@@ -1,29 +1,20 @@
-# 전사적 자원 관리 (ERP) 및 협업 B2B SaaS V1
+# 전사적 자원 관리 (ERP) 및 협업 B2B SaaS
 
 ## 통합 기업 경영(ERP) 및 실시간 협업 웹 플랫폼 구현
 
----
-
 ### 프로젝트 소개
 
-한 줄 설명 — "Java 풀스택 팀이 만든 통합 ERP 시스템"
-프로젝트 배경·목적 — 왜 만들었는지, 어떤 문제를 해결하는지 2~3문장
-주요 기능 목록 — 전자결재·조직도·프로젝트 관리 등 6~7개 기능 bullet
-
-### 기술 스택
-
-Backend — Java, Spring Boot, Spring Security, JWT, JPA/Hibernate
-Frontend — 사용 중인 기술 (React, Thymeleaf 등)
-DB / 인프라 — MySQL/PostgreSQL, 배포 환경 등
-뱃지 이미지(shields.io)로 시각화하면 보기 좋음
+한 줄 설명 — "Java 풀스택 팀이 만든 통합 ERP 시스템"<br/>
+프로젝트 배경·목적 — 왜 만들었는지, 어떤 문제를 해결하는지 2~3문장<br/>
+주요 기능 목록 — 전자결재·조직도·프로젝트 관리 등 6~7개 기능 bullet<br/>
 
 ### 팀원 및 역할 분담
 
-(표형태로 이름/역할/담당기능정리)
-공통 작업(DB 설계, 인증) 별도 명시 추천
+(표형태로 이름/역할/담당기능정리)<br/>
+공통 작업(DB 설계, 인증) 별도 명시 추천<br/>
 
 ### 실행 방법
 
-(예시)Prerequisites — Java 버전, Node 버전 등 요구사항
-설치 & 실행 명령어 — git clone → 환경변수 설정 → 빌드 → 실행 순서
-application.yml 설정 항목 설명 (DB 연결, JWT 시크릿 등)
+(예시)Prerequisites — Java 버전, Node 버전 등 요구사항<br/>
+설치 & 실행 명령어 — git clone → 환경변수 설정 → 빌드 → 실행 순서<br/>
+application.yml 설정 항목 설명 (DB 연결, JWT 시크릿 등)<br/>
