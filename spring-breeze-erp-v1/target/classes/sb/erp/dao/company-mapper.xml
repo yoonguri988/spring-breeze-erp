@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sb.erp.dao.CompanyMapper">
+  <!-- 회사 여러개 조회 -->
+  <select id="selectAll" resultType="CompanyDto">
+  select * from company 
+  where isActive = 1
+  <if test="keyword != null and keyword != ''">
+  	and companyNm like concat('%', #{keyword},'%')
+  </if>
+  order by companyId desc
+  </select>
+  <!-- 회사 등록 -->
+  <insert id="insert">
+  insert into company (companyNm, bizNo, tel, address, logoUrl)
+  values (#{companyNm}, #{bizNo}, #{tel}, #{address}, #{logoUrl})
+  </insert>
+  <select id="countByBizNo" parameterType="string" resultType="int">
+  select count(*) from company
+  where bizNo = #{bizNo} and isActive = 1
+  </select>
+  <!-- 하나만 조회 -->
+  <select id="selectOneById" parameterType="int" resultType="companyDto">
+  select * from company 
+  where companyId = #{companyId} 
+  </select>
+  <!-- 회사 정보 수정 -->
+  <update id="update" parameterType="companyDto">
+    update company
+    set companyNm = #{companyNm}
+        ,tel       = #{tel}
+        ,address   = #{address}
+        <if test="logoUrl != null">,logoUrl   = #{logoUrl}</if>
+    where companyId = #{companyId}
+  </update>
+  <!-- 삭제 - 실제로는 비활성화 처리 -->
+  <update id="softDelete" parameterType="int">
+  update company
+  set isActive = 0
+  where companyId = #{companyId}
+  </update>
+</mapper>

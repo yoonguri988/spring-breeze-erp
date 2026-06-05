@@ -11,5 +11,44 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
 		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd">
 
+<!-- Mapper -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage"     value="sb.erp.dao" />
+		<property name="annotationClass" value="sb.erp.dao.ErpMapper" />
+	</bean>
+<!-- Mybatis -->
+	<context:component-scan base-package="sb.erp" />
 
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:config/mybatis-config.xml" />
+		<property name="mapperLocations">
+			<list>
+				<value>classpath:sb/erp/dao/company-mapper.xml</value>
+				<value>classpath:sb/erp/dao/department-mapper.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory" />
+	</bean>
+<!-- DataSource 
+	<context:property-placeholder location="classpath:config/db.properties"/>
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+		<property name="driverClass" value="${db.driverClass}"/>
+		<property name="url" value="${db.url}"/>
+		<property name="username" value="${db.username}"/>
+		<property name="password" value="${db.password}"/>
+	</bean>
+-->
+<!-- HikariCP -->
+	<context:property-placeholder location="classpath:config/db.properties"/>
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
+		<property name="driverClassName" value="${db.driverClass}"/>
+		<property name="jdbcUrl" value="${db.url}"/>
+		<property name="username" value="${db.username}"/>
+		<property name="password" value="${db.password}"/>
+	</bean>
+	
 </beans>
