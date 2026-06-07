@@ -6,13 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import sb.erp.dao.CompanyMapper;
-import sb.erp.dao.DepartmentMapper;
+import sb.erp.dao.DeptMapper;
 import sb.erp.dto.CompanyDto;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {
 	@Autowired CompanyMapper dao;
-	@Autowired DepartmentMapper deptDao;
+	@Autowired DeptMapper deptDao;
 
 	@Override
 	public List<CompanyDto> list() {

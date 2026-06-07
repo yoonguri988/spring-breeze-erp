@@ -16,10 +16,10 @@ import sb.erp.service.CompanyService;
 public class CompanyController {
 	@Autowired CompanyService service;
 	
-	@RequestMapping("/")
-	public String index() {
-		return "redirect:/company/list.do";
-	}
+//	@RequestMapping("/")
+//	public String index() {
+//		return "redirect:/company/list.do";
+//	}
 	
 	// µî·Ï Æû
 	@RequestMapping(value="/company/add.do", method= RequestMethod.GET)

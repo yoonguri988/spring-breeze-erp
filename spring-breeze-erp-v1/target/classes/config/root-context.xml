@@ -25,7 +25,7 @@
 		<property name="mapperLocations">
 			<list>
 				<value>classpath:sb/erp/dao/company-mapper.xml</value>
-				<value>classpath:sb/erp/dao/department-mapper.xml</value>
+				<value>classpath:sb/erp/dao/dept-mapper.xml</value>
 			</list>
 		</property>
 	</bean>

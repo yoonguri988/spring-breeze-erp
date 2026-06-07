@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sb.erp.dao.DeptMapper">
+  <!-- 해당 회사가 가지고 있는 부서 갯수 조회  -->
+  <select id="countActiveDepts" resultType="int">
+  select count(*) from department
+  where companyId = #{companyId} and isActive = 1
+  </select>
+  <!-- 부서 전체 조회  -->
+  <select id="selectAll" resultType="DeptDto" parameterType="int">
+  select * from department
+  where isActive = 1
+  and companyId = #{companyId}
+  order by sortOrder
+  </select>
+  <!-- id 값을 통해 부서 하나 조회  -->
+  <select id="selectOneById" resultType="DeptDto">
+  select * from department
+  where deptId = #{parentId} and isActive = 1
+  </select>
+  <!--  -->
+  <select id="maxSortOrder">
+  select 
+  </select>
+</mapper>

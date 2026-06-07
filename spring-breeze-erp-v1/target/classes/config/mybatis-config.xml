@@ -5,6 +5,6 @@
 <configuration>
 	<typeAliases>
 		<typeAlias type="sb.erp.dto.CompanyDto" alias="CompanyDto" />
-		<typeAlias type="sb.erp.dto.DepartmentDto" alias="DepartmentDto" />
+		<typeAlias type="sb.erp.dto.DeptDto" alias="DeptDto" />
 	</typeAliases>
 </configuration>
