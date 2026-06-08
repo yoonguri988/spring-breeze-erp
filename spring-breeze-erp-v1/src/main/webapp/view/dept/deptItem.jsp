@@ -21,12 +21,10 @@
 
     <span>${dept.deptNm}</span>
 
-    <a class="btn btn-sm btn-outline-primary ms-1"
+    <a class="btn btn-outline-primary"
        href="${pageContext.request.contextPath}/dept/edit.do?deptId=${dept.deptId}">수정</a>
-    <button class="btn btn-sm btn-outline-danger"
-            data-dept-id="${dept.deptId}"
-            data-bs-toggle="modal"
-            data-bs-target="#deleteModal">삭제</button>
+    <a class="btn btn-outline-danger"
+       href="${pageContext.request.contextPath}/dept/delete.do?deptId=${dept.deptId}">삭제</a>
 </li>
 
 <%-- 하위 부서 재귀 출력 --%>

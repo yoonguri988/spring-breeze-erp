@@ -4,6 +4,9 @@
 <div class="container card my-5">
     <h3 class="card-header">company form</h3>
     <div class="mb-3">
+    	<a class="btn btn-info" href="${pageContext.request.contextPath}/dept/add.do?companyId=${companyId}">부서 등록</a>
+    </div>
+    <div class="mb-3">
         <ul class="list-unstyled p-3">
             <c:forEach var="dept" items="${items}">
                 <%-- depth=0 루트만 여기서 출력 --%>

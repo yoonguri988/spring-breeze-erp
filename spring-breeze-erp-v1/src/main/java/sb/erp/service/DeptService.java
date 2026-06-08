@@ -10,4 +10,12 @@ public interface DeptService {
 
 	public int insert(DeptDto dto);
 
+	public Object flattenOrgTree(int companyId);
+
+	public int delete(int deptId);
+
+	public int update(DeptDto dto);
+
+	public DeptDto selectOneById(int deptId);
+
 }
