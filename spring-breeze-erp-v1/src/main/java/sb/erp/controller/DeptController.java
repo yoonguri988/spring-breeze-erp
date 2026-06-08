@@ -14,10 +14,10 @@ import sb.erp.service.DeptService;
 public class DeptController {
 	@Autowired DeptService service;
 	
-	@RequestMapping("/")
-	public String index() {
-		return "redirect:/dept/tree.do?companyId=1";
-	}
+//	@RequestMapping("/")
+//	public String index() {
+//		return "redirect:/dept/tree.do?companyId=1";
+//	}
 	
 	// 조직도 조회
 	@RequestMapping(value="/dept/tree.do", method=RequestMethod.GET)
