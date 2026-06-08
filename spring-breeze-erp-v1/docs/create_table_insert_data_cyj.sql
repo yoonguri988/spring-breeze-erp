@@ -41,7 +41,7 @@ INSERT INTO company (companyId, companyNm, bizNo, tel, address, logoUrl, created
 (5, '넥스트웨이브',     '567-89-01234', '02-5678-9012', '서울시 마포구 월드컵북로 202',     NULL, '2022-11-01 09:00:00', 1);
 
 -- 임시 데이터 department (30개)
-INSERT INTO department (deptId, companyId, parentId, deptName, deptCode, depth, sortOrder, managerId, createdAt, isActive) VALUES
+INSERT INTO department (deptId, companyId, parentId, deptNm, deptCd, depth, sortOrder, managerId, createdAt, isActive) VALUES
 -- depth 0: 회사 루트
 (1,  1, NULL, '한국테크솔루션',   'KTS',      0, 1, NULL, '2020-03-15 09:00:00', 1),
 (2,  2, NULL, '스마트비즈코리아', 'SBK',      0, 1, NULL, '2019-07-22 09:00:00', 1),
@@ -93,7 +93,6 @@ INSERT INTO department (deptId, companyId, parentId, deptName, deptCode, depth, 
 
 -- depth 3: 파트 — company 2
 (30, 2, 22,   'Android파트',      'SBK-APP-AN',3, 1, NULL, '2020-09-01 09:00:00', 1);
-
 
 select * from company;
 select * from department;
