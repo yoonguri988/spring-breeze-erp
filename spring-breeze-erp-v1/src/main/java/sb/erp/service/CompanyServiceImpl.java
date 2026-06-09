@@ -15,8 +15,8 @@ public class CompanyServiceImpl implements CompanyService {
 	@Autowired DeptMapper deptDao;
 
 	@Override
-	public List<CompanyDto> list() {
-		return dao.selectAll();
+	public List<CompanyDto> list(String keyword, int onepagelist, int pstarValue) {
+		return dao.selectAll(keyword, onepagelist, pstarValue);
 	}
 
 	@Override
@@ -51,6 +51,17 @@ public class CompanyServiceImpl implements CompanyService {
 		}
 		// 진짜 삭제가 아닌 비활성화 처리 - 나중에 진짜 삭제 처리도 따로 구현
 		return dao.softDelete(companyId);
+	}
+
+	@Override
+	public List<CompanyDto> getSuggest(String keyword) {
+		return dao.selectSuggest(keyword);
+	}
+
+	@Override
+	public int listTotal(String keyword) {
+		return dao.listTotal(keyword);
+
 	}
 
 }

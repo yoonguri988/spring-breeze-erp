@@ -5,7 +5,7 @@ import java.util.List;
 import sb.erp.dto.CompanyDto;
 
 public interface CompanyService {
-	public List<CompanyDto> list();
+	public List<CompanyDto> list(String keyword, int onepagelist, int pstarValue);
 	
 	public int add(CompanyDto dto);
 	public boolean isDuplicateBizNo(String bizNo);
@@ -15,4 +15,8 @@ public interface CompanyService {
 	public int update(CompanyDto dto);
 
 	public int delete(int companyId);
+
+	public List<CompanyDto> getSuggest(String keyword);
+
+	public int listTotal(String keyword);
 }

@@ -6,11 +6,33 @@
   <!-- 회사 여러개 조회 -->
   <select id="selectAll" resultType="CompanyDto">
   select * from company 
-  where isActive = 1
+  where 1=1
+  <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
-  	and companyNm like concat('%', #{keyword},'%')
+  	and (companyNm like concat('%', #{keyword},'%') or bizNo like concat('%', #{keyword},'%'))
   </if>
   order by companyId desc
+  limit #{pstarValue}, #{onepagelist}
+  </select>
+  <!-- 회사 여러개 조회 -->
+  <select id="listTotal" resultType="int" parameterType="string">
+  select count(*) from company 
+  where 1=1
+  <!-- 회사명 또는 사업자 번호 검색 -->
+  <if test="keyword != null and keyword != ''">
+  	and (companyNm like concat('%', #{keyword},'%') or bizNo like concat('%', #{keyword},'%'))
+  </if>
+  </select>
+  <select id="selectSuggest" resultType="CompanyDto" parameterType="string">
+    select companyId, companyNm, bizNo
+    FROM company
+    WHERE 1=1
+    <if test="keyword != null and keyword != ''">
+    and (companyNm LIKE CONCAT('%', #{keyword}, '%')
+           OR bizNo LIKE CONCAT('%', #{keyword}, '%'))
+    </if>
+    ORDER BY companyNm ASC
+    LIMIT 5
   </select>
   <!-- 회사 등록 -->
   <insert id="insert">
