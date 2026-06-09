@@ -11,13 +11,13 @@ public interface CompanyMapper {
 	public List<CompanyDto> selectAll(@Param("keyword")String keyword, @Param("onepagelist")int onepagelist, @Param("pstarValue")int pstarValue);
 
 	public int insert(CompanyDto dto);
-	public int countByBizNo(String bizNo);
+	public CompanyDto selectByBizNo(String bizNo);
 
 	public CompanyDto selectOneById(int companyId);
 
 	public int update(CompanyDto dto);
 
-	public int softDelete(int companyId);
+	public int delete(int companyId);
 
 	public List<CompanyDto> selectSuggest(@Param("keyword") String keyword);
 

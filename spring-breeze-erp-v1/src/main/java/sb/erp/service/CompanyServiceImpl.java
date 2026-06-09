@@ -16,21 +16,21 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Override
 	public List<CompanyDto> list(String keyword, int onepagelist, int pstarValue) {
-		return dao.selectAll(keyword, onepagelist, pstarValue);
+		return dao.selectAll(keyword, onepagelist, (pstarValue-1)*onepagelist);
 	}
 
 	@Override
 	public int add(CompanyDto dto) {
 		// 사업자 번호 중복 검증
-		if(dto.getBizNo() != null && dao.countByBizNo(dto.getBizNo()) > 0) {
+		if(dto.getBizNo() != null && dao.selectByBizNo(dto.getBizNo()) != null) {
 			throw new IllegalArgumentException("이미 등록된 사업자번호입니다.");
 		}
 		return dao.insert(dto);
 	}
 
 	@Override
-	public boolean isDuplicateBizNo(String bizNo) {
-		return dao.countByBizNo(bizNo) > 0 ? true : false;
+	public CompanyDto isDuplicateBizNo(String bizNo) {
+		return dao.selectByBizNo(bizNo);
 	}
 
 	@Override
@@ -49,8 +49,8 @@ public class CompanyServiceImpl implements CompanyService {
 		if(deptDao.countActiveDepts(companyId) > 0) {
 			throw new IllegalArgumentException("소속 부서가 존재하여 삭제할 수 없습니다.");
 		}
-		// 진짜 삭제가 아닌 비활성화 처리 - 나중에 진짜 삭제 처리도 따로 구현
-		return dao.softDelete(companyId);
+		// 삭제 처리
+		return dao.delete(companyId);
 	}
 
 	@Override

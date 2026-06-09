@@ -100,9 +100,7 @@ window.addEventListener("load", function () {
                         <tr>
                             <%-- 페이지 역순 번호 --%>
                             <td class="text-center text-muted small">
-                            	<%-- ${status.index} --%>
                             	${paging.listtotal - paging.pstartno - status.index}
-                                <%-- ${totalCount - ((currentPage - 1) * pageSize) - status.index} --%>
                             </td>
                             <td>
                                 <span class="fw-medium">${com.companyNm}</span>
@@ -126,25 +124,12 @@ window.addEventListener("load", function () {
                                    title="조직도 보기">
                                    조직도
                                 </a>
-                                <%-- 비활성화 / 활성화 토글 --%>
-                                <c:choose>
-                                    <c:when test="${com.isActive == 1}">
-                                        <a class="btn btn-outline-warning btn-sm"
-                                           href="${pageContext.request.contextPath}/company/delete.do?companyId=${com.companyId}&page=${currentPage}&keyword=${param.keyword}"
-                                           onclick="return confirm('해당 회사를 비활성화하시겠습니까?')"
-                                           title="비활성화">
-                                           비활성화
-                                        </a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <%-- <span class="badge bg-light text-muted border">비활성</span>
-                                        <a class="btn btn-outline-success btn-sm"
-                                           href="${pageContext.request.contextPath}/company/activate.do?companyId=${com.companyId}&page=${currentPage}&keyword=${param.keyword}"
-                                           title="활성화">
-                                            <i class="bi bi-toggle-off"></i>
-                                        </a> --%>
-                                    </c:otherwise>
-                                </c:choose>
+                                <a class="btn btn-outline-danger btn-sm"
+                                   href="${pageContext.request.contextPath}/company/delete.do?companyId=${com.companyId}&page=${currentPage}&keyword=${param.keyword}"
+                                   onclick="return confirm('해당 회사를 삭제하시겠습니까?')"
+                                   title="삭제">
+                                   삭제
+                                </a>
                             </td>
                         </tr>
                         </c:forEach>
@@ -157,40 +142,26 @@ window.addEventListener("load", function () {
 	<c:if test="${paging.listtotal > 1}">
     <nav class="mt-3" aria-label="페이지 이동">
         <ul class="pagination justify-content-center mb-0">
-
-            <%-- 처음 --%>
-            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                <a class="page-link" href="?keyword=${param.keyword}&page=1"
-                   aria-label="처음">&laquo;&laquo;</a>
-            </li>
             <%-- 이전 --%>
-            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+            <li class="page-item <c:if test="${!(paging.start > 1)}">disabled</c:if>">
                 <a class="page-link"
-                   href="?keyword=${param.keyword}&page=${currentPage - 1}"
-                   aria-label="이전">&laquo;</a>
+                   href="?keyword=${param.keyword}&onepagelist=${paging.onepagelist}&pstartno=${paging.start - 1}"
+                   aria-label="이전">이전</a>
             </li>
 
-            <%-- 번호 블록 (startPage ~ endPage는 컨트롤러/서비스에서 model에 담아줄 것) --%>
-            <c:forEach begin="${startPage}" end="${endPage}" var="p">
-                <li class="page-item ${p == currentPage ? 'active' : ''}">
+            <c:forEach begin="${paging.start}" end="${paging.end}" var="p">
+                <li class="page-item ${p == paging.current ? 'active' : ''}">
                     <a class="page-link"
-                       href="?keyword=${param.keyword}&page=${p}">${p}</a>
+                       href="?keyword=${param.keyword}&onepagelist=${paging.onepagelist}&pstartno=${p}">${p}</a>
                 </li>
             </c:forEach>
 
             <%-- 다음 --%>
-            <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
+            <li class="page-item <c:if test="${!(paging.end < paging.pagetotal)}">disabled</c:if>">
                 <a class="page-link"
-                   href="?keyword=${param.keyword}&page=${currentPage + 1}"
-                   aria-label="다음">&raquo;</a>
+                   href="?keyword=${param.keyword}&onepagelist=${paging.onepagelist}&pstartno=${paging.end + 1}"
+                   aria-label="다음">다음</a>
             </li>
-            <%-- 마지막 --%>
-            <li class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
-                <a class="page-link"
-                   href="?keyword=${param.keyword}&page=${totalPage}"
-                   aria-label="마지막">&raquo;&raquo;</a>
-            </li>
-
         </ul>
     </nav>
     </c:if>    

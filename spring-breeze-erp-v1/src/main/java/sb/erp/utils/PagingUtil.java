@@ -21,8 +21,6 @@ public class PagingUtil {
 		super();
 		this.listtotal = listtotal;
 		this.onepagelist = onepagelist;
-		this.pstartno = pstartno;
-		
 		this.pagetotal = listtotal <= 0 ? 1: (int) Math.ceil(listtotal/(double) onepagelist);
 		this.pstartno = (pstartno-1) * onepagelist;
 		this.current = pstartno;

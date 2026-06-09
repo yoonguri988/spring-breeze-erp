@@ -8,7 +8,7 @@ public interface CompanyService {
 	public List<CompanyDto> list(String keyword, int onepagelist, int pstarValue);
 	
 	public int add(CompanyDto dto);
-	public boolean isDuplicateBizNo(String bizNo);
+	public CompanyDto isDuplicateBizNo(String bizNo);
 	
 	public CompanyDto selectOneById(int companyId);
 

@@ -4,7 +4,7 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="sb.erp.dao.CompanyMapper">
   <!-- 회사 여러개 조회 -->
-  <select id="selectAll" resultType="CompanyDto" parameterType="string">
+  <select id="selectAll" resultType="CompanyDto">
   select * from company 
   where 1=1
   <!-- 회사명 또는 사업자 번호 검색 -->
@@ -12,6 +12,16 @@
   	and (companyNm like concat('%', #{keyword},'%') or bizNo like concat('%', #{keyword},'%'))
   </if>
   order by companyId desc
+  limit #{pstarValue}, #{onepagelist}
+  </select>
+  <!-- 회사 여러개 조회 -->
+  <select id="listTotal" resultType="int" parameterType="string">
+  select count(*) from company 
+  where 1=1
+  <!-- 회사명 또는 사업자 번호 검색 -->
+  <if test="keyword != null and keyword != ''">
+  	and (companyNm like concat('%', #{keyword},'%') or bizNo like concat('%', #{keyword},'%'))
+  </if>
   </select>
   <select id="selectSuggest" resultType="CompanyDto" parameterType="string">
     select companyId, companyNm, bizNo
@@ -29,8 +39,8 @@
   insert into company (companyNm, bizNo, tel, address, logoUrl)
   values (#{companyNm}, #{bizNo}, #{tel}, #{address}, #{logoUrl})
   </insert>
-  <select id="countByBizNo" parameterType="string" resultType="int">
-  select count(*) from company
+  <select id="selectByBizNo" parameterType="string" resultType="companyDto">
+  select * from company
   where bizNo = #{bizNo} and isActive = 1
   </select>
   <!-- 하나만 조회 -->
@@ -47,10 +57,9 @@
         <if test="logoUrl != null">,logoUrl   = #{logoUrl}</if>
     where companyId = #{companyId}
   </update>
-  <!-- 삭제 - 실제로는 비활성화 처리 -->
-  <update id="softDelete" parameterType="int">
-  update company
-  set isActive = 0
+  <!-- 회사 삭제 -->
+  <delete id="delete" parameterType="int">
+  delete from company
   where companyId = #{companyId}
-  </update>
+  </delete>
 </mapper>

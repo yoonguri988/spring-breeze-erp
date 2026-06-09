@@ -1,7 +1,7 @@
 package sb.erp.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,7 +22,7 @@ public class CompanyController {
 	
 	@RequestMapping("/")
 	public String index() {
-		return "redirect:/company/list.do?keyword=";
+		return "redirect:/company/list.do";
 	}
 	
 	// 등록 폼
@@ -37,25 +37,29 @@ public class CompanyController {
 		String msg = "회사 등록에 실패하였습니다.";
 		if(service.add(dto) > 0) { msg = "회사 등록에 성공하였습니다."; }
 		rttr.addFlashAttribute("msg", msg);
-	    return "redirect:/company/list.do?keyword=";
+	    return "redirect:/company/list.do";
 	}
 	
 	//사업자번호 중복 체크 (ajax)
 	@RequestMapping(value="/company/checkBizNo.do", method = RequestMethod.GET)
-	public Map<String, Boolean> checkBizNo(String bizNo){
-		boolean isDup = service.isDuplicateBizNo(bizNo);
-		return Map.of("duplicate", isDup);
+	@ResponseBody
+	public List<CompanyDto> checkBizNo(String bizNo){
+		CompanyDto dto = service.isDuplicateBizNo(bizNo);
+		List<CompanyDto> dtoList = new ArrayList<>();
+		dtoList.add(dto);
+		return dtoList;
 	}
 	
 	// 회사 목록 조회
 	@RequestMapping(value="/company/list.do", method= RequestMethod.GET)
-	public String list(@RequestParam("keyword")String keyword,
+	public String list(@RequestParam(value="keyword", defaultValue = "")String keyword,
 			@RequestParam(value="pstartno", defaultValue = "1") int pstarValue,
-			@RequestParam("onepagelist") int onepagelist,
+			@RequestParam(value="onepagelist", defaultValue = "10") int onepagelist,
 			Model model) {
 		int listtotal = service.listTotal(keyword);
-		model.addAttribute("paging", new PagingUtil(listtotal, onepagelist, pstarValue));
-//		model.addAttribute("items", service.list(keyword, onepagelist, pstarValue));
+		PagingUtil paging = new PagingUtil(listtotal, onepagelist, pstarValue);
+		model.addAttribute("paging", paging);
+		model.addAttribute("items", service.list(keyword, onepagelist, pstarValue));
 		return "/company/list";
 	}
 	
@@ -79,7 +83,7 @@ public class CompanyController {
 		String msg = "회사 정보 수정에 실패하였습니다.";
 		if(service.update(dto) > 0) { msg = "회사 정보가 수정되었습니다.";}
 		rttr.addFlashAttribute("msg", msg);
-		return "redirect:/company/list.do?keyword=";
+		return "redirect:/company/list.do";
 	}
 	
 	// 삭제 처리
@@ -92,7 +96,7 @@ public class CompanyController {
 		} catch (IllegalArgumentException e) {
 			rttr.addFlashAttribute("msg", e.getMessage());
 		}
-		return "redirect:/company/list.do?keyword=";
+		return "redirect:/company/list.do";
 	}
 	
 	
