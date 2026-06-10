@@ -24,7 +24,7 @@ public class DeptController {
 	public String orgTree(int companyId, Model model) {
 		model.addAttribute("items", service.selectOrgTree(companyId));
 		model.addAttribute("companyId", companyId);
-		return "/dept/orgChart";
+		return "/dept/list";
 	}
 	
 	// ºÎ¼­ µî·Ï Æû
