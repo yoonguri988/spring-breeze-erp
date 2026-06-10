@@ -1,10 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@include file="../inc/header.jsp"%>
-
 <div class="container my-5" style="max-width:860px;">
     <%-- 페이지 헤더 --%>
     <div class="d-flex align-items-center justify-content-between mb-4">
+    	<a href="${pageContext.request.contextPath}/company/list.do?companyId=${dto.companyId}"
+           class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-chevron-left"></i>
+        </a>
         <h5 class="mb-0 fw-semibold">
             <i class="bi bi-diagram-3 me-1 text-primary"></i> 조직도
         </h5>
@@ -34,7 +37,6 @@
             </c:choose>
         </div>
     </div>
-
 </div>
 
 <style>
@@ -52,6 +54,11 @@
 </style>
 
 <script>
+window.addEventListener('load', function(){
+	const msg = "${msg}";
+	if(msg != null && msg != '') alert(msg);
+})
+
 // 펼침/접힘 시 아이콘 전환 (bi-dash ↔ bi-plus)
 document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {
     const target = document.querySelector(btn.dataset.bsTarget);

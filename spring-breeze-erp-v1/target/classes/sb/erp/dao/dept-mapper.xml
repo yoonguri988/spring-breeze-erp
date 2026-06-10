@@ -6,19 +6,18 @@
   <!-- 해당 회사가 가지고 있는 부서 갯수 조회  -->
   <select id="countActiveDepts" resultType="int">
   select count(*) from department
-  where companyId = #{companyId} and isActive = 1
+  where companyId = #{companyId}
   </select>
   <!-- 부서 전체 조회  -->
   <select id="selectAll" resultType="DeptDto" parameterType="int">
   select * from department
-  where isActive = 1
-  and companyId = #{companyId}
+  where companyId = #{companyId}
   order by sortOrder
   </select>
   <!-- id 값을 통해 부서 하나 조회  -->
   <select id="selectOneById" resultType="DeptDto">
   select * from department
-  where deptId = #{deptId} and isActive = 1
+  where deptId = #{deptId}
   </select>
   <!-- 부서 순서 정렬 -->
   <select id="maxSortOrder" resultType="int">
@@ -26,7 +25,6 @@
   from department
   where companyId = #{companyId}
   and (parentId = #{parentId} OR (parentId IS NULL AND #{parentId} IS NULL))
-  and isActive = 1
   </select>
   <!-- 부서 등록 -->
   <insert id="insert" parameterType="DeptDto">
@@ -36,7 +34,7 @@
   <!-- 하위 부서 존재 확인 -->
   <select id="countChildren" resultType="int">
   select count(*) from department
-  where parentId = #{deptId} and isActive = 1
+  where parentId = #{deptId} 
   </select>
   <!-- 부서 삭제 -->
   <delete id="delete">
@@ -59,13 +57,11 @@
 	    select deptId 
 	    from department 
 	    where parentId = #{deptId} 
-	    and isActive = 1
 	    union all
 	    select d.deptId 
 	    from department d
 	    join childTree c 
 	    on d.parentId = c.deptId
-	    where d.isActive = 1
 	)
 	select deptId from childTree
   </select>

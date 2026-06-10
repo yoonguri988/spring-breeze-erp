@@ -120,7 +120,7 @@ window.addEventListener("load", function () {
                                 </a>
                                 <%-- 조직도 보기 --%>
                                 <a class="btn btn-outline-secondary btn-sm"
-                                   href="${pageContext.request.contextPath}/dept/tree.do?companyId=${com.companyId}"
+                                   href="${pageContext.request.contextPath}/dept/list.do?companyId=${com.companyId}"
                                    title="조직도 보기">
                                    조직도
                                 </a>

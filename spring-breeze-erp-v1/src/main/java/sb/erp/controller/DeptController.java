@@ -20,7 +20,7 @@ public class DeptController {
 //	}
 	
 	// 조직도 조회
-	@RequestMapping(value="/dept/tree.do", method=RequestMethod.GET)
+	@RequestMapping(value="/dept/list.do", method=RequestMethod.GET)
 	public String orgTree(int companyId, Model model) {
 		model.addAttribute("items", service.selectOrgTree(companyId));
 		model.addAttribute("companyId", companyId);
