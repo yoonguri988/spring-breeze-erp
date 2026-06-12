@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.DeptMapper">
+  <!-- 해당 회사가 가지고 있는 부서 갯수 조회  -->
+  <select id="countActiveDepts" resultType="int">
+  select count(*) from department
+  where companyId = #{companyId}
+  </select>
+  <!-- 부서 전체 조회  -->
+  <select id="selectAll" resultType="DeptDto" parameterType="int">
+  select * from department
+  where companyId = #{companyId}
+  order by sortOrder
+  </select>
+  <!-- id 값을 통해 부서 하나 조회  -->
+  <select id="selectOneById" resultType="DeptDto">
+  select * from department
+  where deptId = #{deptId}
+  </select>
+  <!-- 부서 순서 정렬 -->
+  <select id="maxSortOrder" resultType="int">
+  select coalesce(max(sortOrder), 0)
+  from department
+  where companyId = #{companyId}
+  and (parentId = #{parentId} OR (parentId IS NULL AND #{parentId} IS NULL))
+  </select>
+  <!-- 부서 등록 -->
+  <insert id="insert" parameterType="DeptDto">
+  insert into department (companyId, parentId, deptNm, deptCd, depth, sortOrder)
+  value (#{companyId}, #{parentId}, #{deptNm}, #{deptCd}, #{depth}, #{sortOrder})
+  </insert>
+  <!-- 하위 부서 존재 확인 -->
+  <select id="countChildren" resultType="int">
+  select count(*) from department
+  where parentId = #{deptId} 
+  </select>
+  <!-- 부서 삭제 -->
+  <delete id="delete">
+  delete from department
+  where deptId = #{deptId}
+  </delete>
+  <!-- 부서 수정 -->
+  <update id="update" parameterType="DeptDto">
+  update department
+  set deptNm  = #{deptNm}
+      , deptCd  = #{deptCd}
+      , parentId  = #{parentId}
+      , depth      = #{depth}
+      <if test="managerId != null">, managerId = #{managerId}</if>
+  where deptId = #{deptId}
+  </update>
+  <!-- 하위부서 조회 -->
+  <select id="selectAllChildIds" resultType="DeptDto" parameterType="int">
+	with recursive childTree as (
+	    select deptId 
+	    from department 
+	    where parentId = #{deptId} 
+	    union all
+	    select d.deptId 
+	    from department d
+	    join childTree c 
+	    on d.parentId = c.deptId
+	)
+	select deptId from childTree
+  </select>
+</mapper>
