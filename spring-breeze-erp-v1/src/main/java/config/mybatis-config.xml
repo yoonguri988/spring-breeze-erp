@@ -4,7 +4,7 @@
   "https://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
 	<typeAliases>
-		<typeAlias type="sb.erp.dto.CompanyDto" alias="CompanyDto" />
-		<typeAlias type="sb.erp.dto.DeptDto" alias="DeptDto" />
+		<typeAlias type="com.sb.erp.dto.AuthDto" alias="AuthDto" />
+		<typeAlias type="com.sb.erp.dto.AuthUserDto" alias="AuthUserDto" />
 	</typeAliases>
 </configuration>
