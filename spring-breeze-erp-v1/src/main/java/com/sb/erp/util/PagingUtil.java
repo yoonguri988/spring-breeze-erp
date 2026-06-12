@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class PagingUtil {
-	private int listtotal;  
+	private int listtotal;
 	private int onepagelist = 10; 
 	private int pagetotal;   
 	private int bottomlist;  
@@ -14,12 +14,12 @@ public class PagingUtil {
 
 	private int current;    
 	private int start;      
-	private int end;       
+	private int end;        
 	
 	public PagingUtil(int listtotal, int pstartno) {
 		super();
-		this.listtotal = listtotal; 
-		this.onepagelist = 10;      
+		this.listtotal = listtotal;
+		this.onepagelist = 10;     
 		this.pagetotal = listtotal <= 0 ? 1 : (int) Math.ceil(listtotal/(double) onepagelist);
 		this.bottomlist = 10;
 		this.pstartno = (pstartno-1)*onepagelist;
@@ -29,10 +29,10 @@ public class PagingUtil {
 		if(this.end > this.pagetotal) {this.end = this.pagetotal;}
 	}
 	
-	public PagingUtil(int listtotal, int onepagelist, int pstartno) {
+	public PagingUtil(int listtotal, int onepagelist, int pstarValue) {
 		super();
 		this.listtotal = listtotal; 
-		this.onepagelist = onepagelist;      
+		this.onepagelist = onepagelist;     
 		this.pagetotal = listtotal <= 0 ? 1 : (int) Math.ceil(listtotal/(double) onepagelist);
 		this.bottomlist = 10;
 		this.pstartno = (pstartno-1)*onepagelist;

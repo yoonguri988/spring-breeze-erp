@@ -134,7 +134,7 @@ window.addEventListener("load", function () {
             </table>
         </div>
     </div>
-	<c:if test="${paging.listtotal > 1}">
+	<c:if test="${paging.listtotal > paging.onepagelist} ">
     <nav class="mt-3" aria-label="페이지 이동">
         <ul class="pagination justify-content-center mb-0">
             <%-- 이전 --%>
