@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="sb.erp.dao.DeptMapper">
+<mapper namespace="com.sb.erp.dao.DeptMapper">
   <!-- 해당 회사가 가지고 있는 부서 갯수 조회  -->
   <select id="countActiveDepts" resultType="int">
   select count(*) from department

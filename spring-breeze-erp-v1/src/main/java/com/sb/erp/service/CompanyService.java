@@ -1,8 +1,8 @@
-package sb.erp.service;
+package com.sb.erp.service;
 
 import java.util.List;
 
-import sb.erp.dto.CompanyDto;
+import com.sb.erp.dto.CompanyDto;
 
 public interface CompanyService {
 	public List<CompanyDto> list(String keyword, int onepagelist, int pstarValue);

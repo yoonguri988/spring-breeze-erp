@@ -1,4 +1,4 @@
-package sb.erp.dto;
+package com.sb.erp.dto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +19,6 @@ public class DeptDto {
 	private int depth;
 	private int sortOrder;
 	private int managerId;
-	private String createdAt;
-	private String updatedAt;
-	private int isActive;
 	private String fullPath;        // 예시) 본사>개발부서>백엔드팀
 	private List<DeptDto> children; // 하위 부서 리스트
 	

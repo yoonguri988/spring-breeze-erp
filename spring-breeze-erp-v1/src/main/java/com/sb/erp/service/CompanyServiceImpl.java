@@ -1,13 +1,13 @@
-package sb.erp.service;
+package com.sb.erp.service;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import sb.erp.dao.CompanyMapper;
-import sb.erp.dao.DeptMapper;
-import sb.erp.dto.CompanyDto;
+import com.sb.erp.dao.CompanyMapper;
+import com.sb.erp.dao.DeptMapper;
+import com.sb.erp.dto.CompanyDto;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {

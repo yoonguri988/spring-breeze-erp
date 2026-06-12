@@ -1,12 +1,12 @@
-package sb.erp.dao;
+package com.sb.erp.dao;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import sb.erp.dto.DeptDto;
+import com.sb.erp.dto.DeptDto;
 
-@ErpMapper
+@Mapper
 public interface DeptMapper {
 
 	int countActiveDepts(int companyId);

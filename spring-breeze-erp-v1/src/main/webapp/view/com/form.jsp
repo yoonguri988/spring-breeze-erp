@@ -3,7 +3,7 @@
 <div class="container my-5" style="max-width:640px;">
     <%-- 페이지 헤더 --%>
     <div class="d-flex align-items-center gap-2 mb-4">
-        <a href="${pageContext.request.contextPath}/company/list.do"
+        <a href="${pageContext.request.contextPath}/com/list.do"
            class="btn btn-sm btn-outline-secondary">
 			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
 			  <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
@@ -15,7 +15,7 @@
     <div class="card shadow-sm">
         <div class="card-body p-4">
             <form method="post"
-                  action="${pageContext.request.contextPath}/company/add.do"
+                  action="${pageContext.request.contextPath}/com/add.do"
                   onsubmit="return validateForm()">
                 <%-- 회사명 --%>
                 <div class="mb-3">
@@ -59,7 +59,7 @@
                 <%-- 버튼 --%>
                 <div class="d-flex gap-2 justify-content-end">
                     <button type="reset" class="btn btn-outline-secondary">초기화</button>
-                    <a href="${pageContext.request.contextPath}/company/list.do"
+                    <a href="${pageContext.request.contextPath}/com/list.do"
                        class="btn btn-outline-dark">목록</a>
                     <button type="submit" class="btn btn-primary">등록</button>
                 </div>
@@ -112,7 +112,7 @@ function checkBizNo() {
     spinner.style.display = "";
     bizNoInput.classList.remove("is-valid", "is-invalid");
 
-    fetch("${pageContext.request.contextPath}/company/checkBizNo.do?bizNo=" + encodeURIComponent(bizNo))
+    fetch("${pageContext.request.contextPath}/com/checkBizNo.do?bizNo=" + encodeURIComponent(bizNo))
         .then(res => res.json())
         .then(data => {
             spinner.style.display = "none";

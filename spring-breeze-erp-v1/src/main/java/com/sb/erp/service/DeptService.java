@@ -1,8 +1,8 @@
-package sb.erp.service;
+package com.sb.erp.service;
 
 import java.util.List;
 
-import sb.erp.dto.DeptDto;
+import com.sb.erp.dto.DeptDto;
 
 public interface DeptService {
 

@@ -1,4 +1,4 @@
-package sb.erp.dto;
+package com.sb.erp.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,4 @@ public class CompanyDto {
 	private String tel;
 	private String address;
 	private String logoUrl;
-	private String createdAt;
-	private String updatedAt;
-	private int isActive; 
 }

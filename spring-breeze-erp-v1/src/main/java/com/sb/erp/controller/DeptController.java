@@ -1,4 +1,4 @@
-package sb.erp.controller;
+package com.sb.erp.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import sb.erp.dto.DeptDto;
-import sb.erp.service.DeptService;
+import com.sb.erp.dto.DeptDto;
+import com.sb.erp.service.DeptService;
 
 @Controller
 public class DeptController {

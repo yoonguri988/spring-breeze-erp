@@ -1,4 +1,4 @@
-package sb.erp.service;
+package com.sb.erp.service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import sb.erp.dao.DeptMapper;
-import sb.erp.dto.DeptDto;
+import com.sb.erp.dao.DeptMapper;
+import com.sb.erp.dto.DeptDto;
 
 @Service
 public class DeptServiceImpl implements DeptService {

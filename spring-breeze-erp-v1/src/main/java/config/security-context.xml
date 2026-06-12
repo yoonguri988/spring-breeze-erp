@@ -28,6 +28,11 @@
       <security:intercept-url  pattern="/mem/**"    access="isAuthenticated()" />
 	
       <security:intercept-url  pattern="/board/**"    access="permitAll" />
+      
+      <!-- cyj -->
+      <security:intercept-url  pattern="/com/**" access="permitAll" />
+      <security:intercept-url  pattern="/dept/**" access="permitAll" />
+      <!-- cyj -->
 	  <security:form-login
 	  	  login-page="/mem/login"
 	  	  authentication-success-handler-ref="successHandler"

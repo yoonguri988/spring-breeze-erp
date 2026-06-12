@@ -81,7 +81,6 @@ window.addEventListener("load", function () {
                         <th>회사명</th>
                         <th class="text-center" style="width:140px;">사업자번호</th>
                         <th class="text-center" style="width:130px;">전화번호</th>
-                        <th class="text-center" style="width:120px;">등록일</th>
                         <th class="text-center" style="width:250px;">관리</th>
                     </tr>
                 </thead>
@@ -107,10 +106,6 @@ window.addEventListener("load", function () {
                             </td>
                             <td class="text-center text-muted small">${com.bizNo}</td>
                             <td class="text-center text-muted small">${com.tel}</td>
-                            <td class="text-center text-muted small">
-                            	<fmt:parseDate value="${com.createdAt}" pattern="yyyy-MM-dd" var="parsedDate"/>
-                            	<fmt:formatDate value="${parsedDate}" pattern="yyyy-MM-dd" />
-                            </td>
                             <td class="text-center">
                                 <%-- 수정 --%>
                                 <a class="btn btn-outline-primary btn-sm"

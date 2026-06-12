@@ -1,12 +1,12 @@
-package sb.erp.dao;
+package com.sb.erp.dao;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import sb.erp.dto.CompanyDto;
+import com.sb.erp.dto.CompanyDto;
 
-@ErpMapper
+@Mapper
 public interface CompanyMapper {
 	public List<CompanyDto> selectAll(@Param("keyword")String keyword, @Param("onepagelist")int onepagelist, @Param("pstarValue")int pstarValue);
 
