@@ -20,6 +20,7 @@
          <list> 
          <!-- 지우지 말것! <value>classpath:com/sb/erp/dao/*-mapper.xml</value> -->
          	<value>classpath:com/sb/erp/dao/test-mapper.xml</value>
+         	<value>classpath:com/sb/erp/dao/user.mapper.xml</value>
          </list>
       </property>
    </bean>
