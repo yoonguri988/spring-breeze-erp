@@ -6,8 +6,9 @@
 	<artifactId>spring-breeze-erp-v1</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
+
 	<dependencies>
-		<!-- TEST Unit : 각 단위별로 테스트해주는 부품 -->
+		<!-- TEST Unit -->
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -15,6 +16,7 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
+
 		<!-- spring di, context-info -->
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
 		<dependency>
@@ -22,6 +24,7 @@
 			<artifactId>spring-context</artifactId>
 			<version>4.3.27.RELEASE</version>
 		</dependency>
+
 
 		<!-- spring test tool -->
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-test -->
@@ -32,7 +35,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- LOMBOK: getters/setters, constructor, toString 자동 처리 -->
+		<!-- LOMBOK : getters/setters, constructor, toString -->
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -44,7 +47,6 @@
 		<!-- MYSQL/ORACLE <dependency> <groupId>com.oracle.database.jdbc</groupId> 
 			<artifactId>ojdbc11</artifactId> <version>21.9.0.0</version> </dependency> -->
 
-		<!-- jdbc -->
 		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
 		<dependency>
 			<groupId>mysql</groupId>
@@ -52,6 +54,7 @@
 			<version>8.0.28</version>
 		</dependency>
 
+		<!-- jdbc -->
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-jdbc -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -59,7 +62,7 @@
 			<version>4.3.20.RELEASE</version>
 		</dependency>
 
-		<!-- MYBATIS : mapper -->
+		<!-- MYBATIS - mapper -->
 		<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis -->
 		<dependency>
 			<groupId>org.mybatis</groupId>
@@ -67,7 +70,6 @@
 			<version>3.5.6</version>
 		</dependency>
 
-		<!-- myBatis와 spring의 연결 -->
 		<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-spring -->
 		<dependency>
 			<groupId>org.mybatis</groupId>
@@ -76,7 +78,7 @@
 		</dependency>
 
 
-		<!-- HikariCP: connection pool -->
+		<!-- HikariCP : connector pool -->
 		<!-- https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
 		<dependency>
 			<groupId>com.zaxxer</groupId>
@@ -92,7 +94,7 @@
 			<version>1.16</version>
 		</dependency>
 
-		<!-- -->
+
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
@@ -109,6 +111,10 @@
 			<version>2.17.2</version>
 		</dependency>
 
+
+
+		<!-- spring-webmvc -->
+		<!-- spring-webmvc -->
 		<!-- spring-webmvc -->
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc -->
 		<dependency>
@@ -131,6 +137,13 @@
 			<version>1.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- img upload -->
 		<!-- img upload -->
 		<!-- commons-fileupload -->
@@ -150,65 +163,56 @@
 		<!-- img upload -->
 
 
+		<!-- SECURITY -->
+		<!-- SECURITY -->
+		<!-- SECURITY -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-core -->
 		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-databind</artifactId>
-		    <version>2.15.2</version>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>4.2.2.RELEASE</version>
+			<!-- <version>5.0.7.RELEASE</version> -->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>4.2.2.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>4.2.2.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-taglibs</artifactId>
+			<version>4.2.2.RELEASE</version>
+		</dependency>
+		<!-- SECURITY -->
+		<!-- SECURITY -->
+		<!-- SECURITY -->
+		<!-- jackson -->
+		<!-- jackson -->
+
+		<!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl -->
+		<!-- <dependency> <groupId>org.codehaus.jackson</groupId> <artifactId>jackson-mapper-asl</artifactId> 
+			<version>1.9.13</version> </dependency> -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.17.2</version> <!-- 최신 안정 버전 사용 -->
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.17.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.17.2</version>
 		</dependency>
 
-
-	<!-- 보안 - 인증/인가 -->
-	<!-- SECURITY -->
-	<!-- SECURITY -->
-	<!-- SECURITY -->
-	<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-core -->
-	<dependency>
-		<groupId>org.springframework.security</groupId>
-		<artifactId>spring-security-web</artifactId>
-		<version>4.2.2.RELEASE</version>
-		<!-- <version>5.0.7.RELEASE</version> -->
-
-	</dependency>
-	<dependency>
-		<groupId>org.springframework.security</groupId>
-		<artifactId>spring-security-config</artifactId>
-		<version>4.2.2.RELEASE</version>
-	</dependency>
-	<dependency>
-		<groupId>org.springframework.security</groupId>
-		<artifactId>spring-security-core</artifactId>
-		<version>4.2.2.RELEASE</version>
-	</dependency>
-	<dependency>
-		<groupId>org.springframework.security</groupId>
-		<artifactId>spring-security-taglibs</artifactId>
-		<version>4.2.2.RELEASE</version>
-	</dependency>
-	<!-- SECURITY -->
-	<!-- SECURITY -->
-	<!-- SECURITY -->
-
-		      <!-- jackson -->
-      <!-- jackson -->
-      <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl -->
-      <!-- <dependency> <groupId>org.codehaus.jackson</groupId> <artifactId>jackson-mapper-asl</artifactId> 
-         <version>1.9.13</version> </dependency> -->
-      <dependency>
-         <groupId>com.fasterxml.jackson.core</groupId>
-         <artifactId>jackson-databind</artifactId>
-         <version>2.17.2</version> <!-- 최신 안정 버전 사용 -->
-      </dependency>
-      <dependency>
-         <groupId>com.fasterxml.jackson.core</groupId>
-         <artifactId>jackson-core</artifactId>
-         <version>2.17.2</version>
-      </dependency>
-      <dependency>
-         <groupId>com.fasterxml.jackson.core</groupId>
-         <artifactId>jackson-annotations</artifactId>
-         <version>2.17.2</version>
-      </dependency>
-		
 	</dependencies>
 
 	<build>
@@ -223,7 +227,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
-					<release>16</release>
+					<release>11</release>
 				</configuration>
 			</plugin>
 			<plugin>
