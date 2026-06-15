@@ -4,7 +4,7 @@
 <div class="container my-5" style="max-width:860px;">
     <%-- 페이지 헤더 --%>
     <div class="d-flex align-items-center justify-content-between mb-4">
-    	<a href="${pageContext.request.contextPath}/company/list.do?companyId=${dto.companyId}"
+    	<a href="${pageContext.request.contextPath}/com/list.do?companyId=${dto.companyId}"
            class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-chevron-left"></i>
         </a>

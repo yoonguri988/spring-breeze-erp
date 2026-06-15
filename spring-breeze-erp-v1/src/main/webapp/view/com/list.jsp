@@ -11,7 +11,7 @@ window.addEventListener("load", function () {
 <!-- 페이지 헤더 -->
 	<div class="d-flex align-items-center justify-content-between mb-3">
 		<h4 class="mb-0 fw-semibold">회사 목록</h4>
-		<a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/company/add.do">
+		<a class="btn btn-primary btn-sm" href="${pageContext.request.contextPath}/com/add.do">
 			회사 등록
 		</a>
 	</div>
@@ -19,7 +19,7 @@ window.addEventListener("load", function () {
     <div class="card mb-3 shadow-sm">
         <div class="card-body py-3">
             <form method="GET"
-                  action="${pageContext.request.contextPath}/company/list.do"
+                  action="${pageContext.request.contextPath}/com/list.do"
                   id="searchForm">
                 <div class="d-flex gap-2 align-items-center">
                     <%-- 검색창 --%>
@@ -37,7 +37,7 @@ window.addEventListener("load", function () {
                         <button type="submit" class="btn btn-primary px-4">검색</button>
                         <c:if test="${not empty param.keyword}">
                             <a class="btn btn-outline-secondary"
-                               href="${pageContext.request.contextPath}/company/list.do">
+                               href="${pageContext.request.contextPath}/com/list.do">
                                 초기화
                             </a>
                         </c:if>
@@ -109,7 +109,7 @@ window.addEventListener("load", function () {
                             <td class="text-center">
                                 <%-- 수정 --%>
                                 <a class="btn btn-outline-primary btn-sm"
-                                   href="${pageContext.request.contextPath}/company/edit.do?companyId=${com.companyId}"
+                                   href="${pageContext.request.contextPath}/com/edit.do?companyId=${com.companyId}"
                                    title="수정">
                                    수정
                                 </a>
@@ -120,7 +120,7 @@ window.addEventListener("load", function () {
                                    조직도
                                 </a>
                                 <a class="btn btn-outline-danger btn-sm"
-                                   href="${pageContext.request.contextPath}/company/delete.do?companyId=${com.companyId}&page=${currentPage}&keyword=${param.keyword}"
+                                   href="${pageContext.request.contextPath}/com/delete.do?companyId=${com.companyId}&page=${currentPage}&keyword=${param.keyword}"
                                    onclick="return confirm('해당 회사를 삭제하시겠습니까?')"
                                    title="삭제">
                                    삭제
@@ -199,7 +199,7 @@ window.addEventListener("load", function () {
 
     /* ── AJAX 호출 ── */
     function fetchSuggest(kw) {
-        fetch(CTX + "/company/suggest.do?keyword=" + encodeURIComponent(kw))
+        fetch(CTX + "/com/suggest.do?keyword=" + encodeURIComponent(kw))
             .then(res => {
                 if (!res.ok) throw new Error("network error");
                 return res.json();
