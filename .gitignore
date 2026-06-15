@@ -1,22 +1,78 @@
-# Eclipse 관련 폴더 및 파일 무시
+# ============================
+# Maven
+# ============================
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.jar
+*.war
+*.ear
+
+# ============================
+# Java
+# ============================
+*.class
+*.log
+hs_err_pid*
+
+# ============================
+# Spring / STS
+# ============================
+.springBeans
+.sts4-cache/
+
+# ============================
+# Eclipse / STS
+# ============================
 .classpath
 .project
 .settings/
+.factorypath
 eclipse/
-/Servers/
-.springBeans
-target/
-*.class
+bin/
+build/
 
-# 빌드 결과물 무시
-/bin/
-/build/
+# ============================
+# VS Code
+# ============================
+.vscode/
+.metadata/
 
-# IDE 관련
+# ============================
+# IntelliJ IDEA
+# ============================
 .idea/
 *.iml
+*.iws
+*.ipr
+out/
 
-# OS별 임시파일
-*.DS_Store
+# ============================
+# OS
+# ============================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
 Thumbs.db
-/.metadata/
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================
+# Tomcat
+# ============================
+work/
+logs/
+
+# ============================
+# DB / 환경설정 (보안)
+# ============================
+# src/main/resources/application.properties
+# src/main/resources/application.yml
+# src/main/resources/db.properties
+# src/main/resources/*-secret*
+# src/main/resources/*-local*
+
+/Servers/
