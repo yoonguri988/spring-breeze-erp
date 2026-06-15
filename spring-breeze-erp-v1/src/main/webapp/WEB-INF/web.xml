@@ -38,6 +38,12 @@
 			<param-name>contextConfigLocation</param-name>
 			<param-value>classpath:/config/servlet-context.xml</param-value>
 		</init-param>
+		
+		<init-param>
+	        <param-name>throwExceptionIfNoHandlerFound</param-name>
+	        <param-value>true</param-value>
+	    </init-param>
+		
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
@@ -45,6 +51,7 @@
 		<servlet-name>springDispatcherServlet</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
+	
 <!-- 한글 깨짐 web.xml — CharacterEncodingFilter 추가 -->
 	<filter>
 		<filter-name>encodingFilter</filter-name>
