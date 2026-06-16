@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.DeptDto;
@@ -14,39 +15,34 @@ import com.sb.erp.service.DeptService;
 public class DeptController {
 	@Autowired DeptService service;
 	
-//	@RequestMapping("/")
-//	public String index() {
-//		return "redirect:/dept/tree.do?comId=1";
-//	}
-	
-	// Á¶Á÷µµ Á¶È¸
-	@RequestMapping(value="/dept/list.do", method=RequestMethod.GET)
-	public String orgTree(int comId, Model model) {
+	// ë¶€ì„œ ëª©ë¡ 
+	@RequestMapping(value="/dept/list", method=RequestMethod.GET)
+	public String orgTree(@RequestParam("comId") int comId, Model model) {
 		model.addAttribute("items", service.selectOrgTree(comId));
 		model.addAttribute("comId", comId);
 		return "/dept/list";
 	}
 	
-	// ºÎ¼­ µî·Ï Æû
-	@RequestMapping(value="/dept/add.do", method=RequestMethod.GET)
-	public String addForm(int comId, Model model) {
+	// ë¶€ì„œ ë“±ë¡ í¼
+	@RequestMapping(value="/dept/add", method=RequestMethod.GET)
+	public String addForm(@RequestParam("comId") int comId, Model model) {
 		model.addAttribute("items", service.flattenOrgTree(comId));
 		model.addAttribute("comId", comId);
 		return "/dept/addForm";
 	}
 	
-	// ºÎ¼­ µî·Ï ±â´É
-	@RequestMapping(value="/dept/add.do", method=RequestMethod.POST)
-	public String addForm_post(int comId, DeptDto dto, RedirectAttributes rttr) {
-		String msg = "µî·Ï Ã³¸®¿¡ ½ÇÆĞÇÏ¿´½À´Ï´Ù";
-		if(service.insert(dto) > 0) { msg = "µî·Ï Ã³¸®¿¡ ¼º°øÇÏ¿´½À´Ï´Ù."; }
+	// ë¶€ì„œ ë“±ë¡ ê¸°ëŠ¥
+	@RequestMapping(value="/dept/add", method=RequestMethod.POST)
+	public String addForm_post(@RequestParam("comId") int comId, DeptDto dto, RedirectAttributes rttr) {
+		String msg = "ë¶€ì„œ ë“±ë¡ì— ì„±ê³µí•˜ì˜€ìŠµë‹ˆë‹¤.";
+		if(service.insert(dto) > 0) { msg = "ë¶€ì„œë“±ë¡ì— ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤."; }
 		rttr.addFlashAttribute("msg", msg);
-		return "redirect:/dept/tree.do?comId="+comId;
+		return "redirect:/dept/list?comId="+comId;
 	}
 	
-	// ºÎ¼­ ¼öÁ¤ Æû
-	@RequestMapping(value="/dept/edit.do", method=RequestMethod.GET)
-	public String editForm(int deptId, Model model) {
+	// ë¶€ì„œ ìˆ˜ì • í¼
+	@RequestMapping(value="/dept/edit", method=RequestMethod.GET)
+	public String editForm(@RequestParam("deptId") int deptId, Model model) {
 		DeptDto dto = service.selectOneById(deptId);
 		model.addAttribute("dto", dto);
 		model.addAttribute("items", service.flattenOrgTree(dto.getComId()));
@@ -54,29 +50,29 @@ public class DeptController {
 		return "/dept/editForm";
 	}
 	
-	// ºÎ¼­ ¼öÁ¤ ±â´É
-	@RequestMapping(value="/dept/edit.do", method=RequestMethod.POST)
+	// ë¶€ì„œ ìˆ˜ì • ê¸°ëŠ¥
+	@RequestMapping(value="/dept/edit", method=RequestMethod.POST)
 	public String editForm_post(int deptId, DeptDto dto, RedirectAttributes rttr) {
 		DeptDto se = service.selectOneById(deptId);
 		try {
 			service.update(dto);
-			rttr.addFlashAttribute("msg", "¼öÁ¤ µÇ¾ú½À´Ï´Ù.");
+			rttr.addFlashAttribute("msg", "ë¶€ì„œ ìˆ˜ì • ì„±ê³µ.");
 		} catch (IllegalStateException e) {
 			rttr.addFlashAttribute("msg", e.getMessage());
 		}
-		return "redirect:/dept/tree.do?comId="+se.getComId();
+		return "redirect:/dept/list?comId="+se.getComId();
 	}
 	
-	//ºÎ¼­ »èÁ¦
-	@RequestMapping(value="/dept/delete.do", method=RequestMethod.GET)
+	//ë¶€ì„œ ì‚­ì œ ê¸°ëŠ¥
+	@RequestMapping(value="/dept/delete", method=RequestMethod.GET)
 	public String delete_post(int deptId, RedirectAttributes rttr) {
 		DeptDto dto = service.selectOneById(deptId);
 		try {
 			service.delete(deptId);
-			rttr.addFlashAttribute("msg", "»èÁ¦ µÇ¾ú½À´Ï´Ù.");
+			rttr.addFlashAttribute("msg", "ë¶€ì„œ ì‚­ì œ ì„±ê³µ.");
 		} catch (IllegalStateException e) {
 			rttr.addFlashAttribute("msg", e.getMessage());
 		}
-		return "redirect:/dept/tree.do?comId="+dto.getComId();
+		return "redirect:/dept/list?comId="+dto.getComId();
 	}
 }
