@@ -3,30 +3,8 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.CompanyMapper">
-<resultMap id="CompanyResultMap" type="CompanyDto">
-	<result column="com_id" property="comId" />
-	<result column="indust_code" property="industCode" />
-	<result column="indust_name" property="industName" />
-	<result column="com_name" property="comName" />
-	<result column="com_ceo" property="comCeo" />
-	<result column="biz_no" property="bizNo" />
-	<result column="com_tel" property="comTel" />
-	<result column="com_logo" property="comLogo" />
-	<result column="created_at" property="createdAt" />
-	<result column="updated_at" property="updatedAt" />
-</resultMap>
-<parameterMap id="CompanyParamMap" type="CompanyDto">
-	<parameter property="comId" />
-	<parameter property="industCode" />
-	<parameter property="industName" />
-	<parameter property="comName" />
-	<parameter property="comCeo" />
-	<parameter property="bizNo" />
-	<parameter property="comTel" />
-	<parameter property="comLogo" />
-</parameterMap>
   <!-- 회사 여러개 조회 -->
-  <select id="selectAll" resultMap="CompanyResultMap">
+  <select id="selectAll" resultType="CompanyDto">
   select * from company 
   where 1=1
   <!-- 회사명 또는 사업자 번호 검색 -->
@@ -45,7 +23,7 @@
   	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
   </if>
   </select>
-  <select id="selectSuggest" resultMap="CompanyResultMap" parameterType="string">
+  <select id="selectSuggest" resultType="CompanyDto" parameterType="string">
     select com_id, com_name, biz_no
     FROM company
     WHERE 1=1
@@ -61,17 +39,17 @@
   insert into company (com_name, com_ceo, biz_no, com_tel, com_logo)
   values (#{comName}, #{comCeo}, #{bizNo}, #{comTel}, #{comLogo})
   </insert>
-  <select id="selectByBizNo" parameterType="string" resultMap="CompanyResultMap">
+  <select id="selectByBizNo" parameterType="string" resultType="CompanyDto">
   select * from company
   where biz_no = #{bizNo}
   </select>
   <!-- 하나만 조회 -->
-  <select id="selectOneById" parameterType="int" resultMap="CompanyResultMap">
+  <select id="selectOneById" parameterType="int" resultType="CompanyDto">
   select * from company 
   where com_id = #{comId} 
   </select>
   <!-- 회사 정보 수정 -->
-  <update id="update" parameterMap="CompanyParamMap">
+  <update id="update" parameterType="CompanyDto">
     update company
     set com_name = #{comName}
         ,com_ceo = #{comCeo}

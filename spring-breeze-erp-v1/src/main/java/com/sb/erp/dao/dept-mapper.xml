@@ -3,41 +3,19 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.DeptMapper">
-<resultMap id="DeptResultMap"  type="DeptDto">
-	<result column="dept_id" property="deptId" />
-	<result column="com_id" property="comId" />
-	<result column="parent_id" property="parentId" />
-	<result column="dept_name" property="deptName" />
-	<result column="dept_code" property="deptCode" />
-	<result column="depth" property="depth" />
-	<result column="sort_order" property="sortOrder" />
-	<result column="emp_id" property="empId" />
-	<result column="created_at" property="createdAt" />
-	<result column="updated_at" property="updatedAt" />
-</resultMap>
-
-<parameterMap id="DeptParamMap" type="DeptDto">
-	<parameter property="deptId" />
-	<parameter property="comId" />
-	<parameter property="parentId" />
-	<parameter property="deptName" />
-	<parameter property="deptCode" />
-	<parameter property="empId" />
-</parameterMap>
-
   <!-- 해당 회사가 가지고 있는 부서 갯수 조회  -->
   <select id="countActiveDepts" resultType="int">
   select count(*) from department
   where com_id = #{comId}
   </select>
   <!-- 부서 전체 조회  -->
-  <select id="selectAll" resultMap="DeptResultMap" parameterType="int">
+  <select id="selectAll" resultType="DeptDto" parameterType="int">
   select * from department
   where com_id = #{comId}
   order by sort_order
   </select>
   <!-- id 값을 통해 부서 하나 조회  -->
-  <select id="selectOneById" resultMap="DeptResultMap">
+  <select id="selectOneById" resultType="DeptDto">
   select * from department
   where dept_id = #{deptId}
   </select>
@@ -49,7 +27,7 @@
   and (parent_id = #{parentId} OR (parent_id IS NULL AND #{parentId} IS NULL))
   </select>
   <!-- 부서 등록 -->
-  <insert id="insert" parameterMap="DeptParamMap">
+  <insert id="insert" parameterType="DeptDto">
   insert into department (company_id, parent_id, dept_name, dept_code, depth, sort_order)
   value (#{companyId}, #{parentId}, #{deptName}, #{deptCode}, #{depth}, #{sortOrder})
   </insert>
@@ -64,7 +42,7 @@
   where dept_id = #{deptId}
   </delete>
   <!-- 부서 수정 -->
-  <update id="update" parameterMap="DeptParamMap">
+  <update id="update" parameterType="DeptDto">
   update department
   set dept_name  = #{deptName}
       , dept_code  = #{deptCode}
@@ -74,7 +52,7 @@
   where dept_id = #{deptId}
   </update>
   <!-- 하위부서 조회 -->
-  <select id="selectAllChildIds" resultMap="DeptResultMap" parameterType="int">
+  <select id="selectAllChildIds" resultType="DeptDto" parameterType="int">
 	with recursive childTree as (
 	    select dept_id 
 	    from department 
