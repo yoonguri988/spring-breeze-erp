@@ -26,10 +26,16 @@
       <security:intercept-url  pattern="/mem/join"  access="permitAll" />
       <security:intercept-url  pattern="/mem/login" access="permitAll" />
       <security:intercept-url  pattern="/mem/**"    access="isAuthenticated()" />
+      
+      <!-- KJY -->
+      <security:intercept-url  pattern="/appr/**" access="permitAll"/>
+      <!-- KJY -->
 	
       <security:intercept-url  pattern="/board/**"    access="permitAll" />
+      
 	  <security:form-login
 	  	  login-page="/mem/login"
+	  	  login-processing-url="mem/login"
 	  	  authentication-success-handler-ref="successHandler"
 	  	  authentication-failure-url="/mem/fail"
 	  />

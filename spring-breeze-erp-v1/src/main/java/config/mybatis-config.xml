@@ -6,6 +6,12 @@
 	<typeAliases>
 		<typeAlias type="com.sb.erp.dto.AuthDto" alias="AuthDto" />
 		<typeAlias type="com.sb.erp.dto.AuthUserDto" alias="AuthUserDto" />
-		<typeAlias type="com.sb.erp.dto.UserDto" alias="UserDto" />
+		<!-- KJY -->
+		<typeAlias type="com.sb.erp.dto.ApprDocDto" alias="ApprDocDto" />
+		<typeAlias type="com.sb.erp.dto.ApprFormDto" alias="ApprFormDto" />
+		<typeAlias type="com.sb.erp.dto.ApprLineDto" alias="ApprLineDto" />
+		<typeAlias type="com.sb.erp.dto.ApprFormSearchDto" alias="ApprFormSearchDto" />
+		<typeAlias type="com.sb.erp.dto.CompanySearchDto" alias="CompanySearchDto"/>
+		<!-- KJY -->
 	</typeAliases>
 </configuration>
