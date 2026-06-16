@@ -2,8 +2,11 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.the703.dao.BoardMapper">
+  
+<!-- Son.C.K -->  
+<mapper namespace="com.sb.erp.dao.BoardMapper">
   <select id="now" resultType="string">
   select now()
   </select>
+  
 </mapper>
