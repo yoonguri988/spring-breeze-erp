@@ -12,13 +12,15 @@ import lombok.NoArgsConstructor;
 @Data
 public class DeptDto {
 	private int deptId;
-	private int companyId;
+	private int comId;
 	private int parentId;
-	private String deptNm;
-	private String deptCd;
+	private String deptName;
+	private String deptCode;
 	private int depth;
 	private int sortOrder;
-	private int managerId;
+	private int empId;
+	private String createdAt;
+	private String updatedAt;
 	private String fullPath;        // 예시) 본사>개발부서>백엔드팀
 	private List<DeptDto> children; // 하위 부서 리스트
 	

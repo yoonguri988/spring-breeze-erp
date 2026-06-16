@@ -102,25 +102,25 @@ window.addEventListener("load", function () {
                             	${paging.listtotal - paging.pstartno - status.index}
                             </td>
                             <td>
-                                <span class="fw-medium">${com.companyNm}</span>
+                                <span class="fw-medium">${com.comName}</span>
                             </td>
                             <td class="text-center text-muted small">${com.bizNo}</td>
-                            <td class="text-center text-muted small">${com.tel}</td>
+                            <td class="text-center text-muted small">${com.comTel}</td>
                             <td class="text-center">
                                 <%-- 수정 --%>
                                 <a class="btn btn-outline-primary btn-sm"
-                                   href="${pageContext.request.contextPath}/com/edit.do?companyId=${com.companyId}"
+                                   href="${pageContext.request.contextPath}/com/edit.do?comId=${com.comId}"
                                    title="수정">
                                    수정
                                 </a>
                                 <%-- 조직도 보기 --%>
                                 <a class="btn btn-outline-secondary btn-sm"
-                                   href="${pageContext.request.contextPath}/dept/list.do?companyId=${com.companyId}"
+                                   href="${pageContext.request.contextPath}/dept/list.do?comId=${com.comId}"
                                    title="조직도 보기">
                                    조직도
                                 </a>
                                 <a class="btn btn-outline-danger btn-sm"
-                                   href="${pageContext.request.contextPath}/com/delete.do?companyId=${com.companyId}&page=${currentPage}&keyword=${param.keyword}"
+                                   href="${pageContext.request.contextPath}/com/delete.do?comId=${com.comId}&page=${currentPage}&keyword=${param.keyword}"
                                    onclick="return confirm('해당 회사를 삭제하시겠습니까?')"
                                    title="삭제">
                                    삭제
@@ -134,14 +134,14 @@ window.addEventListener("load", function () {
             </table>
         </div>
     </div>
-	<c:if test="${paging.listtotal > paging.onepagelist} ">
+	<c:if test="${paging.listtotal > 1}">
     <nav class="mt-3" aria-label="페이지 이동">
         <ul class="pagination justify-content-center mb-0">
             <%-- 이전 --%>
             <li class="page-item <c:if test="${!(paging.start > 1)}">disabled</c:if>">
                 <a class="page-link"
                    href="?keyword=${param.keyword}&onepagelist=${paging.onepagelist}&pstartno=${paging.start - 1}"
-                   aria-label="이전">이전</a>
+                   aria-label="이전" >이전</a>
             </li>
 
             <c:forEach begin="${paging.start}" end="${paging.end}" var="p">
@@ -224,7 +224,7 @@ window.addEventListener("load", function () {
             li.style.cursor = "pointer";
 
             // 매칭 글자 하이라이트
-            const highlighted = highlight(item.companyNm, kw);
+            const highlighted = highlight(item.comName, kw);
 
             li.innerHTML =
                 '<span><i class="bi bi-building text-primary me-2 small"></i>'
@@ -233,7 +233,7 @@ window.addEventListener("load", function () {
 
             li.addEventListener("mousedown", function (e) {
                 e.preventDefault(); // blur 방지
-                input.value = item.companyNm;
+                input.value = item.comName;
                 hideSuggest();
                 // 폼 제출 (검색 실행)
                 document.getElementById("searchForm").submit();

@@ -9,13 +9,13 @@ import com.sb.erp.dto.DeptDto;
 @Mapper
 public interface DeptMapper {
 
-	int countActiveDepts(int companyId);
+	int countActiveDepts(int comId);
 
-	List<DeptDto> selectAll(int companyId);
+	List<DeptDto> selectAll(int comId);
 
 	DeptDto selectOneById(int deptId);
 
-	int maxSortOrder(@Param("parentId")int parentId, @Param("companyId")int companyId);
+	int maxSortOrder(@Param("parentId")int parentId, @Param("comId")int comId);
 
 	int insert(DeptDto dto);
 

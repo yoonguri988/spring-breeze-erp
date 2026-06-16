@@ -29,7 +29,7 @@ public class PagingUtil {
 		if(this.end > this.pagetotal) {this.end = this.pagetotal;}
 	}
 	
-	public PagingUtil(int listtotal, int onepagelist, int pstarValue) {
+	public PagingUtil(int listtotal, int onepagelist, int pstartno) {
 		super();
 		this.listtotal = listtotal; 
 		this.onepagelist = onepagelist;     

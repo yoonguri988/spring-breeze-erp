@@ -16,32 +16,32 @@ public class DeptController {
 	
 //	@RequestMapping("/")
 //	public String index() {
-//		return "redirect:/dept/tree.do?companyId=1";
+//		return "redirect:/dept/tree.do?comId=1";
 //	}
 	
 	// 조직도 조회
 	@RequestMapping(value="/dept/list.do", method=RequestMethod.GET)
-	public String orgTree(int companyId, Model model) {
-		model.addAttribute("items", service.selectOrgTree(companyId));
-		model.addAttribute("companyId", companyId);
+	public String orgTree(int comId, Model model) {
+		model.addAttribute("items", service.selectOrgTree(comId));
+		model.addAttribute("comId", comId);
 		return "/dept/list";
 	}
 	
 	// 부서 등록 폼
 	@RequestMapping(value="/dept/add.do", method=RequestMethod.GET)
-	public String addForm(int companyId, Model model) {
-		model.addAttribute("items", service.flattenOrgTree(companyId));
-		model.addAttribute("companyId", companyId);
+	public String addForm(int comId, Model model) {
+		model.addAttribute("items", service.flattenOrgTree(comId));
+		model.addAttribute("comId", comId);
 		return "/dept/addForm";
 	}
 	
 	// 부서 등록 기능
 	@RequestMapping(value="/dept/add.do", method=RequestMethod.POST)
-	public String addForm_post(int companyId, DeptDto dto, RedirectAttributes rttr) {
+	public String addForm_post(int comId, DeptDto dto, RedirectAttributes rttr) {
 		String msg = "등록 처리에 실패하였습니다";
 		if(service.insert(dto) > 0) { msg = "등록 처리에 성공하였습니다."; }
 		rttr.addFlashAttribute("msg", msg);
-		return "redirect:/dept/tree.do?companyId="+companyId;
+		return "redirect:/dept/tree.do?comId="+comId;
 	}
 	
 	// 부서 수정 폼
@@ -49,8 +49,8 @@ public class DeptController {
 	public String editForm(int deptId, Model model) {
 		DeptDto dto = service.selectOneById(deptId);
 		model.addAttribute("dto", dto);
-		model.addAttribute("items", service.flattenOrgTree(dto.getCompanyId()));
-		model.addAttribute("companyId", dto.getCompanyId());
+		model.addAttribute("items", service.flattenOrgTree(dto.getComId()));
+		model.addAttribute("comId", dto.getComId());
 		return "/dept/editForm";
 	}
 	
@@ -64,7 +64,7 @@ public class DeptController {
 		} catch (IllegalStateException e) {
 			rttr.addFlashAttribute("msg", e.getMessage());
 		}
-		return "redirect:/dept/tree.do?companyId="+se.getCompanyId();
+		return "redirect:/dept/tree.do?comId="+se.getComId();
 	}
 	
 	//부서 삭제
@@ -77,6 +77,6 @@ public class DeptController {
 		} catch (IllegalStateException e) {
 			rttr.addFlashAttribute("msg", e.getMessage());
 		}
-		return "redirect:/dept/tree.do?companyId="+dto.getCompanyId();
+		return "redirect:/dept/tree.do?comId="+dto.getComId();
 	}
 }

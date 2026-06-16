@@ -8,10 +8,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class CompanyDto {
-	private int companyId;
-	private String companyNm;
+	private int comId;
+	private String industCode;
+	private String industName;
+	private String comName;
+	private String comCeo;
 	private String bizNo;
-	private String tel;
-	private String address;
-	private String logoUrl;
+	private String comTel;
+	private String comLogo;
+	private String createdAt;
+	private String updatedAt;
 }

@@ -31,13 +31,13 @@ public class DeptServiceImpl implements DeptService {
 		for(DeptDto dept : deptAllList) {
 			if (dept.getParentId() == 0) {
 				// 루트 부서
-				dept.setFullPath(dept.getDeptNm());
+				dept.setFullPath(dept.getDeptName());
 				rootList.add(dept);
 			} else {
 				// 부모를 찾아서 부모 하위 부서에 추가
 				DeptDto parent = deptMap.get(dept.getParentId());
 				if(parent != null) {
-					dept.setFullPath(parent.getFullPath()+">"+dept.getDeptNm());
+					dept.setFullPath(parent.getFullPath()+">"+dept.getDeptName());
 					parent.getChildren().add(dept);
 				}
 			}
@@ -73,7 +73,7 @@ public class DeptServiceImpl implements DeptService {
 		}
 		
 		//sortOrder 동일 부모 하위에서 현재 최대값
-		int maxOrder = dao.maxSortOrder(dto.getParentId(), dto.getCompanyId());
+		int maxOrder = dao.maxSortOrder(dto.getParentId(), dto.getComId());
 		dto.setSortOrder(maxOrder);
 		return dao.insert(dto);
 	}

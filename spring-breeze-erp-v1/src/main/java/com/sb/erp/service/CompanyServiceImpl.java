@@ -34,8 +34,8 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public CompanyDto selectOneById(int companyId) {
-		return dao.selectOneById(companyId);
+	public CompanyDto selectOneById(int comId) {
+		return dao.selectOneById(comId);
 	}
 
 	@Override
@@ -44,13 +44,13 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public int delete(int companyId) {
+	public int delete(int comId) {
 		// 소속된 부서가 존재한다면 회사 삭제 처리 불가
-		if(deptDao.countActiveDepts(companyId) > 0) {
+		if(deptDao.countActiveDepts(comId) > 0) {
 			throw new IllegalArgumentException("소속 부서가 존재하여 삭제할 수 없습니다.");
 		}
 		// 삭제 처리
-		return dao.delete(companyId);
+		return dao.delete(comId);
 	}
 
 	@Override

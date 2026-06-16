@@ -26,22 +26,22 @@ public class CompanyController {
 		return "redirect:/com/list.do";
 	}
 	
-	// 등록 폼
+	// 회사 등록
 	@RequestMapping(value="/com/add.do", method= RequestMethod.GET)
 	public String addForm() {
 		return "/com/form";
 	}
 	
-	// 등록 처리
+	//회사 등록 기능
 	@RequestMapping(value="/com/add.do", method= RequestMethod.POST)
 	public String add(CompanyDto dto, RedirectAttributes rttr) {
 		String msg = "회사 등록에 실패하였습니다.";
-		if(service.add(dto) > 0) { msg = "회사 등록에 성공하였습니다."; }
+		if(service.add(dto) > 0) { msg = "회사 등록에 성공하셨습니다."; }
 		rttr.addFlashAttribute("msg", msg);
 	    return "redirect:/com/list.do";
 	}
 	
-	//사업자번호 중복 체크 (ajax)
+	// 회사 사업자 번호 중복 체크 (ajax)
 	@RequestMapping(value="/com/checkBizNo.do", method = RequestMethod.GET)
 	@ResponseBody
 	public List<CompanyDto> checkBizNo(String bizNo){
@@ -64,35 +64,35 @@ public class CompanyController {
 		return "/com/list";
 	}
 	
-	//
+	// 검색 조회 목록 상위 5개 (ajax)
 	@RequestMapping(value="/com/suggest.do", method=RequestMethod.GET)
 	@ResponseBody
 	public List<CompanyDto> suggest(@RequestParam("keyword") String keyword) {
-	    return service.getSuggest(keyword); // �ִ� 5��
+	    return service.getSuggest(keyword);
 	}
 	
-	// 수정 폼
+	// 회사 수정 폼
 	@RequestMapping(value="/com/edit.do", method = RequestMethod.GET)
-	public String editForm(int companyId, Model model) {
-		model.addAttribute("com", service.selectOneById(companyId));
+	public String editForm(int comId, Model model) {
+		model.addAttribute("com", service.selectOneById(comId));
 		return "/com/edit";
 	}
 	
-	// 수정 처리
+	// 회사 수정 기능
 	@RequestMapping(value="/com/edit.do", method = RequestMethod.POST)
 	public String edit(CompanyDto dto, RedirectAttributes rttr) {
-		String msg = "회사 정보 수정에 실패하였습니다.";
-		if(service.update(dto) > 0) { msg = "회사 정보가 수정되었습니다.";}
+		String msg = "회사 정보 수정에 실패 하였습니다.";
+		if(service.update(dto) > 0) { msg = "회사 정보 수정에 성공하셨습니다.";}
 		rttr.addFlashAttribute("msg", msg);
 		return "redirect:/com/list.do";
 	}
 	
-	// 삭제 처리
+	// 회사 삭제 기능
 	@RequestMapping(value="/com/delete.do", method = RequestMethod.GET)
-	public String delete(int companyId, RedirectAttributes rttr) {
-		String msg = "삭제에 실패하였습니다.";
+	public String delete(int comId, RedirectAttributes rttr) {
+		String msg = "회사 정보 삭제에 실패 하였습니다.";
 		try {
-			if(service.delete(companyId) > 0) { msg ="삭제 되었습니다.";}
+			if(service.delete(comId) > 0) { msg ="회사 정보 삭제에 성공하셨습니다.";}
 			rttr.addFlashAttribute("msg", msg);
 		} catch (IllegalArgumentException e) {
 			rttr.addFlashAttribute("msg", e.getMessage());

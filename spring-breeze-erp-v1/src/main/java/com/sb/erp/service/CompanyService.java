@@ -10,11 +10,11 @@ public interface CompanyService {
 	public int add(CompanyDto dto);
 	public CompanyDto isDuplicateBizNo(String bizNo);
 	
-	public CompanyDto selectOneById(int companyId);
+	public CompanyDto selectOneById(int comId);
 
 	public int update(CompanyDto dto);
 
-	public int delete(int companyId);
+	public int delete(int comId);
 
 	public List<CompanyDto> getSuggest(String keyword);
 

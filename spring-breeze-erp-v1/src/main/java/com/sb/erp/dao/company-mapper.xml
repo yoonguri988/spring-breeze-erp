@@ -3,15 +3,37 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.CompanyMapper">
+<resultMap id="CompanyResultMap" type="CompanyDto">
+	<result column="com_id" property="comId" />
+	<result column="indust_code" property="industCode" />
+	<result column="indust_name" property="industName" />
+	<result column="com_name" property="comName" />
+	<result column="com_ceo" property="comCeo" />
+	<result column="biz_no" property="bizNo" />
+	<result column="com_tel" property="comTel" />
+	<result column="com_logo" property="comLogo" />
+	<result column="created_at" property="createdAt" />
+	<result column="updated_at" property="updatedAt" />
+</resultMap>
+<parameterMap id="CompanyParamMap" type="CompanyDto">
+	<parameter property="comId" />
+	<parameter property="industCode" />
+	<parameter property="industName" />
+	<parameter property="comName" />
+	<parameter property="comCeo" />
+	<parameter property="bizNo" />
+	<parameter property="comTel" />
+	<parameter property="comLogo" />
+</parameterMap>
   <!-- 회사 여러개 조회 -->
-  <select id="selectAll" resultType="CompanyDto">
+  <select id="selectAll" resultMap="CompanyResultMap">
   select * from company 
   where 1=1
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
-  	and (companyNm like concat('%', #{keyword},'%') or bizNo like concat('%', #{keyword},'%'))
+  	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
   </if>
-  order by companyId desc
+  order by com_id desc
   limit #{pstarValue}, #{onepagelist}
   </select>
   <!-- 회사 여러개 조회 -->
@@ -20,46 +42,46 @@
   where 1=1
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
-  	and (companyNm like concat('%', #{keyword},'%') or bizNo like concat('%', #{keyword},'%'))
+  	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
   </if>
   </select>
-  <select id="selectSuggest" resultType="CompanyDto" parameterType="string">
-    select companyId, companyNm, bizNo
+  <select id="selectSuggest" resultMap="CompanyResultMap" parameterType="string">
+    select com_id, com_name, biz_no
     FROM company
     WHERE 1=1
     <if test="keyword != null and keyword != ''">
-    and (companyNm LIKE CONCAT('%', #{keyword}, '%')
-           OR bizNo LIKE CONCAT('%', #{keyword}, '%'))
+    and (com_name LIKE CONCAT('%', #{keyword}, '%')
+           OR biz_no LIKE CONCAT('%', #{keyword}, '%'))
     </if>
-    ORDER BY companyNm ASC
+    ORDER BY com_name ASC
     LIMIT 5
   </select>
   <!-- 회사 등록 -->
   <insert id="insert">
-  insert into company (companyNm, bizNo, tel, address, logoUrl)
-  values (#{companyNm}, #{bizNo}, #{tel}, #{address}, #{logoUrl})
+  insert into company (com_name, com_ceo, biz_no, com_tel, com_logo)
+  values (#{comName}, #{comCeo}, #{bizNo}, #{comTel}, #{comLogo})
   </insert>
-  <select id="selectByBizNo" parameterType="string" resultType="companyDto">
+  <select id="selectByBizNo" parameterType="string" resultMap="CompanyResultMap">
   select * from company
-  where bizNo = #{bizNo} and isActive = 1
+  where biz_no = #{bizNo}
   </select>
   <!-- 하나만 조회 -->
-  <select id="selectOneById" parameterType="int" resultType="companyDto">
+  <select id="selectOneById" parameterType="int" resultMap="CompanyResultMap">
   select * from company 
-  where companyId = #{companyId} 
+  where com_id = #{comId} 
   </select>
   <!-- 회사 정보 수정 -->
-  <update id="update" parameterType="companyDto">
+  <update id="update" parameterMap="CompanyParamMap">
     update company
-    set companyNm = #{companyNm}
-        ,tel       = #{tel}
-        ,address   = #{address}
-        <if test="logoUrl != null">,logoUrl   = #{logoUrl}</if>
-    where companyId = #{companyId}
+    set com_name = #{comName}
+        ,com_ceo = #{comCeo}
+        ,com_tel = #{comTel}
+        <if test="logoUrl != null">,com_logo   = #{comLogo}</if>
+    where com_id = #{comId}
   </update>
   <!-- 회사 삭제 -->
   <delete id="delete" parameterType="int">
   delete from company
-  where companyId = #{companyId}
+  where com_id = #{comId}
   </delete>
 </mapper>
