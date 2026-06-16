@@ -3,9 +3,12 @@
   PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
+	<typeAliases>
+		<typeAlias type="com.sb.erp.dto.AuthDto" alias="AuthDto" />
+		<typeAlias type="com.sb.erp.dto.AuthUserDto" alias="AuthUserDto" />
+	</typeAliases>
 
 	<typeAliases>
 		<typeAlias type="com.sb.erp.dto.BoardDto"    alias="BoardDto"/>
 	</typeAliases>
-	
 </configuration>

@@ -6,7 +6,6 @@
 	<artifactId>spring-breeze-erp-v1</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-
 	<dependencies>
 		<!-- TEST Unit : 각 단위별로 테스트해주는 부품 -->
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
@@ -203,6 +202,84 @@
 			<version>2.17.2</version>
 		</dependency>
 
+		<!-- img upload -->
+		<!-- img upload -->
+		<!-- commons-fileupload -->
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+
+		<!-- commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+		<!-- img upload -->
+		<!-- img upload -->
+
+
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.15.2</version>
+		</dependency>
+
+
+	<!-- 보안 - 인증/인가 -->
+	<!-- SECURITY -->
+	<!-- SECURITY -->
+	<!-- SECURITY -->
+	<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-core -->
+	<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-web</artifactId>
+		<version>4.2.2.RELEASE</version>
+		<!-- <version>5.0.7.RELEASE</version> -->
+
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-config</artifactId>
+		<version>4.2.2.RELEASE</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-core</artifactId>
+		<version>4.2.2.RELEASE</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-taglibs</artifactId>
+		<version>4.2.2.RELEASE</version>
+	</dependency>
+	<!-- SECURITY -->
+	<!-- SECURITY -->
+	<!-- SECURITY -->
+
+		      <!-- jackson -->
+      <!-- jackson -->
+      <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl -->
+      <!-- <dependency> <groupId>org.codehaus.jackson</groupId> <artifactId>jackson-mapper-asl</artifactId> 
+         <version>1.9.13</version> </dependency> -->
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-databind</artifactId>
+         <version>2.17.2</version> <!-- 최신 안정 버전 사용 -->
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-core</artifactId>
+         <version>2.17.2</version>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-annotations</artifactId>
+         <version>2.17.2</version>
+      </dependency>
+		
 	</dependencies>
 
 	<build>
