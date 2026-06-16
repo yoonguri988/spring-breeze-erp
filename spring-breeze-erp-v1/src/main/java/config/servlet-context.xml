@@ -14,8 +14,7 @@
                           default-servlet-handler: 이미지나 정적리소스 -->
    <context:component-scan base-package="com.sb.erp"  />
    <mvc:annotation-driven />
-   <!-- <mvc:default-servlet-handler/> -->
-   <mvc:resources mapping="/resources/**" location="/resources/" />
+   <mvc:default-servlet-handler/>
    
    <!-- View Resolver :  I -->
    <bean id="viewResolver"  

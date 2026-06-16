@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.AuthMapper">
+<resultMap id="authListMap" type="AuthUserDto">
+	<result property="empEmail" column="emp_email" />
+	<result property="empPass" column="emp_pass" />
+	<collection property="authList" resultMap="authMap" />
+</resultMap>
+<resultMap id="authMap" type="AuthDto">
+	<result property="autName" column="aut_name" />
+</resultMap> 
+
+  <select id="readAuth" resultMap="authListMap" parameterType="string">
+  	select e.emp_email, e.emp_pass, a.aut_name
+  	from emp_auth ea 
+  	join employee e on e.emp_id = ea.emp_id
+  	join authority a on a.aut_id = ea.aut_id
+  	where e.emp_email = #{username}
+  </select>
+</mapper>

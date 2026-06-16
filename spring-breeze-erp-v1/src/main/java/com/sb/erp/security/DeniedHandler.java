@@ -14,9 +14,7 @@ public class DeniedHandler  implements AccessDeniedHandler{
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response,
 			AccessDeniedException accessDeniedException) throws IOException, ServletException { 
-		
-
-		response.sendRedirect( request.getContextPath() + "/mem/login"   );
+		response.sendRedirect( request.getContextPath() + "/auth/login"   );
 		
 	}
 

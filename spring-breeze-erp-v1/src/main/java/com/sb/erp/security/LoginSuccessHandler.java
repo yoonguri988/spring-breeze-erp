@@ -22,11 +22,12 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
 		
 		authentication.getAuthorities().forEach(auth->{ roles.add(auth.getAuthority()); });
  
-		// if(roles.contains("ROLE_ADMIN"))
-		// { response.sendRedirect( request.getContextPath() + "/security/admin"   );}
-		
-		response.sendRedirect( request.getContextPath() + "/emp/mypage"   );
-		
+		if(roles.contains("ROLE_ADMIN")){ 
+//			 response.sendRedirect( request.getContextPath() + "/com/list"   );
+			 response.sendRedirect( request.getContextPath() + "/admin/com/list"   );
+		}else {
+			response.sendRedirect( request.getContextPath() + "/"   );
+		}
 	}
 
 }

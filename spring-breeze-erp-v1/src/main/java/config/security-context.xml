@@ -20,27 +20,36 @@
          class="com.sb.erp.security.CustomUserDetailsService"/>
 
    <security:http>
-      <security:intercept-url  pattern="/security/all"     access="permitAll" />
-      <security:intercept-url  pattern="/security/member"  access="hasRole('ROLE_MEMBER')" />
+   	  <!-- cyj : 추후 접근 권한 변경 -->
+      <!-- <security:intercept-url  pattern="/security/all"     access="permitAll" /> -->
+      <!-- <security:intercept-url  pattern="/security/member"  access="hasRole('ROLE_MEMBER')" /> -->
 
-      <security:intercept-url  pattern="/mem/join"  access="permitAll" />
-      <security:intercept-url  pattern="/mem/login" access="permitAll" />
-      <security:intercept-url  pattern="/mem/**"    access="isAuthenticated()" />
+      <security:intercept-url  pattern="/auth/login" access="permitAll" />
+      <security:intercept-url  pattern="/auth/resetPass" access="permitAll" />
+      <!-- <security:intercept-url  pattern="/auth/**"    access="isAuthenticated()" /> -->
 	
    	  <security:intercept-url  pattern="/board/**"    access="permitAll" />
    	  
-   	  <!-- cyj : 추후 접근 권한 변경 -->
-   	  <security:intercept-url pattern="/error/**"              access="permitAll"/>
+   	  <security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')"/>
    	  
-   	  <security:intercept-url pattern="/com/**" access="permitAll"/>
-   	  <security:intercept-url pattern="/dept/**" access="permitAll"/>
+   	  <security:intercept-url pattern="/error/**" access="permitAll"/>
+   	  
+   	  <security:intercept-url pattern="/com/**" access="isAuthenticated()"/>
+   	  <security:intercept-url pattern="/dept/**" access="isAuthenticated()"/>
    	  <!-- cyj -->
    	  
 	  <security:form-login
-	  	  login-page="/mem/login"
+	  	  login-page="/auth/login"
+	  	  login-processing-url="/auth/login"
 	  	  authentication-success-handler-ref="successHandler"
-	  	  authentication-failure-url="/mem/fail"
+	  	  authentication-failure-url="/auth/fail"
 	  />
+	  
+	  <security:logout 
+	      logout-url="/auth/logout"
+	      logout-success-url="/auth/login"
+	      invalidate-session="true"/>
+	  <!-- cyj : 추후 접근 권한 변경 -->
    </security:http>
 
    <security:authentication-manager>
