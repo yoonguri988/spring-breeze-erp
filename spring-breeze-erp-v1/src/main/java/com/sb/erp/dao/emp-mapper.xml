@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.EmpMapper">
+
+	<select id="selectAll" resultType="EmpDto">
+		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name, 
+		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date
+		from employee e join emp_position p on e.pos_id = p.pos_id
+		join department d on e.dept_id = d.dept_id
+		order by pos_order, emp_no
+	</select>
+	
+	<select id="selectByEmpId" parameterType="int" resultType="EmpDto">
+		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name, 
+		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date,
+		e.dept_id, e.pos_id, e.created_at, e.updated_at
+		from employee e join emp_position p on e.pos_id = p.pos_id
+		join department d on e.dept_id = d.dept_id
+		where e.emp_id = #{empId}
+	</select>
+	
+	<select id="search" parameterType="EmpSearchDto" resultType="EmpDto">
+		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name, 
+		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date
+		from employee e join emp_position p on e.pos_id = p.pos_id
+		join department d on e.dept_id = d.dept_id
+		<where>
+			<if test="deptId != null">
+				and e.dept_id = #{deptId}
+			</if>
+			<if test="posId != null">
+				and e.pos_id = #{posId}
+			</if>
+			<if test="empStatus != null and empStatus !=''">
+				and e.emp_status = #{empStatus}
+			</if>
+			<if test="keyword != null and keyword !=''">
+				and (e.emp_name like concat('%', #{keyword}, '%')
+				or e.emp_no like concat('%', #{keyword}, '%'))
+			</if>
+		</where>
+		order by pos_order, emp_no
+	</select>
+
+</mapper>

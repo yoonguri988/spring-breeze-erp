@@ -3,8 +3,15 @@
   PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+	</settings>
 	<typeAliases>
 		<typeAlias type="com.sb.erp.dto.AuthDto" alias="AuthDto" />
 		<typeAlias type="com.sb.erp.dto.AuthUserDto" alias="AuthUserDto" />
+		<typeAlias type="com.sb.erp.dto.EmpDto" alias="EmpDto" />
+		<typeAlias type="com.sb.erp.dto.PosDto" alias="PosDto" />
+		<typeAlias type="com.sb.erp.dto.DeptDto" alias="DeptDto" />
+		<typeAlias type="com.sb.erp.dto.EmpSearchDto" alias="EmpSearchDto" />
 	</typeAliases>
 </configuration>

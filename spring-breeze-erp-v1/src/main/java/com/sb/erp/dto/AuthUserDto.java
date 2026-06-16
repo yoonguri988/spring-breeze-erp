@@ -1,7 +1,6 @@
 package com.sb.erp.dto;
 
-import java.util.List;
-
+import java.util.List; 
 import lombok.Data;
 
 @Data
