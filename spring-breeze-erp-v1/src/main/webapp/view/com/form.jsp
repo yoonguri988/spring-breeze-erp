@@ -4,7 +4,7 @@
 
     <%-- 페이지 헤더 --%>
     <div class="d-flex align-items-center gap-2 mb-4">
-        <a href="${pageContext.request.contextPath}/com/list.do"
+        <a href="${pageContext.request.contextPath}/com/list"
            class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-arrow-left fs-5"></i>
         </a>
@@ -14,7 +14,7 @@
     <div class="card shadow-sm">
         <div class="card-body p-4">
             <form method="post"
-                  action="${pageContext.request.contextPath}/com/add.do"
+                  action="${pageContext.request.contextPath}/com/add"
                   enctype="multipart/form-data"
                   onsubmit="return validateForm()">
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
@@ -166,7 +166,7 @@
                 <div class="d-flex gap-2 justify-content-end mt-2">
                     <button type="reset" class="btn btn-outline-secondary"
                             onclick="resetLogoPreview()">초기화</button>
-                    <a href="${pageContext.request.contextPath}/com/list.do"
+                    <a href="${pageContext.request.contextPath}/com/list"
                        class="btn btn-outline-dark">목록</a>
                     <button type="submit" class="btn btn-primary">등록</button>
                 </div>
@@ -327,7 +327,7 @@ function checkBizNo() {
     spinner.style.display = '';
     bizNoInput.classList.remove('is-valid', 'is-invalid');
 
-    fetch('${pageContext.request.contextPath}/com/checkBizNo.do?bizNo=' + encodeURIComponent(bizNo))
+    fetch('${pageContext.request.contextPath}/com/checkBizNo?bizNo=' + encodeURIComponent(bizNo))
         .then(res => res.json())
         .then(data => {
             spinner.style.display = 'none';

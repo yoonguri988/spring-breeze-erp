@@ -6,7 +6,7 @@
 
     <%-- 페이지 헤더 --%>
     <div class="d-flex align-items-center gap-2 mb-4">
-        <a href="${pageContext.request.contextPath}/dept/list.do?companyId=${param.companyId}"
+        <a href="${pageContext.request.contextPath}/dept/list?companyId=${param.companyId}"
            class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-chevron-left"></i>
         </a>
@@ -18,7 +18,7 @@
     <div class="card shadow-sm">
         <div class="card-body p-4">
             <form method="post"
-                  action="${pageContext.request.contextPath}/dept/add.do"
+                  action="${pageContext.request.contextPath}/dept/add"
                   novalidate id="deptForm">
                 <input type="hidden" name="companyId" value="${param.companyId}">
 
@@ -66,7 +66,7 @@
                     <button type="reset" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> 초기화
                     </button>
-                    <a href="${pageContext.request.contextPath}/dept/list.do?companyId=${param.companyId}"
+                    <a href="${pageContext.request.contextPath}/dept/list?companyId=${param.companyId}"
                        class="btn btn-outline-dark">
                         <i class="bi bi-list me-1"></i> 목록
                     </a>

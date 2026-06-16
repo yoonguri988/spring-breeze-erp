@@ -44,19 +44,19 @@
         <div class="ms-auto d-flex gap-1">
             <a class="btn btn-outline-primary btn-sm py-0 px-2"
                style="font-size:12px;"
-               href="${pageContext.request.contextPath}/dept/add.do?comId=${dept.comId}&parentId=${dept.deptId}"
+               href="${pageContext.request.contextPath}/dept/add?comId=${dept.comId}&parentId=${dept.deptId}"
                title="하위 부서 추가">
                 <i class="bi bi-plus"></i>
             </a>
             <a class="btn btn-outline-secondary btn-sm py-0 px-2"
                style="font-size:12px;"
-               href="${pageContext.request.contextPath}/dept/edit.do?deptId=${dept.deptId}"
+               href="${pageContext.request.contextPath}/dept/edit?deptId=${dept.deptId}"
                title="수정">
                 <i class="bi bi-pencil"></i>
             </a>
             <a class="btn btn-outline-danger btn-sm py-0 px-2"
                style="font-size:12px;"
-               href="${pageContext.request.contextPath}/dept/delete.do?deptId=${dept.deptId}"
+               href="${pageContext.request.contextPath}/dept/delete?deptId=${dept.deptId}"
                title="삭제"
                onclick="return confirm('${dept.deptName} 부서를 삭제하시겠습니까?')">
                 <i class="bi bi-trash"></i>

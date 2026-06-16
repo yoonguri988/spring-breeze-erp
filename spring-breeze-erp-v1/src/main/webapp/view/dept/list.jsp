@@ -4,7 +4,7 @@
 <div class="container my-5" style="max-width:860px;">
     <%-- 페이지 헤더 --%>
     <div class="d-flex align-items-center justify-content-between mb-4">
-    	<a href="${pageContext.request.contextPath}/com/list.do?comId=${dto.comId}"
+    	<a href="${pageContext.request.contextPath}/com/list?comId=${dto.comId}"
            class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-chevron-left"></i>
         </a>
@@ -12,7 +12,7 @@
             <i class="bi bi-diagram-3 me-1 text-primary"></i> 조직도
         </h5>
         <a class="btn btn-primary btn-sm"
-           href="${pageContext.request.contextPath}/dept/add.do?comId=${comId}">
+           href="${pageContext.request.contextPath}/dept/add?comId=${comId}">
             <i class="bi bi-plus-lg me-1"></i> 부서 등록
         </a>
     </div>
