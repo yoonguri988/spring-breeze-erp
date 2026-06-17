@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class ApprFormSearchDto {
 	private String keyword; 
-	private int comId;
+	private Integer comId;
 	private Boolean forStatus;
 }

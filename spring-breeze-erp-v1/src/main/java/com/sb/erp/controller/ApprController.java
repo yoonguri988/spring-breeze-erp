@@ -33,10 +33,16 @@ public class ApprController {
 	@ResponseBody
 	public List<ApprFormDto> searchForms(@RequestParam("keyword") String keyword,
 										 @RequestParam("company") String comId,
-										 @RequestParam("forStatus") Boolean status){
+										 @RequestParam( value = "forStatus", required = false) String status){
 		ApprFormSearchDto dto = new ApprFormSearchDto();
-		dto.setComId(Integer.parseInt(comId));
-		dto.setForStatus(status);
+		dto.setComId(
+				(comId == null || comId.isBlank()) ?
+				null : Integer.parseInt(comId)
+				);
+		dto.setForStatus(
+				(status == null || status.isBlank()) ?
+				null : Boolean.parseBoolean(status)
+				);
 		dto.setKeyword(keyword);
 		
 		//int totalCnt = appr.listFormCnt(dto);

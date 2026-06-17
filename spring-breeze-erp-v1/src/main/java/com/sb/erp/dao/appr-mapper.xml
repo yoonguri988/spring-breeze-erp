@@ -68,15 +68,17 @@
 		left outer join
 			company c on f.com_id = c.com_id
 		<where>
-			<if test="comId != null and comId != ''">
+			<if test="comId != null">
 				and f.com_id = #{comId}
 			</if>
 			<if test="forStatus != null">
 				and f.for_status = #{forStatus}
 			</if>
 			<if test="keyword != null and keyword != ''">
-				f.for_code like concat('%',#{keyword},'%')
-				or f.for_title like concat('%', #{keyword},'%')
+				and (
+					f.for_code like concat('%',#{keyword},'%')
+					or f.for_title like concat('%', #{keyword},'%')
+				)
 			</if>
 		</where>
 		order by f.for_id desc
