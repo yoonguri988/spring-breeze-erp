@@ -26,6 +26,12 @@ public class Test1_Model {
 	@Autowired TestMapper testMapper;
 	
 	@Test
+	public void test3() {
+		
+	}
+	
+	
+	@Ignore @Test
 	public void test2() {
 		System.out.println(".........testMapper.now(): "+testMapper.now());
 	}

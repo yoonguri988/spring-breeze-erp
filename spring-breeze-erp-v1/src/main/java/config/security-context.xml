@@ -28,6 +28,10 @@
       <security:intercept-url  pattern="/auth/resetPass" access="permitAll" />
       <!-- <security:intercept-url  pattern="/auth/**"    access="isAuthenticated()" /> -->
 	
+      <!-- KJY -->
+      <security:intercept-url  pattern="/appr/**" access="permitAll"/>
+      <!-- KJY -->
+
    	  <security:intercept-url  pattern="/board/**"    access="permitAll" />
    	  
    	  <security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')"/>
