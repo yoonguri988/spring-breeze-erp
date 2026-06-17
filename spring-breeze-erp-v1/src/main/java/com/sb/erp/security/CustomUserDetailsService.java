@@ -11,7 +11,6 @@ import com.sb.erp.dto.AuthUserDto;
 
 public class CustomUserDetailsService   implements UserDetailsService{
 	@Autowired AuthMapper mapper;
-	@Autowired BCryptPasswordEncoder passwordEncoder; // XML에 등록된 빈 주입
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

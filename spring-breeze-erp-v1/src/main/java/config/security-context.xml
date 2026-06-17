@@ -34,6 +34,7 @@
    	  
    	  <security:intercept-url pattern="/error/**" access="permitAll"/>
    	  
+   	  <security:intercept-url pattern="/index" access="isAuthenticated()"/>
    	  <security:intercept-url pattern="/com/**" access="isAuthenticated()"/>
    	  <security:intercept-url pattern="/dept/**" access="isAuthenticated()"/>
    	  <!-- cyj -->
