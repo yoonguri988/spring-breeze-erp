@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.ResourceDao">
+
+    <!-- 자원 목록: 회사별 + 검색어(자원명/자원코드) + 타입필터 + 페이징 -->
+    <select id="selectResourceList" parameterType="map" resultType="com.sb.erp.dto.ResourceDto">
+        SELECT
+            res_id     AS resId,
+            com_id     AS comId,
+            res_code   AS resCode,
+            res_name   AS resName,
+            res_type   AS resType,
+            quantity   AS quantity,
+            remark     AS remark,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM resource
+        WHERE com_id = #{comId}
+        <if test="keyword != null and keyword != ''">
+            AND (res_name LIKE CONCAT('%', #{keyword}, '%')
+                 OR res_code LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="resType != null and resType != ''">
+            AND res_type = #{resType}
+        </if>
+        ORDER BY res_id DESC
+        LIMIT #{startRow}, #{pageSize}
+    </select>
+
+    <!-- 자원 전체 개수 (페이징 계산용, 위 검색조건과 동일하게 유지) -->
+    <select id="selectResourceCount" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM resource
+        WHERE com_id = #{comId}
+        <if test="keyword != null and keyword != ''">
+            AND (res_name LIKE CONCAT('%', #{keyword}, '%')
+                 OR res_code LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="resType != null and resType != ''">
+            AND res_type = #{resType}
+        </if>
+    </select>
+
+    <!-- 자원 상세 -->
+    <select id="selectResourceDetail" parameterType="int" resultType="com.sb.erp.dto.ResourceDto">
+        SELECT
+            res_id     AS resId,
+            com_id     AS comId,
+            res_code   AS resCode,
+            res_name   AS resName,
+            res_type   AS resType,
+            quantity   AS quantity,
+            remark     AS remark,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM resource
+        WHERE res_id = #{resId}
+    </select>
+
+    <!-- 자원 등록 -->
+    <insert id="insertResource" parameterType="com.sb.erp.dto.ResourceDto">
+        INSERT INTO resource (com_id, res_code, res_name, res_type, quantity, remark, created_at, updated_at)
+        VALUES (#{comId}, #{resCode}, #{resName}, #{resType}, #{quantity}, #{remark}, NOW(), NOW())
+    </insert>
+
+    <!-- 자원 수정 -->
+    <update id="updateResource" parameterType="com.sb.erp.dto.ResourceDto">
+        UPDATE resource
+        SET res_code   = #{resCode},
+            res_name   = #{resName},
+            res_type   = #{resType},
+            quantity   = #{quantity},
+            remark     = #{remark},
+            updated_at = NOW()
+        WHERE res_id = #{resId}
+    </update>
+
+    <!-- 자원 삭제 -->
+    <delete id="deleteResource" parameterType="int">
+        DELETE FROM resource
+        WHERE res_id = #{resId}
+    </delete>
+
+</mapper>
