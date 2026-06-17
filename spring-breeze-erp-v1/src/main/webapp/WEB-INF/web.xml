@@ -49,7 +49,6 @@
 	</filter-mapping>
 	
 	<!-- 2. DispatherServlet -->
->>>>>>> dc3f00df4555e13270c791adbc28a4a9c22347b0
 	<servlet>
 		<servlet-name>springDispatcherServlet</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Son.C.K -->
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.sb.erp.dao.UserMapper">
+      
+      <select   resultMap="authListMap"    id="readAuth"   parameterType="int">
+         select  emp_id
+         from    users  u  left  join authorities  a  on u.email = a.email
+         where   u.email = #{email}
+      </select>
+      
+      <resultMap   id="authListMap"   type="AuthUserDto"  >
+         <result   property="eamil"    column="email"  />
+         <result   property="bpass"    column="bpass"  />
+         <collection   property="authList"  resultMap="authMap" />
+      </resultMap>
+      
+      <resultMap   id="authMap"   type="AuthDto"  >
+         <result   property="auth"    column="auth"  />
+      </resultMap>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  </mapper>
+  
+  
