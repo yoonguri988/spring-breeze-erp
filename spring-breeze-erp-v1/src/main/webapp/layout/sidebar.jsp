@@ -6,13 +6,13 @@
 </div>
 
 <nav class="sb-nav" id="sbNav">
-  <a class="sb-nav__item" data-page="dashboard" data-tip="대시보드" href="index.html">
+  <a class="sb-nav__item" data-page="dashboard" data-tip="대시보드" href="/">
     <i class="bi bi-grid-1x2-fill"></i><span class="sb-nav__label">대시보드</span>
   </a>
 
   <div class="sb-nav__section">조직 관리</div>
-  <a class="sb-nav__item" data-page="company" data-tip="회사 · 부서" href="com/admin/list.html">
-    <i class="bi bi-building"></i><span class="sb-nav__label">회사 · 부서관리</span>
+  <a class="sb-nav__item" data-page="company" data-tip="회사 • 부서 관리" href="${pageContext.request.contextPath }/com/list">
+    <i class="bi bi-building"></i><span class="sb-nav__label">회사 • 부서 관리</span>
   </a>
   <a class="sb-nav__item" data-page="employees" data-tip="사원관리" href="employees.html">
     <i class="bi bi-people"></i><span class="sb-nav__label">사원관리</span>
@@ -39,13 +39,16 @@
   </a>
 </nav>
 
+<sec:authorize access="isAuthenticated()">
+<sec:authentication property="principal.dto.empName" var="empName"/>
 <div class="sb-sidebar__foot">
   <div class="sb-userchip" data-bs-toggle="dropdown">
-    <div class="sb-avatar">김</div>
+    <div class="sb-avatar"><c:out value="${fn:substring(empName, 0, 1)}"/></div>
     <div class="sb-userchip__meta">
-      <b>김선빈</b>
-      <span>시스템 관리자</span>
+      <b><c:out value="${empName}"/></b>
+      <span><sec:authentication property="principal.dto.posName"/></span>
     </div>
     <i class="bi bi-chevron-expand ms-auto sb-nav__label" style="color:var(--sb-ink-faint);font-size:14px;"></i>
   </div>
 </div>
+</sec:authorize>
