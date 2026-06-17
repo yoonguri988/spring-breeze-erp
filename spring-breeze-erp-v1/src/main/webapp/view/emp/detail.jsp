@@ -1,37 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib uri="http://www.springframework.org/security/tags"
-	prefix="sec"%>
+<%@include file="/layout/header.jsp"%>
+<!-- header -->
+<!-- header -->
 
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<title>사원 관리</title>
-<link rel="stylesheet"
-	href="${pageContext.request.contextPath}/css/reset.css">
-<!-- Latest compiled and minified CSS -->
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<!-- Latest compiled JavaScript -->
-<script
-	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet"
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet"
-	href="${pageContext.request.contextPath}/css/emp.css">
-</head>
-
-<body>
 
 	<section id="profile" class="m-5 p-3">
 		<h3 class="blind">상세 조회</h3>
 		<div class="card m-3 p-3 d-flex flex-row align-items-center">
 			<!-- 유저 이미지 업로드 기능은 나중에 추가 -->
 			<div class="my-3 px-3 flex-shrink-0 gap-2">
-				<img id="userImg" src="https://picsum.photos/200"
+				<img id="userImg" src="https://picsum.photos/100"
 					class="rounded-circle" alt="profile image">
 			</div>
 			<!-- 사원 정보(간략) -->
@@ -61,10 +40,8 @@
 
 			<!-- 버튼 -->
 			<div class="d-flex flex-column gap-2">
-				<a href="${pageContext.request.contextPath}/emp/list"
-					class="btn btn-light">목록으로</a> <a
-					href="${pageContext.request.contextPath}/emp/edit?empId=${emp.empId}"
-					class="btn btn-primary">정보수정</a>
+				<a href="${pageContext.request.contextPath}/emp/edit?empId=${emp.empId}" class="btn btn-primary">정보수정</a>
+				<a href="${pageContext.request.contextPath}/emp/passEdit?empId=${emp.empId}" class="btn btn-light">비밀번호 수정</a>
 			</div>
 		</div>
 		<div class="card m-3 p-3">
@@ -99,7 +76,13 @@
 				</tbody>
 			</table>
 		</div>
+		<!-- 버튼 -->
+		<div class="m-3 text-end">
+			<a href="${pageContext.request.contextPath}/emp/list" class="btn btn-light">목록으로</a>
+			<a href="${pageContext.request.contextPath}/emp/authEdit?empId=${emp.empId}" class="btn btn-danger">권한수정</a>
+		</div>
 	</section>
 
-</body>
-</html>
+<!--  footer -->
+<!--  footer -->
+<%@include file="/layout/footer.jsp"  %>

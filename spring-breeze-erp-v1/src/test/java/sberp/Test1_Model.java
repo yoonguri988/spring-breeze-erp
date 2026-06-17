@@ -43,26 +43,17 @@ public class Test1_Model {
 	}
 	
 	
-	@Ignore //@Test
-	public void test6() {
-		System.out.println( empMapper.selectByEmpId(1) );
-	}
-	
-	@Ignore //@Test
-	public void test5() {
-		System.out.println(deptMapper.selectAll());
-	}
 	
 	@Ignore //@Test
 	public void test4() {
 		System.out.println("...........posMapper.sellectAll()");
-		System.out.println(posMapper.selectAll());
+		System.out.println(posMapper.selectAll(1));
 	}
 	
 	@Ignore // @Test
 	public void test3() {
 		System.out.println("........ empMapper.selectAll()");
-		System.out.println(empMapper.selectAll());
+		System.out.println(empMapper.selectAll(1));
 	}
 	
 	@Ignore // @Test

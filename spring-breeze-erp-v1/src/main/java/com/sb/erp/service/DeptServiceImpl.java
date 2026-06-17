@@ -14,12 +14,12 @@ import com.sb.erp.dto.DeptDto;
 
 @Service
 public class DeptServiceImpl implements DeptService {
-<<<<<<< HEAD
 
 	@Autowired DeptMapper dao;
+	
 	@Override
 	public List<DeptDto> selectAll() {
-		return dao.selectAll();
+		return dao.selectAll(1);
 	}
 
 	@Override

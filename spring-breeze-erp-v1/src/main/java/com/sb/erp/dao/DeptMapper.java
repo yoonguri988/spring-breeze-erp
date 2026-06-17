@@ -8,12 +8,9 @@ import com.sb.erp.dto.DeptDto;
 public interface DeptMapper {
 
 	// 필요한 메서드 선언
-	// 부서 불러오기
-	public List<DeptDto> selectAll();
+	List<DeptDto> selectAll(int comId);
 
 	int countActiveDepts(int comId);
-
-	List<DeptDto> selectAll(int comId);
 
 	DeptDto selectOneById(int deptId);
 

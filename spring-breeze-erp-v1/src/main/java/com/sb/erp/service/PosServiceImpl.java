@@ -13,7 +13,8 @@ public class PosServiceImpl implements PosService {
 	
 	@Override
 	public List<PosDto> selectAll() {
-		return dao.selectAll();
+		
+		return dao.selectAll(1);
 	}
 
 }
