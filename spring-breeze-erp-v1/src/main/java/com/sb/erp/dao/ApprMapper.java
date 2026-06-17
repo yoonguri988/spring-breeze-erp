@@ -1,6 +1,7 @@
 package com.sb.erp.dao;
 
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.sb.erp.dto.ApprFormDto;
@@ -10,15 +11,20 @@ import com.sb.erp.dto.CompanySearchDto;
 @Mapper
 public interface ApprMapper {
 	
-	// °øÅë ÆÄÆ®
+	// ê³µí†µ
 	public List<CompanySearchDto> searchCompany(String keyword);
 	public int getCompanyIdByName(String name);
 	
-	// °áÁ¦ ¾ç½Ä ÆÄÆ®
-	public ApprFormDto selectFormAll();
+	// í˜ì´ì§• ê¸°ëŠ¥
+	public List<ApprFormDto> list10Form(HashMap<String, Integer> map);
+	public int listFormCnt();
+	
+	// ì–‘ì‹ íŒŒíŠ¸
+	public ApprFormDto selectFormAll(int forId);
 	public int insertForm(ApprFormDto dto);
 	public int updateForm(ApprFormDto dto);
 	public int deleteFrom(ApprFormDto dto);
-	public ApprFormDto selectFromList(ApprFormSearchDto dto);
+	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto);
+	
 	
 }

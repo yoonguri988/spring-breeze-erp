@@ -22,9 +22,9 @@
 	
 	<!-- 결재 양식 sql 구문 -->
 	
-	<!-- 결재 양식 테이블 모든 필드 조회 -->
-	<select id="selectFormAll" resultType="ApprFormDto">
-		select * from appr_form
+	<!-- 결재 양식 테이블 forId로 모든 필드 조회 -->
+	<select id="selectFormAll" parameterType="int" resultType="ApprFormDto">
+		select * from appr_form where for_id = #{forId}
 	</select>
 	
 	<!-- 결재 양식 등록 -->
@@ -61,24 +61,36 @@
 			f.for_content as forContent,
 			f.for_status as forStatus,
 			f.for_created as forCreated,
-			f.for_updated as forUpdated
+			f.for_updated as forUpdated,
 			c.com_name as comName
 		from
 			appr_form f
-		left outer join company_table c on f.com_id = c.com_id
+		left outer join
+			company c on f.com_id = c.com_id
 		<where>
-			<if test="comId != null">
+			<if test="comId != null and comId != ''">
 				and f.com_id = #{comId}
 			</if>
 			<if test="forStatus != null">
 				and f.for_status = #{forStatus}
 			</if>
-			<if test="keyword">
+			<if test="keyword != null and keyword != ''">
 				f.for_code like concat('%',#{keyword},'%')
 				or f.for_title like concat('%', #{keyword},'%')
 			</if>
 		</where>
 		order by f.for_id desc
+	</select>
+	
+	<!-- 결재 양식 리스트 기능 구문 -->
+	<select id="list10Form" resultType="ApprFormDto" parameterType="java.util.HashMap">
+		select * 
+		from appr_form
+		order by for_id desc limit #{pstartno}
+	</select>
+	
+	<select id="listFormCnt" resultType="int" parameterType="ApprFormSearchDto">
+		select count(*) from appr_form
 	</select>
 	
 	<!-- 결재 양식 sql 구문 -->

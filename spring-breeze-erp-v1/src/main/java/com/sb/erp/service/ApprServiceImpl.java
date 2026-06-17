@@ -2,6 +2,7 @@ package com.sb.erp.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +30,24 @@ public class ApprServiceImpl implements ApprService {
 		return mapper.searchCompany(keyword);
 	}
 	
-	/////////////////////// ∞·¿Á æÁΩƒ ∆ƒ∆Æ //////////////////////////////////
+	@Override
+	public List<ApprFormDto> list10Form(int pstartno) {
+		HashMap<String,Integer> map = new HashMap<>();
+		map.put("start", (pstartno-1)*10);
+		map.put("end", 10);
+		return mapper.list10Form(map);
+	}
+
+	@Override
+	public int listFormCnt() {
+		return mapper.listFormCnt();
+	}
+	
+	///////////////////////// ÏñëÏãù Í¥ÄÎ†® Í∏∞Îä• //////////////////////////////////
 	
 	@Override
-	public ApprFormDto selectFormAll() {
-		return mapper.selectFormAll();
+	public ApprFormDto selectFormAll(int forId) {
+		return mapper.selectFormAll(forId);
 	}
 
 	@Override
@@ -45,6 +59,10 @@ public class ApprServiceImpl implements ApprService {
 		
 		dto.setForCreated(setTime);
 		dto.setForUpdated(setTime);
+		
+		if(dto.getForStatus() == null) {
+			dto.setForStatus(false);
+		}
 		
 		return mapper.insertForm(dto);
 	}
@@ -66,10 +84,10 @@ public class ApprServiceImpl implements ApprService {
 	}
 
 	@Override
-	public ApprFormDto selectFromList(ApprFormSearchDto dto) {
-		return mapper.selectFromList(dto);
+	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto) {
+		return mapper.selectFormList(dto);
 	}
 
-	/////////////////////// ∞·¿Á æÁΩƒ ∆ƒ∆Æ //////////////////////////////////
+	///////////////////////// ÏñëÏãù Í¥ÄÎ†® Í∏∞Îä• //////////////////////////////////
 	
 }

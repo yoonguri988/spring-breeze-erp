@@ -8,14 +8,17 @@ import com.sb.erp.dto.CompanySearchDto;
 
 public interface ApprService {
 	
-	// °øÅë ÆÄÆ®
+	// ê³µí†µ íŒŒíŠ¸
 	public int getCompanyIdByName(String name);
 	public List<CompanySearchDto> searchCompany(String keyword);
+	// í˜ì´ì§• ê¸°ëŠ¥
+	public List<ApprFormDto> list10Form(int pstartno);
+	public int listFormCnt();
 	
-	// °áÁ¦ ¾ç½Ä ÆÄÆ®
-	public ApprFormDto selectFormAll();
+	// ì–‘ì‹ ì‘ì„± íŒŒíŠ¸
+	public ApprFormDto selectFormAll(int forId);
 	public int insertForm(ApprFormDto dto);
 	public int updateForm(ApprFormDto dto);
 	public int deleteFrom(ApprFormDto dto);
-	public ApprFormDto selectFromList(ApprFormSearchDto dto); 
+	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto); 
 }

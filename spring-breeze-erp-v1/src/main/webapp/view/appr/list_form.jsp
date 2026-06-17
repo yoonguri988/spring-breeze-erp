@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>   
+<%@taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -13,14 +14,15 @@
     <link href="./css/board.css" rel="stylesheet">
 </head>
 <body>
-	<button type="submit" class="btn btn-primary">양식 등록</button>
+		<button type="button" class="btn btn-primary"
+			 	onclick="location.href='${pageContext.request.contextPath}/appr/write_form'">양식 등록</button>
 	<div class="container my-5 card">
 	<h3>결재 양식 목록</h3>
-		<form action="${pageContext.request.contextPath}/appr/write_form" method="post" onsubmit="return checkForm()">
+		<form action="#" method="post" onsubmit="return checkForm()">
 		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 		
 			<div class="my-3">
-				<label for="keyword" class="form-label">키워드 검색</label>
+				<label for="keyword" class="form-label">양식이름, 양식코드</label>
 				<input type="text" class="form-control" id="keyword" name="keyword" />
 			</div>
 			
@@ -34,8 +36,10 @@
 				<div id="companyDropdown" class="dropdown-menu w-100"
 					 style="display: none; max-height: 200px; overflow-y: auto;"></div>
 			</div>
+		
 			
 			<script>
+				///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
 				window.addEventListener("load", function(){
 					
 					let companySearch = document.getElementById("companySearch");
@@ -96,6 +100,110 @@
 						}
 					});
 				});
+				
+				///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
+				
+				/////////////////////// 검색해서 나온 데이터 전송 ///////////////////////
+				
+				function searchForm(page = 1){
+					let comId = document.getElementById("comId").value.trim();
+					let forStatus = document.getElementById("forStatus").value;
+					let keyword = document.getElementById("keyword").value;
+					
+					let url = "${pageContext.request.contextPath}/searchForms"
+							+ "?keyword=" + encodeURIComponent(keyword)
+							+ "&company=" + comId
+							+ "&forStatus=" + forStatus
+					
+					fetch(url)
+					.then(response => response.json())
+					.then(data => {
+						console.log(data);
+						updateTable(data);
+					})
+				}
+				
+				/////////////////////// 검색해서 나온 데이터 전송 ///////////////////////
+								
+				/////////////////////// 검색해서 나온 결과 출력 ///////////////////////
+				
+				function updateTable(data){
+					// 출력할 공간
+					let tbody = document.getElementById("formTbody");
+					
+					tbody.innerHTML = "";
+					
+					if(data.length === 0){ // 없을때 출력할것
+						tbody.innerHTML = "<tr><td colspan='8' class='text-center'>검색 결과가 없습니다.</td></tr>"
+						return;
+					}
+					
+					data.forEach((item, index) => {
+						let tr = document.createElement("tr"); // tr태그 생성
+						
+						let isActive = (item.forStatus === true);
+						
+						// 코드 더러워서 위에서 벳지 처리
+						let badgeClass = isActive ? 'bg-success' : 'bg-secondary';
+						let badgeText = isActive ? '활성화' : '비활성화'
+
+						tr.innerHTML = `
+						<td>\${index + 1}</td>
+						<td><a href="${pageContext.request.contextPath}/appr/update_form?forId=\${item.forId}">
+						\${item.forCode}</a></td>
+						<td>\${item.forTitle}</td>
+						<td>\${item.comName}</td>
+						<td><span class="badge \${badgeClass}">\${badgeText}</span></td>
+						<td>\${item.forCreated}</td>
+						<td>\${item.forUpdated}</td>
+						`;
+						
+						tbody.appendChild(tr); // 위 데이터 다 넣어서 보내기
+					});
+				}
+				
+				/////////////////////// 검색해서 나온 결과 출력 ///////////////////////
+				
+				/////////////////////////   페이징 기능    /////////////////////////
+				
+				function updatePaging(paging){
+					const tfoot = document.getElementById("formTfoot");
+					
+					let html = `<tr><td colspan="5">`;
+					html += `<ul class="pagination justify-content-center">`;
+					
+					if(paging.start > 1){
+						html += `
+						<li class="page-item">
+							<a href="#" class="page-link"
+							onclick="searchForm(${paging.start-1}); return false;">이전</a>
+						</li>`;
+					}
+					
+					for (let i = paging.start; i <= paging.end; i++){
+						let activeClass = (i == paging.current) ? "active" : "";
+						
+						html +=`
+							<li class="page-item ${activeClass}">
+								<a href="#" class="page-link" 
+								onclick="searchForm(${i}); return false;">${i}</a>
+						</li>`;
+					}
+					
+					if(paging.end < paging.pagetotal){
+						html += `
+						<li class="page-item">
+							<a href="#" class="page-link"
+							onclick="searchForm(${paging.end +1}); return false;">다음</a>
+						</li>`;
+					}
+					
+					html += `</ul></td></tr>`;
+					
+					tfoot.innerHTML = html;	
+				}
+				
+				/////////////////////////   페이징 기능    /////////////////////////
 			</script>
 			
 			<div class="my-3">	
@@ -103,8 +211,8 @@
 				
 				<select class="form-select" id="forStatus" name="forStatus">
 					<option value="" selected>전체</option>
-					<option value="1">활성화</option>
-					<option value="0">비활성화</option>
+					<option value="true">활성화</option>
+					<option value="false">비활성화</option>
 				</select>
 			</div>
 			
@@ -113,60 +221,26 @@
 				<button type="button" class="btn btn-primary" onclick="searchForm()">검색</button>
 			</div>
 			
-			<script>
-				function searchForm(){
-					let comId = document.getElementById("comId").value.trim();
-					let forStatus = document.getElementById("forStatus").value;
-					let keyword = document.getElementById("keyword").value;
-					
-					let url = "${pageContext.request.contextPath}/searchForms"
-							+ "?keyword=" + encodeURIComponent(keyword)
-							+ "&company=" + comId
-							+ "&forStatus=" + forStatus;
-					
-					fetch(url)
-					.then(response => response.json())
-					.then(data => {
-						updateTable(data);
-					})
-				}
-				
-				function updateTalbe(data){
-					let tbody = document.getElementById("tbody id명 지정하면 여기에 넣어야함");
-					
-					tbody.innerHTML = "";
-					
-					if(data.length === 0){
-						tbody.innerHTML = "<tr><td colspan='8' class='text-center'>검색 결과가 없습니다.</td></tr>"
-						return;
-					}
-					
-					data.forEach((item, index) => {
-						let tr = document.createElement("tr");
-						
-						tr.innerHTML = `
-						<td>${index + 1}</td>
-						<td><a href="">${item.forCode}</a></td>
-						<td>${item.forTitle}</td>
-						<td>${item.forContent || ''}</td>
-						<td>${item.comName}</td>
-						<td><span class="badge ${item.forStatus === 'Y' ? bg-success : bg-secondary}">
-						${item.forStatus === 'Y' ? '활성화' : '비활성화'}
-						</span></td>
-						<td>${item.forCreated || ''}</td>
-						<td>${item.forUpdated || ''}</td>
-						`
-						
-					})
-				}
-			</script>
-			
 		</form>
 	</div>
 	
 	<div>
-		<thead></thead>
-		<tbody></tbody>
+		<table class="table  table-striped  table-bordered table-hover">
+			<caption>양식 목록</caption>
+			<thead>
+				<tr>
+					<th>번호</th>
+					<th>양식 코드</th>
+					<th>양식 제목</th>
+					<th>회사</th>
+					<th>사용 여부</th>
+					<th>생성일</th>
+					<th>수정일</th>
+				</tr>
+			</thead>
+			<tbody id="formTbody">
+			</tbody>
+		</table>
 	</div>
 	
 </body>
