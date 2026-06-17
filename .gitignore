@@ -27,6 +27,7 @@ hs_err_pid*
 .project
 .settings/
 .factorypath
+eclipse/
 bin/
 build/
 
@@ -76,4 +77,3 @@ logs/
 
 #
 /Servers/
-
