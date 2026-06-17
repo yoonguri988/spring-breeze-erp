@@ -21,10 +21,9 @@ public class DeptDto {
 	private int empId;
 	private String createdAt;
 	private String updatedAt;
-	private String fullPath;        // 예시) 본사>개발부서>백엔드팀
-	private List<DeptDto> children; // 하위 부서 리스트
-	
-	// children 초기화 (NullPointException 방지)
+	private String fullPath;
+	private List<DeptDto> children; 
+
 	public List<DeptDto> getChildren() {
 		if(this.children == null) this.children = new ArrayList<>();
 		return this.children;
