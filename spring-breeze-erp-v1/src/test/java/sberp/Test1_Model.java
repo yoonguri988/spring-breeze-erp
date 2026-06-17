@@ -30,7 +30,6 @@ public class Test1_Model {
 	@Autowired EmpMapper empMapper;
 	@Autowired PosMapper posMapper;
 	@Autowired DeptMapper deptMapper;
-
 	
 	@Test
 	public void test7() {
@@ -39,10 +38,8 @@ public class Test1_Model {
 		search.setKeyword("박");
 		search.setPosId(8);
 		System.out.println("이름에 박+직급8: "+ empMapper.search(search).size() );
-		
 	}
-	
-	
+
 	
 	@Ignore //@Test
 	public void test4() {
@@ -56,7 +53,7 @@ public class Test1_Model {
 		System.out.println(empMapper.selectAll(1));
 	}
 	
-	@Ignore // @Test
+	@Ignore @Test
 	public void test2() {
 		System.out.println(".........testMapper.now(): "+testMapper.now());
 	}
@@ -67,4 +64,5 @@ public class Test1_Model {
 		System.out.println(".........2. "+ ds);
 		System.out.println(".........1. "+ context);
 	}
+
 }
