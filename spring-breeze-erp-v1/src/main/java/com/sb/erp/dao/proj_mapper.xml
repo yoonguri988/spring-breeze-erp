@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.ProjectMapper">
+	<!-- 프로젝트 생성 -->
+	<insert id="insert" parameterType="ProjectDto">
+	  insert into project(com_id, pro_name, pro_desc, emp_id, pro_status,
+                           start_date, end_date, created_at, updated_at )
+      values(#{com_id}, #{pro_name}, #{pro_desc}, #{emp_id}, #{pro_status},
+               #{start_date}, #{end_date}, CURDATE(), CURDATE())
+	</insert> 
+	<!-- 프로젝트 상태별 조회 -->
+	<select id="selectByStatus" parameterType="String" resultType="ProjectDto">
+       select p.* , e.emp_name from project p join employee e on p.emp_id = e.emp_id
+			where p.pro_status = #{pro_status} order by p.pro_id desc
+	</select>
+	<!-- 프로젝트 상세페이지 -->
+	<select id="select" resultType="ProjectDto" parameterType="int">
+		select p.* , e.emp_name from project p join employee e on p.emp_id = e.emp_id
+		where p.pro_id = #{pro_id}
+	</select>
+	<!-- paging -->
+	<select id="select10" resultType="ProjectDto" parameterType="map">
+	select p.*, e.emp_name from project p join employee e on p.emp_id = e.emp_id
+		order by p.pro_id desc limit #{start},#{end}
+	</select>
+	<select id="selectCnt" resultType="int">
+	select count(*) from project
+	</select>
+	<!-- 프로젝트 삭제 -->
+	<delete id="delete" parameterType="int">
+       delete from project where pro_id = #{pro_id}
+    </delete>
+    <!-- 프로젝트 수정 -->
+    <update id="update" parameterType="ProjectDto">
+       update project  set
+       pro_name = #{pro_name}, pro_desc = #{pro_desc}, pro_status = #{pro_status}, 
+       start_date = #{start_date}, end_date = #{end_date}, updated_at = CURDATE()
+       where pro_id = #{pro_id}
+    </update>
+    
+</mapper>
