@@ -6,38 +6,41 @@
   <!-- 회사 여러개 조회 -->
   <select id="selectAll" resultType="CompanyDto">
   select * from company 
-  where 1=1
+  <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
   	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
   </if>
+  </where>
   order by com_id desc
   limit #{pstarValue}, #{onepagelist}
   </select>
   <!-- 회사 여러개 조회 -->
   <select id="listTotal" resultType="int" parameterType="string">
   select count(*) from company 
-  where 1=1
+  <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
   	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
   </if>
+  </where>
   </select>
   <select id="selectSuggest" resultType="CompanyDto" parameterType="string">
     select com_id, com_name, biz_no
     FROM company
-    WHERE 1=1
+    <where>
     <if test="keyword != null and keyword != ''">
     and (com_name LIKE CONCAT('%', #{keyword}, '%')
            OR biz_no LIKE CONCAT('%', #{keyword}, '%'))
     </if>
+    </where>
     ORDER BY com_name ASC
     LIMIT 5
   </select>
   <!-- 회사 등록 -->
-  <insert id="insert">
-  insert into company (com_name, com_ceo, biz_no, com_tel, com_logo)
-  values (#{comName}, #{comCeo}, #{bizNo}, #{comTel}, #{comLogo})
+  <insert id="insert" parameterType="CompanyDto">
+  insert into company (com_name, indust_code, indust_name, com_ceo, biz_no, com_tel, com_logo)
+  values (#{comName}, #{industCode}, #{industName}, #{comCeo}, #{bizNo}, #{comTel}, #{comLogo})
   </insert>
   <select id="selectByBizNo" parameterType="string" resultType="CompanyDto">
   select * from company
@@ -53,8 +56,10 @@
     update company
     set com_name = #{comName}
         ,com_ceo = #{comCeo}
+        ,indust_code = #{industCode}
+        ,indust_name = #{industName}
         ,com_tel = #{comTel}
-        <if test="logoUrl != null">,com_logo   = #{comLogo}</if>
+        <if test="comLogo != null">,com_logo   = #{comLogo}</if>
     where com_id = #{comId}
   </update>
   <!-- 회사 삭제 -->

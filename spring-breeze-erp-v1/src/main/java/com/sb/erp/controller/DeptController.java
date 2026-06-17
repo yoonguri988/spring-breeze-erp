@@ -26,7 +26,7 @@ public class DeptController {
 	// 부서 등록 폼
 	@RequestMapping(value="/dept/add", method=RequestMethod.GET)
 	public String addForm(@RequestParam("comId") int comId, Model model) {
-		model.addAttribute("items", service.flattenOrgTree(comId));
+		model.addAttribute("deptList", service.flattenOrgTree(comId));
 		model.addAttribute("comId", comId);
 		return "/dept/addForm";
 	}
@@ -43,10 +43,10 @@ public class DeptController {
 	// 부서 수정 폼
 	@RequestMapping(value="/dept/edit", method=RequestMethod.GET)
 	public String editForm(@RequestParam("deptId") int deptId, Model model) {
-		DeptDto dto = service.selectOneById(deptId);
-		model.addAttribute("dto", dto);
-		model.addAttribute("items", service.flattenOrgTree(dto.getComId()));
-		model.addAttribute("comId", dto.getComId());
+		DeptDto dept = service.selectOneById(deptId);
+		model.addAttribute("dept", dept);
+		model.addAttribute("deptList", service.flattenOrgTree(dept.getComId()));
+		model.addAttribute("comId", dept.getComId());
 		return "/dept/editForm";
 	}
 	
@@ -64,7 +64,7 @@ public class DeptController {
 	}
 	
 	//부서 삭제 기능
-	@RequestMapping(value="/dept/delete", method=RequestMethod.GET)
+	@RequestMapping(value="/dept/delete", method=RequestMethod.POST)
 	public String delete_post(int deptId, RedirectAttributes rttr) {
 		DeptDto dto = service.selectOneById(deptId);
 		try {

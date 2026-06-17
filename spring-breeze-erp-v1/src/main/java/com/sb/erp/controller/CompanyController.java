@@ -83,7 +83,7 @@ public class CompanyController {
 	}
 	
 	// 회사 삭제 기능
-	@RequestMapping(value="/com/delete.do", method = RequestMethod.GET)
+	@RequestMapping(value="/com/delete", method = RequestMethod.GET)
 	public String delete(int comId, RedirectAttributes rttr) {
 		String msg = "회사 정보 삭제에 실패 하였습니다.";
 		try {

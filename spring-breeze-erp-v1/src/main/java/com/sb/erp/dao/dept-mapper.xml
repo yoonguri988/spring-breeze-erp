@@ -28,8 +28,13 @@
   </select>
   <!-- 부서 등록 -->
   <insert id="insert" parameterType="DeptDto">
-  insert into department (company_id, parent_id, dept_name, dept_code, depth, sort_order)
-  value (#{companyId}, #{parentId}, #{deptName}, #{deptCode}, #{depth}, #{sortOrder})
+  insert into department (com_id, parent_id, dept_name, dept_code, depth, sort_order)
+  value (#{comId},
+      <choose>
+        <when test="parentId == null or parentId == 0">NULL</when>
+        <otherwise>#{parentId}</otherwise>
+    </choose>
+  , #{deptName}, #{deptCode}, #{depth}, #{sortOrder})
   </insert>
   <!-- 하위 부서 존재 확인 -->
   <select id="countChildren" resultType="int">
@@ -46,7 +51,10 @@
   update department
   set dept_name  = #{deptName}
       , dept_code  = #{deptCode}
-      , parent_id  = #{parentId}
+      <choose>
+        <when test="parentId == null or parentId == 0">, parent_id  = NULL</when>
+        <otherwise>, parent_id  = #{parentId}</otherwise>
+      </choose>
       , depth      = #{depth}
       <if test="empId != null">, emp_Id = #{empId}</if>
   where dept_id = #{deptId}
