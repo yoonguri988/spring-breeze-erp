@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.ApprMapper">
+
+	<select id="searchCompany" resultType="CompanySearchDto" parameterType="string">
+		select
+		 com_id as comId,
+		 com_name as companyName
+		from company
+		where com_name like concat('%', #{keyword}, '%')
+		order by com_name asc
+	</select>
+	
+	<!-- 회사 이름 -> 회사 pk 변환 -->
+	<select id="getCompanyIdByName" parameterType="string" resultType="int">
+		select com_id
+		from com_tablename
+		where com_name=#{comName}
+	</select>
+	
+	<!-- 결재 양식 sql 구문 -->
+	
+	<!-- 결재 양식 테이블 forId로 모든 필드 조회 -->
+	<select id="selectFormAll" parameterType="int" resultType="ApprFormDto">
+		select * from appr_form where for_id = #{forId}
+	</select>
+	
+	<!-- 결재 양식 등록 -->
+	<insert id="insertForm" parameterType="ApprFormDto">
+		insert into appr_form
+		(com_id, for_code, for_title, for_content, for_status, for_created, for_updated)
+		values (#{comId},#{forCode},#{forTitle},#{forContent},#{forStatus},#{forCreated},#{forUpdated})
+	</insert>
+	
+	<!-- 결재 양식 수정 -->
+	<update id="updateForm" parameterType="ApprFormDto">
+		update appr_form
+		set
+			for_code = #{forCode},
+			for_title = #{forTitle},
+			for_content = #{forStatus},
+			for_status = #{forStatue},
+			for_updated = #{forUpdated}
+		where com_id = #{comId} and for_id = #{forId}
+	</update>
+	
+	<!-- 결재 양식 삭제 -->
+	<delete id="deleteForm" parameterType="ApprFormDto">
+		delete from appr_form where for_id = #{forId}
+	</delete>
+	
+	<!-- 결재 양식 리스트 / 회사별 출력 -->
+	<select id="selectFormList" parameterType="ApprFormSearchDto" resultType="ApprFormDto">
+		select
+			f.for_id as forId,
+			f.com_id as comId,
+			f.for_code as forCode,
+			f.for_title as forTitle,
+			f.for_content as forContent,
+			f.for_status as forStatus,
+			f.for_created as forCreated,
+			f.for_updated as forUpdated,
+			c.com_name as comName
+		from
+			appr_form f
+		left outer join
+			company c on f.com_id = c.com_id
+		<where>
+			<if test="comId != null">
+				and f.com_id = #{comId}
+			</if>
+			<if test="forStatus != null">
+				and f.for_status = #{forStatus}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				and (
+					f.for_code like concat('%',#{keyword},'%')
+					or f.for_title like concat('%', #{keyword},'%')
+				)
+			</if>
+		</where>
+		order by f.for_id desc
+	</select>
+	
+	<!-- 결재 양식 리스트 기능 구문 -->
+	<select id="list10Form" resultType="ApprFormDto" parameterType="java.util.HashMap">
+		select * 
+		from appr_form
+		order by for_id desc limit #{pstartno}
+	</select>
+	
+	<select id="listFormCnt" resultType="int" parameterType="ApprFormSearchDto">
+		select count(*) from appr_form
+	</select>
+	
+	<!-- 결재 양식 sql 구문 -->
+	
+	
+	<!-- 결재 문서 sql 구문 -->
+	
+	<!-- 결재 문서 테이블 모든 필드 조회 -->
+	<select id="selectDocAll" resultType="ApprDocDto">
+		select * from appr_doc
+	</select>
+	
+	<!-- 결재 문서 sql 구문 -->
+	
+	<!-- 결재선 sql 구문 -->
+	
+	<!-- 결재선 테이블 모든 필드 조회 -->
+	<select id="selectLineAll" resultType="ApprLineDto">
+		select * from appr_line		
+	</select>
+	
+	<!-- 결재선 sql 구문 -->
+	
+</mapper>
