@@ -3,9 +3,16 @@
   PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
+ 	<settings>
+        <setting name="mapUnderscoreToCamelCase" value="true" />
+    </settings>
 	<typeAliases>
 		<typeAlias type="com.sb.erp.dto.AuthDto" alias="AuthDto" />
 		<typeAlias type="com.sb.erp.dto.AuthUserDto" alias="AuthUserDto" />
+		<!-- cyj -->
+		<typeAlias type="com.sb.erp.dto.CompanyDto" alias="CompanyDto" />		
+		<typeAlias type="com.sb.erp.dto.DeptDto" alias="DeptDto" />
+		<!-- cyj -->
 	</typeAliases>
 
 	<typeAliases>

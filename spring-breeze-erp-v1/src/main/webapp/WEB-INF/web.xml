@@ -10,6 +10,24 @@
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
   
+<!-- 한글 깨짐 web.xml — CharacterEncodingFilter 추가 -->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+  
 	<!-- 1.스프링구동 ContextLoaderListener -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -39,6 +57,12 @@
 			<param-name>contextConfigLocation</param-name>
 			<param-value>classpath:/config/servlet-context.xml</param-value>
 		</init-param>
+		
+		<init-param>
+	        <param-name>throwExceptionIfNoHandlerFound</param-name>
+	        <param-value>true</param-value>
+	    </init-param>
+		
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
@@ -46,21 +70,4 @@
 		<servlet-name>springDispatcherServlet</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
-<!-- 한글 깨짐 web.xml — CharacterEncodingFilter 추가 -->
-	<filter>
-		<filter-name>encodingFilter</filter-name>
-		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
-		<init-param>
-			<param-name>encoding</param-name>
-			<param-value>UTF-8</param-value>
-		</init-param>
-		<init-param>
-			<param-name>forceEncoding</param-name>
-			<param-value>true</param-value>
-		</init-param>
-	</filter>
-	<filter-mapping>
-		<filter-name>encodingFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
 </web-app>
