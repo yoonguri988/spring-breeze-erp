@@ -12,38 +12,10 @@
     accent: "sberp.accent",
   };
 
-  // Resolve an absolute base from this script's own URL so partials and
-  // nav links work identically from the root or from nested folders
-  // (e.g. com/admin/list.html).
-  const _self = document.currentScript;
-  const BASE = _self ? _self.src.replace(/js\/layout\.js(?:\?.*)?$/, "") : "";
-
-  // Prepend BASE to relative .html links inside an injected partial so that
-  // sidebar/header navigation resolves correctly from any folder depth.
-  function fixLinks(container) {
-    if (!container) return;
-    container.querySelectorAll("a[href]").forEach((a) => {
-      const href = a.getAttribute("href");
-      if (!href) return;
-      if (/^(https?:|mailto:|tel:|#|\/)/i.test(href)) return; // absolute / anchor
-      a.setAttribute("href", BASE + href);
-    });
-  }
-
-  async function inject(targetId, url) {
-    const el = document.getElementById(targetId);
-    if (!el) return "";
-    try {
-      const res = await fetch(url, { cache: "no-cache" });
-      const html = await res.text();
-      el.innerHTML = html;
-      fixLinks(el);
-      return html;
-    } catch (e) {
-      console.error("layout inject failed:", url, e);
-      return "";
-    }
-  }
+  // NOTE: sidebar.jsp / header.jsp / footer.jsp 는 더 이상 JS의 fetch()로
+  // 끼워넣지 않습니다. <%@include%> 디렉티브를 통해 서버(JSP) 컴파일
+  // 시점에 이미 하나의 HTML로 합쳐져서 내려오기 때문에, 클라이언트에서
+  // 다시 inject()할 필요가 없습니다. (과거 순수 html/js 버전의 잔재 코드 제거)
 
   function applyAccent(hex) {
     if (!hex) return;
@@ -149,12 +121,6 @@
   }
 
   async function boot() {
-    await Promise.all([
-      //inject("sbSidebar", BASE + "layout/sidebar.jsp"),
-      //inject("sbHeader", BASE + "layout/header.jsp"),
-      //inject("sbFooter", BASE + "layout/footer.jsp"),
-    ]);
-
     buildTopbar();
     markActive();
     wireChrome();

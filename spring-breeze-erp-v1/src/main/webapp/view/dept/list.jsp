@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@include file="../inc/header.jsp"%>
-
+<%@include file="/layout/header.jsp"%>
 <%-- Toast 알림 (msg 파라미터) --%>
 <c:if test="${not empty msg}">
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1100">
@@ -114,4 +113,4 @@ document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {
 });
 </script>
 
-<%@include file="../inc/footer.jsp"%>
+<%@include file="/layout/footer.jsp"%>
