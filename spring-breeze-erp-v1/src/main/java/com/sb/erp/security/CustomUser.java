@@ -25,10 +25,10 @@ public class CustomUser extends User{
  
 	//2.username, password에 맞게 셋팅
 	public CustomUser(AuthUserDto dto) {
-		super(dto.getEmail(), 
-			  dto.getBpass(), 
+		super(dto.getEmpEmail(), 
+			  dto.getEmpPass(), 
 			  dto.getAuthList().stream()
-			                   .map(auth->new SimpleGrantedAuthority(auth.getAuth()))
+			                   .map(auth->new SimpleGrantedAuthority(auth.getAutName()))
 			                   .collect(Collectors.toList()));
 		this.dto = dto;
 	}
