@@ -11,8 +11,8 @@ public class AuthDto {
 }
 
 /*
--- ±ÇÇÑ Å×ÀÌºí
--- Å×ÀÌºí ID / »ç¿ëÀÚ ID / Á÷±Þ ID / auth
+-- ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½
+-- ï¿½ï¿½ï¿½Ìºï¿½ ID / ï¿½ï¿½ï¿½ï¿½ï¿½ ID / ï¿½ï¿½ï¿½ï¿½ ID / auth
 create table authority(
 auth_id int not null primary key auto_increment,
 user_id varchar(50) not null,

@@ -19,10 +19,7 @@
       <property name="mapperLocations">
          <list> 
          <!-- 지우지 말것! <value>classpath:com/sb/erp/dao/*-mapper.xml</value> -->
-         	<value>classpath:com/sb/erp/dao/test-mapper.xml</value>
-         	<!-- KJY -->
-         	<value>classpath:com/sb/erp/dao/appr-mapper.xml</value>
-         	<!-- KJY -->
+         	<value>classpath:com/sb/erp/dao/*-mapper.xml</value>
          </list>
       </property>
    </bean>
