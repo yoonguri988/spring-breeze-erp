@@ -71,5 +71,27 @@
 			emp_status = #{empStatus}
 		where emp_id = #{empId}
 	</update>
-
+	
+	<!-- cyj: 비밀번호 찾기시 해당하는 사원정보가 있는지 확인 -->
+	<select id="selectForVerify" parameterType="EmpDto" resultType="EmpDto">
+		select *
+		from employee
+		where emp_no = #{empNo}
+		  and emp_email = #{empEmail} 
+		  and emp_mobile = #{empMobile} 
+	</select>
+	<!-- cyj: 비밀번호 재설정 -->
+	<update id="updatePassByEmpId" parameterType="EmpDto">
+		update employee
+		   set emp_pass = #{empPass}
+		 where emp_id = #{empId}
+	</update>
+	<!-- cyj: 이메일을 기준으로 사용자 정보 찾기 -->
+	<select id="selectByEmpEmail" parameterType="string" resultType="EmpDto">
+		select e.*, d.dept_name, p.pos_name
+		from employee e
+		join department d on d.dept_id = e.dept_id
+		join emp_position p on p.pos_id = e.pos_id
+		where e.emp_email = #{empEmail}
+	</select>
 </mapper>
