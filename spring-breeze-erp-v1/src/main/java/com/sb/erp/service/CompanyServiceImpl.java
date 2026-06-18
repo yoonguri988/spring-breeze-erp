@@ -9,6 +9,7 @@ import com.sb.erp.dao.CompanyMapper;
 import com.sb.erp.dao.DeptMapper;
 import com.sb.erp.dto.ComSearchDto;
 import com.sb.erp.dto.CompanyDto;
+import com.sb.erp.dto.StatsComDto;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {
@@ -47,11 +48,9 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Override
 	public int delete(int comId) {
-		// �Ҽӵ� �μ��� �����Ѵٸ� ȸ�� ���� ó�� �Ұ�
 		if(deptDao.countActiveDepts(comId) > 0) {
-			throw new IllegalArgumentException("�Ҽ� �μ��� �����Ͽ� ������ �� �����ϴ�.");
+			throw new IllegalArgumentException("하위 부서가 존재하는 경우, 회사 삭제 불가능");
 		}
-		// ���� ó��
 		return dao.delete(comId);
 	}
 
@@ -64,6 +63,11 @@ public class CompanyServiceImpl implements CompanyService {
 	public int listTotal(ComSearchDto search) {
 		return dao.listTotal(search);
 
+	}
+
+	@Override
+	public StatsComDto selectStats() {
+		return dao.selectStats();
 	}
 
 }

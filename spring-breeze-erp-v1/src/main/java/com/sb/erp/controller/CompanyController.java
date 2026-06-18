@@ -18,6 +18,7 @@ import com.sb.erp.dto.ComSearchDto;
 import com.sb.erp.dto.CompanyDto;
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.PermDto;
+import com.sb.erp.dto.StatsComDto;
 import com.sb.erp.service.CompanyService;
 import com.sb.erp.service.EmpService;
 import com.sb.erp.service.PermService;
@@ -62,6 +63,10 @@ public class CompanyController {
 	public String list(ComSearchDto search, Model model) {
 		int listtotal = service.listTotal(search);
 		PagingUtil paging = new PagingUtil(listtotal, search.getOnepagelist(), search.getPstarValue());
+		//통계 데이터
+		StatsComDto stats = service.selectStats();
+		
+		model.addAttribute("stats", stats);
 		model.addAttribute("paging", paging);
 		model.addAttribute("items", service.list(search));
 		return "/com/list";

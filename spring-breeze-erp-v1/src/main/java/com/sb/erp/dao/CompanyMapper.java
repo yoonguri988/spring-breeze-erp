@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.sb.erp.dto.ComSearchDto;
 import com.sb.erp.dto.CompanyDto;
+import com.sb.erp.dto.StatsComDto;
 
 @Mapper
 public interface CompanyMapper {
@@ -23,5 +24,7 @@ public interface CompanyMapper {
 	public List<CompanyDto> selectSuggest(@Param("keyword") String keyword);
 
 	public int listTotal(ComSearchDto search);
+
+	public StatsComDto selectStats();
 
 }

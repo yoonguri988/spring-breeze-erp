@@ -8,6 +8,7 @@
 <div class="sb-page-head">
     <div class="sb-page-head__txt">
         <div class="sb-breadcrumb">
+        	조직 관리
             <i class="bi bi-chevron-right"></i>
             회사 관리
             <i class="bi bi-chevron-right"></i>
@@ -31,7 +32,7 @@
                 <div class="sb-stat__ico tone-blue"><i class="bi bi-building"></i></div>
                 <div class="sb-stat__label">전체 회사</div>
             </div>
-            <div class="sb-stat__val">-</div>
+            <div class="sb-stat__val" id="comTotal">-</div>
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
@@ -40,7 +41,7 @@
                 <div class="sb-stat__ico tone-green"><i class="bi bi-people"></i></div>
                 <div class="sb-stat__label">전체 임직원</div>
             </div>
-            <div class="sb-stat__val">-</div>
+            <div class="sb-stat__val" id="empTotal">-</div>
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
@@ -49,7 +50,7 @@
                 <div class="sb-stat__ico tone-violet"><i class="bi bi-grid-3x3-gap"></i></div>
                 <div class="sb-stat__label">업종 수</div>
             </div>
-            <div class="sb-stat__val">-</div>
+            <div class="sb-stat__val" id="industTotal">-</div>
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
@@ -58,7 +59,7 @@
                 <div class="sb-stat__ico tone-amber"><i class="bi bi-calendar-plus"></i></div>
                 <div class="sb-stat__label">최근 등록 회사</div>
             </div>
-            <div class="sb-stat__val" style="font-size:15px;line-height:1.3">-</div>
+            <div class="sb-stat__val" id="comLatest" style="font-size:15px;line-height:1.3">-</div>
         </div>
     </div>
 </div>
@@ -234,8 +235,7 @@
                             </c:choose>
                         </td>
                         <td class="num tnum">
-                            <%-- TODO: empCountMap 연동 시 ${empCountMap[com.comId]} 로 교체 --%>
-                            <span class="text-faint">-</span>
+                            <span class="text-faint">${com.empCount}</span>
                         </td>
                         <td>
                             <div class="d-flex justify-content-end gap-1">
@@ -302,7 +302,16 @@
 (function () {
     "use strict";
     const CTX = "${pageContext.request.contextPath}";
-
+    
+    console.log("${stats}");
+    
+    document.addEventListener("layout:ready", function () {
+    	SB.countUp(document.getElementById("comTotal"), "${stats.comTotal}");
+    	SB.countUp(document.getElementById("empTotal"), "${stats.empTotal}");
+    	SB.countUp(document.getElementById("industTotal"), "${stats.industTotal}");
+        document.getElementById("comLatest").textContent = "${stats.comLatest}";
+    });
+    
     /* ===================== 실시간 자동완성 ===================== */
     const kwInput = document.getElementById("keyword");
     const acList  = document.getElementById("acList");

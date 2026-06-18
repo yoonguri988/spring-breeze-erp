@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sb.erp.dto.ComSearchDto;
 import com.sb.erp.dto.CompanyDto;
+import com.sb.erp.dto.StatsComDto;
 
 public interface CompanyService {
 	public List<CompanyDto> list(ComSearchDto search);
@@ -20,4 +21,6 @@ public interface CompanyService {
 	public List<CompanyDto> getSuggest(String keyword);
 
 	public int listTotal(ComSearchDto search);
+
+	public StatsComDto selectStats();
 }
