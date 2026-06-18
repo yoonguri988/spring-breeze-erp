@@ -1,6 +1,8 @@
 package com.sb.erp.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,6 +33,50 @@ public class ApprController {
 	// 양식 리스트 입력한 값 찾기
 	@RequestMapping( value = "/searchForms", method = RequestMethod.GET)
 	@ResponseBody
+	public Map<String, Object> searchForms(@RequestParam("keyword") String keyword,
+										 @RequestParam("company") String comId,
+										 @RequestParam( value = "forStatus", required = false) String status,
+										 @RequestParam( value = "page", defaultValue = "1") int page){
+		ApprFormSearchDto dto = new ApprFormSearchDto();
+		dto.setComId(
+				(comId == null || comId.isBlank()) ?
+				null : Integer.parseInt(comId)
+				);
+		dto.setForStatus(
+				(status == null || status.isBlank()) ?
+				null : Boolean.parseBoolean(status)
+				);
+		dto.setKeyword(keyword);
+		dto.setPage(page);
+		dto.setPageSize(10); // 한 페이지당 몇개들어갈건지
+		
+		//int totalCnt = appr.listFormCnt(dto);
+		
+		List<ApprFormDto> list = appr.selectFormList(dto);
+		int totalCnt = appr.listFormCnt(dto); 
+		
+		int pagetotal = (totalCnt == 0) ? 1 : (int) Math.ceil((double)totalCnt/ dto.getPageSize()); // 전체 페이지 수
+		int pageNum = 10; // 하단에 보여줄 버튼? 수
+		int start = ((page - 1) / pageNum) * pageNum + 1;
+		int end = Math.min(start + pageNum - 1, pagetotal);
+		
+		Map<String, Object> paging = new HashMap<>();
+		paging.put("current", page);
+		paging.put("pagetotal", pagetotal );
+		paging.put("start", start);
+		paging.put("end", end);
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("list", list);
+		result.put("paging", paging);
+		
+		return result;
+	}
+	
+	/*
+	 // 양식 리스트 입력한 값 찾기
+	@RequestMapping( value = "/searchForms", method = RequestMethod.GET)
+	@ResponseBody
 	public List<ApprFormDto> searchForms(@RequestParam("keyword") String keyword,
 										 @RequestParam("company") String comId,
 										 @RequestParam( value = "forStatus", required = false) String status){
@@ -48,7 +94,8 @@ public class ApprController {
 		//int totalCnt = appr.listFormCnt(dto);
 		
 		return appr.selectFormList(dto);
-	}
+	} 
+	 */
 	
 	// 양식 작성 폼 !권한 부여해야함 관리자 파트임!
 	@RequestMapping( value = "/appr/write_form", method = RequestMethod.GET)

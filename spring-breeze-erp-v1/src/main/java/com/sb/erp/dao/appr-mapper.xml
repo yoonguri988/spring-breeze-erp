@@ -48,8 +48,9 @@
 	</update>
 	
 	<!--
-		이부분 양식 한번 지정하면 회사는 안바꿀거면 아래코드
+		이부분 양식 한번 지정하면 회사는 안바꿀거면 아래코드 
 		양식에서도 회사를 바꿔서 설정할거면 위코드 
+		근데 아마도 바꾸는게 맞는거같음 ㅇㅇ 잘못 설정햇을수도잇지..
 	<update id="updateForm" parameterType="ApprFormDto">
 		update appr_form
 		set
@@ -98,20 +99,66 @@
 			</if>
 		</where>
 		order by f.for_id desc
+		limit #{pageSize} offset #{offset}
 	</select>
 	
-	<!-- 결재 양식 리스트 기능 구문 -->
-	<select id="list10Form" resultType="ApprFormDto" parameterType="java.util.HashMap">
-		select * 
-		from appr_form
-		order by for_id desc limit #{pstartno}
+	<!-- 오류날거 대비 코드 냄겨놓기
+	<select id="selectFormList" parameterType="ApprFormSearchDto" resultType="ApprFormDto">
+		select
+			f.for_id as forId,
+			f.com_id as comId,
+			f.for_code as forCode,
+			f.for_title as forTitle,
+			f.for_content as forContent,
+			f.for_status as forStatus,
+			f.for_created as forCreated,
+			f.for_updated as forUpdated,
+			c.com_name as comName
+		from
+			appr_form f
+		left outer join
+			company c on f.com_id = c.com_id
+		<where>
+			<if test="comId != null">
+				and f.com_id = #{comId}
+			</if>
+			<if test="forStatus != null">
+				and f.for_status = #{forStatus}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				and (
+					f.for_code like concat('%',#{keyword},'%')
+					or f.for_title like concat('%', #{keyword},'%')
+				)
+			</if>
+		</where>
+		order by f.for_id desc
 	</select>
+	 -->
 	
+	<!-- 결재 양식 리스트 기능 구문 / 얘네 일단 보류 -->
 	<select id="listFormCnt" resultType="int" parameterType="ApprFormSearchDto">
-		select count(*) from appr_form
+		select count(*)
+		from appr_form
+		<where>
+			<if test="comId != null">
+				and com_id = #{comId}
+			</if>
+			<if test="forStatus != null">
+				and for_status = #{forStatus}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				and (
+					for_code like concat('%',#{keyword},'%')
+					or for_title like concat('%', #{keyword},'%')
+				)
+			</if>
+		</where>
 	</select>
 	
 	<!-- 결재 양식 sql 구문 -->
+	
+	
 	
 	
 	<!-- 결재 문서 sql 구문 -->
@@ -121,7 +168,85 @@
 		select * from appr_doc
 	</select>
 	
+	<!-- 결재 문서 검색어별 출력 1. 내가 작성한 문서들 -->
+	<select id="selectDocList" parameterType="map" resultType="map">
+		select
+			d.doc_id,
+			d.doc_title,
+			d.doc_status,
+			d.doc_created,
+			d.doc_updated,
+			d.com_id,
+			d.emp_id,
+			
+			l.lin_id,
+			l.emp_id as line_emp_id,
+			l.lin_order,
+			l.lin_status
+		from
+			appr_doc d
+		left outer join
+			appr_line l
+			on d.doc_id = l.doc_id
+			and l.lin_status = 'WAI'
+		<where>
+			and d.com_id = #{사용자회사id}
+			and d.emp_id = #{사용자id(empId)}
+			
+			<if test="docStatus != null and keyword != ''">
+				and d.doc_status = #{docStatus}
+			</if>
+			<if test="docTitle != null and keyword != ''">
+				and d.doc_title like concat('%', #{keyword}, '%')
+			</if>
+		</where>
+		order by d.doc_id desc
+		limit #{pageSize} offset #{offset}
+	</select>
+	
+	<resultMap id="ApprDocResultMap" type="ApprDocDto">
+		<id property="docId" column="doc_id" />
+		<result property="docTitle" column="doc_title"/>
+		<result property="docStatus" column="doc_status"/>
+		<result property="docCreated" column="doc_created"/>
+		<result property="docUpdated" column="doc_updated"/>
+		<result property="comId" column="com_id"/>
+		<result property="empId" column="emp_id"/>
+				
+		<collection property="apprLines" ofType="ApprLineDto">
+			<id property="lineId" column="line_id"/>
+			<result property="docId" column="doc_id"/>
+			<result property="empId" column="line_emp_id"/>
+			<result property="linOrder" column="lin_order"/>
+			<result property="linStatus" column="lin_status"/>
+		</collection>
+	</resultMap>
+	<!-- 결재 문서 검색어별 출력 -->
+	
+	<!-- 결재 문서 페이징 기능 -->
+	<select id="apprDocCnt" parameterType="map" resultType="int">
+		select
+			count(*)
+		from
+			appr_doc d
+		<where>
+			and d.com_id = #{사용자회사id}
+			and d.emp_id = #{사용자id(empId)}
+			
+			<if test="docStatus != null and keyword != ''">
+				and d.doc_status = #{docStatus}
+			</if>
+			<if test="docTitle != null and keyword != ''">
+				and d.doc_title like concat('%', #{keyword}, '%')
+			</if>
+		</where>
+	</select>
+	<!-- 결재 문서 페이징 기능 -->
+	
 	<!-- 결재 문서 sql 구문 -->
+	
+	
+	
 	
 	<!-- 결재선 sql 구문 -->
 	

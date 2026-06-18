@@ -39,8 +39,8 @@ public class ApprServiceImpl implements ApprService {
 	}
 
 	@Override
-	public int listFormCnt() {
-		return mapper.listFormCnt();
+	public int listFormCnt(ApprFormSearchDto dto) {
+		return mapper.listFormCnt(dto);
 	}
 	
 	///////////////////////// 양식 관련 기능 //////////////////////////////////

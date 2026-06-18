@@ -13,7 +13,7 @@ public interface ApprService {
 	public List<CompanySearchDto> searchCompany(String keyword);
 	// 페이징 기능
 	public List<ApprFormDto> list10Form(int pstartno);
-	public int listFormCnt();
+	public int listFormCnt(ApprFormSearchDto dto);
 	
 	// 양식 작성 파트
 	public ApprFormDto selectFormAll(int forId);

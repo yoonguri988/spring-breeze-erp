@@ -161,7 +161,7 @@
 				
 				function deleteForm(forId){
 					if(confirm("양식을 삭제하시겠습니까?")){
-						location.href = "${pageContext.request.contextPath}/appr/delete?forId=" + forId;						
+						location.href = "${pageContext.request.contextPath}/appr/delete?forId" + forId;						
 					}
 					else{
 						console.log("취소 확인");

@@ -17,7 +17,7 @@ public interface ApprMapper {
 	
 	// 페이징 기능
 	public List<ApprFormDto> list10Form(HashMap<String, Integer> map);
-	public int listFormCnt();
+	public int listFormCnt(ApprFormSearchDto dto);
 	
 	// 양식 파트
 	public ApprFormDto selectFormAll(int forId);
