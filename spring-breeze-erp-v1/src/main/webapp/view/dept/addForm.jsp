@@ -2,11 +2,24 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@include file="/layout/header.jsp"%>
 
+<%--
+  returnUrl (선택, 쿼리 파라미터) : 등록 완료/취소 후 돌아갈 경로.
+  com/edit.jsp 의 "부서관리" 탭에서 "부서 등록"으로 들어온 경우
+  /com/edit?comId=... 가 들어오고, 그 외(단독 부서관리 메뉴)에서는
+  비어있으므로 기본값(/dept/list?comId=...)으로 복귀한다.
+--%>
+<c:set var="backUrl">
+    <c:choose>
+        <c:when test="${not empty param.returnUrl}">${param.returnUrl}</c:when>
+        <c:otherwise>${pageContext.request.contextPath}/dept/list?comId=${param.comId}</c:otherwise>
+    </c:choose>
+</c:set>
+
 <div class="container my-5" style="max-width:640px;">
 
     <%-- 페이지 헤더 --%>
     <div class="d-flex align-items-center gap-2 mb-4">
-        <a href="${pageContext.request.contextPath}/dept/list?comId=${param.comId}"
+        <a href="${backUrl}"
            class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-chevron-left"></i>
         </a>
@@ -29,6 +42,11 @@
                   action="${pageContext.request.contextPath}/dept/add?comId=${comId}"
                   novalidate id="deptForm">
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+                <%-- 등록 완료 후 돌아갈 경로 — 컨트롤러가 이 값으로 redirect 처리 --%>
+                <c:if test="${not empty param.returnUrl}">
+                    <input type="hidden" name="returnUrl" value="${param.returnUrl}"/>
+                </c:if>
 
                 <%-- ────────────────────────────────────────
                      섹션 1. 부서 기본 정보
@@ -136,7 +154,7 @@
                     <button type="reset" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-counterclockwise me-1"></i>초기화
                     </button>
-                    <a href="${pageContext.request.contextPath}/dept/list?comId=${param.comId}"
+                    <a href="${backUrl}"
                        class="btn btn-outline-dark">
                         <i class="bi bi-list me-1"></i>목록
                     </a>

@@ -100,4 +100,10 @@
 		from employee e
 		where e.emp_id = #{empId}
 	</select>
+	<!-- cyj: 부서 아이디를 기준으로 사원 정보 확인-->
+	<select id="selectByDeptId" resultType="EmpDto">
+		select *
+		from employee
+		where dept_id = #{deptId}
+	</select>
 </mapper>

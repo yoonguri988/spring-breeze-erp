@@ -60,6 +60,10 @@ public class EmpServiceImpl implements EmpService {
 		String existsPass = dao.selectPassById(dto.getEmpId());
 		return passEncoder.matches(dto.getEmpPass(), existsPass);
 	}
+	@Override
+	public List<EmpDto> selectByDeptId(int deptId) {
+		return dao.selectByDeptId(deptId);
+	}
 
 	
 }
