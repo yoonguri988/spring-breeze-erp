@@ -22,7 +22,9 @@
 		<typeAlias type="com.sb.erp.dto.CompanyDto" alias="CompanyDto" />		
 		<typeAlias type="com.sb.erp.dto.DeptDto" alias="DeptDto" />
 		<!-- cyj -->
-
+		<!-- Son.C.K -->
+		<typeAlias type="com.sb.erp.dto.BoardDto"    alias="BoardDto"/>
+        <!-- Son.C.K -->
 		<!-- jsj -->
 		<typeAlias type="com.sb.erp.dto.EmpDto" alias="EmpDto" />
 		<typeAlias type="com.sb.erp.dto.PosDto" alias="PosDto" />
