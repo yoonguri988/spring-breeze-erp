@@ -1,46 +1,74 @@
-<%@ page language="java" contentType="text/html; charset=EUC-KR"
-    pageEncoding="EUC-KR"%>
-<%@include file="/layout/header.jsp"%>
-		<h4>ÇÁ·ÎÁ§Æ® ¸â¹ö</h4>
-		<div class="my-4" style="display:grid; grid-template-columns:150px 1fr auto; gap:10px; margin-bottom:15px;">
-		 <label for="emp_id" class="form-label">¸â¹öÃß°¡</label>
-		 <input type="text" id="emp_id" name="emp_id" class="form-control" placeholder="»ç¿ø ¹øÈ£ °Ë»ö"/>
-		 <button type="button" id="searchBtn" class="btn btn-primary">Á¶È¸</button>
-		</div>
-		<div class="my-4" style="display:grid; grid-template-columns:150px 1fr; gap:10px; margin-bottom:15px;">
-		<label class="form-label">ÇÁ·ÎÁ§Æ® ¸â¹ö</label>
-		<div class="mb-4">
-   		 <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>¼±ÅÃ</th>
-                <th>»ç¹ø</th>
-                <th>ÀÌ¸§</th>
-                <th>ºÎ¼­</th>
-            </tr>
-        </thead>
-        <tbody id="empList">
-            <!-- ÀÓ½Ã µ¥ÀÌÅÍ -->
-            <tr><td>
- 			<input type="checkbox" class="member-check" data-id="1010" data-name="ÃÖ´Ù¿µ">
-                </td>
-                <td>1010</td>
-                <td>ÃÖ´Ù¿µ</td>
-                <td>°³¹ßÆÀ</td>
-            </tr>
-            <tr> <td>
-             <input type="checkbox" class="member-check" data-id="1011" data-name="ÃÖ¾Æ¿µ">
-                </td>
-                <td>1011</td>
-                <td>ÃÖ¾Æ¿µ</td>
-                <td>°³¹ßÆÀ</td>
-            </tr>
-        </tbody>
-    </table>
+<%@page import="java.time.LocalDate"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file="/layout/header.jsp" %>
+
+<div class="container my-5 ms-5">
+<p>í™ˆ > í”„ë¡œì íŠ¸ > í”„ë¡œì íŠ¸ ë©¤ë²„ê´€ë¦¬</p>
+<h3>í”„ë¡œì íŠ¸ ë©¤ë²„ê´€ë¦¬</h3>
+<div class="text-end">
+<form action="${pageContext.request.contextPath}/proj/proj_member_create" method="post">
+<input type="hidden" name="projectProId" value="${pro_id}">
+<input type="hidden" name="${_csrf.parameterName}"  value="${_csrf.token}" />
+<button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">ì¶”ê°€</button>
+<a href="${pageContext.request.contextPath}/proj/proj_list" class="btn btn-outline-info">ëª©ë¡</a>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title fs-5" id="exampleModalLabel">ë©¤ë²„ì¶”ê°€</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-start">
+          <div class="mb-3">
+            <label for="recipient-name" class="col-form-label">ì‚¬ì›ë²ˆí˜¸</label>
+            <input type="text" class="form-control" id="recipient-name" name="empId" value="${dto.empId}" />
+          </div>
+          <div class="mb-3">
+            <label for="message-text" class="col-form-label">ì‚¬ì›ì´ë¦„</label>
+            <textarea class="form-control" name="empName" id="message-text">${dto.empName}</textarea>
+          </div>
+            <div class="mb-3">
+            <label for="message-text" class="col-form-label">ì—­í• </label>
+            <textarea class="form-control" name="role" id="message-text">${dto.role}</textarea>
+          </div>
+          </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ì·¨ì†Œ</button>
+        <button type="submit" class="btn btn-info">ì¶”ê°€</button>
+      </div>
+    </div>
+  </div>
 </div>
-		<div id="selectedMembers">
-			<!-- ajax °á°ú Ãâ·Â -->
-		</div>
-		</div>
-		</form>
-<%@include file="/layout/footer.jsp"%>
+  </form>
+</div>
+ <div class="card my-5 p-3">
+  <table class="table table-striped table-bordered table-hover">
+   <thead>
+   <tr>
+   	<th scope="col">í”„ë¡œì íŠ¸ëª…</th>
+   	<th scope="col">ì‚¬ì›</th>
+   	<th scope="col">ì—­í• </th>
+   	<th scope="col">ë“±ë¡ì¼</th>
+   	<th scope="col">ì‚­ì œ</th>
+   </tr>
+   </thead>
+   <tbody>
+   <c:forEach items="${list}" var="dto" varStatus="status">
+   	<tr>
+   	<td>${dto.proName}</td>
+   	<td>${dto.empName}</td>
+   	<td>${dto.role}</td>
+   	<td><fmt:formatDate value="${dto.joinedAt}" pattern="yyyy-MM-dd"/></td>
+   	<td><a href="${pageContext.request.contextPath}/proj/proj_member_delete?pm_id=${dto.pmId}&pro_id=${pro_id}" class="btn btn-danger">ì‚­ì œ</a></td>
+   	</tr>
+   	</c:forEach>
+   </tbody>
+  </table>
+ </div>
+</div>    
+
+    
+<%@include file="/layout/footer.jsp" %>
