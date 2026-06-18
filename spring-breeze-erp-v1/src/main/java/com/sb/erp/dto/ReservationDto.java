@@ -2,28 +2,26 @@ package com.sb.erp.dto;
 
 import java.sql.Timestamp;
 
-/**
- * reservation 테이블에 대응하는 DTO
- * 화면 표시를 위해 resource, employee 테이블의 일부 컬럼(이름)도 같이 담는다.
- * (DB 컬럼은 아니고, JOIN 결과를 받기 위한 필드)
- */
+import lombok.Data;
+
+@Data
 public class ReservationDto {
 
-    private int revId;           // 예약 ID (PK, 자동증가)
-    private int resId;           // 자원 ID (FK -> resource.res_id)
-    private int comId;           // 회사 ID (FK -> company.com_id)
-    private int empId;           // 사원 ID (FK -> employee.emp_id)
-    private int quantity;        // 예약(요청) 수량
-    private String status;       // 상태값: WAI(대기) / APP(승인) / REJ(반려)
-    private Timestamp reqDate;   // 요청일시
-    private String remark;       // 비고 (반려 사유 등)
-    private Timestamp updatedAt; // 수정일시
+    private int revId;           
+    private int resId;           
+    private int comId;           
+    private int empId;          
+    private int quantity;        
+    private String status;       
+    private Timestamp reqDate;   
+    private String remark;       
+    private Timestamp updatedAt; 
 
-    // ---- 목록/상세 화면에 같이 보여줄 조인 컬럼 ----
-    private String resName; // resource.res_name
-    private String resCode; // resource.res_code
-    private String empName; // employee.emp_name
-    private String deptName; // department.dept_name
+   
+    private String resName; 
+    private String resCode; 
+    private String empName; 
+    private String deptName; 
 
     public ReservationDto() {
     }

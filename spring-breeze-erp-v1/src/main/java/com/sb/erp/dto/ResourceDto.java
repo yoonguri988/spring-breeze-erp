@@ -2,21 +2,20 @@ package com.sb.erp.dto;
 
 import java.sql.Timestamp;
 
-/**
- * resource 테이블에 대응하는 DTO
- * 자원 목록 / 상세 / 등록 / 수정 화면에서 공통으로 사용한다.
- */
+import lombok.Data;
+
+@Data
 public class ResourceDto {
 
-    private int resId;           // 자원 ID (PK, 자동증가)
-    private int comId;           // 회사 ID (FK -> company.com_id)
-    private String resCode;      // 자원 코드 (예: PC-P)
-    private String resName;      // 자원명 (예: 듀얼모니터)
-    private String resType;      // 자원 타입 (ENUM, 팀에서 정한 값)
-    private int quantity;        // 보유 수량
-    private String remark;       // 비고 (없으면 null)
-    private Timestamp createdAt; // 등록일시
-    private Timestamp updatedAt; // 수정일시
+    private int resId;           
+    private int comId;           
+    private String resCode;     
+    private String resName;      
+    private String resType;      
+    private int quantity;        
+    private String remark;       
+    private Timestamp createdAt; 
+    private Timestamp updatedAt; 
 
     public ResourceDto() { } 
     

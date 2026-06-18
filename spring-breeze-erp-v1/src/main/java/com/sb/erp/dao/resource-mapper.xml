@@ -5,15 +5,15 @@
     <!-- 자원 목록: 회사별 + 검색어(자원명/자원코드) + 타입필터 + 페이징 -->
     <select id="selectResourceList" parameterType="map" resultType="com.sb.erp.dto.ResourceDto">
         SELECT
-            res_id     AS resId,
-            com_id     AS comId,
-            res_code   AS resCode,
-            res_name   AS resName,
-            res_type   AS resType,
-            quantity   AS quantity,
-            remark     AS remark,
-            created_at AS createdAt,
-            updated_at AS updatedAt
+            res_id     ,
+            com_id     ,
+            res_code   ,
+            res_name   ,
+            res_type   ,
+            quantity   ,
+            remark     ,
+            created_at ,
+            updated_at 
         FROM resource
         WHERE com_id = #{comId}
         <if test="keyword != null and keyword != ''">
@@ -44,15 +44,15 @@
     <!-- 자원 상세 -->
     <select id="selectResourceDetail" parameterType="int" resultType="com.sb.erp.dto.ResourceDto">
         SELECT
-            res_id     AS resId,
-            com_id     AS comId,
-            res_code   AS resCode,
-            res_name   AS resName,
-            res_type   AS resType,
-            quantity   AS quantity,
-            remark     AS remark,
-            created_at AS createdAt,
-            updated_at AS updatedAt
+            res_id     ,
+            com_id     ,
+            res_code   ,
+            res_name   ,
+            res_type   ,
+            quantity   ,
+            remark     ,
+            created_at ,
+            updated_at
         FROM resource
         WHERE res_id = #{resId}
     </select>

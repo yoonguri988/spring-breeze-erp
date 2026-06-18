@@ -5,19 +5,19 @@
     <!-- 예약 목록: 회사별 + 상태필터 + 페이징, resource/employee 조인해서 이름까지 표시 -->
     <select id="selectReservationList" parameterType="map" resultType="com.sb.erp.dto.ReservationDto">
         SELECT
-            rv.rev_id     AS revId,
-            rv.res_id     AS resId,
-            rv.com_id     AS comId,
-            rv.emp_id     AS empId,
-            rv.quantity   AS quantity,
-            rv.status     AS status,
-            rv.req_date   AS reqDate,
-            rv.remark     AS remark,
-            rv.updated_at AS updatedAt,
-            r.res_name    AS resName,
-            r.res_code    AS resCode,
-            e.emp_name    AS empName,
-            d.dept_name   AS deptName
+            rv.rev_id     ,
+            rv.res_id     ,
+            rv.com_id     ,
+            rv.emp_id     ,
+            rv.quantity   ,
+            rv.status     ,
+            rv.req_date   ,
+            rv.remark     ,
+            rv.updated_at ,
+            r.res_name    ,
+            r.res_code    ,
+            e.emp_name    ,
+            d.dept_name   
         FROM reservation rv
         JOIN resource r ON rv.res_id = r.res_id
         JOIN employee e ON rv.emp_id = e.emp_id
@@ -43,19 +43,19 @@
     <!-- 예약 상세 -->
     <select id="selectReservationDetail" parameterType="int" resultType="com.sb.erp.dto.ReservationDto">
         SELECT
-            rv.rev_id     AS revId,
-            rv.res_id     AS resId,
-            rv.com_id     AS comId,
-            rv.emp_id     AS empId,
-            rv.quantity   AS quantity,
-            rv.status     AS status,
-            rv.req_date   AS reqDate,
-            rv.remark     AS remark,
-            rv.updated_at AS updatedAt,
-            r.res_name    AS resName,
-            r.res_code    AS resCode,
-            e.emp_name    AS empName,
-            d.dept_name   AS deptName
+            rv.rev_id     ,
+            rv.res_id     ,
+            rv.com_id     ,
+            rv.emp_id     ,
+            rv.quantity   ,
+            rv.status     ,
+            rv.req_date   ,
+            rv.remark     ,
+            rv.updated_at ,
+            r.res_name    ,
+            r.res_code    ,
+            e.emp_name    ,
+            d.dept_name   
         FROM reservation rv
         JOIN resource r ON rv.res_id = r.res_id
         JOIN employee e ON rv.emp_id = e.emp_id
