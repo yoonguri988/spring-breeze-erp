@@ -3,74 +3,88 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.DeptMapper">
-  <!-- 해당 회사가 가지고 있는 부서 갯수 조회  -->
-  <select id="countActiveDepts" resultType="int">
-  select count(*) from department
-  where com_id = #{comId}
-  </select>
-  <!-- 부서 전체 조회  -->
-  <select id="selectAll" resultType="DeptDto" parameterType="int">
-  select * from department
-  where com_id = #{comId}
-  order by sort_order
-  </select>
-  <!-- id 값을 통해 부서 하나 조회  -->
-  <select id="selectOneById" resultType="DeptDto">
-  select * from department
-  where dept_id = #{deptId}
-  </select>
-  <!-- 부서 순서 정렬 -->
-  <select id="maxSortOrder" resultType="int">
-  select coalesce(max(sort_order), 0)
-  from department
-  where com_id = #{comId}
-  and (parent_id = #{parentId} OR (parent_id IS NULL AND #{parentId} IS NULL))
-  </select>
-  <!-- 부서 등록 -->
-  <insert id="insert" parameterType="DeptDto">
-  insert into department (com_id, parent_id, dept_name, dept_code, depth, sort_order)
-  value (#{comId},
-      <choose>
-        <when test="parentId == null or parentId == 0">NULL</when>
-        <otherwise>#{parentId}</otherwise>
-    </choose>
-  , #{deptName}, #{deptCode}, #{depth}, #{sortOrder})
-  </insert>
-  <!-- 하위 부서 존재 확인 -->
-  <select id="countChildren" resultType="int">
-  select count(*) from department
-  where parent_id = #{deptId} 
-  </select>
-  <!-- 부서 삭제 -->
-  <delete id="delete">
-  delete from department
-  where dept_id = #{deptId}
-  </delete>
-  <!-- 부서 수정 -->
-  <update id="update" parameterType="DeptDto">
-  update department
-  set dept_name  = #{deptName}
-      , dept_code  = #{deptCode}
-      <choose>
-        <when test="parentId == null or parentId == 0">, parent_id  = NULL</when>
-        <otherwise>, parent_id  = #{parentId}</otherwise>
-      </choose>
-      , depth      = #{depth}
-      <if test="empId != null">, emp_Id = #{empId}</if>
-  where dept_id = #{deptId}
-  </update>
-  <!-- 하위부서 조회 -->
-  <select id="selectAllChildIds" resultType="DeptDto" parameterType="int">
-	with recursive childTree as (
-	    select dept_id 
-	    from department 
-	    where parent_id = #{deptId} 
-	    union all
-	    select d.dept_id 
-	    from department d
-	    join childTree c 
-	    on d.parent_id = c.dept_id
-	)
-	select dept_id from childTree
-  </select>
+
+
+	<!-- 해당 회사가 가지고 있는 부서 갯수 조회 -->
+	<select id="countActiveDepts" resultType="int">
+		select count(*) from department
+		where com_id = #{comId}
+	</select>
+
+	<!-- 부서 전체 조회 -->
+	<select id="selectAll" resultType="DeptDto" parameterType="int">
+		select * from department
+		where com_id = #{comId}
+		order by sort_order
+	</select>
+
+	<!-- id 값을 통해 부서 하나 조회 -->
+	<select id="selectOneById" resultType="DeptDto">
+		select * from department
+		where dept_id = #{deptId}
+	</select>
+
+	<!-- 부서 순서 정렬 -->
+	<select id="maxSortOrder" resultType="int">
+		select coalesce(max(sort_order), 0)
+		from department
+		where com_id = #{comId}
+		and (parent_id = #{parentId} OR (parent_id IS NULL AND #{parentId} IS
+		NULL))
+	</select>
+
+	<!-- 부서 등록 -->
+	<insert id="insert" parameterType="DeptDto">
+		insert into department (com_id, parent_id, dept_name, dept_code,
+		depth, sort_order)
+		value (#{comId},
+		<choose>
+			<when test="parentId == null or parentId == 0">NULL</when>
+			<otherwise>#{parentId}</otherwise>
+		</choose>
+		, #{deptName}, #{deptCode}, #{depth}, #{sortOrder})
+	</insert>
+
+	<!-- 하위 부서 존재 확인 -->
+	<select id="countChildren" resultType="int">
+		select count(*) from department
+		where parent_id = #{deptId}
+	</select>
+
+	<!-- 부서 삭제 -->
+	<delete id="delete">
+		delete from department
+		where dept_id = #{deptId}
+	</delete>
+
+	<!-- 부서 수정 -->
+	<update id="update" parameterType="DeptDto">
+		update department
+		set dept_name = #{deptName}
+		, dept_code = #{deptCode}
+		<choose>
+			<when test="parentId == null or parentId == 0">, parent_id = NULL</when>
+			<otherwise>, parent_id = #{parentId}</otherwise>
+		</choose>
+		, depth = #{depth}
+		<if test="empId != null">, emp_Id = #{empId}</if>
+		where dept_id = #{deptId}
+	</update>
+
+	<!-- 하위부서 조회 -->
+	<select id="selectAllChildIds" resultType="DeptDto"
+		parameterType="int">
+		with recursive childTree as (
+		select dept_id
+		from department
+		where parent_id = #{deptId}
+		union all
+		select d.dept_id
+		from department d
+		join childTree c
+		on d.parent_id = c.dept_id
+		)
+		select dept_id from childTree
+	</select>
+
 </mapper>

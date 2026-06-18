@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.EmpMapper">
+	
+	<!-- 사원 목록 전체 -->
+	<select id="selectAll" resultType="EmpDto">
+		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name,
+		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date
+		from employee e
+		join emp_position p on e.pos_id = p.pos_id
+		join department d on e.dept_id = d.dept_id
+		where e.com_id = #{comId}
+		order by pos_order, emp_no
+	</select>
+
+	<!-- 사원 상세보기 -->
+	<select id="selectByEmpId" parameterType="int" resultType="EmpDto">
+		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name,
+		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date,
+		e.dept_id, e.pos_id, e.created_at, e.updated_at
+		from employee e
+		join emp_position p on e.pos_id = p.pos_id
+		join department d on e.dept_id = d.dept_id
+		where e.emp_id = #{empId}
+	</select>
+
+	<!-- 사원 검색 -->
+	<select id="search" parameterType="EmpSearchDto"
+		resultType="EmpDto">
+		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name,
+		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date
+		from employee e
+		join emp_position p on e.pos_id = p.pos_id
+		join department d on e.dept_id = d.dept_id
+		<where>
+			<if test="deptId != null">
+				and e.dept_id = #{deptId}
+			</if>
+			<if test="posId != null">
+				and e.pos_id = #{posId}
+			</if>
+			<if test="empStatus != null and empStatus !=''">
+				and e.emp_status = #{empStatus}
+			</if>
+			<if test="keyword != null and keyword !=''">
+				and (e.emp_name like concat('%', #{keyword}, '%')
+				or e.emp_no like concat('%', #{keyword}, '%'))
+			</if>
+		</where>
+		order by pos_order, emp_no
+	</select>
+
+	<!-- 사원 등록 -->
+	<insert id="insert" parameterType="EmpDto">
+		insert into employee(emp_no, emp_pass, emp_name, dept_id, pos_id,
+		com_id, emp_email, emp_mobile, emp_status, hire_date)
+		values (#{empNo}, #{empPass}, #{empName}, #{deptId}, #{posId},
+		#{comId}, #{empEmail}, #{empMobile}, #{empStatus}, #{hireDate})
+	</insert>
+
+	<!-- 등록 정보 수정 -->
+	<update id="update" parameterType="EmpDto">
+		update employee
+		set emp_name = #{empName}, 
+			dept_id = #{deptId}, 
+			pos_id = #{posId},
+			emp_email = #{empEmail},
+			emp_mobile = #{empMobile},
+			emp_status = #{empStatus}
+		where emp_id = #{empId}
+	</update>
+	
+	<!-- cyj: 비밀번호 찾기시 해당하는 사원정보가 있는지 확인 -->
+	<select id="selectForVerify" parameterType="EmpDto" resultType="EmpDto">
+		select *
+		from employee
+		where emp_no = #{empNo}
+		  and emp_email = #{empEmail} 
+		  and emp_mobile = #{empMobile} 
+	</select>
+	<!-- cyj: 비밀번호 재설정 -->
+	<update id="updatePassByEmpId" parameterType="EmpDto">
+		update employee
+		   set emp_pass = #{empPass}
+		 where emp_id = #{empId}
+	</update>
+	<!-- cyj: 이메일을 기준으로 사용자 정보 찾기 -->
+	<select id="selectByEmpEmail" parameterType="string" resultType="EmpDto">
+		select e.*, d.dept_name, p.pos_name
+		from employee e
+		join department d on d.dept_id = e.dept_id
+		join emp_position p on p.pos_id = e.pos_id
+		where e.emp_email = #{empEmail}
+	</select>
+</mapper>
