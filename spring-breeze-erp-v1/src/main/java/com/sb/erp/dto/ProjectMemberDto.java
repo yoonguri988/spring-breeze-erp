@@ -1,13 +1,18 @@
 package com.sb.erp.dto;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import lombok.Data;
 
 @Data
-public class ProjectMemDto {
-	private int pm_id;
-	private int pro_id;
-	private int emp_id;
+public class ProjectMemberDto {
+	private int pmId;
+	private int projectProId;
+	private int empId;
 	private String role;
-	private String joined_at;
+	private Date joinedAt;
+	private String empName;
+	private String proName;
 	
 }
