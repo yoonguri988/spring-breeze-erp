@@ -10,7 +10,10 @@
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
   
-<!-- 한글 깨짐 web.xml — CharacterEncodingFilter 추가 -->
+
+
+  <!-- 한글 깨짐 web.xml — CharacterEncodingFilter 추가 -->
+
 	<filter>
 		<filter-name>encodingFilter</filter-name>
 		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
@@ -69,4 +72,5 @@
 		<servlet-name>springDispatcherServlet</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
+
 </web-app>
