@@ -15,7 +15,6 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
 </head>
-<body>
 <body class="login-page">
 	<div class="aw">
 		<!-- 왼쪽 브랜드 패널 -->
@@ -57,8 +56,9 @@
 						<input  type="hidden" name="${_csrf.parameterName}"  value="${_csrf.token}" />
 						<label class="fl" for="iEmail">이메일 주소</label>
 						<div class="fw">
-							<input class="fi" type="email" id="iEmail"
+							<input class="fi ${not empty param.error ? 'er' : ''}" type="email" id="iEmail"
 								placeholder="name@smartbuilder.com" name="username"
+								value="${not empty param.error ? sessionScope.SPRING_SECURITY_LAST_USERNAME : ''}"
 								autocomplete="email" spellcheck="false">
 							<i class="bi bi-envelope f-icon"></i>
 						</div>
@@ -69,8 +69,8 @@
 							<label class="fl" for="iPw" style="margin: 0">비밀번호</label>
 						</div>
 						<div class="fw">
-							<input class="fi" type="password" id="iPw"
-								placeholder="비밀번호 입력" name="password" autocomplete="current-password"> 
+							<input class="fi ${not empty param.error ? 'er' : ''}" type="password" id="iPw"
+								placeholder="비밀번호 입력" name="password" autocomplete="current-password">
 								<i class="bi bi-eye f-icon clickable" id="togglePw" title="표시/숨기기"></i>
 						</div>
 						<div class="fe" id="ePw">
@@ -78,13 +78,14 @@
 						</div>
 
 						<!-- <label style="display:flex;align-items:center;gap:8px;margin-bottom:22px;cursor:pointer">
-	            <input type="checkbox" style="width:15px;height:15px;accent-color:var(--sb-accent)">
-	            <span style="font-size:13.5px;color:var(--sb-ink-soft)">로그인 상태 유지</span>
-	          </label> -->
+		            <input type="checkbox" style="width:15px;height:15px;accent-color:var(--sb-accent)">
+		            <span style="font-size:13.5px;color:var(--sb-ink-soft)">로그인 상태 유지</span>
+		          </label> -->
 
-						<div class="a-alert" id="alertLogin">
+						<%-- 로그인 실패 시(서버 리다이렉트로 돌아온 직후) 인라인 에러를 바로 표시 --%>
+						<div class="a-alert ${not empty param.error ? 'on' : ''}" id="alertLogin">
 							<i class="bi bi-exclamation-triangle-fill"></i> <span
-								id="alertLoginTxt"></span>
+								id="alertLoginTxt"><c:if test="${not empty param.error}">이메일 또는 비밀번호가 올바르지 않습니다.</c:if></span>
 						</div>
 
   					    <button type="button" class="a-link" id="toForgot">비밀번호를 잊으셨나요?</button>
@@ -179,7 +180,7 @@
   document.getElementById('backToLogin').addEventListener('click', function () {
     document.getElementById('secForgot').classList.remove('on');
     document.getElementById('secLogin').classList.add('on');
-    document.getElementById('empEmail').focus();
+    document.getElementById('iEmail').focus();
   });
 
   /* ---- 비밀번호 표시/숨기기 ---- */
@@ -189,6 +190,33 @@
     inp.type = show ? 'text' : 'password';
     this.className = (show ? 'bi bi-eye-slash' : 'bi bi-eye') + ' f-icon clickable';
   });
+
+  /* ---- 로그인 폼 ----
+     실제 인증은 서버(Spring Security /auth/login)에서 처리하는 일반 폼 제출입니다.
+     여기서는 빈 값 클라이언트 검증만 하고, 통과하면 그대로 서버로 제출합니다
+     (e.preventDefault를 호출하지 않음 → 실제 로그인 처리/리다이렉트가 정상 동작). */
+  document.getElementById('fmLogin').addEventListener('submit', function (e) {
+    var email = document.getElementById('iEmail').value.trim();
+    var pw    = document.getElementById('iPw').value;
+    var ok = true;
+
+    fe('eEmail', ''); fi('iEmail', false);
+    fe('ePw', '');    fi('iPw', false);
+
+    if (!email) { fe('eEmail', '이메일을 입력하세요.'); fi('iEmail', true); ok = false; }
+    if (!pw)    { fe('ePw', '비밀번호를 입력하세요.'); fi('iPw', true); ok = false; }
+
+    if (!ok) { e.preventDefault(); return; }
+
+    loading(document.getElementById('btnLogin'), true);
+    /* 서버 응답(리다이렉트) 전까지 버튼은 로딩 상태 유지, 실패 시 페이지가
+       /auth/login?error=true 로 다시 로드되면서 버튼/필드는 자동으로 초기 상태로 복원됨 */
+  });
+
+  <c:if test="${not empty param.error}">
+  /* 로그인 실패로 되돌아온 경우 비밀번호 입력칸에 포커스 */
+  document.getElementById('iPw').focus();
+  </c:if>
 
   /* ---- 비밀번호 찾기 폼 ---- */
   document.getElementById('fmForgot').addEventListener('submit', function (e) {

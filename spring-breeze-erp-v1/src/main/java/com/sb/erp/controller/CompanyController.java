@@ -1,25 +1,37 @@
 package com.sb.erp.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.sb.erp.dto.ComSearchDto;
 import com.sb.erp.dto.CompanyDto;
+import com.sb.erp.dto.EmpDto;
+import com.sb.erp.dto.PermDto;
 import com.sb.erp.service.CompanyService;
-
+import com.sb.erp.service.EmpService;
+import com.sb.erp.service.PermService;
 import com.sb.erp.util.PagingUtil;
 
 @Controller
 public class CompanyController {
 	@Autowired CompanyService service;
+	@Autowired EmpService empService;
+	@Autowired PermService permService;
 	
 	// 회사 등록
 	@RequestMapping(value="/com/add", method= RequestMethod.GET)
@@ -48,14 +60,11 @@ public class CompanyController {
 	
 	// 회사 목록 조회
 	@RequestMapping(value="/com/list", method= RequestMethod.GET)
-	public String list(@RequestParam(value="keyword", defaultValue = "")String keyword,
-			@RequestParam(value="pstartno", defaultValue = "1") int pstarValue,
-			@RequestParam(value="onepagelist", defaultValue = "10") int onepagelist,
-			Model model) {
-		int listtotal = service.listTotal(keyword);
-		PagingUtil paging = new PagingUtil(listtotal, onepagelist, pstarValue);
+	public String list(ComSearchDto search, Model model) {
+		int listtotal = service.listTotal(search);
+		PagingUtil paging = new PagingUtil(listtotal, search.getOnepagelist(), search.getPstarValue());
 		model.addAttribute("paging", paging);
-		model.addAttribute("items", service.list(keyword, onepagelist, pstarValue));
+		model.addAttribute("items", service.list(search));
 		return "/com/list";
 	}
 	
@@ -82,16 +91,44 @@ public class CompanyController {
 		return "redirect:/com/list";
 	}
 	
-	// 회사 삭제 기능
+	// 회사 삭제 폼
 	@RequestMapping(value="/com/delete", method = RequestMethod.GET)
-	public String delete(int comId, RedirectAttributes rttr) {
-		String msg = "회사 정보 삭제에 실패 하였습니다.";
-		try {
-			if(service.delete(comId) > 0) { msg ="회사 정보 삭제에 성공하셨습니다.";}
-			rttr.addFlashAttribute("msg", msg);
-		} catch (IllegalArgumentException e) {
-			rttr.addFlashAttribute("msg", e.getMessage());
-		}
-		return "redirect:/com/list";
+	public String deleteModal(@RequestParam("comId") Integer comId, Model model) {
+	    CompanyDto dto = service.selectOneById(comId);
+	    model.addAttribute("com", dto);
+		return "/com/delModal";
+	}
+	
+	// 회사 삭제 기능
+	@RequestMapping(value="/com/delete", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> delete(Authentication auth, EmpDto dto) {
+	    Map<String, Object> result = new HashMap<>();
+	    EmpDto emp = empService.selectByEmpEmail(auth.getName());
+	    //1. 로그인한 사용자가 관리자가 아닌 경우
+	    //1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
+	    PermDto root = permService.selectByEmpId(emp.getEmpId());
+
+	    //2. 관리자가 입력한 비밀번호가 일치 하지 않을 경우
+//	    boolean matched = empService.matchPassword(loginEmp.getEmpId(), adminPw);
+//	    if (!matched) {
+//	        result.put("success", false);
+//	        result.put("message", "비밀번호가 올바르지 않습니다.");
+//	        return result;
+//	    }
+
+	    service.delete(comId);
+	    result.put("success", true);
+	    return result;
+	}
+	
+	//관리자 - 회사 목록 조회
+	@RequestMapping(value="/admin/com/list", method= RequestMethod.GET)
+	public String list_admin(ComSearchDto search, Model model) {
+		int listtotal = service.listTotal(search);
+		PagingUtil paging = new PagingUtil(listtotal, search.getOnepagelist(), search.getPstarValue());
+		model.addAttribute("paging", paging);
+		model.addAttribute("items", service.list(search));
+		return "/com/list";
 	}
 }

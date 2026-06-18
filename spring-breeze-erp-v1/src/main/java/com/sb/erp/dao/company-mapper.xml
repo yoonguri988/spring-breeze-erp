@@ -4,24 +4,30 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.CompanyMapper">
   <!-- 회사 여러개 조회 -->
-  <select id="selectAll" resultType="CompanyDto">
+  <select id="selectAll" resultType="CompanyDto" parameterType="ComSearchDto">
   select * from company 
   <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
   	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
   </if>
+  <if test="industCode != null and industCode != ''">
+  	and indust_code = #{industCode}
+  </if>
   </where>
   order by com_id desc
   limit #{pstarValue}, #{onepagelist}
   </select>
   <!-- 회사 여러개 조회 -->
-  <select id="listTotal" resultType="int" parameterType="string">
+  <select id="listTotal" resultType="int" parameterType="ComSearchDto">
   select count(*) from company 
   <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
   	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
+  </if>
+  <if test="industCode != null and industCode != ''">
+  	and indust_code = #{industCode}
   </if>
   </where>
   </select>

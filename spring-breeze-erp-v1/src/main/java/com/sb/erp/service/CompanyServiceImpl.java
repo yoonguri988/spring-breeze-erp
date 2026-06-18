@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.CompanyMapper;
 import com.sb.erp.dao.DeptMapper;
+import com.sb.erp.dto.ComSearchDto;
 import com.sb.erp.dto.CompanyDto;
 
 @Service
@@ -15,15 +16,16 @@ public class CompanyServiceImpl implements CompanyService {
 	@Autowired DeptMapper deptDao;
 
 	@Override
-	public List<CompanyDto> list(String keyword, int onepagelist, int pstarValue) {
-		return dao.selectAll(keyword, onepagelist, (pstarValue-1)*onepagelist);
+	public List<CompanyDto> list(ComSearchDto dto) {
+		// keyword, onepagelist, (pstarValue-1)*onepagelist
+		dto.setPstarValue((dto.getPstarValue()-1)*dto.getOnepagelist());
+		return dao.selectAll(dto);
 	}
 
 	@Override
 	public int add(CompanyDto dto) {
-		// »ç¾÷ÀÚ ¹øÈ£ Áßº¹ °ËÁõ
 		if(dto.getBizNo() != null && dao.selectByBizNo(dto.getBizNo()) != null) {
-			throw new IllegalArgumentException("ÀÌ¹Ì µî·ÏµÈ »ç¾÷ÀÚ¹øÈ£ÀÔ´Ï´Ù.");
+			throw new IllegalArgumentException("ï¿½Ì¹ï¿½ ï¿½ï¿½Ïµï¿½ ï¿½ï¿½ï¿½ï¿½Ú¹ï¿½È£ï¿½Ô´Ï´ï¿½.");
 		}
 		return dao.insert(dto);
 	}
@@ -45,11 +47,11 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Override
 	public int delete(int comId) {
-		// ¼Ò¼ÓµÈ ºÎ¼­°¡ Á¸ÀçÇÑ´Ù¸é È¸»ç »èÁ¦ Ã³¸® ºÒ°¡
+		// ï¿½Ò¼Óµï¿½ ï¿½Î¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´Ù¸ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ ï¿½Ò°ï¿½
 		if(deptDao.countActiveDepts(comId) > 0) {
-			throw new IllegalArgumentException("¼Ò¼Ó ºÎ¼­°¡ Á¸ÀçÇÏ¿© »èÁ¦ÇÒ ¼ö ¾ø½À´Ï´Ù.");
+			throw new IllegalArgumentException("ï¿½Ò¼ï¿½ ï¿½Î¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
 		}
-		// »èÁ¦ Ã³¸®
+		// ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
 		return dao.delete(comId);
 	}
 
@@ -59,8 +61,8 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public int listTotal(String keyword) {
-		return dao.listTotal(keyword);
+	public int listTotal(ComSearchDto search) {
+		return dao.listTotal(search);
 
 	}
 
