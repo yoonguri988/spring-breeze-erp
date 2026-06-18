@@ -32,7 +32,7 @@
       <security:intercept-url  pattern="/appr/**" access="permitAll"/>
       <!-- KJY -->
 
-   	  <security:intercept-url  pattern="/board/**"    access="permitAll" />
+   	  <security:intercept-url  pattern="/notice/**"    access="permitAll" />
    	  
    	  <security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')"/>
    	  

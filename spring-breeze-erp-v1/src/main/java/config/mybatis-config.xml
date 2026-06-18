@@ -23,7 +23,7 @@
 		<typeAlias type="com.sb.erp.dto.DeptDto" alias="DeptDto" />
 		<!-- cyj -->
 		<!-- Son.C.K -->
-		<typeAlias type="com.sb.erp.dto.BoardDto"    alias="BoardDto"/>
+		<typeAlias type="com.sb.erp.dto.NoticeDto"    alias="NoticeDto"/>
         <!-- Son.C.K -->
 		<!-- jsj -->
 		<typeAlias type="com.sb.erp.dto.EmpDto" alias="EmpDto" />

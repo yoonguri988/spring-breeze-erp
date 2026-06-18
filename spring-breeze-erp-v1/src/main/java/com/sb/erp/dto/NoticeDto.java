@@ -2,17 +2,21 @@ package com.sb.erp.dto;
 
 import lombok.Data;
 
+/* Notice 게시글을 표현하는 DTO
+ * DB 컬럼과 매핑되는 필드 정의
+ */
+
 @Data
-public class BoardDto { //notice
+public class NoticeDto { //notice
 	private int bno;
 	private String btitle;
 	private String bcontent;
 	private int bhit;
 	private String bfile;
-	private String created_at;
-	private String updated_at;
-	private int emp_id;
-	private int com_id;
+	private String createdAt;
+	private String updatedAt;
+	private int empId;
+	private int comId;
 
 }
 
