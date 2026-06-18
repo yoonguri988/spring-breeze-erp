@@ -6,13 +6,12 @@
 
 
 	<section class="container card my-5">
-		<h1 class="card-header">정보 수정</h1>
+		<h3 class="card-header">정보 수정</h3>
 		<p class="text-muted">*표시 항목은 필수 입력입니다.</p>
 		<form action="${pageContext.request.contextPath}/emp/edit"
 			method="post" onsubmit="return checkForm()">
-			<input type="hidden" name="${_csrf.parameterName}"
-				value="${_csrf.token}" /> <input type="hidden" name="empId"
-				value="${emp.empId}">
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+			<input type="hidden" name="empId" value="${emp.empId}">
 			<div class="my-3">
 				<label for="empNo" class="form-label"> 사번 *</label> <input
 					type="text" class="form-control" id="empNo" name="empNo"

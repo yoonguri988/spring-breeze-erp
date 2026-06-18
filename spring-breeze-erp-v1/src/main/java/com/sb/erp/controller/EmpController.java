@@ -1,5 +1,7 @@
 package com.sb.erp.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,30 +13,45 @@ import com.sb.erp.dto.EmpSearchDto;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
 import com.sb.erp.service.PosService;
+import com.sb.erp.util.PagingUtil;
 
 @Controller
 public class EmpController {
 
-	@Autowired
-	EmpService empService;
-	@Autowired
-	PosService posService;
-	@Autowired
-	DeptService deptService;
+	@Autowired EmpService empService;
+	@Autowired PosService posService;
+	@Autowired DeptService deptService;
 
-	// 조회 목록
+	// 조회 목록 + 페이징 유틸 이용하기
 	@RequestMapping("/emp/list")
-	public String list(EmpSearchDto search, @RequestParam(value = "searched", required = false) String searched,
+	public String list(EmpSearchDto search, 
+			@RequestParam(value = "searched", required = false) String searched,
 			Model model) {
 
 		if (searched != null) {
-			model.addAttribute("empList", empService.search(search));
+			
+			// search에 페이지 기능을 병합해야함...
+			// 현재 페이지/검색 결과가 없으면 1로 고정
+			int currentPage = (search.getPage() == null) ? 1 : search.getPage();
+			
+			// 전체, 검색 결과 갯수 cnt(*)
+			int total = empService.selectCnt(search);
+			
+			PagingUtil paging = new PagingUtil(total, currentPage);
+			
+			// searchDto에 limit 값 넣기
+			search.setPstartno(paging.getPstartno());
+			search.setOnepagelist(paging.getOnepagelist());
+			List<EmpDto> empList = empService.search(search);
+						
+			model.addAttribute("empList", empList);
+			model.addAttribute("paging", paging);
 		}
 
 		// 사용자가 입력한 검색 조건(폼 value 이용)
 		model.addAttribute("search", search);
 
-		// 드롭다운은 model에
+		// 부서 및 직급
 		model.addAttribute("posList", posService.selectAll());
 		model.addAttribute("deptList", deptService.selectAll());
 		return "emp/list";
@@ -52,7 +69,7 @@ public class EmpController {
 	@RequestMapping(value="/emp/add" , method=RequestMethod.GET)
 	public String addEmp(Model model) {
 
-		// 부서 및 직급 드롭다운 옵션
+		// 부서 및 직급
 		model.addAttribute("posList", posService.selectAll());
 		model.addAttribute("deptList", deptService.selectAll());
 		return "emp/add";
@@ -69,9 +86,9 @@ public class EmpController {
 	//사원 수정
 	@RequestMapping(value="/emp/edit" , method=RequestMethod.GET)
 	public String editForm(@RequestParam int empId, Model model) {
-	    // 1. ??? — 어떤 사원의 수정 폼인지
+	    
 		model.addAttribute("emp", empService.selectByEmpId(empId));
-		// 부서 및 직급 드롭다운 옵션
+		
 		model.addAttribute("posList", posService.selectAll());
 		model.addAttribute("deptList", deptService.selectAll());
 	    return "emp/edit";

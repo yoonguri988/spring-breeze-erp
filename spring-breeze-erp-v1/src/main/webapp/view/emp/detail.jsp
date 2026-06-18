@@ -41,7 +41,7 @@
 			<!-- 버튼 -->
 			<div class="d-flex flex-column gap-2">
 				<a href="${pageContext.request.contextPath}/emp/edit?empId=${emp.empId}" class="btn btn-primary">정보수정</a>
-				<a href="${pageContext.request.contextPath}/emp/passEdit?empId=${emp.empId}" class="btn btn-light">비밀번호 수정</a>
+				<a href="${pageContext.request.contextPath}/emp/editpass?empId=${emp.empId}" class="btn btn-light">비밀번호 수정</a>
 			</div>
 		</div>
 		<div class="card m-3 p-3">

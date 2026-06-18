@@ -22,8 +22,8 @@
 				</select>
 			</div>
 			<div class="col-auto">
-				<label for="posId">직급 선택</label>
-					<select id="posId" name="posId" class="form-select">
+				<label for="posId">직급 선택</label> <select id="posId" name="posId"
+					class="form-select">
 					<option value="">직급</option>
 					<c:forEach var="pos" items="${posList}">
 						<option value="${pos.posId}"
@@ -33,8 +33,8 @@
 				</select>
 			</div>
 			<div class="col-auto">
-				<label for="empStatus">상태 선택</label>
-				<select id="empStatus" name="empStatus" class="form-select">
+				<label for="empStatus">상태 선택</label> <select id="empStatus"
+					name="empStatus" class="form-select">
 					<option value="">상태</option>
 					<option value="재직"
 						<c:if test="${search.empStatus =='재직'}">selected</c:if>>재직</option>
@@ -58,7 +58,7 @@
 		</form>
 
 	</div>
-	<div class="my-3">
+	<div class="my-3 text-center">
 		<c:choose>
 			<c:when test="${empList == null}">
 				<p>검색 조건을 설정하고 검색 버튼을 눌러주세요.</p>
@@ -94,9 +94,9 @@
 								<td>${dto.hireDate}</td>
 								<td><a
 									href="${pageContext.request.contextPath}/emp/detail?empId=${dto.empId}"
-									title="상세정보 보기" class="btn btn-light">상세</a> <a
+									title="상세정보 보기" class="btn btn-light"> 상세 </a> <a
 									href="${pageContext.request.contextPath}/emp/edit?empId=${dto.empId}"
-									title="정보 수정하기" class="btn btn-primary">수정</a></td>
+									title="정보 수정하기" class="btn btn-primary"> 수정 </a></td>
 							</tr>
 						</c:forEach>
 					</tbody>
@@ -105,9 +105,45 @@
 		</c:choose>
 
 	</div>
-	<div class="container card my-3">
-		<!-- 페이징 기능 추가 -->
-	</div>
+	<c:if test="${paging != null}">
+		<div class="my-3">
+			<ul class="pagination justify-content-center">
+				<!-- 검색 필터 조건 유지: c:set 사용하기, searched 값 차후 comId로 변경 -->
+				<c:set var="filter" value="searched=1" />
+				<!-- 검색 조건이 있다면(not empty) 변수(filter)에 값 저장 -->
+				<c:if test="${not empty search.deptId}">
+					<c:set var="filter" value="${filter}&deptId=${search.deptId}" />
+				</c:if>
+				<c:if test="${not empty search.posId}">
+					<c:set var="filter" value="${filter}&posId=${search.posId}" />
+				</c:if>
+				<c:if test="${not empty search.empStatus}">
+					<c:set var="filter" value="${filter}&empStatus=${search.empStatus}" />
+				</c:if>
+				<c:if test="${not empty search.keyword}">
+					<c:set var="filter" value="${filter}&keyword=${search.keyword}" />
+				</c:if>
+				<!-- 이전 -->
+				<c:if test="${paging.current > 1}">
+					<li class="page-item"><a
+						href="?${filter}&page=${paging.current - 1}" class="page-link">이전</a>
+					</li>
+				</c:if>
+				<!-- 목록 번호 표시 -->
+				<c:forEach var="i" begin="${paging.start}" end="${paging.end}">
+					<li class="page-item ${paging.current == i? 'active' : ''}"><a
+						href="?${filter}&page=${i}" class="page-link">${i}</a></li>
+				</c:forEach>
+				<!-- 다음 -->
+				<c:if test="${paging.current < paging.pagetotal}">
+					<li class="page-item"><a
+						href="?${filter}&page=${paging.current + 1}" class="page-link">다음</a>
+					</li>
+				</c:if>
+			</ul>
+		</div>
+	</c:if>
+
 </section>
 
 <!--  footer -->

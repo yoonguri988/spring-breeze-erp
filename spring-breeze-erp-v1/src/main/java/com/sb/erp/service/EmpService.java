@@ -9,6 +9,9 @@ public interface EmpService {
 	public List<EmpDto> search(EmpSearchDto dto);
 	public int insert(EmpDto dto);
 	public int update(EmpDto dto);
+
+	/* paging */
+	public int selectCnt(EmpSearchDto dto);
 	
 
 }

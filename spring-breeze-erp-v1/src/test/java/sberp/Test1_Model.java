@@ -1,5 +1,7 @@
 package sberp;
 
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.apache.ibatis.session.SqlSession;
@@ -15,6 +17,7 @@ import com.sb.erp.dao.DeptMapper;
 import com.sb.erp.dao.EmpMapper;
 import com.sb.erp.dao.PosMapper;
 import com.sb.erp.dao.TestMapper;
+import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -31,13 +34,22 @@ public class Test1_Model {
 	@Autowired PosMapper posMapper;
 	@Autowired DeptMapper deptMapper;
 	
+	
 	@Test
-	public void test7() {
-		EmpSearchDto search;
-		search = new EmpSearchDto();
-		search.setKeyword("박");
-		search.setPosId(8);
-		System.out.println("이름에 박+직급8: "+ empMapper.search(search).size() );
+	public void test9() {
+	    EmpSearchDto dto = new EmpSearchDto();
+	    dto.setComId(1);
+	    dto.setPstartno(0);       // 1페이지 (OFFSET 0)
+	    dto.setOnepagelist(10);
+	    
+	    List<EmpDto> page1 = empMapper.search(dto);
+	    System.out.println("1페이지 개수: " + page1.size());
+	    
+	    dto.setPstartno(10);      // 2페이지 (OFFSET 10)
+	    List<EmpDto> page2 = empMapper.search(dto);
+	    System.out.println("2페이지 개수: " + page2.size());
+	    
+	    System.out.println("전체 개수: " + empMapper.selectCnt(dto));
 	}
 
 	
