@@ -4,15 +4,15 @@ import lombok.Data;
 
 @Data
 public class TaskDto {
-	private int task_id;
-	private int pro_id;
-	private int com_id;
-	private String task_name;
-	private String task_desc;
-	private int pm_id;
-	private String pm_id_name;
-	private String task_start_date;
-	private String task_end_date;
-	private String task_created_at;
-	private String task_updated_at;
+	private int taskId;
+	private int proId;
+	private int comId;
+	private String taskName;
+	private String taskDesc;
+	private int pmId;
+	private String pmIdName;
+	private String taskStartDate;
+	private String taskEndDate;
+	private String taskCreatedAt;
+	private String taskUpdatedAt;
 }
