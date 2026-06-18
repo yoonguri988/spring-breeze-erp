@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.ComSearchDto;
@@ -19,9 +21,14 @@ import com.sb.erp.dto.CompanyDto;
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.PermDto;
 import com.sb.erp.dto.StatsComDto;
+import com.sb.erp.exception.FileUploadException;
 import com.sb.erp.service.CompanyService;
+import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
 import com.sb.erp.service.PermService;
+import com.sb.erp.util.FileUploadDto;
+import com.sb.erp.util.FileUploadType;
+import com.sb.erp.util.FileUploadUtil;
 import com.sb.erp.util.PagingUtil;
 
 @Controller
@@ -29,6 +36,7 @@ public class CompanyController {
 	@Autowired CompanyService service;
 	@Autowired EmpService empService;
 	@Autowired PermService permService;
+	@Autowired DeptService deptService;
 	
 	// 회사 등록
 	@RequestMapping(value="/com/add", method= RequestMethod.GET)
@@ -38,9 +46,21 @@ public class CompanyController {
 	
 	//회사 등록 기능
 	@RequestMapping(value="/com/add", method= RequestMethod.POST)
-	public String add(CompanyDto dto, RedirectAttributes rttr) {
+	public String add(CompanyDto dto, 
+			@RequestParam(value="comLogo", required=false) MultipartFile logoFile,
+			RedirectAttributes rttr) {
 		String msg = "회사 등록에 실패하였습니다.";
-		if(service.add(dto) > 0) { msg = "회사 등록에 성공하셨습니다."; }
+		
+		try {
+			if (logoFile != null && !logoFile.isEmpty()) {
+				FileUploadDto result = FileUploadUtil.upload(logoFile, FileUploadType.COMPANY_LOGO);
+				dto.setComLogo(result.getFileUrl());
+			}
+			if(service.add(dto) > 0) { msg = "회사 등록에 성공하셨습니다."; }
+		} catch (FileUploadException e) {
+			msg = e.getMessage();
+		}
+		
 		rttr.addFlashAttribute("msg", msg);
 	    return "redirect:/com/list";
 	}
@@ -83,14 +103,38 @@ public class CompanyController {
 	@RequestMapping(value="/com/edit", method = RequestMethod.GET)
 	public String editForm(int comId, Model model) {
 		model.addAttribute("com", service.selectOneById(comId));
+		model.addAttribute("items", deptService.selectOrgTree(comId));
 		return "/com/edit";
 	}
 	
 	// 회사 수정 기능
 	@RequestMapping(value="/com/edit", method = RequestMethod.POST)
-	public String edit(CompanyDto dto, RedirectAttributes rttr) {
+	public String edit(CompanyDto dto, 
+			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
+			RedirectAttributes rttr) {
 		String msg = "회사 정보 수정에 실패 하였습니다.";
-		if(service.update(dto) > 0) { msg = "회사 정보 수정에 성공하셨습니다.";}
+		// 새 파일을 안 올렸을 때 기존 로고 URL을 유지하기 위해 수정 전 데이터를 먼저 조회
+		try {
+			CompanyDto before = service.selectOneById(dto.getComId());
+			String oldLogoUrl = (before != null) ? before.getComLogo() : null;
+
+			if (logoFile != null && !logoFile.isEmpty()) {
+				FileUploadDto result = FileUploadUtil.upload(logoFile, FileUploadType.COMPANY_LOGO);
+				dto.setComLogo(result.getFileUrl());
+			} else {
+				dto.setComLogo(oldLogoUrl);
+			}
+			if(service.update(dto) > 0) { 
+				msg = "회사 정보 수정에 성공하셨습니다.";
+				// 로고를 교체한 경우에만 기존 파일 정리
+				if (logoFile != null && !logoFile.isEmpty()) {
+					FileUploadUtil.delete(oldLogoUrl);
+				}
+			}
+		} catch (FileUploadException e) {
+			msg = e.getMessage();
+		}
+		
 		rttr.addFlashAttribute("msg", msg);
 		return "redirect:/com/list";
 	}

@@ -176,16 +176,13 @@
             <div class="sb-card__head">
                 <h2><i class="bi bi-image me-2 text-soft"></i>회사 로고</h2>
                 <span class="sub">PNG · JPG · SVG · WEBP, 최대 2MB</span>
-                <div class="right">
-                    <code class="field-hint" style="font-size:11.5px">com_logo VARCHAR(500)</code>
-                </div>
             </div>
             <div class="sb-card__body">
                 <div class="logo-zone">
                     <div class="logo-preview" id="logoPreviewWrap">
                         <c:choose>
                             <c:when test="${not empty com.comLogo}">
-                                <img id="logoPreview" src="${com.comLogo}" alt="현재 로고"
+                                <img id="logoPreview" src="${pageContext.request.contextPath}${com.comLogo}" alt="현재 로고"
                                      style="width:100%;height:100%;object-fit:cover">
                             </c:when>
                             <c:otherwise>
@@ -194,7 +191,7 @@
                         </c:choose>
                     </div>
                     <div class="flex-grow-1">
-                        <input type="file" class="form-control" id="comLogo" name="comLogo"
+                        <input type="file" class="form-control" id="logoFile" name="logoFile"
                                accept="image/png, image/jpeg, image/svg+xml, image/webp"
                                onchange="previewLogo(this)">
                         <div class="text-faint mt-1" style="font-size:12px">
@@ -218,21 +215,9 @@
 
 <!-- Tab 2: 부서관리  -->
 <div class="sb-tab-panel" id="tab-dept">
-    <div class="sb-card">
-        <div class="sb-card__head">
-            <h2><i class="bi bi-diagram-3 me-2 text-soft"></i>부서 관리</h2>
-            <span class="sub">${com.comName}</span>
-        </div>
-        <div class="sb-card__body" style="text-align:center;padding:48px 24px">
-            <i class="bi bi-diagram-3" style="font-size:36px;color:var(--sb-ink-faint)"></i>
-            <p class="mt-3 mb-3 text-faint">
-                부서 목록·조직도는 별도 부서 관리 화면에서 확인하고 수정할 수 있습니다.
-            </p>
-            <a href="${pageContext.request.contextPath}/dept/list?comId=${com.comId}" class="btn btn-sb btn-sm">
-                <i class="bi bi-box-arrow-up-right"></i> 부서 관리 화면으로 이동
-            </a>
-        </div>
-    </div>
+    <c:set var="returnUrl" scope="request"
+           value="${pageContext.request.contextPath}/com/edit?comId=${comId}"/>
+    <jsp:include page="../dept/deptTreeTab.jsp"/>
 </div><!-- /tab-dept -->
 
 <script>

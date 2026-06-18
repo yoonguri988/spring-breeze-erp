@@ -148,10 +148,7 @@
                 </div>
                 <!-- com_tel -->
                 <div class="col-md-6">
-                    <label class="sb-form-label">
-                        대표 전화
-                        <code class="field-hint">com_tel VARCHAR(100)</code>
-                    </label>
+                    <label class="sb-form-label"> 대표 전화 </label>
                     <input type="tel" class="form-control" id="comTel" name="comTel"
                            placeholder="02-0000-0000" maxlength="100"
                            value="${com.comTel}">
@@ -166,16 +163,13 @@
         <div class="sb-card__head">
             <h2><i class="bi bi-image me-2 text-soft"></i>회사 로고</h2>
             <span class="sub">PNG · JPG · SVG · WEBP, 최대 2MB</span>
-            <div class="right">
-                <code class="field-hint" style="font-size:11.5px">com_logo VARCHAR(500)</code>
-            </div>
         </div>
         <div class="sb-card__body">
             <div class="logo-zone">
                 <div class="logo-preview" id="logoPreviewWrap">
                     <c:choose>
                         <c:when test="${not empty com.comLogo}">
-                            <img id="logoPreview" src="${com.comLogo}" alt="로고 미리보기"
+                            <img id="logoPreview" src="${pageContext.request.contextPath}${com.comLogo}" alt="로고 미리보기"
                                  style="width:100%;height:100%;object-fit:cover">
                         </c:when>
                         <c:otherwise>

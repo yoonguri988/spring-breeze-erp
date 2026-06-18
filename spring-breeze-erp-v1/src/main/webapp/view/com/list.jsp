@@ -211,7 +211,7 @@
                                 <span class="sb-avatar" style="border-radius:9px">
                                     <c:choose>
                                         <c:when test="${not empty com.comLogo}">
-                                            <img src="${com.comLogo}" alt=""
+                                            <img src="${pageContext.request.contextPath}${com.comLogo}" alt=""
                                                  style="width:100%;height:100%;object-fit:cover">
                                         </c:when>
                                         <c:otherwise><i class="bi bi-building"></i></c:otherwise>
