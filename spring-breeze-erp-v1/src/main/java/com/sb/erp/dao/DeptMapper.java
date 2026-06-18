@@ -1,17 +1,16 @@
 package com.sb.erp.dao;
 
 import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
-
 import com.sb.erp.dto.DeptDto;
 
 @Mapper
 public interface DeptMapper {
 
-	int countActiveDepts(int comId);
-
+	// 필요한 메서드 선언
 	List<DeptDto> selectAll(int comId);
+
+	int countActiveDepts(int comId);
 
 	DeptDto selectOneById(int deptId);
 
