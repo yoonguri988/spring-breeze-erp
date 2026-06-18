@@ -36,7 +36,18 @@ public class Test1_Model {
 	
 	
 	@Test
-	public void test9() {
+	public void test6() {
+	    // 존재하는 이메일
+	    int cnt1 = empMapper.countByEmpEmail("admin@smartbuilder.com");
+	    System.out.println("admin 이메일 개수: " + cnt1);  // 1
+	    
+	    // 존재하지 않는 이메일
+	    int cnt2 = empMapper.countByEmpEmail("nobody@nowhere.com");
+	    System.out.println("없는 이메일 개수: " + cnt2);  // 0
+	}
+	
+	@Ignore //@Test
+	public void test5() {
 	    EmpSearchDto dto = new EmpSearchDto();
 	    dto.setComId(1);
 	    dto.setPstartno(0);       // 1페이지 (OFFSET 0)

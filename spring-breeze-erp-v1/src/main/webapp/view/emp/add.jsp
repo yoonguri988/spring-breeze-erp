@@ -8,7 +8,7 @@
 	<section class="container card my-5">
 		<h1 class="card-header">사원 등록</h1>
 		<p class="text-muted">*표시 항목은 필수 입력입니다.</p>
-		<form action="${pageContext.request.contextPath}/emp/join"
+		<form action="${pageContext.request.contextPath}/emp/add"
 			method="post" onsubmit="return checkForm()">
 			<input  type="hidden" name="${_csrf.parameterName}"  value="${_csrf.token}" />
 			<div class="my-3">
@@ -41,35 +41,53 @@
 			
 			<div class="my-3">
 				<label for="empEmail" class="form-label"> 이메일 *</label>
-				<input type="text" class="form-control" id="empEmail" name="empEmail" required />
-				<p class="target blind"> 이메일 중복 검사</p>
+				<input type="email" class="form-control" id="empEmail" name="empEmail" required />
+				<p class="target"></p>
 			</div>
 			<script>
 				window.addEventListener("load", function(){
 					let empEmail = document.getElementById("empEmail");
 					let target = document.querySelector(".target");
-					
-					empEmail.addEventListener("keyup", funtion(e){
+					let submitBtn = document.getElementById("submitBtn");
+
+					empEmail.addEventListener("blur", function(e){
 						let value = e.target.value.trim(); 
 						if(value !== ""){
-							fetch("/doubleEmail?empEmail=" + encodeURIComponent(value))
+
+							if(!empEmail.validity.valid){
+						        target.textContent = "올바른 이메일 형식이 아닙니다.";
+						        target.className = "target alert alert-warning";
+						        submitBtn.disabled = true;
+						        submitBtn.className = "btn btn-secondary";
+						        return;
+						    }
+							
+							fetch("${pageContext.request.contextPath}/emp/checkEmail?empEmail=" + encodeURIComponent(value))
 							.then( res => res.json() )
 							.then(data => {
-								if(data.exists){
+								if(data.duplicate){
 									target.textContent= "이미 사용중인 이메일입니다.";
 									target.className = "target alert alert-danger";
+									submitBtn.disabled = true;
+									submitBtn.className = "btn btn-secondary";
 								} else {
 									target.textContent= "사용 가능한 이메일입니다.";
 									target.className = "target alert alert-success";
+									submitBtn.disabled = false;
+									submitBtn.className = "btn btn-primary";
 								}
 							})
 							.catch(err => {
 								target.textContent= "서버 오류입니다.";
 								target.className = "target alert alert-info";
+								submitBtn.disabled = true;
+								submitBtn.className = "btn btn-secondary";
 							});
 						} else {
 							target.textContent= "이메일을 입력하세요.";
 							target.className = "target alert alert-light";
+							submitBtn.disabled = true;
+							submitBtn.className = "btn btn-secondary";
 						}
 					});
 				});
@@ -87,7 +105,7 @@
 			
 			<div class="my-3 text-end">
 				<a href="${pageContext.request.contextPath}/emp/list" class="btn btn-outline-secondary" title="취소">취소</a>
-				<button type="submit" class="btn btn-primary" title="등록">등록</button>
+				<button type="submit" class="btn btn-primary" id="submitBtn" title="등록하기">등록</button>
 			</div>
 		</form>
 	</section>
@@ -111,6 +129,8 @@
 		if(hireDate.value.trim() ==""){ hireDate.focus();  return false; }
 		return true;
 	}
+	
+
 	</script>
 
 <!--  footer -->

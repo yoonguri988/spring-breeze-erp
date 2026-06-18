@@ -70,7 +70,7 @@ public class EmpController {
 	}
 
 	// 사원 등록 get
-	@RequestMapping(value="/emp/join" , method=RequestMethod.GET)
+	@RequestMapping(value="/emp/add" , method=RequestMethod.GET)
 	public String addEmp(Model model) {
 
 		// 부서 및 직급
@@ -80,7 +80,7 @@ public class EmpController {
 	}
 
 	// 사원 등록 post
-	@RequestMapping(value="/emp/join" , method=RequestMethod.POST)
+	@RequestMapping(value="/emp/add" , method=RequestMethod.POST)
 	public String addEmpPost(EmpDto dto) {
 
 		empService.insert(dto);
@@ -105,7 +105,13 @@ public class EmpController {
 	}
 	
 	
-	
-	
-
+	// 이메일 중복 검사
+	@RequestMapping(value="/emp/checkEmail", method=RequestMethod.GET)
+	@ResponseBody
+	public Map<String, Object> checkEmail(@RequestParam String empEmail) {
+	    boolean duplicate = empService.isEmailDuplicate(empEmail);
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("duplicate", duplicate);
+	    return result;
+	}
 }

@@ -21,7 +21,6 @@ public class EmpServiceImpl implements EmpService {
 	
 	@Override
 	public EmpDto selectByEmpId(int empId) {
-		
 		return dao.selectByEmpId(empId, 1);
 	}
 	
@@ -58,6 +57,12 @@ public class EmpServiceImpl implements EmpService {
 		dto.setComId(1);
 		
 		return dao.selectCnt(dto);
+	}
+
+	/*  이메일 중복검사 */
+	@Override
+	public boolean isEmailDuplicate(String empEmail) {
+		return dao.countByEmpEmail(empEmail) > 0;
 	}
 
 	
