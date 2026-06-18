@@ -1,6 +1,8 @@
 package com.sb.erp.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,6 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
 import com.sb.erp.service.DeptService;
@@ -66,7 +70,7 @@ public class EmpController {
 	}
 
 	// 사원 등록 get
-	@RequestMapping(value="/emp/add" , method=RequestMethod.GET)
+	@RequestMapping(value="/emp/join" , method=RequestMethod.GET)
 	public String addEmp(Model model) {
 
 		// 부서 및 직급
@@ -76,7 +80,7 @@ public class EmpController {
 	}
 
 	// 사원 등록 post
-	@RequestMapping(value="/emp/add" , method=RequestMethod.POST)
+	@RequestMapping(value="/emp/join" , method=RequestMethod.POST)
 	public String addEmpPost(EmpDto dto) {
 
 		empService.insert(dto);
@@ -99,6 +103,9 @@ public class EmpController {
 	    empService.update(dto);
 	    return "redirect:/emp/detail?empId="+ dto.getEmpId(); 
 	}
+	
+	
+	
 	
 
 }

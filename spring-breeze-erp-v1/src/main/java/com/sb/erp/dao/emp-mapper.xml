@@ -80,7 +80,15 @@
 		emp_status = #{empStatus}
 		where emp_id = #{empId}
 	</update>
-
+	
+	
+	<!-- 이메일 중복 검사 -->
+	<select id ="countByEmpEmail" parameterType="String" resultType="">
+	
+	<!-- 이어서 작성 예정 -->
+	
+	</select>
+	
 
 	<!-- paging -->
 	
