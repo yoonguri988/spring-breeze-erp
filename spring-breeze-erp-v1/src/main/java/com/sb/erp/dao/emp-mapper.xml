@@ -94,4 +94,10 @@
 		join emp_position p on p.pos_id = e.pos_id
 		where e.emp_email = #{empEmail}
 	</select>
+	<!-- cyj: 기존 비밀번호와 일치 확인 -->
+	<select id="selectPassById" resultType="string" parameterType="int">
+		select e.emp_pass
+		from employee e
+		where e.emp_id = #{empId}
+	</select>
 </mapper>

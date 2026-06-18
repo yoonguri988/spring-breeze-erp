@@ -8,7 +8,6 @@
 <div class="sb-page-head">
     <div class="sb-page-head__txt">
         <div class="sb-breadcrumb">
-            <a href="${pageContext.request.contextPath}/">홈</a>
             <i class="bi bi-chevron-right"></i>
             회사 관리
             <i class="bi bi-chevron-right"></i>
@@ -265,6 +264,7 @@
             </c:choose>
             </tbody>
         </table>
+		<div id="modalContainer"></div>
     </div>
 
     <!-- 페이지네이션 -->
@@ -383,67 +383,65 @@
         acIndex = -1;
     }
 
-    /* ===================== 삭제 (관리자 비밀번호 확인 모달) =====================
-       ⚠ TODO: 현재 비밀번호 검증은 클라이언트 측 임시 로직(1234)입니다.
-                실제 운영 전 서버 인증 API 연동으로 반드시 교체하세요.
-    ================================================================== */
-    document.querySelectorAll(".com-del").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-            openDeleteModal(btn.dataset.id, btn.dataset.name);
-        });
+    document.addEventListener("click", function (e) {
+        const delBtn = e.target.closest(".com-del");
+        if (!delBtn) return;
+
+        const comId = delBtn.dataset.id;
+
+        fetch(CTX + "/com/delete?comId=" + comId)
+            .then(res => res.text())
+            .then(html => {
+                const container = document.getElementById("modalContainer");
+                container.innerHTML =
+                    '<div class="modal fade" id="deleteModal" tabindex="-1">' +
+                    '  <div class="modal-dialog"><div class="modal-content">' + html + '</div></div>' +
+                    '</div>';
+
+                const modalEl = document.getElementById("deleteModal");
+                const csrfInput = modalEl.querySelector("#csrfToken");
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+
+                const empPass   = modalEl.querySelector("#empPass");
+                const pwErr     = modalEl.querySelector("#delPwErr");
+                const pwErrMsg  = modalEl.querySelector("#delPwErrMsg");
+                const delYesBtn = modalEl.querySelector("#delYes");
+
+                setTimeout(() => empPass.focus(), 300);
+
+                empPass.addEventListener("input", () => {
+                    pwErr.style.display = "none";
+                    empPass.classList.remove("is-invalid");
+                });
+                empPass.addEventListener("keydown", ev => {
+                    if (ev.key === "Enter") { ev.preventDefault(); delYesBtn.click(); }
+                });
+
+                delYesBtn.addEventListener("click", () => {
+                    fetch(CTX + "/com/delete", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: "comId=" + encodeURIComponent(comId) 
+                            + "&empPass=" + encodeURIComponent(empPass.value)
+                            + "&" + csrfInput.name + "=" + encodeURIComponent(csrfInput.value)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.href = CTX + "/com/list";
+                        } else {
+                            pwErrMsg.textContent = data.message;
+                            pwErr.style.display = "";
+                            empPass.classList.add("is-invalid");
+                            empPass.focus();
+                        }
+                    })
+                    .catch(() => alert("삭제 처리 중 오류가 발생했습니다."));
+                });
+            })
+            .catch(() => alert("모달을 불러오지 못했습니다."));
     });
-
-    function openDeleteModal(comId, comName) {
-        const m = SB.modal({
-            title: '<span style="color:var(--sb-red)"><i class="bi bi-shield-exclamation me-1"></i>회사 삭제</span>',
-            body:
-                '<div class="del-modal-icon"><i class="bi bi-building-x"></i></div>'
-                + '<div class="del-company-name">' + comName + '</div>'
-                + '<div class="del-warning">'
-                +   '삭제 시 연결된 부서·사원 데이터에 영향을 줄 수 있습니다.<br>'
-                +   '계속하려면 <b>관리자 비밀번호</b>를 입력하세요.'
-                + '</div>'
-                + '<div class="mb-2">'
-                +   '<label class="sb-form-label">관리자 비밀번호 <span style="color:var(--sb-red)">*</span></label>'
-                +   '<input type="password" class="form-control" id="delPw" placeholder="비밀번호 입력" autocomplete="new-password">'
-                +   '<div id="delPwErr" style="display:none;color:var(--sb-red);font-size:12.5px;margin-top:6px">'
-                +     '<i class="bi bi-exclamation-circle-fill me-1"></i>비밀번호가 올바르지 않습니다.'
-                +   '</div>'
-                + '</div>',
-            footer:
-                '<button class="btn btn-ghost" data-bs-dismiss="modal">취소</button>'
-                + '<button class="btn btn-sb" id="delYes" style="background:var(--sb-red);border-color:var(--sb-red)">'
-                +   '<i class="bi bi-trash3"></i> 삭제 확인'
-                + '</button>',
-        });
-
-        const pwInput = m.el.querySelector("#delPw");
-        const pwErr   = m.el.querySelector("#delPwErr");
-        setTimeout(function () { pwInput.focus(); }, 300);
-
-        pwInput.addEventListener("keydown", function (e) {
-            if (e.key === "Enter") { e.preventDefault(); m.el.querySelector("#delYes").click(); }
-        });
-        pwInput.addEventListener("input", function () {
-            pwErr.style.display = "none";
-            pwInput.classList.remove("is-invalid");
-        });
-
-        m.el.querySelector("#delYes").addEventListener("click", function () {
-            if (pwInput.value !== "1234") {
-                pwErr.style.display = "";
-                pwInput.classList.add("is-invalid");
-                pwInput.focus();
-                return;
-            }
-            const params = new URLSearchParams({
-                comId: comId,
-                page: "${currentPage}",
-                keyword: "${param.keyword}"
-            });
-            location.href = CTX + "/com/delete?" + params.toString();
-        });
-    }
 })();
 </script>
 

@@ -25,7 +25,7 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public int add(CompanyDto dto) {
 		if(dto.getBizNo() != null && dao.selectByBizNo(dto.getBizNo()) != null) {
-			throw new IllegalArgumentException("�̹� ��ϵ� ����ڹ�ȣ�Դϴ�.");
+			throw new IllegalArgumentException("중복된 사업자 번호");
 		}
 		return dao.insert(dto);
 	}

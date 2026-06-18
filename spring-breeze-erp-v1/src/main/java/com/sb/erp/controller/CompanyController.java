@@ -1,17 +1,13 @@
 package com.sb.erp.controller;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,11 +47,14 @@ public class CompanyController {
 	// 회사 사업자 번호 중복 체크 (ajax)
 	@RequestMapping(value="/com/checkBizNo", method = RequestMethod.GET)
 	@ResponseBody
-	public List<CompanyDto> checkBizNo(String bizNo){
+	public Map<String, Object> checkBizNo(String bizNo){
+		Map<String, Object> res = new HashMap<>();
 		CompanyDto dto = service.isDuplicateBizNo(bizNo);
-		List<CompanyDto> dtoList = new ArrayList<>();
-		dtoList.add(dto);
-		return dtoList;
+		
+		if(dto != null) res.put("duplicate", true);
+		else res.put("duplicate", false);
+		
+		return res;
 	}
 	
 	// 회사 목록 조회
@@ -104,20 +103,27 @@ public class CompanyController {
 	@ResponseBody
 	public Map<String, Object> delete(Authentication auth, EmpDto dto) {
 	    Map<String, Object> result = new HashMap<>();
+	    
 	    EmpDto emp = empService.selectByEmpEmail(auth.getName());
 	    //1. 로그인한 사용자가 관리자가 아닌 경우
 	    //1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
 	    PermDto root = permService.selectByEmpId(emp.getEmpId());
+	    
+	    // ROOT(시스템 관리자) 아닌 경우
+	    if(!root.getAutName().equals("ROOT")) {
+	        throw new IllegalStateException("시스템 관리자 외에는 회사를 삭제할 수 없습니다.");
+	    }
 
 	    //2. 관리자가 입력한 비밀번호가 일치 하지 않을 경우
-//	    boolean matched = empService.matchPassword(loginEmp.getEmpId(), adminPw);
-//	    if (!matched) {
-//	        result.put("success", false);
-//	        result.put("message", "비밀번호가 올바르지 않습니다.");
-//	        return result;
-//	    }
+	    dto.setEmpId(emp.getEmpId());
+	    boolean matched = empService.matchPassword(dto);
+	    if (!matched) {
+	        result.put("success", false);
+	        result.put("message", "비밀번호가 올바르지 않습니다.");
+	        return result;
+	    }
 
-	    service.delete(comId);
+	    service.delete(dto.getComId());
 	    result.put("success", true);
 	    return result;
 	}

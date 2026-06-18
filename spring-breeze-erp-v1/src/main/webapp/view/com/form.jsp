@@ -375,6 +375,8 @@ function checkBizNo() {
     fetch('${pageContext.request.contextPath}/com/checkBizNo?bizNo=' + encodeURIComponent(bizNo))
         .then(res => res.json())
         .then(data => {
+        	console.log(data)
+        	
             spinner.style.display = 'none';
             if (data.duplicate) {
                 setInvalid(bizNoEl, '이미 사용 중인 사업자번호입니다.');

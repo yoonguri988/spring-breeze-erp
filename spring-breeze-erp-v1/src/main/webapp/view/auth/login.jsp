@@ -97,7 +97,7 @@
 					<div class="a-demo">
 						<p>
 							<i class="bi bi-info-circle"></i> 데모 계정<br> 
-							이메일 <code>admin@smartbuilder.com</code>
+							이메일 <code>shin.yn@springbreeze.co.kr</code>
 						  / 비밀번호 <code>1234</code>
 						</p>
 					</div>

@@ -17,6 +17,7 @@
         </div>
     </div>
     <input type="hidden" id="comId" value="${com.comId}">
+    <input type="hidden" id="csrfToken" name="${_csrf.parameterName}" value="${_csrf.token}">
 </div>
 <div class="modal-footer">
     <button class="btn btn-ghost" data-bs-dismiss="modal">취소</button>
