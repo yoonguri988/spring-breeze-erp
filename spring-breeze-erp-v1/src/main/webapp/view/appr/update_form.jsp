@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join</title>
+    <title>Update Form</title>
     <!-- Latest compiled and minified CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Latest compiled JavaScript -->
@@ -16,9 +16,10 @@
 <body>
 
 	<div class="container my-5 card">
-	<h3>결재 양식 목록</h3>
-		<form action="${pageContext.request.contextPath}/appr/list_form" method="get" onsubmit="return checkForm()">
+	<h3>결재 양식 수정</h3>
+		<form action="${pageContext.request.contextPath}/appr/update_form" method="post" onsubmit="return checkForm()">
 		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+		<input type="hidden" name="forId" value="${dto.forId}">
 		
 			<div class="my-3">
 				<label for="forCode" class="form-label">양식 코드</label>
@@ -35,7 +36,7 @@
 				<input type="text" class="form-control" id="companySearch"
 					   placeholder="회사이름 입력" autocomplete="off" value="${dto.comName}"/>
 				
-				<input type="hidden" id="comId" name="comId" />	
+				<input type="hidden" id="comId" name="comId" value="${dto.comId}" />	
 				
 				<div id="companyDropdown" class="dropdown-menu w-100"
 					 style="display: none; max-height: 200px; overflow-y: auto;"></div>
@@ -46,8 +47,10 @@
 				
 				<div class="form-check form-switch d-flex align-items-center gap-2 ps-0">
 					<input class="form-check-input ms-0" type="checkbox"
-						   id="forStatus" name="forStatus"
-						   style="width: 40px; height: 20px; cursor: pointer;">
+						   id="forStatus" name="forStatus" value="true"
+						   style="width: 40px; height: 20px; cursor: pointer;"
+						   ${dto.forStatus ? 'checked' : '' }>
+					<input type="hidden" name="_forStatus" value="on"/>
 					<label class="form-check-label" for="forStatus" style="cursor: pointer;">사용</label>
 				</div>
 			</div>
@@ -76,9 +79,17 @@
 				</dl>
 			</div>
 			
+			<div class="my-3">	
+				<label for="forContent" class="form-label">양식 </label>
+				<textarea class="form-control" id="forContent" name="forContent" >${dto.forContent}</textarea>	
+			</div>
+			
 			<div class="text-end">
-				<button type="reset" class="btn btn-outline-primary">초기화</button>
-				<button type="button" class="btn btn-primary" onclick="searchForm()">검색</button>
+				<button type="button" class="btn btn-outline-primary"
+				onclick="location.href='${pageContext.request.contextPath}/appr/list_form'">목록으로</button>
+				<button type="button" class="btn btn-outline-danger"
+			 	onclick="deleteForm('${dto.forId}')">삭제</button>
+				<button type="submit" class="btn btn-primary" >수정하기</button>
 			</div>
 			
 			<script>
@@ -145,6 +156,19 @@
 				});
 				
 				///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
+				
+				///////////////////// 양식 삭제 재확인 /////////////////////
+				
+				function deleteForm(forId){
+					if(confirm("양식을 삭제하시겠습니까?")){
+						location.href = "${pageContext.request.contextPath}/appr/delete?forId=" + forId;						
+					}
+					else{
+						console.log("취소 확인");
+					}
+				}
+				
+				///////////////////// 양식 삭제 재확인 /////////////////////
 			</script>
 			
 		</form>

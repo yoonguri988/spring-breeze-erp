@@ -120,7 +120,8 @@
 			</div>
 			
 			<div class="text-end">
-				<button type="reset" class="btn btn-outline-primary">취소</button>
+				<button type="button" class="btn btn-outline-primary"
+				onclick="location.href='${pageContext.request.contextPath}/appr/list_form'">목록으로</button>
 				<button type="submit" class="btn btn-primary">저장</button>
 			</div>
 		</form>

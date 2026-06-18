@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join</title>
+    <title>List Form</title>
     <!-- Latest compiled and minified CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Latest compiled JavaScript -->
@@ -20,6 +20,7 @@
 	<h3>결재 양식 목록</h3>
 		<form action="#" method="post" onsubmit="return checkForm()">
 		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+		
 		
 			<div class="my-3">
 				<label for="keyword" class="form-label">양식이름, 양식코드</label>

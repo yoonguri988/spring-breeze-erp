@@ -21,8 +21,8 @@ public class ApprServiceImpl implements ApprService {
 	
 	
 	@Override
-	public int getCompanyIdByName(String name) {
-		return mapper.getCompanyIdByName(name);
+	public String getCompanyName(int comId) {
+		return mapper.getCompanyName(comId);
 	}
 	
 	@Override
@@ -79,8 +79,8 @@ public class ApprServiceImpl implements ApprService {
 	}
 
 	@Override
-	public int deleteFrom(ApprFormDto dto) {
-		return mapper.deleteFrom(dto);
+	public int deleteForm(int forId) {
+		return mapper.deleteForm(forId);
 	}
 
 	@Override

@@ -59,11 +59,11 @@ public class ApprController {
 	// 양식 작성 처리 !권한 부여해야함 관리자 파트임!
 	@RequestMapping( value = "/appr/write_form", method = RequestMethod.POST)
 	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr) {
-		System.out.println("제목 = " + dto.getForTitle());
-		System.out.println("내용 = " + dto.getForContent());
+//		System.out.println("제목 = " + dto.getForTitle());
+//		System.out.println("내용 = " + dto.getForContent());
 		
 		if(appr.insertForm(dto) > 0) {
-			return "redirect:/appr/write_form";
+			return "redirect:/appr/list_form";
 		}
 		return "appr/write_form";
 	}
@@ -83,8 +83,28 @@ public class ApprController {
 	// 양식 수정 폼
 	@RequestMapping( value = "/appr/update_form", method = RequestMethod.GET)
 	public String update(int forId, Model model) {
-		model.addAttribute("dto", appr.selectFormAll(forId));
+		
+		ApprFormDto dto = appr.selectFormAll(forId);
+		dto.setComName(appr.getCompanyName(dto.getComId()));
+				
+		model.addAttribute("dto", dto);
 		return "appr/update_form";
+	}
+	
+	// 양식 수정 처리
+	@RequestMapping( value = "/appr/update_form", method = RequestMethod.POST)
+	public String update_post(ApprFormDto dto, Model model) {
+		
+		if(appr.updateForm(dto) > 0) {
+			return "redirect:/appr/list_form";
+		}
+		return "appr/update_form";
+	}
+	
+	@RequestMapping("/appr/delete")
+	public String delete(int forId) {
+		appr.deleteForm(forId);
+		return "appr/list_form";
 	}
 	
 	
