@@ -41,6 +41,18 @@ public class EmpServiceImpl implements EmpService {
 		    
 	    return dao.update(dto);
 	}
+	@Override
+	public EmpDto selectForVerify(EmpDto dto) {
+		return dao.selectForVerify(dto);
+	}
+	@Override
+	public int updatePassByEmpId(EmpDto dto) {
+		return dao.updatePassByEmpId(dto);
+	}
+	@Override
+	public EmpDto selectByEmpEmail(String empEmail) {
+		return dao.selectByEmpEmail(empEmail);
+	}
 
 	
 }
