@@ -94,6 +94,4 @@ public class CompanyController {
 		}
 		return "redirect:/com/list";
 	}
-	
-	
 }
