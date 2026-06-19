@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 .dept-row-lv1 { background: #fafbfc; }
 .dept-row-lv1 td { border-top: 1px solid var(--sb-border) !important; }
 
