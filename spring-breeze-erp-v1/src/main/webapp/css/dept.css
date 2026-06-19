@@ -166,3 +166,24 @@
   margin-bottom: 20px;
 }
 .my-dept-banner i { font-size: 18px; flex: 0 0 auto; }
+
+/* ──────────────────────────────────────────────────────────
+   필드 라벨 (DB 컬럼명 + 타입 힌트)
+   addForm/editForm 의 .sb-form-label 과 비슷하지만,
+   읽기전용 상세 화면이라 별도 클래스로 분리
+   ────────────────────────────────────────────────────────── */
+.dd-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--sb-ink-soft);
+  margin-bottom: 6px;
+}
+.dd-label .field-hint { margin-left: 6px; font-weight: 500; }
+ 
+/* ──────────────────────────────────────────────────────────
+   본인 행 강조 (소속 사원 테이블에서 로그인한 사용자의 행)
+   ────────────────────────────────────────────────────────── */
+.dd-row-me td { background: var(--sb-accent-soft) !important; }
+.dd-row-me:hover td { background: var(--sb-accent-soft-2) !important; }
+.dd-row-me .sb-table__name { color: var(--sb-accent); font-weight: 700; }

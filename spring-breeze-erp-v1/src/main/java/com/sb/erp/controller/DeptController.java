@@ -95,4 +95,12 @@ public class DeptController {
 		}
 		return "redirect:/dept/list?comId="+dto.getComId();
 	}
+	
+	// 부서 상세 조회
+	@RequestMapping(value="/dept/detail", method=RequestMethod.GET)
+	public String detail(@RequestParam("deptId") int deptId, Model model) {
+		model.addAttribute("dept", service.selectOneById(deptId));
+		model.addAttribute("deptEmpList", empService.selectByDeptId(deptId));
+		return "/dept/detail";
+	}
 }

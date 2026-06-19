@@ -140,6 +140,11 @@
                                         <c:param name="returnUrl" value="${returnUrl}"/>
                                     </c:if>
                                 </c:url>
+                                <a class="sb-iconbtn"
+                            	   href="${pageContext.request.contextPath}/dept/detail?deptId=${dept.deptId}"
+                            	   title="상세보기">
+                            		<i class="bi bi-book"></i>
+                            	</a>
                                 <a href="${editUrl}" class="sb-iconbtn" style="width:28px;height:28px;font-size:13px" title="수정">
                                     <i class="bi bi-pencil"></i>
                                 </a>

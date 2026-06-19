@@ -63,8 +63,57 @@
 
 	<!-- id 값을 통해 부서 하나 조회 -->
 	<select id="selectOneById" resultType="DeptDto">
-		select * from department
-		where dept_id = #{deptId}
+		WITH RECURSIVE dept_path AS (
+		    SELECT 
+		        dept_id AS ancestor_id, 
+		        dept_id AS descendant_id,
+		        dept_id AS root_id
+		    FROM department
+		    UNION ALL
+		    SELECT 
+		        dp.ancestor_id, 
+		        d.dept_id,
+		        dp.root_id
+		    FROM dept_path dp
+		    JOIN department d ON d.parent_id = dp.descendant_id
+		),
+		dept_order AS (
+		    SELECT 
+		        dept_id, 
+		        parent_id,
+		        CAST(LPAD(dept_id, 5, '0') AS CHAR(255)) AS sort_path
+		    FROM department
+		    WHERE parent_id IS NULL
+		    UNION ALL
+		    SELECT 
+		        d.dept_id,
+		        d.parent_id,
+		        CONCAT(o.sort_path, '-', LPAD(d.dept_id, 5, '0'))
+		    FROM department d
+		    JOIN dept_order o ON d.parent_id = o.dept_id
+		)
+		SELECT
+		    d.dept_id, d.dept_name, d.dept_code,
+		    d.depth, d.sort_order,
+		    d.parent_id                    AS parent_id,
+		    dp_parent.dept_name            AS parent_name,
+		    d.emp_id                       AS leader_id,
+		    leader.emp_name                AS leader_name,
+		    leader.emp_no                AS leader_emp_no,
+		    leader_p.pos_name                AS leader_pos_name,            
+		    COUNT(e.emp_id)                AS empCount
+		FROM dept_path dp
+		JOIN department d              ON d.dept_id = dp.ancestor_id
+		JOIN dept_order o               ON o.dept_id = d.dept_id
+		LEFT JOIN department dp_parent ON dp_parent.dept_id = d.parent_id
+		LEFT JOIN employee leader      ON leader.emp_id = d.emp_id
+        LEFT JOIN emp_position leader_p on leader_p.pos_id = leader.pos_id
+		LEFT JOIN employee e           ON e.dept_id = dp.descendant_id
+		where d.dept_id = #{deptId}
+		GROUP BY
+		    d.dept_id, d.dept_name, d.dept_code, d.depth, d.sort_order, d.parent_id,
+		    dp_parent.dept_name, d.emp_id, leader.emp_name, o.sort_path
+		ORDER BY o.sort_path
 	</select>
 
 	<!-- 부서 순서 정렬 -->

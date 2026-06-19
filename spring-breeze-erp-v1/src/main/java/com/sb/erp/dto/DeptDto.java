@@ -30,6 +30,10 @@ public class DeptDto {
 	private String leaderName;
 	private String parentName;
 	private int empCount;
+	
+	//부서 상세 조회시 불러오는 추가 데이터
+	private String leaderPosName;
+	private String leaderEmpNo;
 
 	public List<DeptDto> getChildren() {
 		if(this.children == null) this.children = new ArrayList<>();
