@@ -9,6 +9,7 @@ public class TaskDto {
 	private int comId;
 	private String taskName;
 	private String taskDesc;
+	private String taskStatus;
 	private int pmId;
 	private String pmIdName;
 	private String taskStartDate;

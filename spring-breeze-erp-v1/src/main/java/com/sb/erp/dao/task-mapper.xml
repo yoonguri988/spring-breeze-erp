@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.TaskMapper">
+
+<!-- 태스크 추가 -->
+<insert id="insert" parameterType="TaskDto">
+	insert into task (pro_id , com_id , task_name , task_desc , task_status , pm_id , pm_id_name ,
+	                  task_start_date , task_end_date , task_created_at , task_updated_at)
+	       values(#{proId} , #{comId} , #{taskName} , #{taskDesc} , #{taskStatus} , #{pmId}, #{pmIdName},
+	              #{taskStartDate}, #{taskEndDate}, now(), now())
+</insert>
+
+
+<!-- 태스크 수정 -->
+<update id="update" parameterType="TaskDto">
+	update task set
+	task_name = #{taskName},
+	task_desc = #{taskDesc},
+	task_status = #{taskStatus},
+	task_start_date = #{taskStartDate},
+	task_end_date = #{taskEndDate},
+	task_updated_at = now()
+	where task_id = #{taskId}
+</update>
+
+<!-- 태스크 참여 명단..? 조회 -->
+<select id="selectAll" parameterType="int" resultType="TaskDto">
+	select t.task_id, t.task_name, t.task_status, t.task_created_at
+	from task t
+	where t.pro_id = #{proId}
+	order by t.task_id desc
+</select>
+
+<!-- 태스크 상세 목록조회 -->
+<select id="select" parameterType="int" resultType="TaskDto">
+	select t.task_id,t.pro_id,t.task_name,t.task_desc, t.task_status, t.pm_id_name, t.task_start_date, t.task_end_date
+	from task t join project p on t.pro_id = p.pro_id join company c
+    on p.com_id = c.com_id join project_member pi on pi.project_pro_id = p.pro_id and pi.pm_id = t.pm_id
+	where  t.task_id = #{taskID};
+</select>
+
+<!-- 태스크 삭제 -->
+<delete id="delete" parameterType="int">
+delete from task where task_id =#{taskId}
+</delete>
+</mapper>
+<!-- <select id="selectAll" parameterType="int" resultType="TaskDto">
+	select t.task_id,t.task_name, t.task_status
+	from task t join project p on t.pro_id = p.pro_id join company c
+    on p.com_id = c.com_id join project_member pi on pi.project_pro_id = p.pro_id and pi.pm_id = t.pm_id
+	where c.com_id = #{comId}
+ 	 and p.pro_id = #{proId}
+</select> -->
