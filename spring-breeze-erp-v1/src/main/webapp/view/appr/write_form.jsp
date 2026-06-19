@@ -2,129 +2,101 @@
     pageEncoding="UTF-8"%>   
 <%@include file="/layout/header.jsp"%>
     
-<div class="container-fluid px-4 py-4"
-	 style="background-color: #f8f9fa; min-height: 100vh;">
-	 
-	 <div class="d-flex justify-content-between align-items-center mb-4">
-	 	<div>
-	 		<nav style="--bs-breadcrumb-divider: '>';"
-	 			 aria-label="breadcrumb">
-	 			<ol class="breadcrumb mb-1 small text-secondary">
-	 				<li class="breadcrumb-item">이름을</li>
-	 				<li class="breadcrumb-item">정합</li>
-	 				<li class="breadcrumb-item active text-primary fw-bold"
-	 					aria-current="page">시다</li>
-	 			</ol>
-	 		</nav>
-	 		<h3 class="fw-bold m-0" style="color: #1e293b;">결재 양식 작성</h3>
-	 		<p class="text-muted small m-0 mt-1">결재 양식 등록</p>
+<div class="sb-content">
+	 <div class="sb-page-head">
+	 	<div class="sb-page-head__txt">
+	 		<div class="sb-breadcrumb">
+		 		<a href="${pageContext.request.contextPath}/appr/list_form">전자결재</a>
+		 		<i class="bi bi-chevron-right"></i>
+		 		<span>양식관리</span>
+	 		</div>
+	 		<h1>결재 양식 작성</h1>
+	 		<p>새로운 결재 양식을 등록합니다.</p>
 	 	</div>
-	 	<button type="button"
-	 			class="btn btn-white border border-secondary-subtle fw-semibold px-3 py-2 text-secondary bg-white"
-	 			onclick="location.href='${pageContext.request.contextPath}/appr/list_form'"
-	 			style="border-radius: 6px; font-size: 0.9rem;">
-	 			목록으로
-	 	</button>
+	 	<div class="sb-page-head__actions">
+		 	<button type="button" class="btn btn-ghost"
+		 			onclick="location.href='${pageContext.request.contextPath}/appr/list_form'">
+		 			목록으로
+		 	</button>
+	 	</div>
 	 </div>
 
 	<form action="${pageContext.request.contextPath}/appr/write_form" method="post" onsubmit="return checkForm()">
 		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 	
-		<div class="row g-4">
-			<div class="col-lg-12">
-				<div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 12px; background-color: #ffffff;">
-					<h5 class="fw-bold border-bottom pb-2 mb-4 text-dark">기본 정보</h5>
-					
-					<div class="row g-3 mb-4">
-						<div class="col-md-6">
-							<label for="forCode"
-								   class="form-label small fw-bold text-secondary">양식 코드</label>
-							<input type="text"
-								   class="form-control bg-light border-secondary-subtle py-2.5"
-								   id="forCode" name="forCode" placeholder="문서 코드"
-								   style="font-size: 0.95rem;"/>
-						</div>
-						<div class="col-md-6 position-relative">	
-							<label for="companySearch"
-								   class="form-label small fw-bold text-secondary">양식 추가할 회사</label>
-							<input type="text"
-								   class="form-control bg-light border-secondary-subtle py-2.5"
-								   id="companySearch"
-								   placeholder="회사이름 입력" autocomplete="off"
-								   style="font-size: 0.95rem;"/>
-							<input type="hidden" id="comId" name="comId" />	
-							<div id="companyDropdown"
-								 class="dropdown-menu w-100 shadow-sm"
-								 style="display: none; max-height: 200px; overflow-y: auto; z-index: 1050;"></div>
-						</div>
+		<div class="sb-card">
+			<div class="sb-card__head">
+				<h2>기본 정보</h2>
+			</div>
+			
+			<div class="sb-card__body">	
+				<div class="row g-4 mb-4">
+					<div class="col-md-6">
+						<label for="forCode"
+							   class="sb-form-label">양식 코드</label>
+						<input type="text"
+							   class="form-control"
+							   id="forCode" name="forCode" placeholder="ex) TEST-01"/>
 					</div>
-						
-					<div class="row g-3 mb-4 align-items-start">
-						<div class="col-md-6">
-							<label for="forTitle"
-								   class="form-label small fw-bold text-secondary">양식 제목</label>
-							<input type="text"
-								   class="form-control bg-light border-secondary-subtle py-2.5"
-								   id="forTitle" name="forTitle" placeholder="~~신청서"
-								   style="font-size: 0.95rem;"/>
-							<div class="form-text text-muted"
-								 style="font-size: 0.75rem;">결재 양식의 재목</div>
-						</div>
-						<div class="col-md-6">
-							<label class="form-label small fw-bold text-secondary d-block mb-2">활성화 여부</label>
-							<div class="form-check form-switch d-flex align-items-center gap-2 ps-0 mt-1">
-								<input class="form-check-input ms-0 mt-0"
-									   type="checkbox" id="forStatus" name="forStatus"
-									   style="width: 45px; height: 22px; cursor: pointer;">
-								<label class="form-check-label fw-semibold text-dark small"
-									   for="forStatus"
-									   style="cursor: pointer; user-select: none;">활성화</label>
-							</div>
-						</div>
+
+					<div class="col-md-6 position-relative">	
+						<label for="companySearch"
+							   class="sb-form-label">양식 추가할 회사</label>
+						<div class="sb-search" style="max-width: 100%;">
+							<i class="bi bi-building"></i>
+							<input type="text" id="companySearch"
+								   placeholder="회사이름 입력" autocomplete="off"/>
+						</div>	
+							<input type="hidden" id="comId" name="comId" />
+						<div id="companyDropdown"
+							 class="dropdown-menu w-100 shadow-sm"
+							 style="display: none; max-height: 200px; overflow-y: auto; z-index: 1050;"></div>
 					</div>
+				</div>
 					
-					<div class="mt-4">
-						<div class="d-flex justify-content-between align-items-end mb-2">
-							<div>
-								<label for="forContent"
-									   class="form-label small fw-bold text-secondary m-0">양식 내용</label>
-								<div class="text-muted"
-									 style="font-size: 0.75rem; margin-top: 2px">결재 양식의 내용을 입력</div>
-							</div>
-							<div class="btn-group btn-group-sm border-bottom-0" role="group">
-								<button type="button" class="btn btn-outline-primary acitve fw-semibold btn-sm px-3"
-										style="font-size: 0.8rem; border-radius: 4px 0 0 0;">HTML</button>
-								<button type="button" class="btn btn-outline-secondary fw-semibold btn-sm px-3"
-										style="font-size: 0.8rem; border-radius: 0 4px 0 0 ;" disabled>일단비활성화</button>
-							</div>
-						</div>
-						<textarea class="form-control border-secondary-subtle p-3"
-								  id="forContent" name="forContent" rows="12"
-								  placeholder="구문 작성"
-								  style="font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;
-								  		 background-color: #fafafa; color: #1e293b;
-								  		 resize: vertical; line-height: 1.5">
-						</textarea>
+				<div class="row g-4 mb-4">
+					<div class="col-md-6">
+						<label for="forTitle" class="sb-form-label">양식 제목</label>
+						<input type="text" class="form-control"
+							   id="forTitle" name="forTitle" placeholder="ex) 병가신청서"/>
+						<div class="form-text text-faint mt-1">결재 양식의 제목을 입력하세요.</div>
 					</div>
-					
-					<div class="row mt-4">
-						<div class="col-12 d-flex justify-content-end gap-2">
-							<div class="d-flex justify-content-center gap-3">
-								<button type="button" class="btn btn-light border fw-semibold px-5 py-2.5 text-secondary"
-										onclick="location.href='${pageContext.request.contextPath}/appr/list_form'"
-										style="font-size: 0.95rem; border-radius: 6px;">
-										목록으로
-								</button>
-								<button type="submit" class="btn btn-primary fw-semibold px-5 py-2.5"
-										style="font-size: 0.95rem; border-radius: 6px;">
-										작성
-								</button>
-							</div>
+					<div class="col-md-6">
+						<label class="sb-form-label">활성화 여부</label>
+						<div class="form-check form-switch mt-2">
+							<input class="form-check-input sb-checkbox"
+								   type="checkbox" id="forStatus" name="forStatus"
+								   style="width: 40px; height: 20px;">
+							<label class="form-check-label text-dark fw-semibold ms-2"
+								   for="forStatus"
+								   style="cursor: pointer; user-select: none;">활성화</label>
 						</div>
 					</div>
 				</div>
+				
+				<div class="mt-4">
+					<label for="forContent" class="sb-form-label">양식 내용</label>
+					<textarea class="form-control"
+							  id="forContent" name="forContent" rows="12"
+							  placeholder="소속 : * 직급 : * 성명 : ---"
+							  style="font-family: 'Courier New', Courier, monospace;
+							  		 background-color: #fafafa; resize: vertical;"></textarea>
+					<div class="form-text text-faint mt-2">결재 양식의 내용을 작성하세요.</div>
+				</div>
+				
+				<div class="sb-divider"></div>
+				
+				<div class="d-flex justify-content-end gap-2">
+					<button type="button" class="btn btn-ghost"
+							onclick="location.href='${pageContext.request.contextPath}/appr/list_form'">
+							취소
+					</button>
+					<button type="submit" class="btn btn-sb">
+							작성
+					</button>
+				</div>
 			</div>
-		</div>	
+		</div>
 	</form>
 </div>
 <!-- 빈칸시 alert 처리 -->

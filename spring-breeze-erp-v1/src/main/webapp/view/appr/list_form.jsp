@@ -3,158 +3,147 @@
 <%@taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
 <%@include file="/layout/header.jsp"%>
 
-<div class="container-fluid px-4 py-4" style="background-color: #f8f9fa; min-height: 100vh">
-
-	<div class="d-flex justify-content-between align-items-center mb-3">
-		<div>
-			<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-				<ol class="breadcrumb mb-1 small text-secondary">
-					<li>메뉴 이름</li>
-					<li>정해야함</li>
-				</ol>
-			</nav>
-			<h3 class="fw-bold m-0" style="color: #1e293b;">얘도 정해야함</h3>
-			<p class="text-muted small m-0 mt-1">결재 양식 조회,관리</p>
+<div class="sb-content">
+	<div class="sb-page-head">
+		<div class="sb-page-head__txt">
+			<div class="sb-breadcrumb">
+				<a href="#">전자 결재</a>
+				<i class="bi bi-chevron-right"></i>
+				<span>양식 관리</span>
+			</div>
+			<h1>결재 양식 관리</h1>
+			<p>시스템 내 결재 양식을 조회하고 관리</p>
 		</div>
-		<button type="button" class="btn btn-primary fw-semibold px-3 py-2 d-flex align-items-center gap-1"
-		 	onclick="location.href='${pageContext.request.contextPath}/appr/write_form'">
-		 	<span class="fs-5 lh-1">+</span>양식 등록
-		 </button>
+		<div class="sb-page-head__actions">
+			<button type="button" class="btn btn-sb"
+					onclick="location.href='${pageContext.request.contextPath}/appr/write_form'">
+					<i class="bi bi-plus-lg"></i> 양식 등록
+			</button>
+		</div>
 	</div>
 	
-	<div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 12px;">
-		<form action="${pageContext.request.contextPath}/searchForms" method="post">
-			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-			
-			<div class="row g-3">
-				<div class="col-md-4">
-					<label for="keyword" class="form-label small fw-bold text-secondary">키워드 검색</label>
-					<div class="input-group">
-						<input type="text" class="form-control bg-light border-secondary-subtle"
-							   id="keyword" name="keyword" placeholder="양식 코드 또는 제목"
-							   style="font-size: 0.9rem; padding: 0.6rem 1rem;"
-							   value="${keyword}"/>
+	<div class="sb-card mb-4">
+		<div class="sb-card__body">
+			<form action="${pageContext.request.contextPath}/searchForms" method="post">
+				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+				
+				<div class="row g-3">			
+					<div class="col-md-4">
+						<label for="keyword" class="sb-form-label">키워드 검색</label>
+						<div class="sb-search">
+							<i class="bi bi-search"></i>
+							<input type="text" id="keyword" name="keyword"
+								   placeholder="양식 코드 또는 제목" value="${keyword}">
+						</div>
 					</div>
+					
+					<div class="col-md-4 position-relative">
+						<label for="companySearch" class="sb-form-label">회사</label>
+						<div class="sb-search">
+							<i class="bi bi-building"></i>
+							<input type="text" id="companySearch"
+								   placeholder="회사명" autocomplete="off" />
+						</div>
+						<input type="hidden" id="comId" name="comId" value="${comId}">
+						<div id="companyDropdown" class="dropdown-menu w-100 shadow-sm"
+							 style="display: none; max-height: 200px; overflow-y: auto;"></div>
+					</div>
+					
+					<div class="col-md-4">
+						<label for="forStatus" class="sb-form-label">활성화 여부</label>
+						<select class="form-select" id="forStatus" name="forStatus">
+							<option value="" ${empty forStatus ? 'selected' : '' }>전체</option>
+							<option value="true" ${forStatus eq 'true' ? 'selected' : '' }>활성화</option>
+							<option value="false" ${forStatus eq 'false' ? 'selected' : '' }>비활성화</option>
+						</select>
+					</div>
+					
+ 					<div class="d-flex justify-content-end gap-2 mt-3">
+	                    <button type="submit" class="btn btn-sb-soft">검색</button>
+	                </div>
 				</div>
-				
-				<div class="col-md-4 position-relative">	
-					<label for="companySearch" class="form-label small fw-bold text-secondary">회사</label>
-					<input type="text" class="form-control bg-light border-secondary-subtle" id="companySearch"
-						   placeholder="회사이름 입력" autocomplete="off"
-						   style="font-size: 0.9rem; padding: 0.6rem 1rem;"						   />
-					<input type="hidden" id="comId" name="comId" value="${comId}"/>	
-					<div id="companyDropdown" class="dropdown-menu w-100"
-						 style="display: none; max-height: 200px; overflow-y: auto;"></div>
-				</div>	
-				
-				<div class="col-md-4">	
-					<label for="forStatus" class="form-label small fw-bold text-secondary">활성화 여부</label>
-					<select class="form-select bg-light border-secondary-subtle"
-							id="forStatus" name="forStatus"
-							style="font-size: 0.9rem; padding: 0.6rem 1rem;">
-						<option value=""
-						${empty forStatus ? 'selected' : ''}>전체</option>
-						<option value="true"
-						${forStatus eq 'true' ? 'selected' : ''}>활성화</option>
-						<option value="false"
-						${forStatus eq 'false' ? 'selected' : ''}>비활성화</option>
-					</select>
-				</div>
-			</div>
-			
-			<div class="d-flex justify-content-end gap-2 mt-4">
-				<button type="reset" class="btn btn-light border fw-semibold text-secondary px-4 py-2"
-						style="font-size: 0.9rem;">초기화</button>
-				<button type="submit" class="btn btn-primary fw-semibold px-4 py-2"
-						style="font-size: 0.9rem;">검색</button>
-			</div>
-			
-		</form>
-	</div>
-	
-	<div class="table-responsive">
-		<table class="table  table-hover align-middle"
-			   style="font-size: 0.9rem; min-width: 900px;">
-			<caption>양식 목록</caption>
-			<thead>
-				<tr class="table-light text-secondary border-bottom-0"
-					style="--bs-table-bg: #f8f9fa;">
-					<th class="py-3 px-3 fw-semibold">번호</th>
-					<th class="py-3 fw-semibold">양식 코드</th>
-					<th class="py-3 fw-semibold">양식 제목</th>
-					<th class="py-3 fw-semibold">회사</th>
-					<th class="py-3 fw-semibold">사용 여부</th>
-					<th class="py-3 fw-semibold">생성일</th>
-					<th class="py-3 fw-semibold">수정일</th>
-				</tr>
-			</thead>
-			<!-- 받아온 데이터 출력 파트 -->
-			<!-- 안쪽에 주석 못달아서 여기에 적음
-				 위에서 부터
-				 초기화면 처리, 검색 결과 없을때 처리
-				 Controller에서 list로 받아와 for문으로 처리 -->
-			<tbody id="formTbody" class="border-top-0">
-				<c:choose>
-					<c:when test="${empty list}">
-						<tr>
-							<td colspan="8" class="text-center">검색 결과가 없습니다.</td>
-						</tr>
-					</c:when>
-					<c:otherwise>
-						<c:forEach var="item" items="${list}" varStatus="status">
-							<tr>
-								<td>${status.count}</td>
-								<td>
-									<a href="${pageContext.request.contextPath}/appr/update_form?forId=${item.forId}">
-										${item.forCode}
-									</a>
-								</td>
-								<td>${item.forTitle}</td>
-								<td>${item.comName}</td>
-								<td>
-									<span class="badge ${item.forStatus ? 'bg-success' : 'bg-secondary'}">
-										${item.forStatus ? '활성화' : '비활성화'}
-									</span>
-								</td> 
-								<td>${item.forCreated}</td>
-								<td>${item.forUpdated}</td>
-							</tr>
-						</c:forEach>
-					</c:otherwise>
-				</c:choose>
-			</tbody>
-		</table>
-		<!-- 페이징 기능  위부터 순서대로 이전 / 1,2,3 같은 페이지 / 다음 -->
-		<div class="d-flex justify-content-center mt-4">
-			<ul class="pagination" id="pagingUl">
-				<c:if test="${paging.start > 1}">
-					<li class="page-item">
-						<a class="page-link"
-						   href="${pageContext.request.contextPath}/searchForms?keyword=${keyword}&company=${comId}&forStatus=${forStatus}&page=${paging.start - 1}">
-						   이전</a>
-					</li>
-				</c:if>
-				
-				<c:forEach var="i" begin="${paging.start}" end="${paging.end}">
-					<li class="page-item ${paging.current == i ? 'active' : ''}">
-						<a class="page-link"
-						   href="${pageContext.request.contextPath}/searchForms?keyword=${keyword}&company=${comId}&forStatus=${forStatus}&page=${i}">
-						   ${i}</a>
-					</li>
-				</c:forEach>
-				
-				<c:if test="${paging.end < paging.pagetotal}">
-					<li class="page-item">
-						<a class="page-link"
-						   href="${pageContext.request.contextPath}/searchForms?keyword=${keyword}&company=${comId}&forStatus=${forStatus}&page=${paging.end + 1}">
-						   다음</a>
-					</li>
-				</c:if>
-			</ul>
+			</form>
 		</div>
 	</div>
-</div>
 	
+	<div class="sb-card">
+		<div class="sb-card_body sb-card__body--flush">
+			<div class="table-responsive">
+				<table class="sb-table">
+					<thead>
+						<tr>
+							<th class="num">번호</th>
+							<th>양식 코드</th>
+							<th>양식 제목</th>
+							<th>회사</th>
+							<th>사용 여부</th>
+							<th>생성일</th>
+							<th>수정일</th>
+						</tr>
+					</thead>
+					<tbody id="formTbody">
+						<c:choose>
+							<c:when test="${empty list}">
+								<tr>
+									<td colspan="7">
+										<div class="sb-empty">
+											<i class="bi bi-inbox text-faint"></i>
+											<p>겸색 결과가 없습니다.</p>
+										</div>
+									</td>
+								</tr>
+							</c:when>
+							<c:otherwise>
+								<c:forEach var="item" items="${list}" varStatus="status">
+									<tr>
+										<td class="num text-faint">${status.count}</td>
+										<td>
+											<a href="${pageContext.request.contextPath}/appr/update_form?forId=${item.forId}"
+											   class="sb-table__name">
+											   ${item.forCode}
+											</a>
+										</td>
+										<td>${item.forTitle}</td>
+										<td class="text-soft">${item.comName }</td>
+										<td>
+											<span class="sb-badge ${item.forStatus ? 'sb-badge--green' : 'sb-badge--gray'}">
+												<span class="pip"></span> ${item.forStatus ? '활성화' : '비활성화'}
+											</span>
+										</td>
+										<td class="text-faint tnum">${item.forCreated}</td>
+										<td class="text-faint tnum">${item.forUpdated}</td>
+									</tr>
+								</c:forEach>
+							</c:otherwise>
+						</c:choose>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	
+	<div class="d-flex justify-content-center mt-4">
+        <ul class="pagination" id="pagingUl">
+            <c:if test="${paging.start > 1}">
+                <li class="page-item">
+                    <a class="page-link" href="${pageContext.request.contextPath}/searchForms?keyword=${keyword}&company=${comId}&forStatus=${forStatus}&page=${paging.start - 1}">이전</a>
+                </li>
+            </c:if>
+            <c:forEach var="i" begin="${paging.start}" end="${paging.end}">
+                <li class="page-item ${paging.current == i ? 'active' : ''}">
+                    <a class="page-link" href="${pageContext.request.contextPath}/searchForms?keyword=${keyword}&company=${comId}&forStatus=${forStatus}&page=${i}">${i}</a>
+                </li>
+            </c:forEach>
+            <c:if test="${paging.end < paging.pagetotal}">
+                <li class="page-item">
+                    <a class="page-link" href="${pageContext.request.contextPath}/searchForms?keyword=${keyword}&company=${comId}&forStatus=${forStatus}&page=${paging.end + 1}">다음</a>
+                </li>
+            </c:if>
+        </ul>
+    </div>
+    
+</div>
+
 <script>
 	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
 	window.addEventListener("load", function(){
