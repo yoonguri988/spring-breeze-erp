@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.sb.erp.dao.AuthMapper;
+import com.sb.erp.dto.AuthUserDto;
 import com.sb.erp.dto.ResourceDto;
 import com.sb.erp.security.CustomUser;
 import com.sb.erp.service.ResourceService;
@@ -29,6 +31,9 @@ public class ResourceController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthMapper authMapper;
 
     private static final int PAGE_SIZE = 10;
 
@@ -107,10 +112,11 @@ public class ResourceController {
                          @RequestParam(value = "returnTo", required = false, defaultValue = "list") String returnTo) {
 
         if (!matchesCurrentUserPassword(inputPassword)) {
-            if ("detail".equals(returnTo)) {
-                return "redirect:/resv/detail?id=" + resId + "&error=badPassword";
-            }
-            return "redirect:/resv/list?error=badPassword";
+            return buildDeleteRedirect(returnTo, resId, "badPassword");
+        }
+
+        if (resourceService.countReservationsByResourceId(resId) > 0) {
+            return buildDeleteRedirect(returnTo, resId, "hasReservations");
         }
 
         resourceService.deleteResource(resId);
@@ -124,7 +130,27 @@ public class ResourceController {
         }
 
         CustomUser loginUser = (CustomUser) auth.getPrincipal();
+        String submittedPassword = inputPassword == null ? "" : inputPassword.trim();
+        if (submittedPassword.isEmpty()) {
+            return false;
+        }
+
         String encodedPassword = loginUser.getPassword();
-        return inputPassword != null && passwordEncoder.matches(inputPassword, encodedPassword);
+        String username = auth.getName();
+        if (username != null && !username.trim().isEmpty()) {
+            AuthUserDto authUserDto = authMapper.readAuth(username);
+            if (authUserDto != null && authUserDto.getEmpPass() != null && !authUserDto.getEmpPass().trim().isEmpty()) {
+                encodedPassword = authUserDto.getEmpPass();
+            }
+        }
+
+        return encodedPassword != null && passwordEncoder.matches(submittedPassword, encodedPassword);
+    }
+
+    private String buildDeleteRedirect(String returnTo, int resId, String error) {
+        if ("detail".equals(returnTo)) {
+            return "redirect:/resv/detail?id=" + resId + "&error=" + error;
+        }
+        return "redirect:/resv/list?error=" + error;
     }
 }

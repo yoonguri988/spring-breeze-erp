@@ -77,6 +77,12 @@
     </update>
 
     <!-- 자원 삭제 -->
+    <select id="countReservationsByResourceId" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM reservation
+        WHERE res_id = #{resId}
+    </select>
+
     <delete id="deleteResource" parameterType="int">
         DELETE FROM resource
         WHERE res_id = #{resId}

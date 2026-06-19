@@ -21,5 +21,7 @@ public interface ResourceMapper {
 
     void updateResource(ResourceDto resourceDto);
 
+    int countReservationsByResourceId(int resId);
+
     void deleteResource(int resId);
 }

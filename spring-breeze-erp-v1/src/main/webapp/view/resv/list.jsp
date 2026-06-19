@@ -27,6 +27,9 @@
   <c:if test="${error == 'badPassword'}">
     <div class="alert alert-danger">비밀번호가 일치하지 않아 삭제되지 않았습니다.</div>
   </c:if>
+  <c:if test="${error == 'hasReservations'}">
+    <div class="alert alert-danger">예약 이력이 있는 자원은 먼저 예약 내역을 정리해야 삭제할 수 있습니다.</div>
+  </c:if>
 
   <div class="row g-3 mb-3">
     <div class="col-6 col-md-3">
