@@ -23,7 +23,7 @@
 	</div>
 	
 	<div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 12px;">
-		<form action="#" method="post" onsubmit="return checkForm()">
+		<form action="${pageContext.request.contextPath}/searchForms" method="post">
 			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 			
 			<div class="row g-3">
@@ -32,7 +32,8 @@
 					<div class="input-group">
 						<input type="text" class="form-control bg-light border-secondary-subtle"
 							   id="keyword" name="keyword" placeholder="양식 코드 또는 제목"
-							   style="font-size: 0.9rem; padding: 0.6rem 1rem;"/>
+							   style="font-size: 0.9rem; padding: 0.6rem 1rem;"
+							   value="${keyword}"/>
 					</div>
 				</div>
 				
@@ -40,8 +41,8 @@
 					<label for="companySearch" class="form-label small fw-bold text-secondary">회사</label>
 					<input type="text" class="form-control bg-light border-secondary-subtle" id="companySearch"
 						   placeholder="회사이름 입력" autocomplete="off"
-						   style="font-size: 0.9rem; padding: 0.6rem 1rem;"/>
-					<input type="hidden" id="comId" name="comId" />	
+						   style="font-size: 0.9rem; padding: 0.6rem 1rem;"						   />
+					<input type="hidden" id="comId" name="comId" value="${comId}"/>	
 					<div id="companyDropdown" class="dropdown-menu w-100"
 						 style="display: none; max-height: 200px; overflow-y: auto;"></div>
 				</div>	
@@ -51,9 +52,12 @@
 					<select class="form-select bg-light border-secondary-subtle"
 							id="forStatus" name="forStatus"
 							style="font-size: 0.9rem; padding: 0.6rem 1rem;">
-						<option value="" selected>전체</option>
-						<option value="true">활성화</option>
-						<option value="false">비활성화</option>
+						<option value=""
+						${empty forStatus ? 'selected' : ''}>전체</option>
+						<option value="true"
+						${forStatus eq 'true' ? 'selected' : ''}>활성화</option>
+						<option value="false"
+						${forStatus eq 'false' ? 'selected' : ''}>비활성화</option>
 					</select>
 				</div>
 			</div>
@@ -61,7 +65,7 @@
 			<div class="d-flex justify-content-end gap-2 mt-4">
 				<button type="reset" class="btn btn-light border fw-semibold text-secondary px-4 py-2"
 						style="font-size: 0.9rem;">초기화</button>
-				<button type="button" class="btn btn-primary fw-semibold px-4 py-2" onclick="searchForm()"
+				<button type="submit" class="btn btn-primary fw-semibold px-4 py-2"
 						style="font-size: 0.9rem;">검색</button>
 			</div>
 			
@@ -84,11 +88,70 @@
 					<th class="py-3 fw-semibold">수정일</th>
 				</tr>
 			</thead>
+			<!-- 받아온 데이터 출력 파트 -->
+			<!-- 안쪽에 주석 못달아서 여기에 적음
+				 위에서 부터
+				 초기화면 처리, 검색 결과 없을때 처리
+				 Controller에서 list로 받아와 for문으로 처리 -->
 			<tbody id="formTbody" class="border-top-0">
+				<c:choose>
+					<c:when test="${empty list}">
+						<tr>
+							<td colspan="8" class="text-center">검색 결과가 없습니다.</td>
+						</tr>
+					</c:when>
+					<c:otherwise>
+						<c:forEach var="item" items="${list}" varStatus="status">
+							<tr>
+								<td>${status.count}</td>
+								<td>
+									<a href="${pageContext.request.contextPath}/appr/update_form?forId=${item.forId}">
+										${item.forCode}
+									</a>
+								</td>
+								<td>${item.forTitle}</td>
+								<td>${item.comName}</td>
+								<td>
+									<span class="badge ${item.forStatus ? 'bg-success' : 'bg-secondary'}">
+										${item.forStatus ? '활성화' : '비활성화'}
+									</span>
+								</td> 
+								<td>${item.forCreated}</td>
+								<td>${item.forUpdated}</td>
+							</tr>
+						</c:forEach>
+					</c:otherwise>
+				</c:choose>
 			</tbody>
-			<tfoot id="formTfoot">
-			</tfoot>
 		</table>
+		<!-- 페이징 기능  위부터 순서대로 이전 / 1,2,3 같은 페이지 / 다음 -->
+		<div class="d-flex justify-content-center mt-4">
+			<ul class="pagination" id="pagingUl">
+				<c:if test="${paging.start > 1}">
+					<li class="page-item">
+						<a class="page-link"
+						   href="${pageContext.request.contextPath}/searchForms?keyword=${keyword}&company=${comId}&forStatus=${forStatus}&page=${paging.start - 1}">
+						   이전</a>
+					</li>
+				</c:if>
+				
+				<c:forEach var="i" begin="${paging.start}" end="${paging.end}">
+					<li class="page-item ${paging.current == i ? 'active' : ''}">
+						<a class="page-link"
+						   href="${pageContext.request.contextPath}/searchForms?keyword=${keyword}&company=${comId}&forStatus=${forStatus}&page=${i}">
+						   ${i}</a>
+					</li>
+				</c:forEach>
+				
+				<c:if test="${paging.end < paging.pagetotal}">
+					<li class="page-item">
+						<a class="page-link"
+						   href="${pageContext.request.contextPath}/searchForms?keyword=${keyword}&company=${comId}&forStatus=${forStatus}&page=${paging.end + 1}">
+						   다음</a>
+					</li>
+				</c:if>
+			</ul>
+		</div>
 	</div>
 </div>
 	
@@ -157,6 +220,7 @@
 	
 	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
 	
+	/* 이부분 2차때 다시 설계해서 사용해...볼수있게	
 	/////////////////////// 검색해서 나온 데이터 전송 ///////////////////////
 	
 	function searchForm(page = 1){
@@ -181,7 +245,8 @@
 	}
 	
 	/////////////////////// 검색해서 나온 데이터 전송 ///////////////////////
-					
+	
+	
 	/////////////////////// 검색해서 나온 결과 출력 ///////////////////////
 	
 	function updateTable(data){
@@ -222,45 +287,13 @@
 	/////////////////////// 검색해서 나온 결과 출력 ///////////////////////
 	
 	/////////////////////////   페이징 기능    /////////////////////////
-	// 얘.. 이거 큰일났는데..
 	
 	function updatePaging(paging){
-		const tfoot = document.getElementById("formTfoot");
 		
-		let html = `<tr><td colspan="5">`;
-		html += `<ul class="pagination justify-content-center">`;
-		
-		if(paging.start > 1){
-			html += `
-			<li class="page-item">
-				<a href="#" class="page-link"
-				onclick="searchForm(${paging.start-1}); return false;">이전</a>
-			</li>`;
-		}
-		
-		for (let i = paging.start; i <= paging.end; i++){
-			let activeClass = (i == paging.current) ? "active" : "";
-			
-			html +=`
-				<li class="page-item ${activeClass}">
-					<a href="#" class="page-link" 
-					onclick="searchForm(${i}); return false;">${i}</a>
-			</li>`;
-		}
-		
-		if(paging.end < paging.pagetotal){
-			html += `
-			<li class="page-item">
-				<a href="#" class="page-link"
-				onclick="searchForm(${paging.end +1}); return false;">다음</a>
-			</li>`;
-		}
-		
-		html += `</ul></td></tr>`;
-		
-		tfoot.innerHTML = html;	
 	}
 
-  /////////////////////////   페이징 기능    /////////////////////////
+    /////////////////////////   페이징 기능    /////////////////////////
+    */
+    
 </script>
 <%@include file="/layout/footer.jsp"%>
