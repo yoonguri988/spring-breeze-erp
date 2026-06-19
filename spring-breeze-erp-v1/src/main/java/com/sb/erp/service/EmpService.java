@@ -35,6 +35,10 @@ public interface EmpService {
 
 	// 이메일을 기준으로 사용자 정보 확인
 	public EmpDto selectByEmpEmail(String empEmail);
+	// 기존 비밀번호와 일치 확인
+	public boolean matchPassword(EmpDto dto);
+	// 해당 부서 id를 통해 사원정보 조회
+	public List<EmpDto> selectByDeptId(int deptId);
 	
 
 }

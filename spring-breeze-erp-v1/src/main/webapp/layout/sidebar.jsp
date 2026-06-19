@@ -16,30 +16,28 @@
 		<i class="bi bi-grid-1x2-fill"></i><span class="sb-nav__label">대시보드</span>
 	</a>
 
-	<div class="sb-nav__section">조직 관리</div>
-	<a class="sb-nav__item" data-page="company" data-tip="회사 • 부서 관리"
-		href="${pageContext.request.contextPath }/com/list"> <i
-		class="bi bi-building"></i><span class="sb-nav__label">회사 • 부서
-			관리</span>
-	</a> <a class="sb-nav__item" data-page="employees" data-tip="사원관리"
-		href="employees.html"> <i class="bi bi-people"></i><span
-		class="sb-nav__label">사원관리</span>
-	</a> <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리"
-		href="permissions.html"> <i class="bi bi-shield-lock"></i><span
-		class="sb-nav__label">권한 관리</span>
-	</a>
+  <div class="sb-nav__section">조직 관리</div>
+  <a class="sb-nav__item" data-page="company" data-tip="회사 • 부서 관리" href="${pageContext.request.contextPath}/com/list">
+    <i class="bi bi-building"></i><span class="sb-nav__label">회사 • 부서 관리</span>
+  </a>
+  <a class="sb-nav__item" data-page="employees" data-tip="사원관리" href="${pageContext.request.contextPath}/emp/list">
+    <i class="bi bi-people"></i><span class="sb-nav__label">사원관리</span>
+  </a>
+  <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" href="${pageContext.request.contextPath}/perm/list">
+    <i class="bi bi-shield-lock"></i><span class="sb-nav__label">권한 관리</span>
+  </a>
 
-	<div class="sb-nav__section">업무</div>
-	<a class="sb-nav__item" data-page="documents" data-tip="전자결재"
-		href="documents.html"> <i class="bi bi-file-earmark-text"></i><span
-		class="sb-nav__label">전자문서 · 결재</span> <span class="sb-nav__badge">5</span>
-	</a> <a class="sb-nav__item" data-page="projects" data-tip="프로젝트"
-		href="projects.html"> <i class="bi bi-kanban"></i><span
-		class="sb-nav__label">프로젝트 · 태스크</span>
-	</a> <a class="sb-nav__item" data-page="notices" data-tip="공지"
-		href="notices.html"> <i class="bi bi-megaphone"></i><span
-		class="sb-nav__label">공지 관리</span>
-	</a>
+  <div class="sb-nav__section">업무</div>
+  <a class="sb-nav__item" data-page="documents" data-tip="전자결재" href="${pageContext.request.contextPath}/appr/list_form">
+    <i class="bi bi-file-earmark-text"></i><span class="sb-nav__label">전자문서 · 결재</span>
+    <span class="sb-nav__badge">5</span>
+  </a>
+  <a class="sb-nav__item" data-page="projects" data-tip="프로젝트" href="projects.html">
+    <i class="bi bi-kanban"></i><span class="sb-nav__label">프로젝트 · 태스크</span>
+  </a>
+  <a class="sb-nav__item" data-page="notices" data-tip="공지" href="notices.html">
+    <i class="bi bi-megaphone"></i><span class="sb-nav__label">공지 관리</span>
+  </a>
 
 	<div class="sb-nav__section">자산</div>
 	<a class="sb-nav__item" data-page="resources" data-tip="자원예약"

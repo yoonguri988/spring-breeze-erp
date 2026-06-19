@@ -10,10 +10,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.DeptDto;
 import com.sb.erp.service.DeptService;
+import com.sb.erp.service.EmpService;
 
 @Controller
 public class DeptController {
 	@Autowired DeptService service;
+	@Autowired EmpService empService;
 	
 	// 부서 목록 
 	@RequestMapping(value="/dept/list", method=RequestMethod.GET)
@@ -47,6 +49,7 @@ public class DeptController {
 		model.addAttribute("dept", dept);
 		model.addAttribute("deptList", service.flattenOrgTree(dept.getComId()));
 		model.addAttribute("comId", dept.getComId());
+		model.addAttribute("empList", empService.selectByDeptId(deptId));
 		return "/dept/editForm";
 	}
 	

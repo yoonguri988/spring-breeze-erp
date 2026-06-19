@@ -3,6 +3,7 @@ package com.sb.erp.service;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.sb.erp.dao.EmpMapper;
 import com.sb.erp.dto.EmpDto;
@@ -12,6 +13,7 @@ import com.sb.erp.util.PagingUtil;
 @Service
 public class EmpServiceImpl implements EmpService {
 	@Autowired EmpMapper dao;
+	@Autowired BCryptPasswordEncoder passEncoder;
 	
 	// 사원 목록 조회
 	@Override
@@ -86,6 +88,17 @@ public class EmpServiceImpl implements EmpService {
 	@Override
 	public EmpDto selectByEmpEmail(String empEmail) {
 		return dao.selectByEmpEmail(empEmail);
+	}
+
+
+	@Override
+	public boolean matchPassword(EmpDto dto) {
+		String existsPass = dao.selectPassById(dto.getEmpId());
+		return passEncoder.matches(dto.getEmpPass(), existsPass);
+	}
+	@Override
+	public List<EmpDto> selectByDeptId(int deptId) {
+		return dao.selectByDeptId(deptId);
 	}
 	
 }
