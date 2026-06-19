@@ -4,13 +4,18 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.AuthMapper">
 
-<resultMap id="authListMap" type="AuthUserDto">
-	<collection property="authList" resultMap="authMap" />
-</resultMap>
+  <resultMap id="authListMap" type="AuthUserDto">
+    <result property="empEmail" column="emp_email" />
+    <result property="empPass" column="emp_pass" />
+    <result property="empNo" column="emp_no" />
+    <result property="empName" column="emp_name" />
+    <result property="posName" column="pos_name" />
+    <collection property="authList" resultMap="authMap" />
+  </resultMap>
 
-<resultMap id="authMap" type="AuthDto">
+  <resultMap id="authMap" type="AuthDto">
     <result property="auth" column="aut_name" />
-</resultMap>
+  </resultMap>
 
   <select id="readAuth" resultMap="authListMap" parameterType="string">
   	select e.emp_email, e.emp_pass, e.emp_no, e.emp_name, a.aut_name, ep.pos_name
@@ -20,4 +25,5 @@
     join emp_position ep on ep.pos_id = e.pos_id
   	where e.emp_email = #{username}
   </select>
+  
 </mapper>

@@ -122,7 +122,6 @@
 
 	// 사번/이메일/연락처 중복 검사 통합
 	window.addEventListener("load", function(){
-	    // 공통 요소
 	    const empNo = document.getElementById("empNo");
 	    const empEmail = document.getElementById("empEmail");
 	    const empMobile = document.getElementById("empMobile");
@@ -136,7 +135,6 @@
 	    let mobileOk = false;
 	    let empNoOk = false;
 	 
-	    
 		 // Submit 버튼 활성화
 	    function updateSubmit() {
 	        if(empNoOk && emailOk && mobileOk) {
@@ -183,7 +181,6 @@
 	        	empNoOk = false;
 	            updateSubmit();
 	        });
-			
 		});
 	    
 	    // 이메일 검증
