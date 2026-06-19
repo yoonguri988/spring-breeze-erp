@@ -33,15 +33,19 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
 		
 		String empEmail = authentication.getName();
 		EmpDto dto = service.selectByEmpEmail(empEmail);
-		
-		// 관리자가 아니고 비밀번호가 초기설정인 경우에 비밀번호 재설정 페이지로 이동
-		if(!roles.contains("ROLE_ADMIN") && passEncoder.matches("1234", dto.getEmpPass())) {
-			response.sendRedirect( request.getContextPath() + "/auth/resetPass"   );
+		// 시스템 관리자(총괄)
+		if(roles.contains("ROOT")) {
+			response.sendRedirect( request.getContextPath() + "/"   );
 		} else {
-			if(roles.contains("ROLE_ADMIN")){ 
-				response.sendRedirect( request.getContextPath() + "/"   );
+			// 관리자가 아니고 비밀번호가 초기설정인 경우에 비밀번호 재설정 페이지로 이동
+			if(!roles.contains("ROLE_ADMIN") && passEncoder.matches("1234", dto.getEmpPass())) {
+				response.sendRedirect( request.getContextPath() + "/auth/resetPass"   );
 			} else {
-				response.sendRedirect( request.getContextPath() + "/"   );
+				if(roles.contains("ROLE_ADMIN")){ 
+					response.sendRedirect( request.getContextPath() + "/"   );
+				} else {
+					response.sendRedirect( request.getContextPath() + "/"   );
+				}
 			}
 		}
 	}

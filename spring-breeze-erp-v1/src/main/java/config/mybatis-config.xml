@@ -19,6 +19,9 @@
 		<!-- KJY -->
 
 		<!-- cyj -->
+		<typeAlias type="com.sb.erp.dto.PermDto" alias="PermDto" />		
+		<typeAlias type="com.sb.erp.dto.ComSearchDto" alias="ComSearchDto" />		
+		<typeAlias type="com.sb.erp.dto.StatsComDto" alias="StatsComDto" />		
 		<typeAlias type="com.sb.erp.dto.CompanyDto" alias="CompanyDto" />		
 		<typeAlias type="com.sb.erp.dto.DeptDto" alias="DeptDto" />
 		<!-- cyj -->
