@@ -51,7 +51,7 @@ public class EmpServiceImpl implements EmpService {
 	public int update(EmpDto dto) {
 	    return dao.update(dto);
 	}
-	
+
 	/* paging */
 	@Override
 	public int selectCnt(EmpSearchDto dto) {
@@ -74,8 +74,18 @@ public class EmpServiceImpl implements EmpService {
 		return dao.countByEmpMobile(empMobile) > 0;
 	}
 
-	
-	
 
+	@Override
+	public EmpDto selectForVerify(EmpDto dto) {
+		return dao.selectForVerify(dto);
+	}
+	@Override
+	public int updatePassByEmpId(EmpDto dto) {
+		return dao.updatePassByEmpId(dto);
+	}
+	@Override
+	public EmpDto selectByEmpEmail(String empEmail) {
+		return dao.selectByEmpEmail(empEmail);
+	}
 	
 }

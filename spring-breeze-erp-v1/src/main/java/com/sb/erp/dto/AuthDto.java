@@ -6,5 +6,6 @@ import lombok.Data;
 public class AuthDto {
 	
 	private String auth;
+	private String autName;
 
 }

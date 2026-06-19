@@ -2,6 +2,8 @@ package com.sb.erp.dao;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
+
+import org.apache.ibatis.annotations.Param;
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
 
@@ -23,17 +25,22 @@ public interface EmpMapper {
     //정보 수정
     public int update(EmpDto dto);
     
-    //이메일 찾기
+    //이메일 중복 유무
     public int countByEmpEmail(String empEmail);
     
-    //연락처 찾기
+    //연락처 중복 유무
     public int countByEmpMobile(String EmpMobile);
- 
-    
-    //비밀번호 수정 - 로그인 과정에서 비밀번호를 확인했으니 변경시에는 확인하지 않게 진행?
-    // public int updatePass(int empId);
     
     /*	 paging		*/
 	public int selectCnt(EmpSearchDto dto); 
+
+    // 비밀번호 찾기시 해당하는 사원 정보가 있는지 확인
+	public EmpDto selectForVerify(EmpDto dto);
+
+	// 비밀번호 재설정
+	public int updatePassByEmpId(EmpDto dto);
+
+	// 이메일을 기준으로 사용자 정보 확인
+	public EmpDto selectByEmpEmail(@Param("empEmail") String empEmail);
 
 }

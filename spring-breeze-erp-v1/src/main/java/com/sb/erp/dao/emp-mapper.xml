@@ -4,7 +4,7 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.EmpMapper">
 
-	<!-- 사원 목록 전체 -->
+	<!-- jsj : 사원 목록 전체 -->
 	<select id="selectAll" resultType="EmpDto">
 		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name,
 		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date
@@ -15,7 +15,7 @@
 		order by pos_order, emp_no
 	</select>
 
-	<!-- 사원 상세보기 -->
+	<!-- jsj : 사원 상세보기 -->
 	<select id="selectByEmpId" resultType="EmpDto">
 		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name,
 		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date,
@@ -27,7 +27,7 @@
 		and e.com_id = #{comId}
 	</select>
 
-	<!-- 사원 검색 + 페이징 -->
+	<!-- jsj : 사원 검색 + 페이징 -->
 	<select id="search" parameterType="EmpSearchDto" resultType="EmpDto">
 		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name,
 		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date
@@ -56,7 +56,7 @@
 		limit #{pstartno}, #{onepagelist}
 	</select>
 
-	<!-- 사원 등록 -->
+	<!-- jsj : 사원 등록 -->
 	<insert id="insert" parameterType="EmpDto">
 		insert into employee(emp_no,
 		emp_pass, emp_name, dept_id, pos_id,
@@ -68,7 +68,7 @@
 		#{hireDate})
 	</insert>
 
-	<!-- 등록 정보 수정 -->
+	<!-- jsj : 사원 정보 수정 -->
 	<update id="update" parameterType="EmpDto">
 		update employee
 		set emp_name =
@@ -80,24 +80,22 @@
 		emp_status = #{empStatus}
 		where emp_id = #{empId}
 	</update>
-	
-	
-	<!-- 이메일 중복 검사 -->
+
+	<!-- jsj : 이메일 중복 검사 -->
 	<select id ="countByEmpEmail" parameterType="String" resultType="int">
 		select count(*)
 		from employee
 		where emp_email = #{empEmail}	
 	</select>
 	
-	<!-- 모바일 중복 검사 -->
+	<!-- jsj : 모바일 중복 검사 -->
 	<select id ="countByEmpMobile" parameterType="String" resultType="int">
 		select count(*)
 		from employee
 		where emp_mobile = #{empMobile}	
 	</select>	
 
-	<!-- paging -->
-	
+	<!-- jsj : 목록 paging -->
 	<select resultType="int" id="selectCnt">
 		select count(*)
 		from employee e
@@ -120,6 +118,30 @@
 				e.emp_no like concat('%', #{keyword}, '%'))
 			</if>
 		</where>
+	</select>
+
+
+	<!-- cyj: 비밀번호 찾기시 해당하는 사원정보가 있는지 확인 -->
+	<select id="selectForVerify" parameterType="EmpDto" resultType="EmpDto">
+		select *
+		from employee
+		where emp_no = #{empNo}
+		  and emp_email = #{empEmail} 
+		  and emp_mobile = #{empMobile} 
+	</select>
+	<!-- cyj: 비밀번호 재설정 -->
+	<update id="updatePassByEmpId" parameterType="EmpDto">
+		update employee
+		   set emp_pass = #{empPass}
+		 where emp_id = #{empId}
+	</update>
+	<!-- cyj: 이메일을 기준으로 사용자 정보 찾기 -->
+	<select id="selectByEmpEmail" parameterType="string" resultType="EmpDto">
+		select e.*, d.dept_name, p.pos_name
+		from employee e
+		join department d on d.dept_id = e.dept_id
+		join emp_position p on p.pos_id = e.pos_id
+		where e.emp_email = #{empEmail}
 	</select>
 
 
