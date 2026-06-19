@@ -15,23 +15,20 @@
   </a>
 
   <div class="sb-nav__section">조직 관리</div>
-  <a class="sb-nav__item" data-page="company" data-tip="회사 및 부서 관리" href="${pageContext.request.contextPath}/com/list">
-    <i class="bi bi-building"></i>
-    <span class="sb-nav__label">회사 및 부서 관리</span>
+  <a class="sb-nav__item" data-page="company" data-tip="회사 • 부서 관리" href="${pageContext.request.contextPath}/com/list">
+    <i class="bi bi-building"></i><span class="sb-nav__label">회사 • 부서 관리</span>
   </a>
-  <a class="sb-nav__item" data-page="employees" data-tip="사원 관리" href="${pageContext.request.contextPath}/emp/list">
-    <i class="bi bi-people"></i>
-    <span class="sb-nav__label">사원 관리</span>
+  <a class="sb-nav__item" data-page="employees" data-tip="사원관리" href="${pageContext.request.contextPath}/emp/list">
+    <i class="bi bi-people"></i><span class="sb-nav__label">사원관리</span>
   </a>
-  <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" href="#">
-    <i class="bi bi-shield-lock"></i>
-    <span class="sb-nav__label">권한 관리</span>
+  <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" href="${pageContext.request.contextPath}/perm/list">
+    <i class="bi bi-shield-lock"></i><span class="sb-nav__label">권한 관리</span>
   </a>
 
   <div class="sb-nav__section">업무</div>
-  <a class="sb-nav__item" data-page="documents" data-tip="전자문서 및 결재" href="#">
-    <i class="bi bi-file-earmark-text"></i>
-    <span class="sb-nav__label">전자문서 및 결재</span>
+  <a class="sb-nav__item" data-page="documents" data-tip="전자결재" href="${pageContext.request.contextPath}/appr/list_form">
+    <i class="bi bi-file-earmark-text"></i><span class="sb-nav__label">전자문서 · 결재</span>
+    <span class="sb-nav__badge">5</span>
   </a>
   <a class="sb-nav__item" data-page="projects" data-tip="프로젝트" href="#">
     <i class="bi bi-kanban"></i>

@@ -8,6 +8,10 @@
   사용하는 DB 컬럼:
     dept_id, com_id, parent_id, dept_name, dept_code,
     depth, sort_order, emp_id, created_at, updated_at
+
+  request scope 변수 'returnUrl' (선택) 이 있으면,
+  하위 부서 추가/수정 완료 후 그 경로로 복귀하도록 링크에 함께 실어 보낸다.
+  (deptTreeTab.jsp 에서 설정)
 --%>
 <li class="dept-item" style="padding-left:${dept.depth * 24}px;">
     <div class="dept-row d-flex align-items-center gap-1 py-1">
@@ -65,22 +69,39 @@
 
         <%-- 액션 버튼 --%>
         <div class="ms-auto d-flex gap-1">
-            <%-- 하위 부서 추가 — comId, parentId(=현재 dept_id) 전달 --%>
+
+            <%-- 하위 부서 추가 — comId, parentId(=현재 dept_id), returnUrl 전달 --%>
+            <c:url var="addChildUrl" value="/dept/add">
+                <c:param name="comId" value="${dept.comId}"/>
+                <c:param name="parentId" value="${dept.deptId}"/>
+                <c:if test="${not empty returnUrl}">
+                    <c:param name="returnUrl" value="${returnUrl}"/>
+                </c:if>
+            </c:url>
             <a class="btn btn-outline-primary btn-sm py-0 px-2"
                style="font-size:12px;"
-               href="${pageContext.request.contextPath}/dept/add?comId=${dept.comId}&parentId=${dept.deptId}"
+               href="${addChildUrl}"
                title="하위 부서 추가">
                 <i class="bi bi-plus"></i>
             </a>
-            <%-- 수정 --%>
+
+            <%-- 수정 — deptId, returnUrl 전달 --%>
+            <c:url var="editUrl" value="/dept/edit">
+                <c:param name="deptId" value="${dept.deptId}"/>
+                <c:if test="${not empty returnUrl}">
+                    <c:param name="returnUrl" value="${returnUrl}"/>
+                </c:if>
+            </c:url>
             <a class="btn btn-outline-secondary btn-sm py-0 px-2"
                style="font-size:12px;"
-               href="${pageContext.request.contextPath}/dept/edit?deptId=${dept.deptId}"
+               href="${editUrl}"
                title="수정">
                 <i class="bi bi-pencil"></i>
             </a>
+
             <%-- 삭제 — GET href 는 CSRF 취약, POST form 방식으로 처리
-                 list.jsp 에 선언된 #deleteForm 을 공유 --%>
+                 deptTreeTab.jsp 에 선언된 #deleteForm 을 공유
+                 (returnUrl 은 그 폼의 hidden input 에 이미 포함되어 있음) --%>
             <button type="button"
                     class="btn btn-outline-danger btn-sm py-0 px-2"
                     style="font-size:12px;"

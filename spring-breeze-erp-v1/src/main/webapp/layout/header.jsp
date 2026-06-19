@@ -5,12 +5,15 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Spring-Breeze-ERP-V1</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css" />
+<meta charset="UTF-8">
+<title>Spring-Breeze-ERP-V1</title>
+<!-- Latest compiled and minified CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- bootstrap5 icon 추가 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<!-- 스타일 시트 추가 -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/company.css" />
 </head>
 <body>
   <div class="sb-app" data-layout="standard">

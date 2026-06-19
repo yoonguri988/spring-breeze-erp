@@ -3,6 +3,7 @@ package com.sb.erp.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,5 +77,17 @@ public class AuthController {
 		dto.setEmpPass(passEncoder.encode(empPass)); dto.setEmpId(empId);
 		empService.updatePassByEmpId(dto);
 		return "redirect:/auth/login";
+	}
+	
+	@RequestMapping(value="/auth/fail", method=RequestMethod.GET)
+	public String loginFail(HttpServletRequest request) {
+
+	    // TODO: 실패 로그 적재 — 마지막 시도 이메일은 세션에서 꺼낼 수 있습니다.
+	    // String username = (String) request.getSession()
+	    //         .getAttribute("SPRING_SECURITY_LAST_USERNAME");
+	    // String ip = request.getRemoteAddr();
+	    // failLogService.save(username, ip, new Date());
+
+	    return "redirect:/auth/login?error=true";
 	}
 }
