@@ -60,8 +60,8 @@
 <div class="col-md-5">
 <div class="card">
 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-<span>태스크목록</span>
-<a href="" class="btn btn-primary btn-sm">태스크추가</a>
+<span class="text-primary fw-bold">태스크목록</span>
+<a href="${pageContext.request.contextPath}/proj/task_create?project_pro_id=${dto.proId}" class="btn btn-primary btn-sm">태스크추가</a>
 </div>
 <table class="table table-bordered">
 <thead>
@@ -73,17 +73,36 @@
 </tr>
 </thead>
 <tbody>
+<c:forEach items="${list}" var="dto" varStatus="status">
+
 <tr>
-<%-- <td>${dto.taskId}</td>
-<td>${dto.taskName}</td>
+<td>${paging.listtotal-(paging.current-1)*paging.onepagelist+status.index+1}</td>
+<td><a href="${pageContext.request.contextPath}/proj/task_detail?task_id=${dto.taskId}">${dto.taskName}</a></td>
 <td>${dto.taskStatus}</td>
-<td>${dto.taskId}</td> --%>
+<td>${dto.taskCreatedAt}</td>
 </tr>
+</c:forEach>
 </tbody>
 </table>
+
 </div>
 </div>
 </div>
+
+<table class="table table-bordered">
+<thead>
+<tr>
+<th class="text-primary fw-bold">참여인원</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>
+<c:forEach items="${memberList}" var="dto" varStatus="status">
+${dto.empName}<c:if test="${!status.last}">,</c:if>
+</c:forEach>
+</td> </tr>
+</tbody>
+</table>
 
 </div>
 

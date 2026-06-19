@@ -3,6 +3,8 @@ package com.sb.erp.dao;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.sb.erp.dto.ProjectDto;
 
 @Mapper
@@ -17,4 +19,5 @@ public interface ProjectMapper {
 	public List<ProjectDto> select10(HashMap<String,Integer> map);
 	public int selectCnt();
 	
+	List<ProjectDto> selectByPeriod(@Param("startDate") String startDate, @Param("endDate") String endDate);
 }

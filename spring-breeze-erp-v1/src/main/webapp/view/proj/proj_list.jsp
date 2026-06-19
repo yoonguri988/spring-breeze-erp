@@ -21,6 +21,22 @@
 		 <button type="button" id="searchBtn" class="btn btn-primary">조회</button>
 		 </div>
 	 </div>
+	 <hr>
+	   <form action="${pageContext.request.contextPath}/proj/period" method="get" class="row align-items-center g-2 text-center">
+	   <div class="col-auto">
+	     <label class="col-form-label">기간</label>
+	   </div>
+	   <div class="col-auto">
+	     <input type="date" name="startDate" class="form-control" style="width:300px;" value="${param.startDate}" required>
+	   </div>
+	   <div class="col-auto">~</div>
+	   <div class="col-auto">
+	     <input type="date" name="endDate" class="form-control" style="width:300px;" value="${param.endDate}" required>
+	   </div>
+	   <div class="col-auto">
+	     <button type="submit" class="btn btn-primary">조회</button>
+	   </div>
+	 </form>
  </div>
  <div class="text-end my-2">
  <a href="${pageContext.request.contextPath}/proj/proj_create" class="btn btn-outline-warning">프로젝트생성</a>
@@ -43,7 +59,7 @@
  		   		<td><a href="${pageContext.request.contextPath}/proj/proj_detail?pro_id=${dto.proId}">${dto.proName}</a></td>
  				<td>${dto.proDesc}</td>
  				<td>${dto.empName}</td>
- 				<td><a href="${pageContext.request.contextPath}/proj/proj_member?pro_id=${dto.proId}" class="btn btn-outline-primary btn-sm">멤버</a>   ${dto.memberCnt}명</td>
+ 				<td><a href="${pageContext.request.contextPath}/proj/proj_member?pro_id=${dto.proId}" >+👥 </a>/ ${dto.memberCnt}명</td>
  				<td><fmt:formatDate value="${dto.startDate}" pattern="yyyy-MM-dd"/>-
  				<fmt:formatDate value="${dto.endDate}" pattern="yyyy-MM-dd"/></td>
  				<td><fmt:formatDate value="${dto.createdAt}" pattern="yyyy-MM-dd"/></td>

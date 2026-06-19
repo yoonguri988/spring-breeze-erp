@@ -9,7 +9,7 @@
 		<p>홈 > 프로젝트 > 프로젝트 수정</p>
 		<h3 class="card-header">프로젝트 수정</h3>
 		<hr>
-		<form action="${pageContext.request.contextPath}/proj/proj_edit?pro_id=${dto.proId}" method="post" onsubmit="check()">
+		<form action="${pageContext.request.contextPath}/proj/proj_edit" method="post" onsubmit="check()">
 		<input  type="hidden" name="${_csrf.parameterName}"  value="${_csrf.token}" />
 		<input type="hidden" name="proId" value="${dto.proId}">
 		<div class="my-4"style="display:grid; grid-template-columns:150px 1fr; gap:10px; margin-bottom:15px;">

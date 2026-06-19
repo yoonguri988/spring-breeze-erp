@@ -26,4 +26,6 @@ public class ProjectDto {
 	private int memberCnt; //프로젝트 멤버 인원 db값 존재하지않는 컬럼
 	public int getMemberCnt() { return memberCnt; }
 	public void setMemberCnt(int memberCnt) { this.memberCnt = memberCnt; }
+	
+	
 }

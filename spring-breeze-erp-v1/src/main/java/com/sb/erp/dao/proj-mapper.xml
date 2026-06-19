@@ -9,6 +9,7 @@
       values(#{comId}, #{proName}, #{proDesc}, #{empId}, #{proStatus},
                #{startDate}, #{endDate}, CURDATE(), CURDATE())
 	</insert> 
+	
 	 <!-- 프로젝트 상태별 조회 (참여인원 포함) -->
     <select id="selectByStatus" parameterType="String" resultType="ProjectDto">
         select p.*, e.emp_name,
@@ -43,10 +44,12 @@
 	<select id="selectCnt" resultType="int">
 	select count(*) from project
 	</select>
+	
 	<!-- 프로젝트 삭제 -->
 	<delete id="delete" parameterType="int">
        delete from project where pro_id = #{proId}
     </delete>
+    
     <!-- 프로젝트 수정 -->
     <update id="update" parameterType="ProjectDto">
        update project  set
@@ -58,4 +61,14 @@
        updated_at = CURDATE()
        where pro_id = #{proId}
     </update>
+    
+    <!-- 기간조회 -->
+    <select id="selectByPeriod" resultType="ProjectDto">
+    select p.*, e.emp_name as empName, 
+           (select count(*) from project_member pm where pm.project_pro_id = p.pro_id) as memberCnt
+    from project p join employee e on p.emp_id = e.emp_id
+    where p.start_date &lt;= #{endDate}
+      and p.end_date &gt;= #{startDate}
+    order by p.pro_id desc
+</select>
 </mapper>
