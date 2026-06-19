@@ -17,5 +17,7 @@ public interface ResourceService {
 
     void updateResource(ResourceDto resourceDto);
 
+    int countReservationsByResourceId(int resId);
+
     void deleteResource(int resId);
 }

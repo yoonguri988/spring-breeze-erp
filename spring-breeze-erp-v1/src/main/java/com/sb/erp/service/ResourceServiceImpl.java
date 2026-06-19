@@ -44,6 +44,11 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
+    public int countReservationsByResourceId(int resId) {
+        return resourceDao.countReservationsByResourceId(resId);
+    }
+
+    @Override
     public void deleteResource(int resId) {
         resourceDao.deleteResource(resId);
     }
