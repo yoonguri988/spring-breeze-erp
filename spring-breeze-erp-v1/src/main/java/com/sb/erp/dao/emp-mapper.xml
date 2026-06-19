@@ -93,7 +93,14 @@
 		select count(*)
 		from employee
 		where emp_mobile = #{empMobile}	
-	</select>	
+	</select>
+	
+	<!-- jsj : 사번 중복 검사 -->
+	<select id="countByEmpNo" resultType="int">
+		select count(*)
+		from employee
+		where emp_no = #{empNo} and com_id = #{comId}
+	</select>
 
 	<!-- jsj : 목록 paging -->
 	<select resultType="int" id="selectCnt">

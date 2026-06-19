@@ -127,4 +127,15 @@ public class EmpController {
 	}
 	
 	
+	// 사번 중복 검사
+	@RequestMapping(value="/emp/checkEmpNo", method=RequestMethod.GET)
+	@ResponseBody
+	public Map<String, Object> checkEmpNo(@RequestParam String empNo) {
+	    boolean duplicate = empService.isEmpNoDuplicate(empNo);
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("duplicate", duplicate);
+	    return result;
+	}
+	
+	
 }

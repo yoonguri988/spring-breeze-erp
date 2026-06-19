@@ -19,9 +19,10 @@ public interface EmpService {
 	// 사원 정보 수정
 	public int update(EmpDto dto);
 
-	// 이메일, 모바일 중복 검사
+	// 이메일, 모바일, 사번 중복 검사
 	public boolean isEmailDuplicate(String empEmail);
 	public boolean isMobileDuplicate(String empMobile);
+	public boolean isEmpNoDuplicate(String empNo);
 	
 
 	/* paging */

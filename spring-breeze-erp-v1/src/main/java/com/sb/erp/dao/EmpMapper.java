@@ -31,6 +31,11 @@ public interface EmpMapper {
     //연락처 중복 유무
     public int countByEmpMobile(String EmpMobile);
     
+    //사번 중복 유무
+    public int countByEmpNo(@Param("empNo")String empNo, @Param("comId") int comId);
+    
+    
+    
     /*	 paging		*/
 	public int selectCnt(EmpSearchDto dto); 
 

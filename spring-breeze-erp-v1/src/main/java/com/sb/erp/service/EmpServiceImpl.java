@@ -75,6 +75,12 @@ public class EmpServiceImpl implements EmpService {
 	public boolean isMobileDuplicate(String empMobile) {
 		return dao.countByEmpMobile(empMobile) > 0;
 	}
+	
+	/* 사번 중복검사 */
+	@Override
+	public boolean isEmpNoDuplicate(String empNo) {
+		return dao.countByEmpNo(empNo, 1) > 0;
+	}
 
 
 	@Override
@@ -89,7 +95,6 @@ public class EmpServiceImpl implements EmpService {
 	public EmpDto selectByEmpEmail(String empEmail) {
 		return dao.selectByEmpEmail(empEmail);
 	}
-
 
 	@Override
 	public boolean matchPassword(EmpDto dto) {

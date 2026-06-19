@@ -3,17 +3,14 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.AuthMapper">
+
 <resultMap id="authListMap" type="AuthUserDto">
-	<result property="empEmail" column="emp_email" />
-	<result property="empNo" column="emp_no" />
-	<result property="empName" column="emp_name" />
-	<result property="empPass" column="emp_pass" />
-	<result property="posName" column="pos_name" />
 	<collection property="authList" resultMap="authMap" />
 </resultMap>
+
 <resultMap id="authMap" type="AuthDto">
-	<result property="autName" column="aut_name" />
-</resultMap> 
+    <result property="auth" column="aut_name" />
+</resultMap>
 
   <select id="readAuth" resultMap="authListMap" parameterType="string">
   	select e.emp_email, e.emp_pass, e.emp_no, e.emp_name, a.aut_name, ep.pos_name

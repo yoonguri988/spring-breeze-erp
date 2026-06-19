@@ -4,23 +4,23 @@
 <!-- header -->
 <!-- header -->
 
-<section class="sb-content">
+<section class="emp_list sb-content">
 
 	<!-- 페이지 헤더 -->
 	<div class="sb-page-head">
 		<div class="sb-page-head__txt">
 			<div class="sb-breadcrumb">
-				<a href="${pageContext.request.contextPath}/">홈</a> <i
-					class="bi bi-chevron-right"></i> 조직 관리 <i
-					class="bi bi-chevron-right"></i> 사원관리
+				<a href="${pageContext.request.contextPath}/">홈</a>
+				<i class="bi bi-chevron-right"></i> 조직 관리
+				<i class="bi bi-chevron-right"></i> 사원관리
 			</div>
 			<h1>사원관리</h1>
 			<p>전체 임직원 정보를 조회하고 관리합니다.</p>
 		</div>
 		<div class="sb-page-head__actions">
 			<a class="btn btn-sb btn-sm"
-				href="${pageContext.request.contextPath}/emp/add"> <i
-				class="bi bi-person-plus"></i> 사원 등록
+				href="${pageContext.request.contextPath}/emp/add">
+				<i class="bi bi-person-plus"></i> 사원 등록
 			</a>
 		</div>
 	</div>
@@ -93,7 +93,7 @@
 			</c:when>
 			<c:otherwise>
 				<div class="sb-card__body--flush">
-					<table class="sb-table">
+					<table class="empListTable sb-table">
 						<thead>
 							<tr>
 								<th>사번</th>

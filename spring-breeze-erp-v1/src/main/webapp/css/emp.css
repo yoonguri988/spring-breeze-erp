@@ -1,5 +1,53 @@
 @charset "utf-8";
 
+
+:root {
+  /* Brand / accent */
+  --sb-accent: #2563eb;
+  --sb-accent-rgb: 37, 99, 235;
+  --sb-accent-hover: #1d4ed8;
+  --sb-accent-soft: #eff4ff;
+  --sb-accent-soft-2: #dbe6ff;
+
+  /* Neutrals */
+  --sb-bg: #f5f6f8;
+  --sb-surface: #ffffff;
+  --sb-border: #e6e8ec;
+  --sb-border-strong: #d4d8de;
+  --sb-ink: #1a1f29;
+  --sb-ink-soft: #5b6473;
+  --sb-ink-faint: #8a93a3;
+
+  /* Status */
+  --sb-green: #16a34a;
+  --sb-green-soft: #e7f6ed;
+  --sb-amber: #d97706;
+  --sb-amber-soft: #fdf2e3;
+  --sb-red: #dc2626;
+  --sb-red-soft: #fdecec;
+  --sb-violet: #7c3aed;
+  --sb-violet-soft: #f1ebfe;
+  --sb-cyan: #0891b2;
+  --sb-cyan-soft: #e4f5f9;
+
+  /* Geometry */
+  --sb-radius: 10px;
+  --sb-radius-sm: 7px;
+  --sb-radius-lg: 16px;
+  --sb-sidebar-w: 248px;
+  --sb-sidebar-rail: 72px;
+  --sb-header-h: 60px;
+
+  --sb-shadow-sm: 0 1px 2px rgba(16, 24, 40, .05);
+  --sb-shadow: 0 1px 3px rgba(16, 24, 40, .08), 0 1px 2px rgba(16, 24, 40, .04);
+  --sb-shadow-lg: 0 12px 32px rgba(16, 24, 40, .12);
+
+  --bs-primary: var(--sb-accent);
+  --bs-primary-rgb: var(--sb-accent-rgb);
+}
+
+* { -webkit-font-smoothing: antialiased; }
+
 /*
  * emp.css — 사원관리 모듈 전용 스타일
  *
@@ -12,8 +60,50 @@
  *   - emp 전용 레이아웃 조정
  */
 
+/* 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 공 통 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
 
-div.duplicateChkBox {
+.blind { overflow: hidden; position: absolute; clip: rect(0, 0, 0, 0); width: 1px; height: 1px; margin: -1px; white-space: nowrap; }
+.clearfix::after { content: ""; display: block; width: 0; height: 0; font-size: 0; clear: both; }
+
+section { 
+    width: 90vw;
+    min-width: fit-content;
+    overflow: hidden;
+}
+
+section h1 { margin-top: 24px; }
+
+/* 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 사원 목록 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+
+section.emp_list h1 { margin-top: 24px; }
+
+section.emp_list table.empListTable {
+    width: 100%;
+    min-width: fit-content;
+    text-wrap: nowrap;
+}
+
+section.emp_list table.empListTable th, td {
+    min-width: fit-content;
+    text-wrap: nowrap;
+}
+
+
+/* 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 사원 등록 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+
+section.emp_add div.duplicateChkBox {
 
     display: inline-block;
     margin-top: 4px;
@@ -24,3 +114,86 @@ div.duplicateChkBox {
     font-size : 12px;
 
  }
+
+section.emp_add form label span {
+    color: var(--sb-red);
+}
+ 
+
+/* 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 상세 보기 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+
+section.emp_detail div.profileBox {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+section.emp_detail div.sb-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 26px;
+}
+
+section.emp_detail div.sumInfoBox1 p {
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+section.emp_detail div.sumInfoBox1 p:first-child {
+    margin-bottom: 4px;
+    font-size: 16px;
+}
+
+section.emp_detail div.prfBadgeBox {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+section.emp_detail div.sumInfoBox2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+}
+
+section.emp_detail div.sumInfoBox2 div {
+    width: 150px;
+    min-width: fit-content;
+    margin-right: 20px;
+}
+
+section.emp_detail div.sumInfoBox2 p {
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+section.emp_detail div.detInfoBox div.text-faint {
+    font-size: 12px;
+    margin-bottom: 4px;
+    font-weight: normal;
+}
+
+
+ /* 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 사원 정보 수정 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+
+
+section.emp_edit form div.edInfoBox label span {
+    color: var(--sb-red);
+}
+
+section.emp_edit form input.rdOnly {
+    background: var(--sb-border); 
+    color: var(--sb-ink-soft);
+}

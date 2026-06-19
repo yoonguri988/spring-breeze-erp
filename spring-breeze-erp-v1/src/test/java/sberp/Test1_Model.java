@@ -36,6 +36,21 @@ public class Test1_Model {
 	
 	
 	@Test
+	public void test7() {
+	    // 존재하는 사번
+	    int cnt1 = empMapper.countByEmpNo("EMP001", 1);
+	    System.out.println("EMP001 in com 1: " + cnt1);  // 1
+	    
+	    // 같은 사번, 다른 회사 — UNIQUE 정책상 0이어야 함
+	    int cnt2 = empMapper.countByEmpNo("EMP001", 2);
+	    System.out.println("EMP001 in com 2: " + cnt2);  // 0
+	    
+	    // 없는 사번
+	    int cnt3 = empMapper.countByEmpNo("EMP999", 1);
+	    System.out.println("EMP999 in com 1: " + cnt3);  // 0
+	}
+	
+	@Ignore //@Test
 	public void test6() {
 	    // 존재하는 이메일
 	    int cnt1 = empMapper.countByEmpEmail("admin@smartbuilder.com");
