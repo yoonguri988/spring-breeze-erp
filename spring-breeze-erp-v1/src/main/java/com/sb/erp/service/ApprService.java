@@ -12,7 +12,6 @@ public interface ApprService {
 	public String getCompanyName(int comId);
 	public List<CompanySearchDto> searchCompany(String keyword);
 	// 페이징 기능
-	public List<ApprFormDto> list10Form(int pstartno);
 	public int listFormCnt(ApprFormSearchDto dto);
 	
 	// 양식 작성 파트

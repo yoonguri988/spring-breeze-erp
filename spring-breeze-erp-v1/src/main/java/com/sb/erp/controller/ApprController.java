@@ -1,10 +1,14 @@
 package com.sb.erp.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -147,9 +151,11 @@ public class ApprController {
 	@RequestMapping( value = "/appr/update_form", method = RequestMethod.GET)
 	public String update(int forId, Model model) {
 		
+		// 클릭한 해당 양식의 id값으로 데이터 담아서 jsp value들 채울 용도
 		ApprFormDto dto = appr.selectFormAll(forId);
 		dto.setComName(appr.getCompanyName(dto.getComId()));
 				
+		// update_form.jsp 로 데이터 보내기
 		model.addAttribute("dto", dto);
 		return "appr/update_form";
 	}

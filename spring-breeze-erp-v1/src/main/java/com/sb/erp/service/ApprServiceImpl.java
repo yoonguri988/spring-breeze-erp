@@ -2,7 +2,6 @@ package com.sb.erp.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +28,6 @@ public class ApprServiceImpl implements ApprService {
 	public List<CompanySearchDto> searchCompany(String keyword) {
 		return mapper.searchCompany(keyword);
 	}
-	
-	@Override
-	public List<ApprFormDto> list10Form(int pstartno) {
-		HashMap<String,Integer> map = new HashMap<>();
-		map.put("start", (pstartno-1)*10);
-		map.put("end", 10);
-		return mapper.list10Form(map);
-	}
 
 	@Override
 	public int listFormCnt(ApprFormSearchDto dto) {
@@ -53,13 +44,16 @@ public class ApprServiceImpl implements ApprService {
 	@Override
 	public int insertForm(ApprFormDto dto) {
 		
+		// date 관련 호출됐을때 날짜 시간 처리
 		LocalDateTime now = LocalDateTime.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		String setTime = now.format(formatter);
 		
+		// dto에 시간 set
 		dto.setForCreated(setTime);
 		dto.setForUpdated(setTime);
 		
+		// forStatus null로 들어왔을때 오류 방지
 		if(dto.getForStatus() == null) {
 			dto.setForStatus(false);
 		}
@@ -69,6 +63,8 @@ public class ApprServiceImpl implements ApprService {
 
 	@Override
 	public int updateForm(ApprFormDto dto) {
+		
+		// date 관련 호출됐을때 날짜 시간 처리
 		LocalDateTime now = LocalDateTime.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		String setTime = now.format(formatter);
