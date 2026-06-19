@@ -1,54 +1,176 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>비밀번호 재설정</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>비밀번호 재설정 · SBerp</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
 </head>
-<body class="bg-light">
-<div class="container vh-100 d-flex justify-content-center align-items-center">
-    <div class="card shadow" style="width: 100%; max-width: 450px;">
-        <div class="card-body p-4">
-            <h3 class="card-title text-center mb-4">새 비밀번호 설정</h3>
-            
-            <c:if test="${not empty error}">
-                <div class="alert alert-danger text-center small" role="alert">${error}</div>
-            </c:if>
+<body class="reset-page">
+<div class="rp-wrap">
+  <!-- 브랜드 -->
+  <div class="rp-brand">
+    <div class="rp-mark">S</div>
+    <span class="rp-name">SBerp</span>
+  </div>
+  
+  <div class="rp-card">
+<div id="stepForm">
+      <div class="rp-icon-ring"><i class="bi bi-shield-lock-fill"></i></div>
+      <h1 class="rp-h" id="rpTitle">비밀번호 변경</h1>
+      <p class="rp-sub" id="rpSub">보안을 위해 비밀번호를 변경해 주세요.</p>
 
-            <form action="/auth/resetPass" method="post" id="resetForm">
-				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />    
-                <div class="mb-3">
-                    <label for="newPassword" class="form-label">새 비밀번호</label>
-                    <input type="password" class="form-control" id="newPassword" name="newPassword" required>
-                </div>
-                <div class="mb-4">
-                    <label for="confirmPassword" class="form-label">새 비밀번호 확인</label>
-                    <input type="password" class="form-control" id="confirmPassword" required>
-                    <div class="invalid-feedback" id="passwordError">비밀번호가 일치하지 않습니다.</div>
-                </div>
-                <button type="submit" class="btn btn-success w-100">비밀번호 변경 완료</button>
-            </form>
+      <!-- 사용자 배지 -->
+      <div class="rp-user" id="rpUser">
+        <div class="rp-user-av" id="rpUserAv">${fn:substring(emp.empName, 0, 1)}</div>
+        <div>
+          <div class="rp-user-name" id="rpUserName">${emp.empName}</div>
+          <div class="rp-user-sub" id="rpUserSub">${emp.deptName} · ${emp.posName}</div>
         </div>
+        <div style="margin-left:auto">
+          <span class="sb-badge sb-badge--blue" id="rpUserEmail">${emp.empNo}</span>
+        </div>
+      </div>
+
+      <form id="fmReset" action="${pageContext.request.contextPath}/auth/updatePass" method="post" novalidate>
+        <input type="hidden" name="empId" value="${emp.empId}">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+        <!-- 새 비밀번호 -->
+        <label class="fl" for="empPass">새 비밀번호</label>
+        <div class="fw no-mb">
+          <input class="fi" type="password" id="empPass" name="empPass"
+            placeholder="8자 이상, 영문 + 숫자 포함" autocomplete="new-password">
+          <i class="bi bi-eye f-icon clickable" id="tog1" title="표시/숨기기"></i>
+        </div>
+        <div class="pw-bar-wrap"><div class="pw-bar" id="pwBar"></div></div>
+        <div class="pw-lbl" id="pwLbl"></div>
+
+        <!-- 요건 배지 -->
+        <div class="pw-reqs">
+          <span class="pw-req" id="req8"><i class="bi bi-circle"></i> 8자 이상</span>
+          <span class="pw-req" id="reqAlpha"><i class="bi bi-circle"></i> 영문 포함</span>
+          <span class="pw-req" id="reqNum"><i class="bi bi-circle"></i> 숫자 포함</span>
+        </div>
+
+        <!-- 비밀번호 확인 -->
+        <label class="fl" for="rPw2">비밀번호 확인</label>
+        <div class="fw">
+          <input class="fi" type="password" id="empPassConfirm" name="empPassConfirm"
+            placeholder="새 비밀번호를 한 번 더 입력" autocomplete="new-password">
+          <i class="bi bi-eye f-icon clickable" id="tog2" title="표시/숨기기"></i>
+        </div>
+        <div class="f-err" id="errMatch">
+          <i class="bi bi-exclamation-circle"></i><span>비밀번호가 일치하지 않습니다.</span>
+        </div>
+
+        <div class="a-alert" id="alertReset">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <span id="alertResetTxt"></span>
+        </div>
+
+        <button type="submit" class="a-btn" id="btnReset">
+          <i class="bi bi-check-lg"></i><span>비밀번호 변경 완료</span>
+        </button>
+      </form>
     </div>
+    <div id="stepSuccess" style="display:none;text-align:center">
+      <div class="rp-check-ring"><i class="bi bi-check-lg"></i></div>
+      <div class="rp-success-h">비밀번호 변경 완료!</div>
+      <div class="rp-success-sub">새 비밀번호가 설정되었습니다.<br>로그인 페이지에서 다시 로그인해 주세요.</div>
+      <button class="a-btn" id="btnGoLogin">
+        <i class="bi bi-box-arrow-in-right"></i><span>로그인 페이지로 이동</span>
+      </button>
+      <div class="rp-countdown" id="countdown"></div>
+    </div>
+  </div>	
 </div>
-
 <script>
-    // 비밀번호 일치 여부 체크 스크립트
-    document.getElementById('resetForm').addEventListener('submit', function(event) {
-        const password = document.getElementById('newPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const confirmInput = document.getElementById('confirmPassword');
+(function () {
+  'use strict';
 
-        if (password !== confirmPassword) {
-            event.preventDefault(); // 폼 제출 막기
-            confirmInput.classList.add('is-invalid'); // Bootstrap 에러 스타일 적용
-            document.getElementById('passwordError').style.display = 'block';
-        } else {
-            confirmInput.classList.remove('is-invalid');
-        }
-    });
+  /* ---- 표시/숨기기 ---- */
+  function toggle(inputId, iconEl) {
+    var inp = document.getElementById(inputId);
+    var show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    iconEl.className = (show ? 'bi bi-eye-slash' : 'bi bi-eye') + ' f-icon clickable';
+  }
+  document.getElementById('tog1').addEventListener('click', function () { toggle('empPass', this); });
+  document.getElementById('tog2').addEventListener('click', function () { toggle('empPassComfirm', this); });
+
+  /* ---- 실시간 강도 체크 ---- */
+  document.getElementById('empPass').addEventListener('input', function () {
+    var pw = this.value;
+    var s = 0;
+    if (pw.length >= 8)            s++;
+    if (/[a-zA-Z]/.test(pw))       s++;
+    if (/[0-9]/.test(pw))          s++;
+    if (/[!@#$%^&*_\-]/.test(pw))  s++;
+
+    var lv = pw.length === 0 ? 0 : Math.min(s <= 1 ? 1 : s <= 2 ? 2 : 3, 3);
+    var levels = [
+      { w: '0%',   bg: '#e5e7eb', txt: '',   col: '' },
+      { w: '33%',  bg: 'var(--sb-red)',   txt: '약함', col: 'var(--sb-red)' },
+      { w: '66%',  bg: 'var(--sb-amber)', txt: '보통', col: 'var(--sb-amber)' },
+      { w: '100%', bg: 'var(--sb-green)', txt: '강함', col: 'var(--sb-green)' },
+    ];
+    var bar = document.getElementById('pwBar');
+    var lbl = document.getElementById('pwLbl');
+    bar.style.width      = levels[lv].w;
+    bar.style.background = levels[lv].bg;
+    lbl.textContent      = levels[lv].txt;
+    lbl.style.color      = levels[lv].col;
+
+    function req(id, ok) {
+      var el = document.getElementById(id);
+      el.classList.toggle('ok', ok);
+      el.querySelector('i').className = ok ? 'bi bi-check-circle-fill' : 'bi bi-circle';
+    }
+    req('req8',     pw.length >= 8);
+    req('reqAlpha', /[a-zA-Z]/.test(pw));
+    req('reqNum',   /[0-9]/.test(pw));
+  });
+
+  /* ---- 재설정 폼 제출 ---- */
+  document.getElementById('fmReset').addEventListener('submit', function (e) {
+    let empPass = document.getElementById('empPass').value;
+    let empPassConfirm = document.getElementById('empPassConfirm').value;
+
+    document.getElementById('errMatch').classList.remove('on');
+    document.getElementById('alertReset').classList.remove('on');
+    document.getElementById('empPass').classList.remove('er');
+    document.getElementById('empPassConfirm').classList.remove('er');
+
+    if (pw1.length < 8 || !/[a-zA-Z]/.test(pw1) || !/[0-9]/.test(pw1)) {
+      e.preventDefault();
+      document.getElementById('alertResetTxt').textContent = '8자 이상, 영문과 숫자를 모두 포함해야 합니다.';
+      document.getElementById('alertReset').classList.add('on');
+      document.getElementById('empPass').classList.add('er');
+      return;
+    }
+    if (empPass !== empPassConfirm) {
+      e.preventDefault();
+      document.getElementById('errMatch').classList.add('on');
+      document.getElementById('empPassConfirm').classList.add('er');
+      return;
+    }
+
+    // 검증 통과 → preventDefault를 호출하지 않으므로
+    // 폼이 그대로 /auth/resetPass로 POST되고, 서버가 처리 후
+    // /auth/login?reset=1 로 리다이렉트합니다.
+    var btn = document.getElementById('btnReset');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" style="width:16px;height:16px"></span><span>변경 중…</span>';
+  });
+
+})();
 </script>
 </body>
 </html>
