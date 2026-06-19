@@ -89,4 +89,11 @@
 	    (SELECT COUNT(DISTINCT indust_code) FROM company) AS indust_total,
 	    (SELECT com_name FROM company ORDER BY created_at DESC LIMIT 1) AS com_latest
   </select>
+  <!-- 회원 id를 통해 내 회사 정보 조회 -->
+  <select id="selectOneByEmpId" resultType="CompanyDto" parameterType="int">
+    select c.*
+    from company c
+    join employee e on e.com_id = c.com_id
+    where e.emp_id = #{emdId}
+  </select>
 </mapper>

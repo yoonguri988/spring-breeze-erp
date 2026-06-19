@@ -23,4 +23,6 @@ public interface CompanyService {
 	public int listTotal(ComSearchDto search);
 
 	public StatsComDto selectStats();
+
+	public CompanyDto selectOneByEmpId(int empId);
 }
