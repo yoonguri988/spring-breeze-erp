@@ -32,4 +32,10 @@ public interface EmpMapper {
 	// 이메일을 기준으로 사용자 정보 확인
 	public EmpDto selectByEmpEmail(@Param("empEmail") String empEmail);
 
+	// 아이디를 기준으로 패스워드 확인
+	public String selectPassById(int empId);
+
+	// 아이디를 기준으로 사원 정보 확인
+	public List<EmpDto> selectByDeptId(int deptId);
+
 }

@@ -1,9 +1,5 @@
 create database if not exists `sb_erp_db`;
 
-
-alter table company modify com_id INT auto_increment;
-alter table department modify dept_id INT auto_increment;
-
 CREATE TABLE IF NOT EXISTS `sb_erp_db`.`company` (
   `com_id` INT NOT NULL auto_increment,
   `indust_code` VARCHAR(100) NOT NULL,
