@@ -14,7 +14,7 @@ import com.sb.erp.service.ProjectService;
 @Controller
 public class ProjectMemberController {
 	@Autowired ProjectMemberService service;
-	@Autowired ProjectService service1;
+	
 	
 	@RequestMapping(value="/proj/proj_member" ,method=RequestMethod.GET)
 	public String list(int pro_id, Model model) {

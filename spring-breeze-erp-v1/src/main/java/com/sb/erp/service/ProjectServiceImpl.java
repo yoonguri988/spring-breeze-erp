@@ -32,9 +32,9 @@ public class ProjectServiceImpl implements ProjectService{
 		map.put("start", (pstartno-1)*10);
 		map.put("end", 10);
 		return dao.select10(map); }
-
-	@Override public int selectCnt() {  
-		return dao.selectCnt(); }
 	
+    @Override public int selectCnt() { return dao.selectCnt(); }
+
+	@Override public List<ProjectDto> selectByPeriod(String startDate, String endDate) {  return dao.selectByPeriod(startDate, endDate); } 
 	
 }

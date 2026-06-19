@@ -11,6 +11,14 @@
  where p.pro_id = #{value};
 </select>
 
+<select id="selectOne" parameterType="int" resultType="ProjectMemberDto">
+select pm.*, e.emp_name
+from project_member pm
+join employee e
+on pm.emp_id = e.emp_id
+where pm.pm_id = #{pmId}
+</select>
+
 <!-- 프로젝트 멤버 추가 -->
 <insert id="insert" parameterType="ProjectMemberDto">
 	insert into project_member(project_pro_id,emp_id,role,joined_at)
@@ -21,5 +29,17 @@
 <delete id="delete" parameterType="int">
 	delete from project_member where pm_id=#{pmId}
 </delete>
-    
+
+
+    <select id="selectByproject" parameterType="int" resultType="ProjectMemberDto">
+	select pm.pm_id, e.emp_name
+	from project_member pm
+	join employee e on pm.emp_id = e.emp_id
+	where pm.project_pro_id = #{ProId}
+</select>
 </mapper>
+<!-- <select id="selectByproject1" resultType="ProjectMemberDto" parameterType="int">
+ select pm_id_name
+ from project_member
+ where project_pro_id = #{projectProId}
+</select> -->

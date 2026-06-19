@@ -18,4 +18,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
 
 	@Override public List<ProjectMemberDto> select(int pro_id) { return dao.select(pro_id); }
 
+	@Override public List<ProjectMemberDto> selectByproject(int project_pro_id) {  return dao.selectByproject(project_pro_id); }
+
+	@Override public ProjectMemberDto selectOne(int pmId) {  return dao.selectOne(pmId); }
+
 }

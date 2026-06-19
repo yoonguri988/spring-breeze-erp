@@ -16,4 +16,6 @@ public interface ProjectService {
 	public List<ProjectDto> select10(int pstartno);
 	public int selectCnt();
 	
+	List<ProjectDto> selectByPeriod(String startDate, String endDate);
+	
 }
