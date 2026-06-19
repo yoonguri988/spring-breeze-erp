@@ -114,4 +114,17 @@ public class EmpController {
 	    result.put("duplicate", duplicate);
 	    return result;
 	}
+	
+	
+	// 모바일 중복 검사
+	@RequestMapping(value="/emp/checkMobile", method=RequestMethod.GET)
+	@ResponseBody
+	public Map<String, Object> checkMobile(@RequestParam String empMobile) {
+	    boolean duplicate = empService.isMobileDuplicate(empMobile);
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("duplicate", duplicate);
+	    return result;
+	}
+	
+	
 }

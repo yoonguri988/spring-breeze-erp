@@ -26,6 +26,10 @@ public interface EmpMapper {
     //이메일 찾기
     public int countByEmpEmail(String empEmail);
     
+    //연락처 찾기
+    public int countByEmpMobile(String EmpMobile);
+ 
+    
     //비밀번호 수정 - 로그인 과정에서 비밀번호를 확인했으니 변경시에는 확인하지 않게 진행?
     // public int updatePass(int empId);
     

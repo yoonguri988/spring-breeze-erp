@@ -89,6 +89,12 @@
 		where emp_email = #{empEmail}	
 	</select>
 	
+	<!-- 모바일 중복 검사 -->
+	<select id ="countByEmpMobile" parameterType="String" resultType="int">
+		select count(*)
+		from employee
+		where emp_mobile = #{empMobile}	
+	</select>	
 
 	<!-- paging -->
 	

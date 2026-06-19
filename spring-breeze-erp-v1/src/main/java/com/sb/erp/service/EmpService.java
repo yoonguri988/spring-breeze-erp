@@ -10,6 +10,8 @@ public interface EmpService {
 	public int insert(EmpDto dto);
 	public int update(EmpDto dto);
 	public boolean isEmailDuplicate(String empEmail);
+	public boolean isMobileDuplicate(String empMobile);
+	
 
 	/* paging */
 	public int selectCnt(EmpSearchDto dto);

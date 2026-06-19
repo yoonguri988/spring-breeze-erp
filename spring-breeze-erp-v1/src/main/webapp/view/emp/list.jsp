@@ -166,7 +166,7 @@
 		</c:choose>
 
 		<!-- 페이징 -->
-		<c:if test="${paging != null}">
+		<c:if test="${paging != null && paging.listtotal > paging.onepagelist}">
 			<div class="d-flex align-items-center justify-content-between px-3 py-2"
 			     style="border-top:1px solid var(--sb-border)">
 				<span class="text-faint" style="font-size:12.5px">
@@ -174,7 +174,7 @@
 				</span>
 				<nav>
 					<ul class="pagination pagination-sm mb-0">
-						<%-- 검색 필터 조건 유지 --%>
+						<!-- 검색 필터 조건 유지 -->
 						<c:set var="filter" value="searched=1" />
 						<c:if test="${not empty search.deptId}">
 							<c:set var="filter" value="${filter}&deptId=${search.deptId}" />
@@ -188,7 +188,8 @@
 						<c:if test="${not empty search.keyword}">
 							<c:set var="filter" value="${filter}&keyword=${search.keyword}" />
 						</c:if>
-
+						
+						<!-- 이전 -->
 						<c:if test="${paging.current > 1}">
 							<li class="page-item">
 								<a href="?${filter}&page=${paging.current - 1}" class="page-link">
@@ -196,11 +197,13 @@
 								</a>
 							</li>
 						</c:if>
+						<!-- 1~10 -->
 						<c:forEach var="i" begin="${paging.start}" end="${paging.end}">
 							<li class="page-item ${paging.current == i ? 'active' : ''}">
 								<a href="?${filter}&page=${i}" class="page-link">${i}</a>
 							</li>
 						</c:forEach>
+						<!-- 다음 -->
 						<c:if test="${paging.current < paging.pagetotal}">
 							<li class="page-item">
 								<a href="?${filter}&page=${paging.current + 1}" class="page-link">

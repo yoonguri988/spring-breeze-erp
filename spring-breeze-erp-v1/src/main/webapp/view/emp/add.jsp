@@ -41,62 +41,125 @@
 			
 			<div class="my-3">
 				<label for="empEmail" class="form-label"> 이메일 *</label>
-				<input type="email" class="form-control" id="empEmail" name="empEmail" required />
-				<p class="target"></p>
+				<input type="email" class="form-control" id="empEmail" name="empEmail" 
+						placeholder="예: name@company.com" />
+				<div class="tEmail duplicateChkBox"></div>
 			</div>
-			<script>
-				window.addEventListener("load", function(){
-					let empEmail = document.getElementById("empEmail");
-					let target = document.querySelector(".target");
-					let submitBtn = document.getElementById("submitBtn");
-
-					empEmail.addEventListener("blur", function(e){
-						let value = e.target.value.trim(); 
-						if(value !== ""){
-
-							if(!empEmail.validity.valid){
-						        target.textContent = "올바른 이메일 형식이 아닙니다.";
-						        target.className = "target alert alert-warning";
-						        submitBtn.disabled = true;
-						        submitBtn.className = "btn btn-secondary";
-						        return;
-						    }
-							
-							fetch("${pageContext.request.contextPath}/emp/checkEmail?empEmail=" + encodeURIComponent(value))
-							.then( res => res.json() )
-							.then(data => {
-								if(data.duplicate){
-									target.textContent= "이미 사용중인 이메일입니다.";
-									target.className = "target alert alert-danger";
-									submitBtn.disabled = true;
-									submitBtn.className = "btn btn-secondary";
-								} else {
-									target.textContent= "사용 가능한 이메일입니다.";
-									target.className = "target alert alert-success";
-									submitBtn.disabled = false;
-									submitBtn.className = "btn btn-primary";
-								}
-							})
-							.catch(err => {
-								target.textContent= "서버 오류입니다.";
-								target.className = "target alert alert-info";
-								submitBtn.disabled = true;
-								submitBtn.className = "btn btn-secondary";
-							});
-						} else {
-							target.textContent= "이메일을 입력하세요.";
-							target.className = "target alert alert-light";
-							submitBtn.disabled = true;
-							submitBtn.className = "btn btn-secondary";
-						}
-					});
-				});
-			</script>
 			
 			<div class="my-3">
 				<label for="empMobile" class="form-label"> 연락처 *</label>
-				<input type="text" class="form-control" id="empMobile" name="empMobile" required />
+				<input type="tel" class="form-control" id="empMobile" name="empMobile" 
+						placeholder="예: 01012345678" pattern="[0-9{9,11}]" />
+				<div class="tMobile duplicateChkBox"></div>
 			</div>
+			
+			<!-- 이메일/연락처 중복 검사 통합 -->
+			<script>
+			window.addEventListener("load", function(){
+			    // 공통 요소
+			    const empEmail = document.getElementById("empEmail");
+			    const empMobile = document.getElementById("empMobile");
+			    const targetEmail = document.querySelector(".tEmail");
+			    const targetMobile = document.querySelector(".tMobile");
+			    const submitBtn = document.getElementById("submitBtn");
+			    
+			    // 검증 상태 (둘 다 처음에는 false)
+			    let emailOk = false;
+			    let mobileOk = false;
+			    
+			    // Submit 버튼 활성화
+			    function updateSubmit() {
+			    	
+			        submitBtn.disabled = !(emailOk && mobileOk);
+			        if(emailOk && mobileOk) {
+			        	submitBtn.disabled  
+			        	submitBtn.ClassName = "btn btn-primary";
+			        } else {
+			        	submitBtn.disabled = true;
+			        }
+			        
+			    }
+			    
+			    // 초기 비활성화
+			    updateSubmit();
+			    
+			    // 이메일 검증
+			    empEmail.addEventListener("blur", function(e){
+			        let value = e.target.value.trim();
+			        
+			        if(value === ""){
+			            targetEmail.textContent = "이메일을 입력하세요.";
+			            targetEmail.className = "tEmail duplicateChkBox sb-badge--amber";
+			            emailOk = false;
+			            updateSubmit();
+			            return;
+			        }
+			        
+			        if(!empEmail.validity.valid){
+			            targetEmail.textContent = "올바른 이메일 형식이 아닙니다.";
+			            targetEmail.className = "tEmail duplicateChkBox sb-badge--gray";
+			            emailOk = false;
+			            updateSubmit();
+			            return;
+			        }
+			        
+			        fetch("${pageContext.request.contextPath}/emp/checkEmail?empEmail=" + encodeURIComponent(value))
+			        .then(res => res.json())
+			        .then(data => {
+			            if(data.duplicate){
+			                targetEmail.textContent = "이미 사용중인 이메일입니다.";
+			                targetEmail.className = "tEmail duplicateChkBox sb-badge--red";
+			                emailOk = false;
+			            } else {
+			                targetEmail.textContent = "사용 가능한 이메일입니다.";
+			                targetEmail.className = "tEmail duplicateChkBox sb-badge--green";
+			                emailOk = true;
+			            }
+			            updateSubmit();
+			        })
+			        .catch(err => {
+			            targetEmail.textContent = "서버 오류입니다.";
+			            targetEmail.className = "tEmail duplicateChkBox sb-badge--cyan";
+			            emailOk = false;
+			            updateSubmit();
+			        });
+			    });
+			    
+			    // 연락처 검증
+			    empMobile.addEventListener("blur", function(e){
+			        let value = e.target.value.trim();
+			        
+			        if(value === ""){
+			            targetMobile.textContent = "연락처를 입력하세요.";
+			            targetMobile.className = "tMobile duplicateChkBox sb-badge--amber";
+			            mobileOk = false;
+			            updateSubmit();
+			            return;
+			        }
+			        
+			        fetch("${pageContext.request.contextPath}/emp/checkMobile?empMobile=" + encodeURIComponent(value))
+			        .then(res => res.json())
+			        .then(data => {
+			            if(data.duplicate){
+			                targetMobile.textContent = "이미 사용중인 연락처입니다.";
+			                targetMobile.className = "tMobile duplicateChkBox sb-badge--red";
+			                mobileOk = false;
+			            } else {
+			                targetMobile.textContent = "사용 가능한 연락처입니다.";
+			                targetMobile.className = "tMobile duplicateChkBox sb-badge--green";
+			                mobileOk = true;
+			            }
+			            updateSubmit();
+			        })
+			        .catch(err => {
+			            targetMobile.textContent = "서버 오류입니다.";
+			            targetMobile.className = "tMobile duplicateChkBox sb-badge--cyan";
+			            mobileOk = false;
+			            updateSubmit();
+			        });
+			    });
+			});
+			</script>
 			
 			<div class="my-3">
 				<label for="hireDate" class="form-label"> 입사일 *</label>
@@ -105,7 +168,7 @@
 			
 			<div class="my-3 text-end">
 				<a href="${pageContext.request.contextPath}/emp/list" class="btn btn-outline-secondary" title="취소">취소</a>
-				<button type="submit" class="btn btn-primary" id="submitBtn" title="등록하기">등록</button>
+				<button type="submit" class="btn btn-secondary" id="submitBtn" title="등록하기">등록</button>
 			</div>
 		</form>
 	</section>

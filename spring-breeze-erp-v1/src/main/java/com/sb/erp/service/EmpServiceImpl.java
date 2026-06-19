@@ -13,17 +13,20 @@ import com.sb.erp.util.PagingUtil;
 public class EmpServiceImpl implements EmpService {
 	@Autowired EmpMapper dao;
 	
+	// 사원 목록 조회
 	@Override
 	public List<EmpDto> selectAll() {
 		//return dao.selectAll(loginUser.getComId());  // 로그인 사원의 회사
 		return dao.selectAll(1);
 	}
 	
+	// empId로 사원 정보 찾기
 	@Override
 	public EmpDto selectByEmpId(int empId) {
 		return dao.selectByEmpId(empId, 1);
 	}
 	
+	// 사원 정보 검색
 	@Override
 	public List<EmpDto> search(EmpSearchDto dto) {
 		
@@ -63,6 +66,12 @@ public class EmpServiceImpl implements EmpService {
 	@Override
 	public boolean isEmailDuplicate(String empEmail) {
 		return dao.countByEmpEmail(empEmail) > 0;
+	}
+	
+	/*  모바일 중복검사 */
+	@Override
+	public boolean isMobileDuplicate(String empMobile) {
+		return dao.countByEmpMobile(empMobile) > 0;
 	}
 
 	

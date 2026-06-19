@@ -11,3 +11,16 @@
  *   - 재직상태별 행(row) 배경색
  *   - emp 전용 레이아웃 조정
  */
+
+
+div.duplicateChkBox {
+
+    display: inline-block;
+    margin-top: 4px;
+    padding : 4px 8px;
+    width: fit-content;
+    min-width: fit-content;
+    border-radius: 4px;
+    font-size : 12px;
+
+ }
