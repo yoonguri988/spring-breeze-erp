@@ -47,7 +47,7 @@ public class CompanyController {
 	//회사 등록 기능
 	@RequestMapping(value="/com/add", method= RequestMethod.POST)
 	public String add(CompanyDto dto, 
-			@RequestParam(value="comLogo", required=false) MultipartFile logoFile,
+			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
 			RedirectAttributes rttr) {
 		String msg = "회사 등록에 실패하였습니다.";
 		

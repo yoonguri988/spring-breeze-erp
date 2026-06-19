@@ -178,7 +178,7 @@
                     </c:choose>
                 </div>
                 <div class="flex-grow-1">
-                    <input type="file" class="form-control" id="comLogo" name="comLogo"
+                    <input type="file" class="form-control" id="comLogo" name="logoFile"
                            accept="image/png, image/jpeg, image/svg+xml, image/webp"
                            onchange="previewLogo(this)">
                     <div class="text-faint mt-1" style="font-size:12px">
