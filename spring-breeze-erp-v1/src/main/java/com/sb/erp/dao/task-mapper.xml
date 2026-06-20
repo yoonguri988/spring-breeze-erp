@@ -44,10 +44,3 @@
 delete from task where task_id =#{taskId}
 </delete>
 </mapper>
-<!-- <select id="selectAll" parameterType="int" resultType="TaskDto">
-	select t.task_id,t.task_name, t.task_status
-	from task t join project p on t.pro_id = p.pro_id join company c
-    on p.com_id = c.com_id join project_member pi on pi.project_pro_id = p.pro_id and pi.pm_id = t.pm_id
-	where c.com_id = #{comId}
- 	 and p.pro_id = #{proId}
-</select> -->
