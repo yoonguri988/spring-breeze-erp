@@ -29,10 +29,16 @@
       <!-- <security:intercept-url  pattern="/auth/**"    access="isAuthenticated()" /> -->
 	
       <!-- KJY -->
-      <security:intercept-url  pattern="/appr/**" access="permitAll"/>
+      <security:intercept-url  pattern="/appr/**" access="isAuthenticated()"/>
       <!-- KJY -->
+      
+      <!-- jsj -->
+      <security:intercept-url  pattern="/emp/add" access="hasRole('ROLE_ADMIN')"/>
+      <security:intercept-url  pattern="/emp/edit" access="hasRole('ROLE_ADMIN')"/>
+      <security:intercept-url  pattern="/emp/**" access="isAuthenticated()"/>
+      <!-- jsj -->
 
-   	  <security:intercept-url  pattern="/board/**"    access="permitAll" />
+   	  <security:intercept-url  pattern="/board/**" access="permitAll" />
    	  
    	  
    	  <!-- jang -->
