@@ -2,6 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.ProjectMemberMapper">
 
+<!-- 사원 이름,번호 조회 -->
+<select id="searchEmpForProject" parameterType="map" resultType="EmpDto">
+select e.emp_id, e.emp_no, e.emp_name
+from employee e
+where e.com_id = #{comId}
+and (e.emp_name like concat('%', #{keyword}, '%')
+or e.emp_no like concat('%', #{keyword}, '%'))
+</select>
+
 <!-- 프로젝트 참여 인원 조회 -->
 <select id="select" parameterType="int" resultType="ProjectMemberDto">
  select  pm.pm_id,  p.pro_name, e.emp_name, pm.role,pm.joined_at
@@ -11,6 +20,7 @@
  where p.pro_id = #{value};
 </select>
 
+<!-- 멤버 이름 등록 -->
 <select id="selectOne" parameterType="int" resultType="ProjectMemberDto">
 select pm.*, e.emp_name
 from project_member pm
@@ -38,8 +48,3 @@ where pm.pm_id = #{pmId}
 	where pm.project_pro_id = #{ProId}
 </select>
 </mapper>
-<!-- <select id="selectByproject1" resultType="ProjectMemberDto" parameterType="int">
- select pm_id_name
- from project_member
- where project_pro_id = #{projectProId}
-</select> -->

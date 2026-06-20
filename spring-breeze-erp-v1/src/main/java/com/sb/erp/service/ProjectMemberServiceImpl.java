@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.ProjectMemberMapper;
+import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.ProjectMemberDto;
 
 @Service
@@ -21,5 +22,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
 	@Override public List<ProjectMemberDto> selectByproject(int project_pro_id) {  return dao.selectByproject(project_pro_id); }
 
 	@Override public ProjectMemberDto selectOne(int pmId) {  return dao.selectOne(pmId); }
+
+	@Override public List<EmpDto> searchEmpForProject(int comId, String keyword) { return dao.searchEmpForProject(comId, keyword); }
 
 }
