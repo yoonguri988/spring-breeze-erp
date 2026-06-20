@@ -10,11 +10,12 @@ import com.sb.erp.dto.AuthUserDto;
 
 public class CustomUserDetailsService   implements UserDetailsService{
 	@Autowired AuthMapper mapper;
-	
+
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		AuthUserDto dto = mapper.readAuth(username);
 		return  dto == null? null : new CustomUser(dto);
 	}
+
 
 }
