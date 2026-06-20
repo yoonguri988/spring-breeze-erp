@@ -1,41 +1,43 @@
 package com.sb.erp.service;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.ReservationMapper;
 import com.sb.erp.dto.ReservationDto;
+import com.sb.erp.dto.ResvSearchDto;
+import com.sb.erp.dto.StatsResvDto;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
 
     @Autowired
-    private ReservationMapper reservationDao;
+    private ReservationMapper dao;
 
     @Override
-    public List<ReservationDto> getReservationList(Map<String, Object> paramMap) {
-        List<ReservationDto> reservationList = reservationDao.selectReservationList(paramMap);
+    public List<ReservationDto> getReservationList(ResvSearchDto search) {
+        List<ReservationDto> reservationList = dao.selectReservationList(search);
         return reservationList;
     }
 
     @Override
-    public int getReservationCount(Map<String, Object> paramMap) {
-        int totalCount = reservationDao.selectReservationCount(paramMap);
+    public int getReservationCount(ResvSearchDto search) {
+    	search.setPstartno((search.getPstartno()-1)*search.getOnepagelist());
+        int totalCount = dao.selectReservationCount(search);
         return totalCount;
     }
 
     @Override
     public ReservationDto getReservationDetail(int revId) {
-        ReservationDto reservationDto = reservationDao.selectReservationDetail(revId);
+        ReservationDto reservationDto = dao.selectReservationDetail(revId);
         return reservationDto;
     }
 
     @Override
     public void insertReservation(ReservationDto reservationDto) {
-        reservationDao.insertReservation(reservationDto);
+    	dao.insertReservation(reservationDto);
     }
 
     @Override
@@ -47,12 +49,16 @@ public class ReservationServiceImpl implements ReservationService {
         reservationDto.setRemark(remark);
 
        
-        reservationDao.updateStatus(reservationDto);
+        dao.updateStatus(reservationDto);
     }
 
     @Override
-    public int countByStatus(Map<String, Object> paramMap) {
-        int count = reservationDao.countByStatus(paramMap);
-        return count;
+    public StatsResvDto countByStats(ResvSearchDto search) {
+        return dao.countByStats(search);
+    }
+    
+    @Override
+    public int countReservationsByResourceId(int resId) {
+        return dao.countReservationsByResourceId(resId);
     }
 }
