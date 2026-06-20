@@ -18,4 +18,8 @@ public class CompanyDto {
 	private String comLogo;
 	private String createdAt;
 	private String updatedAt;
+	
+	// list -> 임직원수
+	private int empCount;
+	
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sb.erp.dao.ReservationDao">
+<mapper namespace="com.sb.erp.dao.ReservationMapper">
 
     <!-- 예약 목록: 회사별 + 상태필터 + 페이징, resource/employee 조인해서 이름까지 표시 -->
     <select id="selectReservationList" parameterType="map" resultType="com.sb.erp.dto.ReservationDto">

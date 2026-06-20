@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.DeptMapper;
 import com.sb.erp.dto.DeptDto;
+import com.sb.erp.dto.StatsDeptDto;
 
 @Service
 public class DeptServiceImpl implements DeptService {
@@ -24,32 +25,7 @@ public class DeptServiceImpl implements DeptService {
 
 	@Override
 	public List<DeptDto> selectOrgTree(int companyId) {
-		List<DeptDto> deptAllList = dao.selectAll(companyId);
-		
-		//deptId기준으로 Map구성
-		Map<Integer, DeptDto> deptMap = deptAllList.stream()
-				.collect(Collectors.toMap(DeptDto::getDeptId, dept->dept));
-		
-		//루트 부서를 담을 리스트
-		List<DeptDto> rootList = new ArrayList<>();
-		
-		//트리 조립 + fullPath 셋팅
-		for(DeptDto dept : deptAllList) {
-			if (dept.getParentId() == 0) {
-				// 루트 부서
-				dept.setFullPath(dept.getDeptName());
-				rootList.add(dept);
-			} else {
-				// 부모를 찾아서 부모 하위 부서에 추가
-				DeptDto parent = deptMap.get(dept.getParentId());
-				if(parent != null) {
-					dept.setFullPath(parent.getFullPath()+">"+dept.getDeptName());
-					parent.getChildren().add(dept);
-				}
-			}
-		}
-		
-		return rootList; 
+		return dao.selectAll(companyId); 
 	}
 	
 	public List<DeptDto> flattenOrgTree(int companyId) {
@@ -124,6 +100,11 @@ public class DeptServiceImpl implements DeptService {
 	@Override
 	public DeptDto selectOneById(int deptId) {
 		return dao.selectOneById(deptId);
+	}
+
+	@Override
+	public StatsDeptDto selecStats(int comId) {
+		return dao.selectStats(comId);
 	}
 
 }

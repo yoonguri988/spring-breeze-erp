@@ -4,24 +4,38 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.CompanyMapper">
   <!-- 회사 여러개 조회 -->
-  <select id="selectAll" resultType="CompanyDto">
-  select * from company 
+  <select id="selectAll" resultType="CompanyDto" parameterType="ComSearchDto">
+  select *
+  from company c
+  join (
+    select c.com_id, count(e.emp_id) as emp_count
+    from company c
+    left join employee e on c.com_id = e.com_id
+    group by c.com_id
+   ) t
+   on t.com_id = c.com_id 
   <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
-  	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
+  	and (c.com_name like concat('%', #{keyword},'%') or c.biz_no like concat('%', #{keyword},'%'))
+  </if>
+  <if test="industCode != null and industCode != ''">
+  	and c.indust_code = #{industCode}
   </if>
   </where>
-  order by com_id desc
+  order by c.com_id desc
   limit #{pstarValue}, #{onepagelist}
   </select>
   <!-- 회사 여러개 조회 -->
-  <select id="listTotal" resultType="int" parameterType="string">
+  <select id="listTotal" resultType="int" parameterType="ComSearchDto">
   select count(*) from company 
   <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
   	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
+  </if>
+  <if test="industCode != null and industCode != ''">
+  	and indust_code = #{industCode}
   </if>
   </where>
   </select>
@@ -67,4 +81,19 @@
   delete from company
   where com_id = #{comId}
   </delete>
+  <!-- 회사 통계 -->
+  <select id="selectStats" resultType="StatsComDto">
+    SELECT 
+	    (SELECT COUNT(*) FROM company) AS com_total,
+	    (SELECT COUNT(*) FROM employee) AS emp_total,
+	    (SELECT COUNT(DISTINCT indust_code) FROM company) AS indust_total,
+	    (SELECT com_name FROM company ORDER BY created_at DESC LIMIT 1) AS com_latest
+  </select>
+  <!-- 회원 id를 통해 내 회사 정보 조회 -->
+  <select id="selectOneByEmpId" resultType="CompanyDto" parameterType="int">
+    select c.*
+    from company c
+    join employee e on e.com_id = c.com_id
+    where e.emp_id = #{emdId}
+  </select>
 </mapper>
