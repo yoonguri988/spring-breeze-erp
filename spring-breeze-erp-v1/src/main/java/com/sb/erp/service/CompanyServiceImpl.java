@@ -70,4 +70,9 @@ public class CompanyServiceImpl implements CompanyService {
 		return dao.selectStats();
 	}
 
+	@Override
+	public CompanyDto selectOneByEmpId(int empId) {
+		return dao.selectOneByEmpId(empId);
+	}
+
 }

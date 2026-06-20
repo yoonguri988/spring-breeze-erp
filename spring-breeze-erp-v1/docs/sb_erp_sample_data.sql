@@ -12,7 +12,7 @@
 --     로 인코딩한 값을 사용합니다. ($2b$ 포맷이지만 Spring Security의
 --     BCryptPasswordEncoder.matches() 는 $2a/$2b/$2y 모두 동일하게 검증하므로
 --     로그인 테스트에 바로 사용 가능합니다.)
---       HASH = $2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726
+--       HASH = $2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu
 --  4) resource.res_type 은 스키마상 ENUM('Romm') 으로 정의되어 있어(원본 그대로,
 --     'Room'의 오타로 보입니다) 'Romm' 값만 허용됩니다. 더미데이터도 동일하게
 --     'Romm' 으로 넣었습니다. 추후 ENUM 값을 늘리실 때 참고하세요.
@@ -119,52 +119,52 @@ INSERT INTO `employee`
 (`emp_id`, `com_id`, `pos_id`, `dept_id`, `emp_no`, `emp_name`, `emp_pass`, `emp_email`, `emp_mobile`, `emp_status`, `hire_date`, `created_at`, `updated_at`)
 VALUES
 -- ---------- 회사1 : 스프링브리즈 (시스템 관리자 emp_id 1~10) ----------
-(1,  1, 1, 1, 'SB-0001', '김정수', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'kim.js@springbreeze.co.kr',  '010-1000-0001', '재직', '2022-01-03', '2022-01-03 09:00:00', '2022-01-03 09:00:00'),
-(2,  1, 2, 2, 'SB-0002', '박민준', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'park.mj@springbreeze.co.kr', '010-1000-0002', '재직', '2022-02-01', '2022-02-01 09:00:00', '2022-02-01 09:00:00'),
-(3,  1, 3, 2, 'SB-0003', '이서연', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'lee.sy@springbreeze.co.kr',  '010-1000-0003', '재직', '2022-03-01', '2022-03-01 09:00:00', '2022-03-01 09:00:00'),
-(4,  1, 3, 2, 'SB-0004', '정우진', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'jung.wj@springbreeze.co.kr', '010-1000-0004', '재직', '2022-04-01', '2022-04-01 09:00:00', '2022-04-01 09:00:00'),
-(5,  1, 3, 2, 'SB-0005', '한지민', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'han.jm@springbreeze.co.kr',  '010-1000-0005', '재직', '2022-05-01', '2022-05-01 09:00:00', '2022-05-01 09:00:00'),
-(6,  1, 2, 3, 'SB-0006', '윤서아', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'yoon.sa@springbreeze.co.kr', '010-1000-0006', '재직', '2022-02-15', '2022-02-15 09:00:00', '2022-02-15 09:00:00'),
-(7,  1, 3, 3, 'SB-0007', '강민서', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'kang.ms@springbreeze.co.kr', '010-1000-0007', '재직', '2022-06-01', '2022-06-01 09:00:00', '2022-06-01 09:00:00'),
-(8,  1, 3, 3, 'SB-0008', '오태양', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'oh.ty@springbreeze.co.kr',   '010-1000-0008', '재직', '2022-07-01', '2022-07-01 09:00:00', '2022-07-01 09:00:00'),
-(9,  1, 3, 3, 'SB-0009', '신유나', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'shin.yn@springbreeze.co.kr', '010-1000-0009', '휴직', '2022-08-01', '2022-08-01 09:00:00', '2022-08-01 09:00:00'),
-(10, 1, 3, 2, 'SB-0010', '임도현', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'lim.dh@springbreeze.co.kr',  '010-1000-0010', '재직', '2022-09-01', '2022-09-01 09:00:00', '2022-09-01 09:00:00'),
+(1,  1, 1, 1, 'SB-0001', '김정수', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'kim.js@springbreeze.co.kr',  '010-1000-0001', '재직', '2022-01-03', '2022-01-03 09:00:00', '2022-01-03 09:00:00'),
+(2,  1, 2, 2, 'SB-0002', '박민준', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'park.mj@springbreeze.co.kr', '010-1000-0002', '재직', '2022-02-01', '2022-02-01 09:00:00', '2022-02-01 09:00:00'),
+(3,  1, 3, 2, 'SB-0003', '이서연', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'lee.sy@springbreeze.co.kr',  '010-1000-0003', '재직', '2022-03-01', '2022-03-01 09:00:00', '2022-03-01 09:00:00'),
+(4,  1, 3, 2, 'SB-0004', '정우진', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'jung.wj@springbreeze.co.kr', '010-1000-0004', '재직', '2022-04-01', '2022-04-01 09:00:00', '2022-04-01 09:00:00'),
+(5,  1, 3, 2, 'SB-0005', '한지민', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'han.jm@springbreeze.co.kr',  '010-1000-0005', '재직', '2022-05-01', '2022-05-01 09:00:00', '2022-05-01 09:00:00'),
+(6,  1, 2, 3, 'SB-0006', '윤서아', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'yoon.sa@springbreeze.co.kr', '010-1000-0006', '재직', '2022-02-15', '2022-02-15 09:00:00', '2022-02-15 09:00:00'),
+(7,  1, 3, 3, 'SB-0007', '강민서', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'kang.ms@springbreeze.co.kr', '010-1000-0007', '재직', '2022-06-01', '2022-06-01 09:00:00', '2022-06-01 09:00:00'),
+(8,  1, 3, 3, 'SB-0008', '오태양', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'oh.ty@springbreeze.co.kr',   '010-1000-0008', '재직', '2022-07-01', '2022-07-01 09:00:00', '2022-07-01 09:00:00'),
+(9,  1, 3, 3, 'SB-0009', '신유나', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'shin.yn@springbreeze.co.kr', '010-1000-0009', '휴직', '2022-08-01', '2022-08-01 09:00:00', '2022-08-01 09:00:00'),
+(10, 1, 3, 2, 'SB-0010', '임도현', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'lim.dh@springbreeze.co.kr',  '010-1000-0010', '재직', '2022-09-01', '2022-09-01 09:00:00', '2022-09-01 09:00:00'),
 
 -- ---------- 회사2 : 테크노바커머스 (emp_id 11~20) ----------
-(11, 2, 4, 4, 'TN-0001', '이수민', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'lee.sm@technovacommerce.co.kr',  '010-2000-0011', '재직', '2023-03-15', '2023-03-15 09:00:00', '2023-03-15 09:00:00'),
-(12, 2, 5, 5, 'TN-0002', '김도윤', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'kim.dy@technovacommerce.co.kr',  '010-2000-0012', '재직', '2023-03-20', '2023-03-20 09:00:00', '2023-03-20 09:00:00'),
-(13, 2, 7, 5, 'TN-0003', '서지우', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'seo.jw@technovacommerce.co.kr',  '010-2000-0013', '재직', '2023-04-10', '2023-04-10 09:00:00', '2023-04-10 09:00:00'),
-(14, 2, 5, 6, 'TN-0004', '황민재', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'hwang.mj@technovacommerce.co.kr','010-2000-0014', '재직', '2023-03-20', '2023-03-20 09:00:00', '2023-03-20 09:00:00'),
-(15, 2, 6, 6, 'TN-0005', '송하은', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'song.he@technovacommerce.co.kr', '010-2000-0015', '재직', '2023-05-02', '2023-05-02 09:00:00', '2023-05-02 09:00:00'),
-(16, 2, 7, 6, 'TN-0006', '권나윤', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'kwon.ny@technovacommerce.co.kr', '010-2000-0016', '재직', '2023-06-15', '2023-06-15 09:00:00', '2023-06-15 09:00:00'),
-(17, 2, 7, 6, 'TN-0007', '배준호', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'bae.jh@technovacommerce.co.kr',  '010-2000-0017', '휴직', '2023-07-01', '2023-07-01 09:00:00', '2023-07-01 09:00:00'),
-(18, 2, 5, 7, 'TN-0008', '노은서', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'no.es@technovacommerce.co.kr',   '010-2000-0018', '재직', '2023-03-25', '2023-03-25 09:00:00', '2023-03-25 09:00:00'),
-(19, 2, 6, 7, 'TN-0009', '홍태민', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'hong.tm@technovacommerce.co.kr', '010-2000-0019', '재직', '2023-05-10', '2023-05-10 09:00:00', '2023-05-10 09:00:00'),
-(20, 2, 7, 7, 'TN-0010', '장하린', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'jang.hr@technovacommerce.co.kr', '010-2000-0020', '퇴직', '2023-08-01', '2023-08-01 09:00:00', '2024-03-01 09:00:00'),
+(11, 2, 4, 4, 'TN-0001', '이수민', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'lee.sm@technovacommerce.co.kr',  '010-2000-0011', '재직', '2023-03-15', '2023-03-15 09:00:00', '2023-03-15 09:00:00'),
+(12, 2, 5, 5, 'TN-0002', '김도윤', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'kim.dy@technovacommerce.co.kr',  '010-2000-0012', '재직', '2023-03-20', '2023-03-20 09:00:00', '2023-03-20 09:00:00'),
+(13, 2, 7, 5, 'TN-0003', '서지우', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'seo.jw@technovacommerce.co.kr',  '010-2000-0013', '재직', '2023-04-10', '2023-04-10 09:00:00', '2023-04-10 09:00:00'),
+(14, 2, 5, 6, 'TN-0004', '황민재', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'hwang.mj@technovacommerce.co.kr','010-2000-0014', '재직', '2023-03-20', '2023-03-20 09:00:00', '2023-03-20 09:00:00'),
+(15, 2, 6, 6, 'TN-0005', '송하은', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'song.he@technovacommerce.co.kr', '010-2000-0015', '재직', '2023-05-02', '2023-05-02 09:00:00', '2023-05-02 09:00:00'),
+(16, 2, 7, 6, 'TN-0006', '권나윤', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'kwon.ny@technovacommerce.co.kr', '010-2000-0016', '재직', '2023-06-15', '2023-06-15 09:00:00', '2023-06-15 09:00:00'),
+(17, 2, 7, 6, 'TN-0007', '배준호', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'bae.jh@technovacommerce.co.kr',  '010-2000-0017', '휴직', '2023-07-01', '2023-07-01 09:00:00', '2023-07-01 09:00:00'),
+(18, 2, 5, 7, 'TN-0008', '노은서', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'no.es@technovacommerce.co.kr',   '010-2000-0018', '재직', '2023-03-25', '2023-03-25 09:00:00', '2023-03-25 09:00:00'),
+(19, 2, 6, 7, 'TN-0009', '홍태민', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'hong.tm@technovacommerce.co.kr', '010-2000-0019', '재직', '2023-05-10', '2023-05-10 09:00:00', '2023-05-10 09:00:00'),
+(20, 2, 7, 7, 'TN-0010', '장하린', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'jang.hr@technovacommerce.co.kr', '010-2000-0020', '퇴직', '2023-08-01', '2023-08-01 09:00:00', '2024-03-01 09:00:00'),
 
 -- ---------- 회사3 : 한빛물류 (emp_id 21~30) ----------
-(21, 3, 8,  8,  'HB-0001', '최강호', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'choi.kh@hanbitlogis.co.kr', '010-3000-0021', '재직', '2023-05-20', '2023-05-20 09:00:00', '2023-05-20 09:00:00'),
-(22, 3, 9,  9,  'HB-0002', '김태형', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'kim.th@hanbitlogis.co.kr',  '010-3000-0022', '재직', '2023-05-25', '2023-05-25 09:00:00', '2023-05-25 09:00:00'),
-(23, 3, 10, 9,  'HB-0003', '이하은', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'lee.he@hanbitlogis.co.kr',  '010-3000-0023', '재직', '2023-06-15', '2023-06-15 09:00:00', '2023-06-15 09:00:00'),
-(24, 3, 11, 9,  'HB-0004', '박서준', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'park.sj@hanbitlogis.co.kr', '010-3000-0024', '재직', '2023-07-10', '2023-07-10 09:00:00', '2023-07-10 09:00:00'),
-(25, 3, 11, 9,  'HB-0005', '정민아', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'jung.ma@hanbitlogis.co.kr', '010-3000-0025', '재직', '2023-08-01', '2023-08-01 09:00:00', '2023-08-01 09:00:00'),
-(26, 3, 9,  10, 'HB-0006', '윤도현', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'yoon.dh@hanbitlogis.co.kr', '010-3000-0026', '재직', '2023-05-25', '2023-05-25 09:00:00', '2023-05-25 09:00:00'),
-(27, 3, 11, 10, 'HB-0007', '김라온', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'kim.ro@hanbitlogis.co.kr',  '010-3000-0027', '재직', '2023-09-01', '2023-09-01 09:00:00', '2023-09-01 09:00:00'),
-(28, 3, 9,  11, 'HB-0008', '서연우', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'seo.yw@hanbitlogis.co.kr',  '010-3000-0028', '재직', '2023-05-25', '2023-05-25 09:00:00', '2023-05-25 09:00:00'),
-(29, 3, 11, 11, 'HB-0009', '임소율', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'lim.sy@hanbitlogis.co.kr',  '010-3000-0029', '재직', '2023-09-15', '2023-09-15 09:00:00', '2023-09-15 09:00:00'),
-(30, 3, 11, 9,  'HB-0010', '한유준', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'han.yj@hanbitlogis.co.kr',  '010-3000-0030', '재직', '2023-10-01', '2023-10-01 09:00:00', '2023-10-01 09:00:00'),
+(21, 3, 8,  8,  'HB-0001', '최강호', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'choi.kh@hanbitlogis.co.kr', '010-3000-0021', '재직', '2023-05-20', '2023-05-20 09:00:00', '2023-05-20 09:00:00'),
+(22, 3, 9,  9,  'HB-0002', '김태형', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'kim.th@hanbitlogis.co.kr',  '010-3000-0022', '재직', '2023-05-25', '2023-05-25 09:00:00', '2023-05-25 09:00:00'),
+(23, 3, 10, 9,  'HB-0003', '이하은', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'lee.he@hanbitlogis.co.kr',  '010-3000-0023', '재직', '2023-06-15', '2023-06-15 09:00:00', '2023-06-15 09:00:00'),
+(24, 3, 11, 9,  'HB-0004', '박서준', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'park.sj@hanbitlogis.co.kr', '010-3000-0024', '재직', '2023-07-10', '2023-07-10 09:00:00', '2023-07-10 09:00:00'),
+(25, 3, 11, 9,  'HB-0005', '정민아', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'jung.ma@hanbitlogis.co.kr', '010-3000-0025', '재직', '2023-08-01', '2023-08-01 09:00:00', '2023-08-01 09:00:00'),
+(26, 3, 9,  10, 'HB-0006', '윤도현', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'yoon.dh@hanbitlogis.co.kr', '010-3000-0026', '재직', '2023-05-25', '2023-05-25 09:00:00', '2023-05-25 09:00:00'),
+(27, 3, 11, 10, 'HB-0007', '김라온', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'kim.ro@hanbitlogis.co.kr',  '010-3000-0027', '재직', '2023-09-01', '2023-09-01 09:00:00', '2023-09-01 09:00:00'),
+(28, 3, 9,  11, 'HB-0008', '서연우', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'seo.yw@hanbitlogis.co.kr',  '010-3000-0028', '재직', '2023-05-25', '2023-05-25 09:00:00', '2023-05-25 09:00:00'),
+(29, 3, 11, 11, 'HB-0009', '임소율', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'lim.sy@hanbitlogis.co.kr',  '010-3000-0029', '재직', '2023-09-15', '2023-09-15 09:00:00', '2023-09-15 09:00:00'),
+(30, 3, 11, 9,  'HB-0010', '한유준', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'han.yj@hanbitlogis.co.kr',  '010-3000-0030', '재직', '2023-10-01', '2023-10-01 09:00:00', '2023-10-01 09:00:00'),
 
 -- ---------- 회사4 : 대한카드 (emp_id 31~40) ----------
-(31, 4, 12, 12, 'DK-0001', '정다은', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'jung.de@daehancard.co.kr', '010-4000-0031', '재직', '2023-07-10', '2023-07-10 09:00:00', '2023-07-10 09:00:00'),
-(32, 4, 13, 13, 'DK-0002', '강지호', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'kang.jh@daehancard.co.kr', '010-4000-0032', '재직', '2023-07-15', '2023-07-15 09:00:00', '2023-07-15 09:00:00'),
-(33, 4, 15, 13, 'DK-0003', '오수아', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'oh.sa@daehancard.co.kr',   '010-4000-0033', '재직', '2023-08-20', '2023-08-20 09:00:00', '2023-08-20 09:00:00'),
-(34, 4, 15, 13, 'DK-0004', '문재윤', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'moon.jy@daehancard.co.kr', '010-4000-0034', '재직', '2023-09-01', '2023-09-01 09:00:00', '2023-09-01 09:00:00'),
-(35, 4, 13, 14, 'DK-0005', '신예은', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'shin.ye@daehancard.co.kr', '010-4000-0035', '재직', '2023-07-15', '2023-07-15 09:00:00', '2023-07-15 09:00:00'),
-(36, 4, 14, 14, 'DK-0006', '류승민', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'ryu.sm@daehancard.co.kr',  '010-4000-0036', '재직', '2023-08-05', '2023-08-05 09:00:00', '2023-08-05 09:00:00'),
-(37, 4, 15, 14, 'DK-0007', '백하늘', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'baek.hn@daehancard.co.kr', '010-4000-0037', '재직', '2023-09-10', '2023-09-10 09:00:00', '2023-09-10 09:00:00'),
-(38, 4, 13, 15, 'DK-0008', '조은채', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'jo.ec@daehancard.co.kr',   '010-4000-0038', '재직', '2023-07-15', '2023-07-15 09:00:00', '2023-07-15 09:00:00'),
-(39, 4, 14, 15, 'DK-0009', '남도윤', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'nam.dy@daehancard.co.kr',  '010-4000-0039', '재직', '2023-08-10', '2023-08-10 09:00:00', '2023-08-10 09:00:00'),
-(40, 4, 15, 15, 'DK-0010', '유시아', '$2b$12$imf2W9R06aoEAGEzxJHlw.VGTvetRombOpukUSk49wH1mzMLjQ726', 'yoo.sa@daehancard.co.kr',  '010-4000-0040', '재직', '2023-09-20', '2023-09-20 09:00:00', '2023-09-20 09:00:00');
+(31, 4, 12, 12, 'DK-0001', '정다은', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'jung.de@daehancard.co.kr', '010-4000-0031', '재직', '2023-07-10', '2023-07-10 09:00:00', '2023-07-10 09:00:00'),
+(32, 4, 13, 13, 'DK-0002', '강지호', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'kang.jh@daehancard.co.kr', '010-4000-0032', '재직', '2023-07-15', '2023-07-15 09:00:00', '2023-07-15 09:00:00'),
+(33, 4, 15, 13, 'DK-0003', '오수아', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'oh.sa@daehancard.co.kr',   '010-4000-0033', '재직', '2023-08-20', '2023-08-20 09:00:00', '2023-08-20 09:00:00'),
+(34, 4, 15, 13, 'DK-0004', '문재윤', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'moon.jy@daehancard.co.kr', '010-4000-0034', '재직', '2023-09-01', '2023-09-01 09:00:00', '2023-09-01 09:00:00'),
+(35, 4, 13, 14, 'DK-0005', '신예은', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'shin.ye@daehancard.co.kr', '010-4000-0035', '재직', '2023-07-15', '2023-07-15 09:00:00', '2023-07-15 09:00:00'),
+(36, 4, 14, 14, 'DK-0006', '류승민', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'ryu.sm@daehancard.co.kr',  '010-4000-0036', '재직', '2023-08-05', '2023-08-05 09:00:00', '2023-08-05 09:00:00'),
+(37, 4, 15, 14, 'DK-0007', '백하늘', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'baek.hn@daehancard.co.kr', '010-4000-0037', '재직', '2023-09-10', '2023-09-10 09:00:00', '2023-09-10 09:00:00'),
+(38, 4, 13, 15, 'DK-0008', '조은채', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'jo.ec@daehancard.co.kr',   '010-4000-0038', '재직', '2023-07-15', '2023-07-15 09:00:00', '2023-07-15 09:00:00'),
+(39, 4, 14, 15, 'DK-0009', '남도윤', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'nam.dy@daehancard.co.kr',  '010-4000-0039', '재직', '2023-08-10', '2023-08-10 09:00:00', '2023-08-10 09:00:00'),
+(40, 4, 15, 15, 'DK-0010', '유시아', '$2a$10$Qci4eB7OsX3GEjYpthpquO.TFoA6ylChzZTyoEdry3K/qS5Y8piHu', 'yoo.sa@daehancard.co.kr',  '010-4000-0040', '재직', '2023-09-20', '2023-09-20 09:00:00', '2023-09-20 09:00:00');
 
 
 -- =====================================================================
@@ -298,10 +298,10 @@ VALUES
 
 
 -- =====================================================================
--- ⑩ appr_form (전자결재 양식) - `for_status (boolean)` 컬럼명은 스키마 원본 그대로
+-- ⑩ appr_form (전자결재 양식) - `for_status` 컬럼명은 스키마 원본 그대로
 -- =====================================================================
 INSERT INTO `appr_form`
-(`for_id`, `com_id`, `for_code`, `for_title`, `for_content`, `for_status (boolean)`, `for_created`, `for_updated`)
+(`for_id`, `com_id`, `for_code`, `for_title`, `for_content`, `for_status`, `for_created`, `for_updated`)
 VALUES
 (1, 1, 'LEAVE-01', '휴가신청서',   '직원의 휴가 신청을 위한 결재 양식입니다.',           1, '2022-01-10 09:00:00', '2022-01-10 09:00:00'),
 (2, 1, 'EXP-01',   '지출결의서',   '업무 관련 지출에 대한 결재 양식입니다.',             1, '2022-01-10 09:00:00', '2022-01-10 09:00:00'),

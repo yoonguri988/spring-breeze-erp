@@ -10,8 +10,7 @@
 
 <nav class="sb-nav" id="sbNav">
   <a class="sb-nav__item" data-page="dashboard" data-tip="대시보드" href="${pageContext.request.contextPath}/">
-    <i class="bi bi-grid-1x2-fill"></i>
-    <span class="sb-nav__label">대시보드</span>
+    <i class="bi bi-grid-1x2-fill"></i><span class="sb-nav__label">대시보드</span>
   </a>
 
   <div class="sb-nav__section">조직 관리</div>

@@ -1,22 +1,16 @@
-/* ==========================================================================
-   SBerp — auth.css  (로그인 · 비밀번호 재설정 페이지 전용)
-   ========================================================================== */
-
-/* ===== Base ===== */
+@charset "UTF-8";
 html, body { height: 100%; margin: 0; }
 body {
   font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== 로그인 페이지 레이아웃 ===== */
 body.login-page {
   display: flex;
   background: #fff;
 }
 .aw { display: flex; width: 100%; min-height: 100vh; }
 
-/* --- 왼쪽 브랜드 패널 --- */
 .ab {
   flex: 0 0 440px;
   background: linear-gradient(150deg, #1e3a8a 0%, #1d4ed8 52%, #3b82f6 100%);
@@ -55,7 +49,7 @@ body.login-page {
 .ab-feat span { font-size: 13.5px; font-weight: 600; }
 .ab-foot { font-size: 12px; opacity: .4; position: relative; z-index: 1; }
 
-/* --- 오른쪽 폼 패널 --- */
+/* --- �삤瑜몄そ �뤌 �뙣�꼸 --- */
 .ap {
   flex: 1; display: flex; align-items: center;
   justify-content: center; padding: 48px 24px; background: #fff;
@@ -66,7 +60,6 @@ body.login-page {
 .a-h { font-size: 26px; font-weight: 750; color: var(--sb-ink); letter-spacing: -.04em; margin: 0 0 6px; }
 .a-sub { font-size: 14px; color: var(--sb-ink-faint); line-height: 1.65; margin: 0 0 32px; }
 
-/* ===== 비밀번호 재설정 페이지 레이아웃 ===== */
 body.reset-page {
   display: flex; align-items: center; justify-content: center;
   min-height: 100vh; padding: 24px; box-sizing: border-box;
@@ -107,7 +100,6 @@ body.reset-page {
 .rp-user-name { font-weight: 700; font-size: 14px; color: var(--sb-ink); }
 .rp-user-sub { font-size: 12px; color: var(--sb-ink-faint); margin-top: 1px; }
 
-/* 비밀번호 강도 */
 .pw-bar-wrap { height: 4px; background: var(--sb-border); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
 .pw-bar { height: 100%; border-radius: 99px; transition: width .3s, background .3s; width: 0; }
 .pw-lbl { font-size: 12px; font-weight: 650; margin-bottom: 14px; min-height: 16px; }
@@ -121,7 +113,6 @@ body.reset-page {
 .pw-req.ok { background: var(--sb-green-soft); color: var(--sb-green); }
 .pw-req i { font-size: 11px; }
 
-/* 완료 애니메이션 */
 @keyframes popIn {
   0%   { transform: scale(.6); opacity: 0; }
   70%  { transform: scale(1.08); }
@@ -138,7 +129,6 @@ body.reset-page {
 .rp-success-sub { font-size: 14px; color: var(--sb-ink-faint); text-align: center; line-height: 1.65; margin-bottom: 28px; }
 .rp-countdown { text-align: center; font-size: 12.5px; color: var(--sb-ink-faint); margin-top: 14px; }
 
-/* ===== 공통 폼 요소 ===== */
 .fl {
   display: block; font-size: 12.5px; font-weight: 650;
   color: var(--sb-ink-soft); margin-bottom: 7px; letter-spacing: .02em;
@@ -174,7 +164,6 @@ body.reset-page {
 }
 .f-err.on { display: flex; }
 
-/* ===== 공통 버튼 ===== */
 .a-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; height: 52px; background: var(--sb-accent); color: #fff; border: none;
@@ -201,7 +190,6 @@ body.reset-page {
 }
 .a-back:hover { color: var(--sb-ink); }
 
-/* ===== 공통 알림 박스 ===== */
 .a-alert {
   display: none; align-items: flex-start; gap: 10px;
   background: var(--sb-red-soft); border: 1px solid #fca5a5;
@@ -219,7 +207,6 @@ body.reset-page {
 .a-success.on { display: flex; }
 .a-success i { font-size: 22px; color: var(--sb-green); flex: 0 0 auto; }
 
-/* ===== 데모 힌트 ===== */
 .a-demo {
   background: var(--sb-accent-soft); border: 1px solid var(--sb-accent-soft-2);
   border-radius: var(--sb-radius-sm); padding: 12px 14px; margin-top: 22px;
@@ -230,7 +217,6 @@ body.reset-page {
   font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px;
 }
 
-/* ===== 반응형 ===== */
 @media (max-width: 860px) {
   .ab { display: none; }
   .ap { background: var(--sb-bg); }

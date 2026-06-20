@@ -14,6 +14,8 @@
 <!-- 스타일 시트 추가 -->
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/company.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/dept.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/my.css" />
 </head>
 <body>
   <div class="sb-app" data-layout="standard">
