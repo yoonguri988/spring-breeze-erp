@@ -103,7 +103,7 @@
 	</select>
 
 	<!-- jsj : 목록 paging -->
-	<select resultType="int" id="selectCnt">
+	<select id="selectCnt" resultType="int">
 		select count(*)
 		from employee e
 		join emp_position p on e.pos_id = p.pos_id

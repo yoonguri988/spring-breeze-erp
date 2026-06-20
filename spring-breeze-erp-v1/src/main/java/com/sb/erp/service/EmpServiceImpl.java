@@ -34,6 +34,8 @@ public class EmpServiceImpl implements EmpService {
 	public List<EmpDto> search(EmpSearchDto dto) {
 		// 로그인 사용자의 회사
 		dto.setComId(getCurrentComId());
+		
+		dto.setPstartno((dto.getPstartno()-1)*dto.getOnepagelist());
 		return dao.search(dto);
 	}
 	
