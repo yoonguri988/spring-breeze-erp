@@ -21,14 +21,14 @@ public class ApprController {
 	
 	@Autowired ApprService appr;
 	
-	// 입력한 회사 찾기
+	
 	@RequestMapping( value = "/searchCompany", method = RequestMethod.GET)
 	@ResponseBody
 	public List<CompanySearchDto> searchCompany(@RequestParam("company") String company){
 		return appr.searchCompany(company);
 	}
 	
-	// 양식 리스트 입력한 값 찾기
+	
 	@RequestMapping( value = "/searchForms", method = RequestMethod.GET)
 	@ResponseBody
 	public List<ApprFormDto> searchForms(@RequestParam("keyword") String keyword,
@@ -50,17 +50,17 @@ public class ApprController {
 		return appr.selectFormList(dto);
 	}
 	
-	// 양식 작성 폼 !권한 부여해야함 관리자 파트임!
+	
 	@RequestMapping( value = "/appr/write_form", method = RequestMethod.GET)
 	public String writeForm() {
 		return "appr/write_form";
 	}
 	
-	// 양식 작성 처리 !권한 부여해야함 관리자 파트임!
+	
 	@RequestMapping( value = "/appr/write_form", method = RequestMethod.POST)
 	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr) {
-		System.out.println("제목 = " + dto.getForTitle());
-		System.out.println("내용 = " + dto.getForContent());
+		System.out.println("�젣紐� = " + dto.getForTitle());
+		System.out.println("�궡�슜 = " + dto.getForContent());
 		
 		if(appr.insertForm(dto) > 0) {
 			return "redirect:/appr/write_form";
@@ -68,19 +68,19 @@ public class ApprController {
 		return "appr/write_form";
 	}
 	
-	// 양식 리스트 폼 !권한!
+	
 	@RequestMapping( value = "/appr/list_form", method = RequestMethod.GET)
 	public String listForm() {
 		return "appr/list_form";
 	}
 	
-	// 일단 만들어는 놨는데 이후 필요없을거같으면 지울예정
+	
 	@RequestMapping( value = "/appr/list_form", method = RequestMethod.POST)
 	public String listForm_post() {
 		return "appr/list_form";
 	}
 	
-	// 양식 수정 폼
+	
 	@RequestMapping( value = "/appr/update_form", method = RequestMethod.GET)
 	public String update(int forId, Model model) {
 		model.addAttribute("dto", appr.selectFormAll(forId));
