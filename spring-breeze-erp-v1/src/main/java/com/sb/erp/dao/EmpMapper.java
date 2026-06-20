@@ -35,10 +35,10 @@ public interface EmpMapper {
     public int countByEmpNo(@Param("empNo")String empNo, @Param("comId") int comId);
     
     
-    
     /*	 paging		*/
 	public int selectCnt(EmpSearchDto dto); 
 
+	
     // 비밀번호 찾기시 해당하는 사원 정보가 있는지 확인
 	public EmpDto selectForVerify(EmpDto dto);
 

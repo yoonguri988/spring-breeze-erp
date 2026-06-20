@@ -65,7 +65,7 @@
 					<option value="">전체 상태</option>
 					<option value="재직"  <c:if test="${search.empStatus == '재직'}">selected</c:if>>재직</option>
 					<option value="휴직"  <c:if test="${search.empStatus == '휴직'}">selected</c:if>>휴직</option>
-					<option value="퇴사"  <c:if test="${search.empStatus == '퇴사'}">selected</c:if>>퇴사</option>
+					<option value="퇴직"  <c:if test="${search.empStatus == '퇴직'}">selected</c:if>>퇴직</option>
 				</select>
 			</div>
 
@@ -135,9 +135,9 @@
 													<span class="pip"></span>휴직
 												</span>
 											</c:when>
-											<c:when test="${dto.empStatus == '퇴사'}">
+											<c:when test="${dto.empStatus == '퇴직'}">
 												<span class="sb-badge sb-badge--red">
-													<span class="pip"></span>퇴사</span>
+													<span class="pip"></span>퇴직</span>
 											</c:when>
 											<c:otherwise>
 												<span class="sb-badge sb-badge--gray">${dto.empStatus}</span>

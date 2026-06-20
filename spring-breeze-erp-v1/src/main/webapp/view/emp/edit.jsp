@@ -117,9 +117,9 @@
 								<c:if test="${emp.empStatus == '휴직'}">selected</c:if>>
 								휴직
 							</option>
-							<option value="퇴사"
-								<c:if test="${emp.empStatus == '퇴사'}">selected</c:if>>
-								퇴사
+							<option value="퇴직"
+								<c:if test="${emp.empStatus == '퇴직'}">selected</c:if>>
+								퇴직
 							</option>
 						</select>
 					</div>

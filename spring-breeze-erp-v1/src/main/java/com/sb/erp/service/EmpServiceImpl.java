@@ -3,12 +3,16 @@ package com.sb.erp.service;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.sb.erp.dao.EmpMapper;
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
+import com.sb.erp.security.CustomUser;
 import com.sb.erp.util.PagingUtil;
+
 
 @Service
 public class EmpServiceImpl implements EmpService {
@@ -18,29 +22,27 @@ public class EmpServiceImpl implements EmpService {
 	// 사원 목록 조회
 	@Override
 	public List<EmpDto> selectAll() {
-		//return dao.selectAll(loginUser.getComId());  // 로그인 사원의 회사
-		return dao.selectAll(1);
+		return dao.selectAll(getCurrentComId());
 	}
 	
 	// empId로 사원 정보 찾기
 	@Override
 	public EmpDto selectByEmpId(int empId) {
-		return dao.selectByEmpId(empId, 1);
+		return dao.selectByEmpId(empId, getCurrentComId());
 	}
 	
 	// 사원 정보 검색
 	@Override
 	public List<EmpDto> search(EmpSearchDto dto) {
-		
-		// com_id 임시 주입 → 로그인 유저 정보로 수정
-		dto.setComId(1);
-				
+		// 로그인 사용자의 회사
+		dto.setComId(getCurrentComId());
 		return dao.search(dto);
 	}
 	
+	// 사원 정보 수정
 	@Override
 	public int insert(EmpDto dto) {
-		dto.setComId(1);
+		dto.setComId(getCurrentComId());
 		dto.setEmpPass(dto.getEmpNo());
 		
 		if(dto.getEmpStatus() == null || dto.getEmpStatus().isEmpty()) {
@@ -57,29 +59,34 @@ public class EmpServiceImpl implements EmpService {
 	/* paging */
 	@Override
 	public int selectCnt(EmpSearchDto dto) {
-		
-		// com_id 임시 주입 → 로그인 유저 정보로 수정2
-		dto.setComId(1);
-		
+		// 로그인 사용자의 회사
+		dto.setComId(getCurrentComId());
 		return dao.selectCnt(dto);
 	}
 
-	/*  이메일 중복검사 */
+	// 이메일 중복검사
 	@Override
 	public boolean isEmailDuplicate(String empEmail) {
 		return dao.countByEmpEmail(empEmail) > 0;
 	}
 	
-	/*  모바일 중복검사 */
+	//  모바일 중복검사
 	@Override
 	public boolean isMobileDuplicate(String empMobile) {
 		return dao.countByEmpMobile(empMobile) > 0;
 	}
 	
-	/* 사번 중복검사 */
+	// 사번 중복검사
 	@Override
 	public boolean isEmpNoDuplicate(String empNo) {
-		return dao.countByEmpNo(empNo, 1) > 0;
+		return dao.countByEmpNo(empNo, getCurrentComId()) > 0;
+	}
+	
+	// 로그인한 유저의 com_id 가져오기
+	private int getCurrentComId() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		CustomUser principal = (CustomUser) auth.getPrincipal();
+		return principal.getDto().getComId();
 	}
 
 

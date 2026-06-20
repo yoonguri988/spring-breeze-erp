@@ -48,9 +48,9 @@
 								<span class="sb-badge sb-badge--amber ms-1">
 								<span class="pip"></span>휴직</span>
 							</c:when>
-							<c:when test="${emp.empStatus == '퇴사'}">
+							<c:when test="${emp.empStatus == '퇴직'}">
 								<span class="sb-badge sb-badge--red ms-1">
-								<span class="pip"></span>퇴사</span>
+								<span class="pip"></span>퇴직</span>
 							</c:when>
 						</c:choose>
 					</div>
@@ -123,8 +123,8 @@
 							<c:when test="${emp.empStatus == '휴직'}">
 								<span class="sb-badge sb-badge--amber"><span class="pip"></span>휴직</span>
 							</c:when>
-							<c:when test="${emp.empStatus == '퇴사'}">
-								<span class="sb-badge sb-badge--red"><span class="pip"></span>퇴사</span>
+							<c:when test="${emp.empStatus == '퇴직'}">
+								<span class="sb-badge sb-badge--red"><span class="pip"></span>퇴직</span>
 							</c:when>
 						</c:choose>
 					</div>
