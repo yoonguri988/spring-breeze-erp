@@ -39,7 +39,10 @@
 		
 		<!-- jyt -->
 		<typeAlias type="com.sb.erp.dto.ResourceDto" alias="ResourceDto"/>
+		<typeAlias type="com.sb.erp.dto.ResSearchDto" alias="ResSearchDto"/>
 		<typeAlias type="com.sb.erp.dto.ReservationDto" alias="ReservationDto"/>
+		<typeAlias type="com.sb.erp.dto.ResvSearchDto" alias="ResvSearchDto"/>
+		<typeAlias type="com.sb.erp.dto.StatsResvDto" alias="StatsResvDto"/>
 		<!-- jyt -->
     
 	</typeAliases>

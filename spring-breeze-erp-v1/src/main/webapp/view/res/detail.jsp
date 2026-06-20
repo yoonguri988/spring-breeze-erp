@@ -6,14 +6,14 @@
   <div class="sb-page-head">
     <div class="sb-page-head__txt">
       <div class="sb-breadcrumb">
-        <a href="${pageContext.request.contextPath}/resv/list">자원 관리</a>
+        <a href="${pageContext.request.contextPath}/res/list">자원 관리</a>
         <i class="bi bi-chevron-right"></i> 자원 상세
       </div>
       <h1>${resource.resName}</h1>
       <p>자원 상세 정보를 확인합니다.</p>
     </div>
     <div class="sb-page-head__actions">
-      <a href="${pageContext.request.contextPath}/reservation/insertForm?resId=${resource.resId}" class="btn btn-sb btn-sm">
+      <a href="${pageContext.request.contextPath}/resv/insertForm?resId=${resource.resId}" class="btn btn-sb btn-sm">
         <i class="bi bi-calendar2-plus"></i> 예약 신청
       </a>
     </div>
@@ -66,40 +66,37 @@
       </div>
 
       <div class="d-flex gap-2 mt-4">
-        <a href="${pageContext.request.contextPath}/resv/update?id=${resource.resId}" class="btn btn-sb">
+        <a href="${pageContext.request.contextPath}/res/update?resId=${resource.resId}" class="btn btn-sb">
           <i class="bi bi-pencil"></i> 수정
         </a>
         <button type="button" class="btn btn-ghost text-danger" onclick="submitDelete('${resource.resId}', 'detail')">
           <i class="bi bi-trash"></i> 삭제
         </button>
-        <a href="${pageContext.request.contextPath}/resv/list" class="btn btn-ghost ms-auto">목록으로</a>
+        <a href="${pageContext.request.contextPath}/res/list" class="btn btn-ghost ms-auto">목록으로</a>
       </div>
     </div>
   </div>
 
-  <form id="deleteForm" action="${pageContext.request.contextPath}/resv/delete" method="post" style="display:none;">
+  <form id="deleteForm" action="${pageContext.request.contextPath}/res/delete" method="post" style="display:none;">
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-    <input type="hidden" name="id" id="deleteResId">
-    <input type="hidden" name="password" id="deletePassword">
+    <input type="hidden" name="resId" id="deleteResId">
+    <input type="hidden" name="empPass" id="deletePassword">
     <input type="hidden" name="returnTo" id="deleteReturnTo">
   </form>
 </main>
 
 <script>
   function submitDelete(resId, returnTo) {
-    var password = window.prompt('삭제 전 비밀번호를 입력하세요.');
-    if (password === null) {
-      return;
-    }
-    if (!password.trim()) {
+    var empPass = window.prompt('삭제 전 비밀번호를 입력하세요.');
+    if (empPass == null) { return; }
+    if (!empPass.trim()) {
       window.alert('비밀번호를 입력해야 삭제할 수 있습니다.');
       return;
     }
     document.getElementById('deleteResId').value = resId;
-    document.getElementById('deletePassword').value = password;
+    document.getElementById('deletePassword').value = empPass;
     document.getElementById('deleteReturnTo').value = returnTo;
     document.getElementById('deleteForm').submit();
   }
 </script>
-
 <%@ include file="/layout/footer.jsp" %>

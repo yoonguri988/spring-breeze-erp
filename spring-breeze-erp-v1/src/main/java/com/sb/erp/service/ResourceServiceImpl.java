@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.ResourceMapper;
+import com.sb.erp.dto.ResSearchDto;
 import com.sb.erp.dto.ResourceDto;
 
 @Service
@@ -16,14 +17,15 @@ public class ResourceServiceImpl implements ResourceService {
     private ResourceMapper resourceDao;
 
     @Override
-    public List<ResourceDto> getResourceList(Map<String, Object> paramMap) {
-        List<ResourceDto> resourceList = resourceDao.selectResourceList(paramMap);
+    public List<ResourceDto> getResourceList(ResSearchDto search) {
+    	search.setPstartno((search.getPstartno()-1)*search.getOnepagelist());
+        List<ResourceDto> resourceList = resourceDao.selectResourceList(search);
         return resourceList;
     }
 
     @Override
-    public int getResourceCount(Map<String, Object> paramMap) {
-        int totalCount = resourceDao.selectResourceCount(paramMap);
+    public int getResourceCount(ResSearchDto search) {
+        int totalCount = resourceDao.selectResourceCount(search);
         return totalCount;
     }
 
@@ -41,11 +43,6 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public void updateResource(ResourceDto resourceDto) {
         resourceDao.updateResource(resourceDto);
-    }
-
-    @Override
-    public int countReservationsByResourceId(int resId) {
-        return resourceDao.countReservationsByResourceId(resId);
     }
 
     @Override

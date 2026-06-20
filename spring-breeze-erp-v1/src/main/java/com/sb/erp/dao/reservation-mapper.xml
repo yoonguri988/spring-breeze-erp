@@ -26,11 +26,11 @@
             AND rv.status = #{status}
         </if>
         ORDER BY rv.rev_id DESC
-        LIMIT #{startRow}, #{pageSize}
+        LIMIT #{pstartno}, #{onepagelist}
     </select>
 
     <!-- 예약 전체 개수 (페이징 계산용) -->
-    <select id="selectReservationCount" parameterType="map" resultType="int">
+    <select id="selectReservationCount" parameterType="ResvSearchDto" resultType="int">
         SELECT COUNT(*)
         FROM reservation rv
         WHERE rv.com_id = #{comId}
@@ -78,13 +78,18 @@
     </update>
 
     <!-- 상태별 개수 (관리자 대시보드 통계카드: 전체 / 대기 / 승인 / 반려) -->
-    <select id="countByStatus" parameterType="map" resultType="int">
-        SELECT COUNT(*)
-        FROM reservation
-        WHERE com_id = #{comId}
-        <if test="status != null and status != ''">
-            AND status = #{status}
-        </if>
+    <select id="countByStats" parameterType="ResvSearchDto" resultType="StatsResvDto">
+    select 
+		(select COUNT(*) from reservation where com_id = 1) as resvTotal,
+		(select COUNT(*) from reservation where com_id = 1 and status='WAI') as waiTotal,
+		(select COUNT(*) from reservation where com_id = 1 and status='APP') as appTotal,
+		(select COUNT(*) from reservation where com_id = 1 and status='REJ') as rejTotal
     </select>
 
+	<!-- 자원 삭제 전에 예약된 자원이 있는지 확인 -->
+    <select id="countReservationsByResourceId" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM reservation
+        WHERE res_id = #{resId}
+    </select>
 </mapper>
