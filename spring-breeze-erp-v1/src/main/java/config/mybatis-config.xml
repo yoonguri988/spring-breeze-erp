@@ -36,6 +36,11 @@
 		<typeAlias type="com.sb.erp.dto.PosDto" alias="PosDto" />
 		<typeAlias type="com.sb.erp.dto.EmpSearchDto" alias="EmpSearchDto" />
 		<!-- jsj -->
+		
+		<!-- jyt -->
+		<typeAlias type="com.sb.erp.dto.ResourceDto" alias="ResourceDto"/>
+		<typeAlias type="com.sb.erp.dto.ReservationDto" alias="ReservationDto"/>
+		<!-- jyt -->
     
 	</typeAliases>
 </configuration>

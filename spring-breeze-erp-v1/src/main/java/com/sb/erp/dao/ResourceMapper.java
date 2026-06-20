@@ -11,10 +11,8 @@ public interface ResourceMapper {
 
     List<ResourceDto> selectResourceList(Map<String, Object> paramMap);
 
-    
     int selectResourceCount(Map<String, Object> paramMap);
 
-    
     ResourceDto selectResourceDetail(int resId);
 
     void insertResource(ResourceDto resourceDto);
