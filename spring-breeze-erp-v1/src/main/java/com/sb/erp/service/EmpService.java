@@ -40,6 +40,7 @@ public interface EmpService {
 	public boolean matchPassword(EmpDto dto);
 	// 해당 부서 id를 통해 사원정보 조회
 	public List<EmpDto> selectByDeptId(int deptId);
+
 	
 
 }

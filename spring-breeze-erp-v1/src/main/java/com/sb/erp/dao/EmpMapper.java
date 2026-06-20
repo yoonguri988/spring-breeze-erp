@@ -54,4 +54,13 @@ public interface EmpMapper {
 	// 아이디를 기준으로 사원 정보 확인
 	public List<EmpDto> selectByDeptId(int deptId);
 
+    // 비밀번호 찾기시 해당하는 사원 정보가 있는지 확인
+	public EmpDto selectForVerify(EmpDto dto);
+
+	// 비밀번호 재설정
+	public int updatePassByEmpId(EmpDto dto);
+
+	// 이메일을 기준으로 사용자 정보 확인
+	public EmpDto selectByEmpEmail(@Param("empEmail") String empEmail);
+
 }

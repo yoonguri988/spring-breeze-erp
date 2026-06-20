@@ -127,7 +127,6 @@
 		</where>
 	</select>
 
-
 	<!-- cyj: 비밀번호 찾기시 해당하는 사원정보가 있는지 확인 -->
 	<select id="selectForVerify" parameterType="EmpDto" resultType="EmpDto">
 		select *
