@@ -1,5 +1,7 @@
 package com.sb.erp.controller;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.ProjectMemberDto;
 import com.sb.erp.dto.TaskDto;
+import com.sb.erp.service.EmpService;
 import com.sb.erp.service.ProjectMemberService;
 import com.sb.erp.service.TaskService;
 
@@ -17,49 +20,47 @@ import com.sb.erp.service.TaskService;
 public class TaskController {
 	@Autowired TaskService service;
 	@Autowired ProjectMemberService memberservice;
+	@Autowired EmpService empservice;
 
-	
-	/*
-	 * @RequestMapping(value = "/proj/task_list", method = RequestMethod.GET) public
-	 * String taskList(int task_id, Model model) { model.addAttribute("list",
-	 * service.selectAll(task_id)); model.addAttribute("task_id", task_id); return
-	 * "proj/task_detail"; }// 해당 프로젝트-태스크 리스트
-	 * 
-	 * 
-	 */
-	/*
-	 * @RequestMapping("/proj/task_create") public String list(@RequestParam int
-	 * pro_project_id,Model model) { List<ProjectMemberDto>members =
-	 * memberservice.selectByproject(pro_project_id);
-	 * model.addAttribute("members",members);
-	 * model.addAttribute("pro_project_id",pro_project_id); return
-	 * "proj/task/create"; }
-	 */
-	
-	/*
-	 * @RequestMapping(value="/proj/task_create") public String list(@RequestParam
-	 * int project_pro_id ,Model model) {
-	 * model.addAttribute("memberlist",memberservice.selectByproject(project_pro_id)
-	 * ); return "proj/task_create"; }   ?project_pro_id=3
-	 */
-	@RequestMapping(value="proj/task_create", method=RequestMethod.GET)
+	@RequestMapping(value="/proj/task_create", method=RequestMethod.GET)
 	public String createFrom(@RequestParam int project_pro_id, Model model) {
-		System.out.println("..................."+memberservice.selectByproject(project_pro_id));
-		
 		model.addAttribute("memberlist",memberservice.selectByproject(project_pro_id));
 		model.addAttribute("pro_id",project_pro_id);
-		return "proj/task_create";
+		return "proj/task_create"; // 프로젝트 멤버 이름 출력
 	}
 	
-	 @RequestMapping(value="proj/task_create", method=RequestMethod.POST) 
-	 public String create(TaskDto dto) {
+	 @RequestMapping(value="/proj/task_create", method=RequestMethod.POST) 
+	 public String create(TaskDto dto,RedirectAttributes rttr, HttpSession session) {
+		 //Integer comId = (Integer) session.getAttribute("comId");
 		 dto.setComId(1);
 		 ProjectMemberDto member = memberservice.selectOne(dto.getPmId());
+		 if (member == null) {
+			 rttr.addFlashAttribute("result", "유효하지 않은 담당자입니다.");
+			 return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();
+		 }
+		 
 		 dto.setPmIdName(member.getEmpName());
-	
-		 service.insert(dto);
-		 return "redirect:/proj/task_create?project_pro_id="+dto.getProId();
-	 }
+		 
+		 String result="태스크 등록 실패";
+		 if(service.insert(dto)>0) {result="태스크 등록 성공";}
+		 rttr.addFlashAttribute("result",result);
+		 return "redirect:/proj/proj_detail?pro_id="+dto.getProId();
+	 	} // 태스크 등록
+	 
+		/*태스크 등록2
+		 * @RequestMapping(value="proj/task_create", method=RequestMethod.POST) public
+		 * String create(TaskDto dto, Authentication authentication, RedirectAttributes
+		 * rttr) { EmpDto loginEmp =
+		 * empService.selectByEmpEmail(authentication.getName());
+		 * dto.setComId(loginEmp.getComId());
+		 * 
+		 * ProjectMemberDto member = memberservice.selectOne(dto.getPmId());
+		 * dto.setPmIdName(member.getEmpName());
+		 * 
+		 * String result = "태스크 등록 실패"; if (service.insert(dto) > 0) { result =
+		 * "태스크 등록 성공"; } rttr.addFlashAttribute("result", result); return
+		 * "redirect:/proj/proj_detail?pro_id=" + dto.getProId(); }
+		 */
 	
 	  @RequestMapping(value="/proj/task_detail",method=RequestMethod.GET) 
 	 public String view(int task_id,Model model) {
@@ -79,15 +80,17 @@ public class TaskController {
 	  
 	  @RequestMapping(value="/proj/task_edit", method=RequestMethod.POST)
 	 public String edit(TaskDto dto,RedirectAttributes rttr) {
-		  String result= "수정실패";
-		  if(service.update(dto)>0) {result="수정성공";}
+		  String result= "태스크 수정 실패";
+		  if(service.update(dto)>0) {result="태스크 수정 성공";}
 			rttr.addFlashAttribute("result",result);
 			return "redirect:/proj/task_detail?task_id="+dto.getTaskId();
-	  }
+	  } //태스크 수정폼
 	  
 	  @RequestMapping(value="/proj/task_delete", method=RequestMethod.GET)
-	  public String delete(int task_id, @RequestParam("pro_id")int pro_id) {
-		  service.delete(task_id);
+	  public String delete(int task_id, @RequestParam("pro_id")int pro_id,RedirectAttributes rttr) {
+		  String result="태스크 삭제 실패";
+		  if(service.delete(task_id)>0) {result="태스크 삭제 성공";}
+		  rttr.addFlashAttribute("result",result);
 		  return "redirect:/proj/proj_detail?pro_id="+pro_id;
-	  }
+	  }// 태스크 삭제
 }
