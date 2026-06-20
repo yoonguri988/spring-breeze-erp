@@ -3,6 +3,8 @@ package com.sb.erp.service;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.sb.erp.dto.ProjectDto;
 
 public interface ProjectService {
@@ -17,5 +19,6 @@ public interface ProjectService {
 	public int selectCnt();
 	
 	List<ProjectDto> selectByPeriod(String startDate, String endDate);
+	public List<ProjectDto> searchByKeyword(@Param("keyword") String keyword);
 	
 }

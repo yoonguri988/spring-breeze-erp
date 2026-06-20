@@ -35,6 +35,7 @@ public class ProjectServiceImpl implements ProjectService{
 	
     @Override public int selectCnt() { return dao.selectCnt(); }
 
-	@Override public List<ProjectDto> selectByPeriod(String startDate, String endDate) {  return dao.selectByPeriod(startDate, endDate); } 
-	
+	@Override public List<ProjectDto> selectByPeriod(String startDate, String endDate) {  return dao.selectByPeriod(startDate, endDate); }
+
+	@Override public List<ProjectDto> searchByKeyword(String keyword) {  return dao.searchByKeyword(keyword); } 
 }

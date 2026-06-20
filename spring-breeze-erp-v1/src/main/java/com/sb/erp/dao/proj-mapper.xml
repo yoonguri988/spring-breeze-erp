@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.ProjectMapper">
+
+	<select id="searchByKeyword" parameterType="String" resultType="ProjectDto">
+    select p.*, e.emp_name,
+           (select count(*) from project_member pm where pm.project_pro_id = p.pro_id) as memberCnt
+    from project p
+    join employee e on p.emp_id = e.emp_id
+    join company c on p.com_id = c.com_id
+    where p.pro_name like concat('%', #{keyword}, '%')
+    order by p.pro_id desc
+</select>
 	
 	<!-- 프로젝트 생성 -->
 	<insert id="insert" parameterType="ProjectDto">
