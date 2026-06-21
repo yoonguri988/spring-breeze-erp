@@ -28,8 +28,8 @@
       <security:intercept-url  pattern="/auth/resetPass" access="permitAll" />
       <!-- <security:intercept-url  pattern="/auth/**"    access="isAuthenticated()" /> -->
 	
-      <!-- KJY -->
-      <security:intercept-url  pattern="/appr/**" access="isAuthenticated()"/>
+      <!-- KJY : 2차 프로젝트때 페이지 접근 권한은 조금 열어놓고 메서드쪽에서 어노테이션으로 막아야할거같음 -->
+      <security:intercept-url  pattern="/appr/**" access="hasAuthority('ROOT')"/>
       <!-- KJY -->
       
       <!-- jsj -->
@@ -55,6 +55,10 @@
    	  <security:intercept-url pattern="/dept/**" access="isAuthenticated()"/>
    	  <!-- cyj -->
    	  
+   	  <!-- CDY -->
+   	  <security:intercept-url pattern="/proj/**" access="isAuthenticated()"/>
+   	  <!-- CDY -->
+   	   
 	  <security:form-login
 	  	  login-page="/auth/login"
 	  	  login-processing-url="/auth/login"

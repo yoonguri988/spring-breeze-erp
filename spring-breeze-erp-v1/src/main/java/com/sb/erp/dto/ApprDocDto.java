@@ -1,5 +1,7 @@
 package com.sb.erp.dto;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -15,4 +17,5 @@ public class ApprDocDto {
 	private String docUpdated;
 	
 	private String docName;
+	private List<ApprLineDto> apprLines;
 }
