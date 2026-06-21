@@ -28,7 +28,7 @@ public class ApprController {
 	
 	@Autowired ApprService appr;
 	
-	// 입력한 회사 찾기
+	
 	@RequestMapping( value = "/searchCompany", method = RequestMethod.GET)
 	@ResponseBody
 	public List<CompanySearchDto> searchCompany(@RequestParam("company") String company){

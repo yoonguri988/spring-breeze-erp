@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.CompanyMapper;
 import com.sb.erp.dao.DeptMapper;
+import com.sb.erp.dto.ComSearchDto;
 import com.sb.erp.dto.CompanyDto;
+import com.sb.erp.dto.StatsComDto;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {
@@ -15,15 +17,16 @@ public class CompanyServiceImpl implements CompanyService {
 	@Autowired DeptMapper deptDao;
 
 	@Override
-	public List<CompanyDto> list(String keyword, int onepagelist, int pstarValue) {
-		return dao.selectAll(keyword, onepagelist, (pstarValue-1)*onepagelist);
+	public List<CompanyDto> list(ComSearchDto dto) {
+		// keyword, onepagelist, (pstarValue-1)*onepagelist
+		dto.setPstarValue((dto.getPstarValue()-1)*dto.getOnepagelist());
+		return dao.selectAll(dto);
 	}
 
 	@Override
 	public int add(CompanyDto dto) {
-		// »ç¾÷ÀÚ ¹øÈ£ Áßº¹ °ËÁõ
 		if(dto.getBizNo() != null && dao.selectByBizNo(dto.getBizNo()) != null) {
-			throw new IllegalArgumentException("ÀÌ¹Ì µî·ÏµÈ »ç¾÷ÀÚ¹øÈ£ÀÔ´Ï´Ù.");
+			throw new IllegalArgumentException("ì¤‘ë³µëœ ì‚¬ì—…ìž ë²ˆí˜¸");
 		}
 		return dao.insert(dto);
 	}
@@ -45,11 +48,9 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Override
 	public int delete(int comId) {
-		// ¼Ò¼ÓµÈ ºÎ¼­°¡ Á¸ÀçÇÑ´Ù¸é È¸»ç »èÁ¦ Ã³¸® ºÒ°¡
 		if(deptDao.countActiveDepts(comId) > 0) {
-			throw new IllegalArgumentException("¼Ò¼Ó ºÎ¼­°¡ Á¸ÀçÇÏ¿© »èÁ¦ÇÒ ¼ö ¾ø½À´Ï´Ù.");
+			throw new IllegalArgumentException("í•˜ìœ„ ë¶€ì„œê°€ ì¡´ìž¬í•˜ëŠ” ê²½ìš°, íšŒì‚¬ ì‚­ì œ ë¶ˆê°€ëŠ¥");
 		}
-		// »èÁ¦ Ã³¸®
 		return dao.delete(comId);
 	}
 
@@ -59,9 +60,19 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public int listTotal(String keyword) {
-		return dao.listTotal(keyword);
+	public int listTotal(ComSearchDto search) {
+		return dao.listTotal(search);
 
+	}
+
+	@Override
+	public StatsComDto selectStats() {
+		return dao.selectStats();
+	}
+
+	@Override
+	public CompanyDto selectOneByEmpId(int empId) {
+		return dao.selectOneByEmpId(empId);
 	}
 
 }

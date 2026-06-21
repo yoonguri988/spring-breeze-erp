@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class ResourceDto {
-
     private int resId;           
     private int comId;           
     private String resCode;     
@@ -14,6 +13,4 @@ public class ResourceDto {
     private String remark;       
     private String createdAt; 
     private String updatedAt; 
-
-    
 }
