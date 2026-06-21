@@ -108,7 +108,17 @@ public class ProjectController {
 	}
 	
 	@RequestMapping(value="/proj/proj_edit", method=RequestMethod.POST)
-	public String edit_post(ProjectDto dto,RedirectAttributes rttr) { //수정처리
+	public String edit_post(ProjectDto dto,RedirectAttributes rttr, Authentication authentication) { //수정처리
+		ProjectDto origin = service.select(dto.getProId());
+		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
+
+		boolean isAdmin = authentication.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
+
+		if (!isAdmin && origin.getEmpId() != loginEmp.getEmpId()) {
+			rttr.addFlashAttribute("result", "프로젝트 생성자 또는 관리자만 수정할 수 있습니다.");
+			return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();
+		}
 		String result="프로젝트 수정 실패";
 		if(service.edit(dto)>0) {result="프로젝트 수정 성공";}
 		rttr.addFlashAttribute("result",result);
