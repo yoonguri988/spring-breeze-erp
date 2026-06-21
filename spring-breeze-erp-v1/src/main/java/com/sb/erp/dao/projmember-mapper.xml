@@ -20,7 +20,7 @@ or e.emp_no like concat('%', #{keyword}, '%'))
  where p.pro_id = #{value};
 </select>
 
-<!-- 멤버 이름 등록 -->
+<!-- pm_id로 멤버 1명 조회 (담당자 유효성 검증 + 이름 확보용) -->
 <select id="selectOne" parameterType="int" resultType="ProjectMemberDto">
 select pm.*, e.emp_name
 from project_member pm
@@ -40,8 +40,8 @@ where pm.pm_id = #{pmId}
 	delete from project_member where pm_id=#{pmId}
 </delete>
 
-
-    <select id="selectByproject" parameterType="int" resultType="ProjectMemberDto">
+<!-- 해당 프로젝트에 참여 중인 멤버 목록 -->
+<select id="selectByproject" parameterType="int" resultType="ProjectMemberDto">
 	select pm.pm_id, e.emp_name
 	from project_member pm
 	join employee e on pm.emp_id = e.emp_id

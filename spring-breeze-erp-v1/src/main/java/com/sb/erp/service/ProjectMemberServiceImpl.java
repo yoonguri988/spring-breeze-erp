@@ -13,16 +13,22 @@ import com.sb.erp.dto.ProjectMemberDto;
 public class ProjectMemberServiceImpl implements ProjectMemberService{
 	@Autowired ProjectMemberMapper dao;
 	
+	//프로젝트 멤버 추가
 	@Override public int insert(ProjectMemberDto dto) {  return dao.insert(dto); }
-
+	
+	//프로젝트 멤버 삭제
 	@Override public int delete(int pm_id) {  return dao.delete(pm_id); }
-
+	
+	//프로젝트 참여 인원 조회
 	@Override public List<ProjectMemberDto> select(int pro_id) { return dao.select(pro_id); }
-
+	
+	//해당 프로젝트에 참여 중인 멤버 목록
 	@Override public List<ProjectMemberDto> selectByproject(int project_pro_id) {  return dao.selectByproject(project_pro_id); }
-
+	
+	//프로젝트 등록-메버 이름,유효성 체크
 	@Override public ProjectMemberDto selectOne(int pmId) {  return dao.selectOne(pmId); }
-
+	
+	//사원 이름,번호 조회
 	@Override public List<EmpDto> searchEmpForProject(int comId, String keyword) { return dao.searchEmpForProject(comId, keyword); }
 
 }
