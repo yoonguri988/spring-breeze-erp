@@ -13,17 +13,23 @@ import com.sb.erp.dto.ProjectDto;
 public class ProjectServiceImpl implements ProjectService{
 	@Autowired ProjectMapper dao;
 
+	//프로젝트 등록
 	@Override public int insert(ProjectDto dto) {  return dao.insert(dto); }
 
+	//상태별 조회
 	@Override public List<ProjectDto> selectByStatus(String pro_status) 
 	{  return dao.selectByStatus(pro_status); }
 
+	//프로젝트 상세보기
 	@Override public ProjectDto select(int pro_id) {  return dao.select(pro_id); }
-
+	
+	//프로젝트 삭세
 	@Override public int delete(int pro_id) {  return dao.delete(pro_id); }
-
+	
+	//프로젝트 수정
 	@Override public int edit(ProjectDto dto) {  return dao.update(dto); }
-
+	
+	//프로젝트 수정뷰
 	@Override public ProjectDto editView(int pro_id) {  return dao.select(pro_id); }
 
 	/*paging*/
@@ -34,8 +40,10 @@ public class ProjectServiceImpl implements ProjectService{
 		return dao.select10(map); }
 	
     @Override public int selectCnt() { return dao.selectCnt(); }
-
+    
+    //기간조회
 	@Override public List<ProjectDto> selectByPeriod(String startDate, String endDate) {  return dao.selectByPeriod(startDate, endDate); }
-
+	
+	//프로젝트명 검색
 	@Override public List<ProjectDto> searchByKeyword(String keyword) {  return dao.searchByKeyword(keyword); } 
 }
