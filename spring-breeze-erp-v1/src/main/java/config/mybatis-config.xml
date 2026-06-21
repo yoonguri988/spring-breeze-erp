@@ -27,6 +27,12 @@
 		<typeAlias type="com.sb.erp.dto.StatsDeptDto" alias="StatsDeptDto" />		
 		<!-- cyj -->
 		
+		<!-- CDY -->
+		<typeAlias type="com.sb.erp.dto.ProjectDto" alias="ProjectDto" />
+		<typeAlias type="com.sb.erp.dto.ProjectMemberDto" alias="ProjectMemberDto" />
+		<typeAlias type="com.sb.erp.dto.TaskDto" alias="TaskDto" />
+		<!-- CDY -->
+		
 		<!-- Son.C.K -->
 		<typeAlias type="com.sb.erp.dto.BoardDto"    alias="BoardDto"/>
         <!-- Son.C.K -->

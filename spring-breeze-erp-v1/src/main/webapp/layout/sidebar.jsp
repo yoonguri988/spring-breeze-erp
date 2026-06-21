@@ -29,7 +29,7 @@
     <i class="bi bi-file-earmark-text"></i><span class="sb-nav__label">전자문서 · 결재</span>
     <span class="sb-nav__badge">5</span>
   </a>
-  <a class="sb-nav__item" data-page="projects" data-tip="프로젝트" href="#">
+  <a class="sb-nav__item" data-page="projects" data-tip="프로젝트" href="${pageContext.request.contextPath}/proj/proj_list">
     <i class="bi bi-kanban"></i>
     <span class="sb-nav__label">프로젝트 및 태스크</span>
   </a>

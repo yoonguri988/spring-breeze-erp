@@ -56,6 +56,10 @@
    	  <security:intercept-url pattern="/dept/**" access="isAuthenticated()"/>
    	  <!-- cyj -->
    	  
+   	  <!-- CDY -->
+   	  <security:intercept-url pattern="/proj/**" access="isAuthenticated()"/>
+   	  <!-- CDY -->
+   	   
 	  <security:form-login
 	  	  login-page="/auth/login"
 	  	  login-processing-url="/auth/login"
