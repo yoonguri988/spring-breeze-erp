@@ -78,7 +78,7 @@
 		emp_email = #{empEmail},
 		emp_mobile = #{empMobile},
 		emp_status = #{empStatus}
-		where emp_id = #{empId}
+		where emp_id = #{empId} and com_id = #{comId}
 	</update>
 
 	<!-- jsj : 이메일 중복 검사 -->

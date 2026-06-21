@@ -53,6 +53,7 @@ public class EmpServiceImpl implements EmpService {
 	
 	@Override
 	public int update(EmpDto dto) {
+		dto.setComId(getCurrentComId());
 	    return dao.update(dto);
 	}
 	@Override

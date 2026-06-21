@@ -18,6 +18,7 @@
 	</resultMap>
 
 	<resultMap id="authMap" type="AuthDto">
+		<result property="auth" column="aut_name" />
 		<result property="autName" column="aut_name" />
 	</resultMap>
 
