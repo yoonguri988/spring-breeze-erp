@@ -6,7 +6,7 @@
 	 <div class="sb-page-head">
 	 	<div class="sb-page-head__txt">
 	 		<div class="sb-breadcrumb">
-		 		<a href="${pageContext.request.contextPath}/appr/list_form">전자결재</a>
+		 		<a href="${pageContext.request.contextPath}/appr/list">전자결재</a>
 		 		<i class="bi bi-chevron-right"></i>
 		 		<span>양식관리</span>
 	 		</div>
@@ -15,7 +15,7 @@
 	 	</div>
 	 	<div class="sb-page-head__actions">
 		 	<button type="button" class="btn btn-ghost"
-		 			onclick="location.href='${pageContext.request.contextPath}/appr/list_form'">
+		 			onclick="location.href='${pageContext.request.contextPath}/appr/list'">
 		 			목록으로
 		 	</button>
 	 	</div>
@@ -40,17 +40,15 @@
 					</div>
 
 					<div class="col-md-6 position-relative">	
-						<label for="companySearch"
+						<label for="comName"
 							   class="sb-form-label">양식 추가할 회사</label>
-						<div class="sb-search" style="max-width: 100%;">
+							<div class="sb-search">
 							<i class="bi bi-building"></i>
-							<input type="text" id="companySearch"
-								   placeholder="회사이름 입력" autocomplete="off"/>
-						</div>	
-							<input type="hidden" id="comId" name="comId" />
-						<div id="companyDropdown"
-							 class="dropdown-menu w-100 shadow-sm"
-							 style="display: none; max-height: 200px; overflow-y: auto; z-index: 1050;"></div>
+							<input type="text" id="comName" name="comName" value="${param.comName}"
+								   placeholder="회사명" autocomplete="off" />
+							<input type="hidden" id="comId" name="comId" value="${param.comId}"/>
+						</div>
+						<div class="ac-list" id="acList"></div>
 					</div>
 				</div>
 					
@@ -130,65 +128,90 @@
 		return true;
 	}
 
-	window.addEventListener("load", function(){
-		
-		let companySearch = document.getElementById("companySearch");
-		let comId = document.getElementById("comId");
-		let companyDropdown = document.getElementById("companyDropdown");
-		
-		// 입력 할때마다 실행
-		companySearch.addEventListener("keyup", function(e){
-			let value = e.target.value.trim();
-			
-			if(value !== "") {
-				// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
-				fetch("${pageContext.request.contextPath}/searchCompany?company=" + encodeURIComponent(value))
-				.then(response => response.json())
-				.then(data => {
-					console.log(data);
-					companyDropdown.innerHTML = ""; // 기존 목록 비우기
-					
-					if(data && data.length > 0){
-						companyDropdown.style.display = "block";
-						
-						data.forEach(item => {
-							let btn = document.createElement("button");
-							btn.type = "button";
-							btn.className = "dropdown-item";
-							btn.textContent = item.companyName; // 보여줄 회사이름
-							
-							// 검색해서 나온 회사 이름 클릭
-							btn.addEventListener("click", function(){
-								companySearch.value = item.companyName; // 회사이름 넣기
-								comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
-								companyDropdown.style.display = "none"; // 드롭다운 닫기
-							});
-							companyDropdown.appendChild(btn);
-						});
-					}
-					else{ // 검색결과 없을때
-						companyDropdown.innerHTML = "<span class='dropdown-item text-muted disabled'>검색 결과가 없습니다.</span>";
-						companyDropdown.style.display = "block";
-					}
-				})
-				.catch(error => {
-					console.error("회사 검색 오류:",error);
-					companyDropdown.style.display = "none";
-				});
-			}
-			else{ // 입력란 비어있을때 처리
-				comId.value = "";
-				companyDropdown.innerHTML = "";
-				companyDropdown.style.display = "none";
-				
-			}
-		});
-		// 입력창 외부공간 클릭시 정리
-		document.addEventListener("click", function(e){
-			if(e.target !== companySearch && e.target !== companyDropdown){
-				companyDropdown.style.display = "none";
-			}
-		});
-	});
+	(function () {
+	    "use strict";
+		const CTX = "${pageContext.request.contextPath}";
+		/* ===================== 회사 이름 실시간 자동완성 ===================== */
+	    const kwInput = document.getElementById("comName");
+	    const comId = document.getElementById("comId");
+	    const acList  = document.getElementById("acList");
+	    let debounceTimer = null;
+	    let acIndex = -1;
+
+	    kwInput.addEventListener("input", function () {
+	        const kw = this.value.trim();
+	        clearTimeout(debounceTimer);
+	        if (!kw) { hideAc(); return; }
+	        debounceTimer = setTimeout(() => fetchSuggest(kw), 220);
+	    });
+
+	    kwInput.addEventListener("keydown", function (e) {
+	        const items = [...acList.querySelectorAll(".ac-item")];
+	        if (!items.length) return;
+	        if (e.key === "ArrowDown") { e.preventDefault(); acIndex = Math.min(acIndex + 1, items.length - 1); }
+	        else if (e.key === "ArrowUp") { e.preventDefault(); acIndex = Math.max(acIndex - 1, 0); }
+	        else if (e.key === "Enter" && acIndex >= 0) { e.preventDefault(); items[acIndex].dispatchEvent(new Event("mousedown")); return; }
+	        else return;
+	        items.forEach((it, i) => it.classList.toggle("active", i === acIndex));
+	    });
+
+	    document.addEventListener("click", function (e) {
+	        if (!kwInput.contains(e.target) && !acList.contains(e.target)) hideAc();
+	    });
+
+	    function fetchSuggest(kw) {
+	        fetch(CTX + "/com/suggest?keyword=" + encodeURIComponent(kw))
+	            .then(function (res) {
+	                if (!res.ok) throw new Error("network error");
+	                return res.json();
+	            })
+	            .then(function (data) { renderAc(data, kw); })
+	            .catch(hideAc);
+	    }
+
+	    function renderAc(data, kw) {
+	        acList.innerHTML = "";
+	        acIndex = -1;
+
+	        if (!data || data.length === 0) {
+	            acList.innerHTML = '<div class="ac-empty">일치하는 회사가 없습니다.</div>';
+	            acList.classList.add("show");
+	            return;
+	        }
+
+	        data.forEach(function (item) {
+	            const div = document.createElement("div");
+	            div.className = "ac-item";
+	            div.innerHTML =
+	                '<i class="bi bi-building text-faint"></i>'
+	                + '<span>' + highlight(item.comName, kw) + '</span>'
+	                + '<span class="ac-item__meta">' + (item.bizNo || "") + '</span>';
+
+	            div.addEventListener("mousedown", function (e) {
+	                e.preventDefault(); // blur 방지
+	                kwInput.value = item.comName;
+	                comId.value = item.comId;
+	                hideAc();
+	                document.getElementById("searchForm").submit();
+	            });
+
+	            acList.appendChild(div);
+	        });
+
+	        acList.classList.add("show");
+	    }
+
+	    function highlight(text, kw) {
+	        if (!kw) return text;
+	        const escaped = kw.replace(/[.*+?^$\x7B\x7D()|[\]\\]/g, "\\$&");
+	        return text.replace(new RegExp("(" + escaped + ")", "gi"), "<b>$1</b>");
+	    }
+
+	    function hideAc() {
+	        acList.classList.remove("show");
+	        acList.innerHTML = "";
+	        acIndex = -1;
+	    }
+	})();
 </script>
 <%@include file="/layout/footer.jsp"%>

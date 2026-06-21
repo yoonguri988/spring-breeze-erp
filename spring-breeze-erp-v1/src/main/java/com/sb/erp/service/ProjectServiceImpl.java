@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.ProjectMapper;
 import com.sb.erp.dto.ProjectDto;
+import com.sb.erp.dto.ProjectSearchDto;
 
 @Service
 public class ProjectServiceImpl implements ProjectService{
@@ -33,11 +34,10 @@ public class ProjectServiceImpl implements ProjectService{
 	@Override public ProjectDto editView(int pro_id) {  return dao.select(pro_id); }
 
 	/*paging*/
-	@Override public List<ProjectDto> select10(int pstartno) {
-		HashMap<String,Integer> map = new HashMap<>();
-		map.put("start", (pstartno-1)*10);
-		map.put("end", 10);
-		return dao.select10(map); }
+	@Override public List<ProjectDto> selectAll(ProjectSearchDto search) {
+		search.setPstartno((search.getPstartno()-1) * search.getOnepagelist());
+		return dao.selectAll(search);
+	}
 	
     @Override public int selectCnt() { return dao.selectCnt(); }
     

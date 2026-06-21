@@ -100,7 +100,7 @@
 			</if>
 		</where>
 		order by f.for_id desc
-		limit #{page}, #{pageSize}
+		limit #{pstartno}, #{onepagelist}
 	</select>
 	
 	<!-- 오류날거 대비 코드 냄겨놓기

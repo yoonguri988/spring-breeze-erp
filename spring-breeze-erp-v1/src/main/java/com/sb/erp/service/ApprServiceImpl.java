@@ -14,31 +14,28 @@ import com.sb.erp.dto.CompanySearchDto;
 
 @Service
 public class ApprServiceImpl implements ApprService {
-	
-	@Autowired ApprMapper mapper;
-
-	
+	@Autowired ApprMapper dao;
 	
 	@Override
 	public String getCompanyName(int comId) {
-		return mapper.getCompanyName(comId);
+		return dao.getCompanyName(comId);
 	}
 	
 	@Override
 	public List<CompanySearchDto> searchCompany(String keyword) {
-		return mapper.searchCompany(keyword);
+		return dao.searchCompany(keyword);
 	}
 
 	@Override
 	public int listFormCnt(ApprFormSearchDto dto) {
-		return mapper.listFormCnt(dto);
+		return dao.listFormCnt(dto);
 	}
 	
 	///////////////////////// 양식 관련 기능 //////////////////////////////////
 	
 	@Override
 	public ApprFormDto selectFormAll(int forId) {
-		return mapper.selectFormAll(forId);
+		return dao.selectFormAll(forId);
 	}
 
 	@Override
@@ -58,7 +55,7 @@ public class ApprServiceImpl implements ApprService {
 			dto.setForStatus(false);
 		}
 		
-		return mapper.insertForm(dto);
+		return dao.insertForm(dto);
 	}
 
 	@Override
@@ -71,17 +68,18 @@ public class ApprServiceImpl implements ApprService {
 		
 		dto.setForUpdated(setTime);
 		
-		return mapper.updateForm(dto);
+		return dao.updateForm(dto);
 	}
 
 	@Override
 	public int deleteForm(int forId) {
-		return mapper.deleteForm(forId);
+		return dao.deleteForm(forId);
 	}
 
 	@Override
 	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto) {
-		return mapper.selectFormList(dto);
+		dto.setPstartno((dto.getPstartno()-1)*dto.getOnepagelist());
+		return dao.selectFormList(dto);
 	}
 
 	///////////////////////// 양식 관련 기능 //////////////////////////////////

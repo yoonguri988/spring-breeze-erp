@@ -3,7 +3,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@include file="/layout/header.jsp" %>
-
+<main class="sb-content">
 <div class="sb-page-head">
   <div class="sb-page-head__txt">
     <div class="sb-breadcrumb"><a href="${pageContext.request.contextPath}/index.jsp">홈</a> <i class="bi bi-chevron-right"></i> 업무 <i class="bi bi-chevron-right"></i> 프로젝트 <i class="bi bi-chevron-right"></i> 수정</div>
@@ -65,7 +65,7 @@
     </form>
   </div>
 </div>
-
+</main>
 <script>
 function check(){
 	 let proName = document.getElementById("pro_name");

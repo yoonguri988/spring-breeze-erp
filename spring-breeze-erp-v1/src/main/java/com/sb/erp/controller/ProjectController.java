@@ -1,5 +1,6 @@
 package com.sb.erp.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.ProjectDto;
+import com.sb.erp.dto.ProjectSearchDto;
 import com.sb.erp.service.EmpService;
 import com.sb.erp.service.ProjectMemberService;
 import com.sb.erp.service.ProjectService;
@@ -30,14 +32,25 @@ public class ProjectController {
 	@Autowired ProjectMemberService memberService;
 	@Autowired EmpService empService;
 	
-	@RequestMapping(value="/proj/search", method=RequestMethod.GET) // 프로젝트명 검색
-	public String searchByKeyword(String keyword, Model model,
-			@RequestParam(value="pstartno", defaultValue = "1")int pstartno) {
-		List<ProjectDto> list = service.searchByKeyword(keyword); //페이징
-		model.addAttribute("paging", new PagingUtil(list.size(), pstartno));
+	// 프로젝트 목록 페이지
+	@RequestMapping(value = "/proj/proj_list", method = RequestMethod.GET) // 전체출력시
+	public String listselect(ProjectSearchDto search, Model model) {
+		// 1) 검색 조건이 null
+		boolean isEmpty = !search.hasSearchCondition();
+
+		PagingUtil paging = null;
+		List<ProjectDto> list = new ArrayList<>();
+		if (isEmpty) {
+			paging = new PagingUtil(0, search.getPstartno());
+		} else {
+			paging = new PagingUtil(service.selectCnt(), search.getPstartno());
+			list = service.selectAll(search);
+		}
+
+		model.addAttribute("paging", paging);// 페이징
 		model.addAttribute("list", list);
-	    return "proj/proj_list";
-	}
+		return "proj/proj_list";
+	}	
 	
 	@ResponseBody
 	@RequestMapping(value="/proj/empSearch", method=RequestMethod.GET)//사원 조회
@@ -47,29 +60,6 @@ public class ProjectController {
 	    return memberService.searchEmpForProject(comId, keyword);
 	}
 	
-	@RequestMapping(value="/proj/period", method=RequestMethod.GET)//기간조회
-	public String selectByPeriod(String startDate, String endDate, Model model,
-			@RequestParam(value="pstartno", defaultValue = "1") int pstartno) {
-		List<ProjectDto> list = service.selectByPeriod(startDate, endDate);//페이징
-		model.addAttribute("paging", new PagingUtil(list.size(), pstartno));
-		model.addAttribute("list", list);
-	    return "proj/proj_list";
-	}
-	
-	@RequestMapping(value="/proj/proj_list" , method=RequestMethod.GET) //전체출력시
-	public String listselect(Model model, @RequestParam(value="pstartno", defaultValue = "1")int pstartno) {
-		model.addAttribute("paging", new PagingUtil(service.selectCnt(),pstartno));//페이징
-		model.addAttribute("list", service.select10(pstartno));
-		return "proj/proj_list";}
-	
-	@RequestMapping(value="/proj/status", method=RequestMethod.GET) //상태별조회
-	public String selectByStatus(String pro_status, Model model,
-			@RequestParam(value="pstartno", defaultValue = "1") int pstartno) {
-		List<ProjectDto> list = service.selectByStatus(pro_status);//페이징
-		model.addAttribute("paging", new PagingUtil(list.size(), pstartno));
-		model.addAttribute("list", list);
-		return "proj/proj_list";
-	}
 	
 	@RequestMapping(value="/proj/proj_create",method=RequestMethod.GET)
 	public String insert() {return "proj/proj_create";} //등록

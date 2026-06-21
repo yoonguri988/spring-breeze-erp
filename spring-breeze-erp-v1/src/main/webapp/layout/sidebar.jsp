@@ -20,34 +20,34 @@
   <a class="sb-nav__item" data-page="employees" data-tip="사원관리" href="${pageContext.request.contextPath}/emp/list">
     <i class="bi bi-people"></i><span class="sb-nav__label">사원관리</span>
   </a>
-  <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" href="${pageContext.request.contextPath}/perm/list">
+  <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" href="${pageContext.request.contextPath}/auth/list">
     <i class="bi bi-shield-lock"></i><span class="sb-nav__label">권한 관리</span>
   </a>
 
   <div class="sb-nav__section">업무</div>
-  <a class="sb-nav__item" data-page="documents" data-tip="전자결재" href="${pageContext.request.contextPath}/appr/list_form">
+  <a class="sb-nav__item" data-page="documents" data-tip="전자결재" href="${pageContext.request.contextPath}/appr/list">
     <i class="bi bi-file-earmark-text"></i><span class="sb-nav__label">전자문서 · 결재</span>
-    <span class="sb-nav__badge">5</span>
+    <!-- <span class="sb-nav__badge">5</span> -->
   </a>
   <a class="sb-nav__item" data-page="projects" data-tip="프로젝트" href="${pageContext.request.contextPath}/proj/proj_list">
     <i class="bi bi-kanban"></i>
     <span class="sb-nav__label">프로젝트 및 태스크</span>
   </a>
-  <a class="sb-nav__item" data-page="notices" data-tip="공지 관리" href="#">
+  <a class="sb-nav__item" data-page="notices" data-tip="공지 관리" href="${pageContext.request.contextPath}/notice/list">
     <i class="bi bi-megaphone"></i>
     <span class="sb-nav__label">공지 관리</span>
   </a>
 
   <div class="sb-nav__section">자산</div>
-  <a class="sb-nav__item" data-page="resources" data-tip="자원 관리" href="${pageContext.request.contextPath}/resv/list">
+  <a class="sb-nav__item" data-page="resources" data-tip="자원 관리" href="${pageContext.request.contextPath}/res/list">
     <i class="bi bi-collection"></i>
     <span class="sb-nav__label">자원 관리</span>
   </a>
-  <a class="sb-nav__item" data-page="reservation" data-tip="예약 내역" href="${pageContext.request.contextPath}/reservation/list">
+  <a class="sb-nav__item" data-page="reservation" data-tip="예약 내역" href="${pageContext.request.contextPath}/resv/list">
     <i class="bi bi-calendar2-check"></i>
     <span class="sb-nav__label">예약 내역</span>
   </a>
-  <sec:authorize access="hasRole('ROLE_ADMIN')">
+  <sec:authorize access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')">
     <a class="sb-nav__item" data-page="approval" data-tip="예약 승인 관리" href="${pageContext.request.contextPath}/admin/approval/list">
       <i class="bi bi-clipboard-check"></i>
       <span class="sb-nav__label">예약 승인 관리</span>
