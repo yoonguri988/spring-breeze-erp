@@ -1,88 +1,60 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>자원 등록</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <style>
-        body { background:#F4F6FB; font-family:'Segoe UI','Noto Sans KR',sans-serif; }
-        .page-card { background:#fff; border:1px solid #E2E8F0; border-radius:10px; padding:24px; max-width:600px; margin:0 auto; }
-    </style>
-</head>
-<body class="p-4">
-<div class="container">
-
-    <div class="mb-3">
-        <h4 class="fw-bold mb-0">자원 등록</h4>
-        <p class="text-muted mb-0" style="font-size:13px;">새로운 자원 정보를 입력해주세요.</p>
+﻿<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ include file="/layout/header.jsp" %>
+<main class="sb-content">
+  <div class="sb-page-head">
+    <div class="sb-page-head__txt">
+      <div class="sb-breadcrumb">
+        <a href="${pageContext.request.contextPath}/res/list">자원 관리</a>
+        <i class="bi bi-chevron-right"></i> 예약 신청
+      </div>
+      <h1>자원 예약 신청</h1>
+      <p>사용할 자원과 수량을 선택하면 관리자 승인 대기 상태로 접수됩니다.</p>
     </div>
-
-    <div class="page-card">
-        <!-- Controller의 @RequestMapping(value="/resv/insert", method=POST) 와 정확히 일치 -->
-        <form action="${pageContext.request.contextPath}/resv/insert" method="post">
-		 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-		
-            <!-- 자원코드 -->
-            <div class="mb-3">
-                <label for="resCode" class="form-label fw-bold">
-                    자원코드 <span class="text-danger">*</span>
-                </label>
-                <input type="text" name="resCode" id="resCode"
-                       class="form-control" placeholder="예: RM004" required>
-            </div>
-
-            <!-- 자원명 -->
-            <div class="mb-3">
-                <label for="resName" class="form-label fw-bold">
-                    자원명 <span class="text-danger">*</span>
-                </label>
-                <input type="text" name="resName" id="resName"
-                       class="form-control" placeholder="예: 신규 회의실" required>
-            </div>
-
-            <!-- 자원타입 -->
-            <div class="mb-3">
-                <label for="resType" class="form-label fw-bold">
-                    자원타입 <span class="text-danger">*</span>
-                </label>
-                <select name="resType" id="resType" class="form-select" required>
-                  
-                    <option value="ROOM">회의실 (ROOM)</option>
-                </select>
-            </div>
-
-            <!-- 수량 -->
-            <div class="mb-3">
-                <label for="quantity" class="form-label fw-bold">
-                    수량 <span class="text-danger">*</span>
-                </label>
-                <input type="number" name="quantity" id="quantity"
-                       class="form-control" placeholder="0" min="0" value="1" required>
-            </div>
-
-            <!-- 비고 -->
-            <div class="mb-4">
-                <label for="remark" class="form-label fw-bold">비고</label>
-                <input type="text" name="remark" id="remark"
-                       class="form-control" placeholder="비고를 입력하세요 (선택)">
-            </div>
-
-            <!-- 버튼 -->
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-fill">
-                    <i class="bi bi-check-lg"></i> 등록
-                </button>
-                <a href="${pageContext.request.contextPath}/resv/list" class="btn btn-secondary">
-                    취소
-                </a>
-            </div>
-
-        </form>
+  </div>
+  <div class="sb-card" style="max-width:720px">
+    <div class="sb-card__head">
+      <h2>예약 정보</h2>
+      <span class="sub">예약 상태는 최초 대기로 저장됩니다.</span>
     </div>
-</div>
+    <div class="sb-card__body">
+      <form action="${pageContext.request.contextPath}/resv/insert" method="post">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <div class="mb-3">
+          <label for="resId" class="sb-form-label">예약 자원</label>
+          <select name="resId" id="resId" class="form-select" required>
+            <option value="">자원을 선택하세요</option>
+            <c:forEach var="r" items="${resourceList}">
+              <option value="${r.resId}" ${not empty resource and resource.resId == r.resId ? 'selected' : ''}>
+                ${r.resName} (${r.resCode}) / 보유 수량 ${r.quantity}
+              </option>
+            </c:forEach>
+          </select>
+        </div>
+        <c:if test="${not empty resource}">
+          <div class="mb-3 p-3" style="background:var(--sb-accent-soft);border-radius:10px">
+            <div class="text-faint mb-1">선택된 자원</div>
+            <div style="font-weight:750">${resource.resName}</div>
+            <div class="text-soft">${resource.resCode} / 보유 수량 ${resource.quantity}</div>
+          </div>
+        </c:if>
+        <div class="mb-3">
+          <label for="quantity" class="sb-form-label">예약 수량</label>
+          <input type="number" name="quantity" id="quantity" class="form-control" min="1" value="1" required>
+        </div>
+        <div class="mb-4">
+          <label for="remark" class="sb-form-label">신청 사유</label>
+          <textarea name="remark" id="remark" class="form-control" rows="4" placeholder="사용 목적이나 요청 사항을 입력하세요"></textarea>
+        </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-sb">
+            <i class="bi bi-check-lg"></i> 예약 신청
+          </button>
+          <a href="${pageContext.request.contextPath}/res/list" class="btn btn-ghost">취소</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+<%@ include file="/layout/footer.jsp" %>

@@ -184,7 +184,7 @@
                     <th class="num" style="width:110px">
                         임직원 수
                     </th>
-                    <th style="width:170px"></th>
+                    <th style="width:170px; text-align: center">관리</th>
                 </tr>
             </thead>
             <tbody>
@@ -239,6 +239,11 @@
                         </td>
                         <td>
                             <div class="d-flex justify-content-end gap-1">
+                            	<a class="sb-iconbtn"
+                            	   href="${pageContext.request.contextPath}/com/detail?comId=${com.comId}"
+                            	   title="상세보기">
+                            		<i class="bi bi-book"></i>
+                            	</a>
                                 <a class="sb-iconbtn"
                                    href="${pageContext.request.contextPath}/com/edit?comId=${com.comId}"
                                    title="수정">

@@ -1,6 +1,5 @@
 package com.sb.erp.service;
 
-import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -11,7 +10,6 @@ import com.sb.erp.dao.EmpMapper;
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
 import com.sb.erp.security.CustomUser;
-import com.sb.erp.util.PagingUtil;
 
 
 @Service
@@ -55,6 +53,18 @@ public class EmpServiceImpl implements EmpService {
 	public int update(EmpDto dto) {
 	    return dao.update(dto);
 	}
+	@Override
+	public EmpDto selectForVerify(EmpDto dto) {
+		return dao.selectForVerify(dto);
+	}
+	@Override
+	public int updatePassByEmpId(EmpDto dto) {
+		return dao.updatePassByEmpId(dto);
+	}
+	@Override
+	public EmpDto selectByEmpEmail(String empEmail) {
+		return dao.selectByEmpEmail(empEmail);
+	}
 
 	/* paging */
 	@Override
@@ -87,20 +97,6 @@ public class EmpServiceImpl implements EmpService {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		CustomUser principal = (CustomUser) auth.getPrincipal();
 		return principal.getDto().getComId();
-	}
-
-
-	@Override
-	public EmpDto selectForVerify(EmpDto dto) {
-		return dao.selectForVerify(dto);
-	}
-	@Override
-	public int updatePassByEmpId(EmpDto dto) {
-		return dao.updatePassByEmpId(dto);
-	}
-	@Override
-	public EmpDto selectByEmpEmail(String empEmail) {
-		return dao.selectByEmpEmail(empEmail);
 	}
 
 	@Override

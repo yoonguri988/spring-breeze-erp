@@ -127,7 +127,6 @@
 		</where>
 	</select>
 
-
 	<!-- cyj: 비밀번호 찾기시 해당하는 사원정보가 있는지 확인 -->
 	<select id="selectForVerify" parameterType="EmpDto" resultType="EmpDto">
 		select *
@@ -159,9 +158,10 @@
 	</select>
 	<!-- cyj: 부서 아이디를 기준으로 사원 정보 확인-->
 	<select id="selectByDeptId" resultType="EmpDto">
-		select *
-		from employee
-		where dept_id = #{deptId}
+		select e.*, p.pos_name
+		from employee e
+		join emp_position p on e.pos_id = p.pos_id
+		where e.dept_id = #{deptId}
 	</select>
 
 </mapper>
