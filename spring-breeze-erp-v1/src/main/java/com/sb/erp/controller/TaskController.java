@@ -31,10 +31,10 @@ public class TaskController {
 	
 	 @RequestMapping(value="/proj/task_create", method=RequestMethod.POST) 
 	 public String create(TaskDto dto,RedirectAttributes rttr, HttpSession session) {
-		 //Integer comId = (Integer) session.getAttribute("comId");
-		 dto.setComId(1);
+		 Integer comId = (Integer) session.getAttribute("comId");
+		 dto.setComId(comId); //해당회사의
 		 ProjectMemberDto member = memberservice.selectOne(dto.getPmId());
-		 if (member == null) {
+		 if (member == null) { //방어코드
 			 rttr.addFlashAttribute("result", "유효하지 않은 담당자입니다.");
 			 return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();
 		 }
@@ -46,21 +46,6 @@ public class TaskController {
 		 rttr.addFlashAttribute("result",result);
 		 return "redirect:/proj/proj_detail?pro_id="+dto.getProId();
 	 	} // 태스크 등록
-	 
-		/*태스크 등록2
-		 * @RequestMapping(value="proj/task_create", method=RequestMethod.POST) public
-		 * String create(TaskDto dto, Authentication authentication, RedirectAttributes
-		 * rttr) { EmpDto loginEmp =
-		 * empService.selectByEmpEmail(authentication.getName());
-		 * dto.setComId(loginEmp.getComId());
-		 * 
-		 * ProjectMemberDto member = memberservice.selectOne(dto.getPmId());
-		 * dto.setPmIdName(member.getEmpName());
-		 * 
-		 * String result = "태스크 등록 실패"; if (service.insert(dto) > 0) { result =
-		 * "태스크 등록 성공"; } rttr.addFlashAttribute("result", result); return
-		 * "redirect:/proj/proj_detail?pro_id=" + dto.getProId(); }
-		 */
 	
 	  @RequestMapping(value="/proj/task_detail",method=RequestMethod.GET) 
 	 public String view(int task_id,Model model) {
