@@ -19,24 +19,40 @@
 		<!-- KJY -->
 
 		<!-- cyj -->
+		<typeAlias type="com.sb.erp.dto.PermDto" alias="PermDto" />		
+		<typeAlias type="com.sb.erp.dto.ComSearchDto" alias="ComSearchDto" />		
+		<typeAlias type="com.sb.erp.dto.StatsComDto" alias="StatsComDto" />		
 		<typeAlias type="com.sb.erp.dto.CompanyDto" alias="CompanyDto" />		
 		<typeAlias type="com.sb.erp.dto.DeptDto" alias="DeptDto" />
+		<typeAlias type="com.sb.erp.dto.StatsDeptDto" alias="StatsDeptDto" />		
 		<!-- cyj -->
 		
+<<<<<<< HEAD
 		<!-- CDY -->
 		<typeAlias type="com.sb.erp.dto.ProjectDto" alias="ProjectDto" />
 		<typeAlias type="com.sb.erp.dto.ProjectMemberDto" alias="ProjectMemberDto" />
 		<typeAlias type="com.sb.erp.dto.TaskDto" alias="TaskDto" />
 		<!-- CDY -->
 		
+=======
+>>>>>>> 82c6c34bb0ef9152b31a8b71cfca67a3f0aee4cc
 		<!-- Son.C.K -->
 		<typeAlias type="com.sb.erp.dto.BoardDto"    alias="BoardDto"/>
         <!-- Son.C.K -->
+        
 		<!-- jsj -->
 		<typeAlias type="com.sb.erp.dto.EmpDto" alias="EmpDto" />
 		<typeAlias type="com.sb.erp.dto.PosDto" alias="PosDto" />
 		<typeAlias type="com.sb.erp.dto.EmpSearchDto" alias="EmpSearchDto" />
 		<!-- jsj -->
+		
+		<!-- jyt -->
+		<typeAlias type="com.sb.erp.dto.ResourceDto" alias="ResourceDto"/>
+		<typeAlias type="com.sb.erp.dto.ResSearchDto" alias="ResSearchDto"/>
+		<typeAlias type="com.sb.erp.dto.ReservationDto" alias="ReservationDto"/>
+		<typeAlias type="com.sb.erp.dto.ResvSearchDto" alias="ResvSearchDto"/>
+		<typeAlias type="com.sb.erp.dto.StatsResvDto" alias="StatsResvDto"/>
+		<!-- jyt -->
     
 	</typeAliases>
 </configuration>

@@ -15,6 +15,6 @@
 
 ### 실행 방법
 
-(예시)Prerequisites — Java 버전, Node 버전 등 요구사항<br/>
-설치 & 실행 명령어 — git clone → 환경변수 설정 → 빌드 → 실행 순서<br/>
-application.yml 설정 항목 설명 (DB 연결, JWT 시크릿 등)<br/>
+(예시)Prerequisites — Java 버전, Node 버전 등 요구사항 <br/>
+설치 & 실행 명령어 — git clone → 환경변수 설정 → 빌드 → 실행 순서 <br/>
+application.yml 설정 항목 설명 (DB 연결, JWT 시크릿 등) <br/>
