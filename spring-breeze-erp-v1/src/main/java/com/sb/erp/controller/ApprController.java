@@ -170,6 +170,7 @@ public class ApprController {
 		return "appr/update_form";
 	}
 	
+	// 양식 삭제 처리
 	@RequestMapping("/appr/delete")
 	public String delete(int forId) {
 		appr.deleteForm(forId);

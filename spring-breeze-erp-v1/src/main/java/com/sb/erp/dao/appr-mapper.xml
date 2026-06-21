@@ -137,7 +137,7 @@
 	</select>
 	 -->
 	
-	<!-- 결재 양식 리스트 기능 구문 / 얘네 일단 보류 -->
+	<!-- 결재 양식 리스트 기능 구문 -->
 	<select id="listFormCnt" resultType="int" parameterType="ApprFormSearchDto">
 		select count(*)
 		from appr_form
@@ -161,16 +161,15 @@
 	
 	
 	
-	
-	<!-- 결재 문서 sql 구문 -->
+	<!-- 결재 문서 sql 구문 / 2차 진행때 주석 풀고 이어 작성할 예정-->
 	
 	<!-- 결재 문서 테이블 모든 필드 조회 -->
-	<select id="selectDocAll" resultType="ApprDocDto">
+	<!-- <select id="selectDocAll" resultType="ApprDocDto">
 		select * from appr_doc
-	</select>
+	</select> -->
 	
 	<!-- 결재 문서 검색어별 출력 1. 내가 작성한 문서들 -->
-	<select id="selectDocList" parameterType="map" resultType="map">
+	<!-- <select id="selectDocList" parameterType="map" resultType="map">
 		select
 			d.doc_id,
 			d.doc_title,
@@ -221,11 +220,11 @@
 			<result property="linOrder" column="lin_order"/>
 			<result property="linStatus" column="lin_status"/>
 		</collection>
-	</resultMap>
+	</resultMap> -->
 	<!-- 결재 문서 검색어별 출력 -->
 	
 	<!-- 결재 문서 페이징 기능 -->
-	<select id="apprDocCnt" parameterType="map" resultType="int">
+	<!-- <select id="apprDocCnt" parameterType="map" resultType="int">
 		select
 			count(*)
 		from
@@ -241,7 +240,7 @@
 				and d.doc_title like concat('%', #{keyword}, '%')
 			</if>
 		</where>
-	</select>
+	</select> -->
 	<!-- 결재 문서 페이징 기능 -->
 	
 	<!-- 결재 문서 sql 구문 -->
@@ -252,9 +251,9 @@
 	<!-- 결재선 sql 구문 -->
 	
 	<!-- 결재선 테이블 모든 필드 조회 -->
-	<select id="selectLineAll" resultType="ApprLineDto">
+	<!-- <select id="selectLineAll" resultType="ApprLineDto">
 		select * from appr_line		
-	</select>
+	</select> -->
 	
 	<!-- 결재선 sql 구문 -->
 	
