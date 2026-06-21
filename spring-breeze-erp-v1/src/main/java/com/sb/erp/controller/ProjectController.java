@@ -31,43 +31,43 @@ public class ProjectController {
 	@Autowired EmpService empService;
 	
 	@RequestMapping(value="/proj/search", method=RequestMethod.GET) // 프로젝트명 검색
-	public String searchByKeyword(String keyword, Model model) {
-	    model.addAttribute("list", service.searchByKeyword(keyword));
+	public String searchByKeyword(String keyword, Model model,
+			@RequestParam(value="pstartno", defaultValue = "1")int pstartno) {
+		List<ProjectDto> list = service.searchByKeyword(keyword); //페이징
+		model.addAttribute("paging", new PagingUtil(list.size(), pstartno));
+		model.addAttribute("list", list);
 	    return "proj/proj_list";
 	}
 	
 	@ResponseBody
 	@RequestMapping(value="/proj/empSearch", method=RequestMethod.GET)//사원 조회
 	public List<EmpDto> empSearch(@RequestParam String keyword, HttpSession session) {
-	   //Integer comId = (Integer) session.getAttribute("comId");
-		int comId = 1;
+	    Integer comId = (Integer) session.getAttribute("comId");//해당 회사의 해당 사원을 조회할것
+		
 	    return memberService.searchEmpForProject(comId, keyword);
 	}
 	
-	/*//사원조회2
-	 * @ResponseBody
-	 * @RequestMapping(value="/proj/empSearch", method=RequestMethod.GET) public 
-	 * List<EmpDto> empSearch(@RequestParam String keyword, Authentication
-	 * authentication) { EmpDto loginEmp =
-	 * empService.selectByEmpEmail(authentication.getName()); return
-	 * memberService.searchEmpForProject(loginEmp.getComId(), keyword); }
-	 */
-	
 	@RequestMapping(value="/proj/period", method=RequestMethod.GET)//기간조회
-	public String selectByPeriod(String startDate, String endDate, Model model) {
-	    model.addAttribute("list", service.selectByPeriod(startDate, endDate));
+	public String selectByPeriod(String startDate, String endDate, Model model,
+			@RequestParam(value="pstartno", defaultValue = "1") int pstartno) {
+		List<ProjectDto> list = service.selectByPeriod(startDate, endDate);//페이징
+		model.addAttribute("paging", new PagingUtil(list.size(), pstartno));
+		model.addAttribute("list", list);
 	    return "proj/proj_list";
 	}
 	
 	@RequestMapping(value="/proj/proj_list" , method=RequestMethod.GET) //전체출력시
 	public String listselect(Model model, @RequestParam(value="pstartno", defaultValue = "1")int pstartno) {
-		model.addAttribute("paging", new PagingUtil(service.selectCnt(),pstartno));
+		model.addAttribute("paging", new PagingUtil(service.selectCnt(),pstartno));//페이징
 		model.addAttribute("list", service.select10(pstartno));
 		return "proj/proj_list";}
 	
 	@RequestMapping(value="/proj/status", method=RequestMethod.GET) //상태별조회
-	public String selectByStatus(String pro_status, Model model) {
-		model.addAttribute("list",service.selectByStatus(pro_status));
+	public String selectByStatus(String pro_status, Model model,
+			@RequestParam(value="pstartno", defaultValue = "1") int pstartno) {
+		List<ProjectDto> list = service.selectByStatus(pro_status);//페이징
+		model.addAttribute("paging", new PagingUtil(list.size(), pstartno));
+		model.addAttribute("list", list);
 		return "proj/proj_list";
 	}
 	
@@ -79,32 +79,19 @@ public class ProjectController {
 	public String insert_post(ProjectDto dto, HttpSession session,
 			RedirectAttributes rttr) { //등록처리
 		
-		/*
-		 * Integer empId = (Integer) session.getAttribute("emp_id"); Integer comId =
-		 * (Integer) session.getAttribute("com_id"); if (empId == null) { return
-		 * "redirect:/auth/login"; } dto.setComId(comId); dto.setEmpId(empId);
-		*/
-		dto.setComId(1);
-		dto.setEmpId(1);
+		Integer empId = (Integer) session.getAttribute("empId"); //로그인한 사원의 정보를 가져옴
+		Integer comId = (Integer) session.getAttribute("comId");
+		
+		if (empId == null || comId == null) { return "redirect:/auth/login"; }//로그인 사용자가 아니라면 로그인화면으로
+		
+		dto.setComId(comId);
+		dto.setEmpId(empId);
 		 
 		String result="프로젝트 등록 실패";
 	   if(service.insert(dto)>0) {result="프로젝트 등록 성공";}
 	   rttr.addFlashAttribute("result",result);
 	  return "redirect:/proj/proj_list";
 	}
-	
-	/*//등록처리2
-	 * @RequestMapping(value="/proj/proj_create", method=RequestMethod.POST) public
-	 * String insert_post(ProjectDto dto, Authentication authentication, 
-	 * RedirectAttributes rttr) {
-	 * 
-	 * EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
-	 * 
-	 * dto.setComId(loginEmp.getComId()); dto.setEmpId(loginEmp.getEmpId());
-	 * 
-	 * String result="프로젝트 등록 실패"; if(service.insert(dto)>0) {result="프로젝트 등록 성공";}
-	 * rttr.addFlashAttribute("result",result); return "redirect:/proj/proj_list"; }
-	 */
 	
 	@RequestMapping(value="/proj/proj_detail", method=RequestMethod.GET)
 	public String select(int pro_id, Model model) { //상세
@@ -129,7 +116,16 @@ public class ProjectController {
 	}
 	
 	@RequestMapping(value="/proj/delete", method=RequestMethod.GET) //삭제
-	public String delete(int pro_id,RedirectAttributes rttr) {
+	public String delete(int pro_id,RedirectAttributes rttr, Authentication authentication) {
+		ProjectDto dto = service.select(pro_id);
+		
+		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
+		boolean isAdmin = authentication.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
+		if (!isAdmin && dto.getEmpId() != loginEmp.getEmpId()) {
+			rttr.addFlashAttribute("result", "프로젝트 생성자 또는 관리자만 삭제할 수 있습니다.");//권한,프로젝트 생성자만 삭제가능
+			return "redirect:/proj/proj_detail?pro_id=" + pro_id;
+		}
 		
 		String result="프로젝트 삭제 실패";
 		
