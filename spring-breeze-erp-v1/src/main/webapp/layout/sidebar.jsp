@@ -20,14 +20,14 @@
   <a class="sb-nav__item" data-page="employees" data-tip="사원관리" href="${pageContext.request.contextPath}/emp/list">
     <i class="bi bi-people"></i><span class="sb-nav__label">사원관리</span>
   </a>
-  <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" href="${pageContext.request.contextPath}/perm/list">
+  <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" href="${pageContext.request.contextPath}/auth/list">
     <i class="bi bi-shield-lock"></i><span class="sb-nav__label">권한 관리</span>
   </a>
 
   <div class="sb-nav__section">업무</div>
-  <a class="sb-nav__item" data-page="documents" data-tip="전자결재" href="${pageContext.request.contextPath}/appr/list_form">
+  <a class="sb-nav__item" data-page="documents" data-tip="전자결재" href="${pageContext.request.contextPath}/appr/list">
     <i class="bi bi-file-earmark-text"></i><span class="sb-nav__label">전자문서 · 결재</span>
-    <span class="sb-nav__badge">5</span>
+    <!-- <span class="sb-nav__badge">5</span> -->
   </a>
   <a class="sb-nav__item" data-page="projects" data-tip="프로젝트" href="${pageContext.request.contextPath}/proj/proj_list">
     <i class="bi bi-kanban"></i>

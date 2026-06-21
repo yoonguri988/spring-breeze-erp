@@ -11,7 +11,7 @@ window.addEventListener("load",function(){
 	else if (result.length!=0){alert(result);}
 });
 </script>
-
+<main class="sb-content">
 <div class="sb-page-head">
   <div class="sb-page-head__txt">
     <div class="sb-breadcrumb"><a href="${pageContext.request.contextPath}/index.jsp">홈</a> <i class="bi bi-chevron-right"></i> 업무 <i class="bi bi-chevron-right"></i> 프로젝트 <i class="bi bi-chevron-right"></i> 태스크 상세</div>
@@ -67,5 +67,5 @@ window.addEventListener("load",function(){
     </table>
   </div>
 </div>
-
+</main>
 <%@include file="/layout/footer.jsp" %>

@@ -1,11 +1,11 @@
 package com.sb.erp.service;
 
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
 import com.sb.erp.dto.ProjectDto;
+import com.sb.erp.dto.ProjectSearchDto;
 
 public interface ProjectService {
 	//프로젝트 등록
@@ -27,7 +27,7 @@ public interface ProjectService {
 	public ProjectDto editView(int pro_id);
 	
 	/* paging */
-	public List<ProjectDto> select10(int pstartno);
+	public List<ProjectDto> selectAll(ProjectSearchDto search);
 	public int selectCnt();
 	
 	//기간조회

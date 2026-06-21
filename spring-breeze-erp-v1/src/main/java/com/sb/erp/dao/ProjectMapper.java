@@ -1,11 +1,11 @@
 package com.sb.erp.dao;
 
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
 import com.sb.erp.dto.ProjectDto;
+import com.sb.erp.dto.ProjectSearchDto;
 
 @Mapper
 public interface ProjectMapper {
@@ -25,7 +25,7 @@ public interface ProjectMapper {
 	public int update(ProjectDto dto);
 	
 	/* paging */
-	public List<ProjectDto> select10(HashMap<String,Integer> map);
+	public List<ProjectDto> selectAll(ProjectSearchDto search);
 	public int selectCnt();
 	
 	//기간조회

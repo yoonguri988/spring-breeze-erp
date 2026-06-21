@@ -163,5 +163,14 @@
 		join emp_position p on e.pos_id = p.pos_id
 		where e.dept_id = #{deptId}
 	</select>
-
+	<!-- cyj: 회사 아이디를 기준으로 권한 정보와 엮여있는 사원 정보 확인 -->
+	<select id="selectAuthByComId" resultType="EmpAuthDto">
+		select e.emp_id, e.emp_name, e.emp_no, p.pos_name, d.dept_name, a.aut_name
+		from employee e 
+		join emp_position p on e.pos_id = p.pos_id
+		join department d on e.dept_id = d.dept_id
+		join emp_auth ea on e.emp_id = ea.emp_id
+		join authority a on a.aut_id = ea.aut_id and e.com_id = a.com_id
+		where e.com_id = #{comId}
+	</select>
 </mapper>
