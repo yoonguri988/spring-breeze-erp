@@ -1,5 +1,5 @@
 <%@page import="java.time.LocalDate"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@include file="/layout/header.jsp" %>
@@ -63,9 +63,9 @@ window.addEventListener("load",function(){
             </c:choose>
           </td></tr>
           <tr><th>생성자</th><td>${dto.empName}</td></tr>
-          <tr><th>시작일</th><td class="tnum">${dto.startDate}</td></tr>
-          <tr><th>종료일</th><td class="tnum">${dto.endDate}</td></tr>
-          <tr><th>등록일</th><td class="tnum">${dto.createdAt}</td></tr>
+          <tr><th>시작일</th><td class="tnum"><fmt:formatDate value="${dto.startDate}" pattern="yyyy-MM-dd"/></td></tr>
+		  <tr><th>종료일</th><td class="tnum"><fmt:formatDate value="${dto.endDate}" pattern="yyyy-MM-dd"/></td></tr>
+		  <tr><th>등록일</th><td class="tnum"><fmt:formatDate value="${dto.createdAt}" pattern="yyyy-MM-dd"/></td></tr>
         </table>
       </div>
     </div>

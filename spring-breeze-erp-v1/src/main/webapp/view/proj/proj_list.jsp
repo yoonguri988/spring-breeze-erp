@@ -87,7 +87,7 @@ window.addEventListener("load",function(){
       <div class="sb-empty"><i class="bi bi-folder2-open"></i><p>조회된 프로젝트가 없습니다.</p></div>
     </c:if>
   </div>
-
+<c:if test="${not empty paging}">
   <div class="d-flex justify-content-center py-3" style="border-top:1px solid var(--sb-border)">
     <ul class="pagination pagination-sm mb-0">
       <c:if test="${paging.start > paging.bottomlist}">
@@ -103,6 +103,7 @@ window.addEventListener("load",function(){
       </c:if>
     </ul>
   </div>
+ </c:if>
 </div>
 
 <%@include file="/layout/footer.jsp" %>
