@@ -94,7 +94,7 @@
 		)
 		SELECT
 		    d.dept_id, d.dept_name, d.dept_code,
-		    d.depth, d.sort_order,
+		    d.depth, d.sort_order,  d.com_id,
 		    d.parent_id                    AS parent_id,
 		    dp_parent.dept_name            AS parent_name,
 		    d.emp_id                       AS leader_id,

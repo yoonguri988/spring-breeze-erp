@@ -23,7 +23,7 @@ public class DeptController {
 	
 	// 부서 목록 
 	@RequestMapping(value="/dept/list", method=RequestMethod.GET)
-	public String orgTree(@RequestParam("comId") int comId, Model model) {
+	public String orgTree(int comId, Model model) {
 		CompanyDto com = comService.selectOneById(comId);
 		
 		// 통계데이터
@@ -47,8 +47,8 @@ public class DeptController {
 	// 부서 등록 기능
 	@RequestMapping(value="/dept/add", method=RequestMethod.POST)
 	public String addForm_post(@RequestParam("comId") int comId, DeptDto dto, RedirectAttributes rttr) {
-		String msg = "부서 등록에 성공하였습니다.";
-		if(service.insert(dto) > 0) { msg = "부서등록에 실패하였습니다."; }
+		String msg = "부서 등록에 실패하였습니다.";
+		if(service.insert(dto) > 0) { msg = "부서등록에 성공하였습니다."; }
 		rttr.addFlashAttribute("msg", msg);
 		return "redirect:/dept/list?comId="+comId;
 	}
@@ -63,16 +63,15 @@ public class DeptController {
 		DeptDto dept = service.selectOneById(deptId);
 		
 		model.addAttribute("dept", dept);
-		model.addAttribute("deptList", service.selectOrgTree(dept.getComId()));
+		model.addAttribute("deptList", service.selectOrgTree(comId));
 		model.addAttribute("com", com);
-		model.addAttribute("empList", empService.selectByDeptId(deptId));
 		model.addAttribute("deptEmpList", empService.selectByDeptId(deptId));
 		return "/dept/edit";
 	}
 	
 	// 부서 수정 기능
 	@RequestMapping(value="/dept/edit", method=RequestMethod.POST)
-	public String editForm_post(int deptId, DeptDto dto, RedirectAttributes rttr) {
+	public String editForm_post(int deptId, int comId, DeptDto dto, RedirectAttributes rttr) {
 		DeptDto se = service.selectOneById(deptId);
 		try {
 			service.update(dto);
