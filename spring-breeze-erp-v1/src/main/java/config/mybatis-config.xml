@@ -19,7 +19,8 @@
 		<!-- KJY -->
 
 		<!-- cyj -->
-		<typeAlias type="com.sb.erp.dto.PermDto" alias="PermDto" />		
+		<typeAlias type="com.sb.erp.dto.AuthPermDto" alias="AuthPermDto" />		
+		<typeAlias type="com.sb.erp.dto.EmpAuthDto" alias="EmpAuthDto" />		
 		<typeAlias type="com.sb.erp.dto.ComSearchDto" alias="ComSearchDto" />		
 		<typeAlias type="com.sb.erp.dto.StatsComDto" alias="StatsComDto" />		
 		<typeAlias type="com.sb.erp.dto.CompanyDto" alias="CompanyDto" />		
@@ -27,8 +28,16 @@
 		<typeAlias type="com.sb.erp.dto.StatsDeptDto" alias="StatsDeptDto" />		
 		<!-- cyj -->
 		
+		<!-- CDY -->
+		<typeAlias type="com.sb.erp.dto.ProjectSearchDto" alias="ProjectSearchDto" />
+		<typeAlias type="com.sb.erp.dto.ProjectDto" alias="ProjectDto" />
+		<typeAlias type="com.sb.erp.dto.ProjectMemberDto" alias="ProjectMemberDto" />
+		<typeAlias type="com.sb.erp.dto.TaskDto" alias="TaskDto" />
+		<!-- CDY -->
+		
 		<!-- Son.C.K -->
-		<typeAlias type="com.sb.erp.dto.BoardDto"    alias="BoardDto"/>
+		<typeAlias type="com.sb.erp.dto.NoticeDto"    alias="NoticeDto"/>
+		<typeAlias type="com.sb.erp.dto.NoticeSearchDto"    alias="NoticeSearchDto"/>
         <!-- Son.C.K -->
         
 		<!-- jsj -->

@@ -9,8 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.ApprFormDto;
@@ -22,7 +20,6 @@ import com.sb.erp.util.PagingUtil;
 
 @Controller
 public class ApprController {
-	
 	@Autowired ApprService appr;
 	@Autowired CompanyService com;
 	
@@ -68,42 +65,29 @@ public class ApprController {
 	// 양식 리스트 입력한 값 찾기
 	// required = false : 필수 값이 아니라고 설정
     // defaultValue = "" : 값이 안 넘어오면 디폴트값 지정
-	@RequestMapping( value = "/searchForms", method = {RequestMethod.GET, RequestMethod.POST}) // GET, POST 두방식중 어느방식으로든 접근했을때 동일한 처리
-	public String searchForms(@RequestParam( value = "keyword", required = false, defaultValue = "") String keyword,
-							  @RequestParam( value = "comId", required = false, defaultValue = "") String comId,
-							  @RequestParam( value = "forStatus", required = false, defaultValue = "") String status,
-							  @RequestParam( value = "page", defaultValue = "1") int page,
-							  Model model){
-		// 검색어에 입력한 값들 지정하고
-		ApprFormSearchDto dto = new ApprFormSearchDto();
-		// 각각 dto의 파라미터 값에 맞게 타입 바꿔주기
-		dto.setComId(
-				(comId == null || comId.isBlank()) ?
-				null : Integer.parseInt(comId)
-				);
-		dto.setForStatus(
-				(status == null || status.isBlank()) ?
-				null : Boolean.parseBoolean(status)
-				);
-		dto.setKeyword(keyword);
+	@RequestMapping( value = "/appr/list", method = RequestMethod.GET)
+	public String searchForms(ApprFormSearchDto search, Model model){
+		//1) 검색 조건이 null
+		boolean isEmpty = !search.hasSearchCondition();
 		
-		// 전체 양식 수
-		int totalCnt = appr.listFormCnt(dto);
-		PagingUtil paging = new PagingUtil(totalCnt, page);
-		
-		// 페이징 번호 세팅 / 시작번호, 한줄에 보여질 페이지
-		dto.setPage(paging.getPstartno());
-		dto.setPageSize(paging.getOnepagelist());
-		
-		// 검색해서 나온 데이터, 페이징 list에 담기
-		List<ApprFormDto> list = appr.selectFormList(dto);
+		int totalCnt = 0;
+	    List<ApprFormDto> list = new ArrayList<>();
+	    PagingUtil paging;
+	    
+	    //2) 검색 조건이 null, 쿼리 실행 자체를 안함
+	    if(isEmpty) {
+	    	paging = new PagingUtil(0, search.getPstartno());
+	    }else {
+	    	// 전체 양식 수
+	    	totalCnt = appr.listFormCnt(search);
+	    	paging = new PagingUtil(totalCnt, search.getPstartno());
+	    	list = appr.selectFormList(search);
+	    }
 		
 		// jsp로 데이터 보내기
 		model.addAttribute("list", list);
 		model.addAttribute("paging", paging);
-		model.addAttribute("keyword", keyword);
-		model.addAttribute("comId", comId);
-		model.addAttribute("forStatus", status);
+		model.addAttribute("search", search);
 		
 		return "appr/list_form";
 	} 
@@ -118,19 +102,11 @@ public class ApprController {
 	// 양식 작성 처리
 	@RequestMapping( value = "/appr/write_form", method = RequestMethod.POST)
 	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr) {
-//		System.out.println("제목 = " + dto.getForTitle());
-//		System.out.println("내용 = " + dto.getForContent());
-		
+		// 양식 작성 성공
 		if(appr.insertForm(dto) > 0) {
-			return "redirect:/appr/list_form";
+			return "redirect:/appr/list";
 		}
 		return "appr/write_form";
-	}
-	
-	// 양식 리스트 폼
-	@RequestMapping( value = "/appr/list_form", method = RequestMethod.GET)
-	public String listForm() {
-		return "appr/list_form";
 	}
 	
 	// 양식 수정 폼
@@ -149,9 +125,9 @@ public class ApprController {
 	// 양식 수정 처리
 	@RequestMapping( value = "/appr/update_form", method = RequestMethod.POST)
 	public String update_post(ApprFormDto dto, Model model) {
-		
+		// 양식 수정 성공
 		if(appr.updateForm(dto) > 0) {
-			return "redirect:/appr/list_form";
+			return "redirect:/appr/list";
 		}
 		return "appr/update_form";
 	}

@@ -11,6 +11,7 @@ public class AuthUserDto {
 	private String empEmail;
 	private String empPass;
 	private String posName;
+	private String comName;
 	private List<AuthDto> authList;
 	
 	private int empId;

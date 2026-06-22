@@ -1,10 +1,10 @@
 package com.sb.erp.dao;
 
-import com.sb.erp.dto.PermDto;
+import com.sb.erp.dto.AuthPermDto;
 
 @Mapper
 public interface PermMapper {
 
-	PermDto selectByEmpId(int empId);
+	AuthPermDto selectByEmpId(int empId);
 
 }

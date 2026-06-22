@@ -33,19 +33,12 @@ public class EmpController {
 			Model model) {
 
 		if (searched != null) {
-			
 			// search에 페이지 기능을 병합해야함...
-			// 현재 페이지/검색 결과가 없으면 1로 고정
-			int currentPage = (search.getPage() == null) ? 1 : search.getPage();
 			
 			// 전체, 검색 결과 갯수 cnt(*)
 			int total = empService.selectCnt(search);
 			
-			PagingUtil paging = new PagingUtil(total, currentPage);
-			
-			// searchDto에 limit 값 넣기
-			search.setPstartno(paging.getPstartno());
-			search.setOnepagelist(paging.getOnepagelist());
+			PagingUtil paging = new PagingUtil(total, search.getPstartno());
 			List<EmpDto> empList = empService.search(search);
 						
 			model.addAttribute("empList", empList);

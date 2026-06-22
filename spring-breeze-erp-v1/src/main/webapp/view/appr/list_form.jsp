@@ -21,45 +21,49 @@
 			</button>
 		</div>
 	</div>
-	
+	<!-- 검색 / 필터 툴바 (실제 GET 검색 폼) -->
 	<div class="sb-card mb-4">
 		<div class="sb-card__body">
-			<form action="${pageContext.request.contextPath}/searchForms" method="post">
-				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-				
-				<div class="row g-3">			
+			<form method="GET" action="${pageContext.request.contextPath}/appr/list"
+			      id="searchForm">
+				<div class="row g-3">	
+					<!--  검색 조건1 : 양식코드 또는 제목 -->		
 					<div class="col-md-4">
 						<label for="keyword" class="sb-form-label">키워드 검색</label>
 						<div class="sb-search">
 							<i class="bi bi-search"></i>
 							<input type="text" id="keyword" name="keyword"
-								   placeholder="양식 코드 또는 제목" value="${keyword}">
+								   placeholder="양식 코드 또는 제목" value="${param.keyword}">
 						</div>
 					</div>
-					
+					<!--  검색 조건2 : 회사명 또는 사업자 번호 검색 -->		
 					<div class="col-md-4 position-relative">
-						<label for="companySearch" class="sb-form-label">회사</label>
+						<label for="comName" class="sb-form-label">회사</label>
 						<div class="sb-search">
 							<i class="bi bi-building"></i>
-							<input type="text" id="companySearch"
+							<input type="text" id="comName" name="comName" value="${param.comName}"
 								   placeholder="회사명" autocomplete="off" />
+							<input type="hidden" id="comId" name="comId" value="${param.comId}"/>
 						</div>
-						<input type="hidden" id="comId" name="comId" value="${comId}">
-						<div id="companyDropdown" class="dropdown-menu w-100 shadow-sm"
-							 style="display: none; max-height: 200px; overflow-y: auto;"></div>
+						<div class="ac-list" id="acList"></div>
 					</div>
 					
 					<div class="col-md-4">
 						<label for="forStatus" class="sb-form-label">활성화 여부</label>
 						<select class="form-select" id="forStatus" name="forStatus">
-							<option value="" ${empty forStatus ? 'selected' : '' }>전체</option>
-							<option value="true" ${forStatus eq 'true' ? 'selected' : '' }>활성화</option>
-							<option value="false" ${forStatus eq 'false' ? 'selected' : '' }>비활성화</option>
+							<option value="" ${empty param.forStatus ? 'selected' : '' }>전체</option>
+							<option value="true" ${param.forStatus eq 'true' ? 'selected' : '' }>활성화</option>
+							<option value="false" ${param.forStatus eq 'false' ? 'selected' : '' }>비활성화</option>
 						</select>
 					</div>
 					
  					<div class="d-flex justify-content-end gap-2 mt-3">
-	                    <button type="submit" class="btn btn-sb-soft">검색</button>
+	                    <button type="submit" class="btn btn-sb-soft btn-sm">
+							<i class="bi bi-search"></i> 검색
+						</button>
+						<c:if test="${not empty param.keyword}">
+				            <a class="btn btn-ghost btn-sm" href="${pageContext.request.contextPath}/appr/list">초기화</a>
+				        </c:if>
 	                </div>
 				</div>
 			</form>
@@ -283,6 +287,12 @@
 
     /////////////////////////   페이징 기능    /////////////////////////
     */
-    
+    function checkForm(){
+    	var keyword = documet.getElementById("keyword");
+    	var comName = documet.getElementById("comName");
+    	if(keyword.value.trim() == "" && comName.value.trim() == ""){
+    		alert("검색 조건 하나이상은 포함해야한다.");
+    	}	
+    }
 </script>
 <%@include file="/layout/footer.jsp"%>

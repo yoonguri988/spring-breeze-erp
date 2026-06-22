@@ -6,7 +6,7 @@
 	 <div class="sb-page-head">
 	 	<div class="sb-page-head__txt">
 	 		<div class="sb-breadcrumb">
-		 		<a href="${pageContext.request.contextPath}/appr/list_form">전자결재</a>
+		 		<a href="${pageContext.request.contextPath}/appr/list">전자결재</a>
 		 		<i class="bi bi-chevron-right"></i>
 		 		<span>양식관리</span>
 	 		</div>
@@ -15,7 +15,7 @@
 	 	</div>
 	 	<div class="sb-page-head__actions">
 		 	<button type="button" class="btn btn-ghost"
-		 			onclick="location.href='${pageContext.request.contextPath}/appr/list_form'">
+		 			onclick="location.href='${pageContext.request.contextPath}/appr/list'">
 		 			목록으로
 		 	</button>
 	 	</div>
@@ -47,9 +47,9 @@
 					</div>
 
 					<div class="col-md-6 position-relative">	
-						<label for="companySearch"
+						<label for="comName"
 							   class="sb-form-label">양식 추가할 회사</label>
-						<div class="sb-search" style="max-width: 100%;">
+							<div class="sb-search">
 							<i class="bi bi-building"></i>
 							<input type="text" id="companySearch"
 								   placeholder="회사이름 입력" autocomplete="off"/>
