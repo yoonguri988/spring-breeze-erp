@@ -23,7 +23,7 @@ import com.sb.erp.dto.ComSearchDto;
 import com.sb.erp.dto.CompanyDto;
 import com.sb.erp.dto.DeptDto;
 import com.sb.erp.dto.EmpDto;
-import com.sb.erp.dto.PermDto;
+import com.sb.erp.dto.AuthPermDto;
 import com.sb.erp.dto.StatsComDto;
 import com.sb.erp.dto.StatsDeptDto;
 import com.sb.erp.exception.FileUploadException;
@@ -89,7 +89,7 @@ public class CompanyController {
 		Integer empId = (Integer) session.getAttribute("empId");
 		//만약 로그인 사용자가 시스템 관리자가 아닌 경우
 		//1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-	    PermDto root = permService.selectByEmpId(empId);
+	    AuthPermDto root = permService.selectByEmpId(empId);
 		
 	    if(!root.getAutName().equals("ROOT")) return "redirect:/com/my";
 		
@@ -168,7 +168,7 @@ public class CompanyController {
 	    EmpDto emp = empService.selectByEmpEmail(auth.getName());
 	    //1. 로그인한 사용자가 관리자가 아닌 경우
 	    //1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-	    PermDto root = permService.selectByEmpId(emp.getEmpId());
+	    AuthPermDto root = permService.selectByEmpId(emp.getEmpId());
 	    
 	    // ROOT(시스템 관리자) 아닌 경우
 	    if(!root.getAutName().equals("ROOT")) {

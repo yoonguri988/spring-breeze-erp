@@ -22,25 +22,25 @@
     <div class="col-6 col-md-3">
       <div class="sb-card p-3">
         <div class="text-faint" style="font-size:12px">전체</div>
-        <div style="font-weight:750;font-size:22px">${totalCount}</div>
+        <div style="font-weight:750;font-size:22px">${stats.resvTotal}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="sb-card p-3">
         <div class="text-faint" style="font-size:12px">대기</div>
-        <div class="text-warning" style="font-weight:750;font-size:22px">${waitCount}</div>
+        <div class="text-warning" style="font-weight:750;font-size:22px">${stats.waiTotal}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="sb-card p-3">
         <div class="text-faint" style="font-size:12px">승인</div>
-        <div class="text-success" style="font-weight:750;font-size:22px">${approveCount}</div>
+        <div class="text-success" style="font-weight:750;font-size:22px">${stats.appTotal}</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="sb-card p-3">
         <div class="text-faint" style="font-size:12px">반려</div>
-        <div class="text-danger" style="font-weight:750;font-size:22px">${rejectCount}</div>
+        <div class="text-danger" style="font-weight:750;font-size:22px">${stats.rejTotal}</div>
       </div>
     </div>
   </div>

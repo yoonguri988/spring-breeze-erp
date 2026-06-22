@@ -1,8 +1,6 @@
 ﻿package com.sb.erp.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
@@ -13,91 +11,75 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.sb.erp.dto.ResSearchDto;
 import com.sb.erp.dto.ReservationDto;
 import com.sb.erp.dto.ResourceDto;
+import com.sb.erp.dto.ResvSearchDto;
 import com.sb.erp.service.ReservationService;
 import com.sb.erp.service.ResourceService;
 import com.sb.erp.util.PagingUtil;
 
 @Controller
-@RequestMapping("/reservation")
+@RequestMapping("/resv")
 public class ReservationController {
+    @Autowired private ReservationService reservationService;
+    @Autowired private ResourceService resourceService;
 
-    @Autowired
-    private ReservationService reservationService;
-
-    @Autowired
-    private ResourceService resourceService;
-
-    private static final int PAGE_SIZE = 10;
-
+    // 자원 예약 관리 목록
     @RequestMapping("/list")
     public String list(@RequestParam(value = "status", required = false) String status,
                        @RequestParam(value = "page", required = false, defaultValue = "1") int curPage,
                        HttpSession session,
                        Model model) {
+    	ResvSearchDto search = new ResvSearchDto();
+    	search.setComId((Integer) session.getAttribute("comId"));
+    	search.setStatus(status);
+    	
+        int totalCount = reservationService.getReservationCount(search);
+        List<ReservationDto> reservationList = reservationService.getReservationList(search);
 
-        int comId = getLoginComId(session);
-
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("comId", comId);
-        paramMap.put("status", status);
-
-        int totalCount = reservationService.getReservationCount(paramMap);
-        PagingUtil paging = new PagingUtil(totalCount, PAGE_SIZE, curPage);
-
-        paramMap.put("startRow", paging.getPstartno());
-        paramMap.put("pageSize", paging.getOnepagelist());
-        List<ReservationDto> reservationList = reservationService.getReservationList(paramMap);
-
+        PagingUtil paging = new PagingUtil(totalCount, curPage);
+        
         model.addAttribute("reservationList", reservationList);
         model.addAttribute("paging", paging);
         model.addAttribute("status", status);
 
-        return "resv/reservationList";
+        return "resv/list";
     }
 
-    @RequestMapping(value = "/insertForm", method = RequestMethod.GET)
+    // 자원 예약 등록 폼
+    @RequestMapping(value = "/insert", method = RequestMethod.GET)
     public String insertForm(@RequestParam(value = "resId", required = false) Integer resId,
                              HttpSession session,
                              Model model) {
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("comId", getLoginComId(session));
-        paramMap.put("keyword", null);
-        paramMap.put("resType", null);
-        paramMap.put("startRow", 0);
-        paramMap.put("pageSize", 100);
+    	ResSearchDto search = new ResSearchDto();
+    	search.setComId((Integer) session.getAttribute("comId"));
 
-        List<ResourceDto> resourceList = resourceService.getResourceList(paramMap);
+        List<ResourceDto> resourceList = resourceService.getResourceList(search);
         model.addAttribute("resourceList", resourceList);
 
         if (resId != null) {
             ResourceDto resourceDto = resourceService.getResourceDetail(resId);
             model.addAttribute("resource", resourceDto);
         }
-        return "resv/reservationInsert";
+        return "resv/insert";
     }
 
+    // 자원 예약 등록 기능
     @RequestMapping(value = "/insert", method = RequestMethod.POST)
     public String insert(ReservationDto reservationDto, HttpSession session) {
-
-        int comId = getLoginComId(session);
-        int empId = getLoginEmpId(session);
+        Integer comId = (Integer) session.getAttribute("comId");
+        Integer empId = (Integer) session.getAttribute("empId");
 
         reservationDto.setComId(comId);
         reservationDto.setEmpId(empId);
 
         reservationService.insertReservation(reservationDto);
-        return "redirect:/reservation/list";
+        return "redirect:/resv/list";
     }
-
-    private int getLoginComId(HttpSession session) {
-        Object comId = session.getAttribute("loginComId");
-        return comId instanceof Integer ? (Integer) comId : 1;
-    }
-
-    private int getLoginEmpId(HttpSession session) {
-        Object empId = session.getAttribute("loginEmpId");
-        return empId instanceof Integer ? (Integer) empId : 1;
-    }
+    
+    // 자원 예약 수정 폼
+    // 자원 예약 수정 기능
+    // 자원 예약 삭제 폼
+    // 자원 예약 삭제 기능
 }

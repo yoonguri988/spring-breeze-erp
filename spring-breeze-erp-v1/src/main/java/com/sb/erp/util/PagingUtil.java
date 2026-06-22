@@ -10,7 +10,7 @@ public class PagingUtil {
    private int onepagelist = 10; 
    private int pagetotal;   
    private int bottomlist;  
-   private int pstartno;    
+   private int pstartno = 1;    
 
    private int current;    
    private int start;      

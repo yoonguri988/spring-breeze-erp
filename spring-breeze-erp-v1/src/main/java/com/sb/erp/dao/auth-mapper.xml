@@ -3,13 +3,13 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.AuthMapper">
-
 	<resultMap id="authListMap" type="AuthUserDto">
 		<result property="empEmail" column="emp_email" />
 		<result property="empPass" column="emp_pass" />
 		<result property="empNo" column="emp_no" />
 		<result property="empName" column="emp_name" />
 		<result property="posName" column="pos_name" />
+		<result property="comName" column="com_name" />
 		<result property="comId" column="com_id" />
 		<result property="empId" column="emp_id" />
 		<result property="deptId" column="dept_id" />
@@ -19,17 +19,55 @@
 
 	<resultMap id="authMap" type="AuthDto">
 		<result property="auth" column="aut_name" />
+		<result property="autName" column="aut_name" />
 	</resultMap>
 
 	<select id="readAuth" resultMap="authListMap"
 		parameterType="string">
 		select e.emp_email, e.emp_pass, e.emp_no, e.emp_name, a.aut_name,
-		ep.pos_name, e.com_id, e.emp_id, e.dept_id, e.pos_id
+		ep.pos_name, c.com_name, e.com_id, e.emp_id, e.dept_id, e.pos_id
 		from emp_auth ea
 		join employee e on e.emp_id = ea.emp_id
 		join authority a on a.aut_id = ea.aut_id
 		join emp_position ep on ep.pos_id = e.pos_id
+		join company c on c.com_id = e.com_id
 		where e.emp_email = #{username}
 	</select>
-
+	
+	<!-- 권한 전체 조회 -->
+	<select id="selectAll" resultType="AuthPermDto" parameterType="integer">
+		select a.com_id, ea.aut_id, a.aut_name, count(*) as aut_count
+		from emp_auth ea
+		right join authority a on ea.aut_id = a.aut_id
+		<where>
+		<if test="comId != null or comId = ''">
+		and a.com_id = #{comId}
+		</if>
+		</where>
+		group by a.com_id, ea.aut_id, a.aut_name
+	</select>
+	<!-- 권한 하나만 조회 -->
+	<select id="selectOneById" resultType="AuthPermDto" parameterType="int">
+		select ea.aut_id, a.aut_name
+		from emp_auth ea
+		right join authority a on ea.aut_id = a.aut_id
+		where a.aut_id = #{autId}
+		group by ea.aut_id, a.aut_name
+	</select>
+	<!-- 권한 등록 -->
+	<insert id="insert" parameterType="AuthPermDto">
+		insert into authority (com_id, aut_name)
+		values (#{comId}, #{autName})
+	</insert>
+	<!-- 권한 수정 -->
+	<update id="update" parameterType="AuthPermDto">
+		update authority
+		set aut_name = #{autName}
+		where com_id = #{comId}
+	</update>
+	<!-- 권한 삭제 -->
+	<delete id="delete" parameterType="int">
+		delete from authority
+		where aut_id = #{autId}
+	</delete>
 </mapper>

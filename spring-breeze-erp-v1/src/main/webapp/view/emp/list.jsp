@@ -166,7 +166,7 @@
 		</c:choose>
 
 		<!-- 페이징 -->
-		<c:if test="${paging != null && paging.listtotal > paging.onepagelist}">
+		<c:if test="${paging.listtotal > 0}">
 			<div class="d-flex align-items-center justify-content-between px-3 py-2"
 			     style="border-top:1px solid var(--sb-border)">
 				<span class="text-faint" style="font-size:12.5px">
@@ -190,27 +190,25 @@
 						</c:if>
 						
 						<!-- 이전 -->
-						<c:if test="${paging.current > 1}">
-							<li class="page-item">
-								<a href="?${filter}&page=${paging.current - 1}" class="page-link">
+						<c:if test="${paging.pagetotal > 1}">
+							<li class="page-item ${!(paging.start > 1) ? 'disabled' : ''}">
+								<a href="?${filter}&pstartno=${paging.start - 1}" class="page-link">
 									<i class="bi bi-chevron-left"></i>
 								</a>
 							</li>
-						</c:if>
 						<!-- 1~10 -->
 						<c:forEach var="i" begin="${paging.start}" end="${paging.end}">
 							<li class="page-item ${paging.current == i ? 'active' : ''}">
-								<a href="?${filter}&page=${i}" class="page-link">${i}</a>
+								<a href="?${filter}&pstartno=${i}" class="page-link">${i}</a>
 							</li>
 						</c:forEach>
 						<!-- 다음 -->
-						<c:if test="${paging.current < paging.pagetotal}">
-							<li class="page-item">
-								<a href="?${filter}&page=${paging.current + 1}" class="page-link">
-									<i class="bi bi-chevron-right"></i>
-								</a>
-							</li>
-						</c:if>
+						<li class="page-item ${!(paging.end < paging.pagetotal) ? 'disabled' : ''}">
+							<a href="?${filter}&pstartno=${paging.end + 1}" class="page-link">
+								<i class="bi bi-chevron-right"></i>
+							</a>
+						</li>
+			            </c:if>
 					</ul>
 				</nav>
 			</div>

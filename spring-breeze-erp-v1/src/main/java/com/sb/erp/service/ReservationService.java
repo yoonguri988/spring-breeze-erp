@@ -1,22 +1,26 @@
 package com.sb.erp.service;
 
 import java.util.List;
-import java.util.Map;
 
 import com.sb.erp.dto.ReservationDto;
+import com.sb.erp.dto.ResvSearchDto;
+import com.sb.erp.dto.StatsResvDto;
 
 public interface ReservationService {
 
-    List<ReservationDto> getReservationList(Map<String, Object> paramMap);
+    List<ReservationDto> getReservationList(ResvSearchDto search);
 
-    int getReservationCount(Map<String, Object> paramMap);
+    int getReservationCount(ResvSearchDto search);
 
     ReservationDto getReservationDetail(int revId);
 
     void insertReservation(ReservationDto reservationDto);
 
-   
     void updateStatus(int revId, String status, String remark);
 
-    int countByStatus(Map<String, Object> paramMap);
+    // 통계 (전체/승인/대기/반려)
+    StatsResvDto countByStats(ResvSearchDto search);
+
+    // 예약 관리에서 예약 된 자원이 있는지 확인
+    int countReservationsByResourceId(int resId);
 }

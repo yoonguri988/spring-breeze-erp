@@ -1,17 +1,18 @@
 package com.sb.erp.service;
 
-import java.util.HashMap;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.sb.erp.dao.EmpMapper;
+import com.sb.erp.dto.EmpAuthDto;
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
 import com.sb.erp.security.CustomUser;
-import com.sb.erp.util.PagingUtil;
 
 
 @Service
@@ -36,6 +37,8 @@ public class EmpServiceImpl implements EmpService {
 	public List<EmpDto> search(EmpSearchDto dto) {
 		// 로그인 사용자의 회사
 		dto.setComId(getCurrentComId());
+		
+		dto.setPstartno((dto.getPstartno()-1)*dto.getOnepagelist());
 		return dao.search(dto);
 	}
 	
@@ -53,6 +56,7 @@ public class EmpServiceImpl implements EmpService {
 	
 	@Override
 	public int update(EmpDto dto) {
+		dto.setComId(getCurrentComId());
 	    return dao.update(dto);
 	}
 	@Override
@@ -101,28 +105,23 @@ public class EmpServiceImpl implements EmpService {
 		return principal.getDto().getComId();
 	}
 
-
-	@Override
-	public EmpDto selectForVerify(EmpDto dto) {
-		return dao.selectForVerify(dto);
-	}
-	@Override
-	public int updatePassByEmpId(EmpDto dto) {
-		return dao.updatePassByEmpId(dto);
-	}
-	@Override
-	public EmpDto selectByEmpEmail(String empEmail) {
-		return dao.selectByEmpEmail(empEmail);
-	}
-
+	// 기존 비밀번호와 일치 확인
 	@Override
 	public boolean matchPassword(EmpDto dto) {
 		String existsPass = dao.selectPassById(dto.getEmpId());
 		return passEncoder.matches(dto.getEmpPass(), existsPass);
 	}
+	
+	// 해당 부서 id를 통해 사원정보 조회
 	@Override
 	public List<EmpDto> selectByDeptId(int deptId) {
 		return dao.selectByDeptId(deptId);
+	}
+
+	// 회사 아이디를 기준으로 권한 정보와 엮여있는 사원 정보 확인
+	@Override
+	public List<EmpAuthDto> selectAuthByComId(int comId) {
+		return dao.selectAuthByComId(comId);
 	}
 	
 }

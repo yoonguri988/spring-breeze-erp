@@ -66,11 +66,9 @@
 
 <!-- 목록 카드 -->
 <div class="sb-card">
-
     <!-- 검색 / 필터 툴바 (실제 GET 검색 폼) -->
     <form method="GET" action="${pageContext.request.contextPath}/com/list"
           id="searchForm" class="sb-toolbar">
-
         <div class="ac-wrap grow" style="max-width:460px">
             <div class="sb-field sb-field--search" style="width:100%">
                 <i class="bi bi-search"></i>
@@ -307,8 +305,6 @@
 (function () {
     "use strict";
     const CTX = "${pageContext.request.contextPath}";
-    
-    console.log("${stats}");
     
     document.addEventListener("layout:ready", function () {
     	SB.countUp(document.getElementById("comTotal"), "${stats.comTotal}");
