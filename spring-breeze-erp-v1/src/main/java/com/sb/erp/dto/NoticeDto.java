@@ -8,15 +8,17 @@ import lombok.Data;
 
 @Data
 public class NoticeDto { //notice
-	private int bno;
-	private String btitle;
-	private String bcontent;
-	private int bhit;
-	private String bfile;
-	private String createdAt;
-	private String updatedAt;
-	private int empId;
-	private int comId;
+	private int bno;          // 게시글 번호
+	private String category;  // 카테고리 (인사, 보안, IT, 복지, 일반)
+	private String btitle;    // 제목
+	private String bcontent;  // 내용
+	private int bhit;         // 조회수
+	private String bfile;     // 서버에 저장할 파일
+	private String createdAt; // 입력한 날짜 (포맷팅용 String 또는 Date)
+	private String updatedAt; // 수정한 날짜
+	private int empId;		  // 사원ID - 공지글 작성자 bwriter
+	private int comId;		  // 회사ID 
+
 
 }
 

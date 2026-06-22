@@ -4,27 +4,28 @@
 <mapper namespace="com.sb.erp.dao.NoticeMapper">
 
   <!-- ✅ resultMap 추가: DB 컬럼명과 DTO 필드명 매핑 -->
-  <resultMap id="noticeResultMap" type="NoticeDto">
+<!--   <resultMap id="noticeResultMap" type="NoticeDto">
     <id property="bno" column="bno"/>
     <result property="btitle" column="btitle"/>
     <result property="bcontent" column="bcontent"/>
     <result property="bhit" column="bhit"/>
     <result property="bfile" column="bfile"/>
     <result property="createdAt" column="created_at"/>
+    
     <result property="updatedAt" column="updated_at"/>
     <result property="empId" column="emp_id"/>
     <result property="comId" column="com_id"/>
-  </resultMap>
+  </resultMap> -->
 
   <!-- 공지 게시글 등록 (insert 구문 포함) -->
   <!-- ✅ PK(bno) 자동 생성 후 DTO에 매핑되도록 옵션 추가 -->
-  <insert id="insert" parameterType="NoticeDto" useGeneratedKeys="true" keyProperty="bno">
+  <insert id="insert" parameterType="NoticeDto" >
     insert into notice (btitle, bcontent, emp_id, com_id, bfile)  
     values (#{btitle}, #{bcontent}, #{empId}, #{comId}, #{bfile})
   </insert>
   
   <!-- 상세 페이지 조회 -->
-  <select id="select" resultMap="noticeResultMap" parameterType="int">
+  <select id="select" resultType="NoticeDto" parameterType="int">
     select * from notice where bno = #{bno}
   </select>
   
@@ -48,10 +49,10 @@
   </update>
   
   <!-- 페이징 -->
-  <select id="selectPaging" resultMap="noticeResultMap" parameterType="java.util.HashMap">
+  <select id="selectPaging" resultType="NoticeDto" parameterType="java.util.HashMap">
     select * from notice
     order by bno desc
-    limit #{offset}, #{pageSize}
+    limit #{start}, #{end}
   </select>
 
   <!-- 전체 카운트 -->
@@ -60,7 +61,7 @@
   </select>
   
   <!-- 공지글 페이징 + 검색 (제목/내용) -->
-  <select id="selectNoticeList" resultMap="noticeResultMap" parameterType="java.util.HashMap">
+  <select id="selectNoticeList" resultType="NoticeDto" parameterType="java.util.HashMap">
     select * from notice
     where (lower(btitle) like lower(CONCAT('%', #{searchKeyword}, '%'))
            or lower(bcontent) like lower(CONCAT('%', #{searchKeyword}, '%')))
@@ -69,7 +70,7 @@
   </select> 
   
   <!-- 검색 결과 카운트 -->
-  <select id="selectCountNoticeList" resultType="long" parameterType="java.util.HashMap">
+  <select id="selectCountNoticeList" resultType="int" parameterType="java.util.HashMap">
     select count(*) as total_count
     from notice
     where (lower(btitle) like lower(CONCAT('%', #{searchKeyword}, '%'))
