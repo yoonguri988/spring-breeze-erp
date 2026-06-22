@@ -19,10 +19,10 @@ window.addEventListener("load", function() {
     <h3>공지글 삭제 확인</h3>
     <p class="text-muted">게시글을 삭제하시려면 본인의 사원ID를 입력해주세요.</p>
     
-    <form action="${pageContext.request.contextPath}/notice/delete.do" 
+    <form action="${pageContext.request.contextPath}/notice/delete" 
           method="post" 
           onsubmit="return checkForm()"> 
-              
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />         
         <input type="hidden" name="bno" value="${param.bno}" />
               
         <div class="my-3">
@@ -32,7 +32,7 @@ window.addEventListener("load", function() {
         
         <div class="my-3 text-end"> 
             <button type="reset" class="btn btn-outline-primary" title="글취소">취소</button>
-            <a href="${pageContext.request.contextPath}/notice/list.do" class="btn btn-outline-success" 
+            <a href="${pageContext.request.contextPath}/notice/list" class="btn btn-outline-success" 
             		title="목록보러가기">목록</a>
             <button type="submit" class="btn btn-danger" title="글삭제">글삭제</button>
         </div>

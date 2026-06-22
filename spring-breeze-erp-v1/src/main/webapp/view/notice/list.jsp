@@ -35,23 +35,28 @@
         <span class="sb-dot" style="background:#9aa3b1"></span> 일반</button>
   </div>
 
+  <!-- 목록 카드 -->
   <div class="sb-card">
-    <div class="sb-toolbar">
+    <!-- 검색 / 필터 툴바 (실제 GET 검색 폼) -->
       <strong style="font-size:14px">공지 목록</strong>
       <span class="sb-badge sb-badge--gray" id="ntcCount">${notices.size()}건</span>
+      <!-- 구분선 -->
       <div class="grow"></div>
-      <div class="sb-field sb-field--search">
-        <i class="bi bi-search"></i>
-        <input type="text" id="ntcSearch" placeholder="제목 검색" value="${pi.searchKeyword}">
-      </div>
-      <div class="sb-field">
-        <select id="ntcSort">
-          <option value="new" ${pi.sort eq 'new' ? 'selected' : ''}>최신순</option>
-          <option value="views" ${pi.sort eq 'views' ? 'selected' : ''}>조회순</option>
-        </select>
-      </div>
+      
+      <form action="${pageContext.request.contextPath}/notice/list" method="GET"
+            id="searchForm" class="sb-toolbar">
+	      <div class="sb-field sb-field--search">
+	        <i class="bi bi-search"></i>
+	        <input type="text" id="keyword" name="keyword" placeholder="제목 검색" value="${param.keyword}">
+	      </div>
+	      <div class="sb-field">
+	        <select id="sortBy" name="sortBy" >
+	          <option value="new" ${param.sortBy eq 'new' ? 'selected' : ''}>최신순</option>
+	          <option value="views" ${param.sortBy eq 'views' ? 'selected' : ''}>조회순</option>
+	        </select>
+	      </div>
+      </form>
     </div>
-    
 <div id="ntcList">
   <c:if test="${empty notices}">
     <div class="sb-empty" id="ntcEmpty">
@@ -65,12 +70,12 @@
          data-id="${n.bno}" data-title="${n.btitle}" data-views="${n.bhit}"
          onclick="viewNotice(${n.bno})">
       
-      <i class="bi bi-pin-angle" style="color:var(--sb-ink-faint);font-size:14px;opacity:.4;margin-right:6px"></i>
+      <%-- <i class="bi bi-pin-angle" style="color:var(--sb-ink-faint);font-size:14px;opacity:.4;margin-right:6px"></i>
       <span class="sb-badge sb-badge--blue me-2">${n.category}</span>
-      
+       --%>
       <div class="flex-grow-1 d-flex flex-column" style="min-width:0">
         <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-           <a href="${pageContext.request.contextPath}/notice/detail.do?bno=${n.bno}" 
+           <a href="${pageContext.request.contextPath}/notice/detail?bno=${n.bno}" 
              class="text-decoration-none text-dark">
             <c:out value="${n.btitle}"/>
           </a>
@@ -115,7 +120,6 @@
             	</ul>
       </nav>
     </div>
-  </div>
 </main>
 
 <div class="modal fade" id="noticeDetailModal" tabindex="-1" aria-hidden="true">
@@ -140,7 +144,7 @@
         <div class="sb-divider"></div>
         <div id="mdFileArea" class="d-flex align-items-center gap-3 text-faint" style="font-size:13px">
           <span><i class="bi bi-paperclip"></i> 첨부파일</span>
-          <a id="mdFileLink" href="#" download class="d-inline-flex align-items-center gap-1" 
+          <a id="mdFileLink" href="#" class="d-inline-flex align-items-center gap-1" 
              style="background: #fafbfc; border: 1px solid var(--sb-border); border-radius: 7px; padding: 4px 10px; 
              		color:inherit;">
             <i class="bi bi-file-earmark-pdf" style="color:var(--sb-red)"></i> <span id="mdFileName"></span>
@@ -160,8 +164,7 @@
 <div class="modal fade" id="noticeFormModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      <form id="noticeRegForm" action="${pageContext.request.contextPath}/notice/insert.do" method="POST" 
-      		enctype="multipart/form-data">
+      <form id="noticeRegForm" action="${pageContext.request.contextPath}/notice/insert" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
         <input type="hidden" name="bno" id="nnBno" value="0">
         
@@ -215,7 +218,6 @@
   <input type="hidden" name="bno" id="delBno">
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   const contextPath = "${pageContext.request.contextPath}";
   let detailModal, formModal;
@@ -226,17 +228,6 @@
     formModal = new bootstrap.Modal(document.getElementById('noticeFormModal'));
 
     const catChips = document.getElementById("catChips");
-    const searchInput = document.getElementById("ntcSearch");
-    const sortSelect = document.getElementById("ntcSort");
-
-    function submitSearchData() {
-      const activeCat = catChips.querySelector(".cat-chip.active").dataset.cat;
-      const keyword = searchInput.value.trim();
-      const sortBy = sortSelect.value;
-      
-      location.href = contextPath + "/notice/list?page=1&category=" + activeCat + "&searchKeyword=" 
-                    + encodeURIComponent(keyword) + "&sort=" + sortBy;
-    }
 
     catChips.addEventListener("click", (e) => {
       const b = e.target.closest(".cat-chip"); if (!b) return;
@@ -324,7 +315,7 @@
     
     /* const csrfParam = "${_csrf.parameterName}";  
     const csrfToken = "${_csrf.token}"; */
-    form.action = contextPath + "/notice/insert.do"; //+ csrfParam + "=" + csrfToken
+    form.action = contextPath + "/notice/insert"; //+ csrfParam + "=" + csrfToken
     
     document.getElementById("nnBno").value = "0";
     document.getElementById("formModalTitle").textContent = "공지 작성";
@@ -358,5 +349,4 @@
     formModal.show();
   }
 </script>
-
 <%@include file="/layout/footer.jsp"%>

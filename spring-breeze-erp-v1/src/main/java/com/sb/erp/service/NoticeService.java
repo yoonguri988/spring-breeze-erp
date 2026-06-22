@@ -1,8 +1,8 @@
 package com.sb.erp.service;
 
-import java.util.HashMap;
 import java.util.List;
 import com.sb.erp.dto.NoticeDto;
+import com.sb.erp.dto.NoticeSearchDto;
 
 /* Service 계층 인터페이스
  * 비즈니스 로직 정의
@@ -17,11 +17,11 @@ public interface NoticeService {
 	    NoticeDto select(int bno);
 	    int updateHit(int bno);
 	    
-	    List<NoticeDto> selectPaging(HashMap<String, Object> map);
+	    List<NoticeDto> selectAll(NoticeSearchDto search);
 	    int selectCount();
 	    
-	    List<NoticeDto> selectNoticeList(HashMap<String, Object> map);
-	    long selectCountNoticeList(HashMap<String, Object> map);
+	    List<NoticeDto> selectNoticeList(NoticeSearchDto search);
+	    long selectCountNoticeList(NoticeSearchDto search);
 	}
 	
 
