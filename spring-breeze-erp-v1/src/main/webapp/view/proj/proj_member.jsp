@@ -133,6 +133,7 @@ function check(){
       <thead>
         <tr>
           <th>프로젝트명</th>
+          <th>부서</th>
           <th>사원</th>
           <th>역할</th>
           <th>등록일</th>
@@ -143,6 +144,7 @@ function check(){
         <c:forEach items="${list}" var="dto" varStatus="status">
           <tr>
             <td class="sb-table__name">${dto.proName}</td>
+          	<td class="sb-table_dept">${dto.deptName}</td>
             <td>${dto.empName}</td>
             <td class="sb-table__muted">${dto.role}</td>
             <td class="sb-hr-cell tnum"><fmt:formatDate value="${dto.joinedAt}" pattern="yyyy-MM-dd"/></td>

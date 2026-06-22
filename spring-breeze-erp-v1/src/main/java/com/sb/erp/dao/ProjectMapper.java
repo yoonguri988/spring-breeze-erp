@@ -26,7 +26,7 @@ public interface ProjectMapper {
 	
 	/* paging */
 	public List<ProjectDto> selectAll(ProjectSearchDto search);
-	public int selectCnt();
+	public int selectCnt(ProjectSearchDto search);
 	
 	//기간조회
 	public List<ProjectDto> selectByPeriod(@Param("startDate") String startDate, @Param("endDate") String endDate);
