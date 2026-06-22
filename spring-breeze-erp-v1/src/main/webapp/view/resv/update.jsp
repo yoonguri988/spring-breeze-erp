@@ -9,9 +9,14 @@
         <i class="bi bi-chevron-right"></i> 자원 수정
       </div>
       <h1>자원 수정</h1>
-      <p>등록된 자원 정보를 수정합니다.</p>
+      <p>등록된 자원 기본 정보를 수정합니다.</p>
+      <span class="sb-badge sb-badge--blue mt-2 d-inline-block">관리자 화면</span>
     </div>
   </div>
+
+  <c:if test="${error == 'duplicateCode'}">
+    <div class="alert alert-danger">이미 사용 중인 자원코드입니다. 다른 코드를 입력하세요.</div>
+  </c:if>
 
   <div class="sb-card" style="max-width:720px">
     <div class="sb-card__head">
@@ -24,7 +29,7 @@
         <input type="hidden" name="resId" value="${resource.resId}"/>
 
         <div class="mb-3">
-          <label class="sb-form-label">자원ID</label>
+          <label class="sb-form-label">자원 ID</label>
           <input type="text" class="form-control" value="${resource.resId}" readonly>
         </div>
 

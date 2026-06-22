@@ -10,7 +10,8 @@
         <i class="bi bi-chevron-right"></i> 예약 승인 관리
       </div>
       <h1>예약 승인 관리</h1>
-      <p>자원 예약 신청을 확인하고 승인 또는 반려 처리합니다.</p>
+      <p>대기 중인 예약 요청을 검토하고 승인 또는 반려할 수 있습니다.</p>
+      <span class="sb-badge sb-badge--blue mt-2 d-inline-block">관리자 화면</span>
     </div>
   </div>
 
@@ -47,7 +48,7 @@
 
   <div class="sb-card">
     <div class="sb-card__head">
-      <h2>예약 신청 목록</h2>
+      <h2>예약 요청 목록</h2>
       <div class="right">
         <a class="btn btn-ghost btn-sm ${empty status ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/approval/list">전체</a>
         <a class="btn btn-ghost btn-sm ${status == 'WAI' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/approval/list?status=WAI">대기</a>
@@ -59,13 +60,13 @@
       <table class="sb-table">
         <thead>
           <tr>
-            <th>예약ID</th>
+            <th>예약 ID</th>
             <th>자원명</th>
             <th>부서</th>
-            <th>신청자</th>
+            <th>요청자</th>
             <th class="num">수량</th>
             <th>상태</th>
-            <th>신청일</th>
+            <th>요청일</th>
             <th class="text-end">관리</th>
           </tr>
         </thead>
@@ -73,7 +74,7 @@
           <c:choose>
             <c:when test="${empty reservationList}">
               <tr>
-                <td colspan="8" class="text-center text-faint py-4">예약 신청 내역이 없습니다.</td>
+                <td colspan="8" class="text-center text-faint py-4">예약 요청 내역이 없습니다.</td>
               </tr>
             </c:when>
             <c:otherwise>
@@ -95,7 +96,7 @@
                   <td>${r.reqDate}</td>
                   <td class="text-end">
                     <c:if test="${r.status == 'WAI'}">
-                      <form action="${pageContext.request.contextPath}/admin/approval/approve" method="post" class="d-inline" onsubmit="return confirm('승인하시겠습니까?');">
+                      <form action="${pageContext.request.contextPath}/admin/approval/approve" method="post" class="d-inline">
                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                         <input type="hidden" name="revId" value="${r.revId}">
                         <button type="submit" class="btn btn-sb btn-sm">승인</button>
@@ -114,11 +115,17 @@
 
   <nav class="mt-3">
     <ul class="pagination justify-content-center">
+      <li class="page-item ${paging.current <= 1 ? 'disabled' : ''}">
+        <a class="page-link" href="${pageContext.request.contextPath}/admin/approval/list?status=${status}&page=${paging.current - 1}">이전</a>
+      </li>
       <c:forEach var="p" begin="${paging.start}" end="${paging.end}">
         <li class="page-item ${p == paging.current ? 'active' : ''}">
           <a class="page-link" href="${pageContext.request.contextPath}/admin/approval/list?status=${status}&page=${p}">${p}</a>
         </li>
       </c:forEach>
+      <li class="page-item ${paging.current >= paging.pagetotal ? 'disabled' : ''}">
+        <a class="page-link" href="${pageContext.request.contextPath}/admin/approval/list?status=${status}&page=${paging.current + 1}">다음</a>
+      </li>
     </ul>
   </nav>
 </main>

@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/layout/header.jsp" %>
-
 <main class="sb-content">
   <div class="sb-page-head">
     <div class="sb-page-head__txt">
@@ -9,19 +8,13 @@
         <i class="bi bi-chevron-right"></i> 자원 등록
       </div>
       <h1>자원 등록</h1>
-      <p>예약에 사용할 회의실과 장비 정보를 등록합니다.</p>
-      <span class="sb-badge sb-badge--blue mt-2 d-inline-block">관리자 화면</span>
+      <p>예약에 사용할 회의실, 장비, 공간 정보를 입력합니다.</p>
     </div>
   </div>
-
-  <c:if test="${error == 'duplicateCode'}">
-    <div class="alert alert-danger">이미 사용 중인 자원코드입니다. 다른 코드를 입력하세요.</div>
-  </c:if>
 
   <div class="sb-card" style="max-width:720px">
     <div class="sb-card__head">
       <h2>기본 정보</h2>
-      <span class="sub">필수 입력 항목을 먼저 작성하세요.</span>
     </div>
     <div class="sb-card__body">
       <form action="${pageContext.request.contextPath}/resv/insert" method="post">
@@ -52,7 +45,7 @@
 
         <div class="mb-4">
           <label for="remark" class="sb-form-label">비고</label>
-          <input type="text" name="remark" id="remark" class="form-control" placeholder="필요한 설명이 있으면 입력하세요.">
+          <input type="text" name="remark" id="remark" class="form-control" placeholder="필요하면 설명을 입력하세요.">
         </div>
 
         <div class="d-flex gap-2">
@@ -65,5 +58,4 @@
     </div>
   </div>
 </main>
-
 <%@ include file="/layout/footer.jsp" %>
