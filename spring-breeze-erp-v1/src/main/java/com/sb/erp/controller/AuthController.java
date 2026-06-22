@@ -54,7 +54,6 @@ public class AuthController {
 	public Map<String, Object> confirm(EmpDto dto, HttpSession session) {
 		Map<String, Object> result = new HashMap<>();
 		EmpDto emp = empService.selectForVerify(dto);
-		
 		if (emp == null) {
 	        result.put("state", "FAIL");
 	        return result;
@@ -69,6 +68,7 @@ public class AuthController {
 	@RequestMapping(value="/auth/resetPass", method = RequestMethod.GET)
 	public String reset_pass(Authentication authentication, Model model) {
 	    if (authentication == null) return "redirect:/auth/login";
+	    
 	    EmpDto emp = empService.selectByEmpEmail(authentication.getName());
 		model.addAttribute("emp", emp);
 		return "/auth/resetPass";
@@ -79,7 +79,7 @@ public class AuthController {
 	public String reset_pass(HttpSession session, Model model) {
 		Integer empId = (Integer) session.getAttribute("empId");
 		if(empId == null || empId == 0) return "redirect:/auth/login";
-		model.addAttribute("emp", empService.selectByEmpId(empId));
+		model.addAttribute("emp", empService.selectAuthByEmpId(empId));
 		return "/auth/resetPass";
 	}
 	
@@ -109,73 +109,73 @@ public class AuthController {
 	}
 	
 	// 권한 목록
-	@RequestMapping(value="/auth/list", method=RequestMethod.GET)
-	public String list(@RequestParam(value="comId", required=false)Integer comId,
-			 		   @RequestParam(value="autId", required=false)Integer autId,
-			 		   HttpSession session,
-			 		   Authentication authentication,
-			           Model model) {
-		// 로그인 사용자의 권한 목록 추출
-	    List<String> roles = new ArrayList<>();
-	    authentication.getAuthorities().forEach(auth -> roles.add(auth.getAuthority()));
-	    boolean isRoot = roles.contains("ROOT");
-	    
-	    // 로그인 사용자 정보
-	    CustomUser login = (CustomUser) authentication.getPrincipal();
-	    AuthUserDto dto = login.getDto();
-	    if (!isRoot) { comId = dto.getComId(); }
-
-		List<AuthPermDto> authList = service.selectAll(comId);
-		
-		// autId 파라미터 결과 값 유무에 따라
-		AuthPermDto selectedRole = null;
-		if(autId != null) selectedRole = service.selectOneById(autId);
-		
-		// comId 파라미터 결과 값 유무에 따라
-		List<EmpAuthDto> empList = Collections.emptyList();
-		if(comId != null) empList = empService.selectAuthByComId(comId);
-		
-		// 회사 목록 리스트
-		ComSearchDto search = new ComSearchDto();
-		List<CompanyDto> comList = comService.list(search);
-		
-		model.addAttribute("authList", authList);
-		model.addAttribute("selectedRole", selectedRole);
-		model.addAttribute("empList", empList);
-		model.addAttribute("companyList", comList);
-		//
-		CompanyDto com = comId == null? null : comService.selectOneById(comId);
-		model.addAttribute("com", com);
-		return "/auth/list";
-	}
+//	@RequestMapping(value="/auth/list", method=RequestMethod.GET)
+//	public String list(@RequestParam(value="comId", required=false)Integer comId,
+//			 		   @RequestParam(value="autId", required=false)Integer autId,
+//			 		   HttpSession session,
+//			 		   Authentication authentication,
+//			           Model model) {
+//		// 로그인 사용자의 권한 목록 추출
+//	    List<String> roles = new ArrayList<>();
+//	    authentication.getAuthorities().forEach(auth -> roles.add(auth.getAuthority()));
+//	    boolean isRoot = roles.contains("ROOT");
+//	    
+//	    // 로그인 사용자 정보
+//	    CustomUser login = (CustomUser) authentication.getPrincipal();
+//	    AuthUserDto dto = login.getDto();
+//	    if (!isRoot) { comId = dto.getComId(); }
+//
+//		List<AuthPermDto> authList = service.selectAll(comId);
+//		
+//		// autId 파라미터 결과 값 유무에 따라
+//		AuthPermDto selectedRole = null;
+//		if(autId != null) selectedRole = service.selectOneById(autId);
+//		
+//		// comId 파라미터 결과 값 유무에 따라
+//		List<EmpAuthDto> empList = Collections.emptyList();
+//		if(comId != null) empList = empService.selectAuthByComId(comId);
+//		
+//		// 회사 목록 리스트
+//		ComSearchDto search = new ComSearchDto();
+//		List<CompanyDto> comList = comService.list(search);
+//		
+//		model.addAttribute("authList", authList);
+//		model.addAttribute("selectedRole", selectedRole);
+//		model.addAttribute("empList", empList);
+//		model.addAttribute("companyList", comList);
+//		//
+//		CompanyDto com = comId == null? null : comService.selectOneById(comId);
+//		model.addAttribute("com", com);
+//		return "/auth/list";
+//	}
 	
 	// 권한 추가 폼
-	@RequestMapping(value="/auth/add", method=RequestMethod.GET)
-	public String add() {
-		return "/auth/add";
-	}
+//	@RequestMapping(value="/auth/add", method=RequestMethod.GET)
+//	public String add() {
+//		return "/auth/add";
+//	}
 	
 	// 권한 추가 기능
-	@RequestMapping(value="/auth/add", method=RequestMethod.POST)
-	public String add_post(AuthPermDto dto) {
-		service.insert(dto);
-		return "redirect:/auth/edit";
-	}
+//	@RequestMapping(value="/auth/add", method=RequestMethod.POST)
+//	public String add_post(AuthPermDto dto) {
+//		service.insert(dto);
+//		return "redirect:/auth/edit";
+//	}
 	
 	// 권한 수정 폼
-	@RequestMapping(value="/auth/edit", method=RequestMethod.GET)
-	public String edit(AuthPermDto dto, Model model) {
-		AuthPermDto auth = service.selectOneById(dto.getAutId());
-		model.addAttribute("auth", auth);
-		return "/auth/edit";
-	}
-	
+//	@RequestMapping(value="/auth/edit", method=RequestMethod.GET)
+//	public String edit(AuthPermDto dto, Model model) {
+//		AuthPermDto auth = service.selectOneById(dto.getAutId());
+//		model.addAttribute("auth", auth);
+//		return "/auth/edit";
+//	}
+//	
 	// 권한 수정 기능
-	@RequestMapping(value="/auth/edit", method=RequestMethod.POST)
-	public String edit_post(AuthPermDto dto) {
-		service.update(dto);
-		return "redirect:/auth/edit";
-	}
+//	@RequestMapping(value="/auth/edit", method=RequestMethod.POST)
+//	public String edit_post(AuthPermDto dto) {
+//		service.update(dto);
+//		return "redirect:/auth/edit";
+//	}
 	
 	// 모달 팝업 구현 예정
 //	@RequestMapping(value="/perm/del", method=RequestMethod.GET)
@@ -184,10 +184,10 @@ public class AuthController {
 //	}
 	
 	//권한 삭제 기능
-	@RequestMapping(value="/auth/del", method=RequestMethod.POST)
-	public String del_post(AuthPermDto dto) {
-		//비밀번호 확인 과정 필요
-		service.delete(dto);
-		return "redirect:/auth/list";
-	}
+//	@RequestMapping(value="/auth/del", method=RequestMethod.POST)
+//	public String del_post(AuthPermDto dto) {
+//		//비밀번호 확인 과정 필요
+//		service.delete(dto);
+//		return "redirect:/auth/list";
+//	}
 }
