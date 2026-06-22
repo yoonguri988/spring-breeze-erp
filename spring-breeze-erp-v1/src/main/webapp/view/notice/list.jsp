@@ -160,7 +160,8 @@
 <div class="modal fade" id="noticeFormModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      <form id="noticeRegForm" action="${pageContext.request.contextPath}/notice/insert.do" method="POST" enctype="multipart/form-data">
+      <form id="noticeRegForm" action="${pageContext.request.contextPath}/notice/insert.do" method="POST" 
+      		enctype="multipart/form-data">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
         <input type="hidden" name="bno" id="nnBno" value="0">
         
