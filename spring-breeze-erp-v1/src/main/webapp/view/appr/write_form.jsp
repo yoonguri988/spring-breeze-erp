@@ -37,6 +37,13 @@
 						<input type="text"
 							   class="form-control"
 							   id="forCode" name="forCode" placeholder="ex) TEST-01"/>
+						<div id="err_forCode" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 양식 코드를 입력해주세요
+						</div>
+						<div class="text-secondary fw-semibold mt-1 tforCode"
+							 style="font-size: 14px;">
+						</div>
 					</div>
 
 					<div class="col-md-6 position-relative">	
@@ -48,9 +55,14 @@
 								   placeholder="회사이름 입력" autocomplete="off"/>
 						</div>	
 							<input type="hidden" id="comId" name="comId" />
+						<div id="err_comId" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 추가할 회사를 선택해주세요
+						</div>
 						<div id="companyDropdown"
 							 class="dropdown-menu w-100 shadow-sm"
 							 style="display: none; max-height: 200px; overflow-y: auto; z-index: 1050;"></div>
+						
 					</div>
 				</div>
 					
@@ -60,6 +72,10 @@
 						<input type="text" class="form-control"
 							   id="forTitle" name="forTitle" placeholder="ex) 병가신청서"/>
 						<div class="form-text text-faint mt-1">결재 양식의 제목을 입력하세요.</div>
+						<div id="err_forTitle" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 양식 제목을 입력해주세요
+						</div>
 					</div>
 					<div class="col-md-6">
 						<label class="sb-form-label">활성화 여부</label>
@@ -78,10 +94,14 @@
 					<label for="forContent" class="sb-form-label">양식 내용</label>
 					<textarea class="form-control"
 							  id="forContent" name="forContent" rows="12"
-							  placeholder="소속 : * 직급 : * 성명 : ---"
+							  placeholder="소속 : 생산1팀 &#10; 직급 : 사원 &#10; 성명 : 홍길동 &#10;"
 							  style="font-family: 'Courier New', Courier, monospace;
-							  		 background-color: #fafafa; resize: vertical;"></textarea>
+							  		 background-color: #fafafa; resize: vertical;">소속 : &#10;직급 : &#10;성명 : </textarea>
 					<div class="form-text text-faint mt-2">결재 양식의 내용을 작성하세요.</div>
+					<div id="err_forContent" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 양식 내용을 입력해주세요
+						</div>
 				</div>
 				
 				<div class="sb-divider"></div>
@@ -101,35 +121,151 @@
 </div>
 <!-- 빈칸시 alert 처리 -->
 <script>
-	function checkForm(){
-		let forCode = document.getElementById("forCode");
-		let forTitle = document.getElementById("forTitle");
-		let comId = document.getElementById("comId");
-		let forContent = document.getElementById("forContent");
-		
-		if(forCode.value.trim() == ""){
-			alert("양식 코드 입력");
-			forCode.focus();
-			return false;
-		}
-		if(forTitle.value.trim() == ""){
-			alert("양식 제목 입력");
-			forTitle.focus();
-			return false;
-		}
-		if(comId.value.trim() == ""){
-			alert("회사 입력");
-			comId.focus();
-			return false;
-		}
-		if(forContent.value.trim() == ""){
-			alert("양식 입력");
-			forContent.focus();
-			return false;
-		}
-		return true;
-	}
 
+let valid = false; // 강제 입력시 막아줄 전역 변수
+
+	/////////////////////////////// 빈칸 처리 ///////////////////////////////
+	
+	function checkForm(){
+		// 빈칸 체크할 요소들 매핑 {key : value}
+		// 아래처럼 매핑 안하면 일일이 하나씩 getElementById 를써서 비교하고 변경해야함
+		const fields = [
+			{ id: "forCode", errId: "err_forCode"},
+			{ id: "forTitle", errId: "err_forTitle"},
+			{ id: "comId", errId: "err_comId", focusId: "companySearch"},
+			{ id: "forContent", errId: "err_forContent"}
+		];
+		
+		let result = true;
+		let focusElement = null;
+		
+		// 에러 초기화
+		fields.forEach(field => {
+			let id = document.getElementById(field.id);
+			let errId = document.getElementById(field.errId);
+			
+			// 테두리 제거
+			id.classList.remove("is-invalid");
+			if(field.focusId){
+				document.getElementById(field.focusId).classList.remove("is-invalid");
+			}
+			
+			// 에러 구문 제거
+			if(errId){
+				errId.style.display = "none";
+			}
+			
+			// 비어있는 값 체크
+			if(id.value.trim() == ""){
+				if(field.focusId){
+					document.getElementById(field.focusId).classList.add("is-invalid");
+				}
+				else{
+					id.classList.add("is-invalid");
+				}
+				
+				if(errId) {
+					errId.style.display = "block";
+				}
+				if(!focusElement){
+					focusElement = field.focusId ? document.getElementById(field.focusId) : id;
+				}
+				
+				result = false;
+			}
+			
+		});
+		// 양식 중복 인데 강제로 작성 눌렀을시 제어
+		if(!valid){
+			alert("중복된 양식코드는 사용할수 없습니다.");
+			document.getElementById("forCode").focus();
+			return false;
+		}
+		
+		if(!result){
+			if(focusElement){
+				focusElement.focus();
+			}
+				return false;
+		}
+
+		return true;
+
+	}
+	
+	/////////////////////////////// 빈칸 처리 ///////////////////////////////
+	
+	
+	/////////////////////////////// 양식 중복 처리 ///////////////////////////////
+	
+	window.addEventListener("load", function(){
+		let forCode = document.getElementById("forCode"); // forCode 가져오기
+		let tforCode = document.querySelector(".tforCode"); // 입력 결과 출력할 부분 가져오기
+		
+		// 입력할때마다 호출 
+		forCode.addEventListener("keyup", function(e){
+			let value = e.target.value.trim(); // 빈칸제외 forCode의 입력값 가져오기
+			
+			// 양식 중복 검색할 회사 값 가져오기
+			let comIdElement = document.getElementById("comId");
+			let comIdVal = comIdElement ? comIdElement.value.trim() : "" ;
+			
+			valid = false; // 초기화
+			
+			// 양식 검사에 회사의 id값이 필요해 먼저 하도록 유도
+			if(comIdVal === ""){
+				tforCode.textContent = "양식을 추가할 회사를 먼저 검색하여 선택해주세요.";
+				tforCode.className = "text-danger fw-semibold mt-1 tforCode";
+				forCode.classList.remove("is-valid");
+				forCode.classList.add("is-invalid");
+				return;
+			}
+			
+			if(value !== ""){
+				fetch("${pageContext.request.contextPath}/checkCode?code="
+						+ encodeURIComponent(value)
+						+ "&comId="
+						+ encodeURIComponent(comIdVal))
+				.then( response => response.json() )
+				.then( data => {
+					
+					// 초기화
+					tforCode.className = "fw-semibold mt-1 tforCode";
+	                forCode.classList.remove("is-valid", "is-invalid");
+	                
+					if(data.checkCode){
+						tforCode.textContent = "사용 가능한 양식코드 입니다" ;
+						tforCode.classList.add("valid-feedback");
+						forCode.classList.add("is-valid");
+						valid = true;
+					}
+					else{
+						tforCode.textContent = "중복된 양식코드 입니다" ;
+						tforCode.classList.add("invalid-feedback");
+						forCode.classList.add("is-invalid");
+						valid = false;
+					}
+				}).catch( err => {
+					tforCode.textContent = "서버 오류" ;
+					tforCode.classList.add("invalid-feedback");
+					forCode.classList.add("is-invalid");
+					valid = false;
+				})
+			}
+			else{
+				tforCode.textContent = "";
+				tforCode.className = "tforCode";
+				forCode.classList.remove("is-valid", "is-invalid");
+				valid = false;
+			}
+		})
+	})
+	
+	/////////////////////////////// 양식 중복 처리 ///////////////////////////////
+	
+	
+	/////////////////////////////// 회사 이름 검색 ///////////////////////////////
+	
 	window.addEventListener("load", function(){
 		
 		let companySearch = document.getElementById("companySearch");
@@ -155,11 +291,11 @@
 							let btn = document.createElement("button");
 							btn.type = "button";
 							btn.className = "dropdown-item";
-							btn.textContent = item.companyName; // 보여줄 회사이름
+							btn.textContent = item.comName; // 보여줄 회사이름
 							
 							// 검색해서 나온 회사 이름 클릭
 							btn.addEventListener("click", function(){
-								companySearch.value = item.companyName; // 회사이름 넣기
+								companySearch.value = item.comName; // 회사이름 넣기
 								comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
 								companyDropdown.style.display = "none"; // 드롭다운 닫기
 							});
@@ -190,5 +326,7 @@
 			}
 		});
 	});
+	
+	/////////////////////////////// 회사 이름 검색 ///////////////////////////////
 </script>
 <%@include file="/layout/footer.jsp"%>

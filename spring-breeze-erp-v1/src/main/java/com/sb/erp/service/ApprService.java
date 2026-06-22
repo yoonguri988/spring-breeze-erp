@@ -20,4 +20,5 @@ public interface ApprService {
 	public int updateForm(ApprFormDto dto);
 	public int deleteForm(int forId);
 	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto); 
+	public String findByCode(ApprFormDto dto);
 }

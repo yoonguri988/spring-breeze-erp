@@ -151,6 +151,9 @@
 </form>
 </div>
 <script>
+
+let valid = false;
+
 	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
 	window.addEventListener("load", function(){
 		
@@ -177,11 +180,11 @@
 							let btn = document.createElement("button");
 							btn.type = "button";
 							btn.className = "dropdown-item";
-							btn.textContent = item.companyName; // 보여줄 회사이름
+							btn.textContent = item.comName; // 보여줄 회사이름
 							
 							// 검색해서 나온 회사 이름 클릭
 							btn.addEventListener("click", function(){
-								companySearch.value = item.companyName; // 회사이름 넣기
+								companySearch.value = item.comName; // 회사이름 넣기
 								comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
 								companyDropdown.style.display = "none"; // 드롭다운 닫기
 							});
@@ -227,6 +230,145 @@
 	}
 	
 	///////////////////// 양식 삭제 재확인 /////////////////////
+	
+	/////////////////////////////// 빈칸 처리 ///////////////////////////////
+	
+	function checkForm(){
+		// 빈칸 체크할 요소들 매핑 {key : value}
+		// 아래처럼 매핑 안하면 일일이 하나씩 getElementById 를써서 비교하고 변경해야함
+		const fields = [
+			{ id: "forCode", errId: "err_forCode"},
+			{ id: "forTitle", errId: "err_forTitle"},
+			{ id: "comId", errId: "err_comId", focusId: "companySearch"},
+			{ id: "forContent", errId: "err_forContent"}
+		];
+		
+		let result = true;
+		let focusElement = null;
+		
+		// 에러 초기화
+		fields.forEach(field => {
+			let id = document.getElementById(field.id);
+			let errId = document.getElementById(field.errId);
+			
+			// 테두리 제거
+			id.classList.remove("is-invalid");
+			if(field.focusId){
+				document.getElementById(field.focusId).classList.remove("is-invalid");
+			}
+			
+			// 에러 구문 제거
+			if(errId){
+				errId.style.display = "none";
+			}
+			
+			// 비어있는 값 체크
+			if(id.value.trim() == ""){
+				if(field.focusId){
+					document.getElementById(field.focusId).classList.add("is-invalid");
+				}
+				else{
+					id.classList.add("is-invalid");
+				}
+				
+				if(errId) {
+					errId.style.display = "block";
+				}
+				if(!focusElement){
+					focusElement = field.focusId ? document.getElementById(field.focusId) : id;
+				}
+				
+				result = false;
+			}
+			
+		});
+		// 양식 중복 인데 강제로 작성 눌렀을시 제어
+		if(!valid){
+			alert("중복된 양식코드는 사용할수 없습니다.");
+			document.getElementById("forCode").focus();
+			return false;
+		}
+		
+		if(!result){
+			if(focusElement){
+				focusElement.focus();
+			}
+				return false;
+		}
+
+		return true;
+
+	}
+	
+	/////////////////////////////// 빈칸 처리 ///////////////////////////////
+	
+	/////////////////////////////// 양식 중복 처리 ///////////////////////////////
+	
+	window.addEventListener("load", function(){
+		let forCode = document.getElementById("forCode"); // forCode 가져오기
+		let tforCode = document.querySelector(".tforCode"); // 입력 결과 출력할 부분 가져오기
+		
+		// 입력할때마다 호출 
+		forCode.addEventListener("keyup", function(e){
+			let value = e.target.value.trim(); // 빈칸제외 forCode의 입력값 가져오기
+			
+			// 양식 중복 검색할 회사 값 가져오기
+			let comIdElement = document.getElementById("comId");
+			let comIdVal = comIdElement ? comIdElement.value.trim() : "" ;
+			
+			valid = false; // 초기화
+			
+			// 양식 검사에 회사의 id값이 필요해 먼저 하도록 유도
+			if(comIdVal === ""){
+				tforCode.textContent = "양식을 추가할 회사를 먼저 검색하여 선택해주세요.";
+				tforCode.className = "text-danger fw-semibold mt-1 tforCode";
+				forCode.classList.remove("is-valid");
+				forCode.classList.add("is-invalid");
+				return;
+			}
+			
+			if(value !== ""){
+				fetch("${pageContext.request.contextPath}/checkCode?code="
+						+ encodeURIComponent(value)
+						+ "&comId="
+						+ encodeURIComponent(comIdVal))
+				.then( response => response.json() )
+				.then( data => {
+					
+					// 초기화
+					tforCode.className = "fw-semibold mt-1 tforCode";
+	                forCode.classList.remove("is-valid", "is-invalid");
+	                
+					if(data.checkCode){
+						tforCode.textContent = "사용 가능한 양식코드 입니다" ;
+						tforCode.classList.add("valid-feedback");
+						forCode.classList.add("is-valid");
+						valid = true;
+					}
+					else{
+						tforCode.textContent = "중복된 양식코드 입니다" ;
+						tforCode.classList.add("invalid-feedback");
+						forCode.classList.add("is-invalid");
+						valid = false;
+					}
+				}).catch( err => {
+					tforCode.textContent = "서버 오류" ;
+					tforCode.classList.add("invalid-feedback");
+					forCode.classList.add("is-invalid");
+					valid = false;
+				})
+			}
+			else{
+				tforCode.textContent = "";
+				tforCode.className = "tforCode";
+				forCode.classList.remove("is-valid", "is-invalid");
+				valid = false;
+			}
+		})
+	})
+	
+	/////////////////////////////// 양식 중복 처리 ///////////////////////////////
+	
 </script>
 
 <%@include file="/layout/footer.jsp"%>

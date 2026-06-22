@@ -84,6 +84,11 @@ public class ApprServiceImpl implements ApprService {
 		return mapper.selectFormList(dto);
 	}
 
+	@Override
+	public String findByCode(ApprFormDto dto) {
+		return mapper.findByCode(dto);
+	}
+
 	///////////////////////// 양식 관련 기능 //////////////////////////////////
 	
 }

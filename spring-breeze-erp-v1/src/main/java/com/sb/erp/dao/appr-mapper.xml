@@ -13,6 +13,16 @@
 	
 	<!-- 결재 양식 sql 구문 -->
 	
+	<!-- 양식 코드 중복 검사 -->
+	<select id="findByCode" resultType="string" parameterType="ApprFormDto">
+		select
+			for_code
+		from
+			appr_form
+		where
+			for_code = #{forCode} and com_id = #{comId}
+	</select>
+	
 	<!-- 양식 생성, 리스트 검색시에 회사 이름 검색 -->
 	<select id="searchCompany" resultType="CompanySearchDto" parameterType="string">
 		select
@@ -47,22 +57,6 @@
 			for_updated = #{forUpdated}
 		where for_id = #{forId}
 	</update>
-	
-	<!--
-		이부분 양식 한번 지정하면 회사는 안바꿀거면 아래코드 
-		양식에서도 회사를 바꿔서 설정할거면 위코드 
-		근데 아마도 바꾸는게 맞는거같음 ㅇㅇ 잘못 설정햇을수도잇지..
-	<update id="updateForm" parameterType="ApprFormDto">
-		update appr_form
-		set
-			for_code = #{forCode},
-			for_title = #{forTitle},
-			for_content = #{forContent},
-			for_status = #{forStatue},
-			for_updated = #{forUpdated}
-		where com_id = #{comId} and for_id = #{forId}
-	</update>
-	-->
 	
 	<!-- 결재 양식 삭제 -->
 	<delete id="deleteForm" parameterType="int">
@@ -102,40 +96,6 @@
 		order by f.for_id desc
 		limit #{page}, #{pageSize}
 	</select>
-	
-	<!-- 오류날거 대비 코드 냄겨놓기
-	<select id="selectFormList" parameterType="ApprFormSearchDto" resultType="ApprFormDto">
-		select
-			f.for_id as forId,
-			f.com_id as comId,
-			f.for_code as forCode,
-			f.for_title as forTitle,
-			f.for_content as forContent,
-			f.for_status as forStatus,
-			f.for_created as forCreated,
-			f.for_updated as forUpdated,
-			c.com_name as comName
-		from
-			appr_form f
-		left outer join
-			company c on f.com_id = c.com_id
-		<where>
-			<if test="comId != null">
-				and f.com_id = #{comId}
-			</if>
-			<if test="forStatus != null">
-				and f.for_status = #{forStatus}
-			</if>
-			<if test="keyword != null and keyword != ''">
-				and (
-					f.for_code like concat('%',#{keyword},'%')
-					or f.for_title like concat('%', #{keyword},'%')
-				)
-			</if>
-		</where>
-		order by f.for_id desc
-	</select>
-	 -->
 	
 	<!-- 결재 양식 리스트 기능 구문 -->
 	<select id="listFormCnt" resultType="int" parameterType="ApprFormSearchDto">

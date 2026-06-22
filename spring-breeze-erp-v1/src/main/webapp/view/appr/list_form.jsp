@@ -88,7 +88,7 @@
 									<td colspan="7">
 										<div class="sb-empty">
 											<i class="bi bi-inbox text-faint"></i>
-											<p>겸색 결과가 없습니다.</p>
+											<p>검색 결과가 없습니다.</p>
 										</div>
 									</td>
 								</tr>
@@ -161,7 +161,7 @@
 				fetch("${pageContext.request.contextPath}/searchCompany?company=" + encodeURIComponent(value))
 				.then(response => response.json())
 				.then(data => {
-					console.log(data);
+					//console.log(data);
 					companyDropdown.innerHTML = ""; // 기존 목록 비우기
 					
 					if(data && data.length > 0){
@@ -171,11 +171,11 @@
 							let btn = document.createElement("button");
 							btn.type = "button";
 							btn.className = "dropdown-item";
-							btn.textContent = item.companyName; // 보여줄 회사이름
+							btn.textContent = item.comName; // 보여줄 회사이름
 							
 							// 검색해서 나온 회사 이름 클릭
 							btn.addEventListener("click", function(){
-								companySearch.value = item.companyName; // 회사이름 넣기
+								companySearch.value = item.comName; // 회사이름 넣기
 								comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
 								companyDropdown.style.display = "none"; // 드롭다운 닫기
 							});
