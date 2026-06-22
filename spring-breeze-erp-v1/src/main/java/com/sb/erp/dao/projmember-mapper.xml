@@ -17,7 +17,7 @@ or e.emp_no like concat('%', #{keyword}, '%'))
  from project_member pm
  join employee e on pm.emp_id=e.emp_id
  join project p on p.pro_id=pm.project_pro_id
- join department d on d.dept_id=e.com_id
+ join department d on d.dept_id=e.dept_id
  where p.pro_id = #{value};
 </select>
 
