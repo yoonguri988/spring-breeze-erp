@@ -69,12 +69,6 @@
 .blind { overflow: hidden; position: absolute; clip: rect(0, 0, 0, 0); width: 1px; height: 1px; margin: -1px; white-space: nowrap; }
 .clearfix::after { content: ""; display: block; width: 0; height: 0; font-size: 0; clear: both; }
 
-section { 
-    width: 90vw;
-    min-width: fit-content;
-    overflow: hidden;
-}
-
 section h1 { margin-top: 24px; }
 
 /* 
@@ -87,14 +81,16 @@ section.emp_list h1 { margin-top: 24px; }
 
 section.emp_list table.empListTable {
     width: 100%;
-    min-width: fit-content;
-    text-wrap: nowrap;
 }
 
-section.emp_list table.empListTable th, td {
-    min-width: fit-content;
-    text-wrap: nowrap;
+section.emp_list div.pagingBox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 14px;
+    border-top: 1px solid var(--sb-border);
 }
+
 
 
 /* 
@@ -182,7 +178,7 @@ section.emp_detail div.detInfoBox div.text-faint {
 }
 
 
- /* 
+/* 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 사원 정보 수정 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -197,3 +193,105 @@ section.emp_edit form input.rdOnly {
     background: var(--sb-border); 
     color: var(--sb-ink-soft);
 }
+
+
+
+/* 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 비밀번호 초기화 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+
+section.emp_resetPass div.profileBox {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+
+section.emp_resetPass div.sumInfoBox1 p:first-child {
+    margin-bottom: 4px;
+    font-size: 16px;
+}
+
+section.emp_resetPass div.prfBadgeBox {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+section.emp_resetPass div.sumInfoBox2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+}
+
+section.emp_resetPass div.sumInfoBox2 div {
+    width: 150px;
+    min-width: fit-content;
+    margin-right: 20px;
+}
+
+section.emp_resetPass div.sumInfoBox2 p {
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: bold;
+
+}
+
+/* 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 비밀번호 수정 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+
+
+section.emp_editPass div.editPassBox form {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 20px;
+}
+
+div.emp_editPass form label span {
+    color: var(--sb-red);
+}
+
+
+/* 위험 액션 버튼 (초기화) */
+.btn-danger {
+  background: var(--sb-red); color: #fff; border: 1px solid var(--sb-red);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-danger:hover { background: #c01e1e; border-color: #c01e1e; color: #fff; }
+
+/* 초기화 확인 박스 */
+.sb-confirm-box {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px 18px; margin-bottom: 20px;
+  background: var(--sb-red-soft); border: 1px solid #f3c9c9;
+  border-radius: var(--sb-radius);
+}
+.sb-confirm-box__icon { color: var(--sb-red); font-size: 22px; line-height: 1.2; flex-shrink: 0; }
+.sb-confirm-box__text { display: flex; flex-direction: column; gap: 6px; }
+.sb-confirm-box__title { margin: 0; font-size: 14.5px; color: var(--sb-ink); }
+.sb-confirm-box__desc  { margin: 0; font-size: 13px; color: var(--sb-ink-soft); line-height: 1.55; }
+
+/* 알림 배너 (에러 메시지) */
+.sb-alert {
+  display: flex; align-items: center;
+  padding: 12px 16px; border-radius: var(--sb-radius); font-size: 13.5px;
+}
+.sb-alert--danger { background: var(--sb-red-soft); color: #c01e1e; border: 1px solid #f3c9c9; }
+
+/* 폼 하단 액션 버튼 정렬 */
+.sb-form-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+  margin: 0; padding-top: 6px;
+}
+
+/* 입력 하단 검증 메시지 */
+.sb-field-msg { display: block; margin-top: 5px; font-size: 12.5px; min-height: 16px; }

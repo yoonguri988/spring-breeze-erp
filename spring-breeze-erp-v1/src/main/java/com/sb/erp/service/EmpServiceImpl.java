@@ -46,7 +46,7 @@ public class EmpServiceImpl implements EmpService {
 	@Override
 	public int insert(EmpDto dto) {
 		dto.setComId(getCurrentComId());
-		dto.setEmpPass(dto.getEmpNo());
+		dto.setEmpPass(passEncoder.encode(dto.getEmpNo()));
 		
 		if(dto.getEmpStatus() == null || dto.getEmpStatus().isEmpty()) {
 			dto.setEmpStatus("재직");
