@@ -28,7 +28,7 @@ public class ApprController {
 	
 	@Autowired ApprService appr;
 	
-	// 입력한 회사 찾기
+	
 	@RequestMapping( value = "/searchCompany", method = RequestMethod.GET)
 	@ResponseBody
 	public List<CompanySearchDto> searchCompany(@RequestParam("company") String company){
@@ -170,6 +170,7 @@ public class ApprController {
 		return "appr/update_form";
 	}
 	
+	// 양식 삭제 처리
 	@RequestMapping("/appr/delete")
 	public String delete(int forId) {
 		appr.deleteForm(forId);

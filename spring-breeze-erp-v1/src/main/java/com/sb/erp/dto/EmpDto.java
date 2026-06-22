@@ -15,9 +15,9 @@ public class EmpDto {
 	private String hireDate;
 	private String createdAt;
 	private String updatedAt;
-	private int deptId; // FK (예정)
-	private int posId; // FK (예정)
-	private int comId; // FK (예정)
+	private int deptId; // FK
+	private int posId; // FK
+	private int comId; // FK
 	private String posName;
 	private String deptName;
 	

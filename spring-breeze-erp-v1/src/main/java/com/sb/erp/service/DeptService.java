@@ -2,6 +2,7 @@ package com.sb.erp.service;
 
 import java.util.List;
 import com.sb.erp.dto.DeptDto;
+import com.sb.erp.dto.StatsDeptDto;
 
 public interface DeptService {
 
@@ -18,5 +19,7 @@ public interface DeptService {
 	public int update(DeptDto dto);
 
 	public DeptDto selectOneById(int deptId);
+
+	public StatsDeptDto selecStats(int comId);
 
 }

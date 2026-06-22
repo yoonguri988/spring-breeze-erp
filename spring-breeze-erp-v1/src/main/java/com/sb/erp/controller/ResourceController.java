@@ -1,167 +1,127 @@
 package com.sb.erp.controller;
 
-import java.util.HashMap;
+import java.security.Principal;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sb.erp.dto.EmpDto;
+import com.sb.erp.dto.ResSearchDto;
 import com.sb.erp.dto.ResourceDto;
+import com.sb.erp.service.EmpService;
+import com.sb.erp.service.ReservationService;
 import com.sb.erp.service.ResourceService;
 import com.sb.erp.util.PagingUtil;
 
 @Controller
 public class ResourceController {
+    @Autowired private ResourceService service;
+    @Autowired private ReservationService resvService;
+    @Autowired private EmpService empService;
+    @Autowired private BCryptPasswordEncoder passwordEncoder;
 
-    @Autowired
-    private ResourceService resourceService;
-
-    private static final int PAGE_SIZE = 10; 
-
-    
-    @RequestMapping(value="/resv/list",method=RequestMethod.GET)
+    // 자원 관리 목록 페이지
+    @RequestMapping(value = "/res/list", method = RequestMethod.GET)
     public String list(@RequestParam(value = "keyword", required = false) String keyword,
-                        @RequestParam(value = "resType", required = false) String resType,
-                        @RequestParam(value = "page", required = false, defaultValue = "1") int curPage,
-                        HttpSession session,
-                        Model model) {
+                       @RequestParam(value = "resType", required = false) String resType,
+                       @RequestParam(value = "page", required = false, defaultValue = "1") int curPage,
+                       @RequestParam(value = "error", required = false) String error,
+                       HttpSession session,
+                       Model model) {
+    	ResSearchDto search = new ResSearchDto();
+    	search.setComId((Integer) session.getAttribute("comId"));
+    	search.setKeyword(keyword);
+    	search.setResType(resType);
+        
+        int totalCount = service.getResourceCount(search);
+        PagingUtil paging = new PagingUtil(totalCount, curPage);
+        List<ResourceDto> resourceList = service.getResourceList(search);
 
-
-    	//Integer loginComId = (Integer) session.getAttribute("loginComId");
-
-
-    	int comId = 1;
-
-
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("comId", comId);
-        paramMap.put("keyword", keyword);
-        paramMap.put("resType", resType);
-
-   
-        int totalCount = resourceService.getResourceCount(paramMap);
-        PagingUtil paging = new PagingUtil(totalCount, PAGE_SIZE, curPage);
-
-       
-        paramMap.put("startRow", paging.getPstartno());   // DB 조회 시작 행
-        paramMap.put("pageSize", paging.getOnepagelist());
-       
-        List<ResourceDto> resourceList = resourceService.getResourceList(paramMap);
-
-      
         model.addAttribute("resourceList", resourceList);
         model.addAttribute("paging", paging);
         model.addAttribute("keyword", keyword);
         model.addAttribute("resType", resType);
+        model.addAttribute("error", error);
 
-        return "resv/list";
+        return "res/list";
     }
 
-    //(상세)
-    @RequestMapping("/resv/detail")
-    public String detail(@RequestParam("id") int resId, Model model) {
-        ResourceDto resourceDto = resourceService.getResourceDetail(resId);
+    // 자원 관리 상세 페이지
+    @RequestMapping(value = "/res/detail", method = RequestMethod.GET)
+    public String detail(@RequestParam("resId") int resId,
+                         @RequestParam(value = "error", required = false) String error,
+                         Model model) {
+        ResourceDto resourceDto = service.getResourceDetail(resId);
         model.addAttribute("resource", resourceDto);
-        return "resv/detail";
+        model.addAttribute("error", error);
+        return "res/detail";
     }
 
-    //(등록)보여지는 페이지 뷰단 
-    @RequestMapping(value = "/resv/insert", method = RequestMethod.GET)
+    // 자원 관리 등록 페이지
+    @RequestMapping(value = "/res/insert", method = RequestMethod.GET)
     public String insertForm() {
-        return "/resv/insert";
+        return "res/insert";
     }
 
-   //(등록)실제 사용하는 기능
-    @RequestMapping(value = "/resv/insert", method = RequestMethod.POST)
+    // 자원 관리 등록 기능
+    @RequestMapping(value = "/res/insert", method = RequestMethod.POST)
     public String insert(ResourceDto resourceDto, HttpSession session) {
-        
-    	int comId = 1;
-       // int comId = (Integer) session.getAttribute("loginComId");
-        resourceDto.setComId(comId);
-
-        resourceService.insertResource(resourceDto);
-        return "redirect:/resv/list";
+    	resourceDto.setComId((Integer) session.getAttribute("comId"));
+    	service.insertResource(resourceDto);
+        return "redirect:/res/list";
     }
 
-    //(수정)
-    @RequestMapping(value = "/resv/update", method = RequestMethod.GET)
-    public String updateForm(@RequestParam("id") int resId, Model model) {
-        ResourceDto resourceDto = resourceService.getResourceDetail(resId);
+    // 자원 관리 수정 페이지
+    @RequestMapping(value = "/res/update", method = RequestMethod.GET)
+    public String updateForm(@RequestParam("resId") int resId, Model model) {
+        ResourceDto resourceDto = service.getResourceDetail(resId);
         model.addAttribute("resource", resourceDto);
-        return "resv/update";
+        return "res/update";
     }
 
-    
-    @RequestMapping(value = "/resv/update", method = RequestMethod.POST)
+    // 자원 관리 수정 등록
+    @RequestMapping(value = "/res/update", method = RequestMethod.POST)
     public String update(ResourceDto resourceDto) {
-        resourceService.updateResource(resourceDto);
-        return "redirect:/resv/list";
+    	service.updateResource(resourceDto);
+        return "redirect:/res/list";
     }
 
-    
-    @RequestMapping("/delete")
-    public String delete(@RequestParam("id") int resId) {
-        resourceService.deleteResource(resId);
-        return "redirect:/resv/list";
-    }
-    
-    /**
-     * <!-- JYT -->
-    // ============================================
-    // 자원 삭제 - 관리자 비밀번호 재인증 방식
-    // ============================================
- 
-   
-     * 비밀번호 검증 후 삭제까지 한 번에 처리.
-     * 프론트(JS)에서 fetch/ajax로 비밀번호와 resId를 함께 전송하고,
-     * 응답 JSON의 success 값으로 성공/실패를 판단해서 화면을 갱신하는 방식.
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private ResourceService resourceservice;
-    
-    
-    @RequestMapping(value = "/resv/deleteWithAuth", method = RequestMethod.POST)
-    @ResponseBody
-    public Map<String, Object> deleteWithAuth(@RequestParam("id") int resId,
-                                               @RequestParam("password") String inputPassword) {
-        Map<String, Object> result = new HashMap<>();
- 
-        // 1. 현재 로그인한 관리자 정보 가져오기 (Spring Security)
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        
-        // TODO: 실제 CustomUser/CustomUserDetailsService 구조에 맞게
-        //       암호화된 비밀번호를 가져오는 부분을 채워야 함.
-        //       예: CustomUser loginUser = (CustomUser) auth.getPrincipal();
-        //           String encodedPassword = loginUser.getPassword();
-        String encodedPassword = "여기에 로그인한 관리자의 암호화된 비밀번호를 가져와야 함";
- 
-        // 2. 입력한 비밀번호와 암호화된 비밀번호 비교 (BCrypt)
-        boolean isMatch = passwordEncoder.matches(inputPassword, encodedPassword);
- 
-        if (!isMatch) {
-            // 비밀번호가 틀리면 삭제하지 않고 실패 응답
-            result.put("success", false);
-            result.put("message", "비밀번호가 일치하지 않습니다.");
-            return result;
+    // 자원 관리 삭제 기능
+    @RequestMapping(value = "/res/delete", method = RequestMethod.POST)
+    public String delete(@RequestParam("resId") int resId,
+                         @RequestParam("empPass") String inputPassword,
+                         @RequestParam(value = "returnTo", required = false, defaultValue = "list") String returnTo,
+                         Principal prinicipal) {
+    	// 현재 로그인 사용자 정보 prinicipal
+    	String empEmail = prinicipal.getName();
+    	EmpDto dto = empService.selectByEmpEmail(empEmail);
+
+    	// 입력한 비밀번호와 저장된 비밀 번호가 불일치 (평문, 암호화)
+    	if(!passwordEncoder.matches(inputPassword,dto.getEmpPass())) {
+    		return buildDeleteRedirect(returnTo, resId, "badPassword");
+    		
+    	}
+        // 예약 처리 중인 자원의 경우 삭제 불가
+        if (resvService.countReservationsByResourceId(resId) > 0) {
+            return buildDeleteRedirect(returnTo, resId, "hasReservations");
         }
- 
-        // 3. 비밀번호가 맞으면 실제 삭제 진행
-        resourceService.deleteResource(resId);
- 
-        result.put("success", true);
-        result.put("message", "삭제되었습니다.");
-        return result;
+
+        service.deleteResource(resId);
+        return "redirect:/res/list";
     }
-     */
+
+    private String buildDeleteRedirect(String returnTo, int resId, String error) {
+        if ("detail".equals(returnTo)) {
+            return "redirect:/res/detail?resId=" + resId + "&error=" + error;
+        }
+        return "redirect:/res/list?error=" + error;
+    }
 }

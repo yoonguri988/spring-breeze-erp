@@ -27,4 +27,6 @@ public interface CompanyMapper {
 
 	public StatsComDto selectStats();
 
+	public CompanyDto selectOneByEmpId(int empId);
+
 }

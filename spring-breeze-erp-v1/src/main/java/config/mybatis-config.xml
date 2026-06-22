@@ -24,15 +24,26 @@
 		<typeAlias type="com.sb.erp.dto.StatsComDto" alias="StatsComDto" />		
 		<typeAlias type="com.sb.erp.dto.CompanyDto" alias="CompanyDto" />		
 		<typeAlias type="com.sb.erp.dto.DeptDto" alias="DeptDto" />
+		<typeAlias type="com.sb.erp.dto.StatsDeptDto" alias="StatsDeptDto" />		
 		<!-- cyj -->
+		
 		<!-- Son.C.K -->
 		<typeAlias type="com.sb.erp.dto.BoardDto"    alias="BoardDto"/>
         <!-- Son.C.K -->
+        
 		<!-- jsj -->
 		<typeAlias type="com.sb.erp.dto.EmpDto" alias="EmpDto" />
 		<typeAlias type="com.sb.erp.dto.PosDto" alias="PosDto" />
 		<typeAlias type="com.sb.erp.dto.EmpSearchDto" alias="EmpSearchDto" />
 		<!-- jsj -->
+		
+		<!-- jyt -->
+		<typeAlias type="com.sb.erp.dto.ResourceDto" alias="ResourceDto"/>
+		<typeAlias type="com.sb.erp.dto.ResSearchDto" alias="ResSearchDto"/>
+		<typeAlias type="com.sb.erp.dto.ReservationDto" alias="ReservationDto"/>
+		<typeAlias type="com.sb.erp.dto.ResvSearchDto" alias="ResvSearchDto"/>
+		<typeAlias type="com.sb.erp.dto.StatsResvDto" alias="StatsResvDto"/>
+		<!-- jyt -->
     
 	</typeAliases>
 </configuration>
