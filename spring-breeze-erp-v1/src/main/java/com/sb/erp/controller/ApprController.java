@@ -71,7 +71,7 @@ public class ApprController {
 	// 양식 리스트 입력한 값 찾기
 	// required = false : 필수 값이 아니라고 설정
     // defaultValue = "" : 값이 안 넘어오면 디폴트값 지정
-	@RequestMapping( value = "/appr/list", method = RequestMethod.GET)
+	@RequestMapping( value = "/appr/list_form", method = RequestMethod.GET)
 	public String searchForms(ApprFormSearchDto search, Model model){
 		//1) 검색 조건이 null
 		boolean isEmpty = !search.hasSearchCondition();
@@ -110,7 +110,7 @@ public class ApprController {
 	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr) {
 		// 양식 작성 성공
 		if(appr.insertForm(dto) > 0) {
-			return "redirect:/appr/list";
+			return "redirect:/appr/list_form";
 		}
 		return "appr/write_form";
 	}
@@ -133,7 +133,7 @@ public class ApprController {
 	public String update_post(ApprFormDto dto, Model model) {
 		// 양식 수정 성공
 		if(appr.updateForm(dto) > 0) {
-			return "redirect:/appr/list";
+			return "redirect:/appr/list_form";
 		}
 		return "appr/update_form";
 	}

@@ -24,7 +24,7 @@
 	<!-- 검색 / 필터 툴바 (실제 GET 검색 폼) -->
 	<div class="sb-card mb-4">
 		<div class="sb-card__body">
-			<form method="GET" action="${pageContext.request.contextPath}/appr/list"
+			<form method="GET" action="${pageContext.request.contextPath}/appr/list_form"
 			      id="searchForm">
 				<div class="row g-3">	
 					<!--  검색 조건1 : 양식코드 또는 제목 -->		
@@ -62,7 +62,7 @@
 							<i class="bi bi-search"></i> 검색
 						</button>
 						<c:if test="${not empty param.keyword}">
-				            <a class="btn btn-ghost btn-sm" href="${pageContext.request.contextPath}/appr/list">초기화</a>
+				            <a class="btn btn-ghost btn-sm" href="${pageContext.request.contextPath}/appr/list_form">초기화</a>
 				        </c:if>
 	                </div>
 				</div>
