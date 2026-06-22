@@ -6,7 +6,7 @@
 	 <div class="sb-page-head">
 	 	<div class="sb-page-head__txt">
 	 		<div class="sb-breadcrumb">
-		 		<a href="${pageContext.request.contextPath}/appr/list">전자결재</a>
+		 		<a href="${pageContext.request.contextPath}/appr/list_form">전자결재</a>
 		 		<i class="bi bi-chevron-right"></i>
 		 		<span>양식관리</span>
 	 		</div>
@@ -15,7 +15,7 @@
 	 	</div>
 	 	<div class="sb-page-head__actions">
 		 	<button type="button" class="btn btn-ghost"
-		 			onclick="location.href='${pageContext.request.contextPath}/appr/list'">
+		 			onclick="location.href='${pageContext.request.contextPath}/appr/list_form'">
 		 			목록으로
 		 	</button>
 	 	</div>
@@ -101,7 +101,7 @@
 					<div id="err_forContent" class="text-danger fw-semibold mt-1"
 							 style="display: none; font-size: 14px;">
 							 양식 내용을 입력해주세요
-						</div>
+					</div>
 				</div>
 				
 				<div class="sb-divider"></div>

@@ -24,7 +24,7 @@
 	<!-- 검색 / 필터 툴바 (실제 GET 검색 폼) -->
 	<div class="sb-card mb-4">
 		<div class="sb-card__body">
-			<form method="GET" action="${pageContext.request.contextPath}/appr/list"
+			<form method="GET" action="${pageContext.request.contextPath}/appr/list_form"
 			      id="searchForm">
 				<div class="row g-3">	
 					<!--  검색 조건1 : 양식코드 또는 제목 -->		
@@ -62,7 +62,7 @@
 							<i class="bi bi-search"></i> 검색
 						</button>
 						<c:if test="${not empty param.keyword}">
-				            <a class="btn btn-ghost btn-sm" href="${pageContext.request.contextPath}/appr/list">초기화</a>
+				            <a class="btn btn-ghost btn-sm" href="${pageContext.request.contextPath}/appr/list_form">초기화</a>
 				        </c:if>
 	                </div>
 				</div>
@@ -102,7 +102,7 @@
 									<tr>
 										<td class="num text-faint">${status.count}</td>
 										<td>
-											<a href="${pageContext.request.contextPath}/appr/update_form?forId=${item.forId}"
+											<a href="${pageContext.request.contextPath}/appr/detail_form?forId=${item.forId}"
 											   class="sb-table__name">
 											   ${item.forCode}
 											</a>
@@ -152,9 +152,9 @@
 	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
 	window.addEventListener("load", function(){
 		
-		let companySearch = document.getElementById("companySearch");
+		let companySearch = document.getElementById("comName");
 		let comId = document.getElementById("comId");
-		let companyDropdown = document.getElementById("companyDropdown");
+		let companyDropdown = document.getElementById("acList");
 		
 		// 입력 할때마다 실행
 		companySearch.addEventListener("keyup", function(e){
@@ -174,8 +174,21 @@
 						data.forEach(item => {
 							let btn = document.createElement("button");
 							btn.type = "button";
-							btn.className = "dropdown-item";
-							btn.textContent = item.comName; // 보여줄 회사이름
+							btn.className = "dropdown-item d-flex justify-content-between align-items-center ";
+							
+							// 회사 이름
+							let nameSpan = document.createElement("span");
+							nameSpan.className = "company-name"
+							btn.textContent = item.comName;
+							
+							// 사업자 번호
+							let bizSpan = document.createElement("span");
+							bizSpan.className = "text-muted small ms-2";
+							bizSpan.textContent = item.bizNo
+							
+							// 집어 넣기
+							btn.appendChild(nameSpan);
+							btn.appendChild(bizSpan);
 							
 							// 검색해서 나온 회사 이름 클릭
 							btn.addEventListener("click", function(){
@@ -288,8 +301,8 @@
     /////////////////////////   페이징 기능    /////////////////////////
     */
     function checkForm(){
-    	var keyword = documet.getElementById("keyword");
-    	var comName = documet.getElementById("comName");
+    	var keyword = document.getElementById("keyword");
+    	var comName = document.getElementById("comName");
     	if(keyword.value.trim() == "" && comName.value.trim() == ""){
     		alert("검색 조건 하나이상은 포함해야한다.");
     	}	

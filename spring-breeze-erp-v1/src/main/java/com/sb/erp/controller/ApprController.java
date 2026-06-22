@@ -1,5 +1,6 @@
 package com.sb.erp.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.ApprFormDto;
@@ -65,7 +68,7 @@ public class ApprController {
 	// 양식 리스트 입력한 값 찾기
 	// required = false : 필수 값이 아니라고 설정
     // defaultValue = "" : 값이 안 넘어오면 디폴트값 지정
-	@RequestMapping( value = "/appr/list", method = RequestMethod.GET)
+	@RequestMapping( value = "/appr/list_form", method = RequestMethod.GET)
 	public String searchForms(ApprFormSearchDto search, Model model){
 		//1) 검색 조건이 null
 		boolean isEmpty = !search.hasSearchCondition();
@@ -107,6 +110,17 @@ public class ApprController {
 			return "redirect:/appr/list";
 		}
 		return "appr/write_form";
+	}
+	
+	// 양식 상세보기
+	@RequestMapping( value = "/appr/detail_form", method = RequestMethod.GET)
+	public String detail(int forId, Model model) {
+		
+		ApprFormDto dto = appr.selectFormAll(forId);
+		dto.setComName(appr.getCompanyName(dto.getComId()));
+		
+		model.addAttribute("dto", dto);
+		return "appr/detail_form";
 	}
 	
 	// 양식 수정 폼

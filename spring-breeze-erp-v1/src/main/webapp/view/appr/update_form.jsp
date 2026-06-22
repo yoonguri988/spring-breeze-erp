@@ -14,7 +14,7 @@
 			<h1>결재 양식 수정</h1>
 			<p>결재 양식 정보를 수정하고 저장합니다.</p>
 		</div>
-		<div>
+		<div class="sb-page-head__actions">
 			<button type="button" class="btn btn-ghost"
 					onclick="location.href='${pageContext.request.contextPath}/appr/list_form'">
 					목록으로
@@ -40,6 +40,10 @@
 	                            <input type="text" class="form-control"
 									   id="forCode" name="forCode" value="${dto.forCode}"/>
 	                            <div class="form-text text-faint mt-1">ex) TEST-01</div>
+	                            <div id="err_forCode" class="text-danger fw-semibold mt-1"
+									 style="display: none; font-size: 14px;">
+									 양식 코드를 입력해주세요
+								</div>
                         	</div>
 	                        <div class="col-md-6 position-relative">
 	                            <label for="companySearch"
@@ -50,6 +54,10 @@
 		                            	   value="${dto.comName}" autocomplete="off"/>
                            	    </div>
 	                            <input type="hidden" id="comId" name="comId" value="${dto.comId}" />	
+	                            <div id="err_comId" class="text-danger fw-semibold mt-1"
+									 style="display: none; font-size: 14px;">
+									 추가할 회사를 선택해주세요
+								</div>
 	                            <div id="companyDropdown"
 	                            	 class="dropdown-menu w-100 shadow-sm"
 	                            	 style="display: none; max-height: 200px; overflow-y: auto; z-index: 1050;"></div>
@@ -63,6 +71,10 @@
                             	   class="sb-form-label">양식 제목</label>
                             <input type="text" class="form-control"
                             	   id="forTitle" name="forTitle" value="${dto.forTitle}"/>
+                           	<div id="err_forTitle" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 양식 제목을 입력해주세요
+					</div>
                         </div>
                         <div class="col-md-6">
                             <label class="sb-form-label">사용 여부</label>
@@ -81,6 +93,10 @@
                     	<label for="forContent" class="sb-form-label">양식 내용</label>
                         <textarea class="form-control" id="forContent" name="forContent" rows="14" 
                                   style="font-family: 'Courier New', Courier, monospace; background-color: #fafafa; resize: vertical;">${dto.forContent}</textarea>
+                        <div id="err_forContent" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 양식 내용을 입력해주세요
+						</div>
                     </div>
                     
                     <div class="sb-divider"></div>
