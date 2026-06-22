@@ -5,7 +5,7 @@
   <div class="sb-page-head">
     <div class="sb-page-head__txt">
       <div class="sb-breadcrumb">
-        <a href="${pageContext.request.contextPath}/resv/list">자원 관리</a>
+        <a href="${pageContext.request.contextPath}/res/list">자원 관리</a>
         <i class="bi bi-chevron-right"></i> 자원 수정
       </div>
       <h1>자원 수정</h1>
@@ -19,7 +19,7 @@
       <span class="sub">${resource.resCode}</span>
     </div>
     <div class="sb-card__body">
-      <form action="${pageContext.request.contextPath}/resv/update" method="post">
+      <form action="${pageContext.request.contextPath}/res/update" method="post">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <input type="hidden" name="resId" value="${resource.resId}"/>
 
@@ -60,7 +60,7 @@
           <button type="submit" class="btn btn-sb">
             <i class="bi bi-check-lg"></i> 수정 완료
           </button>
-          <a href="${pageContext.request.contextPath}/resv/detail?id=${resource.resId}" class="btn btn-ghost">취소</a>
+          <a href="${pageContext.request.contextPath}/res/detail?resId=${resource.resId}" class="btn btn-ghost">취소</a>
         </div>
       </form>
     </div>

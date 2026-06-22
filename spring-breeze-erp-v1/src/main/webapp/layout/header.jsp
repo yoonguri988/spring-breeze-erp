@@ -16,6 +16,8 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/company.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dept.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/my.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/perm.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/project.css" />
 </head>
 <body>
   <div class="sb-app" data-layout="standard">

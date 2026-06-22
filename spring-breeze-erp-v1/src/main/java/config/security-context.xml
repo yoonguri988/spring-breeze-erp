@@ -26,15 +26,15 @@
 
       <security:intercept-url  pattern="/auth/login" access="permitAll" />
       <security:intercept-url  pattern="/auth/resetPass" access="permitAll" />
-      <!-- <security:intercept-url  pattern="/auth/**"    access="isAuthenticated()" /> -->
+      <security:intercept-url  pattern="/auth/**"    access="isAuthenticated()" />
 	
-      <!-- KJY -->
-      <security:intercept-url  pattern="/appr/**" access="isAuthenticated()"/>
+      <!-- KJY : 2차 프로젝트때 페이지 접근 권한은 조금 열어놓고 메서드쪽에서 어노테이션으로 막아야할거같음 -->
+      <security:intercept-url  pattern="/appr/**" access="hasAuthority('ROOT')"/>
       <!-- KJY -->
       
       <!-- jsj -->
-      <security:intercept-url  pattern="/emp/add" access="hasRole('ROLE_ADMIN')"/>
-      <security:intercept-url  pattern="/emp/edit" access="hasRole('ROLE_ADMIN')"/>
+      <security:intercept-url  pattern="/emp/add" access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"/>
+      <security:intercept-url  pattern="/emp/edit" access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"/>
       <security:intercept-url  pattern="/emp/**" access="isAuthenticated()"/>
       <!-- jsj -->
 
@@ -45,18 +45,24 @@
    	  
    	  
    	  <!-- jang -->
-   	  <security:intercept-url pattern="/admin/**" access="permitAll"/>
+   	  <security:intercept-url pattern="/res/**" access="isAuthenticated()"/>
+   	  <security:intercept-url pattern="/resv/**" access="isAuthenticated()"/>
+   	  <security:intercept-url pattern="/admin/**" access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"/>
    	  <!-- jang -->
 >>>>>>> d162a2d8a1b48a86ced34f8ca451aa2dde7d63a4
    	  
    	  
    	  <security:intercept-url pattern="/error/**" access="permitAll"/>
    	  
-   	  <security:intercept-url pattern="/index" access="permitAll"/>
-   	  <security:intercept-url pattern="/com/**" access="permitAll"/>
-   	  <security:intercept-url pattern="/dept/**" access="permitAll"/>
+   	  <security:intercept-url pattern="/index" access="isAuthenticated()"/>
+   	  <security:intercept-url pattern="/com/**" access="isAuthenticated()"/>
+   	  <security:intercept-url pattern="/dept/**" access="isAuthenticated()"/>
    	  <!-- cyj -->
    	  
+   	  <!-- CDY -->
+   	  <security:intercept-url pattern="/proj/**" access="isAuthenticated()"/>
+   	  <!-- CDY -->
+   	   
 	  <security:form-login
 	  	  login-page="/auth/login"
 	  	  login-processing-url="/auth/login"
