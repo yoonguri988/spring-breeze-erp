@@ -26,8 +26,8 @@ window.addEventListener("load", function() {
         <input type="hidden" name="bno" value="${param.bno}" />
               
         <div class="my-3">
-            <label for="emp_no" class="form-label">사원번호 확인</label>
-            <input type="text" class="form-control" id="emp_no" name="emp_no" placeholder="사원번호를 입력하세요." />
+            <label for="empId" class="form-label">사원 ID 번호 확인</label>
+            <input type="text" class="form-control" id="empId" name="empId" placeholder="사원 Id 번호를 입력하세요." />
         </div> 
         
         <div class="my-3 text-end"> 
@@ -41,9 +41,9 @@ window.addEventListener("load", function() {
     <script>
     function checkForm() { 
         // 변수명을 역할에 맞게 bpass에서 empId로 변경하여 직관성을 높였습니다
-        let empId = document.getElementById("emp_no"); 
+        let empId = document.getElementById("empId"); 
         if (empId.value.trim() === "") { 
-            alert("사원번호가 빈칸입니다. \n확인 후 입력해주세요."); 
+            alert("사원 ID 번호가 빈칸입니다. \n확인 후 입력해주세요."); 
             empId.focus();  
             return false; 
         } 

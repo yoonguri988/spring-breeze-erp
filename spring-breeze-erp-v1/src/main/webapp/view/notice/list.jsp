@@ -214,6 +214,9 @@
 <form id="deleteForm" action="${pageContext.request.contextPath}/notice/delete" method="POST" style="display:none;">
   <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
   <input type="hidden" name="bno" id="delBno">
+  <input type="hidden" name="empId" id="deleteEmpId">
+  <input type="hidden" name="password" id="deletePassword">
+  <input type="hidden" name="returnTo" id="deleteReturnTo">
 </form>
 
 <script>
@@ -324,9 +327,6 @@
   function openEditModal(data) {
     const form = document.getElementById("noticeRegForm");
     form.reset();
-    
-  /*   const csrfParam = "${_csrf.parameterName}";
-    const csrfToken = "${_csrf.token}"; */
     
     // 따옴표 구조 오타를 완벽히 해결하여 스크립트가 뻗는 문제를 정상화했습니다.
     form.action = contextPath + "/notice/update?" + csrfParam + "=" + csrfToken; 
