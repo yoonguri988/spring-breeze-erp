@@ -14,5 +14,6 @@ public class ProjectMemberDto {
 	private Date joinedAt;
 	private String empName;
 	private String proName;
+	private String deptName;
 	
 }
