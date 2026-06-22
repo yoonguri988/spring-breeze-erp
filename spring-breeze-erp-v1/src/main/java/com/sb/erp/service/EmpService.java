@@ -42,9 +42,9 @@ public interface EmpService {
 	public boolean matchPassword(EmpDto dto);
 	// 해당 부서 id를 통해 사원정보 조회
 	public List<EmpDto> selectByDeptId(int deptId);
+	
 	// 회사 아이디를 기준으로 권한 정보와 엮여있는 사원 정보 확인
 	public List<EmpAuthDto> selectAuthByComId(int comId);
-
 	
 
 }

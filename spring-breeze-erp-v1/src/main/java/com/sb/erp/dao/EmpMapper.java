@@ -3,8 +3,6 @@ package com.sb.erp.dao;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
-import org.apache.ibatis.annotations.Param;
-
 import com.sb.erp.dto.EmpAuthDto;
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
@@ -56,5 +54,4 @@ public interface EmpMapper {
 
 	// 회사 아이디를 기준으로 권한 정보와 엮여있는 사원 정보 확인
 	public List<EmpAuthDto> selectAuthByComId(int comId);
-
 }

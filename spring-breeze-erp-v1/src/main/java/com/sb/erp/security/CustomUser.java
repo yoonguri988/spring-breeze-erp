@@ -28,7 +28,7 @@ public class CustomUser extends User{
 		super(dto.getEmpEmail(), 
 			  dto.getEmpPass(), 
 			  dto.getAuthList().stream()
-			                   .map(auth->new SimpleGrantedAuthority(auth.getAuth()))
+			                   .map(auth->new SimpleGrantedAuthority(auth.getAutName()))
 			                   .collect(Collectors.toList()));
 		this.dto = dto;
 	}

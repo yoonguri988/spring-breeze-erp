@@ -38,8 +38,9 @@
       <security:intercept-url  pattern="/emp/**" access="isAuthenticated()"/>
       <!-- jsj -->
 
-   	  <security:intercept-url  pattern="/board/**" access="permitAll" />
-   	  
+	  <!-- sonmir -->
+   	  <security:intercept-url  pattern="/notice/**"    access="isAuthenticated()" />
+	  <!-- sonmir -->
    	  
    	  <!-- jang -->
    	  <security:intercept-url pattern="/res/**" access="isAuthenticated()"/>

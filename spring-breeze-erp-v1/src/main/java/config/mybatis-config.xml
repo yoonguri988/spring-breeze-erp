@@ -36,7 +36,8 @@
 		<!-- CDY -->
 		
 		<!-- Son.C.K -->
-		<typeAlias type="com.sb.erp.dto.BoardDto"    alias="BoardDto"/>
+		<typeAlias type="com.sb.erp.dto.NoticeDto"    alias="NoticeDto"/>
+		<typeAlias type="com.sb.erp.dto.NoticeSearchDto"    alias="NoticeSearchDto"/>
         <!-- Son.C.K -->
         
 		<!-- jsj -->
