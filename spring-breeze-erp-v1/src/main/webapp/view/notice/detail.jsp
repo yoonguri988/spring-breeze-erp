@@ -35,11 +35,11 @@ window.addEventListener("load", function() {
     </c:if>
     
     <div class="my-3 text-end"> 
-        <a href="${pageContext.request.contextPath}/notice/edit.do?bno=${notice.bno}" 
+        <a href="${pageContext.request.contextPath}/notice/edit?bno=${notice.bno}" 
         		class="btn btn-outline-primary" title="글수정">수정</a>
-        <a href="${pageContext.request.contextPath}/notice/delete.do?bno=${notice.bno}" 
+        <a href="${pageContext.request.contextPath}/notice/delete?bno=${notice.bno}" 
         		class="btn btn-outline-danger" title="글삭제" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
-        <a href="${pageContext.request.contextPath}/notice/list.do" class="btn btn-primary" title="목록보러가기">목록</a>
+        <a href="${pageContext.request.contextPath}/notice/list" class="btn btn-primary" title="목록보러가기">목록</a>
     </div>
 </div>
 

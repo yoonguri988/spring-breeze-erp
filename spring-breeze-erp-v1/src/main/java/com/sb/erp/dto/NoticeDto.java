@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class NoticeDto { //notice
 	private int bno;          // 게시글 번호
-	private String category;  // 카테고리 (인사, 보안, IT, 복지, 일반)
+	// private String category;  // 카테고리 (인사, 보안, IT, 복지, 일반)
 	private String btitle;    // 제목
 	private String bcontent;  // 내용
 	private int bhit;         // 조회수
