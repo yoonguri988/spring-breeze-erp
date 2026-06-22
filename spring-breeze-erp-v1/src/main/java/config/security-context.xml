@@ -38,6 +38,9 @@
       <security:intercept-url  pattern="/emp/**" access="isAuthenticated()"/>
       <!-- jsj -->
 
+<<<<<<< HEAD
+   	  <security:intercept-url  pattern="/notice/**"    access="permitAll" />
+=======
    	  <security:intercept-url  pattern="/board/**" access="permitAll" />
    	  
    	  
@@ -46,6 +49,7 @@
    	  <security:intercept-url pattern="/resv/**" access="isAuthenticated()"/>
    	  <security:intercept-url pattern="/admin/**" access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"/>
    	  <!-- jang -->
+>>>>>>> d162a2d8a1b48a86ced34f8ca451aa2dde7d63a4
    	  
    	  
    	  <security:intercept-url pattern="/error/**" access="permitAll"/>
