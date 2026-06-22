@@ -19,7 +19,9 @@ public interface ProjectMapper {
 	public ProjectDto select(int pro_id);
 	
 	//프로젝트 삭제
-	public int delete(int pro_id);
+	public int deleteTaskByProjectId(int pro_id);
+	public int deleteMemberByProjectId(int pro_id);
+	public int deleteProject(int pro_id);
 	
 	//프로젝트 수정
 	public int update(ProjectDto dto);

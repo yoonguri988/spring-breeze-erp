@@ -94,10 +94,20 @@
     </where>
 	</select>
 	
+	<!-- 프로젝트 삭제 영역 -->
+	<!-- 태스크 삭제 -->
+	<delete id="deleteTaskByProjectId" parameterType="int">
+	    delete from task where pro_id = #{proId}
+	</delete>
+	<!-- 프로젝트 멤버 삭제 -->
+	<delete id="deleteMemberByProjectId" parameterType="int">
+	    delete from project_member where project_pro_id = #{proId}
+	</delete>
 	<!-- 프로젝트 삭제 -->
-	<delete id="delete" parameterType="int">
-       delete from project where pro_id = #{proId}
-    </delete>
+	<delete id="deleteProject" parameterType="int">
+	    delete from project where pro_id = #{proId}
+	</delete>
+    <!-- 프로젝트 삭제 영역 -->
     
     <!-- 프로젝트 수정 -->
     <update id="update" parameterType="ProjectDto">
