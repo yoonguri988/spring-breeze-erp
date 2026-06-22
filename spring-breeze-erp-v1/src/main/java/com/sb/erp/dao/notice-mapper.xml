@@ -20,8 +20,12 @@
   <!-- 공지 게시글 등록 (insert 구문 포함) -->
   <!-- ✅ PK(bno) 자동 생성 후 DTO에 매핑되도록 옵션 추가 -->
   <insert id="insert" parameterType="NoticeDto" >
-    insert into notice (btitle, bcontent, emp_id, com_id, bfile)  
-    values (#{btitle}, #{bcontent}, #{empId}, #{comId}, #{bfile})
+    insert into notice (btitle, bcontent, emp_id, com_id
+    	<if test="bfile != null and bfile != ''">, bfile</if>
+    )  
+    values (#{btitle}, #{bcontent}, #{empId}, #{comId}
+    	<if test="bfile != null and bfile != ''">, #{bfile}</if>
+    )
   </insert>
   
   <!-- 상세 페이지 조회 -->
@@ -42,17 +46,25 @@
   <!-- 공지 수정 -->
   <update id="update" parameterType="NoticeDto">
     update notice
-    set btitle   = #{btitle},
-        bcontent = #{bcontent},
-        bfile    = #{bfile}
+    set btitle   = #{btitle}
+        , bcontent = #{bcontent}
+        <if test="bfile != null and bfile != ''">, bfile    = #{bfile}</if>
     where bno = #{bno}
   </update>
   
   <!-- 페이징 -->
-  <select id="selectPaging" resultType="NoticeDto" parameterType="java.util.HashMap">
+  <select id="selectAll" resultType="NoticeDto" parameterType="NoticeSearchDto">
     select * from notice
+    <where>
+    	<if test="keyword != null and keyword != ''">
+    	and (lower(btitle) like lower(CONCAT('%', #{keyword}, '%'))
+           or lower(bcontent) like lower(CONCAT('%', #{keyword}, '%')))
+    	</if>
+    </where>
     order by bno desc
-    limit #{start}, #{end}
+    <if test="sortBy == 'new'">, created_at desc</if>
+    <if test="sortBy == 'views'">, created_at desc</if>
+    limit #{pstartno}, #{onepagelist}
   </select>
 
   <!-- 전체 카운트 -->
@@ -61,19 +73,22 @@
   </select>
   
   <!-- 공지글 페이징 + 검색 (제목/내용) -->
-  <select id="selectNoticeList" resultType="NoticeDto" parameterType="java.util.HashMap">
+  <!-- <select id="selectNoticeList" resultType="NoticeDto" parameterType="NoticeSearchDto">
     select * from notice
-    where (lower(btitle) like lower(CONCAT('%', #{searchKeyword}, '%'))
-           or lower(bcontent) like lower(CONCAT('%', #{searchKeyword}, '%')))
-    order by bno desc
-    limit #{offset}, #{pageSize}
+    <where>
+    	<if test="keyword != null and keyword != ''">
+    	and (lower(btitle) like lower(CONCAT('%', #{keyword}, '%'))
+           or lower(bcontent) like lower(CONCAT('%', #{keyword}, '%')))
+    	</if>
+    </where>
+    limit #{pstartno}, #{onepagelist}
   </select> 
-  
+   -->
   <!-- 검색 결과 카운트 -->
-  <select id="selectCountNoticeList" resultType="int" parameterType="java.util.HashMap">
+  <select id="selectCountNoticeList" resultType="int" parameterType="NoticeSearchDto">
     select count(*) as total_count
     from notice
-    where (lower(btitle) like lower(CONCAT('%', #{searchKeyword}, '%'))
-           or lower(bcontent) like lower(CONCAT('%', #{searchKeyword}, '%')))
+    where (lower(btitle) like lower(CONCAT('%', #{keyword}, '%'))
+           or lower(bcontent) like lower(CONCAT('%', #{keyword}, '%')))
   </select>  
 </mapper>

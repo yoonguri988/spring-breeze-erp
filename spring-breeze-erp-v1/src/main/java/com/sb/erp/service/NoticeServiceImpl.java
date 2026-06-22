@@ -1,11 +1,11 @@
 package com.sb.erp.service;
 
-import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.sb.erp.dao.NoticeMapper;
 import com.sb.erp.dto.NoticeDto;
+import com.sb.erp.dto.NoticeSearchDto;
 
 /* Service 구현체
  * Mapper 호출하여 실제 DB 작업 수행
@@ -42,8 +42,9 @@ public class NoticeServiceImpl implements NoticeService{
 	    }
 
 	    @Override  // 페이징
-	    public List<NoticeDto> selectPaging(HashMap<String, Object> map) {
-	        return noticeMapper.selectPaging(map);
+	    public List<NoticeDto> selectAll(NoticeSearchDto search) {
+	    	search.setPstartno((search.getPstartno()-1)*search.getOnepagelist());
+	        return noticeMapper.selectAll(search);
 	    }
 
 	    @Override // 전체 카운트
@@ -52,12 +53,12 @@ public class NoticeServiceImpl implements NoticeService{
 	    }
 
 	    @Override // 검색+페이징
-	    public List<NoticeDto> selectNoticeList(HashMap<String, Object> map) {
-	        return noticeMapper.selectNoticeList(map);
+	    public List<NoticeDto> selectNoticeList(NoticeSearchDto search) {
+	        return noticeMapper.selectNoticeList(search);
 	    }
 
 	    @Override // 검색 결과 카운트
-	    public long selectCountNoticeList(HashMap<String, Object> map) {
-	        return noticeMapper.selectCountNoticeList(map);
+	    public long selectCountNoticeList(NoticeSearchDto search) {
+	        return noticeMapper.selectCountNoticeList(search);
 	    }
 }
