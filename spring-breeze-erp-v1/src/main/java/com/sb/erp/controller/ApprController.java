@@ -38,7 +38,8 @@ public class ApprController {
 	@RequestMapping( value = "/checkCode", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String,Object> checkCode(@RequestParam("code") String code,
-										@RequestParam("comId") String comId) {
+										@RequestParam("comId") String comId,
+								@RequestParam(value ="forId", required = false) Integer forId) {
 		
 		Map<String,Object> result = new HashMap<>();
 		
@@ -52,6 +53,9 @@ public class ApprController {
 		dto.setComId(Integer.parseInt(comId));
 		dto.setForCode(code);
 		
+		if(forId != null) { 
+			dto.setForId(forId);
+		}
 		
 		String find = appr.findByCode(dto);
 		
@@ -107,7 +111,7 @@ public class ApprController {
 	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr) {
 		// 양식 작성 성공
 		if(appr.insertForm(dto) > 0) {
-			return "redirect:/appr/list";
+			return "redirect:/appr/list_form";
 		}
 		return "appr/write_form";
 	}
@@ -141,7 +145,7 @@ public class ApprController {
 	public String update_post(ApprFormDto dto, Model model) {
 		// 양식 수정 성공
 		if(appr.updateForm(dto) > 0) {
-			return "redirect:/appr/list";
+			return "redirect:/appr/list_form";
 		}
 		return "appr/update_form";
 	}

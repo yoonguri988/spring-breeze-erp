@@ -44,6 +44,7 @@
 									 style="display: none; font-size: 14px;">
 									 양식 코드를 입력해주세요
 								</div>
+								<div class="tforCode"></div>
                         	</div>
 	                        <div class="col-md-6 position-relative">
 	                            <label for="companySearch"
@@ -176,6 +177,12 @@ let valid = false;
 		let companySearch = document.getElementById("companySearch");
 		let comId = document.getElementById("comId");
 		let companyDropdown = document.getElementById("companyDropdown");
+		let forCode = document.getElementById("forCode");
+		let tforCode = document.querySelector(".tforCode");
+		
+		if("${dto.forId}" != ""){
+			valid = true;
+		}
 		
 		// 입력 할때마다 실행
 		companySearch.addEventListener("keyup", function(e){
@@ -347,7 +354,8 @@ let valid = false;
 				fetch("${pageContext.request.contextPath}/checkCode?code="
 						+ encodeURIComponent(value)
 						+ "&comId="
-						+ encodeURIComponent(comIdVal))
+						+ encodeURIComponent(comIdVal)
+						+ "&forId=${dto.forId}")
 				.then( response => response.json() )
 				.then( data => {
 					

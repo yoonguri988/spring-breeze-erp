@@ -21,6 +21,9 @@
 			appr_form
 		where
 			for_code = #{forCode} and com_id = #{comId}
+		<if test="forId != null and forId != '' and forId != 0">
+			and for_id != #{forId}
+		</if>
 	</select>
 	
 	<!-- 양식 생성, 리스트 검색시에 회사 이름 검색 -->

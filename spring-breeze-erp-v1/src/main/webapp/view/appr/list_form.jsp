@@ -61,9 +61,6 @@
 	                    <button type="submit" class="btn btn-sb-soft btn-sm">
 							<i class="bi bi-search"></i> 검색
 						</button>
-						<c:if test="${not empty param.keyword}">
-				            <a class="btn btn-ghost btn-sm" href="${pageContext.request.contextPath}/appr/list_form">초기화</a>
-				        </c:if>
 	                </div>
 				</div>
 			</form>
@@ -102,7 +99,8 @@
 									<tr>
 										<td class="num text-faint">${status.count}</td>
 										<td>
-											<a href="${pageContext.request.contextPath}/appr/detail_form?forId=${item.forId}"
+											<%-- <a href="${pageContext.request.contextPath}/appr/detail_form?forId=${item.forId}" --%>
+											<a href="${pageContext.request.contextPath}/appr/update_form?forId=${item.forId}"
 											   class="sb-table__name">
 											   ${item.forCode}
 											</a>
