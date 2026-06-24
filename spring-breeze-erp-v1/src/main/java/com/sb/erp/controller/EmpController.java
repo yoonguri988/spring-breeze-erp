@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
+import com.sb.erp.security.CustomUser;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
 import com.sb.erp.service.PosService;
@@ -27,36 +28,37 @@ public class EmpController {
 	@Autowired PosService posService;
 	@Autowired DeptService deptService;
 	@Autowired BCryptPasswordEncoder passEncoder;
-
+	
+	// 로그인한 유저의 com_id 가져오기 (컨트롤러 내부 공통 메서드)
+	private int getCurrentComId(Authentication authentication) {
+		CustomUser principal = (CustomUser) authentication.getPrincipal();
+		return principal.getDto().getComId();
+	}
+	
 	// 조회 목록 + 페이징 유틸 이용하기
 	@RequestMapping("/emp/list")
 	public String list(EmpSearchDto search, 
 			@RequestParam(value = "searched", required = false) String searched,
-			Model model) {
+			Model model,
+			Authentication authentication) {
 		
-		// 검색 조건이 있는지 확인
+		int comId = getCurrentComId(authentication);
+		
 		boolean hasFilter = search.getDeptId() != null
 		     || search.getPosId() != null
 		     || (search.getEmpStatus() != null && !search.getEmpStatus().isEmpty())
 		     || (search.getKeyword() != null && !search.getKeyword().trim().isEmpty());
 
 		if (searched != null && hasFilter) {
-			
-			// 전체, 검색 결과 갯수 cnt(*)
-			int total = empService.selectCnt(search);
-			
+			int total = empService.selectCnt(search, comId);
 			PagingUtil paging = new PagingUtil(total, search.getPstartno());
-			List<EmpDto> empList = empService.search(search);
+			List<EmpDto> empList = empService.search(search, comId);
 			
 			model.addAttribute("empList", empList);
 			model.addAttribute("paging", paging);
-			
 		}
 		
-		// 사용자가 입력한 검색 조건(폼 value 이용)
 		model.addAttribute("search", search);
-
-		// 부서 및 직급
 		model.addAttribute("posList", posService.selectAll());
 		model.addAttribute("deptList", deptService.selectAll());
 		return "emp/list";
@@ -65,70 +67,62 @@ public class EmpController {
 	// 상세페이지
 	@RequestMapping("/emp/detail")
 	public String detail(@RequestParam int empId, Model model, Authentication authentication) {
-		EmpDto emp = empService.selectByEmpId(empId);
+		int comId = getCurrentComId(authentication);
+		EmpDto emp = empService.selectByEmpId(empId, comId);
 		model.addAttribute("emp", emp);
 		
-		// 로그인한 본인의 empId 전달
-		if (authentication != null && authentication.isAuthenticated()) {
-	        EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
-	        if (loginEmp != null) {
-	            model.addAttribute("loginEmpId", loginEmp.getEmpId());
-	        }
-	    }
+		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
+		if (loginEmp != null) {
+			model.addAttribute("loginEmpId", loginEmp.getEmpId());
+		}
 		return "emp/detail";
 	}
-
+	
 	// 사원 등록 get
 	@RequestMapping(value="/emp/add" , method=RequestMethod.GET)
 	public String addEmp(Model model) {
-
-		// 부서 및 직급
-		model.addAttribute("posList", posService.selectAll());
-		model.addAttribute("deptList", deptService.selectAll());
-		return "emp/add";
+	    model.addAttribute("posList", posService.selectAll());
+	    model.addAttribute("deptList", deptService.selectAll());
+	    return "emp/add";
 	}
 
 	// 사원 등록 post
 	@RequestMapping(value="/emp/add" , method=RequestMethod.POST)
-	public String addEmpPost(EmpDto dto) {
-
-		empService.insert(dto);
+	public String addEmpPost(EmpDto dto, Authentication authentication) {
+		int comId = getCurrentComId(authentication);
+		empService.insert(dto, comId);
 		return "redirect:/emp/list";
 	}
 	
-	//사원 정보 수정
+	// 사원 정보 수정
 	@RequestMapping(value="/emp/edit" , method=RequestMethod.GET)
-	public String editForm(@RequestParam int empId, Model model) {
-	    
-		model.addAttribute("emp", empService.selectByEmpId(empId));
-		
-		// 드롭다운
+	public String editForm(@RequestParam int empId, Model model, Authentication authentication) {
+		int comId = getCurrentComId(authentication);
+		model.addAttribute("emp", empService.selectByEmpId(empId, comId));
 		model.addAttribute("posList", posService.selectAll());
 		model.addAttribute("deptList", deptService.selectAll());
 	    return "emp/edit";
 	}
 	
-	//사원 정보 수정
 	@RequestMapping(value="/emp/edit" , method=RequestMethod.POST)
-	public String editProcess(EmpDto dto) {
-	    empService.update(dto);
+	public String editProcess(EmpDto dto, Authentication authentication) {
+		int comId = getCurrentComId(authentication);
+	    empService.update(dto, comId);
 	    return "redirect:/emp/detail?empId="+ dto.getEmpId(); 
 	}
 	
-	
-	
-	//비밀번호 초기화(관리자)
+	// 비밀번호 초기화(관리자)
 	@RequestMapping(value="/emp/resetPass", method=RequestMethod.GET)
-	public String resetPass(@RequestParam int empId, Model model) {
-		model.addAttribute("emp", empService.selectByEmpId(empId));
+	public String resetPass(@RequestParam int empId, Model model, Authentication authentication) {
+		int comId = getCurrentComId(authentication);
+		model.addAttribute("emp", empService.selectByEmpId(empId, comId));
 		return "emp/resetPass";
 	}
 	
-	//비밀번호 초기화(관리자)
 	@RequestMapping(value="/emp/resetPass", method=RequestMethod.POST)
-	public String resetPassPost(@RequestParam int empId) {
-		
-		EmpDto emp = empService.selectByEmpId(empId);
+	public String resetPassPost(@RequestParam int empId, Authentication authentication) {
+		int comId = getCurrentComId(authentication);
+		EmpDto emp = empService.selectByEmpId(empId, comId);
 		EmpDto dto = new EmpDto();
 		dto.setEmpId(empId);
 		dto.setEmpPass(passEncoder.encode(emp.getEmpNo()));
@@ -137,11 +131,11 @@ public class EmpController {
 		return "redirect:/emp/detail?empId="+ dto.getEmpId(); 
 	}
 	
-
 	// 비밀번호 초기화(사용자)
 	@RequestMapping(value="/emp/editPass", method=RequestMethod.GET)
-	public String editPass(@RequestParam int empId, Model model) {
-		model.addAttribute("emp", empService.selectByEmpId(empId));
+	public String editPass(@RequestParam int empId, Model model, Authentication authentication) {
+		int comId = getCurrentComId(authentication);
+		model.addAttribute("emp", empService.selectByEmpId(empId, comId));
 		return "emp/editPass";
 	}
 	
@@ -150,18 +144,14 @@ public class EmpController {
 							   @RequestParam String currentPass,
 							   @RequestParam String editPass,
 							   @RequestParam String checkPass) 
-	
 	{	
-		// 새로운 비밀번호 일치 확인
 		if (!editPass.equals(checkPass)) { return "emp/editPass"; }
 		
-		// 현재 비밀번호 확인
 		EmpDto chk = new EmpDto();
 		chk.setEmpId(empId);
 		chk.setEmpPass(currentPass);
 		if (!empService.matchPassword(chk)) { return "emp/editPass"; }
 		
-		// 확인이 끝나면 비밀번호를 업데이트
 		EmpDto dto = new EmpDto();
 		dto.setEmpId(empId);
 		dto.setEmpPass(passEncoder.encode(editPass));
@@ -169,11 +159,6 @@ public class EmpController {
 		
 		return "redirect:/emp/detail?empId="+ empId;		
 	}
-	
-	
-	// 비밀번호 초기화(사용자)
-	
-	
 	
 	// 이메일 중복 검사
 	@RequestMapping(value="/emp/checkEmail", method=RequestMethod.GET)
@@ -185,7 +170,6 @@ public class EmpController {
 	    return result;
 	}
 	
-	
 	// 모바일 중복 검사
 	@RequestMapping(value="/emp/checkMobile", method=RequestMethod.GET)
 	@ResponseBody
@@ -196,16 +180,14 @@ public class EmpController {
 	    return result;
 	}
 	
-	
 	// 사번 중복 검사
 	@RequestMapping(value="/emp/checkEmpNo", method=RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> checkEmpNo(@RequestParam String empNo) {
-	    boolean duplicate = empService.isEmpNoDuplicate(empNo);
+	public Map<String, Object> checkEmpNo(@RequestParam String empNo, Authentication authentication) {
+		int comId = getCurrentComId(authentication);
+	    boolean duplicate = empService.isEmpNoDuplicate(empNo, comId);
 	    Map<String, Object> result = new HashMap<>();
 	    result.put("duplicate", duplicate);
 	    return result;
 	}
-	
-	
 }
