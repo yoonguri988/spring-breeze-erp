@@ -1,8 +1,11 @@
 package com.sb.erp.controller;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -18,9 +21,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.ComSearchDto;
 import com.sb.erp.dto.CompanyDto;
+import com.sb.erp.dto.DeptDto;
 import com.sb.erp.dto.EmpDto;
-import com.sb.erp.dto.PermDto;
+import com.sb.erp.dto.AuthPermDto;
 import com.sb.erp.dto.StatsComDto;
+import com.sb.erp.dto.StatsDeptDto;
 import com.sb.erp.exception.FileUploadException;
 import com.sb.erp.service.CompanyService;
 import com.sb.erp.service.DeptService;
@@ -47,7 +52,7 @@ public class CompanyController {
 	//회사 등록 기능
 	@RequestMapping(value="/com/add", method= RequestMethod.POST)
 	public String add(CompanyDto dto, 
-			@RequestParam(value="comLogo", required=false) MultipartFile logoFile,
+			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
 			RedirectAttributes rttr) {
 		String msg = "회사 등록에 실패하였습니다.";
 		
@@ -80,7 +85,14 @@ public class CompanyController {
 	
 	// 회사 목록 조회
 	@RequestMapping(value="/com/list", method= RequestMethod.GET)
-	public String list(ComSearchDto search, Model model) {
+	public String list(ComSearchDto search, Model model, HttpSession session) {
+		Integer empId = (Integer) session.getAttribute("empId");
+		//만약 로그인 사용자가 시스템 관리자가 아닌 경우
+		//1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
+	    AuthPermDto root = permService.selectByEmpId(empId);
+		
+	    if(!root.getAutName().equals("ROOT")) return "redirect:/com/my";
+		
 		int listtotal = service.listTotal(search);
 		PagingUtil paging = new PagingUtil(listtotal, search.getOnepagelist(), search.getPstarValue());
 		//통계 데이터
@@ -156,7 +168,7 @@ public class CompanyController {
 	    EmpDto emp = empService.selectByEmpEmail(auth.getName());
 	    //1. 로그인한 사용자가 관리자가 아닌 경우
 	    //1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-	    PermDto root = permService.selectByEmpId(emp.getEmpId());
+	    AuthPermDto root = permService.selectByEmpId(emp.getEmpId());
 	    
 	    // ROOT(시스템 관리자) 아닌 경우
 	    if(!root.getAutName().equals("ROOT")) {
@@ -177,13 +189,36 @@ public class CompanyController {
 	    return result;
 	}
 	
-	//관리자 - 회사 목록 조회
-	@RequestMapping(value="/admin/com/list", method= RequestMethod.GET)
-	public String list_admin(ComSearchDto search, Model model) {
-		int listtotal = service.listTotal(search);
-		PagingUtil paging = new PagingUtil(listtotal, search.getOnepagelist(), search.getPstarValue());
-		model.addAttribute("paging", paging);
-		model.addAttribute("items", service.list(search));
-		return "/com/list";
+	// 회사 정보 상세 조회
+	@RequestMapping(value="/com/detail", method=RequestMethod.GET)
+	public String myDetail(@RequestParam("comId") int comId,
+						   Model model) {
+		//통계 데이터
+		StatsDeptDto stats = deptService.selecStats(comId);
+		List<DeptDto> deptList = deptService.selectOrgTree(comId);
+		CompanyDto com = service.selectOneById(comId);
+		
+		model.addAttribute("stats", stats);
+		model.addAttribute("com", com);
+		model.addAttribute("deptList", deptList);
+		return "/com/detail";
+	}
+	
+	// 내 회사 정보 조회
+	@RequestMapping(value="/com/my", method=RequestMethod.GET)
+	public String mycom(Principal prinipal, HttpSession session, Model model) {
+		Integer empId = (Integer) session.getAttribute("empId");
+		Integer comId = (Integer) session.getAttribute("comId");
+		if(empId == null || comId == null) return "redirect:/auth/login";
+		
+		CompanyDto com = service.selectOneByEmpId(empId);
+		//통계 데이터
+		StatsDeptDto stats = deptService.selecStats(comId);
+		List<DeptDto> deptList = deptService.selectOrgTree(comId);
+				
+		model.addAttribute("stats", stats);
+		model.addAttribute("com", com);
+		model.addAttribute("deptList", deptList);
+		return "/com/mypage";
 	}
 }

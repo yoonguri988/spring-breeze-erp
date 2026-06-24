@@ -3,6 +3,7 @@ package com.sb.erp.dao;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import com.sb.erp.dto.DeptDto;
+import com.sb.erp.dto.StatsDeptDto;
 
 @Mapper
 public interface DeptMapper {
@@ -25,5 +26,7 @@ public interface DeptMapper {
 	int update(DeptDto dto);
 
 	List<Integer> selectAllChildIds(int deptId);
+
+	StatsDeptDto selectStats(int comId);
 
 }

@@ -7,19 +7,15 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
 		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
    <!-- 암호화 : BCrypt -->
-   <!-- 로그인 비밀번호 비교에 사용하는 암호화 방식 -->
    <bean id="passwordEncoder" 
          class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
    <!-- 로그인성공 --> 
-   <!-- 로그인 성공 후 이동 경로와 초기 비밀번호 정책을 처리하는 핸들러 -->
    <bean id="successHandler"
          class="com.sb.erp.security.LoginSuccessHandler"/>
    <!-- 로그인실패-권한x --> 
-   <!-- 권한이 없는 사용자가 보호된 URL에 접근했을 때 실행되는 핸들러 -->
    <bean id="deniedHandler"
          class="com.sb.erp.security.DeniedHandler"/>
    <!-- 유저정보  -->
-   <!-- DB에서 사용자와 권한 정보를 읽어오는 UserDetailsService -->
    <bean id="customUserDetailsService"
          class="com.sb.erp.security.CustomUserDetailsService"/>
 
@@ -28,27 +24,34 @@
       <!-- <security:intercept-url  pattern="/security/all"     access="permitAll" /> -->
       <!-- <security:intercept-url  pattern="/security/member"  access="hasRole('ROLE_MEMBER')" /> -->
 
-      <!-- 로그인/비밀번호 재설정은 비로그인 상태에서도 접근 가능 -->
-      <security:intercept-url  pattern="/auth/login" access="permitAll" />
-      <security:intercept-url  pattern="/auth/resetPass" access="permitAll" />
-      <!-- <security:intercept-url  pattern="/auth/**"    access="isAuthenticated()" /> -->
+      <!-- <security:intercept-url  pattern="/auth/login" access="permitAll" />
+      <security:intercept-url  pattern="/auth/confirm"    access="permitAll" />
+      <security:intercept-url  pattern="/auth/updatePass"    access="permitAll" />
+      <security:intercept-url  pattern="/auth/fail"    access="permitAll" />
+      <security:intercept-url  pattern="/auth/forgotResetPass"    access="permitAll" />
+      <security:intercept-url  pattern="/auth/resetPass" access="isAuthenticated()" /> -->
+      <security:intercept-url  pattern="/auth/**"    access="permitAll" />
 	
+      <!-- KJY : 2차 프로젝트때 페이지 접근 권한은 조금 열어놓고 메서드쪽에서 어노테이션으로 막아야할거같음 -->
+      <security:intercept-url  pattern="/appr/**" access="hasAuthority('ROOT')"/>
       <!-- KJY -->
-      <security:intercept-url  pattern="/appr/**" access="permitAll"/>
-      <!-- KJY -->
+      
+      <!-- jsj -->
+      <security:intercept-url  pattern="/emp/add" access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"/>
+      <security:intercept-url  pattern="/emp/edit" access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"/>
+      <security:intercept-url  pattern="/emp/**" access="isAuthenticated()"/>
+      <!-- jsj -->
 
-   	  <security:intercept-url  pattern="/board/**"    access="permitAll" />
+	  <!-- sonmir -->
+   	  <security:intercept-url  pattern="/notice/**"    access="isAuthenticated()" />
+	  <!-- sonmir -->
    	  
-   	  
-   	  <!-- JYT-->
-   	  <security:intercept-url pattern="/admin/**" access="hasAnyAuthority('ROLE_ADMIN','ADMIN','ROOT')"/>
-   	  <security:intercept-url pattern="/resv/insert" access="hasAnyAuthority('ROLE_ADMIN','ADMIN','ROOT')"/>
-   	  <security:intercept-url pattern="/resv/update" access="hasAnyAuthority('ROLE_ADMIN','ADMIN','ROOT')"/>
-   	  <security:intercept-url pattern="/resv/delete" access="hasAnyAuthority('ROLE_ADMIN','ADMIN','ROOT')"/>
-   	 
+   	  <!-- jang -->
+   	  <security:intercept-url pattern="/res/**" access="isAuthenticated()"/>
    	  <security:intercept-url pattern="/resv/**" access="isAuthenticated()"/>
-   	  <security:intercept-url pattern="/reservation/**" access="isAuthenticated()"/>
-   	   <!-- JYT -->
+   	  <security:intercept-url pattern="/admin/**" access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"/>
+   	  <!-- jang -->
+   	  
    	  
    	  <security:intercept-url pattern="/error/**" access="permitAll"/>
    	  
@@ -57,7 +60,10 @@
    	  <security:intercept-url pattern="/dept/**" access="isAuthenticated()"/>
    	  <!-- cyj -->
    	  
-	  <!-- 폼 로그인과 로그아웃 진입점 -->
+   	  <!-- CDY -->
+   	  <security:intercept-url pattern="/proj/**" access="isAuthenticated()"/>
+   	  <!-- CDY -->
+   	   
 	  <security:form-login
 	  	  login-page="/auth/login"
 	  	  login-processing-url="/auth/login"
@@ -72,7 +78,6 @@
 	  <!-- cyj : 추후 접근 권한 변경 -->
    </security:http>
 
-   <!-- 인증 시 customUserDetailsService 와 BCrypt 인코더를 함께 사용 -->
    <security:authentication-manager>
       <security:authentication-provider   user-service-ref="customUserDetailsService">
          <security:password-encoder      ref="passwordEncoder"/>

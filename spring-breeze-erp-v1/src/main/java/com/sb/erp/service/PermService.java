@@ -1,8 +1,8 @@
 package com.sb.erp.service;
 
-import com.sb.erp.dto.PermDto;
+import com.sb.erp.dto.AuthPermDto;
 
 public interface PermService {
 
-	PermDto selectByEmpId(int empId);
+	AuthPermDto selectByEmpId(int empId);
 }

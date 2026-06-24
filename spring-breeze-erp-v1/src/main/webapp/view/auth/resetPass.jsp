@@ -148,7 +148,7 @@
     document.getElementById('empPass').classList.remove('er');
     document.getElementById('empPassConfirm').classList.remove('er');
 
-    if (pw1.length < 8 || !/[a-zA-Z]/.test(pw1) || !/[0-9]/.test(pw1)) {
+    if (empPass.length < 8 || !/[a-zA-Z]/.test(empPass) || !/[0-9]/.test(empPass)) {
       e.preventDefault();
       document.getElementById('alertResetTxt').textContent = '8자 이상, 영문과 숫자를 모두 포함해야 합니다.';
       document.getElementById('alertReset').classList.add('on');

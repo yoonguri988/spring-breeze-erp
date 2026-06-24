@@ -8,9 +8,9 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -30,9 +30,14 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
 		List<String>  roles = new ArrayList<>();
 		
 		authentication.getAuthorities().forEach(auth->{ roles.add(auth.getAuthority()); });
-		
+
 		String empEmail = authentication.getName();
 		EmpDto dto = service.selectByEmpEmail(empEmail);
+		//세션에 사원 id 저장
+		HttpSession session = request.getSession();
+		session.setAttribute("empId", dto.getEmpId());
+		session.setAttribute("comId", dto.getComId());
+		
 		// 시스템 관리자(총괄)
 		if(roles.contains("ROOT")) {
 			response.sendRedirect( request.getContextPath() + "/"   );

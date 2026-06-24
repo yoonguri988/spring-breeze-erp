@@ -1,39 +1,26 @@
 package com.sb.erp.service;
 
 import java.util.List;
-import java.util.Map;
 
 import com.sb.erp.dto.ReservationDto;
+import com.sb.erp.dto.ResvSearchDto;
+import com.sb.erp.dto.StatsResvDto;
 
 public interface ReservationService {
 
-    // ¿¹¾à ¸ñ·Ï Á¶È¸ (°Ë»ö Á¶°Ç + ÆäÀÌÂ¡ Æ÷ÇÔ)
-    List<ReservationDto> getReservationList(Map<String, Object> paramMap);
+    List<ReservationDto> getReservationList(ResvSearchDto search);
 
-    // ¿¹¾à ÀüÃ¼ °Ç¼ö Á¶È¸ (ÆäÀÌÂ¡ °è»ê¿ë)
-    int getReservationCount(Map<String, Object> paramMap);
+    int getReservationCount(ResvSearchDto search);
 
-    // ¿¹¾à »ó¼¼ 1°Ç Á¶È¸ (È¸»çID + ¿¹¾àID·Î Æ¯Á¤)
-    ReservationDto getReservationDetail(int comId, int revId);
+    ReservationDto getReservationDetail(int revId);
 
-    // ¿¹¾à ½ÅÃ» µî·Ï
     void insertReservation(ReservationDto reservationDto);
 
-    // ¿¹¾à Á¤º¸ ¼öÁ¤
-    void updateReservation(ReservationDto reservationDto);
-
-    // ¿¹¾à »èÁ¦ (È¸»çID + ¿¹¾àID·Î Æ¯Á¤)
-    void deleteReservation(int comId, int revId);
-
-    // ¿¹¾à »óÅÂ º¯°æ (WAI ¡æ APP ½ÂÀÎ / WAI ¡æ REJ ¹İ·Á)
-    // remark: ¹İ·Á ½Ã »çÀ¯ ÀÔ·Â, ½ÂÀÎ ½Ã null
     void updateStatus(int revId, String status, String remark);
 
-    // Æ¯Á¤ »óÅÂ(WAI / APP / REJ)ÀÇ ¿¹¾à °Ç¼ö Á¶È¸
-    // °ü¸®ÀÚ ´ë½Ãº¸µå Åë°è Ä«µå¿¡ »ç¿ë
-    int countByStatus(Map<String, Object> paramMap);
+    // í†µê³„ (ì „ì²´/ìŠ¹ì¸/ëŒ€ê¸°/ë°˜ë ¤)
+    StatsResvDto countByStats(ResvSearchDto search);
 
-    // Æ¯Á¤ ÀÚ¿ø¿¡ ¿¬°áµÈ ¿¹¾à °Ç¼ö Á¶È¸
-    // ÀÚ¿ø »èÁ¦ Àü ¿¹¾à Á¸Àç ¿©ºÎ È®ÀÎÇÒ ¶§ »ç¿ë
-    int countReservationsByResourceId(int comId, int resId);
+    // ì˜ˆì•½ ê´€ë¦¬ì—ì„œ ì˜ˆì•½ ëœ ìì›ì´ ìˆëŠ”ì§€ í™•ì¸
+    int countReservationsByResourceId(int resId);
 }

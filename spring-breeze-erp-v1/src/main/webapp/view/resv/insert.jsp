@@ -1,69 +1,60 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+﻿<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ include file="/layout/header.jsp" %>
-
 <main class="sb-content">
   <div class="sb-page-head">
     <div class="sb-page-head__txt">
       <div class="sb-breadcrumb">
-        <a href="${pageContext.request.contextPath}/resv/list">자원 관리</a>
-        <i class="bi bi-chevron-right"></i> 자원 등록
+        <a href="${pageContext.request.contextPath}/res/list">자원 관리</a>
+        <i class="bi bi-chevron-right"></i> 예약 신청
       </div>
-      <h1>자원 등록</h1>
-      <p>예약에 사용할 회의실과 장비 정보를 등록합니다.</p>
-      <span class="sb-badge sb-badge--blue mt-2 d-inline-block">관리자 화면</span>
+      <h1>자원 예약 신청</h1>
+      <p>사용할 자원과 수량을 선택하면 관리자 승인 대기 상태로 접수됩니다.</p>
     </div>
   </div>
-
-  <c:if test="${error == 'duplicateCode'}">
-    <div class="alert alert-danger">이미 사용 중인 자원코드입니다. 다른 코드를 입력하세요.</div>
-  </c:if>
-
   <div class="sb-card" style="max-width:720px">
     <div class="sb-card__head">
-      <h2>기본 정보</h2>
-      <span class="sub">필수 입력 항목을 먼저 작성하세요.</span>
+      <h2>예약 정보</h2>
+      <span class="sub">예약 상태는 최초 대기로 저장됩니다.</span>
     </div>
     <div class="sb-card__body">
       <form action="${pageContext.request.contextPath}/resv/insert" method="post">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-
         <div class="mb-3">
-          <label for="resCode" class="sb-form-label">자원코드</label>
-          <input type="text" name="resCode" id="resCode" class="form-control" placeholder="예: RM004" required>
-        </div>
-
-        <div class="mb-3">
-          <label for="resName" class="sb-form-label">자원명</label>
-          <input type="text" name="resName" id="resName" class="form-control" placeholder="예: 대회의실 화이트보드" required>
-        </div>
-
-        <div class="mb-3">
-          <label for="resType" class="sb-form-label">자원 유형</label>
-          <select name="resType" id="resType" class="form-select" required>
-            <option value="ROOM">회의실</option>
-            <option value="EQUIPMENT">장비</option>
+          <label for="resId" class="sb-form-label">예약 자원</label>
+          <select name="resId" id="resId" class="form-select" required>
+            <option value="">자원을 선택하세요</option>
+            <c:forEach var="r" items="${resourceList}">
+              <option value="${r.resId}" ${not empty resource and resource.resId == r.resId ? 'selected' : ''}>
+                ${r.resName} (${r.resCode}) / 보유 수량 ${r.quantity}
+              </option>
+            </c:forEach>
           </select>
         </div>
-
+        <c:if test="${not empty resource}">
+          <div class="mb-3 p-3" style="background:var(--sb-accent-soft);border-radius:10px">
+            <div class="text-faint mb-1">선택된 자원</div>
+            <div style="font-weight:750">${resource.resName}</div>
+            <div class="text-soft">${resource.resCode} / 보유 수량 ${resource.quantity}</div>
+          </div>
+        </c:if>
         <div class="mb-3">
-          <label for="quantity" class="sb-form-label">수량</label>
-          <input type="number" name="quantity" id="quantity" class="form-control" min="0" value="1" required>
+          <label for="quantity" class="sb-form-label">예약 수량</label>
+          <input type="number" name="quantity" id="quantity" class="form-control" min="1" value="1" required>
         </div>
-
         <div class="mb-4">
-          <label for="remark" class="sb-form-label">비고</label>
-          <input type="text" name="remark" id="remark" class="form-control" placeholder="필요한 설명이 있으면 입력하세요.">
+          <label for="remark" class="sb-form-label">신청 사유</label>
+          <textarea name="remark" id="remark" class="form-control" rows="4" placeholder="사용 목적이나 요청 사항을 입력하세요"></textarea>
         </div>
 
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-sb">
-            <i class="bi bi-check-lg"></i> 등록
+            <i class="bi bi-check-lg"></i> 예약 신청
           </button>
-          <a href="${pageContext.request.contextPath}/resv/list" class="btn btn-ghost">취소</a>
+          <a href="${pageContext.request.contextPath}/res/list" class="btn btn-ghost">취소</a>
         </div>
       </form>
     </div>
   </div>
 </main>
-
 <%@ include file="/layout/footer.jsp" %>

@@ -130,33 +130,7 @@ CREATE TABLE IF NOT EXISTS `sb_erp_db`.`project` (
   `com_id` INT NOT NULL,
   `pro_name` VARCHAR(100) NOT NULL,
   `pro_desc` VARCHAR(45) NOT NULL,
-  `pro_status` VARCHAR(20) NOT NULL,
-  `start_date` DATETIME NOT NULL,
-  `end_date` DATETIME NOT NULL,
-  `created_at` DATETIME NOT NULL,
-  `updated_at` DATETIME NOT NULL,
-  PRIMARY KEY (`pro_id`),
-  INDEX `fk_project_employee1_idx` (`emp_id` ASC) VISIBLE,
-  INDEX `fk_project_company1_idx` (`com_id` ASC) VISIBLE,
-  CONSTRAINT `fk_project_employee1`
-    FOREIGN KEY (`emp_id`)
-    REFERENCES `sb_erp_db`.`employee` (`emp_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_project_company1`
-    FOREIGN KEY (`com_id`)
-    REFERENCES `sb_erp_db`.`company` (`com_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-;
-
-CREATE TABLE IF NOT EXISTS `sb_erp_db`.`project` (
-  `pro_id` INT NOT NULL AUTO_INCREMENT,
-  `emp_id` INT NOT NULL,
-  `com_id` INT NOT NULL,
-  `pro_name` VARCHAR(100) NOT NULL,
-  `pro_desc` VARCHAR(45) NOT NULL,
-  `pro_status` VARCHAR(20) NOT NULL,
+  `pro_status` ENUM('TODO', 'DOING', 'DONE') NOT NULL,
   `start_date` DATETIME NOT NULL,
   `end_date` DATETIME NOT NULL,
   `created_at` DATETIME NOT NULL,
@@ -204,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `sb_erp_db`.`task` (
   `com_id` INT NOT NULL,
   `task_name` VARCHAR(100) NOT NULL,
   `task_desc` VARCHAR(45) NOT NULL,
-  `task_status` VARCHAR(20) NOT NULL,
+  `task_status` ENUM('TODO', 'DOING', 'DONE') NOT NULL,
   `pm_id_name` VARCHAR(50) NOT NULL,
   `task_start_date` DATETIME NOT NULL,
   `task_end_date` DATETIME NOT NULL,
@@ -237,7 +211,7 @@ CREATE TABLE IF NOT EXISTS `sb_erp_db`.`appr_form` (
   `for_code` VARCHAR(50) NOT NULL,
   `for_title` VARCHAR(50) NOT NULL,
   `for_content` VARCHAR(500) NOT NULL,
-  `for_status (boolean)` TINYINT NOT NULL,
+  `for_status` TINYINT NOT NULL,
   `for_created` DATETIME NOT NULL,
   `for_updated` DATETIME NOT NULL,
   PRIMARY KEY (`for_id`),
@@ -334,7 +308,7 @@ CREATE TABLE IF NOT EXISTS `sb_erp_db`.`resource` (
   `com_id` INT NOT NULL,
   `res_code` VARCHAR(50) NOT NULL,
   `res_name` VARCHAR(100) NOT NULL,
-  `res_type` ENUM('Romm') NOT NULL,
+  `res_type` ENUM('ROOM','EQUIPMENT') NOT NULL,
   `quantity` INT NOT NULL,
   `remark` VARCHAR(255) NULL,
   `created_at` DATETIME NULL,
