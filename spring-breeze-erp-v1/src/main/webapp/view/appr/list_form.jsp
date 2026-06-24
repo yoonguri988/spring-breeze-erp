@@ -99,8 +99,8 @@
 									<tr>
 										<td class="num text-faint">${status.count}</td>
 										<td>
-											<%-- <a href="${pageContext.request.contextPath}/appr/detail_form?forId=${item.forId}" --%>
-											<a href="${pageContext.request.contextPath}/appr/update_form?forId=${item.forId}"
+											<%-- <a href="${pageContext.request.contextPath}/appr/update_form?forId=${item.forId}" --%>
+											<a href="${pageContext.request.contextPath}/appr/detail_form?forId=${item.forId}"
 											   class="sb-table__name">
 											   ${item.forCode}
 											</a>
