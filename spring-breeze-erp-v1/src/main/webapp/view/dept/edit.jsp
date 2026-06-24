@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <form id="deptForm" class="form-narrow" novalidate method="post"
+    <form id="deptForm" class="form-wide" novalidate method="post"
           action="${pageContext.request.contextPath}/dept/edit">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <input type="hidden" name="deptId" value="${dept.deptId}"/>
