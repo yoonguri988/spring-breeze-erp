@@ -2,6 +2,7 @@ package com.sb.erp.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,11 @@ public class ApprServiceImpl implements ApprService {
 	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto) {
 		dto.setPstartno((dto.getPstartno()-1)*dto.getOnepagelist());
 		return dao.selectFormList(dto);
+	}
+
+	@Override
+	public String findByCode(ApprFormDto dto) {
+		return dao.findByCode(dto);
 	}
 
 	///////////////////////// 양식 관련 기능 //////////////////////////////////
