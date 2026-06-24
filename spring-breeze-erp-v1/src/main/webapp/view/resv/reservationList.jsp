@@ -14,7 +14,7 @@
       <span class="sb-badge ${isAdmin ? 'sb-badge--blue' : 'sb-badge--green'} mt-2 d-inline-block">${roleLabel}</span>
     </div>
     <div class="sb-page-head__actions">
-      <a href="${pageContext.request.contextPath}/reservation/insertForm" class="btn btn-sb btn-sm">
+      <a href="${pageContext.request.contextPath}/resv/insert" class="btn btn-sb btn-sm">
         <i class="bi bi-calendar2-plus"></i> 예약 요청
       </a>
       <c:if test="${isAdmin}">
@@ -33,10 +33,10 @@
     <div class="sb-card__head">
       <h2>예약 목록</h2>
       <div class="right">
-        <a href="${pageContext.request.contextPath}/reservation/list" class="btn btn-ghost btn-sm ${empty status ? 'active' : ''}">전체</a>
-        <a href="${pageContext.request.contextPath}/reservation/list?status=WAI" class="btn btn-ghost btn-sm ${status == 'WAI' ? 'active' : ''}">대기</a>
-        <a href="${pageContext.request.contextPath}/reservation/list?status=APP" class="btn btn-ghost btn-sm ${status == 'APP' ? 'active' : ''}">승인</a>
-        <a href="${pageContext.request.contextPath}/reservation/list?status=REJ" class="btn btn-ghost btn-sm ${status == 'REJ' ? 'active' : ''}">반려</a>
+        <a href="${pageContext.request.contextPath}/resv/list" class="btn btn-ghost btn-sm ${empty status ? 'active' : ''}">전체</a>
+        <a href="${pageContext.request.contextPath}/resv/list?status=WAI" class="btn btn-ghost btn-sm ${status == 'WAI' ? 'active' : ''}">대기</a>
+        <a href="${pageContext.request.contextPath}/resv/list?status=APP" class="btn btn-ghost btn-sm ${status == 'APP' ? 'active' : ''}">승인</a>
+        <a href="${pageContext.request.contextPath}/resv/list?status=REJ" class="btn btn-ghost btn-sm ${status == 'REJ' ? 'active' : ''}">반려</a>
       </div>
     </div>
     <div class="sb-card__body--flush">
@@ -79,8 +79,8 @@
                   <td>${empty r.remark ? '-' : r.remark}</td>
                   <td class="text-end">
                     <c:if test="${r.status == 'WAI' and (isAdmin or loginEmpId == r.empId)}">
-                      <a href="${pageContext.request.contextPath}/reservation/update?id=${r.revId}" class="btn btn-ghost btn-sm">수정</a>
-                      <form action="${pageContext.request.contextPath}/reservation/delete" method="post" class="d-inline" onsubmit="return confirm('이 예약 요청을 삭제하시겠습니까?');">
+                      <a href="${pageContext.request.contextPath}/resv/update?id=${r.revId}" class="btn btn-ghost btn-sm">수정</a>
+                      <form action="${pageContext.request.contextPath}/resv/delete" method="post" class="d-inline" onsubmit="return confirm('이 예약 요청을 삭제하시겠습니까?');">
                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                         <input type="hidden" name="revId" value="${r.revId}">
                         <button type="submit" class="btn btn-ghost btn-sm text-danger">삭제</button>
@@ -99,15 +99,15 @@
   <nav class="mt-3">
     <ul class="pagination justify-content-center">
       <li class="page-item ${paging.current <= 1 ? 'disabled' : ''}">
-        <a class="page-link" href="${pageContext.request.contextPath}/reservation/list?status=${status}&page=${paging.current - 1}">이전</a>
+        <a class="page-link" href="${pageContext.request.contextPath}/resv/list?status=${status}&page=${paging.current - 1}">이전</a>
       </li>
       <c:forEach var="p" begin="${paging.start}" end="${paging.end}">
         <li class="page-item ${p == paging.current ? 'active' : ''}">
-          <a class="page-link" href="${pageContext.request.contextPath}/reservation/list?status=${status}&page=${p}">${p}</a>
+          <a class="page-link" href="${pageContext.request.contextPath}/resv/list?status=${status}&page=${p}">${p}</a>
         </li>
       </c:forEach>
       <li class="page-item ${paging.current >= paging.pagetotal ? 'disabled' : ''}">
-        <a class="page-link" href="${pageContext.request.contextPath}/reservation/list?status=${status}&page=${paging.current + 1}">다음</a>
+        <a class="page-link" href="${pageContext.request.contextPath}/resv/list?status=${status}&page=${paging.current + 1}">다음</a>
       </li>
     </ul>
   </nav>

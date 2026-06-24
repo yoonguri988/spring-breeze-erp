@@ -19,7 +19,7 @@
       <h2>예약 정보</h2>
     </div>
     <div class="sb-card__body">
-      <form action="${pageContext.request.contextPath}/reservation/insert" method="post">
+      <form action="${pageContext.request.contextPath}/resv/insert" method="post">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
         <div class="mb-3">
@@ -47,7 +47,7 @@
           <button type="submit" class="btn btn-sb">
             <i class="bi bi-check-lg"></i> 요청 등록
           </button>
-          <a href="${pageContext.request.contextPath}/reservation/list" class="btn btn-ghost">취소</a>
+          <a href="${pageContext.request.contextPath}/resv/list" class="btn btn-ghost">취소</a>
         </div>
       </form>
     </div>

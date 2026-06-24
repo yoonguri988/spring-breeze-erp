@@ -6,7 +6,7 @@
   <div class="sb-page-head">
     <div class="sb-page-head__txt">
       <div class="sb-breadcrumb">
-        <a href="${pageContext.request.contextPath}/reservation/list">예약 내역</a>
+        <a href="${pageContext.request.contextPath}/resv/list">예약 내역</a>
         <i class="bi bi-chevron-right"></i> 예약 수정
       </div>
       <h1>예약 수정</h1>
@@ -20,7 +20,7 @@
       <span class="sub">예약 상태: ${reservation.status}</span>
     </div>
     <div class="sb-card__body">
-      <form action="${pageContext.request.contextPath}/reservation/update" method="post">
+      <form action="${pageContext.request.contextPath}/resv/update" method="post">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <input type="hidden" name="revId" value="${reservation.revId}"/>
 
@@ -49,7 +49,7 @@
           <button type="submit" class="btn btn-sb">
             <i class="bi bi-check-lg"></i> 수정 완료
           </button>
-          <a href="${pageContext.request.contextPath}/reservation/list" class="btn btn-ghost">취소</a>
+          <a href="${pageContext.request.contextPath}/resv/list" class="btn btn-ghost">취소</a>
         </div>
       </form>
     </div>
