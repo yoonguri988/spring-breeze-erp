@@ -1,5 +1,9 @@
 package com.sb.erp.dto;
 
+import java.util.Date;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 import lombok.Data;
 
 @Data
@@ -12,8 +16,10 @@ public class TaskDto {
 	private String taskStatus;
 	private int pmId;
 	private String pmIdName;
-	private String taskStartDate;
-	private String taskEndDate;
-	private String taskCreatedAt;
-	private String taskUpdatedAt;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date taskStartDate;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date taskEndDate;
+	private Date taskCreatedAt;
+	private Date taskUpdatedAt;
 }
