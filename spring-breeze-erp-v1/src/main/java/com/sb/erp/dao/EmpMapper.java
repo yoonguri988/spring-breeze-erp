@@ -15,6 +15,9 @@ public interface EmpMapper {
 
     // 상세조회
     public EmpDto selectByEmpId(@Param("empId") int empId, @Param("comId") int comId);
+    
+    // 비로그인 상태시 본인 확인용
+    public EmpDto selectByEmpIdOnly(@Param("empId") int empId);
 
     // 검색 필터 + 페이징(limit 추가)
     public List<EmpDto> search(EmpSearchDto dto);

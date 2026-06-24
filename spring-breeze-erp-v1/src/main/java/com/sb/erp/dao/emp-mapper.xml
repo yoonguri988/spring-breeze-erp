@@ -26,6 +26,13 @@
 		where e.emp_id = #{empId}
 		and e.com_id = #{comId}
 	</select>
+	
+	<!-- 추가: comId 없이 / 비로그인 상태시 본인 확인용 -->
+	<select id="selectByEmpIdOnly" resultType="EmpDto">
+	    SELECT *
+	    FROM employee
+	    WHERE emp_id = #{empId}
+	</select>
 
 	<!-- jsj : 사원 검색 + 페이징 -->
 	<select id="search" parameterType="EmpSearchDto" resultType="EmpDto">

@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/company.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dept.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/emp.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/my.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/perm.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/project.css" />
@@ -53,7 +54,7 @@
 		        </span>
 		      </li>
 		      <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>내 프로필</a></li>
-		      <sec:authorize access="hasRole('ROLE_ADMID')">
+		      <sec:authorize access="hasRole('ROLE_ADMIN')">
 		      <li><a class="dropdown-item" href="permissions.html"><i class="bi bi-shield-lock me-2"></i>권한 설정</a></li>
 			  </sec:authorize>
 		      <li>

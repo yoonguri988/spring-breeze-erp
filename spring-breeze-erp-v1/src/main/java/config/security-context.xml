@@ -36,9 +36,7 @@
       <security:intercept-url  pattern="/appr/**" access="hasAuthority('ROOT')"/>
       <!-- KJY -->
       
-      <!-- jsj -->
-      <security:intercept-url  pattern="/emp/add" access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"/>
-      <security:intercept-url  pattern="/emp/edit" access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"/>
+      <!-- jsj : 차후 add/resetPass 권한은 ADMIN으로 변경 예정 -->
       <security:intercept-url  pattern="/emp/**" access="isAuthenticated()"/>
       <!-- jsj -->
 
