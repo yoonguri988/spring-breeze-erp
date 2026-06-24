@@ -61,7 +61,10 @@
 	                    <button type="submit" class="btn btn-sb-soft btn-sm">
 							<i class="bi bi-search"></i> 검색
 						</button>
-	                </div>
+						<c:if test="${not empty param.keyword}">
+				            <a class="btn btn-ghost btn-sm" href="${pageContext.request.contextPath}/appr/list_form">초기화</a>
+				    </c:if>
+	        </div>
 				</div>
 			</form>
 		</div>

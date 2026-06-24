@@ -54,4 +54,7 @@ public interface EmpMapper {
 
 	// 회사 아이디를 기준으로 권한 정보와 엮여있는 사원 정보 확인
 	public List<EmpAuthDto> selectAuthByComId(int comId);
+
+	// 비밀번호 분실 - session(empId) 기반, 본인확인 후에만 진입 가능
+	public Object selectAuthByEmpId(int empId);
 }
