@@ -42,8 +42,6 @@ window.addEventListener("load", function() {
          <label for="bfile"   class="form-label">파일 첨부</label>
          <input type="file"  id="bfile"  name="bfile"   value = "${dto.bfile}" readonly   class="form-control"/>
         </div> --%> 
-        
-      	
       	<div  class="my-3  text-end"> 
       		<button type="reset"   class="btn btn-outline-primary"  title="글수정취소">취소</button>
       		<a href="${pageContext.request.contextPath}/notice/list"  

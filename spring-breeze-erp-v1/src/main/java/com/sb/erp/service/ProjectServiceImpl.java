@@ -24,8 +24,16 @@ public class ProjectServiceImpl implements ProjectService{
 	//프로젝트 상세보기
 	@Override public ProjectDto select(int pro_id) {  return dao.select(pro_id); }
 	
-	//프로젝트 삭세
-	@Override public int delete(int pro_id) {  return dao.delete(pro_id); }
+	//프로젝트 삭제
+	@Override public int delete(int pro_id) {  
+		 //1.태스크 삭제
+		  dao.deleteTaskByProjectId(pro_id);
+
+	     // 2. 프로젝트 멤버 삭제
+		  dao.deleteMemberByProjectId(pro_id);
+
+		 // 3. 프로젝트 삭제
+		return  dao.deleteProject(pro_id); }
 	
 	//프로젝트 수정
 	@Override public int edit(ProjectDto dto) {  return dao.update(dto); }
@@ -39,7 +47,7 @@ public class ProjectServiceImpl implements ProjectService{
 		return dao.selectAll(search);
 	}
 	
-    @Override public int selectCnt() { return dao.selectCnt(); }
+    @Override public int selectCnt(ProjectSearchDto search) { return dao.selectCnt(search); }
     
     //기간조회
 	@Override public List<ProjectDto> selectByPeriod(String startDate, String endDate) {  return dao.selectByPeriod(startDate, endDate); }

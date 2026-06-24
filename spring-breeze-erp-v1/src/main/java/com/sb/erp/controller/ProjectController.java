@@ -34,20 +34,29 @@ public class ProjectController {
 	
 	// 프로젝트 목록 페이지
 	@RequestMapping(value = "/proj/proj_list", method = RequestMethod.GET) // 전체출력시
-	public String listselect(ProjectSearchDto search, Model model) {
-		// 1) 검색 조건이 null
-		boolean isEmpty = !search.hasSearchCondition();
+	public String listselect(ProjectSearchDto search, Model model, HttpSession session
+			                 ,Authentication authentication) {
+		
+		//권한 체크
+		boolean isAdmin = authentication.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
+		   if (!isAdmin) {
+		        // 일반 사원 → 자기 회사만
+		        Integer comId = (Integer) session.getAttribute("comId");
+		        search.setComId(comId);
+		    } else {
+		        // 관리자 → 전체 회사
+		        search.setComId(null);
+		    }
+		   if(!search.isSearched()) {return "proj/proj_list";}
 
-		PagingUtil paging = null;
-		List<ProjectDto> list = new ArrayList<>();
-		if (isEmpty) {
-			paging = new PagingUtil(0, search.getPstartno());
-		} else {
-			paging = new PagingUtil(service.selectCnt(), search.getPstartno());
-			list = service.selectAll(search);
-		}
+		int totalCnt = service.selectCnt(search); //전체 데이터 수
 
-		model.addAttribute("paging", paging);// 페이징
+	    PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
+	    
+	    List<ProjectDto> list = service.selectAll(search); //목록 조회
+
+		model.addAttribute("paging", paging);
 		model.addAttribute("list", list);
 		return "proj/proj_list";
 	}	
@@ -84,10 +93,18 @@ public class ProjectController {
 	}
 	
 	@RequestMapping(value="/proj/proj_detail", method=RequestMethod.GET)
-	public String select(int pro_id, Model model) { //상세
+	public String select(int pro_id, Model model,Authentication authentication) { //상세
 		model.addAttribute("dto",service.select(pro_id)); //프로젝트 상세조회
 		model.addAttribute("list", taskService.selectAll(pro_id)); //해당 태스크 리스트
 		model.addAttribute("memberList", memberService.select(pro_id)); //머더라 그 머더라..그.. 멤버출력
+		
+		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName()); //삭제버튼이 보일 유저들
+		boolean isAdmin = authentication.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
+		
+		model.addAttribute("loginEmpId", loginEmp.getEmpId()); //jsp에서 사용하게 보내줄거임
+		model.addAttribute("isAdmin",isAdmin);
+		
 		return "proj/proj_detail";
 	}
 	

@@ -1,11 +1,9 @@
 package com.sb.erp.service;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.sb.erp.dao.EmpMapper;
 import com.sb.erp.dto.EmpAuthDto;
 import com.sb.erp.dto.EmpDto;
@@ -119,4 +117,11 @@ public class EmpServiceImpl implements EmpService {
 	public List<EmpAuthDto> selectAuthByComId(int comId) {
 		return dao.selectAuthByComId(comId);
 	}
+
+	// 비밀번호 분실 - session(empId) 기반, 본인확인 후에만 진입 가능
+	@Override
+	public Object selectAuthByEmpId(int empId) {
+		return dao.selectAuthByEmpId(empId);
+	}
+
 }

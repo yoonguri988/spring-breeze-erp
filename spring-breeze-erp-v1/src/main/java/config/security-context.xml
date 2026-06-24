@@ -25,8 +25,12 @@
       <!-- <security:intercept-url  pattern="/security/member"  access="hasRole('ROLE_MEMBER')" /> -->
 
       <security:intercept-url  pattern="/auth/login" access="permitAll" />
-      <security:intercept-url  pattern="/auth/resetPass" access="permitAll" />
-      <security:intercept-url  pattern="/auth/**"    access="isAuthenticated()" />
+      <security:intercept-url  pattern="/auth/confirm"    access="permitAll" />
+      <security:intercept-url  pattern="/auth/updatePass"    access="permitAll" />
+      <security:intercept-url  pattern="/auth/fail"    access="permitAll" />
+      <security:intercept-url  pattern="/auth/forgotResetPass"    access="permitAll" />
+      <security:intercept-url  pattern="/auth/resetPass" access="isAuthenticated()" />
+      <security:intercept-url  pattern="/auth/**"    access="permitAll" />
 	
       <!-- KJY : 2차 프로젝트때 페이지 접근 권한은 조금 열어놓고 메서드쪽에서 어노테이션으로 막아야할거같음 -->
       <security:intercept-url  pattern="/appr/**" access="hasAuthority('ROOT')"/>
