@@ -63,8 +63,8 @@
 						</button>
 						<c:if test="${not empty param.keyword}">
 				            <a class="btn btn-ghost btn-sm" href="${pageContext.request.contextPath}/appr/list_form">초기화</a>
-				        </c:if>
-	                </div>
+				    </c:if>
+	        </div>
 				</div>
 			</form>
 		</div>
@@ -92,7 +92,7 @@
 									<td colspan="7">
 										<div class="sb-empty">
 											<i class="bi bi-inbox text-faint"></i>
-											<p>겸색 결과가 없습니다.</p>
+											<p>검색 결과가 없습니다.</p>
 										</div>
 									</td>
 								</tr>
@@ -102,7 +102,8 @@
 									<tr>
 										<td class="num text-faint">${status.count}</td>
 										<td>
-											<a href="${pageContext.request.contextPath}/appr/update_form?forId=${item.forId}"
+											<%-- <a href="${pageContext.request.contextPath}/appr/update_form?forId=${item.forId}" --%>
+											<a href="${pageContext.request.contextPath}/appr/detail_form?forId=${item.forId}"
 											   class="sb-table__name">
 											   ${item.forCode}
 											</a>
@@ -149,91 +150,81 @@
 </div>
 
 <script>
-(function () {
-    "use strict";
-	const CTX = "${pageContext.request.contextPath}";
-	/* ===================== 회사 이름 실시간 자동완성 ===================== */
-    const kwInput = document.getElementById("comName");
-    const comId = document.getElementById("comId");
-    const acList  = document.getElementById("acList");
-    let debounceTimer = null;
-    let acIndex = -1;
-
-    kwInput.addEventListener("input", function () {
-        const kw = this.value.trim();
-        clearTimeout(debounceTimer);
-        if (!kw) { hideAc(); return; }
-        debounceTimer = setTimeout(() => fetchSuggest(kw), 220);
-    });
-
-    kwInput.addEventListener("keydown", function (e) {
-        const items = [...acList.querySelectorAll(".ac-item")];
-        if (!items.length) return;
-        if (e.key === "ArrowDown") { e.preventDefault(); acIndex = Math.min(acIndex + 1, items.length - 1); }
-        else if (e.key === "ArrowUp") { e.preventDefault(); acIndex = Math.max(acIndex - 1, 0); }
-        else if (e.key === "Enter" && acIndex >= 0) { e.preventDefault(); items[acIndex].dispatchEvent(new Event("mousedown")); return; }
-        else return;
-        items.forEach((it, i) => it.classList.toggle("active", i === acIndex));
-    });
-
-    document.addEventListener("click", function (e) {
-        if (!kwInput.contains(e.target) && !acList.contains(e.target)) hideAc();
-    });
-
-    function fetchSuggest(kw) {
-        fetch(CTX + "/com/suggest?keyword=" + encodeURIComponent(kw))
-            .then(function (res) {
-                if (!res.ok) throw new Error("network error");
-                return res.json();
-            })
-            .then(function (data) { renderAc(data, kw); })
-            .catch(hideAc);
-    }
-
-    function renderAc(data, kw) {
-        acList.innerHTML = "";
-        acIndex = -1;
-
-        if (!data || data.length === 0) {
-            acList.innerHTML = '<div class="ac-empty">일치하는 회사가 없습니다.</div>';
-            acList.classList.add("show");
-            return;
-        }
-
-        data.forEach(function (item) {
-            const div = document.createElement("div");
-            div.className = "ac-item";
-            div.innerHTML =
-                '<i class="bi bi-building text-faint"></i>'
-                + '<span>' + highlight(item.comName, kw) + '</span>'
-                + '<span class="ac-item__meta">' + (item.bizNo || "") + '</span>';
-
-            div.addEventListener("mousedown", function (e) {
-                e.preventDefault(); // blur 방지
-                kwInput.value = item.comName;
-                comId.value = item.comId;
-                hideAc();
-                document.getElementById("searchForm").submit();
-            });
-
-            acList.appendChild(div);
-        });
-
-        acList.classList.add("show");
-    }
-
-    function highlight(text, kw) {
-        if (!kw) return text;
-        const escaped = kw.replace(/[.*+?^$\x7B\x7D()|[\]\\]/g, "\\$&");
-        return text.replace(new RegExp("(" + escaped + ")", "gi"), "<b>$1</b>");
-    }
-
-    function hideAc() {
-        acList.classList.remove("show");
-        acList.innerHTML = "";
-        acIndex = -1;
-    }
-})();
+	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
+	window.addEventListener("load", function(){
+		
+		let companySearch = document.getElementById("comName");
+		let comId = document.getElementById("comId");
+		let companyDropdown = document.getElementById("acList");
+		
+		// 입력 할때마다 실행
+		companySearch.addEventListener("keyup", function(e){
+			let value = e.target.value.trim();
+			
+			if(value !== "") {
+				// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
+				fetch("${pageContext.request.contextPath}/searchCompany?company=" + encodeURIComponent(value))
+				.then(response => response.json())
+				.then(data => {
+					//console.log(data);
+					companyDropdown.innerHTML = ""; // 기존 목록 비우기
+					
+					if(data && data.length > 0){
+						companyDropdown.style.display = "block";
+						
+						data.forEach(item => {
+							let btn = document.createElement("button");
+							btn.type = "button";
+							btn.className = "dropdown-item d-flex justify-content-between align-items-center ";
+							
+							// 회사 이름
+							let nameSpan = document.createElement("span");
+							nameSpan.className = "company-name"
+							btn.textContent = item.comName;
+							
+							// 사업자 번호
+							let bizSpan = document.createElement("span");
+							bizSpan.className = "text-muted small ms-2";
+							bizSpan.textContent = item.bizNo
+							
+							// 집어 넣기
+							btn.appendChild(nameSpan);
+							btn.appendChild(bizSpan);
+							
+							// 검색해서 나온 회사 이름 클릭
+							btn.addEventListener("click", function(){
+								companySearch.value = item.comName; // 회사이름 넣기
+								comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
+								companyDropdown.style.display = "none"; // 드롭다운 닫기
+							});
+							companyDropdown.appendChild(btn);
+						});
+					}
+					else{ // 검색결과 없을때
+						companyDropdown.innerHTML = "<span class='dropdown-item text-muted disabled'>검색 결과가 없습니다.</span>";
+						companyDropdown.style.display = "block";
+					}
+				})
+				.catch(error => {
+					console.error("회사 검색 오류:",error);
+					companyDropdown.style.display = "none";
+				});
+			}
+			else{ // 입력란 비어있을때 처리
+				comId.value = "";
+				companyDropdown.innerHTML = "";
+				companyDropdown.style.display = "none";
+				
+			}
+		});
+		// 입력창 외부공간 클릭시 정리
+		document.addEventListener("click", function(e){
+			if(e.target !== companySearch && e.target !== companyDropdown){
+				companyDropdown.style.display = "none";
+			}
+		});
+	});
+	
 	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
 	
 	/* 이부분 2차때 다시 설계해서 사용해...볼수있게	
@@ -311,8 +302,8 @@
     /////////////////////////   페이징 기능    /////////////////////////
     */
     function checkForm(){
-    	var keyword = documet.getElementById("keyword");
-    	var comName = documet.getElementById("comName");
+    	var keyword = document.getElementById("keyword");
+    	var comName = document.getElementById("comName");
     	if(keyword.value.trim() == "" && comName.value.trim() == ""){
     		alert("검색 조건 하나이상은 포함해야한다.");
     	}	

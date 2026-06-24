@@ -22,7 +22,9 @@ window.addEventListener("load",function(){
   <div class="sb-page-head__actions">
     <a href="${pageContext.request.contextPath}/proj/proj_list" class="btn btn-ghost btn-sm"><i class="bi bi-list"></i> 목록</a>
     <a href="${pageContext.request.contextPath}/proj/proj_edit?pro_id=${dto.proId}" class="btn btn-ghost btn-sm"><i class="bi bi-pencil"></i> 수정</a>
+    <c:if test="${isAdmin or dto.empId == loginEmpId}">
     <button type="button" class="btn btn-ghost btn-sm" style="color:var(--sb-red)" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="bi bi-trash3"></i> 삭제</button>
+    </c:if>
   </div>
 </div>
 
@@ -96,7 +98,7 @@ window.addEventListener("load",function(){
                     <c:otherwise><span class="sb-badge sb-badge--gray"><span class="pip"></span>${dto.taskStatus}</span></c:otherwise>
                   </c:choose>
                 </td>
-                <td class="sb-hr-cell tnum">${dto.taskCreatedAt}</td>
+                <td class="sb-hr-cell tnum"><fmt:formatDate value="${dto.taskCreatedAt}" pattern="yyyy-MM-dd"/></td>
               </tr>
             </c:forEach>
           </tbody>

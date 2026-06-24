@@ -13,10 +13,11 @@ or e.emp_no like concat('%', #{keyword}, '%'))
 
 <!-- 프로젝트 참여 인원 조회 -->
 <select id="select" parameterType="int" resultType="ProjectMemberDto">
- select  pm.pm_id,  p.pro_name, e.emp_name, pm.role,pm.joined_at
+ select  d.dept_name as deptName, pm.pm_id,  p.pro_name, e.emp_name, pm.role,pm.joined_at
  from project_member pm
  join employee e on pm.emp_id=e.emp_id
  join project p on p.pro_id=pm.project_pro_id
+ join department d on d.dept_id=e.dept_id
  where p.pro_id = #{value};
 </select>
 

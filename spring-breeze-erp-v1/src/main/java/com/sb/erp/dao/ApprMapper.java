@@ -1,6 +1,7 @@
 package com.sb.erp.dao;
 
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.sb.erp.dto.ApprFormDto;
@@ -23,6 +24,6 @@ public interface ApprMapper {
 	public int updateForm(ApprFormDto dto);
 	public int deleteForm(int forId);
 	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto);
-	
+	public String findByCode(ApprFormDto dto);
 	
 }
