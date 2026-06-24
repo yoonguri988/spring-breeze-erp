@@ -25,7 +25,7 @@
   ══════════════════════════════════════════════════════════════════
 --%>
 
-<c:set var="backUrl">${pageContext.request.contextPath}/com/edit?comId=${com.comId}</c:set>
+<c:set var="backUrl">${pageContext.request.contextPath}/dept/list?comId=${param.comId}</c:set>
 
 <c:if test="${not empty errorMsg}">
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1100">
@@ -80,10 +80,10 @@
             <p>DEPT-<fmt:formatNumber value="${dept.deptId}" minIntegerDigits="3" groupingUsed="false"/> · 부서 정보를 수정합니다.</p>
         </div>
         <div class="sb-page-head__actions">
-            <button type="button" class="btn btn-ghost btn-sm" id="delBtn"
+            <!-- <button type="button" class="btn btn-ghost btn-sm" id="delBtn"
                     style="color:var(--sb-red);border-color:#f3c9c9" data-bs-toggle="modal" data-bs-target="#deptDelModal">
                 <i class="bi bi-trash3"></i> 삭제
-            </button>
+            </button> -->
             <a href="${backUrl}" class="btn btn-ghost btn-sm">
                 <i class="bi bi-arrow-left"></i> 목록으로
             </a>
@@ -161,6 +161,7 @@
                                 없음 (최상위 본부)
                             </option>
                             <c:forEach var="d" items="${deptList}">
+                            ${d.deptId} - ${dept.parentId}
                                 <c:if test="${d.deptId != dept.deptId}">
                                     <option value="${d.deptId}" data-depth="${d.depth}" data-parentid="${d.parentId}"
                                         ${d.deptId == dept.parentId ? 'selected' : ''}>
@@ -222,9 +223,9 @@
                         <label class="sb-form-label">부서장 사원 선택</label>
                         <select class="form-select" id="fEmp" name="empId" onchange="sbRefreshLeadChip()">
                             <option value="">지정 안 함</option>
-                            <c:forEach var="emp" items="${empList}">
+                            <c:forEach var="emp" items="${deptEmpList}">
                                 <option value="${emp.empId}" data-name="${emp.empName}" data-pos="${emp.posName}"
-                                    ${emp.empId == dept.empId ? 'selected' : ''}>
+                                    ${emp.empId == dept.leaderId ? 'selected' : ''}>
                                     ${emp.empName} (${emp.posName})
                                 </option>
                             </c:forEach>

@@ -42,9 +42,9 @@
     <div class="sb-tab active" data-tab="info">
         <i class="bi bi-building"></i> 기본정보
     </div>
-    <div class="sb-tab" data-tab="dept">
-        <i class="bi bi-diagram-3"></i> 부서관리
-    </div>
+<!--     <div class="sb-tab" data-tab="dept"> -->
+<!--         <i class="bi bi-diagram-3"></i> 부서관리 -->
+<!--     </div> -->
 </div>
 
 <!-- Tab 1: 기본정보-->
