@@ -10,17 +10,17 @@
 	<div class="sb-page-head">
 		<div class="sb-page-head__txt">
 			<div class="sb-breadcrumb">
-				<a href="${pageContext.request.contextPath}/">홈</a>
-				<i class="bi bi-chevron-right"></i> 조직 관리
-				<i class="bi bi-chevron-right"></i> 사원관리
+				<a href="${pageContext.request.contextPath}/">홈</a> <i
+					class="bi bi-chevron-right"></i> 조직 관리 <i
+					class="bi bi-chevron-right"></i> 사원관리
 			</div>
 			<h1>사원관리</h1>
 			<p>전체 임직원 정보를 조회하고 관리합니다.</p>
 		</div>
 		<div class="sb-page-head__actions">
 			<a class="btn btn-sb btn-sm"
-				href="${pageContext.request.contextPath}/emp/add">
-				<i class="bi bi-person-plus"></i> 사원 등록
+				href="${pageContext.request.contextPath}/emp/add"> <i
+				class="bi bi-person-plus"></i> 사원 등록
 			</a>
 		</div>
 	</div>
@@ -164,38 +164,38 @@
 				</div>
 			</c:otherwise>
 		</c:choose>
-
+		
 		<!-- 페이징 -->
-		<c:if test="${paging.listtotal > 0}">
-			<div class="d-flex align-items-center justify-content-between px-3 py-2"
-			     style="border-top:1px solid var(--sb-border)">
-				<span class="text-faint" style="font-size:12.5px">
-					총 <b>${paging.listtotal}</b>명
-				</span>
-				<nav>
-					<ul class="pagination pagination-sm mb-0">
-						<!-- 검색 필터 조건 유지 -->
-						<c:set var="filter" value="searched=1" />
-						<c:if test="${not empty search.deptId}">
-							<c:set var="filter" value="${filter}&deptId=${search.deptId}" />
-						</c:if>
-						<c:if test="${not empty search.posId}">
-							<c:set var="filter" value="${filter}&posId=${search.posId}" />
-						</c:if>
-						<c:if test="${not empty search.empStatus}">
-							<c:set var="filter" value="${filter}&empStatus=${search.empStatus}" />
-						</c:if>
-						<c:if test="${not empty search.keyword}">
-							<c:set var="filter" value="${filter}&keyword=${search.keyword}" />
-						</c:if>
-						
+		<div class="pagingBox">
+			<c:if test="${not empty paging.listtotal}">
+				<span class="text-faint"> 총 <b>${paging.listtotal}</b>명 </span>
+			</c:if>
+			<nav>
+				<ul class="pagination pagination-sm mb-0">
+					<!-- 검색 필터 조건 유지 -->
+					<c:set var="filter" value="searched=1" />
+					<c:if test="${not empty search.deptId}">
+						<c:set var="filter" value="${filter}&deptId=${search.deptId}" />
+					</c:if>
+					<c:if test="${not empty search.posId}">
+						<c:set var="filter" value="${filter}&posId=${search.posId}" />
+					</c:if>
+					<c:if test="${not empty search.empStatus}">
+						<c:set var="filter"
+							value="${filter}&empStatus=${search.empStatus}" />
+					</c:if>
+					<c:if test="${not empty search.keyword}">
+						<c:set var="filter" value="${filter}&keyword=${search.keyword}" />
+					</c:if>
+
+					<!-- 검색했을 때에만 페이징 버튼 노출 -->
+					<c:if test="${not empty paging and paging.listtotal > 0}">
 						<!-- 이전 -->
-						<c:if test="${paging.pagetotal > 1}">
-							<li class="page-item ${!(paging.start > 1) ? 'disabled' : ''}">
-								<a href="?${filter}&pstartno=${paging.start - 1}" class="page-link">
-									<i class="bi bi-chevron-left"></i>
-								</a>
-							</li>
+						<li class="page-item ${!(paging.start > 1) ? 'disabled' : ''}">
+							<a href="?${filter}&pstartno=${paging.start - 1}"
+							class="page-link"> <i class="bi bi-chevron-left"></i>
+						</a>
+						</li>
 						<!-- 1~10 -->
 						<c:forEach var="i" begin="${paging.start}" end="${paging.end}">
 							<li class="page-item ${paging.current == i ? 'active' : ''}">
@@ -203,16 +203,16 @@
 							</li>
 						</c:forEach>
 						<!-- 다음 -->
-						<li class="page-item ${!(paging.end < paging.pagetotal) ? 'disabled' : ''}">
+						<li
+							class="page-item ${!(paging.end < paging.pagetotal) ? 'disabled' : ''}">
 							<a href="?${filter}&pstartno=${paging.end + 1}" class="page-link">
 								<i class="bi bi-chevron-right"></i>
-							</a>
+						</a>
 						</li>
-			            </c:if>
-					</ul>
-				</nav>
-			</div>
-		</c:if>
+					</c:if>
+				</ul>
+			</nav>
+		</div>
 	</div>
 </section>
 

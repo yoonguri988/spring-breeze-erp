@@ -9,11 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.sb.erp.dto.NoticeDto;
 import com.sb.erp.dto.NoticeSearchDto;
@@ -57,7 +56,8 @@ public class NoticeController {
     // - HTML Form 태그를 통해 전송된 데이터를 @ModelAttribute로 매핑하여 받습니다.
     // 새 공지사항 글 작성 처리 - JSP의 openNewModal()에서 지정한 'form.action = contextPath + "/notice/insert"'를 수신
     @RequestMapping(value="/notice/insert", method= RequestMethod.POST)
-    public String insertNotice(NoticeDto dto, HttpSession session) {
+    public String insertNotice(NoticeDto dto, 
+			@RequestParam("file")  MultipartFile file, HttpSession session) {
     	// 등록 로직 처리 // ### 임시 세션 연동
     	Integer empId = (Integer) session.getAttribute("empId");
     	Integer comId = (Integer) session.getAttribute("comId");
@@ -65,7 +65,7 @@ public class NoticeController {
     	dto.setEmpId(empId); //### 보안 로그 인식 emp_id 셋팅- 로그인 후 세션 가져오기
     	dto.setComId(comId); //### 보안 로그 인식 comId 셋팅-
  
-        noticeService.insert(dto);  // DB 저장 로직 수행
+        noticeService.insert(dto, file);  // DB 저장 로직 수행
         return "redirect:/notice/list"; // 등록 완료 후 목록 페이지로 강제 리다이렉트 (.do 패턴)
     }
     // 3. 공지 수정 페이지 이동 (GET 방식)
@@ -79,14 +79,15 @@ public class NoticeController {
     // 4. 공지 수정 처리 (POST 방식)
     //  HTML Form은 기본적으로 PUT을 지원하지 않으므로 POST 방식으로 변경합니다.
     @RequestMapping(value="/notice/edit", method= RequestMethod.POST)
-    public String update(NoticeDto dto, HttpSession session) {
+    public String update(NoticeDto dto, 
+			@RequestParam("file")  MultipartFile file, HttpSession session) {
     	// ### 임시 세션 연동 - 로그인 정보 매핑 처리
     	Integer empId = (Integer) session.getAttribute("empId");
     	Integer comId = (Integer) session.getAttribute("comId");
     	
     	dto.setEmpId(empId); //### 보안 로그 인식 emp_id 셋팅- 로그인 후 세션 가져오기
     	dto.setComId(comId); //### 보안 로그 인식 emp_id 셋팅-
-        noticeService.update(dto); // DB 수정 업데이트 수행
+        noticeService.update(dto, file); // DB 수정 업데이트 수행
         return "redirect:/notice/detail?bno=" + dto.getBno(); // 수정 완료 후 상세 페이지로 이동
     }
 

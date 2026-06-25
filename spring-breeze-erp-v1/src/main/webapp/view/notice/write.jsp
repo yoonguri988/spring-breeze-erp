@@ -22,10 +22,10 @@
       		<textarea  class="form-control"    id="bcontent"  name="bcontent"  ></textarea>
       	</div>
       	
-      	<!-- <div class="my-3">
+      	<div class="my-3">
          <label for="bfile"   class="form-label">파일첨부</label>
          <input type="file"  id="bfile"  name="bfile"   class="form-control"/>
-        </div>  -->
+        </div>  
       	
       	<div  class="my-3  text-end"> 
       		<button type="reset"   class="btn btn-outline-primary"  title="글취소">취소</button>

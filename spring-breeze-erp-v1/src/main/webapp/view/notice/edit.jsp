@@ -33,15 +33,22 @@ window.addEventListener("load", function() {
       		<textarea  class="form-control"    id="bcontent"  name="bcontent"  >${dto.bcontent}</textarea>
       	</div>
       	
-      	<%-- <div class="my-3">
+      	<div class="my-3">
          <label for="bfile"   class="form-label">기존파일</label>
-         <input type="file"  id="bfile"  name="bfile"   value = "${dto.bfile}" readonly  class="form-control"/>
-        </div>  --%>
+         <input type="text"  id="bfile"  name="bfile"   value = "${dto.bfile}" readonly  class="form-control"/>
+        </div>  
         
-        <%-- <div class="my-3">
-         <label for="bfile"   class="form-label">파일 첨부</label>
-         <input type="file"  id="bfile"  name="bfile"   value = "${dto.bfile}" readonly   class="form-control"/>
-        </div> --%> 
+            <c:if test="${not empty dto.bfile}">
+        <div class="my-3">
+            <img src="${pageContext.request.contextPath}/upload/${dto.bfile}" alt="${dto.btitle}" 
+                	class="img-fluid w-25" />
+        </div>
+    		</c:if>
+
+         <div class="my-3">
+         <label for="file"   class="form-label">파일 첨부</label>
+         <input type="file"  id="file"  name="file"       class="form-control"/>
+        </div> 
       	<div  class="my-3  text-end"> 
       		<button type="reset"   class="btn btn-outline-primary"  title="글수정취소">취소</button>
       		<a href="${pageContext.request.contextPath}/notice/list"  
