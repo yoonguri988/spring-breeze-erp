@@ -20,9 +20,9 @@
   <a class="sb-nav__item" data-page="employees" data-tip="사원관리" href="${pageContext.request.contextPath}/emp/list">
     <i class="bi bi-people"></i><span class="sb-nav__label">사원관리</span>
   </a>
-  <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" href="${pageContext.request.contextPath}/auth/list">
+  <!-- <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" href="${pageContext.request.contextPath}/auth/list">
     <i class="bi bi-shield-lock"></i><span class="sb-nav__label">권한 관리</span>
-  </a>
+  </a> -->
 
   <div class="sb-nav__section">업무</div>
   <a class="sb-nav__item" data-page="documents" data-tip="전자결재" href="${pageContext.request.contextPath}/appr/list_form">
