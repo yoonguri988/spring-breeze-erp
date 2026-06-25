@@ -51,7 +51,7 @@
 | 김주엽 | approval-docs | 결재 문서 양식 관리 · CRUD | ✅ shipped |
 | 최다영 | project-task | 프로젝트 / 태스크 관리 · 참여 사원 관리 | ✅ shipped |
 | 장영탁 | resource | 자원 관리 CRUD · 자원 예약 관리 | ✅ shipped |
-| 손창기 | notice | 공지 관리 · CRUD | 🔄 in-progress |
+| 손창기 | notice | 공지 관리 · CRUD | ✅ shipped |
 
 ## 🗂 ERD (Entity Relationship Diagram)
 
@@ -107,7 +107,7 @@
 - 태스크 CRUD, 프로젝트와 연계 관리
 - 프로젝트 참여 사원(`project_member`) 추가 / 삭제 — N:M 매핑
 
-### 06. NOTICE — 공지 관리 (@손창기, 진행 중)
+### 06. NOTICE — 공지 관리 (@손창기)
 - 공지사항 목록 조회 / 검색
 - 공지 등록 / 상세 조회 / 수정 / 삭제
 
