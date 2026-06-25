@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class NoticeSearchDto {
+	private Integer empId;
+	private Integer comId;
 	private String keyword;
 	private String sortBy = "new";
 	

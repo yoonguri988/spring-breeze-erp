@@ -1,8 +1,13 @@
 package com.sb.erp.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.sb.erp.dao.NoticeMapper;
 import com.sb.erp.dto.NoticeDto;
 import com.sb.erp.dto.NoticeSearchDto;
@@ -17,12 +22,36 @@ public class NoticeServiceImpl implements NoticeService{
 	    @Autowired	    NoticeMapper noticeMapper;
 
 	    @Override // 공지등록
-	    public int insert(NoticeDto dto) { 
+	    public int insert(NoticeDto dto , MultipartFile file) { 
+			String fileName   = "notice.png";
+			
+			if( !file.isEmpty() ) {
+				fileName   = file.getOriginalFilename();
+				String uploadPath = "C:/file/";
+				File       demp   = new File(uploadPath + fileName);  //파일경로
+				
+				try { file.transferTo(demp); }  // 파일옮기기
+				catch (IOException e) { e.printStackTrace(); } 
+			}
+			
+			dto.setBfile(fileName);
 	        return noticeMapper.insert(dto);
 	    }
 
 	    @Override // 공지수정
-	    public int update(NoticeDto dto) {
+	    public int update(NoticeDto dto, MultipartFile file) {
+			String fileName = dto.getBfile();  // #1. 기본파일명으로 들어간거 넣어놓고
+			
+			if(  !file.isEmpty()) {
+				fileName = file.getOriginalFilename();
+				String uploadPath = "C:/file/";
+				File demp = new File(  uploadPath + fileName );
+				
+				try { file.transferTo(demp); }   //#2. 파일올리기
+				catch (IOException e) { e.printStackTrace(); }
+				
+			}
+			dto.setBfile(fileName);  // #3. 파일명셋팅
 	        return noticeMapper.update(dto);
 	    }
 

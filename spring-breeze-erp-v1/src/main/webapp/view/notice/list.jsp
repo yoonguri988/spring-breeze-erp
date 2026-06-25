@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <div class="d-flex gap-2 flex-wrap mb-3" id="catChips">
+ <%--  <div class="d-flex gap-2 flex-wrap mb-3" id="catChips">
     <button class="cat-chip ${empty pi.category || pi.category eq 'all' ? 'active' : ''}" data-cat="all">
         <i class="bi bi-grid"></i> 전체</button>
     <button class="cat-chip ${pi.category eq '인사' ? 'active' : ''}" data-cat="인사">
@@ -30,7 +30,7 @@
         <span class="sb-dot" style="background:var(--sb-green)"></span> 복지</button>
     <button class="cat-chip ${pi.category eq '일반' ? 'active' : ''}" data-cat="일반">
         <span class="sb-dot" style="background:#9aa3b1"></span> 일반</button>
-  </div>
+  </div> --%>
 
   <!-- 목록 카드 -->
   <div class="sb-card">
@@ -171,7 +171,7 @@
         </div>
         <div class="modal-body">
           <div class="row g-3">
-            <div class="col-md-4">
+            <!-- <div class="col-md-4">
               <label class="sb-form-label">카테고리</label>
               <select class="form-select" name="category" id="nnCat">
                 <option value="인사">인사</option>
@@ -180,7 +180,7 @@
                 <option value="복지">복지</option>
                 <option value="일반">일반</option>
               </select>
-            </div>
+            </div> -->
             <div class="col-md-8">
               <label class="sb-form-label">제목</label>
               <input class="form-control" name="btitle" id="nnTitle" placeholder="공지 제목" required>
@@ -190,15 +190,16 @@
               <textarea class="form-control" name="bcontent" rows="5" id="nnBody" placeholder="공지 내용을 입력하세요." 
               			required></textarea>
             </div>
+            <!-- 파일 첨부  -->
             <div class="col-12">
-              <label class="sb-form-label">파일 첨부</label>
-              <input type="file" class="form-control" name="bFile" id="nnFile">
-            </div>
-            <div class="col-12 d-flex align-items-center gap-2">
+              <label for="nnFile" class="sb-form-label">파일 첨부</label>
+              <input type="file" class="form-control" name="file" id="nnFile">
+            </div> 
+            <!-- <div class="col-12 d-flex align-items-center gap-2">
               <input type="checkbox" id="nnPin" name="isPinned" value="1" style="width:16px; height:16px; 
               			accent-color:var(--sb-accent);">
               <span style="font-size:13.5px">상단 고정 (중요 공지)</span>
-            </div>
+            </div> -->
           </div>
         </div>
         <div class="modal-footer">
@@ -213,6 +214,9 @@
 <form id="deleteForm" action="${pageContext.request.contextPath}/notice/delete" method="POST" style="display:none;">
   <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
   <input type="hidden" name="bno" id="delBno">
+  <input type="hidden" name="empId" id="deleteEmpId">
+  <input type="hidden" name="password" id="deletePassword">
+  <input type="hidden" name="returnTo" id="deleteReturnTo">
 </form>
 
 <script>
@@ -323,9 +327,6 @@
   function openEditModal(data) {
     const form = document.getElementById("noticeRegForm");
     form.reset();
-    
-  /*   const csrfParam = "${_csrf.parameterName}";
-    const csrfToken = "${_csrf.token}"; */
     
     // 따옴표 구조 오타를 완벽히 해결하여 스크립트가 뻗는 문제를 정상화했습니다.
     form.action = contextPath + "/notice/update?" + csrfParam + "=" + csrfToken; 

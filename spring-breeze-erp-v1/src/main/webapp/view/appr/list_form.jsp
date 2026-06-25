@@ -63,8 +63,8 @@
 						</button>
 						<c:if test="${not empty param.keyword}">
 				            <a class="btn btn-ghost btn-sm" href="${pageContext.request.contextPath}/appr/list_form">초기화</a>
-				    </c:if>
-	        </div>
+				        </c:if>
+	                </div>
 				</div>
 			</form>
 		</div>
