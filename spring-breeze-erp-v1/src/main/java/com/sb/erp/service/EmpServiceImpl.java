@@ -123,5 +123,5 @@ public class EmpServiceImpl implements EmpService {
 	public Object selectAuthByEmpId(int empId) {
 		return dao.selectAuthByEmpId(empId);
 	}
-
+	
 }
