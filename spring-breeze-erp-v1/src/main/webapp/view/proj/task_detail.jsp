@@ -1,4 +1,5 @@
 <%@page import="java.time.LocalDate"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@include file="/layout/header.jsp" %>
@@ -62,8 +63,8 @@ window.addEventListener("load",function(){
         </c:choose>
       </td></tr>
       <tr><th>담당자이름</th><td>${dto.pmIdName}</td></tr>
-      <tr><th>태스크시작일</th><td class="tnum">${dto.taskStartDate}</td></tr>
-      <tr><th>태스크종료일</th><td class="tnum">${dto.taskEndDate}</td></tr>
+      <tr><th>태스크시작일</th><td class="tnum"><fmt:formatDate value="${dto.taskStartDate}" pattern="yyyy-MM-dd"/></td></tr>
+      <tr><th>태스크종료일</th><td class="tnum"><fmt:formatDate value="${dto.taskEndDate}" pattern="yyyy-MM-dd"/></td></tr>
     </table>
   </div>
 </div>

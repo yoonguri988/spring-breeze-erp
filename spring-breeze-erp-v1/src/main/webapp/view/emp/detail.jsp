@@ -130,7 +130,7 @@
 					</div>
 				</div>
 				<div class="col-md-3">
-					<div class="text-faint" style="font-size: 12px; margin-bottom: 4px">
+					<div class="text-faint">
 						등록일
 					</div>
 					<p class="tnum">
@@ -138,7 +138,7 @@
 					</p>
 				</div>
 				<div class="col-md-3">
-					<div class="text-faint" style="font-size: 12px; margin-bottom: 4px">
+					<div class="text-faint">
 						최근 수정일
 					</div>
 					<p class="tnum">
@@ -155,13 +155,21 @@
 			<i class="bi bi-shield-lock"></i>
 			권한 수정
 		</a>
-		<a href="${pageContext.request.contextPath}/emp/editpass?empId=${emp.empId}" class="btn btn-ghost btn-sm">
-			<i class="bi bi-key"></i>
-			비밀번호 수정
+		<!-- 비밀번호 초기화 : 관리자 전용/차후 권한 변경 -->
+		<a
+			href="${pageContext.request.contextPath}/emp/resetPass?empId=${emp.empId}"
+			class="btn btn-ghost btn-sm"> <i class="bi bi-key"></i> 비밀번호 초기화
 		</a>
-		<a href="${pageContext.request.contextPath}/emp/edit?empId=${emp.empId}" class="btn btn-sb btn-sm">
-			<i class="bi bi-pencil"></i>
-			정보 수정
+		<!-- 비밀번호 수정 : 본인만 -->
+		<c:if test="${loginEmpId == emp.empId}">
+			<a
+				href="${pageContext.request.contextPath}/emp/editPass?empId=${emp.empId}"
+				class="btn btn-ghost btn-sm"> <i class="bi bi-key"></i> 비밀번호 수정
+			</a>
+		</c:if>
+		<a
+			href="${pageContext.request.contextPath}/emp/edit?empId=${emp.empId}"
+			class="btn btn-sb btn-sm"> <i class="bi bi-pencil"></i> 정보 수정
 		</a>
 	</div>
 </section>

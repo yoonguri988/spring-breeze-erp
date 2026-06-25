@@ -28,12 +28,13 @@ public interface ProjectService {
 	
 	/* paging */
 	public List<ProjectDto> selectAll(ProjectSearchDto search);
-	public int selectCnt();
+	public int selectCnt(ProjectSearchDto search);
 	
 	//기간조회
 	public List<ProjectDto> selectByPeriod(String startDate, String endDate);
 	
 	//프로젝트명 조회
 	public List<ProjectDto> searchByKeyword(@Param("keyword") String keyword);
+	
 	
 }

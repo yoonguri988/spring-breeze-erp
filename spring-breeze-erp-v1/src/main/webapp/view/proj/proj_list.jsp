@@ -27,7 +27,7 @@ window.addEventListener("load",function(){
 <div class="sb-card mb-3">
   <div class="sb-toolbar">
   <form id="searchForm" action="${pageContext.request.contextPath}/proj/proj_list" method="get" class="sb-search-form">
-
+ 	<input type="hidden" name="searched" value="true">
     <div class="sb-field sb-field--search">
       <i class="bi bi-search"></i>
       <input type="text" name="keyword" placeholder="프로젝트명 검색" value="${param.keyword}">
@@ -41,7 +41,9 @@ window.addEventListener("load",function(){
       <a href="#" onclick="setStatus('DOING'); return false;" class="${param.proStatus=='DOING' ? 'active' : ''}"><span class="sb-dot" style="background:var(--sb-accent);width:6px;height:6px;"></span> DOING</a>
       <a href="#" onclick="setStatus('DONE'); return false;" class="${param.proStatus=='DONE' ? 'active' : ''}"><span class="sb-dot" style="background:var(--sb-green);width:6px;height:6px;"></span> DONE</a>
     </div>
+	<script>
 
+	</script>
     <div class="grow"></div>
 
     <div class="sb-field sb-field--date">

@@ -26,6 +26,13 @@
 		where e.emp_id = #{empId}
 		and e.com_id = #{comId}
 	</select>
+	
+	<!-- 추가: comId 없이 / 비로그인 상태시 본인 확인용 -->
+	<select id="selectByEmpIdOnly" resultType="EmpDto">
+	    SELECT *
+	    FROM employee
+	    WHERE emp_id = #{empId}
+	</select>
 
 	<!-- jsj : 사원 검색 + 페이징 -->
 	<select id="search" parameterType="EmpSearchDto" resultType="EmpDto">
@@ -172,5 +179,15 @@
 		join emp_auth ea on e.emp_id = ea.emp_id
 		join authority a on a.aut_id = ea.aut_id and e.com_id = a.com_id
 		where e.com_id = #{comId}
+	</select>
+	<!-- 비밀번호 분실 - session(empId) 기반, 본인확인 후에만 진입 가능 -->
+	<select id="selectAuthByEmpId" resultType="EmpDto" parameterType="int">
+		select e.emp_id, e.emp_no, e.emp_name, d.dept_name, p.pos_name,
+		e.emp_email, e.emp_mobile, e.emp_status, e.hire_date,
+		e.dept_id, e.pos_id, e.created_at, e.updated_at
+		from employee e
+		join emp_position p on e.pos_id = p.pos_id
+		join department d on e.dept_id = d.dept_id
+		where e.emp_id = #{empId}
 	</select>
 </mapper>

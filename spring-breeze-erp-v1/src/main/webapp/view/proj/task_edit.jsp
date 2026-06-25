@@ -55,11 +55,11 @@
       <div class="row g-3 mb-4">
         <div class="col-md-6">
           <label for="task_start_date" class="sb-form-label">시작일</label>
-          <input type="date" id="task_start_date" name="taskStartDate" class="form-control" value="${dto.taskStartDate}"/>
+          <input type="date" id="task_start_date" name="taskStartDate" class="form-control" value="<fmt:formatDate value="${dto.taskStartDate}" pattern="yyyy-MM-dd"/>"/>
         </div>
         <div class="col-md-6">
           <label for="task_end_date" class="sb-form-label">종료일</label>
-          <input type="date" id="task_end_date" name="taskEndDate" class="form-control" value="${dto.taskEndDate}"/>
+          <input type="date" id="task_end_date" name="taskEndDate" class="form-control" value="<fmt:formatDate value="${dto.taskEndDate}" pattern="yyyy-MM-dd"/>"/>
         </div>
       </div>
 

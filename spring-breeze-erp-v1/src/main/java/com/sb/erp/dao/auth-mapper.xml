@@ -21,8 +21,7 @@
 		<result property="autName" column="aut_name" />
 	</resultMap>
 
-	<select id="readAuth" resultMap="authListMap"
-		parameterType="string">
+	<select id="readAuth" resultMap="authListMap" parameterType="string">
 		select e.emp_email, e.emp_pass, e.emp_no, e.emp_name, a.aut_name,
 		ep.pos_name, c.com_name, e.com_id, e.emp_id, e.dept_id, e.pos_id
 		from emp_auth ea

@@ -25,7 +25,7 @@
   </a>
 
   <div class="sb-nav__section">업무</div>
-  <a class="sb-nav__item" data-page="documents" data-tip="전자결재" href="${pageContext.request.contextPath}/appr/list">
+  <a class="sb-nav__item" data-page="documents" data-tip="전자결재" href="${pageContext.request.contextPath}/appr/list_form">
     <i class="bi bi-file-earmark-text"></i><span class="sb-nav__label">전자문서 · 결재</span>
     <!-- <span class="sb-nav__badge">5</span> -->
   </a>
