@@ -11,7 +11,7 @@
             <div class="sb-breadcrumb">
                 <a href="${pageContext.request.contextPath}/">홈</a>
                 <i class="bi bi-chevron-right"></i>
-                <a href="${pageContext.request.contextPath}/dept/my">내 부서 현황</a>
+                <a href="${pageContext.request.contextPath}/dept/detail?deptId=${dept.deptId}">부서 상세 현황</a>
                 <i class="bi bi-chevron-right"></i>
                 ${dept.deptName}
             </div>
@@ -19,7 +19,7 @@
             <p>${dept.deptCode}</p>
         </div>
         <div class="sb-page-head__actions">
-            <a href="${pageContext.request.contextPath}/dept/my" class="btn btn-ghost btn-sm">
+            <a href="${pageContext.request.contextPath}/dept/list?comId=${dept.comId}" class="btn btn-ghost btn-sm">
                 <i class="bi bi-arrow-left"></i> 목록으로
             </a>
         </div>
