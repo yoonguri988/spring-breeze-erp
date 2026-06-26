@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class ResvSearchDto {
 	private int comId;
+	private Integer empId;
 	private String status;
 	
 	// 페이징

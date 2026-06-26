@@ -16,6 +16,10 @@ public interface ReservationService {
 
     void insertReservation(ReservationDto reservationDto);
 
+    void updateReservation(ReservationDto reservationDto);
+
+    void deleteReservation(int revId);
+
     void updateStatus(int revId, String status, String remark);
 
     // 통계 (전체/승인/대기/반려)
