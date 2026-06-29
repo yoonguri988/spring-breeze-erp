@@ -16,6 +16,10 @@ public interface ReservationMapper {
     ReservationDto selectReservationDetail(int revId);
     
     void insertReservation(ReservationDto reservationDto);
+
+    void updateReservation(ReservationDto reservationDto);
+
+    void deleteReservation(int revId);
     
     void updateStatus(ReservationDto reservationDto);
 

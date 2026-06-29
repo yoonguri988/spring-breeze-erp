@@ -18,13 +18,13 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<ReservationDto> getReservationList(ResvSearchDto search) {
+        search.setPstartno((search.getPstartno()-1)*search.getOnepagelist());
         List<ReservationDto> reservationList = dao.selectReservationList(search);
         return reservationList;
     }
 
     @Override
     public int getReservationCount(ResvSearchDto search) {
-    	search.setPstartno((search.getPstartno()-1)*search.getOnepagelist());
         int totalCount = dao.selectReservationCount(search);
         return totalCount;
     }
@@ -38,6 +38,16 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public void insertReservation(ReservationDto reservationDto) {
     	dao.insertReservation(reservationDto);
+    }
+
+    @Override
+    public void updateReservation(ReservationDto reservationDto) {
+        dao.updateReservation(reservationDto);
+    }
+
+    @Override
+    public void deleteReservation(int revId) {
+        dao.deleteReservation(revId);
     }
 
     @Override
