@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +27,7 @@ public class EmpController {
 	@Autowired EmpService empService;
 	@Autowired PosService posService;
 	@Autowired DeptService deptService;
-	@Autowired BCryptPasswordEncoder passEncoder;
+	@Autowired PasswordEncoder passEncoder;
 	
 	// 로그인한 유저의 com_id 가져오기 (컨트롤러 내부 공통 메서드)
 	private int getCurrentComId(Authentication authentication) {

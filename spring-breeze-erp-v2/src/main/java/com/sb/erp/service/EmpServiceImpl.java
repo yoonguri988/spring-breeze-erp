@@ -2,7 +2,7 @@ package com.sb.erp.service;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.sb.erp.dao.EmpMapper;
 import com.sb.erp.dto.EmpAuthDto;
@@ -13,7 +13,7 @@ import com.sb.erp.dto.EmpSearchDto;
 @Service
 public class EmpServiceImpl implements EmpService {
 	@Autowired EmpMapper dao;
-	@Autowired BCryptPasswordEncoder passEncoder;
+	@Autowired PasswordEncoder passEncoder;
 	
 	// 사원 목록 조회
 	@Override

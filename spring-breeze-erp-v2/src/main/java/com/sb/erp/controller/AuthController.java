@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,12 +27,7 @@ public class AuthController {
 	@Autowired AuthService service;
 	@Autowired EmpService empService;
 	@Autowired CompanyService comService;
-	@Autowired BCryptPasswordEncoder passEncoder;
-	
-	@RequestMapping("/")
-	public String index() {
-		return "index";
-	}
+	@Autowired PasswordEncoder passEncoder;
 	
 	// 로그인 페이지로 이동
 	@RequestMapping(value="/auth/login", method = RequestMethod.GET)
