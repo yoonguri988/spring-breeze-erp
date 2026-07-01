@@ -16,26 +16,26 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http//1. 허용경로
-		    .authorizeHttpRequests(auth -> auth.requestMatchers("/users/join","/users/login","/users/iddouble","/api/**").permitAll()
-		    		                           .requestMatchers("/users/mypage","/users/update","/users/delete").authenticated()
+		    .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/join","/auth/login","/auth/iddouble","/api/**","/**").permitAll()
+		    		                           .requestMatchers("/auth/mypage","/auth/update","/auth/delete").authenticated()
 		    		                           .anyRequest().permitAll()
 		    		              )
 		    //2. 로그인처리
-		    .formLogin(form -> form.loginPage("/users/login")
-		    		               .loginProcessingUrl("/users/loginProc")
-		    		               .defaultSuccessUrl("/users/mypage", true)
-		    		               .failureUrl("/users/fail")
+		    .formLogin(form -> form.loginPage("/auth/login")
+		    		               .loginProcessingUrl("/auth/loginProc")
+		    		               .defaultSuccessUrl("/auth/mypage", true)
+		    		               .failureUrl("/auth/fail")
 		    		               .permitAll()
 		    		  )
 		    //3. 로그아웃
-		    .logout(logout -> logout.logoutUrl("/users/logout")
-		    		                .logoutSuccessUrl("/users/login")
+		    .logout(logout -> logout.logoutUrl("/auth/logout")
+		    		                .logoutSuccessUrl("/auth/login")
 		    		                .invalidateHttpSession(true)
 		    		                .clearAuthentication(true)
 		    		                .permitAll()
 		    	   )
 		    //4. csrf 예외처리
-		    .csrf(csrf -> csrf.ignoringRequestMatchers("/users/join", "/users/update", "/users/delete"));
+		    .csrf(csrf -> csrf.ignoringRequestMatchers("/auth/join", "/auth/update", "/auth/delete"));
 		return http.build();
 	}
 
