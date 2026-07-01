@@ -4,7 +4,7 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +26,7 @@ public class ResourceController {
     @Autowired private ResourceService service;
     @Autowired private ReservationService resvService;
     @Autowired private EmpService empService;
-    @Autowired private BCryptPasswordEncoder passwordEncoder;
+    @Autowired private PasswordEncoder passwordEncoder;
 
     // 자원 관리 목록 페이지
     @RequestMapping(value = "/res/list", method = RequestMethod.GET)

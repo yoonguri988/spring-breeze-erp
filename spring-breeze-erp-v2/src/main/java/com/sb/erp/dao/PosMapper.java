@@ -1,6 +1,9 @@
 package com.sb.erp.dao;
 
 import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
 import com.sb.erp.dto.PosDto;
 
 @Mapper
