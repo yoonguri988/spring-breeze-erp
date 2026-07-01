@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.PosMapper">
+
+	<select id="selectAll" resultType="PosDto" parameterType="int">
+		select p.pos_id, p.pos_name 
+		from emp_position p
+		join company c 
+		on p.com_id = c.com_id
+		where p.com_id = #{comId}
+		order by pos_order
+	</select>
+
+</mapper>
