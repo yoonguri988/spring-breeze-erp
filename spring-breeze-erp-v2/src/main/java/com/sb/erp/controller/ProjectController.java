@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +27,7 @@ import jakarta.servlet.http.HttpSession;
 
 
 @Controller
+@RequestMapping("/proj")
 public class ProjectController {
 	@Autowired ProjectService service;
 	@Autowired TaskService taskService;
@@ -32,7 +35,7 @@ public class ProjectController {
 	@Autowired EmpService empService;
 	
 	// 프로젝트 목록 페이지
-	@RequestMapping(value = "/proj/proj_list", method = RequestMethod.GET) // 전체출력시
+	@GetMapping("/proj_list") // 전체출력시
 	public String listselect(ProjectSearchDto search, Model model, HttpSession session
 			                 ,Authentication authentication) {
 		
@@ -61,7 +64,7 @@ public class ProjectController {
 	}	
 	
 	@ResponseBody
-	@RequestMapping(value="/proj/empSearch", method=RequestMethod.GET)//사원 조회
+	@GetMapping("/empSearch")//사원 조회
 	public List<EmpDto> empSearch(@RequestParam String keyword, HttpSession session) {
 	    Integer comId = (Integer) session.getAttribute("comId");//해당 회사의 해당 사원을 조회할것
 		
@@ -69,11 +72,11 @@ public class ProjectController {
 	}
 	
 	
-	@RequestMapping(value="/proj/proj_create",method=RequestMethod.GET)
+	@GetMapping("/proj_create")
 	public String insert() {return "proj/proj_create";} //등록
 	
 	
-	@RequestMapping(value="/proj/proj_create", method=RequestMethod.POST)
+	@PostMapping("/proj_create")
 	public String insert_post(ProjectDto dto, HttpSession session,
 			RedirectAttributes rttr) { //등록처리
 		
@@ -91,7 +94,7 @@ public class ProjectController {
 	  return "redirect:/proj/proj_list";
 	}
 	
-	@RequestMapping(value="/proj/proj_detail", method=RequestMethod.GET)
+	@GetMapping("/proj_detail")
 	public String select(int pro_id, Model model,Authentication authentication) { //상세
 		model.addAttribute("dto",service.select(pro_id)); //프로젝트 상세조회
 		model.addAttribute("list", taskService.selectAll(pro_id)); //해당 태스크 리스트
@@ -107,13 +110,13 @@ public class ProjectController {
 		return "proj/proj_detail";
 	}
 	
-	@RequestMapping(value="/proj/proj_edit", method = RequestMethod.GET)
+	@GetMapping("/proj_edit")
 	public String editView(int pro_id, Model model) { //수정뷰
 		model.addAttribute("dto", service.editView(pro_id));
 		return "proj/proj_edit";
 	}
 	
-	@RequestMapping(value="/proj/proj_edit", method=RequestMethod.POST)
+	@PostMapping("/proj_edit")
 	public String edit_post(ProjectDto dto,RedirectAttributes rttr, Authentication authentication) { //수정처리
 		ProjectDto origin = service.select(dto.getProId());
 		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
@@ -131,7 +134,7 @@ public class ProjectController {
 		return "redirect:/proj/proj_detail?pro_id="+dto.getProId();
 	}
 	
-	@RequestMapping(value="/proj/delete", method=RequestMethod.GET) //삭제
+	@GetMapping("/delete") //삭제
 	public String delete(int pro_id,RedirectAttributes rttr, Authentication authentication) {
 		ProjectDto dto = service.select(pro_id);
 		
