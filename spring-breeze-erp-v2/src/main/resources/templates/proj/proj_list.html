@@ -1,18 +1,16 @@
-<!-- <%@page import="java.time.LocalDate"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %> -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
    layout:decorate="~{fragments/layout}">
 <head lang="ko">
 <meta charset="UTF-8">
-<title>프로젝트 목록</title> 
+<title>프로젝트 목록</title>
 </head>
 <body>
 <th:block layout:fragment="content">
 <script th:inline="javascript">
 window.addEventListener("load",function(){
-	let result = [[$'{result}']];
+	let result = /*[[${result}]]*/ '';
 	console.log(result);
 
 	if(result=="프로젝트 등록 실패"||result=="프로젝트 삭제 실패"){alert(result); history.go(-1);}
@@ -28,7 +26,7 @@ window.addEventListener("load",function(){
     <p>전체 프로젝트 현황을 조회하고 관리합니다.</p>
   </div>
   <div class="sb-page-head__actions my-3">
-    <a href="@{/proj/proj_create}" class="btn btn-sb btn-sm"><i class="bi bi-folder-plus"></i> 프로젝트 생성</a>
+    <a th:href="@{/proj/proj_create}" class="btn btn-sb btn-sm"><i class="bi bi-folder-plus"></i> 프로젝트 생성</a>
   </div>
 </div>
 
@@ -45,13 +43,11 @@ window.addEventListener("load",function(){
 
     <div class="sb-segment">
       <a href="#" onclick="setStatus(''); return false;" th:classappend="${param.proStatus == null or #strings.isEmpty(param.proStatus)} ? 'active' : ''">전체</a>
-      <a href="#" onclick="setStatus('TODO'); return false;" th:classappend="${param.proStatus=='TODO' ? 'active' : ''}"><span class="sb-dot" style="background:var(--sb-ink-faint);width:6px;height:6px;"></span> TODO</a>
-      <a href="#" onclick="setStatus('DOING'); return false;" th:classappend="${param.proStatus=='DOING' ? 'active' : ''}"><span class="sb-dot" style="background:var(--sb-accent);width:6px;height:6px;"></span> DOING</a>
-      <a href="#" onclick="setStatus('DONE'); return false;" th:classappend="${param.proStatus=='DONE' ? 'active' : ''}"><span class="sb-dot" style="background:var(--sb-green);width:6px;height:6px;"></span> DONE</a>
+      <a href="#" onclick="setStatus('TODO'); return false;" th:classappend="${param.proStatus=='TODO'} ? 'active' : ''"><span class="sb-dot" style="background:var(--sb-ink-faint);width:6px;height:6px;"></span> TODO</a>
+      <a href="#" onclick="setStatus('DOING'); return false;" th:classappend="${param.proStatus=='DOING'} ? 'active' : ''"><span class="sb-dot" style="background:var(--sb-accent);width:6px;height:6px;"></span> DOING</a>
+      <a href="#" onclick="setStatus('DONE'); return false;" th:classappend="${param.proStatus=='DONE'} ? 'active' : ''"><span class="sb-dot" style="background:var(--sb-green);width:6px;height:6px;"></span> DONE</a>
     </div>
-	<script>
 
-	</script>
     <div class="grow"></div>
 
     <div class="sb-field sb-field--date">
@@ -80,42 +76,34 @@ window.addEventListener("load",function(){
         </tr>
       </thead>
       <tbody>
-        <c:forEach items="${list}" var="dto" varStatus="status">
-          <tr>
-            <td><a href="${pageContext.request.contextPath}/proj/proj_detail?pro_id=${dto.proId}" class="sb-table__name">${dto.proName}</a></td>
-            <td class="sb-table__muted">${dto.proDesc}</td>
-            <td>${dto.empName}</td>
+        <tr th:each="dto : ${list}">
+            <td><a th:href="@{/proj/proj_detail(pro_id=${dto.proId})}" class="sb-table__name" th:text="${dto.proName}"></a></td>
+            <td class="sb-table__muted" th:text="${dto.proDesc}"></td>
+            <td th:text="${dto.empName}"></td>
             <td>
-              <a href="${pageContext.request.contextPath}/proj/proj_member?pro_id=${dto.proId}" class="sb-iconbtn" style="width:28px;height:28px;font-size:14px;display:inline-grid;"><i class="bi bi-people"></i></a>
-              ${dto.memberCnt}명
+              <a th:href="@{/proj/proj_member(pro_id=${dto.proId})}" class="sb-iconbtn" style="width:28px;height:28px;font-size:14px;display:inline-grid;"><i class="bi bi-people"></i></a>
+              [[${dto.memberCnt}]]명
             </td>
-            <td class="sb-hr-cell tnum"><fmt:formatDate value="${dto.startDate}" pattern="yyyy-MM-dd"/> ~ <fmt:formatDate value="${dto.endDate}" pattern="yyyy-MM-dd"/></td>
-            <td class="sb-hr-cell tnum"><fmt:formatDate value="${dto.createdAt}" pattern="yyyy-MM-dd"/></td>
-          </tr>
-        </c:forEach>
+            <td class="sb-hr-cell tnum" th:text="${#dates.format(dto.startDate, 'yyyy-MM-dd')} + ' ~ ' + ${#dates.format(dto.endDate, 'yyyy-MM-dd')}"></td>
+            <td class="sb-hr-cell tnum" th:text="${#dates.format(dto.createdAt, 'yyyy-MM-dd')}"></td>
+        </tr>
       </tbody>
     </table>
-    <c:if test="${empty list}">
-      <div class="sb-empty"><i class="bi bi-folder2-open"></i><p>조회된 프로젝트가 없습니다.</p></div>
-    </c:if>
+    <div class="sb-empty" th:if="${#lists.isEmpty(list)}"><i class="bi bi-folder2-open"></i><p>조회된 프로젝트가 없습니다.</p></div>
   </div>
-<c:if test="${not empty paging}">
-  <div class="d-flex justify-content-center py-3" style="border-top:1px solid var(--sb-border)">
+<div class="d-flex justify-content-center py-3" style="border-top:1px solid var(--sb-border)" th:if="${paging != null}">
     <ul class="pagination pagination-sm mb-0">
-      <c:if test="${paging.start > paging.bottomlist}">
-        <li class="page-item"><a href="?pstartno=${paging.start-1}" class="page-link">이전</a></li>
-      </c:if>
-      <c:forEach var="i" begin="${paging.start}" end="${paging.end}">
-        <li class="page-item <c:if test="${i==paging.current}">active</c:if>">
-          <a href="?pstartno=${i}" class="page-link">${i}</a>
-        </li>
-      </c:forEach>
-      <c:if test="${paging.pagetotal > paging.end}">
-        <li class="page-item"><a href="?pstartno=${paging.end+1}" class="page-link">다음</a></li>
-      </c:if>
+      <li class="page-item" th:if="${paging.start > paging.bottomlist}">
+        <a th:href="@{/proj/proj_list(pstartno=${paging.start-1})}" class="page-link">이전</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(paging.start, paging.end)}" th:classappend="${i==paging.current} ? 'active' : ''">
+        <a th:href="@{/proj/proj_list(pstartno=${i})}" class="page-link" th:text="${i}"></a>
+      </li>
+      <li class="page-item" th:if="${paging.pagetotal > paging.end}">
+        <a th:href="@{/proj/proj_list(pstartno=${paging.end+1})}" class="page-link">다음</a>
+      </li>
     </ul>
   </div>
- </c:if>
 </div>
 </main>
 <script th:inline="javascript">
@@ -126,4 +114,4 @@ function setStatus(status) {
 </script>
 </th:block>
 </body>
-</html>      
+</html>
