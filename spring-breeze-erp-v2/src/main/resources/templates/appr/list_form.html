@@ -1,6 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/header :: header}"></head>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout.html}">
+<head>
+	<title>결재 양식 관리</title>
+</head>
+<body>
+
+<main layout:fragment="content">
 <div class="sb-content">
 	<div class="sb-page-head">
 		<div class="sb-page-head__txt">
@@ -130,7 +137,7 @@
                    th:href="@{/appr/list_form(keyword=${param.keyword}, company=${param.comId}, forStatus=${param.forStatus}, page=${paging.start -1})}">이전</a>
             </li>
             <th:block th:each="i : ${#numbers.sequence(paging.start, paging.end)}">
-	            <li class="page-item ${paging.current == i ? 'active' : ''}">
+	            <li class="page-item" th:classappend="${paging.current == i} ? 'active' : ''">
 	                <a class="page-link"
 	                   th:href="@{/appr/list_form(keyword=${param.keyword}, company=${param.comId}, forStatus=${param.forStatus}, page=${i})}"
 	                   th:text="${i}"></a>
@@ -157,7 +164,7 @@
 			
 			if(value !== "") {
 				// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
-				fetch("/searchCompany?company=" + encodeURIComponent(value))
+				fetch(`/searchCompany?company=${encodeURIComponent(value)}`)
 				.then(response => response.json())
 				.then(data => {
 					//console.log(data);
@@ -303,4 +310,6 @@
     	}	
     }
 </script>
+</main>
+</body>
 </html>
