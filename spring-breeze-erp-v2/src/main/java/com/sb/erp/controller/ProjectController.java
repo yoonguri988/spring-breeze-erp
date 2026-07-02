@@ -40,7 +40,7 @@ public class ProjectController {
 			                 ,Authentication authentication) {
 		
 		//권한 체크
-		boolean isAdmin = authentication.getAuthorities().stream()
+		/*boolean isAdmin = authentication.getAuthorities().stream()
 				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
 		   if (!isAdmin) {
 		        // 일반 사원 → 자기 회사만
@@ -49,7 +49,13 @@ public class ProjectController {
 		    } else {
 		        // 관리자 → 전체 회사
 		        search.setComId(null);
-		    }
+		    } */
+		
+		   //하드코딩 나중에 지워
+		   boolean isAdmin = true;
+		    search.setComId(null);
+		   //여기까지 지워 
+		
 		   if(!search.isSearched()) {return "proj/proj_list";}
 
 		int totalCnt = service.selectCnt(search); //전체 데이터 수
@@ -100,9 +106,16 @@ public class ProjectController {
 		model.addAttribute("list", taskService.selectAll(pro_id)); //해당 태스크 리스트
 		model.addAttribute("memberList", memberService.select(pro_id)); //머더라 그 머더라..그.. 멤버출력
 		
-		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName()); //삭제버튼이 보일 유저들
+		
+		/*EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName()); //삭제버튼이 보일 유저들
 		boolean isAdmin = authentication.getAuthorities().stream()
-				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
+				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN")); */
+		
+		 //하드코딩 나중에 지워
+		EmpDto loginEmp = new EmpDto();
+		loginEmp.setEmpId(1);     
+		boolean isAdmin = true;
+		//여기까지 지우셈
 		
 		model.addAttribute("loginEmpId", loginEmp.getEmpId()); //jsp에서 사용하게 보내줄거임
 		model.addAttribute("isAdmin",isAdmin);
@@ -119,7 +132,8 @@ public class ProjectController {
 	@PostMapping("/proj_edit")
 	public String edit_post(ProjectDto dto,RedirectAttributes rttr, Authentication authentication) { //수정처리
 		ProjectDto origin = service.select(dto.getProId());
-		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
+		
+		/* EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
 
 		boolean isAdmin = authentication.getAuthorities().stream()
 				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
@@ -127,7 +141,10 @@ public class ProjectController {
 		if (!isAdmin && origin.getEmpId() != loginEmp.getEmpId()) {
 			rttr.addFlashAttribute("result", "프로젝트 생성자 또는 관리자만 수정할 수 있습니다.");
 			return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();
-		}
+		} */
+		
+		boolean isAdmin = true; //나중에 지워..!!
+		
 		String result="프로젝트 수정 실패";
 		if(service.edit(dto)>0) {result="프로젝트 수정 성공";}
 		rttr.addFlashAttribute("result",result);
@@ -138,13 +155,15 @@ public class ProjectController {
 	public String delete(int pro_id,RedirectAttributes rttr, Authentication authentication) {
 		ProjectDto dto = service.select(pro_id);
 		
-		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
+		/*EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
 		boolean isAdmin = authentication.getAuthorities().stream()
 				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
 		if (!isAdmin && dto.getEmpId() != loginEmp.getEmpId()) {
 			rttr.addFlashAttribute("result", "프로젝트 생성자 또는 관리자만 삭제할 수 있습니다.");//권한,프로젝트 생성자만 삭제가능
 			return "redirect:/proj/proj_detail?pro_id=" + pro_id;
-		}
+		}*/
+		
+		boolean isAdmin = true; //나중에 지워!!
 		
 		String result="프로젝트 삭제 실패";
 		
