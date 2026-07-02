@@ -1,30 +1,44 @@
 package com.sb.erp.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+
+import com.sb.erp.security.CustomUserDetails;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
 	// http 경로 설정
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http, PasswordEncoder passEncoder) throws Exception {
 		http//1. 허용경로
-		    .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/join","/auth/login","/auth/iddouble","/api/**","/**").permitAll()
-		    		                           .requestMatchers("/auth/mypage","/auth/update","/auth/delete").authenticated()
+		    .authorizeHttpRequests(auth -> auth.requestMatchers(
+		    										"/css/**", "/js/**", "/images/**", "/api/**",
+		    										"/auth/login","/auth/confirm",
+		    										"/auth/resetPass", "/auth/forgotResetPass"
+		    									).permitAll()
+		    		                           .requestMatchers(
+		    		                        		"/auth/updatePass",
+		    		                        		"/",
+		    		                        	    "/com/list"
+		    		                        	).authenticated()
+		    		                           .requestMatchers("/root/**").hasRole("ROOT")
+		    		                           .requestMatchers("/admin/**").hasAnyRole("ROOT", "ADMIN")
 		    		                           .anyRequest().permitAll()
 		    		              )
 		    //2. 로그인처리
 		    .formLogin(form -> form.loginPage("/auth/login")
-		    		               .loginProcessingUrl("/auth/loginProc")
-		    		               .defaultSuccessUrl("/auth/mypage", true)
-		    		               .failureUrl("/auth/fail")
+		    		               .loginProcessingUrl("/auth/login")
+		    		               .successHandler(authenticationSuccessHandler(passEncoder))
+		    		               .failureUrl("/auth/login?error")
 		    		               .permitAll()
 		    		  )
 		    //3. 로그아웃
@@ -35,10 +49,42 @@ public class SecurityConfig {
 		    		                .permitAll()
 		    	   )
 		    //4. csrf 예외처리
-		    .csrf(csrf -> csrf.ignoringRequestMatchers("/auth/join", "/auth/update", "/auth/delete"));
+		    .csrf(csrf -> csrf.ignoringRequestMatchers("/auth/login", "/auth/update", "/auth/delete"));
 		return http.build();
 	}
 
+	
+	// 로그인 성공 후 이동 경로 분기
+	// - ROOT 권한: 비밀번호 그대로 사용 -> 메인("/")으로 이동
+	// - 그 외 권한: 최초 로그인(pwd_change_yn = 'N')인 경우에만 비밀번호 재설정 페이지로 이동
+	//              이미 비밀번호를 변경한 적이 있으면 정상적으로 메인으로 이동
+	@Bean
+	public AuthenticationSuccessHandler authenticationSuccessHandler(PasswordEncoder passEncoder) {
+		return (request, response, authentication) -> {
+			CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+ 
+			boolean isRoot = authentication.getAuthorities().stream()
+					.anyMatch(a -> a.getAuthority().equals("ROOT"));
+
+			// 세션에 사원 id/회사 id 저장 (기존 화면들이 session의 empId/comId를 참조하는 경우 대비)
+			request.getSession().setAttribute("empId", principal.getUser().getEmpId());
+			request.getSession().setAttribute("comId", principal.getUser().getComId());
+			
+			if (isRoot) {
+				response.sendRedirect(request.getContextPath() + "/");
+				return;
+			} else {
+				if (passEncoder.matches(principal.getEmpNo(), principal.getPassword())) {
+					response.sendRedirect(request.getContextPath() + "/auth/resetPass");
+					return;
+				}
+			}
+ 
+ 
+			response.sendRedirect(request.getContextPath() + "/");
+		};
+	}
+	
 	// AuthenticationManager 설정
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

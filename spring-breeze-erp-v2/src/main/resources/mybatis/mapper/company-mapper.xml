@@ -24,7 +24,7 @@
   </if>
   </where>
   order by c.com_id desc
-  limit #{pstarValue}, #{onepagelist}
+  OFFSET #{pstarValue} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
   </select>
   <!-- 회사 여러개 조회 -->
   <select id="listTotal" resultType="int" parameterType="ComSearchDto">
@@ -83,11 +83,14 @@
   </delete>
   <!-- 회사 통계 -->
   <select id="selectStats" resultType="StatsComDto">
-    SELECT 
+	SELECT 
 	    (SELECT COUNT(*) FROM company) AS com_total,
 	    (SELECT COUNT(*) FROM employee) AS emp_total,
-	    (SELECT COUNT(DISTINCT indust_code) FROM company) AS indust_total,
-	    (SELECT com_name FROM company ORDER BY created_at DESC LIMIT 1) AS com_latest
+	    (SELECT COUNT(DISTINCT industry_code) FROM company) AS indust_total,
+	    (SELECT com_name FROM company 
+	      ORDER BY created_at DESC 
+	      FETCH FIRST 1 ROWS ONLY) AS com_latest
+	FROM dual
   </select>
   <!-- 회원 id를 통해 내 회사 정보 조회 -->
   <select id="selectOneByEmpId" resultType="CompanyDto" parameterType="int">
