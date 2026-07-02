@@ -10,8 +10,8 @@ public class ApprFormDto {
 	private String forTitle;
 	private String forContent;
 	private Boolean forStatus;
-	private String forCreated;
-	private String forUpdated;
+	private String createdAt;
+	private String updatedAt;
 	
 	private String comName;
 }

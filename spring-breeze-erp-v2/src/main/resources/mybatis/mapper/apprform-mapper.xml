@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sb.erp.dao.ApprMapper">
+<mapper namespace="com.sb.erp.dao.ApprFormMapper">
 
 	<!-- 회사 id 로 회사 이름 찾기 -->
 	<select id="getCompanyName" parameterType="int" resultType="string">
@@ -44,8 +44,8 @@
 	<!-- 결재 양식 등록 -->
 	<insert id="insertForm" parameterType="ApprFormDto">
 		insert into appr_form
-		(com_id, for_code, for_title, for_content, for_status, for_created, for_updated)
-		values (#{comId},#{forCode},#{forTitle},#{forContent},#{forStatus},#{forCreated},#{forUpdated})
+		(com_id, for_code, for_title, for_content, for_status)
+		values (#{comId},#{forCode},#{forTitle},#{forContent},#{forStatus})
 	</insert>
 	
 	<!-- 결재 양식 수정 -->
@@ -56,8 +56,7 @@
 			for_code = #{forCode},
 			for_title = #{forTitle},
 			for_content = #{forContent},
-			for_status = #{forStatus},
-			for_updated = #{forUpdated}
+			for_status = #{forStatus}
 		where for_id = #{forId}
 	</update>
 	
@@ -75,8 +74,8 @@
 			f.for_title as forTitle,
 			f.for_content as forContent,
 			f.for_status as forStatus,
-			f.for_created as forCreated,
-			f.for_updated as forUpdated,
+			f.created_at as createdAt,
+			f.updated_ad as updatedAt,
 			c.com_name as comName
 		from
 			appr_form f
@@ -138,121 +137,5 @@
 		</where>
 		order by for_id desc limit #{pstartno}
 	</select>
-	
-<!-- 	<select id="listFormCnt" resultType="int" parameterType="ApprFormSearchDto">
-		select count(*) from appr_form
-		<where>
-			<if test="comId != null and comId != ''">
-				and f.com_id = #{comId}
-			</if>
-			<if test="forStatus != null">
-				and f.for_status = #{forStatus}
-			</if>
-			<if test="keyword != null and keyword != ''">
-				f.for_code like concat('%',#{keyword},'%')
-				or f.for_title like concat('%', #{keyword},'%')
-			</if>
-		</where>
-	</select> -->
-	
-	<!-- 결재 양식 sql 구문 -->
-	
-	
-	
-	<!-- 결재 문서 sql 구문 / 2차 진행때 주석 풀고 이어 작성할 예정-->
-	
-	<!-- 결재 문서 테이블 모든 필드 조회 -->
-	<!-- <select id="selectDocAll" resultType="ApprDocDto">
-		select * from appr_doc
-	</select> -->
-	
-	<!-- 결재 문서 검색어별 출력 1. 내가 작성한 문서들 -->
-	<!-- <select id="selectDocList" parameterType="map" resultType="map">
-		select
-			d.doc_id,
-			d.doc_title,
-			d.doc_status,
-			d.doc_created,
-			d.doc_updated,
-			d.com_id,
-			d.emp_id,
-			
-			l.lin_id,
-			l.emp_id as line_emp_id,
-			l.lin_order,
-			l.lin_status
-		from
-			appr_doc d
-		left outer join
-			appr_line l
-			on d.doc_id = l.doc_id
-			and l.lin_status = 'WAI'
-		<where>
-			and d.com_id = #{사용자회사id}
-			and d.emp_id = #{사용자id(empId)}
-			
-			<if test="docStatus != null and keyword != ''">
-				and d.doc_status = #{docStatus}
-			</if>
-			<if test="docTitle != null and keyword != ''">
-				and d.doc_title like concat('%', #{keyword}, '%')
-			</if>
-		</where>
-		order by d.doc_id desc
-		limit #{pageSize} offset #{offset}
-	</select>
-	
-	<resultMap id="ApprDocResultMap" type="ApprDocDto">
-		<id property="docId" column="doc_id" />
-		<result property="docTitle" column="doc_title"/>
-		<result property="docStatus" column="doc_status"/>
-		<result property="docCreated" column="doc_created"/>
-		<result property="docUpdated" column="doc_updated"/>
-		<result property="comId" column="com_id"/>
-		<result property="empId" column="emp_id"/>
-				
-		<collection property="apprLines" ofType="ApprLineDto">
-			<id property="lineId" column="line_id"/>
-			<result property="docId" column="doc_id"/>
-			<result property="empId" column="line_emp_id"/>
-			<result property="linOrder" column="lin_order"/>
-			<result property="linStatus" column="lin_status"/>
-		</collection>
-	</resultMap> -->
-	<!-- 결재 문서 검색어별 출력 -->
-	
-	<!-- 결재 문서 페이징 기능 -->
-	<!-- <select id="apprDocCnt" parameterType="map" resultType="int">
-		select
-			count(*)
-		from
-			appr_doc d
-		<where>
-			and d.com_id = #{사용자회사id}
-			and d.emp_id = #{사용자id(empId)}
-			
-			<if test="docStatus != null and keyword != ''">
-				and d.doc_status = #{docStatus}
-			</if>
-			<if test="docTitle != null and keyword != ''">
-				and d.doc_title like concat('%', #{keyword}, '%')
-			</if>
-		</where>
-	</select> -->
-	<!-- 결재 문서 페이징 기능 -->
-	
-	<!-- 결재 문서 sql 구문 -->
-	
-	
-	
-	
-	<!-- 결재선 sql 구문 -->
-	
-	<!-- 결재선 테이블 모든 필드 조회 -->
-	<!-- <select id="selectLineAll" resultType="ApprLineDto">
-		select * from appr_line		
-	</select> -->
-	
-	<!-- 결재선 sql 구문 -->
-	
+
 </mapper>

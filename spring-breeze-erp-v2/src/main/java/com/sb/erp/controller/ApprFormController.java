@@ -17,13 +17,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprFormSearchDto;
 import com.sb.erp.dto.CompanyDto;
-import com.sb.erp.service.ApprService;
+import com.sb.erp.service.ApprFormService;
 import com.sb.erp.service.CompanyService;
 import com.sb.erp.util.PagingUtil;
 
 @Controller
-public class ApprController {
-	@Autowired ApprService appr;
+public class ApprFormController { 
+	@Autowired ApprFormService appr;
 	@Autowired CompanyService com;
 	
 	// 회사 검색 기능
@@ -159,47 +159,3 @@ public class ApprController {
 	
 	
 }
-
-
-//// 양식 리스트 입력한 값 찾기 -> 2차 프로젝트때 다시 시도.....
-//@RequestMapping( value = "/searchForms", method = RequestMethod.GET)
-//@ResponseBody
-//public Map<String, Object> searchForms(@RequestParam("keyword") String keyword,
-//									 @RequestParam("company") String comId,
-//									 @RequestParam( value = "forStatus", required = false) String status,
-//									 @RequestParam( value = "page", defaultValue = "1") int page){
-//	ApprFormSearchDto dto = new ApprFormSearchDto();
-//	dto.setComId(
-//			(comId == null || comId.isBlank()) ?
-//			null : Integer.parseInt(comId)
-//			);
-//	dto.setForStatus(
-//			(status == null || status.isBlank()) ?
-//			null : Boolean.parseBoolean(status)
-//			);
-//	dto.setKeyword(keyword);
-//	dto.setPage(page);
-//	dto.setPageSize(10); // 한 페이지당 몇개들어갈건지
-//	
-//	//int totalCnt = appr.listFormCnt(dto);
-//	
-//	List<ApprFormDto> list = appr.selectFormList(dto);
-//	int totalCnt = appr.listFormCnt(dto); 
-//	
-//	int pagetotal = (totalCnt == 0) ? 1 : (int) Math.ceil((double)totalCnt/ dto.getPageSize()); // 전체 페이지 수
-//	int pageNum = 10; // 하단에 보여줄 버튼? 수
-//	int start = ((page - 1) / pageNum) * pageNum + 1;
-//	int end = Math.min(start + pageNum - 1, pagetotal);
-//	
-//	Map<String, Object> paging = new HashMap<>();
-//	paging.put("current", page);
-//	paging.put("pagetotal", pagetotal );
-//	paging.put("start", start);
-//	paging.put("end", end);
-//	
-//	Map<String, Object> result = new HashMap<>();
-//	result.put("list", list);
-//	result.put("paging", paging);
-//	
-//	return result;
-//}

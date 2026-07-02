@@ -1,21 +1,18 @@
 package com.sb.erp.service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sb.erp.dao.ApprMapper;
+import com.sb.erp.dao.ApprFormMapper;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprFormSearchDto;
 import com.sb.erp.dto.CompanySearchDto;
 
 @Service
-public class ApprServiceImpl implements ApprService {
-	@Autowired ApprMapper dao;
+public class ApprFormServiceImpl implements ApprFormService {
+	@Autowired ApprFormMapper dao;  
 	
 	@Override
 	public String getCompanyName(int comId) {
@@ -42,15 +39,6 @@ public class ApprServiceImpl implements ApprService {
 	@Override
 	public int insertForm(ApprFormDto dto) {
 		
-		// date 관련 호출됐을때 날짜 시간 처리
-		LocalDateTime now = LocalDateTime.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		String setTime = now.format(formatter);
-		
-		// dto에 시간 set
-		dto.setForCreated(setTime);
-		dto.setForUpdated(setTime);
-		
 		// forStatus null로 들어왔을때 오류 방지
 		if(dto.getForStatus() == null) {
 			dto.setForStatus(false);
@@ -61,13 +49,6 @@ public class ApprServiceImpl implements ApprService {
 
 	@Override
 	public int updateForm(ApprFormDto dto) {
-		
-		// date 관련 호출됐을때 날짜 시간 처리
-		LocalDateTime now = LocalDateTime.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		String setTime = now.format(formatter);
-		
-		dto.setForUpdated(setTime);
 		
 		return dao.updateForm(dto);
 	}
