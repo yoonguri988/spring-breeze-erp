@@ -1,11 +1,16 @@
-<%@page import="java.time.LocalDate"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@include file="/layout/header.jsp" %>
-<script>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+   layout:decorate="~{fragments/layout}">
+<head lang="ko">
+<meta charset="UTF-8">
+<title>태스크 상세조회</title>
+</head>
+<body>
+<th:block layout:fragment="content">
+<script th:inline="javascript">
 window.addEventListener("load",function(){
-	let result = '${result}';
+	let result = /*[[${result}]]*/ '';
 	console.log(result);
 
 	if(result=="태스크 수정 실패"){alert(result); history.go(-1);}
@@ -15,18 +20,18 @@ window.addEventListener("load",function(){
 <main class="sb-content">
 <div class="sb-page-head">
   <div class="sb-page-head__txt">
-    <div class="sb-breadcrumb"><a href="${pageContext.request.contextPath}/index.jsp">홈</a> <i class="bi bi-chevron-right"></i> 업무 <i class="bi bi-chevron-right"></i> 프로젝트 <i class="bi bi-chevron-right"></i> 태스크 상세</div>
+    <div class="sb-breadcrumb"><a th:href="@{/}">홈</a> <i class="bi bi-chevron-right"></i> 업무 <i class="bi bi-chevron-right"></i> 프로젝트 <i class="bi bi-chevron-right"></i> 태스크 상세</div>
     <h1>태스크 상세조회</h1>
   </div>
   <div class="sb-page-head__actions">
-    <a href="${pageContext.request.contextPath}/proj/proj_list" class="btn btn-ghost btn-sm"><i class="bi bi-list"></i> 목록</a>
-    <a href="${pageContext.request.contextPath}/proj/task_edit?task_id=${dto.taskId}&project_pro_id=${pro_id}" class="btn btn-ghost btn-sm"><i class="bi bi-pencil"></i> 수정</a>
+    <a th:href="@{/proj/proj_list}" class="btn btn-ghost btn-sm"><i class="bi bi-list"></i> 목록</a>
+    <a th:href="@{/proj/task_edit(task_id=${dto.taskId}, project_pro_id=${pro_id})}" class="btn btn-ghost btn-sm"><i class="bi bi-pencil"></i> 수정</a>
     <button type="button" class="btn btn-ghost btn-sm" style="color:var(--sb-red)" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="bi bi-trash3"></i> 삭제</button>
   </div>
 </div>
 
-<input type="hidden" name="taskId" value="${dto.taskId}">
-<input type="hidden" name="projectProId" value="${pro_id}">
+<input type="hidden" name="taskId" th:value="${dto.taskId}">
+<input type="hidden" name="projectProId" th:value="${pro_id}">
 
 <!-- 삭제 확인 모달 -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -43,7 +48,7 @@ window.addEventListener("load",function(){
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">취소</button>
-        <a href="${pageContext.request.contextPath}/proj/task_delete?task_id=${dto.taskId}&pro_id=${pro_id}" class="btn btn-danger">삭제</a>
+        <a th:href="@{/proj/task_delete(task_id=${dto.taskId}, pro_id=${pro_id})}" class="btn btn-danger">삭제</a>
       </div>
     </div>
   </div>
@@ -53,20 +58,20 @@ window.addEventListener("load",function(){
   <div class="sb-card__head"><h2>태스크 상세조회</h2></div>
   <div class="sb-card__body--flush">
     <table class="sb-table">
-      <tr><th style="width:25%">태스크명</th><td class="sb-table__name">${dto.taskName}</td></tr>
-      <tr><th>태스크설명</th><td class="sb-table__muted">${dto.taskDesc}</td></tr>
+      <tr><th style="width:25%">태스크명</th><td class="sb-table__name" th:text="${dto.taskName}"></td></tr>
+      <tr><th>태스크설명</th><td class="sb-table__muted" th:text="${dto.taskDesc}"></td></tr>
       <tr><th>태스크상태</th><td>
-        <c:choose>
-          <c:when test="${dto.taskStatus=='DONE'}"><span class="sb-badge sb-badge--green"><span class="pip"></span>${dto.taskStatus}</span></c:when>
-          <c:when test="${dto.taskStatus=='DOING'}"><span class="sb-badge sb-badge--blue"><span class="pip"></span>${dto.taskStatus}</span></c:when>
-          <c:otherwise><span class="sb-badge sb-badge--gray"><span class="pip"></span>${dto.taskStatus}</span></c:otherwise>
-        </c:choose>
+        <span th:class="${dto.taskStatus=='DONE'} ? 'sb-badge sb-badge--green' : (${dto.taskStatus=='DOING'} ? 'sb-badge sb-badge--blue' : 'sb-badge sb-badge--gray')">
+          <span class="pip"></span><span th:text="${dto.taskStatus}"></span>
+        </span>
       </td></tr>
-      <tr><th>담당자이름</th><td>${dto.pmIdName}</td></tr>
-      <tr><th>태스크시작일</th><td class="tnum"><fmt:formatDate value="${dto.taskStartDate}" pattern="yyyy-MM-dd"/></td></tr>
-      <tr><th>태스크종료일</th><td class="tnum"><fmt:formatDate value="${dto.taskEndDate}" pattern="yyyy-MM-dd"/></td></tr>
+      <tr><th>담당자이름</th><td th:text="${dto.pmIdName}"></td></tr>
+      <tr><th>태스크시작일</th><td class="tnum" th:text="${#dates.format(dto.taskStartDate, 'yyyy-MM-dd')}"></td></tr>
+      <tr><th>태스크종료일</th><td class="tnum" th:text="${#dates.format(dto.taskEndDate, 'yyyy-MM-dd')}"></td></tr>
     </table>
   </div>
 </div>
 </main>
-<%@include file="/layout/footer.jsp" %>
+</th:block>
+</body>
+</html>
