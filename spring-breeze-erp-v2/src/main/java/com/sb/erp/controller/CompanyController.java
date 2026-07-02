@@ -1,6 +1,7 @@
 package com.sb.erp.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,23 +87,27 @@ public class CompanyController {
 	}
 	
 	// 회사 목록 조회
-	@RequestMapping(value="/com/list", method= RequestMethod.GET)
-	public String list(ComSearchDto search, Model model, HttpSession session) {
-		Integer empId = (Integer) session.getAttribute("empId");
-		//만약 로그인 사용자가 시스템 관리자가 아닌 경우
-		//1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-//	    AuthPermDto root = permService.selectByEmpId(empId);
-//		
-//	    if(!root.getAutName().equals("ROOT")) return "redirect:/com/my";
-		
+	@GetMapping("/list")
+	public String list(ComSearchDto search, Model model) {
 		int listtotal = service.listTotal(search);
-		PagingUtil paging = new PagingUtil(listtotal, search.getPstarValue(), search.getOnepagelist(), 10);
+		// 검색 조건이 null
+		boolean isEmpty = !search.hasSearchCondition();
+		
+		List<CompanyDto> list = new ArrayList<>();
+		PagingUtil paging;
+		
+		if(isEmpty) {
+	    	paging = new PagingUtil(0, search.getPstartno());
+		}else {
+			paging = new PagingUtil(listtotal, search.getPstartno(), search.getOnepagelist(), 10);
+			list = service.list(search);
+		}
+		
 		//통계 데이터
 		StatsComDto stats = service.selectStats();
-		
 		model.addAttribute("stats", stats);
 		model.addAttribute("paging", paging);
-		model.addAttribute("items", service.list(search));
+		model.addAttribute("items", list);
 		return "/com/list";
 	}
 	
