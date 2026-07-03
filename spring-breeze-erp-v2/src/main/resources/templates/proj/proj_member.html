@@ -44,17 +44,17 @@ window.addEventListener("load",function(){
       <div class="modal-body text-start">
         <div class="mb-3 position-relative">
           <label for="empName" class="sb-form-label">사원이름</label>
-          <input class="form-control" name="empName" id="empName" th:value="${dto.empName}" autocomplete="off" />
+          <input class="form-control" name="empName" id="empName" autocomplete="off" />
           <ul id="empSearchResult" class="list-group position-absolute"
               style="z-index:1050; width:100%; display:none; max-height:200px; overflow-y:auto;"></ul>
         </div>
         <div class="mb-3">
           <label for="empId" class="sb-form-label">사원번호</label>
-          <input type="text" class="form-control" id="empId" name="empId" th:value="${dto.empId}" readonly />
+          <input type="text" class="form-control" id="empId" name="empId" readonly />
         </div>
         <div class="mb-3">
-          <label for="role" class="sb-form-label">역할</label>
-          <textarea class="form-control" name="role" id="role" th:text="${dto.role}"></textarea>
+          <label for="memberRole" class="sb-form-label">역할</label>
+          <textarea class="form-control" name="memberRole" id="memberRole"></textarea>
         </div>
       </div>
       <div class="modal-footer">
@@ -124,11 +124,11 @@ window.addEventListener("load", function(){
 function check(){
 	 let empId = document.getElementById("empId");
 	 let empName = document.getElementById("empName");
-	 let role = document.getElementById("role");
+	 let memberRole = document.getElementById("memberRole");
 
 	 if(empId.value.trim()==""){alert("사원을 검색해서 선택해주세요."); empName.focus(); return false;}
 	 if(empName.value.trim()==""){empName.focus(); return false;}
-	 if(role.value.trim()==""){role.focus(); return false;}
+	 if(memberRole.value.trim()==""){memberRole.focus(); return false;}
 	 return true;
 }
 </script>
@@ -151,8 +151,8 @@ function check(){
             <td class="sb-table__name" th:text="${m.proName}"></td>
           	<td class="sb-table_dept" th:text="${m.deptName}"></td>
             <td th:text="${m.empName}"></td>
-            <td class="sb-table__muted" th:text="${m.role}"></td>
-            <td class="sb-hr-cell tnum" th:text="${#dates.format(m.joinedAt, 'yyyy-MM-dd')}"></td>
+            <td class="sb-table__muted" th:text="${m.memberRole}"></td>
+            <td class="sb-hr-cell tnum" th:text="${#temporals.format(m.joinedAt, 'yyyy-MM-dd')}"></td>
             <td class="num"><a th:href="@{/proj/proj_member_delete(pm_id=${m.pmId}, pro_id=${pro_id})}" class="btn btn-ghost btn-sm" style="color:var(--sb-red)"><i class="bi bi-trash3"></i> 삭제</a></td>
         </tr>
       </tbody>
