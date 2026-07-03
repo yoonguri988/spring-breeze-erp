@@ -51,7 +51,7 @@
         <div class="col-md-4">
           <label for="reg_date" class="sb-form-label">수정일</label>
           <input type="text" id="reg_date" class="form-control"
-                 th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
+                 th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
                  readonly style="background:#fafbfc;"/>
         </div>
       </div>
@@ -59,11 +59,11 @@
       <div class="row g-3 mb-4">
         <div class="col-md-6">
           <label for="task_start_date" class="sb-form-label">시작일</label>
-          <input type="date" id="task_start_date" name="taskStartDate" class="form-control" th:value="${#dates.format(dto.taskStartDate, 'yyyy-MM-dd')}"/>
+          <input type="date" id="task_start_date" name="taskStartDate" class="form-control" th:value="${#temporals.format(dto.taskStartDate, 'yyyy-MM-dd')}"/>
         </div>
         <div class="col-md-6">
           <label for="task_end_date" class="sb-form-label">종료일</label>
-          <input type="date" id="task_end_date" name="taskEndDate" class="form-control" th:value="${#dates.format(dto.taskEndDate, 'yyyy-MM-dd')}"/>
+          <input type="date" id="task_end_date" name="taskEndDate" class="form-control" th:value="${#temporals.format(dto.taskEndDate, 'yyyy-MM-dd')}"/>
         </div>
       </div>
 

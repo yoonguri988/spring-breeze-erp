@@ -65,9 +65,9 @@ window.addEventListener("load",function(){
           <span class="pip"></span><span th:text="${dto.taskStatus}"></span>
         </span>
       </td></tr>
-      <tr><th>담당자이름</th><td th:text="${dto.pmIdName}"></td></tr>
-      <tr><th>태스크시작일</th><td class="tnum" th:text="${#dates.format(dto.taskStartDate, 'yyyy-MM-dd')}"></td></tr>
-      <tr><th>태스크종료일</th><td class="tnum" th:text="${#dates.format(dto.taskEndDate, 'yyyy-MM-dd')}"></td></tr>
+      <tr><th>담당자이름</th><td th:text="${dto.pmName}"></td></tr>
+      <tr><th>태스크시작일</th><td class="tnum" th:text="${#temporals.format(dto.taskStartDate, 'yyyy-MM-dd')}"></td></tr>
+      <tr><th>태스크종료일</th><td class="tnum" th:text="${#temporals.format(dto.taskEndDate, 'yyyy-MM-dd')}"></td></tr>
     </table>
   </div>
 </div>
