@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,6 +37,7 @@ import com.sb.erp.util.FileUploadDto;
 import com.sb.erp.util.FileUploadType;
 import com.sb.erp.util.FileUploadUtil;
 import com.sb.erp.util.PagingUtil;
+import com.sb.erp.util.SecurityUtil;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -49,12 +51,14 @@ public class CompanyController {
 	
 	// 회사 등록
 	@GetMapping("/add")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String addForm() {
 		return "/com/form";
 	}
 	
 	//회사 등록 기능
 	@PostMapping("/add")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String add(CompanyDto dto, 
 			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
 			RedirectAttributes rttr) {
@@ -77,6 +81,7 @@ public class CompanyController {
 	// 회사 사업자 번호 중복 체크 (ajax)
 	@GetMapping("/checkBizNo")
 	@ResponseBody
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public Map<String, Object> checkBizNo(String bizNo){
 		Map<String, Object> res = new HashMap<>();
 		CompanyDto dto = service.isDuplicateBizNo(bizNo);
@@ -89,7 +94,12 @@ public class CompanyController {
 	
 	// 회사 목록 조회
 	@GetMapping("/list")
-	public String list(ComSearchDto search, Model model) {
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+	public String list(ComSearchDto search, Model model, Authentication auth) {
+		if (!SecurityUtil.isAdminOrRoot(auth)) {
+	        return "redirect:/com/my";
+	    }
+		
 		int listtotal = service.listTotal(search);
 		// 검색 조건이 null
 		boolean isEmpty = !search.hasSearchCondition();
@@ -121,6 +131,7 @@ public class CompanyController {
 	
 	// 회사 수정 폼
 	@GetMapping("/edit")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String editForm(int comId, Model model) {
 		model.addAttribute("com", service.selectOneById(comId));
 		return "/com/edit";
@@ -128,6 +139,7 @@ public class CompanyController {
 	
 	// 회사 수정 기능
 	@PostMapping("/edit")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String edit(CompanyDto dto, 
 			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
 			RedirectAttributes rttr) {
@@ -160,6 +172,7 @@ public class CompanyController {
 	
 	// 회사 삭제 폼
 	@GetMapping("/delete")
+	@PreAuthorize("hasAuthority('ROOT')")
 	public String deleteModal(@RequestParam("comId") Integer comId, Model model) {
 	    CompanyDto dto = service.selectOneById(comId);
 	    model.addAttribute("com", dto);
@@ -168,19 +181,10 @@ public class CompanyController {
 	
 	// 회사 삭제 기능
 	@PostMapping("/delete")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@ResponseBody
 	public Map<String, Object> delete(Authentication auth, EmpDto dto) {
 	    Map<String, Object> result = new HashMap<>();
-	    
-//	    EmpDto emp = empService.selectByEmpEmail(auth.getName());
-	    //1. 로그인한 사용자가 관리자가 아닌 경우
-	    //1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-//	    AuthPermDto root = permService.selectByEmpId(emp.getEmpId());
-	    
-	    // ROOT(시스템 관리자) 아닌 경우
-//	    if(!root.getAutName().equals("ROOT")) {
-//	        throw new IllegalStateException("시스템 관리자 외에는 회사를 삭제할 수 없습니다.");
-//	    }
 
 	    //2. 관리자가 입력한 비밀번호가 일치 하지 않을 경우
 	    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();

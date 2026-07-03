@@ -3,14 +3,6 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head lang="ko"><title>sidebar fragment</title></head>
 <body>
-<!--
-  [변경점]
-  - <%@ taglib ... %> 지시어들은 모두 제거.
-    Thymeleaf 는 별도 taglib 선언이 필요 없고, <html> 태그에 xmlns:sec 네임스페이스만
-    선언해주면 sec: 관련 속성을 바로 사용할 수 있다. (thymeleaf-extras-springsecurity6 의존성 필요)
-  - 전체 내용을 th:fragment="sidebar" 로 감싸서,
-    메인 레이아웃에서 th:replace="~{fragments/sidebar :: sidebar}" 형태로 재사용.
--->
 <th:block th:fragment="sidebar">
 
     <div class="sb-brand">
@@ -25,9 +17,10 @@
         </a>
 
         <div class="sb-nav__section">조직 관리</div>
-        <a class="sb-nav__item" data-page="company" data-tip="회사 • 부서 관리" th:href="@{/com/list}">
-            <i class="bi bi-building"></i><span class="sb-nav__label">회사 • 부서 관리</span>
-        </a>
+        <a class="sb-nav__item" data-page="company" data-tip="회사 • 부서 관리"
+		   th:href="${#authorization.expression('hasAuthority(''ROOT'') or hasRole(''ADMIN'')')} ? @{/com/list} : @{/com/my}">
+		    <i class="bi bi-building"></i><span class="sb-nav__label">회사 • 부서 관리</span>
+		</a>
         <a class="sb-nav__item" data-page="employees" data-tip="사원관리" th:href="@{/emp/list}">
             <i class="bi bi-people"></i><span class="sb-nav__label">사원관리</span>
         </a>
