@@ -14,23 +14,11 @@ import com.sb.erp.dto.EmpSearchDto;
 public class EmpServiceImpl implements EmpService {
 	@Autowired EmpMapper dao;
 	@Autowired PasswordEncoder passEncoder;
-	
-	// 사원 목록 조회
-	@Override
-	public List<EmpDto> selectAll(int comId) {
-		return dao.selectAll(comId);
-	}
-	
+		
 	// empId로 사원 정보 찾기
 	@Override
 	public EmpDto selectByEmpId(int empId, int comId) {
 		return dao.selectByEmpId(empId, comId);
-	}
-	
-	// 비로그인 상태시(비밀번호 찾을 때) 본인 확인용
-	@Override
-	public EmpDto selectByEmpId(int empId) {
-		return dao.selectByEmpIdOnly(empId);
 	}
 	
 	// 사원 정보 검색

@@ -6,14 +6,8 @@ import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
 public interface EmpService {
 	
-	// 사원 목록
-	public List<EmpDto> selectAll(int comId);
-
 	// 상세 보기
 	public EmpDto selectByEmpId(int empId, int comId);
-	
-	// 비로그인 상태시 본인 확인용
-	public EmpDto selectByEmpId(int empId);
 
 	// 사원 목록(검색)
 	public List<EmpDto> search(EmpSearchDto dto, int comId);

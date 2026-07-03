@@ -22,10 +22,6 @@ public class AuthServiceImpl implements AuthService {
 		return dao.insert(dto);
 	}
 
-	@Override
-	public AuthPermDto selectOneById(int autId) {
-		return dao.selectOneById(autId);
-	}
 
 	@Override
 	public int update(AuthPermDto dto) {

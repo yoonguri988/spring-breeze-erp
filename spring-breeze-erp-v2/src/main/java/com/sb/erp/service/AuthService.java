@@ -10,8 +10,6 @@ public interface AuthService {
 
 	int insert(AuthPermDto dto);
 
-	AuthPermDto selectOneById(int autId);
-
 	int update(AuthPermDto dto);
 
 	int delete(AuthPermDto dto);
