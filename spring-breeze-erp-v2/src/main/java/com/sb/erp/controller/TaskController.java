@@ -35,6 +35,10 @@ public class TaskController {
 	 @PostMapping("/task_create") 
 	 public String create(TaskDto dto,RedirectAttributes rttr, HttpSession session) {
 		 Integer comId = (Integer) session.getAttribute("comId");
+		 
+		 // 하드코딩 이거지워
+		 if (comId == null) comId = 1;
+		 
 		 dto.setComId(comId); //해당회사의
 		 ProjectMemberDto member = memberservice.selectOne(dto.getPmId());
 		 if (member == null) { //방어코드
@@ -42,7 +46,7 @@ public class TaskController {
 			 return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();
 		 }
 		 
-		 dto.setPmIdName(member.getEmpName());
+		//  dto.setPmIdName(member.getEmpName());
 		 
 		 String result="태스크 등록 실패";
 		 if(service.insert(dto)>0) {result="태스크 등록 성공";}
