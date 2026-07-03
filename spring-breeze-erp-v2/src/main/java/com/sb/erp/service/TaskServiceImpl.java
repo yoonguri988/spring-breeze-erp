@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.TaskMapper;
 import com.sb.erp.dto.TaskDto;
+import com.sb.erp.dto.TaskSearchDto;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -15,8 +16,9 @@ public class TaskServiceImpl implements TaskService {
 	//태스크 추가
 	@Override public int insert(TaskDto dto) {  return dao.insert(dto); }
 
-	//태스크 참여 명단 조회
-	@Override public List<TaskDto> selectAll(int pro_id) {  return dao.selectAll(pro_id); }
+	/*paging*/
+	@Override public List<TaskDto> selectAll(TaskSearchDto search) {  return dao.selectAll(search); }
+	@Override public int selectCnt(int pro_id) {  return dao.selectCnt(pro_id); }
 	
 	//태스크 삭제
 	@Override public int delete(int task_id) {  return dao.delete(task_id); }
@@ -29,5 +31,7 @@ public class TaskServiceImpl implements TaskService {
 	
 	//태스크 수정뷰
 	@Override public TaskDto taskEditView(int task_id) { return dao.select(task_id); }
+	
+	
 	
 }

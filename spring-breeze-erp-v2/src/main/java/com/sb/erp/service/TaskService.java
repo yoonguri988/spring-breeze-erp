@@ -3,6 +3,7 @@ package com.sb.erp.service;
 import java.util.List;
 
 import com.sb.erp.dto.TaskDto;
+import com.sb.erp.dto.TaskSearchDto;
 
 public interface TaskService {
 	
@@ -10,7 +11,10 @@ public interface TaskService {
 	public int insert(TaskDto dto);
 	
 	//태스크 참여 명단 조회
-	public List<TaskDto> selectAll(int pro_id);
+	public List<TaskDto> selectAll(TaskSearchDto search);
+	
+	//태스크 개수 카운트
+	public int selectCnt(int proId);
 	
 	//태스크 삭제
 	public int delete(int task_id);
