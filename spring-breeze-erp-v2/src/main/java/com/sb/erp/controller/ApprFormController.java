@@ -73,22 +73,25 @@ public class ApprFormController {
 	// required = false : 필수 값이 아니라고 설정
     // defaultValue = "" : 값이 안 넘어오면 디폴트값 지정
 	@RequestMapping( value = "/appr/list_form", method = RequestMethod.GET)
-	public String searchForms(ApprFormSearchDto search, Model model){
-		//1) 검색 조건이 null
-		boolean isEmpty = !search.hasSearchCondition();
+	public String searchForms(ApprFormSearchDto search, Model model,
+							  @RequestParam( value = "page", defaultValue = "1") int page){
 		
 		int totalCnt = 0;
 	    List<ApprFormDto> list = new ArrayList<>();
 	    PagingUtil paging;
 	    
-	    //2) 검색 조건이 null, 쿼리 실행 자체를 안함
-	    if(isEmpty) {
-	    	paging = new PagingUtil(0, search.getPstartno());
-	    }else {
+	    //2) 검색 조건이 null이 아닐때 실행
+	    if(search.hasSearchCondition() || page > 1) {
+	    	
 	    	// 전체 양식 수
 	    	totalCnt = appr.listFormCnt(search);
-	    	paging = new PagingUtil(totalCnt, search.getPstartno());
+	    	paging = new PagingUtil(totalCnt, page);
+	    	int offset = (page - 1) * paging.getOnepagelist();
+	    	search.setPstartno(offset);
+	    	
 	    	list = appr.selectFormList(search);
+	    } else {
+	    	paging = new PagingUtil(0, page);
 	    }
 		
 		// jsp로 데이터 보내기

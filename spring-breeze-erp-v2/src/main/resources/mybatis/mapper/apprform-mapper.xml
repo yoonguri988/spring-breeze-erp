@@ -117,7 +117,7 @@
 		left outer join
 			company c on f.com_id = c.com_id
 		<where>
-			<if test="comId != null and comId != ''">
+			<if test="comId != null">
 				and f.com_id = #{comId}
 			</if>
 			<if test="forStatus != null">
@@ -146,11 +146,11 @@
 				and for_status = #{forStatus}
 			</if>
 			<if test="keyword != null and keyword != ''">
-				and (
-					for_code like '%' || #{keyword} || '%'
-					or for_title like '%' ||  #{keyword} || '%'
-				)
-			</if>
+	            and (
+	                for_code like '%' || #{keyword} || '%'
+	                or for_title like '%' || #{keyword} || '%'
+	            )
+	        </if>
 		</where>
 	</select>
 	
@@ -166,8 +166,10 @@
 				and for_status = #{forStatus}
 			</if>
 			<if test="keyword != null and keyword != ''">
+			and(
 				for_code like '%' || #{keyword} || '%'
 				or for_title like '%' ||  #{keyword} || '%'
+			)
 			</if>
 		</where>
 		order by for_id desc offset #{pstartno} rows fetch next 10 rows only

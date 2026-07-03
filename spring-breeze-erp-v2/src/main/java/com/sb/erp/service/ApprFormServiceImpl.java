@@ -60,7 +60,6 @@ public class ApprFormServiceImpl implements ApprFormService {
 
 	@Override
 	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto) {
-		dto.setPstartno((dto.getPstartno()-1)*dto.getOnepagelist());
 		return dao.selectFormList(dto);
 	}
 

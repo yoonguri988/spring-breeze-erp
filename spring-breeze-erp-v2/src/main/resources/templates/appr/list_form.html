@@ -38,7 +38,7 @@
 						<div class="sb-search">
 							<i class="bi bi-search"></i>
 							<input type="text" id="keyword" name="keyword"
-								   placeholder="양식 코드 또는 제목" th:value="${param.keyword}">
+								   placeholder="양식 코드 또는 제목" th:value="${search.keyword}">
 						</div>
 					</div>
 					<!--  검색 조건2 : 회사명 또는 사업자 번호 검색 -->		
@@ -46,9 +46,9 @@
 						<label for="comName" class="sb-form-label">회사</label>
 						<div class="sb-search">
 							<i class="bi bi-building"></i>
-							<input type="text" id="comName" name="comName" th:value="${param.comName}"
+							<input type="text" id="comName" name="comName" th:value="${search.comName}"
 								   placeholder="회사명" autocomplete="off" />
-							<input type="hidden" id="comId" name="comId" th:value="${param.comId}"/>
+							<input type="hidden" id="comId" name="comId" th:value="${search.comId}"/>
 						</div>
 						<div class="ac-list" id="acList"></div>
 					</div>
@@ -56,19 +56,24 @@
 					<div class="col-md-4">
 						<label for="forStatus" class="sb-form-label">활성화 여부</label>
 						<select class="form-select" id="forStatus" name="forStatus">
-							<option value="" th:selected="${param.forStatus == null or #strings.inEmpty(param.forStatus)}">전체</option>
-							<option value="true" th:selected="${param.forStatus != null and param.forStatus[0] == 'true'}">활성화</option>
-							<option value="false" th:selected="${param.forStatus != null and param.forStatus[0] == 'false'}">비활성화</option>
+							<option value="" th:selected="${search.forStatus == null}">전체</option>
+							<option value="true" th:selected="${search.forStatus == true}">활성화</option>
+							<option value="false" th:selected="${search.forStatus == false}">비활성화</option>
 						</select>
 					</div>
-					
- 					<div class="d-flex justify-content-end gap-2 mt-3">
-	                    <button type="submit" class="btn btn-sb-soft btn-sm">
-							<i class="bi bi-search"></i> 검색
-						</button>					
-			            <a th:if="${param.keyword != null and !#strings.isEmpty(param.keyword)}"
-			               class="btn btn-ghost btn-sm"
-			               th:href="@{/appr/list_form}">초기화</a>
+					<div class="col-12 d-flex justify-content-between align-items-center mt-3">
+						<div id="search-error" class="text-danger small fw-bold"
+							 style="display : none;">
+							 <i class="bi bi-exclamation-circle-fill"></i> 키워드 또는 회사 중 하나는 입력해야 합니다.
+						</div>
+	 					<div class="ms-auto d-flex gap-2">
+		                    <button type="submit" class="btn btn-sb-soft btn-sm">
+								<i class="bi bi-search"></i> 검색
+							</button>					
+				            <a th:if="${search.keyword != null and !#strings.isEmpty(search.keyword)}"
+				               class="btn btn-ghost btn-sm"
+				               th:href="@{/appr/list_form}">초기화</a>
+		                </div>
 	                </div>
 				</div>
 			</form>
@@ -103,7 +108,8 @@
 						
 						<tr th:unless="${#lists.isEmpty(list)}"
 							th:each="item, status : ${list}">
-							<td class="num text-faint" th:text="${status.count}">1</td>
+							<td class="num text-faint"
+							    th:text="${paging.listtotal - ((paging.current -1) * paging.onepagelist) - status.index}">1</td>
 							<td>
 								<a th:href="@{/appr/detail_form(forId=${item.forId})}"
 								   class="sb-table__name"
@@ -134,17 +140,17 @@
         <ul class="pagination" id="pagingUl">
             <li class="page-item" th:if="${paging.start > 1}">
                 <a class="page-link"
-                   th:href="@{/appr/list_form(keyword=${param.keyword}, company=${param.comId}, forStatus=${param.forStatus}, page=${paging.start -1})}">이전</a>
+                   th:href="@{/appr/list_form(keyword=${search.keyword}, comId=${search.comId}, forStatus=${search.forStatus}, page=${paging.start -1})}">이전</a>
             </li>
             <th:block th:each="i : ${#numbers.sequence(paging.start, paging.end)}">
 	            <li class="page-item" th:classappend="${paging.current == i} ? 'active' : ''">
 	                <a class="page-link"
-	                   th:href="@{/appr/list_form(keyword=${param.keyword}, company=${param.comId}, forStatus=${param.forStatus}, page=${i})}"
+	                   th:href="@{/appr/list_form(keyword=${search.keyword}, comId=${search.comId}, forStatus=${search.forStatus}, page=${i})}"
 	                   th:text="${i}"></a>
 	            </li>
 			</th:block>
-            <li class="page-item">
-                <a class="page-link" th:href="@{/appr/list_form(keyword=${param.keyword}, company=${param.comId}, forStatus=${param.forStatus}, page=${paging.end +1})}">다음</a>
+            <li class="page-item" th:if="${paging.end < paging.pagetotal}">
+                <a class="page-link" th:href="@{/appr/list_form(keyword=${search.keyword}, comId=${search.comId}, forStatus=${search.forStatus}, page=${paging.end +1})}">다음</a>
             </li>
         </ul>
     </div>
@@ -228,87 +234,57 @@
 	
 	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
 	
-	/* 이부분 2차때 다시 설계해서 사용해...볼수있게	
-	/////////////////////// 검색해서 나온 데이터 전송 ///////////////////////
-	
-	function searchForm(page = 1){
-		let comId = document.getElementById("comId").value.trim();
-		let forStatus = document.getElementById("forStatus").value;
-		let keyword = document.getElementById("keyword").value;
+	///////////////////// 키워드,회사 미입력시 입력 유도 /////////////////////
+    
+	window.addEventListener("load", function(){
+		let searchForm = document.getElementById("searchForm");
+		let keyword = document.getElementById("keyword");
+		let comName = document.getElementById("comName");
+		let searchErr = document.getElementById("search-error");
 		
-		let url = "${pageContext.request.contextPath}/searchForms"
-				+ "?keyword=" + encodeURIComponent(keyword)
-				+ "&company=" + comId
-				+ "&forStatus=" + forStatus
-				+ "&page=" + page;
-		
-		fetch(url)
-		.then(response => response.json())
-		.then(data => {
-			console.log(data);
-			console.log(data.paging);
-			updateTable(data.list);
-			updatePaging(data.paging);
+		searchForm.addEventListener("submit", function(e){
+			let keywordVal = keyword.value.trim();
+			let comNameVal = comName.value.trim();
+			
+			// 둘다 비어있는 경우
+			if( keywordVal === "" && comNameVal === ""){
+				// 전송 막기
+				e.preventDefault();
+				
+				// 테두리 강조 및 안내 문구 표시
+				keyword.style.borderColor = "var(--sb-red)";
+				keyword.style.boxShadow = "0 0 0 3px rgba(220, 38, 38, .12)";
+				comName.style.borderColor = "var(--sb-red)";
+				comName.style.boxShadow = "0 0 0 3px rgba(220, 38, 38, .12)";
+				
+				searchErr.style.display = "block";
+				keyword.focus(); // 키워드로 입력 커서 넘기기
+			}
+			else{
+				// 입력되었다면 정상적으로 초기화후 서브밋
+				keyword.style.borderColor = "";
+				keyword.style.boxShadow = "";
+				comName.style.borderColor = "";
+				comName.style.boxShadow = "";
+			}
 		})
-	}
-	
-	/////////////////////// 검색해서 나온 데이터 전송 ///////////////////////
-	
-	
-	/////////////////////// 검색해서 나온 결과 출력 ///////////////////////
-	
-	function updateTable(data){
-		// 출력할 공간
-		let tbody = document.getElementById("formTbody");
 		
-		tbody.innerHTML = "";
+		// 둘중 하나라도 입력할시 정상적으로 돌리기
+		keyword.addEventListener("input", clearError);
+		comName.addEventListener("input", clearError);
 		
-		if(data.length === 0){ // 없을때 출력할것
-			tbody.innerHTML = "<tr><td colspan='8' class='text-center'>검색 결과가 없습니다.</td></tr>"
-			return;
+		function clearError(){ // 저안에 집어넣기 더러워서 따로뺌
+			if(keyword.value.trim() !== "" || comName.value.trim() !== ""){
+				keyword.style.borderColor = "";
+				keyword.style.boxShadow = "";
+				comName.style.borderColor = "";
+				comName.style.boxShadow = "";
+				searchErr.style.display = "none";
+			}
 		}
-		
-		data.forEach((item, index) => {
-			let tr = document.createElement("tr"); // tr태그 생성
-			
-			let isActive = (item.forStatus === true);
-			
-			// 코드 더러워서 위에서 벳지 처리
-			let badgeClass = isActive ? 'bg-success' : 'bg-secondary';
-			let badgeText = isActive ? '활성화' : '비활성화'
-
-			tr.innerHTML = `
-			<td>\${index + 1}</td>
-			<td><a href="${pageContext.request.contextPath}/appr/update_form?forId=\${item.forId}">
-			\${item.forCode}</a></td>
-			<td>\${item.forTitle}</td>
-			<td>\${item.comName}</td>
-			<td><span class="badge \${badgeClass}">\${badgeText}</span></td>
-			<td>\${item.forCreated}</td>
-			<td>\${item.forUpdated}</td>
-			`;
-			
-			tbody.appendChild(tr); // 위 데이터 다 넣어서 보내기
-		});
-	}
+	});
 	
-	/////////////////////// 검색해서 나온 결과 출력 ///////////////////////
-	
-	/////////////////////////   페이징 기능    /////////////////////////
-	
-	function updatePaging(paging){
-		
-	}
-
-    /////////////////////////   페이징 기능    /////////////////////////
-    */
-    function checkForm(){
-    	var keyword = document.getElementById("keyword");
-    	var comName = document.getElementById("comName");
-    	if(keyword.value.trim() == "" && comName.value.trim() == ""){
-    		alert("검색 조건 하나이상은 포함해야한다.");
-    	}	
-    }
+	///////////////////// 키워드,회사 미입력시 입력 유도 /////////////////////
 </script>
 </main>
 </body>
