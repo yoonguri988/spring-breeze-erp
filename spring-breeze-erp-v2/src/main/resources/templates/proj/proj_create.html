@@ -55,7 +55,7 @@
       <div class="mb-4">
         <label for="reg_date" class="sb-form-label">등록일</label>
         <input type="text" id="reg_date" class="form-control"
-               th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
+               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
                readonly style="max-width:200px;background:#fafbfc;" />
       </div>
 

@@ -66,9 +66,9 @@ window.addEventListener("load",function(){
             </span>
           </td></tr>
           <tr><th>생성자</th><td th:text="${dto.empName}"></td></tr>
-          <tr><th>시작일</th><td class="tnum" th:text="${#dates.format(dto.startDate, 'yyyy-MM-dd')}"></td></tr>
-		  <tr><th>종료일</th><td class="tnum" th:text="${#dates.format(dto.endDate, 'yyyy-MM-dd')}"></td></tr>
-		  <tr><th>등록일</th><td class="tnum" th:text="${#dates.format(dto.createdAt, 'yyyy-MM-dd')}"></td></tr>
+          <tr><th>시작일</th><td class="tnum" th:text="${#temporals.format(dto.startDate, 'yyyy-MM-dd')}"></td></tr>
+		  <tr><th>종료일</th><td class="tnum" th:text="${#temporals.format(dto.endDate, 'yyyy-MM-dd')}"></td></tr>
+		  <tr><th>등록일</th><td class="tnum" th:text="${#temporals.format(dto.createdAt, 'yyyy-MM-dd')}"></td></tr>
         </table>
       </div>
     </div>
@@ -89,14 +89,14 @@ window.addEventListener("load",function(){
           </thead>
           <tbody>
             <tr th:each="task, status : ${list}">
-                <td class="sb-table__muted" th:text="${paging.listtotal-(paging.current-1)*paging.onepagelist+status.index+1}"></td>
+                <td class="sb-table__muted" th:text="${status.count}"></td>
                 <td><a th:href="@{/proj/task_detail(task_id=${task.taskId})}" class="sb-table__name" th:text="${task.taskName}"></a></td>
                 <td>
                   <span th:class="${task.taskStatus=='DONE'} ? 'sb-badge sb-badge--green' : (${task.taskStatus=='DOING'} ? 'sb-badge sb-badge--blue' : 'sb-badge sb-badge--gray')">
                     <span class="pip"></span><span th:text="${task.taskStatus}"></span>
                   </span>
                 </td>
-                <td class="sb-hr-cell tnum" th:text="${#dates.format(task.taskCreatedAt, 'yyyy-MM-dd')}"></td>
+                <td class="sb-hr-cell tnum" th:text="${#temporals.format(task.createdAt, 'yyyy-MM-dd')}"></td>
             </tr>
           </tbody>
         </table>

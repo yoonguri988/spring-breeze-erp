@@ -36,10 +36,10 @@ window.addEventListener("load",function(){
  	<input type="hidden" name="searched" value="true">
     <div class="sb-field sb-field--search">
       <i class="bi bi-search"></i>
-      <input type="text" name="keyword" placeholder="프로젝트명 검색" th:value="${param.keyword}">
+      <input type="text" name="keyword" placeholder="프로젝트명 검색" th:value="${search.keyword}">
     </div>
 
-    <input type="hidden" name="proStatus" id="proStatus" th:value="${param.proStatus}">
+    <input type="hidden" name="proStatus" id="proStatus" th:value="${search.proStatus}">
 
     <div class="sb-segment">
       <a href="#" onclick="setStatus(''); return false;" th:classappend="${param.proStatus == null or #strings.isEmpty(param.proStatus)} ? 'active' : ''">전체</a>
@@ -84,8 +84,8 @@ window.addEventListener("load",function(){
               <a th:href="@{/proj/proj_member(pro_id=${dto.proId})}" class="sb-iconbtn" style="width:28px;height:28px;font-size:14px;display:inline-grid;"><i class="bi bi-people"></i></a>
               [[${dto.memberCnt}]]명
             </td>
-            <td class="sb-hr-cell tnum" th:text="${#dates.format(dto.startDate, 'yyyy-MM-dd')} + ' ~ ' + ${#dates.format(dto.endDate, 'yyyy-MM-dd')}"></td>
-            <td class="sb-hr-cell tnum" th:text="${#dates.format(dto.createdAt, 'yyyy-MM-dd')}"></td>
+            <td class="sb-hr-cell tnum" th:text="${#temporals.format(dto.startDate, 'yyyy-MM-dd')} + ' ~ ' + ${#temporals.format(dto.endDate, 'yyyy-MM-dd')}"></td>
+            <td class="sb-hr-cell tnum" th:text="${#temporals.format(dto.createdAt, 'yyyy-MM-dd')}"></td>
         </tr>
       </tbody>
     </table>
@@ -94,13 +94,13 @@ window.addEventListener("load",function(){
 <div class="d-flex justify-content-center py-3" style="border-top:1px solid var(--sb-border)" th:if="${paging != null}">
     <ul class="pagination pagination-sm mb-0">
       <li class="page-item" th:if="${paging.start > paging.bottomlist}">
-        <a th:href="@{/proj/proj_list(pstartno=${paging.start-1})}" class="page-link">이전</a>
+        <a th:href="@{/proj/proj_list(pstartno=${paging.start-1}, keyword=${param.keyword}, proStatus=${param.proStatus}, startDate=${param.startDate}, endDate=${param.endDate}, searched=true)}" class="page-link">이전</a>
       </li>
       <li class="page-item" th:each="i : ${#numbers.sequence(paging.start, paging.end)}" th:classappend="${i==paging.current} ? 'active' : ''">
-        <a th:href="@{/proj/proj_list(pstartno=${i})}" class="page-link" th:text="${i}"></a>
+        <a th:href="@{/proj/proj_list(pstartno=${i}, keyword=${param.keyword}, proStatus=${param.proStatus}, startDate=${param.startDate}, endDate=${param.endDate}, searched=true)}" class="page-link" th:text="${i}"></a>
       </li>
       <li class="page-item" th:if="${paging.pagetotal > paging.end}">
-        <a th:href="@{/proj/proj_list(pstartno=${paging.end+1})}" class="page-link">다음</a>
+        <a th:href="@{/proj/proj_list(pstartno=${paging.end+1}, keyword=${param.keyword}, proStatus=${param.proStatus}, startDate=${param.startDate}, endDate=${param.endDate}, searched=true)}" class="page-link">다음</a>
       </li>
     </ul>
   </div>

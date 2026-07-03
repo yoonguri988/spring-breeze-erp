@@ -46,12 +46,12 @@
         <div class="col-md-4">
           <label for="start_date" class="sb-form-label">시작일</label>
           <input type="date" id="start_date" name="startDate" class="form-control"
-                 th:value="${#dates.format(dto.startDate, 'yyyy-MM-dd')}"/>
+                 th:value="${#temporals.format(dto.startDate, 'yyyy-MM-dd')}"/>
         </div>
         <div class="col-md-4">
           <label for="end_date" class="sb-form-label">종료일</label>
           <input type="date" id="end_date" name="endDate" class="form-control"
-                 th:value="${#dates.format(dto.endDate, 'yyyy-MM-dd')}"/>
+                 th:value="${#temporals.format(dto.endDate, 'yyyy-MM-dd')}"/>
         </div>
       </div>
 
