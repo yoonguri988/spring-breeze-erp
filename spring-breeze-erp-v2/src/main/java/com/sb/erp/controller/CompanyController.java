@@ -27,6 +27,7 @@ import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.StatsComDto;
 import com.sb.erp.dto.StatsDeptDto;
 import com.sb.erp.exception.FileUploadException;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.CompanyService;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
@@ -122,7 +123,6 @@ public class CompanyController {
 	@GetMapping("/edit")
 	public String editForm(int comId, Model model) {
 		model.addAttribute("com", service.selectOneById(comId));
-		model.addAttribute("items", deptService.selectOrgTree(comId));
 		return "/com/edit";
 	}
 	
@@ -172,18 +172,19 @@ public class CompanyController {
 	public Map<String, Object> delete(Authentication auth, EmpDto dto) {
 	    Map<String, Object> result = new HashMap<>();
 	    
-	    EmpDto emp = empService.selectByEmpEmail(auth.getName());
+//	    EmpDto emp = empService.selectByEmpEmail(auth.getName());
 	    //1. 로그인한 사용자가 관리자가 아닌 경우
 	    //1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-	    AuthPermDto root = permService.selectByEmpId(emp.getEmpId());
+//	    AuthPermDto root = permService.selectByEmpId(emp.getEmpId());
 	    
 	    // ROOT(시스템 관리자) 아닌 경우
-	    if(!root.getAutName().equals("ROOT")) {
-	        throw new IllegalStateException("시스템 관리자 외에는 회사를 삭제할 수 없습니다.");
-	    }
+//	    if(!root.getAutName().equals("ROOT")) {
+//	        throw new IllegalStateException("시스템 관리자 외에는 회사를 삭제할 수 없습니다.");
+//	    }
 
 	    //2. 관리자가 입력한 비밀번호가 일치 하지 않을 경우
-	    dto.setEmpId(emp.getEmpId());
+	    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+	    dto.setEmpId(user.getUser().getEmpId());
 	    boolean matched = empService.matchPassword(dto);
 	    if (!matched) {
 	        result.put("success", false);
