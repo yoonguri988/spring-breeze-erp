@@ -19,7 +19,7 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public List<CompanyDto> list(ComSearchDto dto) {
 		// keyword, onepagelist, (pstarValue-1)*onepagelist
-		dto.setPstarValue((dto.getPstarValue()-1)*dto.getOnepagelist());
+		dto.setPstartno((dto.getPstartno()-1)*dto.getOnepagelist());
 		return dao.selectAll(dto);
 	}
 

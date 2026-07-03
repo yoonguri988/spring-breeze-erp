@@ -1,6 +1,7 @@
 package com.sb.erp.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,6 +39,7 @@ import com.sb.erp.util.PagingUtil;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
+@RequestMapping("/com")
 public class CompanyController {
 	@Autowired CompanyService service;
 	@Autowired EmpService empService;
@@ -43,13 +47,13 @@ public class CompanyController {
 	@Autowired DeptService deptService;
 	
 	// 회사 등록
-	@RequestMapping(value="/com/add", method= RequestMethod.GET)
+	@GetMapping("/add")
 	public String addForm() {
 		return "/com/form";
 	}
 	
 	//회사 등록 기능
-	@RequestMapping(value="/com/add", method= RequestMethod.POST)
+	@PostMapping("/add")
 	public String add(CompanyDto dto, 
 			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
 			RedirectAttributes rttr) {
@@ -70,7 +74,7 @@ public class CompanyController {
 	}
 	
 	// 회사 사업자 번호 중복 체크 (ajax)
-	@RequestMapping(value="/com/checkBizNo", method = RequestMethod.GET)
+	@GetMapping("/checkBizNo")
 	@ResponseBody
 	public Map<String, Object> checkBizNo(String bizNo){
 		Map<String, Object> res = new HashMap<>();
@@ -83,35 +87,39 @@ public class CompanyController {
 	}
 	
 	// 회사 목록 조회
-	@RequestMapping(value="/com/list", method= RequestMethod.GET)
-	public String list(ComSearchDto search, Model model, HttpSession session) {
-		Integer empId = (Integer) session.getAttribute("empId");
-		//만약 로그인 사용자가 시스템 관리자가 아닌 경우
-		//1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-	    AuthPermDto root = permService.selectByEmpId(empId);
-		
-	    if(!root.getAutName().equals("ROOT")) return "redirect:/com/my";
-		
+	@GetMapping("/list")
+	public String list(ComSearchDto search, Model model) {
 		int listtotal = service.listTotal(search);
-		PagingUtil paging = new PagingUtil(listtotal, search.getPstarValue(), search.getOnepagelist(), 10);
+		// 검색 조건이 null
+		boolean isEmpty = !search.hasSearchCondition();
+		
+		List<CompanyDto> list = new ArrayList<>();
+		PagingUtil paging;
+		
+		if(isEmpty) {
+	    	paging = new PagingUtil(0, search.getPstartno());
+		}else {
+			paging = new PagingUtil(listtotal, search.getPstartno(), search.getOnepagelist(), 10);
+			list = service.list(search);
+		}
+		
 		//통계 데이터
 		StatsComDto stats = service.selectStats();
-		
 		model.addAttribute("stats", stats);
 		model.addAttribute("paging", paging);
-		model.addAttribute("items", service.list(search));
+		model.addAttribute("items", list);
 		return "/com/list";
 	}
 	
 	// 검색 조회 목록 상위 5개 (ajax)
-	@RequestMapping(value="/com/suggest", method=RequestMethod.GET)
+	@GetMapping("/suggest")
 	@ResponseBody
 	public List<CompanyDto> suggest(@RequestParam("keyword") String keyword) {
 	    return service.getSuggest(keyword);
 	}
 	
 	// 회사 수정 폼
-	@RequestMapping(value="/com/edit", method = RequestMethod.GET)
+	@GetMapping("/edit")
 	public String editForm(int comId, Model model) {
 		model.addAttribute("com", service.selectOneById(comId));
 		model.addAttribute("items", deptService.selectOrgTree(comId));
@@ -119,7 +127,7 @@ public class CompanyController {
 	}
 	
 	// 회사 수정 기능
-	@RequestMapping(value="/com/edit", method = RequestMethod.POST)
+	@PostMapping("/edit")
 	public String edit(CompanyDto dto, 
 			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
 			RedirectAttributes rttr) {
@@ -151,7 +159,7 @@ public class CompanyController {
 	}
 	
 	// 회사 삭제 폼
-	@RequestMapping(value="/com/delete", method = RequestMethod.GET)
+	@GetMapping("/delete")
 	public String deleteModal(@RequestParam("comId") Integer comId, Model model) {
 	    CompanyDto dto = service.selectOneById(comId);
 	    model.addAttribute("com", dto);
@@ -159,7 +167,7 @@ public class CompanyController {
 	}
 	
 	// 회사 삭제 기능
-	@RequestMapping(value="/com/delete", method = RequestMethod.POST)
+	@PostMapping("/delete")
 	@ResponseBody
 	public Map<String, Object> delete(Authentication auth, EmpDto dto) {
 	    Map<String, Object> result = new HashMap<>();
@@ -189,7 +197,7 @@ public class CompanyController {
 	}
 	
 	// 회사 정보 상세 조회
-	@RequestMapping(value="/com/detail", method=RequestMethod.GET)
+	@GetMapping("/detail")
 	public String myDetail(@RequestParam("comId") int comId,
 						   Model model) {
 		//통계 데이터
@@ -204,7 +212,7 @@ public class CompanyController {
 	}
 	
 	// 내 회사 정보 조회
-	@RequestMapping(value="/com/my", method=RequestMethod.GET)
+	@GetMapping("/my")
 	public String mycom(Principal prinipal, HttpSession session, Model model) {
 		Integer empId = (Integer) session.getAttribute("empId");
 		Integer comId = (Integer) session.getAttribute("comId");

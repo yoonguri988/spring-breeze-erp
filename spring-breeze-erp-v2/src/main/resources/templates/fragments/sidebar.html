@@ -77,8 +77,8 @@
       Thymeleaf 에서는 sec:authorize(조건) + th:with(변수 추출)를 한 태그에서 같이 처리 가능.
     -->
     <div class="sb-sidebar__foot" sec:authorize="isAuthenticated()"
-         th:with="empName=${#authentication.principal.dto.empName},
-                   posName=${#authentication.principal.dto.posName}">
+         th:with="empName=${#authentication.principal.user.empName},
+                   posName=${#authentication.principal.user.posName}">
         <div class="sb-userchip" data-bs-toggle="dropdown">
             <div class="sb-avatar" th:text="${#strings.substring(empName, 0, 1)}">S</div>
             <div class="sb-userchip__meta">

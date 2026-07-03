@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.EmpSearchDto;
-import com.sb.erp.security.CustomUser;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
 import com.sb.erp.service.PosService;
@@ -31,8 +31,8 @@ public class EmpController {
 	
 	// 로그인한 유저의 com_id 가져오기 (컨트롤러 내부 공통 메서드)
 	private int getCurrentComId(Authentication authentication) {
-		CustomUser principal = (CustomUser) authentication.getPrincipal();
-		return principal.getDto().getComId();
+		CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+		return principal.getUser().getComId();
 	}
 	
 	// 조회 목록 + 페이징 유틸 이용하기
