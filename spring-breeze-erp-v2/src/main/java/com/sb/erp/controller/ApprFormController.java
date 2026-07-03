@@ -118,7 +118,7 @@ public class ApprFormController {
 	
 	// 양식 상세보기
 	@RequestMapping( value = "/appr/detail_form", method = RequestMethod.GET)
-	public String detail(int forId, Model model) {
+	public String detail(ApprFormDto forId, Model model) {
 		
 		ApprFormDto dto = appr.selectFormAll(forId);
 		dto.setComName(appr.getCompanyName(dto.getComId()));
@@ -129,7 +129,7 @@ public class ApprFormController {
 	
 	// 양식 수정 폼
 	@RequestMapping( value = "/appr/update_form", method = RequestMethod.GET)
-	public String update(int forId, Model model) {
+	public String update(ApprFormDto forId, Model model) {
 		
 		// 클릭한 해당 양식의 id값으로 데이터 담아서 jsp value들 채울 용도
 		ApprFormDto dto = appr.selectFormAll(forId);
@@ -152,8 +152,8 @@ public class ApprFormController {
 	
 	// 양식 삭제 처리
 	@RequestMapping("/appr/delete")
-	public String delete(int forId) {
-		appr.deleteForm(forId);
+	public String delete(ApprFormDto dto) {
+		appr.deleteForm(dto);
 		return "appr/list_form";
 	}
 	

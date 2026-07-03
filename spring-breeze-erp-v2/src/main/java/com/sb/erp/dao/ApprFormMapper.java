@@ -20,10 +20,10 @@ public interface ApprFormMapper {
 	public int listFormCnt(ApprFormSearchDto dto);
 	
 	// 양식 파트
-	public ApprFormDto selectFormAll(int forId);
+	public ApprFormDto selectFormAll(ApprFormDto dto);
 	public int insertForm(ApprFormDto dto);
 	public int updateForm(ApprFormDto dto);
-	public int deleteForm(int forId);
+	public int deleteForm(ApprFormDto dto);
 	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto);
 	public String findByCode(ApprFormDto dto);
 	

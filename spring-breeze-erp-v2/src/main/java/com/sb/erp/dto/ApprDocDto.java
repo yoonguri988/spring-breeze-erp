@@ -13,8 +13,9 @@ public class ApprDocDto {
 	private String docTitle;
 	private String docContent;
 	private String docStatus;
-	private String docCreated;
-	private String docUpdated;
+	private String createdAt;
+	private String updatedAt;
+	private boolean isImportant;
 	
 	private String docName;
 	private List<ApprLineDto> apprLines;

@@ -32,8 +32,8 @@ public class ApprFormServiceImpl implements ApprFormService {
 	///////////////////////// 양식 관련 기능 //////////////////////////////////
 	
 	@Override
-	public ApprFormDto selectFormAll(int forId) {
-		return dao.selectFormAll(forId);
+	public ApprFormDto selectFormAll(ApprFormDto dto) {
+		return dao.selectFormAll(dto);
 	}
 
 	@Override
@@ -54,8 +54,8 @@ public class ApprFormServiceImpl implements ApprFormService {
 	}
 
 	@Override
-	public int deleteForm(int forId) {
-		return dao.deleteForm(forId);
+	public int deleteForm(ApprFormDto dto) {
+		return dao.deleteForm(dto);
 	}
 
 	@Override
