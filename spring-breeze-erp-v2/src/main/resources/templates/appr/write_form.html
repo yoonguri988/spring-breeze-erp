@@ -28,7 +28,7 @@
 	 </div>
 
 	<form th:action="@{/appr/write_form}" method="post" onsubmit="return checkForm()">
-		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+		<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 	
 		<div class="sb-card">
 			<div class="sb-card__head">
@@ -182,17 +182,17 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 			
 		});
 		// 양식 중복 인데 강제로 작성 눌렀을시 제어
-		if(!valid){
-			alert("중복된 양식코드는 사용할수 없습니다.");
-			document.getElementById("forCode").focus();
-			return false;
-		}
-		
 		if(!result){
 			if(focusElement){
 				focusElement.focus();
 			}
 				return false;
+		}
+
+		if(!valid){
+			alert("중복된 양식코드는 사용할수 없습니다.");
+			document.getElementById("forCode").focus();
+			return false;
 		}
 
 		return true;
@@ -228,10 +228,8 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 			}
 			
 			if(value !== ""){
-				fetch("${pageContext.request.contextPath}/checkCode?code="
-						+ encodeURIComponent(value)
-						+ "&comId="
-						+ encodeURIComponent(comIdVal))
+				//`/searchCompany?company=${encodeURIComponent(value)}`
+				fetch(`/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}`)
 				.then( response => response.json() )
 				.then( data => {
 					
@@ -284,7 +282,7 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 			
 			if(value !== "") {
 				// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
-				fetch("${pageContext.request.contextPath}/searchCompany?company=" + encodeURIComponent(value))
+				fetch(`/searchCompany?company=${encodeURIComponent(value)}`)
 				.then(response => response.json())
 				.then(data => {
 					console.log(data);

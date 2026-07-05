@@ -27,7 +27,7 @@
 		</div>
 	</div>
 	
-	<div class="row g-8">
+	<div class="row g-4">
 		<div class="col-lg-9">
 			<div class="sb-card">
 				<div class="sb-card__head">
@@ -35,43 +35,32 @@
 				</div>
 				
 				<div class="sb-card__body">
-					<div class="row g-4 mb-4">
+					<div class="row g-4 mb-4 border-bottom pb-4">
 						<div class="col-md-6">
-							<label class="sb-form-label">양식 코드</label>
-							<input type="text" class="form-control-plaintext fw-semibold text-dark px-2 bg-light border rounded"
-								   th:value="${dto.forCode}" readonly />
+							<label class="sb-form-label text-soft">양식 코드</label>
+							<div class="fs-5 fw-bold text-dark mt-1"
+								 th:text="${dto.forCode}">TEST-001</div>
 						</div>
 						<div class="col-md-6">
-							<label class="sb-form-label">회사</label>
-							<div class="sb-search" style="max-width: 100%; background-color: #f8f9fa;">
+							<label class="sb-form-label text-soft">회사</label>
+							<div class="d-flex align-items-center text-dark fw-semibold mt-1">
 								<i class="bi bi-building"></i>
-								<input type="text" class="form-control-plaintext text-dark ps-5" 
-									   th:value="${dto.comName}" readonly />
+								<span th:text="${dto.comName}">회사명</span>
 							</div>
 						</div>
 					</div>
 
 					<div class="row g-4 mb-4">
-						<div class="col-md-6">
-							<label class="sb-form-label">양식 제목</label>
-							<input type="text" class="form-control-plaintext text-dark px-2 bg-light border rounded"
-								   th:value="${dto.forTitle}" readonly />
-							</div>
-						<div class="col-md-6">
-							<label class="sb-form-label">활성화 여부</label>
-							<div class="form-check form-switch mt-2">
-								<input class="form-check-input sb-checkbox" type="checkbox" 
-									   style="width: 40px; height: 20px;"
-									   th:checked="${dto.forStatus}" disabled>
-								<label class="form-check-label text-dark fw-semibold ms-2" style="user-select: none;"
-									   th:text="${dto.forStatus} ? '활성화' : '비활성화' ">
-								</label>
+						<div class="col-md-12">
+							<label class="sb-form-label text-soft">양식 제목</label>
+							<div class="fs-5 fw-bold text-dark mt-1"
+								 th:text="${dto.forTitle}">병가신청서
 							</div>
 						</div>
 					</div>
-
-					<div class="mb-4">
-						<label class="sb-form-label">양식 내용</label>
+					
+					<div class="mb-4 mt-2">
+						<label class="sb-form-label text-soft">양식 내용 미리보기</label>
 						<textarea class="form-control" rows="14" 
 								  style="font-family: 'Courier New', Courier, monospace; background-color: #fafafa; resize: none;" 
 								  th:text="${dto.forContent}"
@@ -79,14 +68,14 @@
 					</div>
 					
 					<div class="sb-divider"></div>
-					
+
 					<div class="d-flex justify-content-end gap-2">
 						<button type="button" class="btn btn-ghost" 
 								th:onclick="|location.href='@{/appr/list_form}'|">
 								목록으로
 						</button>
 						<button type="button" class="btn btn-sb" 
-								th:onclick="|location.href='@{/appr/update_form(forId=${dto.forId})}'|">
+								th:onclick="|location.href='@{/appr/update_form(forId=${dto.forId}, forVersion=${dto.forVersion})}'|">
 								<i class="bi bi-pencil-square"></i> 수정하기
 						</button>
 					</div>
@@ -103,15 +92,15 @@
 				<div class="sb-card__body">
 					<div class="d-flex justify-content-between border-bottom pb-2 mb-2">
 						<span class="text-soft font-size-13">양식 ID</span>
-						<span class="fw-750 tnum" th:text="${dto.forId}"></span>
+						<span class="fw-bold tnum text-secondary" th:text="${dto.forId}"></span>
 					</div>
 					<div class="d-flex justify-content-between border-bottom pb-2 mb-2">
 						<span class="text-soft font-size-13">생성일</span>
-						<span class="fw-600 tnum text-dark" th:text="${dto.forCreated}"></span>
+						<span class="tnum text-dark small" th:text="${dto.createdAt}"></span>
 					</div>
 					<div class="d-flex justify-content-between border-bottom pb-2 mb-2">
 						<span class="text-soft font-size-13">수정일</span>
-						<span class="fw-600 tnum text-dark" th:text="${dto.forUpdated}"></span>
+						<span class="tnum text-dark small" th:text="${dto.updatedAt}"></span>
 					</div>
 					<div class="d-flex justify-content-between align-items-center">
 						<span class="text-soft font-size-13">사용 여부</span>
@@ -125,9 +114,10 @@
 
 				<div class="sb-card__body bg-light border-top">
 					<div class="d-flex gap-2 align-items-start">
-						<i class="bi bi-info-circle-fill text-primary mt-1"></i>
-						<p class="m-0 text-soft" style="font-size: 12px;">
-							생성일과 수정일은 시스템에서 자동으로 관리됩니다.
+						<i class="bi bi-info-circle-fill text-primary"
+						   style="font-size: 13px;"></i>
+						<p class="m-0 text-soft" style="font-size: 12px; line-height: 1.4;">
+							해당 양식의 고유 정보 및 변경 이력입니다.
 						</p>
 					</div>
 				</div>
