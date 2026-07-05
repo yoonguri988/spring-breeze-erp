@@ -124,12 +124,14 @@ public class ApprFormController {
 	public String detail(Model model,
 						 @RequestParam("forId") int forId,
 						 @RequestParam("forVersion") int forVersion) {
-					
+		
+		// 받아온 값 dto 에 저장하여 select문으로 데이터 가져옴
 		ApprFormDto param = new ApprFormDto();
 		param.setForId(forId);
 		param.setForVersion(forVersion);
 		
 		ApprFormDto dto = appr.selectFormAll(param);
+
 		dto.setComName(appr.getCompanyName(dto.getComId()));
 		
 		model.addAttribute("dto", dto);

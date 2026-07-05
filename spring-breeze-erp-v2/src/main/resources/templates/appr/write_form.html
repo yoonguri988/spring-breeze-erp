@@ -56,8 +56,8 @@
 						<label for="comName"
 							   class="sb-form-label">양식 추가할 회사</label>
 							<div class="sb-search">
-							<i class="bi bi-building"></i>
-							<input type="text" id="companySearch"
+								<i class="bi bi-building"></i>
+								<input type="text" id="comName"
 								   placeholder="회사이름 입력" autocomplete="off"/>
 						</div>	
 							<input type="hidden" id="comId" name="comId" />
@@ -65,9 +65,7 @@
 							 style="display: none; font-size: 14px;">
 							 추가할 회사를 선택해주세요
 						</div>
-						<div id="companyDropdown"
-							 class="dropdown-menu w-100 shadow-sm"
-							 style="display: none; max-height: 200px; overflow-y: auto; z-index: 1050;"></div>
+						<div class="ac-list" id="companyDropdown"></div>
 						
 					</div>
 				</div>
@@ -138,7 +136,7 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 		const fields = [
 			{ id: "forCode", errId: "err_forCode"},
 			{ id: "forTitle", errId: "err_forTitle"},
-			{ id: "comId", errId: "err_comId", focusId: "companySearch"},
+			{ id: "comId", errId: "err_comId", focusId: "comName"},
 			{ id: "forContent", errId: "err_forContent"}
 		];
 		
@@ -272,7 +270,7 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 	
 	window.addEventListener("load", function(){
 		
-		let companySearch = document.getElementById("companySearch");
+		let companySearch = document.getElementById("comName");
 		let comId = document.getElementById("comId");
 		let companyDropdown = document.getElementById("companyDropdown");
 		
@@ -285,7 +283,6 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 				fetch(`/searchCompany?company=${encodeURIComponent(value)}`)
 				.then(response => response.json())
 				.then(data => {
-					console.log(data);
 					companyDropdown.innerHTML = ""; // 기존 목록 비우기
 					
 					if(data && data.length > 0){
@@ -294,8 +291,23 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 						data.forEach(item => {
 							let btn = document.createElement("button");
 							btn.type = "button";
-							btn.className = "dropdown-item";
-							btn.textContent = item.comName; // 보여줄 회사이름
+							btn.className = "dropdown-item d-flex justify-content-between align-items-center";
+							
+							// 태그 생성
+							let nameSpan = document.createElement("span");
+							// 생성된 태그에 클래스 추가
+							nameSpan.className = "company-name";
+							// 회사이름
+							btn.textContent = item.comName;
+							
+							// 위와 동일, 사업자 번호 파트
+							let bizSpan = document.createElement("span");
+							bizSpan.className = "text-muted small ms-2";
+							bizSpan.textContent = item.bizNo;
+							
+							// 삽입
+							btn.appendChild(nameSpan);
+							btn.appendChild(bizSpan);
 							
 							// 검색해서 나온 회사 이름 클릭
 							btn.addEventListener("click", function(){

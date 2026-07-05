@@ -111,6 +111,7 @@
 			f.for_status,
 			f.created_at,
 			f.updated_at,
+			f.for_version,
 			c.com_name as comName
 		from
 			appr_form f

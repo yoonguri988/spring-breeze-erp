@@ -50,7 +50,7 @@
 								   placeholder="회사명" autocomplete="off" />
 							<input type="hidden" id="comId" name="comId" th:value="${search.comId}"/>
 						</div>
-						<div class="ac-list" id="acList"></div>
+						<div class="ac-list" id="companyDropdown"></div>
 					</div>
 					
 					<div class="col-md-4">
@@ -93,7 +93,7 @@
 							<th>사용 여부</th>
 							<th>생성일</th>
 							<th>수정일</th>
-							<th class="text-center" style="width: 160px;">관리</th>
+							<th class="text-center">관리</th>
 						</tr>
 					</thead>
 					<tbody id="formTbody">
@@ -171,7 +171,7 @@
 		
 		let companySearch = document.getElementById("comName");
 		let comId = document.getElementById("comId");
-		let companyDropdown = document.getElementById("acList");
+		let companyDropdown = document.getElementById("companyDropdown");
 		
 		// 입력 할때마다 실행
 		companySearch.addEventListener("keyup", function(e){
@@ -182,7 +182,6 @@
 				fetch(`/searchCompany?company=${encodeURIComponent(value)}`)
 				.then(response => response.json())
 				.then(data => {
-					//console.log(data);
 					companyDropdown.innerHTML = ""; // 기존 목록 비우기
 					
 					if(data && data.length > 0){
@@ -191,17 +190,17 @@
 						data.forEach(item => {
 							let btn = document.createElement("button");
 							btn.type = "button";
-							btn.className = "dropdown-item d-flex justify-content-between align-items-center ";
+							btn.className = "dropdown-item d-flex justify-content-between align-items-center";
 							
 							// 회사 이름
 							let nameSpan = document.createElement("span");
-							nameSpan.className = "company-name"
+							nameSpan.className = "company-name";
 							btn.textContent = item.comName;
 							
 							// 사업자 번호
 							let bizSpan = document.createElement("span");
 							bizSpan.className = "text-muted small ms-2";
-							bizSpan.textContent = item.bizNo
+							bizSpan.textContent = item.bizNo;
 							
 							// 집어 넣기
 							btn.appendChild(nameSpan);
