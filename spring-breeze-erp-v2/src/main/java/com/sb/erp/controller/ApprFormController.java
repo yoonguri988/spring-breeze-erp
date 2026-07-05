@@ -121,9 +121,15 @@ public class ApprFormController {
 	
 	// 양식 상세보기
 	@RequestMapping( value = "/appr/detail_form", method = RequestMethod.GET)
-	public String detail(ApprFormDto forId, Model model) {
+	public String detail(Model model,
+						 @RequestParam("forId") int forId,
+						 @RequestParam("forVersion") int forVersion) {
+					
+		ApprFormDto param = new ApprFormDto();
+		param.setForId(forId);
+		param.setForVersion(forVersion);
 		
-		ApprFormDto dto = appr.selectFormAll(forId);
+		ApprFormDto dto = appr.selectFormAll(param);
 		dto.setComName(appr.getCompanyName(dto.getComId()));
 		
 		model.addAttribute("dto", dto);
@@ -132,10 +138,16 @@ public class ApprFormController {
 	
 	// 양식 수정 폼
 	@RequestMapping( value = "/appr/update_form", method = RequestMethod.GET)
-	public String update(ApprFormDto forId, Model model) {
+	public String update(Model model,
+						 @RequestParam("forId") int forId,
+						 @RequestParam("forVersion") int forVersion) {
+		
+		ApprFormDto param = new ApprFormDto();
+		param.setForId(forId);
+		param.setForVersion(forVersion);
 		
 		// 클릭한 해당 양식의 id값으로 데이터 담아서 jsp value들 채울 용도
-		ApprFormDto dto = appr.selectFormAll(forId);
+		ApprFormDto dto = appr.selectFormAll(param);
 		dto.setComName(appr.getCompanyName(dto.getComId()));
 				
 		// update_form.jsp 로 데이터 보내기
