@@ -93,12 +93,13 @@
 							<th>사용 여부</th>
 							<th>생성일</th>
 							<th>수정일</th>
+							<th class="text-center" style="width: 160px;">관리</th>
 						</tr>
 					</thead>
 					<tbody id="formTbody">
 					
 						<tr th:if="${#lists.isEmpty(list)}">
-							<td colspan="7">
+							<td colspan="8">
 								<div class="sb-empty">
 									<i class="bi bi-inbox text-faint"></i>
 									<p>검색 결과가 없습니다.</p>
@@ -110,13 +111,8 @@
 							th:each="item, status : ${list}">
 							<td class="num text-faint"
 							    th:text="${paging.listtotal - ((paging.current -1) * paging.onepagelist) - status.index}">1</td>
-							<td>
-								<a th:href="@{/appr/detail_form(forId=${item.forId})}"
-								   class="sb-table__name"
-								   th:text="${item.forCode}">
-								   양식코드
-								</a>
-							</td>
+							<td class="fw-bold text-dark"
+							    th:text="${item.forCode}">양식 코드</td>
 							<td th:text="${item.forTitle}">양식 제목</td>
 							<td class="text-soft" th:text="${item.comName}">회사명</td>
 							<td>
@@ -128,6 +124,19 @@
 							</td>
 							<td class="text-faint tnum" th:text="${item.createdAt}">생성일</td>
 							<td class="text-faint tnum" th:text="${item.updatedAt}">수정일</td>
+							
+							<td>
+								<div class="d-flex justify-content-center gap-1">
+									<a th:href="@{/appr/detail_form(forId=${item.forId}, forVersion=${item.forVersion})}"
+									   class="btn btn-sb-soft btn-xs px-2 py-1" style="font-size: 11px;">
+									   <i class="bi bi-eye"></i> 상세보기
+									</a>
+									<a th:href="@{/appr/update_form(forId=${item.forId}, forVersion=${item.forVersion})}"
+									   class="btn btn-sb-soft btn-xs px-2 py-1" style="font-size: 11px;">
+									   <i class="bi bi-pencil-square"></i> 수정
+									</a>
+								</div>
+							</td>
 						</tr>
 						
 					</tbody>
