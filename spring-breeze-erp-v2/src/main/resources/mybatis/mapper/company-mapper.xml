@@ -56,7 +56,7 @@
   <!-- 회사 등록 -->
   <insert id="insert" parameterType="CompanyDto">
   insert into company (com_name, industry_code, industry_grp_code, com_ceo, biz_no, com_tel, com_logo)
-  values (#{comName}, #{industryCode}, #{industryGrpCode}, #{comCeo}, #{bizNo}, #{comTel}, #{comLogo})
+  values (#{comName}, #{industryCode}, #{industryGrpCode}, #{comCeo}, #{bizNo}, #{comTel}, #{comLogo, jdbcType=VARCHAR})
   </insert>
   <select id="selectByBizNo" parameterType="string" resultType="CompanyDto">
   select * from company
@@ -70,12 +70,14 @@
   <!-- 회사 정보 수정 -->
   <update id="update" parameterType="CompanyDto">
     update company
-    set com_name = #{comName}
-        ,com_ceo = #{comCeo}
-        ,industry_grp_code = #{industryGrpCode}
-        ,industry_code = #{industryCode}
-        ,com_tel = #{comTel}
-        <if test="comLogo != null">,com_logo   = #{comLogo}</if>
+    <set>
+    	<if test="comName != null">com_name = #{comName},</if>
+    	<if test="comCeo != null">com_ceo = #{comCeo},</if>
+    	<if test="industryGrpCode != null">industry_grp_code = #{industryGrpCode},</if>
+    	<if test="industryCode != null">industry_code = #{industryCode},</if>
+    	<if test="comTel != null">com_tel = #{comTel},</if>
+        <if test="comLogo != null">com_logo   = #{comLogo},</if>
+    </set>
     where com_id = #{comId}
   </update>
   <!-- 회사 삭제 -->

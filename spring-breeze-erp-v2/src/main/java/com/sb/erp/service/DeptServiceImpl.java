@@ -2,20 +2,21 @@ package com.sb.erp.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sb.erp.dao.CompanyMapper;
 import com.sb.erp.dao.DeptMapper;
+import com.sb.erp.dto.CompanyDto;
 import com.sb.erp.dto.DeptDto;
 import com.sb.erp.dto.StatsDeptDto;
 
 @Service
 public class DeptServiceImpl implements DeptService {
 
+	@Autowired CompanyMapper comDao;
 	@Autowired DeptMapper dao;
 	
 	@Override
@@ -66,9 +67,9 @@ public class DeptServiceImpl implements DeptService {
 	        throw new IllegalStateException("하위 부서가 존재하여 삭제할 수 없습니다.");
 	    }
 	    // 사원 연결 후 활성화
-	    // if (employeeMapper.countByDept(deptId) > 0) {
-	    //     throw new IllegalStateException("소속 사원이 존재하여 삭제할 수 없습니다.");
-	    // }
+	     if (dao.countByDept(deptId) > 0) {
+	         throw new IllegalStateException("소속 사원이 존재하여 삭제할 수 없습니다.");
+	     }
 		return dao.delete(deptId);
 	}
 
@@ -105,6 +106,21 @@ public class DeptServiceImpl implements DeptService {
 	@Override
 	public StatsDeptDto selecStats(int comId) {
 		return dao.selectStats(comId);
+	}
+
+	@Override
+	public Object getAncestorChain(int deptId) {
+		List<String> chain = new ArrayList<>();
+	    DeptDto dept = dao.selectOneById(deptId);
+	    chain.add(0, dept.getDeptName());
+	    while (dept.getParentId() != 0) {
+	        dept = dao.selectOneById(dept.getParentId());
+	        chain.add(0, dept.getDeptName());
+	    }
+	    // 맨 앞에 회사명 추가
+	    CompanyDto com = comDao.selectOneById(dept.getComId());
+	    chain.add(0, com.getComName());
+	    return chain;
 	}
 
 }

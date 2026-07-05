@@ -22,4 +22,6 @@ public interface DeptService {
 
 	public StatsDeptDto selecStats(int comId);
 
+	public Object getAncestorChain(int deptId);
+
 }

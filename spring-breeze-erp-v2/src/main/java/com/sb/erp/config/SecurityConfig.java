@@ -27,7 +27,7 @@ public class SecurityConfig {
 		    		                           .requestMatchers(
 		    		                        		"/auth/updatePass",
 		    		                        		"/",
-		    		                        	    "/com/list"
+		    		                        	    "/com/**", "/dept/**"
 		    		                        	).authenticated()
 		    		                           .requestMatchers("/root/**").hasRole("ROOT")
 		    		                           .requestMatchers("/admin/**").hasAnyRole("ROOT", "ADMIN")

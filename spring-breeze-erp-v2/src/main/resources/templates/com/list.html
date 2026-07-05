@@ -88,12 +88,6 @@
 		<div class="grow"></div>
 
 		<div class="sb-field">
-		    <!--
-		      [수정 · 진짜 원인]
-		      param.xxx 는 항상 String[] 배열입니다(요청 파라미터가 다중값일 수 있어서).
-		      ${param.industryCode == 'C'} 는 배열과 문자열을 비교하는 꼴이라 절대 true가 될 수 없었습니다.
-		      -> main 태그에서 th:with 로 미리 뽑아둔 ic(= param.industryCode[0], 안전 처리됨) 사용.
-		    -->
 		    <select id="comIndustry" name="industryGrpCode"
                     onchange="document.getElementById('pageHidden').value='1'; this.form.submit();">
                 <option value="">전체 업종</option>
@@ -121,12 +115,6 @@
         <button type="submit" class="btn btn-sb btn-sm">
             <i class="bi bi-search"></i> 검색
         </button>
-        <!--
-          [수정 · 진짜 원인]
-          empty 는 JSP EL(JSTL) 전용 키워드이고 Thymeleaf(OGNL/SpringEL 기반)에는 없는 문법입니다.
-          ${not empty param.keyword} 는 파싱 단계에서 바로 예외가 나거나 무시됩니다.
-          -> Thymeleaf 유틸리티 객체 #strings.isEmpty(...) 로 교체 (null과 빈 문자열 "" 모두 안전하게 처리, null-safe).
-        -->
         <a th:if="${not #strings.isEmpty(kw)}" class="btn btn-ghost btn-sm" th:href="@{/com/list}">초기화</a>
         <input type="hidden" name="page" id="pageHidden" value="1">
     </form>
@@ -162,7 +150,6 @@
                     <td>
                         <div class="sb-rowuser">
                             <span class="sb-avatar" style="border-radius:9px">
-                                <!-- [수정] not empty com.comLogo -> not #strings.isEmpty(com.comLogo) -->
                                 <img th:if="${not #strings.isEmpty(com.comLogo)}" th:src="@{${com.comLogo}}" alt=""
                                      style="width:100%;height:100%;object-fit:cover">
                                 <i th:unless="${not #strings.isEmpty(com.comLogo)}" class="bi bi-building"></i>
