@@ -160,18 +160,37 @@ public class ApprFormController {
 	// 양식 수정 처리
 	@RequestMapping( value = "/appr/update_form", method = RequestMethod.POST)
 	public String update_post(ApprFormDto dto, Model model) {
+		
 		// 양식 수정 성공
 		if(appr.updateForm(dto) > 0) {
 			return "redirect:/appr/list_form";
 		}
+		
+		ApprFormDto fail = new ApprFormDto();
+		fail.setForId(dto.getForId());
+		fail.setForVersion(dto.getForVersion());
+		
+		ApprFormDto result = appr.selectFormAll(fail);
+		
+		if(result != null) {
+			result.setComName(appr.getCompanyName(result.getComId()));
+		}
+		
+		model.addAttribute("dto", result);
 		return "appr/update_form";
 	}
 	
 	// 양식 삭제 처리
 	@RequestMapping("/appr/delete")
-	public String delete(ApprFormDto dto) {
+	public String delete(@RequestParam("forId") int forId,
+						 @RequestParam("forVersion") int forVersion) {
+		
+		ApprFormDto dto = new ApprFormDto();
+		dto.setForId(forId);
+		dto.setForVersion(forVersion);
+		
 		appr.deleteForm(dto);
-		return "appr/list_form";
+		return "redirect:/appr/list_form";
 	}
 	
 	

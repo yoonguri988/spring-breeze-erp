@@ -29,7 +29,6 @@
 	<!-- 검색 / 필터 툴바 (실제 GET 검색 폼) -->
 	<div class="sb-card mb-4">
 		<div class="sb-card__body">
-			<!-- <form method="GET" action="${pageContext.request.contextPath}/appr/list_form" -->
 			<form method="GET" th:action="@{/appr/list_form}" id="searchForm">
 				<div class="row g-3">	
 					<!--  검색 조건1 : 양식코드 또는 제목 -->		
