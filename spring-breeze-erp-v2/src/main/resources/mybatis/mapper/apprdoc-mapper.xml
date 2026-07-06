@@ -4,6 +4,73 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.ApprDocMapper">
 
+	<!-- 결재 문서 작성하려는 사용자의 회사 양식 가져오기 / 활성화된 양식만 -->
+	<select id="findForm" parameterType="ApprDocDto" resultType="ApprFormDto">
+		select * 
+		from 
+			appr_form f
+		where
+			f.com_id = #{comId}
+			and f.for_status = 1
+			and f.is_deleted = 0
+			and f.for_version = (
+				select max(ff.for_version)
+				from
+					appr_form ff
+				where
+					ff.com_id = f.com_id
+					and ff.for_id = f.for_id
+					and ff.for_status = 1
+					and ff.is_deleted = 0
+			)
+	</select>
+		
+	<!-- 양식 값 가져오기 -->
+	<select id="getForm" parameterType="map" resultType="ApprFormDto">
+		select * from appr_form where for_id = #{forId} and for_version = #{forVersion}
+	</select>
 	
+	
+	<!-- 결재 양식 작성하러 들어갈때 데이터 싹다 끌고와야함ㅇ애ㅔㅂ주ㅠ려ㅠㄴ -->
+	<select id="initResponse" parameterType="ApprDocDto" resultType="ApprDocInitResponseDto" >
+		select
+			e.emp_id,
+			e.emp_name,
+			p.pos_name,
+			c.com_id,
+			c.com_name,
+			d.dept_id,
+			d.dept_name
+		from
+			employee e
+		inner join company c on e.com_id = c.com_id
+		inner join department d on e.dept_id = d.dept_id
+		inner join emp_position p on e.pos_id = p.pos_id
+		where
+			e.emp_id = #{empId}
+		
+	</select>
+	
+	<!-- 결재 문서 insert -->
+	<insert id="insertDoc" parameterType="ApprDocDto">
+		insert into appr_doc(
+			emp_id,
+			for_id,
+			for_version,
+			com_id,
+			doc_title,
+			doc_content,
+			doc_status,
+			is_important)
+		values(
+			#{empId},
+			#{forId},
+			#{forVersion},
+			#{comId},
+			#{docTitle},
+			#{docContent},
+			#{docStatus},
+			#{isImportant})
+	</insert>
 
 </mapper>
