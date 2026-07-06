@@ -136,27 +136,27 @@ public class ProjectController {
 	 * return "proj/proj_detail"; }
 	 */
 	@GetMapping("/proj_detail")
-	public String select(int pro_id, 
+	public String select(@RequestParam("pro_id") int proId,
 	                      @RequestParam(defaultValue = "1") int pstartno,
 	                      Model model, Authentication authentication) {
 	    
-	    model.addAttribute("dto", service.select(pro_id));
+	    model.addAttribute("dto", service.select(proId));
 	    
 		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName()); //삭제버튼이 보일 유저들
 		boolean isAdmin = authentication.getAuthorities().stream()
 				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN")); 
 
 	    // 태스크 페이징 처리
-	    int taskTotalCnt = taskService.selectCnt(pro_id);
+	    int taskTotalCnt = taskService.selectCnt(proId);
 	    PagingUtil paging = new PagingUtil(taskTotalCnt, pstartno);
 
 	    TaskSearchDto taskSearch = new TaskSearchDto();
-	    taskSearch.setProId(pro_id);
+	    taskSearch.setProId(proId);
 	    taskSearch.setPstartno((pstartno - 1) * taskSearch.getOnepagelist());
 
 	    model.addAttribute("list", taskService.selectAll(taskSearch));
 	    model.addAttribute("paging", paging);
-	    model.addAttribute("memberList", memberService.select(pro_id));
+	    model.addAttribute("memberList", memberService.select(proId));
 
 
 
@@ -167,8 +167,8 @@ public class ProjectController {
 	}
 	
 	@GetMapping("/proj_edit")
-	public String editView(int pro_id, Model model) { //수정뷰
-		model.addAttribute("dto", service.editView(pro_id));
+	public String editView(@RequestParam("pro_id") int proId, Model model) { //수정뷰
+		model.addAttribute("dto", service.editView(proId));
 		return "proj/proj_edit";
 	}
 	
@@ -193,21 +193,27 @@ public class ProjectController {
 	}
 	
 	@GetMapping("/delete") //삭제
-	public String delete(int pro_id,RedirectAttributes rttr, Authentication authentication) {
-		ProjectDto dto = service.select(pro_id);
+	public String delete(@RequestParam("pro_id") int proId, RedirectAttributes rttr, Authentication authentication) {
+		ProjectDto dto = service.select(proId);
 		
 		EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
 		boolean isAdmin = authentication.getAuthorities().stream()
 				.anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
 		if (!isAdmin && dto.getEmpId() != loginEmp.getEmpId()) {
 			rttr.addFlashAttribute("result", "프로젝트 생성자 또는 관리자만 삭제할 수 있습니다.");//권한,프로젝트 생성자만 삭제가능
-			return "redirect:/proj/proj_detail?pro_id=" + pro_id;
+			return "redirect:/proj/proj_detail?pro_id=" +proId;
 		}
 		
 		String result="프로젝트 삭제 실패";
 		
-		if(service.delete(pro_id)>0) {result="프로젝트 삭제 성공";}
+		if(service.delete(proId)>0) {result="프로젝트 삭제 성공";}
 		rttr.addFlashAttribute("result",result);
 		return "redirect:/proj/proj_list";
+	}
+	
+	@GetMapping("/analysis")
+	@ResponseBody
+	public String analyzeProject(@RequestParam Integer proId) {
+		return service.analyzeProject(proId);
 	}
 }
