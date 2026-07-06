@@ -22,27 +22,26 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 					// ─── 정적 리소스 + 인증 관련 ───────────
 					.requestMatchers("/css/**", "/js/**", "/images/**", 
-							"/api/**", "/auth/login", "/auth/confirm",
-							"/auth/resetPass", "/auth/forgotResetPass").permitAll()
+						"/api/**", "/auth/login", "/auth/confirm",
+						"/auth/resetPass", "/auth/forgotResetPass").permitAll()
 					// ─── 로그인만 하면 접근 가능 ───────────
 					.requestMatchers("/auth/updatePass", "/", "/com/list", 
-							"/emp/list", "/emp/detail", "/emp/edit", "/emp/editPass").authenticated()
+						"/emp/list", "/emp/detail", "/emp/edit", "/emp/editPass").authenticated()
 					// ─── ROOT 전용 ────────────────────────
 				    .requestMatchers("/root/**").hasRole("ROOT")
 				    // ─── ADMIN 이상 ──────────────────
 				    .requestMatchers("/admin/**").hasAnyRole("ROOT", "ADMIN")
 				    // ─── 사원 파트: 조회는 로그인만, 관리는 ADMIN ─────
 					.requestMatchers("/emp/add", "/emp/resetPass", 
-							"/emp/checkEmail", "/emp/checkMobile",
-							"/emp/checkEmpNo").hasAnyRole("ROOT", "ADMIN")
-					// ─── 권한 관리 (ADMIN 전용) ────────────────
+						"/emp/checkEmail", "/emp/checkMobile",
+						"/emp/checkEmpNo").hasAnyRole("ROOT", "ADMIN")
+					// ─── 직급/권한 관리 (ADMIN 전용) ────────────────
 				    .requestMatchers(
 				        "/auth/list", "/auth/add", "/auth/edit", "/auth/delete",
-				        "/auth/emp", "/auth/grant", "/auth/revoke").hasRole("ADMIN")
-				    // ─── 직급 관리 (ADMIN 전용) ──────────────── 기능 추가 후
-				    // .requestMatchers("/pos/**").hasRole("ADMIN")
-					.anyRequest().permitAll())
-			
+				        "/auth/emp", "/auth/grant", "/auth/revoke", "/pos/**").hasRole("ADMIN")
+				    // ─── 그 외 ────────────────
+				    .anyRequest().permitAll())
+				
 				// 2. 로그인처리
 				.formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/login")
 						.successHandler(authenticationSuccessHandler(passEncoder)).failureUrl("/auth/login?error")
