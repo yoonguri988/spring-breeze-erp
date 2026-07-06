@@ -2,8 +2,8 @@ package com.sb.erp.util;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import com.sb.erp.security.CustomUserDetails;
+import org.springframework.stereotype.Component;
 
 public class SecurityUtil {
 
@@ -31,7 +31,7 @@ public class SecurityUtil {
 		return 0;
 	}
 
-	// 현재 로그인 사용자가 ROOT 또는 ROLE_ADMIN 권한을 가졌는지 확인
+	// 현재 로그인 사용자가 ROOT 또는 ROLE_ADMIN 권한을 가졌는지 확인(보고 합치기)
 	public static boolean isAdmin() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth == null || !auth.isAuthenticated()) { return false; }
@@ -41,4 +41,12 @@ public class SecurityUtil {
 			return role.equals("ROOT") || role.equals("ROLE_ADMIN");
 		});
 	}
+
+	public static boolean isAdminOrRoot(Authentication auth) {
+        if (auth == null) return false;
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROOT")
+                            || a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
 }

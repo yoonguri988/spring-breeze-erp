@@ -5,9 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +31,7 @@ import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.StatsComDto;
 import com.sb.erp.dto.StatsDeptDto;
 import com.sb.erp.exception.FileUploadException;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.CompanyService;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
@@ -35,6 +40,7 @@ import com.sb.erp.util.FileUploadDto;
 import com.sb.erp.util.FileUploadType;
 import com.sb.erp.util.FileUploadUtil;
 import com.sb.erp.util.PagingUtil;
+import com.sb.erp.util.SecurityUtil;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -48,12 +54,14 @@ public class CompanyController {
 	
 	// 회사 등록
 	@GetMapping("/add")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String addForm() {
 		return "/com/form";
 	}
 	
 	//회사 등록 기능
 	@PostMapping("/add")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String add(CompanyDto dto, 
 			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
 			RedirectAttributes rttr) {
@@ -76,6 +84,7 @@ public class CompanyController {
 	// 회사 사업자 번호 중복 체크 (ajax)
 	@GetMapping("/checkBizNo")
 	@ResponseBody
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public Map<String, Object> checkBizNo(String bizNo){
 		Map<String, Object> res = new HashMap<>();
 		CompanyDto dto = service.isDuplicateBizNo(bizNo);
@@ -88,7 +97,12 @@ public class CompanyController {
 	
 	// 회사 목록 조회
 	@GetMapping("/list")
-	public String list(ComSearchDto search, Model model) {
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+	public String list(ComSearchDto search, Model model, Authentication auth) {
+		if (!SecurityUtil.isAdminOrRoot(auth)) {
+	        return "redirect:/com/my";
+	    }
+		
 		int listtotal = service.listTotal(search);
 		// 검색 조건이 null
 		boolean isEmpty = !search.hasSearchCondition();
@@ -120,16 +134,18 @@ public class CompanyController {
 	
 	// 회사 수정 폼
 	@GetMapping("/edit")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String editForm(int comId, Model model) {
 		model.addAttribute("com", service.selectOneById(comId));
-		model.addAttribute("items", deptService.selectOrgTree(comId));
 		return "/com/edit";
 	}
 	
 	// 회사 수정 기능
 	@PostMapping("/edit")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String edit(CompanyDto dto, 
 			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
+			Authentication auth,
 			RedirectAttributes rttr) {
 		String msg = "회사 정보 수정에 실패 하였습니다.";
 		// 새 파일을 안 올렸을 때 기존 로고 URL을 유지하기 위해 수정 전 데이터를 먼저 조회
@@ -155,11 +171,26 @@ public class CompanyController {
 		}
 		
 		rttr.addFlashAttribute("msg", msg);
-		return "redirect:/com/list";
+		
+		// 권한 문자열만 추출해서 비교
+		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+	    Set<String> authNames = user.getAuthorities().stream()
+	            .map(GrantedAuthority::getAuthority)
+	            .collect(Collectors.toSet());
+
+	    boolean isRoot = authNames.contains("ROOT");
+	    
+	    if(isRoot) {
+	    	return "redirect:/com/list";
+	    } else {
+	    	return "redirect:/com/my";
+	    }
+		
 	}
 	
 	// 회사 삭제 폼
 	@GetMapping("/delete")
+	@PreAuthorize("hasAuthority('ROOT')")
 	public String deleteModal(@RequestParam("comId") Integer comId, Model model) {
 	    CompanyDto dto = service.selectOneById(comId);
 	    model.addAttribute("com", dto);
@@ -168,22 +199,14 @@ public class CompanyController {
 	
 	// 회사 삭제 기능
 	@PostMapping("/delete")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@ResponseBody
 	public Map<String, Object> delete(Authentication auth, EmpDto dto) {
 	    Map<String, Object> result = new HashMap<>();
-	    
-	    EmpDto emp = empService.selectByEmpEmail(auth.getName());
-	    //1. 로그인한 사용자가 관리자가 아닌 경우
-	    //1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-	    AuthPermDto root = permService.selectByEmpId(emp.getEmpId());
-	    
-	    // ROOT(시스템 관리자) 아닌 경우
-	    if(!root.getAutName().equals("ROOT")) {
-	        throw new IllegalStateException("시스템 관리자 외에는 회사를 삭제할 수 없습니다.");
-	    }
 
 	    //2. 관리자가 입력한 비밀번호가 일치 하지 않을 경우
-	    dto.setEmpId(emp.getEmpId());
+	    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+	    dto.setEmpId(user.getUser().getEmpId());
 	    boolean matched = empService.matchPassword(dto);
 	    if (!matched) {
 	        result.put("success", false);

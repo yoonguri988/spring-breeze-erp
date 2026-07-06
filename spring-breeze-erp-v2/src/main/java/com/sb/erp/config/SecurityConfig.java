@@ -18,6 +18,7 @@ public class SecurityConfig {
 	// http 경로 설정
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http, PasswordEncoder passEncoder) throws Exception {
+<<<<<<< HEAD
 		http// 1. 허용경로
 			.authorizeHttpRequests(auth -> auth
 					// ─── 정적 리소스 + 인증 관련 ───────────
@@ -25,8 +26,9 @@ public class SecurityConfig {
 						"/api/**", "/auth/login", "/auth/confirm",
 						"/auth/resetPass", "/auth/forgotResetPass").permitAll()
 					// ─── 로그인만 하면 접근 가능 ───────────
-					.requestMatchers("/auth/updatePass", "/", "/com/list", 
-						"/emp/list", "/emp/detail", "/emp/edit", "/emp/editPass").authenticated()
+					.requestMatchers("/auth/updatePass", "/", "/emp/list", 
+					"/emp/detail", "/emp/edit", "/emp/editPass",
+					"/com/**", "/dept/**").authenticated()
 					// ─── ROOT 전용 ────────────────────────
 				    .requestMatchers("/root/**").hasRole("ROOT")
 				    // ─── ADMIN 이상 ──────────────────
@@ -43,14 +45,20 @@ public class SecurityConfig {
 				    .anyRequest().permitAll())
 				
 				// 2. 로그인처리
-				.formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/login")
-						.successHandler(authenticationSuccessHandler(passEncoder)).failureUrl("/auth/login?error")
+				.formLogin(form -> form.loginPage("/auth/login")
+						.loginProcessingUrl("/auth/login")
+						.successHandler(authenticationSuccessHandler(passEncoder))
+						.failureUrl("/auth/login?error")
 						.permitAll())
 				// 3. 로그아웃
-				.logout(logout -> logout.logoutUrl("/auth/logout").logoutSuccessUrl("/auth/login")
-						.invalidateHttpSession(true).clearAuthentication(true).permitAll())
+				.logout(logout -> logout.logoutUrl("/auth/logout")
+										.logoutSuccessUrl("/auth/login")
+										.invalidateHttpSession(true)
+										.clearAuthentication(true)
+										.permitAll())
 				// 4. csrf 예외처리
 				.csrf(csrf -> csrf.ignoringRequestMatchers("/auth/login", "/auth/update", "/auth/delete"));
+
 		return http.build();
 	}
 

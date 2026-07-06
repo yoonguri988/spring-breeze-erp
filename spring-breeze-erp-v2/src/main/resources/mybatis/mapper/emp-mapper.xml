@@ -169,7 +169,9 @@
 		select e.*, p.pos_name
 		from employee e
 		join emp_position p on e.pos_id = p.pos_id
-		where e.dept_id = #{deptId}
+		join department d on e.dept_id = d.dept_id
+		where d.dept_id = #{deptId} 
+		   or d.parent_id = #{deptId} 
 	</select>
 	
 	
