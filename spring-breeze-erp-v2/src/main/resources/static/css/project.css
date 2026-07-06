@@ -33,3 +33,38 @@
 
 /* 두 번째 date(endDate)는 아이콘 없이 인풋만, 폭을 동일하게 맞춤 */
 .sb-search-form .sb-field input[type="date"] { width: 150px; }
+
+/* ===========================
+   AI 분석
+=========================== */
+
+/* 결과 카드 */
+.ai-result-card {
+    display: none;
+    margin-top: 20px;
+}
+
+/* 로딩 */
+.ai-loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+/* 결과 내용 */
+.ai-result-text {
+    white-space: pre-line;
+    line-height: 1.8;
+}
+
+/* 위험도 배지 */
+.ai-risk-badge {
+    display: none;
+    margin-bottom: 15px;
+}
+
+/* 버튼 영역 */
+.ai-btn-area {
+    text-align: right;
+    margin-top: 20px;
+}
