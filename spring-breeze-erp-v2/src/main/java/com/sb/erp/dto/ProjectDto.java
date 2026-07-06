@@ -24,12 +24,9 @@ public class ProjectDto {
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
 	
-	
 	private String empName;
-	
 	private Integer memberCnt; //프로젝트 멤버 인원 db값 존재하지않는 컬럼
-	public Integer getMemberCnt() { return memberCnt; }
-	public void setMemberCnt(int memberCnt) { this.memberCnt = memberCnt; }
+
 	
 	
 }
