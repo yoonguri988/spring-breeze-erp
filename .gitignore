@@ -74,10 +74,6 @@ logs/
 # src/main/resources/db.properties
 # src/main/resources/*-secret*
 # src/main/resources/*-local*
-# ============================
-# auth.properties
-# ============================
-spring-breeze-erp-v2\src\main\resources\application-oauth.properties
 
 #
 /Servers/

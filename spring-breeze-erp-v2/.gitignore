@@ -54,4 +54,4 @@ dependency-reduced-pom.xml
 *.hprof
 
 # 
-src\main\resources\application-oauth.properties
+src/main/resources/application-oauth.properties
