@@ -1,19 +1,23 @@
 package com.sb.erp.controller;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.CompanyDto;
 import com.sb.erp.dto.DeptDto;
 import com.sb.erp.dto.StatsDeptDto;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.CompanyService;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
@@ -27,9 +31,20 @@ public class DeptController {
 	
 	// 부서 목록 
 	@GetMapping("/list")
-	public String orgTree(int comId, Model model) {
-		CompanyDto com = comService.selectOneById(comId);
+	public String orgTree(Integer comId, Model model, Authentication auth) {
+		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+		// 권한 문자열만 추출해서 비교
+	    Set<String> authNames = user.getAuthorities().stream()
+	            .map(GrantedAuthority::getAuthority)
+	            .collect(Collectors.toSet());
+
+	    boolean isAdmin = authNames.contains("ROOT") || authNames.contains("ROLE_ADMIN");
+
+	    if (!isAdmin || comId == null) {
+	        comId = user.getUser().getComId();
+	    }
 		
+		CompanyDto com = comService.selectOneById(comId);
 		// 통계데이터
 		StatsDeptDto stats = service.selecStats(comId);
 		
@@ -101,7 +116,12 @@ public class DeptController {
 	
 	// 부서 상세 조회
 	@GetMapping("/detail")
-	public String detail(@RequestParam("deptId") int deptId, Model model) {
+	public String detail(@RequestParam(value="deptId", required = false) Integer deptId, Model model, Authentication auth) {
+		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+		if(deptId == null) {
+			deptId = user.getUser().getDeptId();
+		}
+		
 		//계층 경로
 		model.addAttribute("ancestorChain", service.getAncestorChain(deptId));
 		model.addAttribute("dept", service.selectOneById(deptId));
