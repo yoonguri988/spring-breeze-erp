@@ -52,3 +52,6 @@ src/main/resources/static/uploads/*
 ### 기타 ###
 dependency-reduced-pom.xml
 *.hprof
+
+# 
+src/main/resources/application-oauth.properties
