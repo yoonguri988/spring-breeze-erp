@@ -14,10 +14,10 @@ public interface ProjectMemberMapper {
 	public int insert(ProjectMemberDto dto);
 	
 	//프로젝트 멤버 삭제
-	public int delete(int pm_id);
+	public int delete(int pmId);
 	
 	//프로젝트 참여 인원 조회
-	public List<ProjectMemberDto> select(int pro_id);
+	public List<ProjectMemberDto> select(int proId);
 	
 	//해당 프로젝트에 참여 중인 멤버 목록
 	public List<ProjectMemberDto> selectByproject(int projectProId);
