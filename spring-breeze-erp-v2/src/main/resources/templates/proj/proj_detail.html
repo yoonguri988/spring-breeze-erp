@@ -25,6 +25,7 @@ window.addEventListener("load",function(){
     <p>프로젝트의 기본정보, 태스크, 참여인원을 확인합니다.</p>
   </div>
   <div class="sb-page-head__actions">
+    <button type="button" id="btnAiAnalyze" class="btn btn-sb btn-sm"><i class="bi bi-stars"></i> AI 리스크 분석</button>
     <a th:href="@{/proj/proj_list}" class="btn btn-ghost btn-sm"><i class="bi bi-list"></i> 목록</a>
     <a th:href="@{/proj/proj_edit(pro_id=${dto.proId})}" class="btn btn-ghost btn-sm"><i class="bi bi-pencil"></i> 수정</a>
     <button type="button" th:if="${isAdmin or dto.empId == loginEmpId}" class="btn btn-ghost btn-sm" style="color:var(--sb-red)" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="bi bi-trash3"></i> 삭제</button>
@@ -101,6 +102,19 @@ window.addEventListener("load",function(){
           </tbody>
         </table>
         <div class="sb-empty" th:if="${#lists.isEmpty(list)}"><i class="bi bi-list-check"></i><p>등록된 태스크가 없습니다.</p></div>
+        <div class="d-flex justify-content-center py-3" style="border-top:1px solid var(--sb-border)" th:if="${paging != null}">
+    <ul class="pagination pagination-sm mb-0">
+      <li class="page-item" th:if="${paging.start > paging.bottomlist}">
+        <a th:href="@{/proj/proj_list(pstartno=${paging.start-1}, keyword=${param.keyword}, proStatus=${param.proStatus}, startDate=${param.startDate}, endDate=${param.endDate}, searched=true)}" class="page-link">이전</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(paging.start, paging.end)}" th:classappend="${i==paging.current} ? 'active' : ''">
+        <a th:href="@{/proj/proj_list(pstartno=${i}, keyword=${param.keyword}, proStatus=${param.proStatus}, startDate=${param.startDate}, endDate=${param.endDate}, searched=true)}" class="page-link" th:text="${i}"></a>
+      </li>
+      <li class="page-item" th:if="${paging.pagetotal > paging.end}">
+        <a th:href="@{/proj/proj_list(pstartno=${paging.end+1}, keyword=${param.keyword}, proStatus=${param.proStatus}, startDate=${param.startDate}, endDate=${param.endDate}, searched=true)}" class="page-link">다음</a>
+      </li>
+    </ul>
+  </div>
       </div>
     </div>
   </div>
@@ -118,6 +132,96 @@ window.addEventListener("load",function(){
     </span>
   </div>
 </div>
+<div class="sb-card mt-3" id="aiResultCard" style="display:none;">
+  <div class="sb-card__head">
+    <h2><i class="bi bi-stars"></i> AI 리스크 분석 결과</h2>
+    <div class="right">
+      <span id="aiRiskBadge" class="sb-badge sb-badge--gray" style="display:none;">
+        <span class="pip"></span><span id="aiRiskBadgeText"></span>
+      </span>
+    </div>
+  </div>
+  <div class="sb-card__body">
+    <div id="aiLoading" style="display:none;" class="text-faint">
+      <i class="bi bi-arrow-repeat"></i> AI가 프로젝트를 분석하고 있습니다...
+    </div>
+    <div id="aiResultText" style="white-space:pre-line; line-height:1.6;"></div>
+  </div>
+</div>
+<script th:inline="javascript">
+window.addEventListener("load", function () {
+
+    const proId = /*[[${dto.proId}]]*/ 0;
+
+    const btn = document.getElementById("btnAiAnalyze");
+    const card = document.getElementById("aiResultCard");
+
+    const loading = document.getElementById("aiLoading");
+    const resultText = document.getElementById("aiResultText");
+
+    const riskBadge = document.getElementById("aiRiskBadge");
+    const riskBadgeText = document.getElementById("aiRiskBadgeText");
+
+    btn.addEventListener("click", function () {
+
+        card.style.display = "block";
+        resultText.textContent = "";
+        loading.style.display = "block";
+        riskBadge.style.display = "none";
+
+        btn.disabled = true;
+
+        fetch(`/proj/analysis?proId=${proId}`, {
+            method: "GET"
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(err => {
+                    throw new Error(err);
+                });
+            }
+            return response.text();
+        })
+        .then(result => {
+
+            loading.style.display = "none";
+            resultText.textContent = result;
+
+            if (result.includes("HIGH")) {
+
+                riskBadge.style.display = "inline-flex";
+                riskBadge.className = "sb-badge ai-risk-badge sb-badge--red";
+                riskBadgeText.textContent = "HIGH";
+
+            } else if (result.includes("MEDIUM")) {
+
+                riskBadge.style.display = "inline-flex";
+                riskBadge.className = "sb-badge ai-risk-badge sb-badge--blue";
+                riskBadgeText.textContent = "MEDIUM";
+
+            } else if (result.includes("LOW")) {
+
+                riskBadge.style.display = "inline-flex";
+                riskBadge.className = "sb-badge ai-risk-badge sb-badge--green";
+                riskBadgeText.textContent = "LOW";
+
+            }
+
+        })
+        .catch(error => {
+            console.error(error);
+
+            loading.style.display = "none";
+            resultText.textContent = "AI 분석 중 오류가 발생했습니다.";
+        })
+        .finally(() => {
+            btn.disabled = false;
+        });
+
+    });
+
+});
+</script>
 </main>
 </th:block>
 </body>
