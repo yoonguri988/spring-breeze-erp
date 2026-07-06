@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head><title>deptTreeTab fragment</title></head>
 <body>
 <th:block th:fragment="content">
@@ -28,7 +29,9 @@
         <div class="grow"></div>
 
         <span class="text-faint" id="deptCount" style="font-size:12.5px"></span>
+        <!-- [추가] 일반 사용자에게는 등록 버튼 숨김 -->
         <a th:href="@{/dept/add(comId=${com != null ? com.comId : null})}"
+           sec:authorize="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"
            class="btn btn-sb btn-sm"><i class="bi bi-plus-lg"></i> 부서 등록</a>
     </div>
 
@@ -91,10 +94,12 @@
                                 <i class="bi bi-book"></i>
                             </a>
                             <a th:href="@{/dept/edit(deptId=${dept.deptId}, comId=${com != null ? com.comId : null})}"
+                               sec:authorize="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"
                                class="sb-iconbtn" style="width:28px;height:28px;font-size:13px" title="수정">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <button type="button" class="sb-iconbtn dept-del"
+                                    sec:authorize="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"
                                     th:attr="data-id=${dept.deptId}, data-name=${dept.deptName}"
                                     style="width:28px;height:28px;font-size:13px;color:var(--sb-red)"
                                     title="삭제">

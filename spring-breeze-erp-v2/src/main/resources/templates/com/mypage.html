@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{fragments/layout}">
 <head>
     <title>내 회사 정보 · SBerp</title>
@@ -19,6 +20,11 @@
             </div>
             <h1>내 회사 정보</h1>
             <p>소속 회사의 기본 정보와 조직도를 확인합니다.</p>
+        </div>
+        <div class="sb-page-head__actions" sec:authorize="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')">
+            <a th:href="@{/com/edit(comId=${com.comId})}" class="btn btn-sb btn-sm">
+                <i class="bi bi-pencil"></i> 수정하기
+            </a>
         </div>
     </div>
 

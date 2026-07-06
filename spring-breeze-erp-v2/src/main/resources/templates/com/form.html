@@ -4,6 +4,8 @@
       layout:decorate="~{fragments/layout}">
 <head>
     <title>회사 등록</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 <main layout:fragment="content" class="sb-content">
@@ -21,6 +23,9 @@
         <p>새로운 회사를 시스템에 등록합니다.</p>
     </div>
     <div class="sb-page-head__actions">
+    	<button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#ocrModal">
+            <i class="bi bi-camera"></i> 사업자등록증으로 자동입력
+        </button>
         <a th:href="@{/com/list}" class="btn btn-ghost btn-sm">
             <i class="bi bi-arrow-left"></i> 목록으로
         </a>
@@ -28,20 +33,12 @@
 </div>
 
 <!-- 서버 측 오류 메시지 출력 -->
-<!-- [변경점] <c:if test="${not empty errorMsg}"> -> th:if="${not #strings.isEmpty(errorMsg)}" (empty는 JSP EL 전용, Thymeleaf엔 없음) -->
 <div th:if="${not #strings.isEmpty(errorMsg)}" class="alert alert-danger alert-dismissible fade show" role="alert">
     <i class="bi bi-exclamation-triangle-fill me-1"></i>
     <span th:text="${errorMsg}"></span>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 
-<!--
-  [변경점]
-  - action="${pageContext.request.contextPath}/com/add" -> th:action="@{/com/add}"
-  - CSRF hidden input은 th:action 쓴 <form>에 자동 삽입되므로 제거
-  - com 모델 속성은 등록 폼(신규)에서는 검증 실패로 재진입할 때만 존재할 수 있으므로
-    아래 모든 th:value 는 com?.xxx 형태로 안전 탐색(safe navigation) 사용
--->
 <form method="post"
       th:action="@{/com/add}"
       enctype="multipart/form-data"
@@ -59,11 +56,6 @@
                     <label class="sb-form-label">
                         업종 <span style="color:var(--sb-red)">*</span>
                     </label>
-                    <!--
-                      [변경점 · 방향 확정]
-                      기존 15개 대분류 + JS 2단계 세부선택 -> list.html과 동일한 KSIC 8개 단일 select로 교체.
-                      onchange 로 industryCode(대분류+01) 자동 파생.
-                    -->
                     <select class="form-select" id="industryGrpCode" name="industryGrpCode"
                             onchange="syncIndustryCode()" required>
                         <option value="">-- 업종 선택 --</option>
@@ -79,7 +71,6 @@
                     <div class="invalid-feedback">업종을 선택하세요.</div>
                 </div>
 
-                <!-- [변경점] value="${com.industName}" 제거 (DB에 없는 필드). 대신 industryCode를 대분류+01로 자동 채움 -->
                 <input type="hidden" id="industryCode" name="industryCode" th:value="${com?.industryCode}"/>
             </div>
         </div>
@@ -99,7 +90,6 @@
                 <div class="col-md-8">
                     <label class="sb-form-label">
                         회사명 <span style="color:var(--sb-red)">*</span>
-                        <code class="field-hint">com_name VARCHAR(100)</code>
                     </label>
                     <input type="text" class="form-control" id="comName" name="comName"
                            placeholder="예: (주)선빈테크놀로지" maxlength="100"
@@ -110,7 +100,6 @@
                 <div class="col-md-4">
                     <label class="sb-form-label">
                         대표자 <span style="color:var(--sb-red)">*</span>
-                        <code class="field-hint">com_ceo VARCHAR(100)</code>
                     </label>
                     <input type="text" class="form-control" id="comCeo" name="comCeo"
                            placeholder="대표자명" maxlength="100"
@@ -121,7 +110,6 @@
                 <div class="col-md-6">
                     <label class="sb-form-label">
                         사업자등록번호 <span style="color:var(--sb-red)">*</span>
-                        <code class="field-hint">biz_no VARCHAR(45)</code>
                     </label>
                     <div class="input-group has-validation">
                         <input type="text" class="form-control" id="bizNo" name="bizNo"
@@ -144,6 +132,27 @@
                            th:value="${com?.comTel}">
                     <div class="text-faint mt-1" style="font-size:12px">선택 입력</div>
                 </div>
+
+                <!-- 개업일자: DB 저장 컬럼은 아니며, 국세청 진위확인 API 호출에만 사용되는 임시 입력값 -->
+                <div class="col-md-6">
+                    <label class="sb-form-label"> 개업일자 <span style="color:var(--sb-red)">*</span></label>
+                    <input type="date" class="form-control" id="startDt" name="startDt" required>
+                    <div class="text-faint mt-1" style="font-size:12px">
+                        진위확인 시에만 사용되며 DB에는 저장되지 않습니다.
+                    </div>
+                </div>
+
+                <!-- 사업자등록번호 진위확인 (국세청 API) -->
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="w-100">
+                        <button type="button" class="btn btn-outline-secondary w-100" id="verifyBizNoBtn" onclick="verifyBizNo()">
+                            <i class="bi bi-patch-check"></i> 국세청 진위확인
+                        </button>
+                        <div id="bizNoVerifyResult" class="mt-1" style="font-size:13px;">
+                            <span class="text-faint"><i class="bi bi-info-circle"></i> 등록하려면 진위확인이 필요합니다.</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -157,7 +166,6 @@
         <div class="sb-card__body">
             <div class="logo-zone">
                 <div class="logo-preview" id="logoPreviewWrap">
-                    <!-- [변경점] c:choose/c:when/c:otherwise -> th:if/th:unless + #strings.isEmpty(null-safe) -->
                     <img th:if="${not #strings.isEmpty(com?.comLogo)}" id="logoPreview"
                          th:src="@{${com.comLogo}}" alt="로고 미리보기"
                          style="width:100%;height:100%;object-fit:cover">
@@ -185,22 +193,56 @@
     </div>
 </form>
 
-<!--
-  [변경점]
-  - th:inline="javascript" 로 인라인 모드 켬. #httpServletRequest는 layout 병합 과정에서
-    null이 될 수 있어(지난번 실제로 겪음) 절대 쓰지 않고, URL은 전부 @{...} 로 직접 생성.
-  - '${com.xxx}' 처럼 JS 문자열 리터럴 안에 EL을 그대로 넣던 부분 -> /*[[${com?.xxx ?: ''}]]*/ '' 형태로 교체.
--->
+<!-- OCR 자동입력 모달: 별도 util 파일 포함 -->
+<div th:replace="~{com/util/ocrModal :: ocrModal}"></div>
+
+
 <script th:inline="javascript">
 (function () {
     "use strict";
+
+    /* 마지막으로 "진위확인 성공"했을 때의 bizNo/startDt/ceoName 스냅샷.
+       null이면 "아직 진위확인 안 됨" 또는 "확인 이후 값이 바뀌어 무효화됨" 상태. */
+    let verifiedSnapshot = null;
+
+    function currentBizFields() {
+        return {
+            bizNo:   document.getElementById('bizNo').value.trim(),
+            startDt: document.getElementById('startDt').value.trim(),
+            ceoName: document.getElementById('comCeo').value.trim()
+        };
+    }
+
+    function isSameAsVerified(fields) {
+        return verifiedSnapshot !== null
+            && verifiedSnapshot.bizNo === fields.bizNo
+            && verifiedSnapshot.startDt === fields.startDt
+            && verifiedSnapshot.ceoName === fields.ceoName;
+    }
+
+    /* 진위확인 이후 관련 필드(bizNo/startDt/comCeo) 값이 바뀌면 스냅샷을 무효화하고
+       "다시 진위확인 필요" 상태로 되돌린다. */
+    function invalidateVerificationIfChanged() {
+        if (verifiedSnapshot === null) return; // 애초에 확인된 적 없으면 할 일 없음
+        if (isSameAsVerified(currentBizFields())) return; // 값이 그대로면 유지
+
+        verifiedSnapshot = null;
+        const resultEl = document.getElementById('bizNoVerifyResult');
+        const verifyBtn = document.getElementById('verifyBizNoBtn');
+        resultEl.innerHTML = '<span class="text-warning"><i class="bi bi-arrow-repeat"></i> 정보가 변경되었습니다. 진위확인을 다시 진행해주세요.</span>';
+        verifyBtn.classList.remove('btn-outline-secondary', 'btn-outline-success');
+        verifyBtn.classList.add('btn-outline-warning');
+    }
+
+    ['bizNo', 'startDt', 'comCeo'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', invalidateVerificationIfChanged);
+    });
 
     /* 대분류 선택 시 세부코드(industryCode) 자동 파생: "대분류+01" 규칙 */
     function syncIndustryCode() {
         const grp = document.getElementById('industryGrpCode').value;
         document.getElementById('industryCode').value = grp ? (grp + '01') : '';
     }
-    // 전역에서 onchange="syncIndustryCode()" 로 호출하므로 window에 노출
     window.syncIndustryCode = syncIndustryCode;
 
     function previewLogo(input) {
@@ -221,15 +263,21 @@
     }
     window.previewLogo = previewLogo;
 
-    /* 초기화 버튼 — 폼 reset 후 미리보기·업종 선택도 원복 */
+    /* 초기화 버튼 — 폼 reset 후 미리보기·업종 선택·진위확인 상태도 원복 */
     function resetForm() {
         document.getElementById('logoPreviewWrap').innerHTML =
             '<i id="logoPlaceholder" class="bi bi-building"></i>';
         document.getElementById('industryGrpCode').value = '';
         document.getElementById('industryCode').value = '';
-        // Bootstrap 검증 클래스 제거
         document.querySelectorAll('.is-valid, .is-invalid')
                 .forEach(el => el.classList.remove('is-valid', 'is-invalid'));
+
+        verifiedSnapshot = null;
+        const verifyBtn = document.getElementById('verifyBizNoBtn');
+        verifyBtn.classList.remove('btn-outline-warning', 'btn-outline-danger', 'btn-outline-success');
+        verifyBtn.classList.add('btn-outline-secondary');
+        document.getElementById('bizNoVerifyResult').innerHTML =
+            '<span class="text-faint"><i class="bi bi-info-circle"></i> 등록하려면 진위확인이 필요합니다.</span>';
     }
     window.resetForm = resetForm;
 
@@ -269,6 +317,25 @@
             valid = false;
         }
 
+        const startDtEl = document.getElementById('startDt');
+        if (!startDtEl.value.trim()) {
+            setInvalid(startDtEl, '개업일자는 필수입니다.');
+            valid = false;
+        } else {
+            setValid(startDtEl);
+        }
+
+        /* 진위확인이 "현재 입력값" 기준으로 성공한 상태가 아니면 제출 차단 */
+        const resultEl  = document.getElementById('bizNoVerifyResult');
+        const verifyBtn = document.getElementById('verifyBizNoBtn');
+        if (!isSameAsVerified(currentBizFields())) {
+            resultEl.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> 사업자등록번호 진위확인을 먼저 완료해주세요.</span>';
+            verifyBtn.classList.remove('btn-outline-secondary', 'btn-outline-warning', 'btn-outline-success');
+            verifyBtn.classList.add('btn-outline-danger');
+            resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            valid = false;
+        }
+
         return valid;
     }
     window.validateForm = validateForm;
@@ -287,8 +354,7 @@
         spinner.style.display = '';
         bizNoEl.classList.remove('is-valid', 'is-invalid');
 
-        /* [변경점] '${pageContext.request.contextPath}/com/checkBizNo?...' -> @{/com/checkBizNo} 인라인 + JS로 쿼리스트링 부착 */
-        const CHECK_BIZNO_URL = /*[[@{/com/checkBizNo}]]*/ "/com/checkBizNo";
+        const CHECK_BIZNO_URL = "/com/checkBizNo";
 
         fetch(CHECK_BIZNO_URL + "?bizNo=" + encodeURIComponent(bizNo))
             .then(res => res.json())
@@ -307,6 +373,89 @@
     }
     window.checkBizNo = checkBizNo;
 
+    /* 국세청 사업자등록정보 진위확인 (POST /api/util/bizno/verify) */
+    const VERIFY_BIZNO_URL = "/api/util/bizno/verify";
+
+    function verifyBizNo() {
+        const fields = currentBizFields();
+        const resultEl = document.getElementById('bizNoVerifyResult');
+        const btn = document.getElementById('verifyBizNoBtn');
+
+        const bizNoPattern = /^\d{3}-\d{2}-\d{5}$/;
+        if (!bizNoPattern.test(fields.bizNo)) {
+            resultEl.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> 사업자등록번호 형식을 먼저 확인해주세요.</span>';
+            return;
+        }
+        if (!fields.startDt) {
+            resultEl.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> 개업일자를 입력해주세요.</span>';
+            return;
+        }
+        if (!fields.ceoName) {
+            resultEl.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> 대표자명을 먼저 입력해주세요.</span>';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.classList.remove('btn-outline-warning', 'btn-outline-danger', 'btn-outline-success');
+        btn.classList.add('btn-outline-secondary');
+        resultEl.innerHTML = '<span class="text-faint"><span class="spinner-border spinner-border-sm"></span> 국세청에 확인 중...</span>';
+
+        const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        const fetchHeaders = { 'Content-Type': 'application/json' };
+        if (csrfToken && csrfHeader) {
+            fetchHeaders[csrfHeader] = csrfToken;
+        }
+
+        fetch(VERIFY_BIZNO_URL, {
+            method: 'POST',
+            headers: fetchHeaders,
+            body: JSON.stringify({ bizNo: fields.bizNo, startDt: fields.startDt, ceoName: fields.ceoName })
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+
+            if (!data || data.status_code !== 'OK' || !data.data || !data.data.length) {
+                verifiedSnapshot = null;
+                btn.classList.remove('btn-outline-secondary', 'btn-outline-warning');
+                btn.classList.add('btn-outline-danger');
+                resultEl.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> 진위확인 서비스 응답을 확인할 수 없습니다.</span>';
+                return;
+            }
+
+            const item = data.data[0];
+            if (item.valid === '01') {
+                /* [핵심] 검증 성공 시점의 값을 스냅샷으로 저장 -> 이후 값이 바뀌면 무효화됨 */
+                verifiedSnapshot = { bizNo: fields.bizNo, startDt: fields.startDt, ceoName: fields.ceoName };
+
+                let extra = '';
+                resultEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> 국세청에 등록된 사업자 정보와 일치합니다.' + extra + '</span>';
+                setValid(document.getElementById('bizNo'));
+                btn.classList.remove('btn-outline-warning', 'btn-outline-danger');
+                btn.classList.add('btn-outline-success');
+            } else {
+                verifiedSnapshot = null;
+                const msg = item.valid_msg || '입력하신 정보와 일치하는 사업자를 찾을 수 없습니다.';
+                resultEl.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + escapeHtml(msg) + '</span>';
+                setInvalid(document.getElementById('bizNo'), msg);
+                btn.classList.remove('btn-outline-secondary', 'btn-outline-warning', 'btn-outline-success');
+                btn.classList.add('btn-outline-danger');
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            resultEl.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> 진위확인 중 오류가 발생했습니다.</span>';
+        });
+    }
+    window.verifyBizNo = verifyBizNo;
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str == null ? '' : str;
+        return div.innerHTML;
+    }
+
     function setInvalid(el, message) {
         el.classList.remove('is-valid');
         el.classList.add('is-invalid');
@@ -321,6 +470,9 @@
     }
 })();
 </script>
+
+<!-- OCR 모달 전용 스크립트 (별도 파일) -->
+<script th:src="@{/js/com-ocr.js}"></script>
 </main>
 </body>
 </html>

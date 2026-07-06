@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -142,6 +145,7 @@ public class CompanyController {
 	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String edit(CompanyDto dto, 
 			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
+			Authentication auth,
 			RedirectAttributes rttr) {
 		String msg = "회사 정보 수정에 실패 하였습니다.";
 		// 새 파일을 안 올렸을 때 기존 로고 URL을 유지하기 위해 수정 전 데이터를 먼저 조회
@@ -167,7 +171,21 @@ public class CompanyController {
 		}
 		
 		rttr.addFlashAttribute("msg", msg);
-		return "redirect:/com/list";
+		
+		// 권한 문자열만 추출해서 비교
+		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+	    Set<String> authNames = user.getAuthorities().stream()
+	            .map(GrantedAuthority::getAuthority)
+	            .collect(Collectors.toSet());
+
+	    boolean isRoot = authNames.contains("ROOT");
+	    
+	    if(isRoot) {
+	    	return "redirect:/com/list";
+	    } else {
+	    	return "redirect:/com/my";
+	    }
+		
 	}
 	
 	// 회사 삭제 폼

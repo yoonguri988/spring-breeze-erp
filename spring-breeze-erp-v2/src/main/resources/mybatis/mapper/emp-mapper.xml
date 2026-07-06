@@ -168,7 +168,9 @@
 		select e.*, p.pos_name
 		from employee e
 		join emp_position p on e.pos_id = p.pos_id
-		where e.dept_id = #{deptId}
+		join department d on e.dept_id = d.dept_id
+		where d.dept_id = #{deptId} 
+		   or d.parent_id = #{deptId} 
 	</select>
 	<!-- cyj: 회사 아이디를 기준으로 권한 정보와 엮여있는 사원 정보 확인 -->
 	<select id="selectAuthByComId" resultType="EmpAuthDto">
