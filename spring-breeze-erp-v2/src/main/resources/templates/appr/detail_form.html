@@ -61,10 +61,10 @@
 					
 					<div class="mb-4 mt-2">
 						<label class="sb-form-label text-soft">양식 내용 미리보기</label>
-						<textarea class="form-control" rows="14" 
-								  style="font-family: 'Courier New', Courier, monospace; background-color: #fafafa; resize: none;" 
-								  th:text="${dto.forContent}"
-								  readonly></textarea>
+						<div class="approval-document-wrap p-4 border rounded"
+							 style="background-color: #ffffff; min-height: 350px; overflow-x: auto;">
+							<div th:utext="${dto.forContent}"></div>
+						</div>		  
 					</div>
 					
 					<div class="sb-divider"></div>

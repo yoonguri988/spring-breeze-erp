@@ -4,6 +4,7 @@
       layout:decorate="~{fragments/layout.html}">
 <head>
 	<title>결재 양식 관리</title>
+	<link rel="stylesheet" th:href="@{/css/summernote-lite.min.css}"/>
 </head>
 <body>
 
@@ -17,7 +18,7 @@
 				<span>양식 관리</span>
 			</div>
 			<h1>결재 양식 수정</h1>
-			<p>결재 양식 정보를 수정하고 저장합니다.</p>
+			<p>결재 양식 정보를 삭제 및 수정 저장합니다.</p>
 		</div>
 		<div class="sb-page-head__actions">
 			<button type="button" class="btn btn-ghost"
@@ -28,8 +29,9 @@
 	</div>
 	
 	<form th:action="@{/appr/update_form}" method="post" onsubmit="return checkForm()">
-		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+		<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 		<input type="hidden" name="forId" th:value="${dto.forId}">
+		<input type="hidden" name="forVersion" th:value="${dto.forVersion}">
 	
 		<div class="row g-8">
             <div class="col-lg-9">
@@ -52,11 +54,11 @@
 								<div class="tforCode"></div>
                         	</div>
 	                        <div class="col-md-6 position-relative">
-	                            <label for="companySearch"
+	                            <label for="comName"
 	                            	   class="sb-form-label">회사</label>
 	                            <div class="sb-search" style="max-width: 100%;">
 	                            	<i class="bi bi-building"></i>
-		                            <input type="text" id="companySearch"
+		                            <input type="text" id="comName"
 		                            	   th:value="${dto.comName}" autocomplete="off"/>
                            	    </div>
 	                            <input type="hidden" id="comId" name="comId" th:value="${dto.comId}" />	
@@ -64,9 +66,7 @@
 									 style="display: none; font-size: 14px;">
 									 추가할 회사를 선택해주세요
 								</div>
-	                            <div id="companyDropdown"
-	                            	 class="dropdown-menu w-100 shadow-sm"
-	                            	 style="display: none; max-height: 200px; overflow-y: auto; z-index: 1050;"></div>
+	                            <div class="ac-list" id="companyDropdown"></div>
 	                        </div>
                         </div>
                     
@@ -80,27 +80,31 @@
                            	<div id="err_forTitle" class="text-danger fw-semibold mt-1"
 							 style="display: none; font-size: 14px;">
 							 양식 제목을 입력해주세요
-					</div>
+							</div>
                         </div>
                         <div class="col-md-6">
-                            <label class="sb-form-label">사용 여부</label>
+                            <label class="sb-form-label">활성화 여부</label>
                             <div class="form-check form-switch mt-2">
                                 <input class="form-check-input sb-checkbox"
                                 	   type="checkbox" id="forStatus" name="forStatus"
                                 	   style="width: 40px; height: 20px;"
-                                	   th:checked="${dto.forStatus} ? 'checked' : ''">
-                                <input type="hidden" name="_forStatus" value="on"/>
+                                	   th:checked="${dto.forStatus == true}">
+                                <input type="hidden" name="_forStatus" value="off"/>
                                 <label class="form-check-label text-dark fw-semibold ms-2"
-                                	   for="forStatus" style="cursor: pointer; user-select: none;">사용</label>
+                                	   for="forStatus"
+                                	   style="cursor: pointer; user-select: none;">활성화</label>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-4">
                     	<label for="forContent" class="sb-form-label">양식 내용</label>
-                        <textarea class="form-control" id="forContent" name="forContent" rows="14" 
+                        <!-- <textarea class="form-control" id="forContent" name="forContent" rows="12" 
                                   style="font-family: 'Courier New', Courier, monospace; background-color: #fafafa; resize: vertical;"
-                                  th:text="${dto.forContent}"></textarea>
+                                  th:text="${dto.forContent}"></textarea> -->
+                        <textarea name="forContent" rows="10" cols="40"
+						      	  class="form-control" id="forContent"
+						      	  th:text="${dto.forContent}"></textarea>
                         <div id="err_forContent" class="text-danger fw-semibold mt-1"
 							 style="display: none; font-size: 14px;">
 							 양식 내용을 입력해주세요
@@ -111,7 +115,7 @@
                     
                     <div class="d-flex justify-content-between align-items-center">
 						<button type="button" class="btn btn-ghost text-danger" 
-						        th:onclick="|deleteForm('${dto.forId}')|">
+						        th:onclick="|deleteForm('${dto.forId}', '${dto.forVersion}')|">
 						     	<i class="bi bi-trash3"></i>삭제
 						</button>
 						<div class="d-flex gap-2">
@@ -136,15 +140,15 @@
                 <div class="sb-card__body">
                     <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
                         <span class="text-soft font-size-13">양식 ID</span>
-                        <span class="fw-750 tnum" th:text="${dto.forId}"></span>
+                        <span class="fw-bold tnum text-secondary" th:text="${dto.forId}"></span>
                     </div>
                     <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
                         <span class="text-soft font-size-13">생성일</span>
-                        <span class="fw-600 tnum text-dark" th:text="${dto.forCreated}"></span>
+                        <span class="tnum text-dark small" th:text="${dto.createdAt}"></span>
                     </div>
                     <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
                         <span class="text-soft font-size-13">수정일</span>
-                        <span class="fw-600 tnum text-dark" th:text="${dto.forUpdated}"></span>
+                        <span class="tnum text-dark small" th:text="${dto.updatedAt}"></span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-soft font-size-13">사용 여부</span>
@@ -160,7 +164,7 @@
                 	<div class="d-flex gap-2 align-items-start">
                     	<i class="bi bi-info-circle-fill text-primary mt-1"></i>
                     	<p class="m-0 text-soft" style="font-size: 12px;">
-                        	생성일과 수정일은 시스템에서 자동으로 관리됩니다.
+                        	해당 양식의 고유 정보 및 변경 이력입니다.
                     	</p>
 	                </div>
 	            </div>
@@ -168,86 +172,132 @@
 	    </div>
 	</div>	
 </form>
+
+	<!-- jquery 로드 -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	
+	<!-- js파일 로드 -->
+	<script th:src="@{/js/summernote-lite.min.js}"></script>
+	
+	<script>
+	/////////////////////////////// 웹 에디터 ///////////////////////////////
+	
+		(function(){
+			// 제이쿼리, 써머노트 메모리에 등록될때까지 확인
+			var initTimer = setInterval(function(){
+				if (typeof window.jQuery !== 'undefined' && window.jQuery.fn.summernote){
+					clearInterval(initTimer);
+					
+					// 써머노트 에디터 구동
+					window.jQuery('#forContent').summernote({
+						placeholder: '양식 내용을 입력해 주세요.',
+						tabsize: 2,
+						height: 350,
+						toolbar:[
+							['style',['style']],
+							['font', ['bold', 'italic', 'underline', 'clear']],
+							['color', ['color']],
+							['para', ['ul', 'ol', 'paragraph']],
+							['table', ['table']],
+							['insert', ['link', 'picture']],
+							['view', ['fullscreen', 'codeview']]
+						]
+					});
+					console.log("써머노트 구동테스트");
+				}
+			}, 50);
+		})();
+	
+	/////////////////////////////// 웹 에디터 ///////////////////////////////
+	</script>
+
 </div>
 <script>
 
 let valid = false;
 
-	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
-	window.addEventListener("load", function(){
-		
-		let companySearch = document.getElementById("companySearch");
-		let comId = document.getElementById("comId");
-		let companyDropdown = document.getElementById("companyDropdown");
-		let forCode = document.getElementById("forCode");
-		let tforCode = document.querySelector(".tforCode");
-		
-		if("${dto.forId}" != ""){
-			valid = true;
-		}
-		
-		// 입력 할때마다 실행
-		companySearch.addEventListener("keyup", function(e){
-			let value = e.target.value.trim();
-			
-			if(value !== "") {
-				// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
-				fetch("${pageContext.request.contextPath}/searchCompany?company=" + encodeURIComponent(value))
-				.then(response => response.json())
-				.then(data => {
-					console.log(data);
-					companyDropdown.innerHTML = ""; // 기존 목록 비우기
-					
-					if(data && data.length > 0){
-						companyDropdown.style.display = "block";
-						
-						data.forEach(item => {
-							let btn = document.createElement("button");
-							btn.type = "button";
-							btn.className = "dropdown-item";
-							btn.textContent = item.comName; // 보여줄 회사이름
-							
-							// 검색해서 나온 회사 이름 클릭
-							btn.addEventListener("click", function(){
-								companySearch.value = item.comName; // 회사이름 넣기
-								comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
-								companyDropdown.style.display = "none"; // 드롭다운 닫기
-							});
-							companyDropdown.appendChild(btn);
-						});
-					}
-					else{ // 검색결과 없을때
-						companyDropdown.innerHTML = "<span class='dropdown-item text-muted disabled'>검색 결과가 없습니다.</span>";
-						companyDropdown.style.display = "block";
-					}
-				})
-				.catch(error => {
-					console.error("회사 검색 오류:",error);
-					companyDropdown.style.display = "none";
-				});
-			}
-			else{ // 입력란 비어있을때 처리
-				comId.value = "";
-				companyDropdown.innerHTML = "";
-				companyDropdown.style.display = "none";
-				
-			}
-		});
-		// 입력창 외부공간 클릭시 정리
-		document.addEventListener("click", function(e){
-			if(e.target !== companySearch && e.target !== companyDropdown){
-				companyDropdown.style.display = "none";
-			}
-		});
-	});
+/////////////////////////////// 회사 이름 검색 ///////////////////////////////
+
+window.addEventListener("load", function(){
 	
-	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////
+	let companySearch = document.getElementById("comName");
+	let comId = document.getElementById("comId");
+	let companyDropdown = document.getElementById("companyDropdown");
+	
+	// 입력 할때마다 실행
+	companySearch.addEventListener("keyup", function(e){
+		let value = e.target.value.trim();
+		
+		if(value !== "") {
+			// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
+			fetch(`/searchCompany?company=${encodeURIComponent(value)}`)
+			.then(response => response.json())
+			.then(data => {
+				companyDropdown.innerHTML = ""; // 기존 목록 비우기
+				
+				if(data && data.length > 0){
+					companyDropdown.style.display = "block";
+					
+					data.forEach(item => {
+						let btn = document.createElement("button");
+						btn.type = "button";
+						btn.className = "dropdown-item d-flex justify-content-between align-items-center";
+						
+						// 태그 생성
+						let nameSpan = document.createElement("span");
+						// 생성된 태그에 클래스 추가
+						nameSpan.className = "company-name";
+						// 회사이름
+						btn.textContent = item.comName;
+						
+						// 위와 동일, 사업자 번호 파트
+						let bizSpan = document.createElement("span");
+						bizSpan.className = "text-muted small ms-2";
+						bizSpan.textContent = item.bizNo;
+						
+						// 삽입
+						btn.appendChild(nameSpan);
+						btn.appendChild(bizSpan);
+						
+						// 검색해서 나온 회사 이름 클릭
+						btn.addEventListener("click", function(){
+							companySearch.value = item.comName; // 회사이름 넣기
+							comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
+							companyDropdown.style.display = "none"; // 드롭다운 닫기
+						});
+						companyDropdown.appendChild(btn);
+					});
+				}
+				else{ // 검색결과 없을때
+					companyDropdown.innerHTML = "<span class='dropdown-item text-muted disabled'>검색 결과가 없습니다.</span>";
+					companyDropdown.style.display = "block";
+				}
+			})
+			.catch(error => {
+				console.error("회사 검색 오류:",error);
+				companyDropdown.style.display = "none";
+			});
+		}
+		else{ // 입력란 비어있을때 처리
+			comId.value = "";
+			companyDropdown.innerHTML = "";
+			companyDropdown.style.display = "none";
+			
+		}
+	});
+	// 입력창 외부공간 클릭시 정리
+	document.addEventListener("click", function(e){
+		if(e.target !== companySearch && e.target !== companyDropdown){
+			companyDropdown.style.display = "none";
+		}
+	});
+});
 	
 	///////////////////// 양식 삭제 재확인 /////////////////////
 	
-	function deleteForm(forId){
+	function deleteForm(forId,forVersion){
 		if(confirm("양식을 삭제하시겠습니까?")){
-			location.href = "${pageContext.request.contextPath}/appr/delete?forId=" + forId;						
+			location.href = "/appr/delete?forId=" + forId + "&forVersion=" + forVersion;						
 		}
 		else{
 			console.log("취소 확인");
@@ -353,11 +403,7 @@ let valid = false;
 			}
 			
 			if(value !== ""){
-				fetch("${pageContext.request.contextPath}/checkCode?code="
-						+ encodeURIComponent(value)
-						+ "&comId="
-						+ encodeURIComponent(comIdVal)
-						+ "&forId=${dto.forId}")
+				fetch(`/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}`)
 				.then( response => response.json() )
 				.then( data => {
 					
