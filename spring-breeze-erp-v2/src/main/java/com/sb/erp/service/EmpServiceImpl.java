@@ -110,7 +110,7 @@ public class EmpServiceImpl implements EmpService {
 	}
 	
 	// 본인 비밀번호 변경 - 현재 비번 검증 후 변경
-	// 반환값: -1(사원 없음), 0(현재 비번 불일치), 1(성공)
+	// 반환값: -1(사원 없음), 0(불일치), 1(성공)
 	@Override
 	public int changePassword(int empId, String currentPass, String newPass) {
 		String savedHash = dao.selectPassById(empId);

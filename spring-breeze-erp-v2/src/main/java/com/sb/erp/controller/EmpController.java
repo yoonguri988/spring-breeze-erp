@@ -32,9 +32,10 @@ public class EmpController {
 	
 	// ─── 목록 조회 (검색 + 페이징) ────────────────────
 	@GetMapping("/emp/list")
-	public String list(EmpSearchDto search, @RequestParam(value = "searched", required = false) String searched,
+	public String list(EmpSearchDto search, 
+			@RequestParam(value = "searched", required = false) String searched,
 			Model model) {
-
+		
 		boolean hasFilter = search.getDeptId() != null || search.getPosId() != null
 				|| (search.getEmpStatus() != null && !search.getEmpStatus().isEmpty())
 				|| (search.getKeyword() != null && !search.getKeyword().trim().isEmpty());
@@ -59,6 +60,8 @@ public class EmpController {
 		model.addAttribute("search", search);
 		model.addAttribute("posList", posService.selectAll());
 		model.addAttribute("deptList", deptService.selectAll());
+		model.addAttribute("loginEmpId", SecurityUtil.getCurrentEmpId());
+		model.addAttribute("isAdmin", SecurityUtil.isAdmin());
 		return "emp/list";
 	}
 	
@@ -66,11 +69,20 @@ public class EmpController {
 	// ─── 상세 조회 ──────────────────────────────────
 	@GetMapping("/emp/detail")
 	public String detail(@RequestParam int empId, Model model) {
+		int loginEmpId = SecurityUtil.getCurrentEmpId();
+	    boolean isAdmin = SecurityUtil.isAdmin();
+		
+	    // 본인이 혹은 관리자 여부 확인
+	    if (empId != loginEmpId && !isAdmin) {
+	        return "redirect:/emp/detail?empId=" + loginEmpId;
+	    }
+	    
 		EmpDto emp = empService.selectByEmpId(empId);
 		model.addAttribute("emp", emp);
 
 		// 본인 여부 판별용 loginEmpId 전달
-		model.addAttribute("loginEmpId", SecurityUtil.getCurrentEmpId());
+		model.addAttribute("loginEmpId", loginEmpId);
+		model.addAttribute("isAdmin", isAdmin);
 		return "emp/detail";
 	}
 	
@@ -93,14 +105,41 @@ public class EmpController {
 	// ─── 사원 정보 수정 ─────────────────────────────
 	@GetMapping("/emp/edit")
 	public String editForm(@RequestParam int empId, Model model) {
+		int loginEmpId = SecurityUtil.getCurrentEmpId();
+		boolean isAdmin = SecurityUtil.isAdmin();
+
+		// 본인이 아니고 관리자도 아니면 본인 수정 화면으로
+		if (empId != loginEmpId && !isAdmin) {
+			return "redirect:/emp/edit?empId=" + loginEmpId;
+		}
+		
 		model.addAttribute("emp", empService.selectByEmpId(empId));
 		model.addAttribute("posList", posService.selectAll());
 		model.addAttribute("deptList", deptService.selectAll());
+		model.addAttribute("isAdmin", isAdmin);
 		return "emp/edit";
 	}
 
 	@PostMapping("/emp/edit")
 	public String editProcess(EmpDto dto) {
+		int loginEmpId = SecurityUtil.getCurrentEmpId();
+		boolean isAdmin = SecurityUtil.isAdmin();
+
+		// 타인 정보 수정시도 차단
+		if (dto.getEmpId() != loginEmpId && !isAdmin) {
+			return "redirect:/emp/detail?empId=" + loginEmpId;
+		}
+		
+		// 본인 수정 시 관리자만 수정 가능한 필드는 무시 (덮어쓰기 방지)
+		if (!isAdmin) {
+			// 현재 저장된 값으로 보정
+			EmpDto current = empService.selectByEmpId(dto.getEmpId());
+			dto.setEmpName(current.getEmpName());
+			dto.setDeptId(current.getDeptId());
+			dto.setPosId(current.getPosId());
+			dto.setEmpStatus(current.getEmpStatus());
+		}
+		
 		empService.update(dto);
 		return "redirect:/emp/detail?empId=" + dto.getEmpId();
 	}
@@ -124,14 +163,30 @@ public class EmpController {
 	// ─── 비밀번호 변경 (본인) ────────────────────────
 	@GetMapping("/emp/editPass")
 	public String editPassForm(@RequestParam int empId, Model model) {
+		int loginEmpId = SecurityUtil.getCurrentEmpId();
+
+	    // 본인만 접근 가능 (관리자는 resetPass로)
+	    if (empId != loginEmpId) {
+	        return "redirect:/emp/detail?empId=" + loginEmpId;
+	    }
+	    
 		model.addAttribute("emp", empService.selectByEmpId(empId));
 		return "emp/editPass";
 	}
 
 	@PostMapping("/emp/editPass")
-	public String editPassProcess(@RequestParam int empId, @RequestParam String currentPass,
-			@RequestParam String editPass, @RequestParam String checkPass) {
-
+	public String editPassProcess(@RequestParam int empId, 
+			@RequestParam String currentPass,
+			@RequestParam String editPass, 
+			@RequestParam String checkPass) {
+		
+		int loginEmpId = SecurityUtil.getCurrentEmpId();
+	   
+		// 본인만 (URL 조작 방어)
+	    if (empId != loginEmpId) {
+	        return "redirect:/emp/detail?empId=" + loginEmpId;
+	    }
+		
 		// 새 비밀번호 일치 확인
 		if (!editPass.equals(checkPass)) {
 			return "redirect:/emp/editPass?empId=" + empId;
