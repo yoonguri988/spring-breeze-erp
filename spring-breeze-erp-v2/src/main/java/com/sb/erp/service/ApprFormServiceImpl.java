@@ -52,7 +52,13 @@ public class ApprFormServiceImpl implements ApprFormService {
 		
 		return dao.updateForm(dto);
 	}
-
+	
+	@Override
+	public int updateFormNewVersion(ApprFormDto dto) {
+		
+		return dao.updateFormNewVersion(dto);
+	}
+	
 	@Override
 	public int deleteForm(ApprFormDto dto) {
 		return dao.deleteForm(dto);

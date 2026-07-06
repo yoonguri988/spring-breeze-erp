@@ -60,8 +60,8 @@
 		)
 	</insert>
 	
-	<!-- 결재 양식 수정 -->
-	<!-- <update id="updateForm" parameterType="ApprFormDto">
+	<!-- 결재 양식 수정 / 양식이 수정되지 않았을때 ( 버전 x ) -->
+	<update id="updateForm" parameterType="ApprFormDto">
 		update appr_form
 		set
 			com_id = #{comId},
@@ -70,8 +70,10 @@
 			for_content = #{forContent},
 			for_status = #{forStatus}
 		where for_id = #{forId} and for_version = #{forVersion}
-	</update> -->
-	<insert id="updateForm" parameterType="ApprFormDto">
+	</update>
+	
+	<!-- 결재 양식 수정 / 양식이 수정되었을때 ( 버전 o ) -->
+	<insert id="updateFormNewVersion" parameterType="ApprFormDto">
 		insert into appr_form
 		(
 			for_id,
