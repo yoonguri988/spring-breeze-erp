@@ -42,10 +42,10 @@ window.addEventListener("load",function(){
     <input type="hidden" name="proStatus" id="proStatus" th:value="${search.proStatus}">
 
     <div class="sb-segment">
-      <a href="#" onclick="setStatus(''); return false;" th:classappend="${param.proStatus == null or #strings.isEmpty(param.proStatus)} ? 'active' : ''">전체</a>
-      <a href="#" onclick="setStatus('TODO'); return false;" th:classappend="${param.proStatus=='TODO'} ? 'active' : ''"><span class="sb-dot" style="background:var(--sb-ink-faint);width:6px;height:6px;"></span> TODO</a>
-      <a href="#" onclick="setStatus('DOING'); return false;" th:classappend="${param.proStatus=='DOING'} ? 'active' : ''"><span class="sb-dot" style="background:var(--sb-accent);width:6px;height:6px;"></span> DOING</a>
-      <a href="#" onclick="setStatus('DONE'); return false;" th:classappend="${param.proStatus=='DONE'} ? 'active' : ''"><span class="sb-dot" style="background:var(--sb-green);width:6px;height:6px;"></span> DONE</a>
+     <a href="#" onclick="setStatus(''); return false;" th:classappend="${search.proStatus == null or #strings.isEmpty(search.proStatus)} ? 'active' : ''">전체</a>
+	 <a href="#" onclick="setStatus('TODO'); return false;" th:classappend="${search.proStatus=='TODO'} ? 'active' : ''">· TODO</a>
+	 <a href="#" onclick="setStatus('DOING'); return false;" th:classappend="${search.proStatus=='DOING'} ? 'active' : ''">· DOING</a>
+   	 <a href="#" onclick="setStatus('DONE'); return false;" th:classappend="${search.proStatus=='DONE'} ? 'active' : ''">· DONE</a>
     </div>
 
     <div class="grow"></div>
