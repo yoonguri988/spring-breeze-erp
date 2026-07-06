@@ -18,7 +18,7 @@ public class SecurityConfig {
 	// http 경로 설정
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http, PasswordEncoder passEncoder) throws Exception {
-<<<<<<< HEAD
+
 		http// 1. 허용경로
 			.authorizeHttpRequests(auth -> auth
 					// ─── 정적 리소스 + 인증 관련 ───────────

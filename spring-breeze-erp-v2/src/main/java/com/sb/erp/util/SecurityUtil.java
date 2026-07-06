@@ -31,22 +31,17 @@ public class SecurityUtil {
 		return 0;
 	}
 
-	// 현재 로그인 사용자가 ROOT 또는 ROLE_ADMIN 권한을 가졌는지 확인(보고 합치기)
-	public static boolean isAdmin() {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth == null || !auth.isAuthenticated()) { return false; }
-		
-		return auth.getAuthorities().stream().anyMatch(a -> {
-			String role = a.getAuthority();
-			return role.equals("ROOT") || role.equals("ROLE_ADMIN");
-		});
+	// 현재 로그인 사용자가 ROOT 또는 ROLE_ADMIN 권한을 가졌는지 확인
+	public static boolean isAdminOrRoot(Authentication auth) {
+	    if (auth == null || !auth.isAuthenticated()) return false;
+	    return auth.getAuthorities().stream()
+	        .anyMatch(a -> a.getAuthority().equals("ROOT")
+	                    || a.getAuthority().equals("ROLE_ADMIN"));
 	}
 
-	public static boolean isAdminOrRoot(Authentication auth) {
-        if (auth == null) return false;
-        return auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROOT")
-                            || a.getAuthority().equals("ROLE_ADMIN"));
-    }
+	public static boolean isAdmin() {
+	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    return isAdminOrRoot(auth);
+	}
 
 }
