@@ -2,7 +2,10 @@ package com.sb.erp.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,13 +19,14 @@ import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
 
 @Controller
+@RequestMapping("/dept")
 public class DeptController {
 	@Autowired DeptService service;
 	@Autowired CompanyService comService;
 	@Autowired EmpService empService;
 	
 	// 부서 목록 
-	@RequestMapping(value="/dept/list", method=RequestMethod.GET)
+	@GetMapping("/list")
 	public String orgTree(int comId, Model model) {
 		CompanyDto com = comService.selectOneById(comId);
 		
@@ -36,7 +40,7 @@ public class DeptController {
 	}
 	
 	// 부서 등록 폼
-	@RequestMapping(value="/dept/add", method=RequestMethod.GET)
+	@GetMapping("/add")
 	public String addForm(@RequestParam("comId") int comId, Model model) {
 		CompanyDto com = comService.selectOneById(comId);
 		model.addAttribute("deptList", service.selectOrgTree(comId));
@@ -45,7 +49,7 @@ public class DeptController {
 	}
 	
 	// 부서 등록 기능
-	@RequestMapping(value="/dept/add", method=RequestMethod.POST)
+	@PostMapping("/add")
 	public String addForm_post(@RequestParam("comId") int comId, DeptDto dto, RedirectAttributes rttr) {
 		String msg = "부서 등록에 실패하였습니다.";
 		if(service.insert(dto) > 0) { msg = "부서등록에 성공하였습니다."; }
@@ -54,7 +58,7 @@ public class DeptController {
 	}
 	
 	// 부서 수정 폼
-	@RequestMapping(value="/dept/edit", method=RequestMethod.GET)
+	@GetMapping("/edit")
 	public String editForm(
 			@RequestParam("deptId") int deptId, 
 			@RequestParam("comId") int comId, 
@@ -70,7 +74,7 @@ public class DeptController {
 	}
 	
 	// 부서 수정 기능
-	@RequestMapping(value="/dept/edit", method=RequestMethod.POST)
+	@PostMapping("/edit")
 	public String editForm_post(int deptId, int comId, DeptDto dto, RedirectAttributes rttr) {
 		DeptDto se = service.selectOneById(deptId);
 		try {
@@ -83,7 +87,7 @@ public class DeptController {
 	}
 	
 	//부서 삭제 기능
-	@RequestMapping(value="/dept/delete", method=RequestMethod.POST)
+	@PostMapping("/delete")
 	public String delete_post(int deptId, RedirectAttributes rttr) {
 		DeptDto dto = service.selectOneById(deptId);
 		try {
@@ -96,8 +100,10 @@ public class DeptController {
 	}
 	
 	// 부서 상세 조회
-	@RequestMapping(value="/dept/detail", method=RequestMethod.GET)
+	@GetMapping("/detail")
 	public String detail(@RequestParam("deptId") int deptId, Model model) {
+		//계층 경로
+		model.addAttribute("ancestorChain", service.getAncestorChain(deptId));
 		model.addAttribute("dept", service.selectOneById(deptId));
 		model.addAttribute("deptEmpList", empService.selectByDeptId(deptId));
 		return "/dept/detail";

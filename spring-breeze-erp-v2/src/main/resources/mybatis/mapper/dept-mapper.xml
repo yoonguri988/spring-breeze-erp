@@ -11,11 +11,11 @@
 
 	<!-- 부서 전체 조회 -->
 	<select id="selectAll" resultType="DeptDto" parameterType="int">
-		WITH RECURSIVE dept_path AS (
+		WITH dept_path (ancestor_id, descendant_id, root_id) AS (
 		    SELECT 
-		        dept_id AS ancestor_id, 
-		        dept_id AS descendant_id,
-		        dept_id AS root_id
+		        dept_id, 
+		        dept_id,
+		        dept_id
 		    FROM department
 		    WHERE com_id = #{comId}
 		    UNION ALL
@@ -26,18 +26,18 @@
 		    FROM dept_path dp
 		    JOIN department d ON d.parent_id = dp.descendant_id
 		),
-		dept_order AS (
+		dept_order (dept_id, parent_id, sort_path) AS (
 		    SELECT 
 		        dept_id, 
 		        parent_id,
-		        CAST(LPAD(dept_id, 5, '0') AS CHAR(255)) AS sort_path
+		        CAST(LPAD(TO_CHAR(dept_id), 5, '0') AS VARCHAR2(255))
 		    FROM department
 		    WHERE parent_id IS NULL AND com_id = #{comId}
 		    UNION ALL
 		    SELECT 
 		        d.dept_id,
 		        d.parent_id,
-		        CONCAT(o.sort_path, '-', LPAD(d.dept_id, 5, '0'))
+		        o.sort_path || '-' || LPAD(TO_CHAR(d.dept_id), 5, '0')
 		    FROM department d
 		    JOIN dept_order o ON d.parent_id = o.dept_id
 		)
@@ -51,7 +51,7 @@
 		    COUNT(e.emp_id)                AS empCount
 		FROM dept_path dp
 		JOIN department d              ON d.dept_id = dp.ancestor_id
-		JOIN dept_order o               ON o.dept_id = d.dept_id
+		JOIN dept_order o              ON o.dept_id = d.dept_id
 		LEFT JOIN department dp_parent ON dp_parent.dept_id = d.parent_id
 		LEFT JOIN employee leader      ON leader.emp_id = d.emp_id
 		LEFT JOIN employee e           ON e.dept_id = dp.descendant_id
@@ -63,11 +63,11 @@
 
 	<!-- id 값을 통해 부서 하나 조회 -->
 	<select id="selectOneById" resultType="DeptDto">
-		WITH RECURSIVE dept_path AS (
+		WITH dept_path (ancestor_id, descendant_id, root_id) AS (
 		    SELECT 
-		        dept_id AS ancestor_id, 
-		        dept_id AS descendant_id,
-		        dept_id AS root_id
+		        dept_id, 
+		        dept_id,
+		        dept_id
 		    FROM department
 		    UNION ALL
 		    SELECT 
@@ -77,42 +77,42 @@
 		    FROM dept_path dp
 		    JOIN department d ON d.parent_id = dp.descendant_id
 		),
-		dept_order AS (
+		dept_order (dept_id, parent_id, sort_path) AS (
 		    SELECT 
 		        dept_id, 
 		        parent_id,
-		        CAST(LPAD(dept_id, 5, '0') AS CHAR(255)) AS sort_path
+		        CAST(LPAD(TO_CHAR(dept_id), 5, '0') AS VARCHAR2(255))
 		    FROM department
 		    WHERE parent_id IS NULL
 		    UNION ALL
 		    SELECT 
 		        d.dept_id,
 		        d.parent_id,
-		        CONCAT(o.sort_path, '-', LPAD(d.dept_id, 5, '0'))
+		        o.sort_path || '-' || LPAD(TO_CHAR(d.dept_id), 5, '0')
 		    FROM department d
 		    JOIN dept_order o ON d.parent_id = o.dept_id
 		)
 		SELECT
 		    d.dept_id, d.dept_name, d.dept_code,
-		    d.depth, d.sort_order,  d.com_id,
+		    d.depth, d.sort_order, d.com_id,
 		    d.parent_id                    AS parent_id,
 		    dp_parent.dept_name            AS parent_name,
 		    d.emp_id                       AS leader_id,
 		    leader.emp_name                AS leader_name,
-		    leader.emp_no                AS leader_emp_no,
-		    leader_p.pos_name                AS leader_pos_name,            
+		    leader.emp_no                  AS leader_emp_no,
+		    leader_p.pos_name              AS leader_pos_name,
 		    COUNT(e.emp_id)                AS empCount
 		FROM dept_path dp
 		JOIN department d              ON d.dept_id = dp.ancestor_id
-		JOIN dept_order o               ON o.dept_id = d.dept_id
+		JOIN dept_order o              ON o.dept_id = d.dept_id
 		LEFT JOIN department dp_parent ON dp_parent.dept_id = d.parent_id
 		LEFT JOIN employee leader      ON leader.emp_id = d.emp_id
-        LEFT JOIN emp_position leader_p on leader_p.pos_id = leader.pos_id
-		LEFT JOIN employee e           ON e.dept_id = dp.descendant_id
-		where d.dept_id = #{deptId}
+		LEFT JOIN emp_position leader_p ON leader_p.pos_id = leader.pos_id
+		LEFT JOIN employee e            ON e.dept_id = dp.descendant_id
+		WHERE d.dept_id = #{deptId}
 		GROUP BY
-		    d.dept_id, d.dept_name, d.dept_code, d.depth, d.sort_order, d.parent_id,
-		    dp_parent.dept_name, d.emp_id, leader.emp_name, o.sort_path
+		    d.dept_id, d.dept_name, d.dept_code, d.depth, d.sort_order, d.com_id, d.parent_id,
+		    dp_parent.dept_name, d.emp_id, leader.emp_name, leader.emp_no, leader_p.pos_name, o.sort_path
 		ORDER BY o.sort_path
 	</select>
 
@@ -129,7 +129,7 @@
 	<insert id="insert" parameterType="DeptDto">
 		insert into department (com_id, parent_id, dept_name, dept_code,
 		depth, sort_order)
-		value (#{comId},
+		values (#{comId},
 		<choose>
 			<when test="parentId == null or parentId == 0">NULL</when>
 			<otherwise>#{parentId}</otherwise>
@@ -152,20 +152,21 @@
 	<!-- 부서 수정 -->
 	<update id="update" parameterType="DeptDto">
 		update department
-		set dept_name = #{deptName}
-		, dept_code = #{deptCode}
-		<choose>
-			<when test="parentId == null or parentId == 0">, parent_id = NULL</when>
-			<otherwise>, parent_id = #{parentId}</otherwise>
-		</choose>
-		, depth = #{depth}
-		<if test="empId != null">, emp_Id = #{empId}</if>
+		<set>
+			<if test="deptName != null">dept_name = #{deptName},</if>
+			<if test="deptCode != null">dept_code = #{deptCode},</if>
+			<choose>
+				<when test="parentId == null or parentId == 0">parent_id = NULL,</when>
+				<otherwise>parent_id = #{parentId},</otherwise>
+			</choose>
+			<if test="depth != null">depth = #{depth},</if>
+			<if test="empId != null">emp_Id = #{empId},</if>
+		</set>
 		where dept_id = #{deptId}
 	</update>
 
 	<!-- 하위부서 조회 -->
-	<select id="selectAllChildIds" resultType="DeptDto"
-		parameterType="int">
+	<select id="selectAllChildIds" resultType="DeptDto" parameterType="int">
 		with recursive childTree as (
 		select dept_id
 		from department
@@ -181,10 +182,19 @@
 
 	<!-- 부서 통계 데이터 조회 -->
 	<select id="selectStats" resultType="StatsDeptDto">
-	    SELECT
-        (SELECT COUNT(*) FROM department WHERE com_id = #{comId}) AS deptTotal,
-        (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND depth = 0) AS dept0Total,
-        (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND depth = 1) AS dept1Total,
-        (SELECT COUNT(*) FROM employee WHERE com_id = #{comId} AND emp_status = '재직') AS empTotal
+		SELECT
+        (SELECT COUNT(*) FROM department WHERE com_id = 1) AS deptTotal,
+        (SELECT COUNT(*) FROM department WHERE com_id = 1 AND depth = 1) AS dept1Total,
+        (SELECT COUNT(*) FROM department WHERE com_id = 1 AND depth in (2,3)) AS dept2Total,
+        (SELECT COUNT(*) FROM employee WHERE com_id = 1 AND emp_status = '재직') AS empTotal
+        from DUAL
+	</select>
+	
+	<select id="countByDept" parameterType="int">
+		SELECT COUNT(*) 
+		FROM EMPLOYEE E
+		JOIN DEPARTMENT D
+		ON E.DEPT_ID = D.DEPT_ID
+		WHERE E.DEPT_ID = #{deptId}
 	</select>
 </mapper>
