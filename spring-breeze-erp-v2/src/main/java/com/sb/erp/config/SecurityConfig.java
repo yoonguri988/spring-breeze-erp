@@ -38,8 +38,13 @@ public class SecurityConfig {
 							"/emp/checkEmail", "/emp/checkMobile",
 							"/emp/checkEmpNo", "/perm/**", "/pos/**").hasRole("ADMIN")
 				    // ─── 그 외 ────────────────
-				    .anyRequest().permitAll())
-				
+				    .anyRequest().permitAll()
+				)
+				// 권한이 없는 페이지(403)에 접근했을 경우
+				.exceptionHandling(ex -> ex.accessDeniedHandler((request, response, accessDeniedException) -> {
+					request.getSession().setAttribute("accessDeniedMsg", "접근 권한이 없습니다.");
+					response.sendRedirect(request.getContextPath() + "/");
+				}))
 				// 2. 로그인처리
 				.formLogin(form -> form.loginPage("/auth/login")
 						.loginProcessingUrl("/auth/login")
