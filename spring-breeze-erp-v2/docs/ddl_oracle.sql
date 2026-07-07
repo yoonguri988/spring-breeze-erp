@@ -6,7 +6,7 @@ DROP TABLE com_resource CASCADE CONSTRAINTS;
 DROP TABLE notice CASCADE CONSTRAINTS;
 DROP TABLE task CASCADE CONSTRAINTS;
 DROP TABLE project_member CASCADE CONSTRAINTS;
-DROP TABLE project CASCADE CONSTRAINTS;
+DROP TABLE project CASCADE CONSTRAINTS; 
 DROP TABLE appr_line CASCADE CONSTRAINTS;
 DROP TABLE appr_doc CASCADE CONSTRAINTS;
 DROP TABLE appr_form CASCADE CONSTRAINTS;
@@ -16,6 +16,7 @@ DROP TABLE employee CASCADE CONSTRAINTS;
 DROP TABLE emp_position CASCADE CONSTRAINTS;
 DROP TABLE department CASCADE CONSTRAINTS;
 DROP TABLE company CASCADE CONSTRAINTS;
+
 
 -- 기존 시퀀스 삭제 (필요 시 주석 해제 후 사용)
 DROP SEQUENCE seq_company;
@@ -31,7 +32,7 @@ DROP SEQUENCE seq_project;
 DROP SEQUENCE seq_project_member;
 DROP SEQUENCE seq_task;
 DROP SEQUENCE seq_notice;
-DROP SEQUENCE seq_resource;
+DROP SEQUENCE seq_com_resource;
 DROP SEQUENCE seq_reservation;
 
 
@@ -560,24 +561,32 @@ CREATE INDEX fk_notice_employee1_idx ON notice (emp_id);
 CREATE INDEX fk_notice_company1_idx  ON notice (com_id);
 
 -- ==========================================
--- 14. 자원관리 (com_resource) - 예약어 우회 반영
+-- 14. 자원관리 (com_resource)
 -- ==========================================
 CREATE TABLE com_resource (
-  res_id      NUMBER NOT NULL,
-  com_id      NUMBER NOT NULL,
-  res_code    VARCHAR2(50) NOT NULL,
-  res_name    VARCHAR2(100) NOT NULL,
-  res_type    VARCHAR2(20) NOT NULL,
-  quantity    NUMBER NOT NULL,
-  remark      VARCHAR2(255),
-  created_at  DATE DEFAULT SYSDATE,
-  updated_at  DATE DEFAULT SYSDATE,
+  res_id          NUMBER NOT NULL,
+  com_id          NUMBER NOT NULL,
+  res_code        VARCHAR2(50) NOT NULL,
+  res_name        VARCHAR2(100) NOT NULL,
+  res_type        VARCHAR2(20) NOT NULL,
+  quantity        NUMBER NOT NULL,
+  location        VARCHAR2(200),                 -- [신규] 위치 (예: 본관 3층, 지하주차장 차고)
+  capacity        NUMBER,                        -- [신규] 수용인원 (ROOM 타입에서 주로 사용, EQUIPMENT/VEHICLE는 NULL 허용)
+  res_status      VARCHAR2(20) DEFAULT 'AVAILABLE' NOT NULL,  -- [신규] AVAILABLE / MAINTENANCE / DISABLED
+  manager_emp_id  NUMBER,                        -- [신규] 자원 담당자 (employee FK, nullable)
+  remark          VARCHAR2(255),
+  created_at      DATE DEFAULT SYSDATE,
+  updated_at      DATE DEFAULT SYSDATE,
   CONSTRAINT pk_com_resource PRIMARY KEY (res_id),
   CONSTRAINT uq_com_resource_com_code UNIQUE (com_id, res_code),
-  CONSTRAINT ck_com_resource_type CHECK (res_type IN ('ROOM','EQUIPMENT')),
+  CONSTRAINT ck_com_resource_type CHECK (res_type IN ('ROOM','EQUIPMENT','VEHICLE')),
   CONSTRAINT ck_com_resource_qty CHECK (quantity >= 0),
+  CONSTRAINT ck_com_resource_capacity CHECK (capacity IS NULL OR capacity > 0),
+  CONSTRAINT ck_com_resource_status CHECK (res_status IN ('AVAILABLE','MAINTENANCE','DISABLED')),
   CONSTRAINT fk_com_resource_company1
-    FOREIGN KEY (com_id) REFERENCES company (com_id)
+    FOREIGN KEY (com_id) REFERENCES company (com_id),
+  CONSTRAINT fk_com_resource_manager1
+    FOREIGN KEY (manager_emp_id) REFERENCES employee (emp_id)
 );
  
 CREATE SEQUENCE seq_com_resource START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
@@ -599,29 +608,40 @@ BEGIN
   :NEW.updated_at := SYSDATE;
 END;
 /
+ 
+CREATE INDEX fk_com_resource_manager1_idx ON com_resource (manager_emp_id);
 
 -- ==========================================
 -- 15. 자원예약 (reservation)
 -- ==========================================
 CREATE TABLE reservation (
-  rev_id      NUMBER NOT NULL,
-  res_id      NUMBER NOT NULL,
-  com_id      NUMBER NOT NULL,
-  emp_id      NUMBER NOT NULL,
-  quantity    NUMBER NOT NULL,
-  status      VARCHAR2(10) DEFAULT 'WAI' NOT NULL,
-  req_date    DATE,
-  remark      VARCHAR2(255),
-  updated_at  DATE DEFAULT SYSDATE,
+  rev_id          NUMBER NOT NULL,
+  res_id          NUMBER NOT NULL,
+  com_id          NUMBER NOT NULL,
+  emp_id          NUMBER NOT NULL,
+  quantity        NUMBER NOT NULL,
+  status          VARCHAR2(10) DEFAULT 'WAI' NOT NULL,   -- WAI(대기) / APP(승인) / REJ(반려)
+  start_dt        TIMESTAMP NOT NULL,             -- [신규] 예약 시작 일시 (충돌 감지의 전제조건)
+  end_dt          TIMESTAMP NOT NULL,              -- [신규] 예약 종료 일시
+  return_dt       TIMESTAMP,                       -- [신규] 실제 반납 일시 (EQUIPMENT/VEHICLE, 승인 후 채워짐)
+  approved_emp_id NUMBER,                          -- [신규] 승인/반려 처리자 (employee FK, nullable)
+  approved_at     DATE,                            -- [신규] 승인/반려 처리 일시
+  reject_reason   VARCHAR2(500),                   -- [신규] 반려 사유
+  remark          VARCHAR2(255),                   -- 신청자 비고 (승인/반려 사유와 분리됨)
+  created_at      DATE DEFAULT SYSDATE NOT NULL,    -- [신규] 예약 신청 생성일시
+  updated_at      DATE DEFAULT SYSDATE,
   CONSTRAINT pk_reservation PRIMARY KEY (rev_id),
   CONSTRAINT ck_reservation_status CHECK (status IN ('WAI','APP','REJ')),
   CONSTRAINT ck_reservation_qty CHECK (quantity > 0),
+  CONSTRAINT ck_reservation_dates CHECK (end_dt >= start_dt),
   CONSTRAINT fk_reservation_employee1
     FOREIGN KEY (emp_id) REFERENCES employee (emp_id),
+  CONSTRAINT fk_reservation_approver1
+    FOREIGN KEY (approved_emp_id) REFERENCES employee (emp_id),
   CONSTRAINT fk_reservation_company1
     FOREIGN KEY (com_id) REFERENCES company (com_id),
   CONSTRAINT fk_reservation_com_resource1
-    FOREIGN KEY (res_id) REFERENCES com_resource (res_id) -- 변경된 테이블 참조
+    FOREIGN KEY (res_id) REFERENCES com_resource (res_id)
 );
  
 CREATE SEQUENCE seq_reservation START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
@@ -645,5 +665,10 @@ END;
 /
  
 CREATE INDEX fk_reservation_employee1_idx ON reservation (emp_id);
-CREATE INDEX fk_reservation_company1_idx  ON reservation (com_id);
-CREATE INDEX fk_reservation_resource1_idx ON reservation (res_id);
+CREATE INDEX fk_reservation_approver1_idx  ON reservation (approved_emp_id);
+CREATE INDEX fk_reservation_company1_idx   ON reservation (com_id);
+CREATE INDEX fk_reservation_resource1_idx  ON reservation (res_id);
+ 
+-- 시간대 충돌 감지 조회에 자주 쓰이는 복합 인덱스
+-- (같은 자원(res_id)에 대해 특정 시간대와 겹치는 예약이 있는지 조회할 때 사용)
+CREATE INDEX ix_reservation_res_time ON reservation (res_id, start_dt, end_dt);
