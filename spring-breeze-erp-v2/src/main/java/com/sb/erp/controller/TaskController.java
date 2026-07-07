@@ -26,9 +26,9 @@ public class TaskController {
 	@Autowired EmpService empservice;
 
 	@GetMapping("/task_create")
-	public String createFrom(@RequestParam int project_pro_id, Model model) {
-		model.addAttribute("memberlist",memberservice.selectByproject(project_pro_id));
-		model.addAttribute("pro_id",project_pro_id);
+	public String createFrom(@RequestParam("project_pro_id") int projectProId, Model model) {
+		model.addAttribute("memberlist",memberservice.selectByproject(projectProId));
+		model.addAttribute("pro_id",projectProId);
 		return "proj/task_create"; // 프로젝트 멤버 이름 출력
 	}
 	
@@ -53,18 +53,18 @@ public class TaskController {
 	 	} // 태스크 등록
 	
 	  @GetMapping("/task_detail") 
-	 public String view(int task_id,Model model) {
-	 TaskDto dto = service.select(task_id);
-	  model.addAttribute("dto",service.select(task_id));
+	 public String view(@RequestParam("task_id") int taskId,Model model) {
+	 TaskDto dto = service.select(taskId);
+	  model.addAttribute("dto",service.select(taskId));
 	  model.addAttribute("pro_id", dto.getProId());
 	  return "proj/task_detail";
 	  } //해당 태스크 상세
 	 	  
 	 @GetMapping("/task_edit") 
-	 public String taskEditView(int task_id,int project_pro_id, Model model) {
-		  model.addAttribute("dto",service.taskEditView(task_id));
-		  model.addAttribute("memberlist",memberservice.selectByproject(project_pro_id));
-		  model.addAttribute("pro_id",project_pro_id);
+	 public String taskEditView(@RequestParam("task_id") int taskId,@RequestParam("project_pro_id") int projectProId, Model model) {
+		  model.addAttribute("dto",service.taskEditView(taskId));
+		  model.addAttribute("memberlist",memberservice.selectByproject(projectProId));
+		  model.addAttribute("pro_id",projectProId);
 		  return "proj/task_edit";  }//태스크 수정뷰
 		  
 	  
@@ -77,10 +77,10 @@ public class TaskController {
 	  } //태스크 수정폼
 	  
 	  @GetMapping("/task_delete")
-	  public String delete(int task_id, @RequestParam("pro_id")int pro_id,RedirectAttributes rttr) {
+	  public String delete(@RequestParam("task_id") int taskId, @RequestParam("pro_id") int proId,RedirectAttributes rttr) {
 		  String result="태스크 삭제 실패";
-		  if(service.delete(task_id)>0) {result="태스크 삭제 성공";}
+		  if(service.delete(taskId)>0) {result="태스크 삭제 성공";}
 		  rttr.addFlashAttribute("result",result);
-		  return "redirect:/proj/proj_detail?pro_id="+pro_id;
+		  return "redirect:/proj/proj_detail?pro_id="+proId;
 	  }// 태스크 삭제
 }
