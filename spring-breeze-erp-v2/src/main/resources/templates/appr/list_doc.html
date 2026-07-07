@@ -22,17 +22,17 @@
 			<p>내가 기안/결재한 문서 및 결재 대기 중인 문서를 확인합니다.</p>
 		</div>
 		<div class="sb-page-head__actions">
-			<button type="button" class="btn btn-sb" th:onclick="|loaction.href='@{appr/write_doc}'|">
+			<button type="button" class="btn btn-sb" th:onclick="|location.href='@{/appr/write_doc}'|">
 				<i class="bi bi-pencil-square"></i> 새 결재 기안
 			</button>
 		</div>
 	</div>
 	
-	<!-- 문서 상태별 대시보드 / 이부분도 백단위 만들면 th:text 기입 -->
+	<!-- 문서 상태별 대시보드 -->
 	<div class="row g-3 mb-4">
 	
 		<div class="col-12 col-md-3">
-			<div class="sb-card h-100 p-3 d-flex align-item center">
+			<div class="sb-card h-100 p-3 d-flex align-item-center">
 				<div class="rounded-3 p-3 bg-primary-subtle text-primary me-3 d-flex align-items-center justify-content-center"
 					 style="width: 54px; height: 54px;">
 				<i class="bi bi-folder2-open fs-3"></i>
@@ -40,7 +40,8 @@
 				<div>
 					<div class="text-muted small fw-medium mb-1">전체 문서</div>
 					<div class="fs-4 fw-bold text-dark">
-						<span class="tnum">24</span>
+						<span class="tnum"
+							  th:text="${docCnts != null ? docCnts.TOTALCNT : 0}">0</span>
 						<span class="fs-6 fw-normal text-secondary">건</span>
 					</div>
 				</div>
@@ -54,9 +55,10 @@
 				<i class="bi bi-hourglass-split fs-3"></i>
 				</div>
 				<div>
-					<div class="text-muted small fw-medium mb-1">대기 (WAI)</div>
+					<div class="text-muted small fw-medium mb-1">대기</div>
 					<div class="fs-4 fw-bold text-dark">
-						<span class="tnum">24</span>
+						<span class="tnum"
+							  th:text="${docCnts != null ? docCnts.WAICNT : 0}">0</span>
 						<span class="fs-6 fw-normal text-secondary">건</span>
 					</div>
 				</div>
@@ -70,9 +72,10 @@
 				<i class="bi bi-check-lg fs-3"></i>
 				</div>
 				<div>
-					<div class="text-muted small fw-medium mb-1">승인 (APR)</div>
+					<div class="text-muted small fw-medium mb-1">승인</div>
 					<div class="fs-4 fw-bold text-dark">
-						<span class="tnum">24</span>
+						<span class="tnum"
+						      th:text="${docCnts != null ? docCnts.APPCNT : 0}">0</span>
 						<span class="fs-6 fw-normal text-secondary">건</span>
 					</div>
 				</div>
@@ -86,9 +89,10 @@
 				<i class="bi bi-x-lg fs-3"></i>
 				</div>
 				<div>
-					<div class="text-muted small fw-medium mb-1">전체 문서</div>
+					<div class="text-muted small fw-medium mb-1">반려</div>
 					<div class="fs-4 fw-bold text-dark">
-						<span class="tnum">24</span>
+						<span class="tnum"
+							  th:text="${docCnts != null ? docCnts.REJCNT : 0}">0</span>
 						<span class="fs-6 fw-normal text-secondary">건</span>
 					</div>
 				</div>
@@ -118,19 +122,173 @@
 		</div>
 	</div>
 	
-	<!-- 탭 메뉴 / 백 단위 처리하고 타임리프 구문 추가해야함-->
+	<!-- 탭 메뉴 -->
 	<div class="sb-tabs">
 		<div class="sb-tab active" data-tab="tab-my-history">
 			<i class="bi bi-archive-fill"></i> 내가 결재했던 모든 문서
-			<span class="sb-nav__badge bg-secondary text-white"></span>
+			<span class="sb-nav__badge bg-secondary text-white"
+				  th:text="${hisDocs != null ? hisDocs.size() : 0}">0</span>
 		</div>
 		<div class="sb-tab" data-tab="tab-my-todo">
 			<i class="bi bi-file-earmark-check-fill"></i> 내가 결재해야 할 문서
-			<span class="sb-nav__badge"></span>
+			<span class="sb-nav__badge"
+				  th:text="${todoDocs != null ? todoDocs.size() : 0}">0</span>
+		</div>
+	</div>
+	
+	<!-- 내가 했던 문서 -->
+	<div id="tab-my-history" class="sb-tab-panel active">
+		<div class="sb-card">
+			<div class="sb-card__body sb-card__body--flush">
+				<table class="sb-table align-middle">
+					<thead>
+						<tr>
+							<th style="width: 12%">문서번호</th>
+							<th>문서 제목</th>
+							<th style="width: 12%">기안자</th>
+							<th style="width: 15%">기안 일시</th>
+							<th style="width: 10%">결재 상태</th>
+							<th style="width: 12%; text-align: center">상세 보기</th>
+						</tr>
+					</thead>
+					<tbody> 
+						<tr th:each="doc : ${hisDocs}">
+							<td class="tnum fw-semibold" th:text="${doc.docId}">1</td>
+							<td>
+								<span th:if="${doc.isImportant == 1}"
+									  class="badge bg-danger me-1"
+									  style="font-size: 11px;">중요</span>
+								<span class="sb-table__name"
+									  th:text="${doc.docTitle}">결재 문서 제목</span>
+							</td>
+							<td>
+								<span th:text="${doc.empName}">이름</span>
+							</td>
+							<td class="tnum text-soft" th:text="${doc.createdAt}">0000-00-00</td>
+							<td>
+								<span th:if="${doc.docStatus == 'APP'}"
+									  class="sb-badge sb-badge--green">승인</span>
+								<span th:if="${doc.docStatus == 'REJ'}"
+									  class="sb-badge sb-badge--red">반려</span>
+								<span th:if="${doc.docStatus == 'ING'}"
+									  class="sb-badge sb-badge--blue">진행</span>
+							</td>
+							<td style="text-align: center;">
+								<button type="button" class="btn btn-ghost btn-sm"
+										th:onclick="|location.href='@{/appr/detail_doc(docId=${doc.docId})}'|">
+									<i class="bi bi-search"></i> 상세보기
+								</button>
+							</td>
+						</tr>
+						
+						<!-- 데이터 없을때 -->
+						<tr th:if="${#lists.isEmpty(hisDocs)}">
+							<td colspan="6">
+								<div class="sb-empty">
+									<i class="bi bi-folder-x"></i>
+									<p>여태까지 처리하거나 기안한 결재 문서가 없습니다.</p>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 내가 해야되는 문서 -->
+	<div id="tab-my-todo" class="sb-tab-panel">
+		<div class="sb-card">
+			<div class="sb-card__body sb-card__body--flush">
+				<table class="sb-table align-middle">
+					<thead>
+						<tr>
+							<th style="width: 12%">문서 번호</th>
+							<th>문서 제목</th>
+							<th style="width: 12%">기안자</th>
+							<th style="width: 15%">기안 일시</th>
+							<th style="width: 10%">결재 단계</th>
+							<th style="width: 12%; text-align: center;">결재 처리</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each=" doc : ${todoDocs}">
+							<td class="tnum fw-semibold" th:text="${doc.docId}">0</td>
+							<td>
+								<span th:if="${doc.isImportant == 1}" class="badge bg-danger me-1"
+									  style="font-size: 11px;">중요</span>
+								<span class="sb-table__name" th:text="${doc.docTitle}">결재 문서 제목</span>
+							</td>
+							<td>
+								<span th:text="${doc.empName}">이름</span>
+							</td>
+							<td class="tnum text-soft" th:text="${doc.createdAt}">날짜</td>
+							<td>
+								<span class="sb-badge sb-badge--amber">
+									<span class="pip"></span>결재 대기
+								</span>
+							</td>
+							<td>
+								<button type="button" class="btn btn-ghost btn-sm"
+										th:onclick="|location.href='@{/appr/detail_doc(docId=${doc.docId})}'|">
+									<i class="bi bi-search"></i> 상세보기
+								</button>
+							</td>
+						</tr>
+						<!-- 데이터 없을떄 -->
+						<tr th:if="${#lists.isEmpty(todoDocs)}">
+							<td colspan="6">
+								<div class="sb-empty">
+									<i class="bi bi-check-all text-success" style="opacity: 1;"></i>
+									<p class="text-success fw-semibold">대기 중인 결재 문서가 없습니다</p>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>
 
+<script>
+
+	//////////////////////////// 했던 / 해야될 문서 탭 처리 파트 //////////////////////
+	
+	// html 문서가 모두 로드 되면 실행
+	document.addEventListener("DOMContentLoaded", function(){ 
+		
+		var tabs = document.querySelectorAll('.sb-tab');
+		var panels = document.querySelectorAll('.sb-tab-panel');
+		
+		tabs.forEach(function(tab) {
+			tab.addEventListener('click', function(){
+				
+				// 탭, 패널 초기화
+				tabs.forEach(function(t) {
+					t.classList.remove('active');
+				});
+				panels.forEach(function(p) {
+					p.classList.remove('active');
+				});
+				
+				// 누른 탭에만 추가
+				tab.classList.add('active');
+				
+				// data-tab 의 속성값을 읽어옴 
+				var targetId = tab.getAttribute('data-tab');
+				
+				var targetPanel = document.getElementById(targetId);
+				if(targetPanel){
+					targetPanel.classList.add('active');
+				}
+			});
+		});
+	});
+	
+	//////////////////////////// 했던 / 해야될 문서 탭 처리 파트 //////////////////////
+
+</script>
 </main>
 </body>
 </html>

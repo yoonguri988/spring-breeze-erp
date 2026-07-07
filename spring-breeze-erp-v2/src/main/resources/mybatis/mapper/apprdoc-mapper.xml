@@ -72,5 +72,74 @@
 			#{docStatus},
 			#{isImportant})
 	</insert>
+	
+	<!-- ApprDocDto 리절트맵 -->
+	<resultMap id="apprDocResultMap" type="ApprDocDto">
+		<id property="docId" column="doc_id"/>
+		<result property="empId" column="emp_id"/>
+		<result property="docTitle" column="doc_title"/>
+		<result property="docStatus" column="doc_status"/>
+		<result property="isImportant" column="is_important"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="empName" column="emp_name"/>
+	</resultMap>
 
+	<!-- 대시보드용 통계 -->
+	<select id="selectDocCnt" parameterType="ApprDocDto" resultType="map">
+		select
+			count(distinct case when d.emp_id = #{empId} or l.emp_id = #{empId} then d.doc_id end) as "TOTALCNT",
+			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'WAI' then d.doc_id end) as "WAICNT",
+			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'APP' then d.doc_id end) as "APPCNT",
+			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'REJ' then d.doc_id end) as "REJCNT"
+		from
+			appr_doc d
+		left join
+			appr_line l on d.doc_id = l.doc_id
+		where
+			d.emp_id = #{empId} or l.emp_id = #{empId}
+	</select>
+	
+	<!-- 내가 결재했던 모든 문서 조회 -->
+	<select id="selectMyHistoryDocs" parameterType="ApprDocDto" resultMap="apprDocResultMap">
+		select distinct
+			d.doc_id,
+			d.doc_title,
+			d.emp_id,
+			d.doc_status,
+			d.is_important,
+			d.created_at,
+			(select emp_name from employee where emp_id = d.emp_id) as emp_name
+		from
+			appr_doc d
+		left join
+			appr_line l on d.doc_id = l.doc_id
+		where
+			d.emp_id = #{empId}
+			or (l.emp_id = #{empId} and l.lin_status in ('APP', 'REJ'))
+		order by
+			d.created_at desc
+	</select>
+	
+	<!-- 내가 결재해야 할 문서 -->
+	<select id="selectMyTodoDocs" parameterType="ApprDocDto" resultMap="apprDocResultMap">
+		select
+			d.doc_id,
+			d.doc_title,
+			d.emp_id,
+			d.doc_status,
+			d.is_important,
+			d.created_at,
+			(select emp_name from employee where emp_id = d.emp_id) as emp_name
+		from
+			appr_doc d
+		inner join
+			appr_line l on d.doc_id = l.doc_id
+		where
+			l.emp_id = #{empId}
+			and l.lin_status = 'WAI'
+			and d.doc_status = 'ING'
+		order by
+			d.created_at desc
+	</select>
+	
 </mapper>

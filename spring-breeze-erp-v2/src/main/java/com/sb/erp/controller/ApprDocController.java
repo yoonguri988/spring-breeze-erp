@@ -38,7 +38,7 @@ public class ApprDocController {
 	@GetMapping("/getFormDetail")
 	@ResponseBody
 	public ApprFormDto getFormDetail(@RequestParam("forId") int forId,
-							   @RequestParam("forVersion") int forVersion) {
+							   		 @RequestParam("forVersion") int forVersion) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("forId", forId);
 		params.put("forVersion", forVersion);
@@ -62,7 +62,21 @@ public class ApprDocController {
 	////////////////////////////문서 조회 처리 파트 /////////////////////////////
 	
 	@GetMapping("/appr/list_doc")
-	public String listDoc() {
+	public String listDoc(Model model) {
+		
+		// 로그인 유저 정보 가져오기 (emp_id)
+		ApprDocDto dto = new ApprDocDto(); 
+		dto.setEmpId(41); // 일단 임시값으로 넣음
+		
+		// 각각 구성 넣어 보내기
+		Map<String, Object> docCnts = service.selectDocCnt(dto);
+		List<Map<String, Object>> hisDocs = service.selectMyHistoryDocs(dto);
+		List<Map<String, Object>> todoDocs = service.selectMyTodoDocs(dto);
+		
+		model.addAttribute("docCnts", docCnts);
+		model.addAttribute("hisDocs", hisDocs);
+		model.addAttribute("todoDocs", todoDocs);
+		
 		return "appr/list_doc";
 	}
 	
