@@ -20,9 +20,9 @@ public class ProjectMemberController {
 	
 	
 	@GetMapping("/proj_member")
-	public String list(int pro_id, Model model) {
-		 model.addAttribute("list", service.select(pro_id));
-		 model.addAttribute("pro_id", pro_id);
+	public String list(@RequestParam("pro_id") int proId, Model model) {
+		 model.addAttribute("list", service.select(proId));
+		 model.addAttribute("pro_id", proId);
 		return "proj/proj_member";} //프로젝트 참여인원 조회
 	
 	  @PostMapping("/proj_member_create") 
@@ -34,11 +34,11 @@ public class ProjectMemberController {
 	 
 	
 	@GetMapping("/proj_member_delete") 
-	public String delete(@RequestParam("pm_id")int pm_id, @RequestParam("pro_id") int pro_id,
+	public String delete(@RequestParam("pm_id")int pmId, @RequestParam("pro_id") int proId,
 			RedirectAttributes rttr) {
 		String result="프로젝트 멤버 삭제 실패";
-		if(service.delete(pm_id)>0) {result="프로젝트 멤버 삭제 성공";}
+		if(service.delete(pmId)>0) {result="프로젝트 멤버 삭제 성공";}
 		rttr.addFlashAttribute("result",result);
-		return "redirect:/proj/proj_member?pro_id="+pro_id;}//프로젝트 멤버 삭제
+		return "redirect:/proj/proj_member?pro_id="+proId;}//프로젝트 멤버 삭제
 
 }
