@@ -17,15 +17,15 @@ public interface TaskService {
 	public int selectCnt(int proId);
 	
 	//태스크 삭제
-	public int delete(int task_id);
+	public int delete(int taskId);
 	
 	//태스크 수정
 	public int update(TaskDto dto);
 	
 	//태스크 상세 조회
-	public TaskDto select(int task_id);
+	public TaskDto select(int taskId);
 	
 	//태스크 수정뷰
-	public TaskDto taskEditView(int task_id);
+	public TaskDto taskEditView(int taskId);
 	
 }
