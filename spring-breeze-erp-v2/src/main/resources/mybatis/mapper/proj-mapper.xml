@@ -131,26 +131,50 @@
     order by p.pro_id desc
 	</select>
 	
-	<!-- ai 분석 결과 -> sql에서 계산 처리 -->
+	<!-- 리스크 예측용 api -> sql에서 계산 처리 -->
 	<select id="projectAnalysis" resultType="ProjectAnalysisDto" parameterType="int">
-<![CDATA[
-	select 
+	<![CDATA[
+	select
 	p.pro_id as proId,
 	p.pro_name as projectName,
 	p.end_date as endDate,
-	nvl(count(t.task_id),0) as totalTask,
-	nvl(sum(case when t.task_status='TODO' then 1 end), 0) as todoCount,
-	nvl(sum(case when t.task_status='DOING' then 1 end), 0) as doingCount,
-	nvl(sum(case when t.task_status='DONE' then 1 end), 0) as doneCount,
-	nvl(sum(case when t.task_status <> 'DONE' and t.task_end_date < SYSDATE then 1 end), 0) as delayCount,
-	case when count(t.task_id)=0 then 0
-	else round(sum(case when t.task_status = 'DONE' then 1 else 0 end) / count(t.task_id) * 100)
-	end as progressRate
-	from project p 
-	left join task t on p.pro_id=t.pro_id
-	where p.pro_id=#{proId}
+	nvl(count(t.task_id), 0) as totalTask,
+	nvl(sum(case when t.task_status = 'TODO' then 1 end), 0) as todoCount,
+	nvl(sum(case when t.task_status = 'DOING' then 1 end), 0) as doingCount,
+	nvl(sum(case when t.task_status = 'DONE' then 1 end), 0) as doneCount,
+	nvl(sum(case when t.task_status <> 'DONE' and t.task_end_date < sysdate then 1 end), 0) as delayCount,
+	nvl(round(sum(case when t.task_status = 'DONE' then 1 else 0 end) / count(t.task_id) * 100), 0) as progressRate
+	from project p
+	left join task t on p.pro_id = t.pro_id
+	where p.pro_id = #{proId}
 	group by p.pro_id, p.pro_name, p.end_date
-]]>
+	]]>
+	</select>
+	
+	<!-- 주간보고서용 api ->sql에서 계산 처리 -->
+	<select id="weeklyReport" resultType="WeeklyReportDto" parameterType="int">
+	<![CDATA[
+	select
+	p.pro_id as proId,
+	p.pro_name as projectName,
+	p.end_date as endDate,
+	(p.end_date - trunc(sysdate)) as remainDays,
+	nvl(count(t.task_id), 0) as totalTask,
+	nvl(sum(case when t.task_status = 'DONE'
+	    and t.actual_end_date >= trunc(sysdate,'IW') - 7
+	    and t.actual_end_date <  trunc(sysdate,'IW')
+	    then 1 end), 0) as completedThisWeek,
+    nvl(sum(case when t.task_status <> 'DONE' and t.task_end_date < sysdate then 1 end), 0) as delayTaskCount,
+	nvl(round(sum(case when t.task_status = 'DONE' then 1 else 0 end) / count(t.task_id) * 100), 0) as progressRate,
+	nvl(round(avg(case when t.actual_start_date is not null and t.actual_end_date is not null
+	    then t.actual_end_date - t.actual_start_date end), 1), 0) as avgTaskDays,
+	nvl(round(avg(case when t.actual_end_date > t.task_end_date
+	    then t.actual_end_date - t.task_end_date end)), 0) as avgDelayDays
+	from project p
+	left join task t on p.pro_id = t.pro_id
+	where p.pro_id = #{proId}
+	group by p.pro_id, p.pro_name, p.end_date
+	]]>
 	</select>
 	
 </mapper>
