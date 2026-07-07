@@ -131,7 +131,7 @@
     order by p.pro_id desc
 	</select>
 	
-	<!-- 그뭐더라 그 분석결과ai 그거 -->
+	<!-- ai 분석 결과 -> sql에서 계산 처리 -->
 	<select id="projectAnalysis" resultType="ProjectAnalysisDto" parameterType="int">
 <![CDATA[
 	select 
