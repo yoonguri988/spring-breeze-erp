@@ -14,14 +14,14 @@ public interface TaskMapper {
 	
 	//태스크 페이징
 	public List<TaskDto> selectAll(TaskSearchDto search);
-	public int selectCnt (int pro_id);
+	public int selectCnt (int proId);
 	
 	//태스크 삭제
-	public int delete(int task_id);
+	public int delete(int taskId);
 	
 	//태스크 삭제
 	public int update(TaskDto dto);
 	
 	//태스크 상세
-	public TaskDto select(int task_id);
+	public TaskDto select(int taskId);
 }
