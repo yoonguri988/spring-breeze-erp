@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{fragments/layout}">
+<head>
+<title>사원 상세</title>
+</head>
+<body>
+	<section class="emp_detail sb-content" layout:fragment="content">
+
+		<!-- 페이지 헤더 -->
+		<div class="sb-page-head">
+			<div class="sb-page-head__txt">
+				<div class="sb-breadcrumb">
+					<a th:href="@{/}">홈</a> <i class="bi bi-chevron-right"></i> <a
+						th:href="@{/emp/list}">사원관리</a> <i class="bi bi-chevron-right"></i>
+					상세정보
+				</div>
+				<h1 th:text="${emp.empName}">홍길동</h1>
+				<p>
+					<span th:text="${emp.deptName}">부서</span> · <span
+						th:text="${emp.posName}">직급</span>
+				</p>
+			</div>
+			<div class="sb-page-head__actions">
+				<a th:href="@{/emp/list}" class="btn btn-ghost btn-sm"> <i
+					class="bi bi-arrow-left"></i> 목록으로
+				</a>
+			</div>
+		</div>
+
+		<!-- 프로필 카드 -->
+		<div class="sb-card mb-3">
+			<div class="profileBox sb-card__body">
+				<!-- 아바타 + 이름 -->
+				<div class="d-flex align-items-center gap-3">
+					<div class="sb-avatar"
+						th:text="${#strings.substring(emp.empName, 0, 1)}">홍</div>
+					<div class="sumInfoBox1">
+						<p class="prfSumInfo" th:text="${emp.empName}">홍길동</p>
+						<p class="prfSumInfo">
+							<span th:text="${emp.deptName}">부서</span> · <span
+								th:text="${emp.posName}">직급</span>
+						</p>
+						<div class="prfBadgeBox mt-1">
+							<span class="sb-badge sb-badge--gray" th:text="${emp.empNo}">EMP-001</span>
+							<span th:switch="${emp.empStatus}"> <span th:case="'재직'"
+								class="sb-badge sb-badge--green ms-1"> <span class="pip"></span>재직
+							</span> <span th:case="'휴직'" class="sb-badge sb-badge--amber ms-1">
+									<span class="pip"></span>휴직
+							</span> <span th:case="'퇴직'" class="sb-badge sb-badge--red ms-1">
+									<span class="pip"></span>퇴직
+							</span>
+							</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="vr d-none d-md-block"></div>
+
+				<div class="sumInfoBox2">
+					<div>
+						<p class="text-faint">이메일</p>
+						<p th:text="${emp.empEmail}">email@sberp.com</p>
+					</div>
+					<div>
+						<p class="text-faint">연락처</p>
+						<p th:text="${emp.empMobile}">010-0000-0000</p>
+					</div>
+					<div>
+						<p class="text-faint">입사일</p>
+						<p th:text="${emp.hireDate}">2020-01-01</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 상세 정보 카드 -->
+		<div class="detInfoBox sb-card mb-3">
+			<div class="sb-card__head">
+				<h2>
+					<i class="bi bi-person-lines-fill me-2 text-soft"></i>상세 정보
+				</h2>
+			</div>
+			<div class="sb-card__body">
+				<div class="row g-3">
+					<div class="col-md-3">
+						<div class="text-faint">사번</div>
+						<p th:text="${emp.empNo}">EMP-001</p>
+					</div>
+					<div class="col-md-3">
+						<div class="text-faint">이름</div>
+						<p th:text="${emp.empName}">홍길동</p>
+					</div>
+					<div class="col-md-3">
+						<div class="text-faint">부서</div>
+						<p th:text="${emp.deptName}">부서</p>
+					</div>
+					<div class="col-md-3">
+						<div class="text-faint">직급</div>
+						<p th:text="${emp.posName}">직급</p>
+					</div>
+					<div class="col-md-3">
+						<div class="text-faint">이메일</div>
+						<p th:text="${emp.empEmail}">email@sberp.com</p>
+					</div>
+					<div class="col-md-3">
+						<div class="text-faint">연락처</div>
+						<p th:text="${emp.empMobile}">010-0000-0000</p>
+					</div>
+					<div class="col-md-3">
+						<div class="text-faint">입사일</div>
+						<p class="tnum" th:text="${emp.hireDate}">2020-01-01</p>
+					</div>
+					<div class="col-md-3">
+						<div class="text-faint">재직상태</div>
+						<div th:switch="${emp.empStatus}">
+							<span th:case="'재직'" class="sb-badge sb-badge--green"><span
+								class="pip"></span>재직</span> <span th:case="'휴직'"
+								class="sb-badge sb-badge--amber"><span class="pip"></span>휴직</span>
+							<span th:case="'퇴직'" class="sb-badge sb-badge--red"><span
+								class="pip"></span>퇴직</span>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="text-faint">등록일</div>
+						<p class="tnum" th:text="${emp.createdAt}">2020-01-01</p>
+					</div>
+					<div class="col-md-3">
+						<div class="text-faint">최근 수정일</div>
+						<p class="tnum" th:text="${emp.updatedAt}">2020-01-01</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 하단 버튼 -->
+		<div class="d-flex gap-2 justify-content-end">
+			<!-- 권한 관리 (관리자용) -->
+			<a sec:authorize="hasRole('ROLE_ADMIN')"
+				th:href="@{/perm/emp(empId=${emp.empId})}"
+				class="btn btn-ghost btn-sm"> <i class="bi bi-shield-lock"></i>
+				권한 관리
+			</a>
+			<!-- 비밀번호 초기화 (관리자용) -->
+			<a sec:authorize="hasRole('ROLE_ADMIN')"
+				th:href="@{/emp/resetPass(empId=${emp.empId})}"
+				class="btn btn-ghost btn-sm"> <i class="bi bi-key"></i> 비밀번호 초기화
+			</a>
+			<!-- 비밀번호 수정 (본인만) -->
+			<a th:if="${loginEmpId == emp.empId}"
+				th:href="@{/emp/editPass(empId=${emp.empId})}"
+				class="btn btn-ghost btn-sm"> <i class="bi bi-key"></i> 비밀번호 수정
+			</a> <a th:href="@{/emp/edit(empId=${emp.empId})}"
+				class="btn btn-sb btn-sm"> <i class="bi bi-pencil"></i> 정보 수정
+			</a>
+		</div>
+	</section>
+</body>
+</html>

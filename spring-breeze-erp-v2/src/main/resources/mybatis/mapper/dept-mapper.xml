@@ -3,9 +3,11 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.DeptMapper">
+
 	<!-- 해당 회사가 가지고 있는 부서 갯수 조회 -->
 	<select id="countActiveDepts" resultType="int">
-		select count(*) from department
+		select count(*) from
+		department
 		where com_id = #{comId}
 	</select>
 
@@ -53,11 +55,11 @@
 		JOIN department d              ON d.dept_id = dp.ancestor_id
 		JOIN dept_order o              ON o.dept_id = d.dept_id
 		LEFT JOIN department dp_parent ON dp_parent.dept_id = d.parent_id
-		LEFT JOIN employee leader      ON leader.emp_id = d.emp_id
-		LEFT JOIN employee e           ON e.dept_id = dp.descendant_id
-		GROUP BY
-		    d.dept_id, d.dept_name, d.dept_code, d.depth, d.sort_order, d.parent_id,
-		    dp_parent.dept_name, d.emp_id, leader.emp_name, o.sort_path
+		LEFT JOIN employee leader ON leader.emp_id = d.emp_id
+		LEFT JOIN employee e ON e.dept_id = dp.descendant_id
+		GROUP BY d.dept_id, d.dept_name, d.dept_code,
+		d.depth, d.sort_order, d.parent_id,
+		dp_parent.dept_name, d.emp_id, leader.emp_name, o.sort_path
 		ORDER BY o.sort_path
 	</select>
 
@@ -118,11 +120,12 @@
 
 	<!-- 부서 순서 정렬 -->
 	<select id="maxSortOrder" resultType="int">
-		select coalesce(max(sort_order), 0)
+		select
+		coalesce(max(sort_order), 0)
 		from department
 		where com_id = #{comId}
-		and (parent_id = #{parentId} OR (parent_id IS NULL AND #{parentId} IS
-		NULL))
+		and (parent_id = #{parentId}
+		OR (parent_id IS NULL AND #{parentId} IS NULL))
 	</select>
 
 	<!-- 부서 등록 -->
@@ -139,7 +142,8 @@
 
 	<!-- 하위 부서 존재 확인 -->
 	<select id="countChildren" resultType="int">
-		select count(*) from department
+		select count(*) from
+		department
 		where parent_id = #{deptId}
 	</select>
 
@@ -177,7 +181,7 @@
 		join childTree c
 		on d.parent_id = c.dept_id
 		)
-		select dept_id from childTree
+		SELECT dept_id FROM childTree
 	</select>
 
 	<!-- 부서 통계 데이터 조회 -->
@@ -197,4 +201,5 @@
 		ON E.DEPT_ID = D.DEPT_ID
 		WHERE E.DEPT_ID = #{deptId}
 	</select>
+
 </mapper>
