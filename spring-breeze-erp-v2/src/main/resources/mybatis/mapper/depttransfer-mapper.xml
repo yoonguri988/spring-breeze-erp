@@ -98,11 +98,11 @@
 	SET DEPT_STATUS = 'ACTIVE'
 	WHERE DEPT_ID = #{deptId}
 </update>
-<delete id="markDeleted">
-	DELETE DEPARTMENT
-	WHERE DEPT_ID = #{deptId}
-	  AND DEPT_STATUS = 'PENDING_DELETE'
-</delete>
+<update id="markDeleted">
+	UPDATE DEPARTMENT
+	SET DEPT_STATUS = 'DELETED'
+	WHERE DEPT_ID = #{deptId} 
+</update>
 <update id="updateEmployeeDept">
 	UPDATE employee
     SET dept_id = #{newDeptId}
