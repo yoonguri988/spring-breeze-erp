@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.sb.erp.api.EmailApi;
 import com.sb.erp.dao.EmpMapper;
 import com.sb.erp.dto.EmpAuthDto;
 import com.sb.erp.dto.EmpDto;
@@ -54,13 +55,22 @@ public class EmpServiceImpl implements EmpService {
 	// 사원 정보 등록
 	@Override
 	public int insert(EmpDto dto) {
+		int result = -1;
 		dto.setComId(SecurityUtil.getCurrentComId());
 		dto.setEmpPass(passEncoder.encode(dto.getEmpNo()));
 		
 		if(dto.getEmpStatus() == null || dto.getEmpStatus().isEmpty()) {
 			dto.setEmpStatus("재직");
 		}
-		return dao.insert(dto);
+		//////
+		result = dao.insert(dto);
+		
+		if(result >0 ) {  
+					
+			/* 메일보내기  */ 
+			// 가이드 메일(가입 즉시), 5일 후에 확인 메일 재발송
+		}
+		return result;
 	}
 	
 	@Override
