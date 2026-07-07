@@ -34,7 +34,7 @@
 			<div class="sb-page-head__txt">
 				<div class="sb-breadcrumb">
 					<a th:href="@{/}">홈</a> <i class="bi bi-chevron-right"></i> <a
-						th:href="@{/auth/list}">권한 관리</a> <i class="bi bi-chevron-right"></i>
+						th:href="@{/perm/list}">권한 관리</a> <i class="bi bi-chevron-right"></i>
 					사원 권한 부여
 				</div>
 				<h1>사원 권한 관리</h1>
@@ -122,7 +122,7 @@
 								<span class="rm-code" th:text="${a.autName}">ROLE_ADMIN</span>
 							</div>
 							<!-- 회수 form -->
-							<form th:action="@{/auth/revoke}" method="post"
+							<form th:action="@{/perm/revoke}" method="post"
 								style="display: inline"
 								onsubmit="return confirm('이 권한을 회수하시겠습니까?');">
 								<input type="hidden" name="empAutId" th:value="${a.empAutId}" />
@@ -162,7 +162,7 @@
 								</span>
 							</div>
 							<!-- 부여 form -->
-							<form th:action="@{/auth/grant}" method="post"
+							<form th:action="@{/perm/grant}" method="post"
 								style="display: inline">
 								<input type="hidden" name="empId" th:value="${emp.empId}" /> <input
 									type="hidden" name="autId" th:value="${all.autId}" />

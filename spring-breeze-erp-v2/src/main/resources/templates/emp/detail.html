@@ -139,7 +139,7 @@
 		<div class="d-flex gap-2 justify-content-end">
 			<!-- 권한 관리 (관리자용) -->
 			<a sec:authorize="hasRole('ROLE_ADMIN')"
-				th:href="@{/auth/emp(empId=${emp.empId})}"
+				th:href="@{/perm/emp(empId=${emp.empId})}"
 				class="btn btn-ghost btn-sm"> <i class="bi bi-shield-lock"></i>
 				권한 관리
 			</a>

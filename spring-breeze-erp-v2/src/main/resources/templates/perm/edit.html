@@ -33,14 +33,14 @@
 			<div class="sb-page-head__txt">
 				<div class="sb-breadcrumb">
 					<a th:href="@{/}">홈</a> <i class="bi bi-chevron-right"></i> <a
-						th:href="@{/auth/list}">권한 관리</a> <i class="bi bi-chevron-right"></i>
+						th:href="@{/perm/list}">권한 관리</a> <i class="bi bi-chevron-right"></i>
 					권한 수정
 				</div>
 				<h1>권한 수정</h1>
 				<p>기존 권한의 이름을 수정합니다.</p>
 			</div>
 			<div class="sb-page-head__actions">
-				<a th:href="@{/auth/list(autId=${auth.autId})}"
+				<a th:href="@{/perm/list(autId=${auth.autId})}"
 					class="btn btn-ghost btn-sm"> <i class="bi bi-arrow-left"></i>
 					목록으로
 				</a>
@@ -55,7 +55,7 @@
 			</div>
 			<div class="sb-card__body">
 
-				<form th:action="@{/auth/edit}" method="post"
+				<form th:action="@{/perm/edit}" method="post"
 					onsubmit="return checkForm()">
 					<input type="hidden" name="autId" th:value="${auth.autId}" />
 
@@ -69,7 +69,7 @@
 					</div>
 
 					<div class="sb-form-actions">
-						<a th:href="@{/auth/list(autId=${auth.autId})}"
+						<a th:href="@{/perm/list(autId=${auth.autId})}"
 							class="btn btn-ghost">취소</a>
 						<button type="submit" class="btn btn-sb">
 							<i class="bi bi-check-lg"></i> 수정

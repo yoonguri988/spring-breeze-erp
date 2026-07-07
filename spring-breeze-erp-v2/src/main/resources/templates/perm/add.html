@@ -33,14 +33,14 @@
 			<div class="sb-page-head__txt">
 				<div class="sb-breadcrumb">
 					<a th:href="@{/}">홈</a> <i class="bi bi-chevron-right"></i> <a
-						th:href="@{/auth/list}">권한 관리</a> <i class="bi bi-chevron-right"></i>
+						th:href="@{/perm/list}">권한 관리</a> <i class="bi bi-chevron-right"></i>
 					권한 등록
 				</div>
 				<h1>권한 등록</h1>
 				<p>회사에 새로운 권한을 등록합니다.</p>
 			</div>
 			<div class="sb-page-head__actions">
-				<a th:href="@{/auth/list}" class="btn btn-ghost btn-sm"> <i
+				<a th:href="@{/perm/list}" class="btn btn-ghost btn-sm"> <i
 					class="bi bi-arrow-left"></i> 목록으로
 				</a>
 			</div>
@@ -54,7 +54,7 @@
 			</div>
 			<div class="sb-card__body">
 
-				<form th:action="@{/auth/add}" method="post"
+				<form th:action="@{/perm/add}" method="post"
 					onsubmit="return checkForm()">
 
 					<div class="mb-3">
@@ -67,7 +67,7 @@
 					</div>
 
 					<div class="sb-form-actions">
-						<a th:href="@{/auth/list}" class="btn btn-ghost">취소</a>
+						<a th:href="@{/perm/list}" class="btn btn-ghost">취소</a>
 						<button type="submit" class="btn btn-sb">
 							<i class="bi bi-check-lg"></i> 등록
 						</button>

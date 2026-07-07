@@ -43,7 +43,7 @@
 					적용됩니다.</p>
 			</div>
 			<div class="sb-page-head__actions">
-				</a> <a class="btn btn-sb btn-sm" th:href="@{/auth/add}"> <i
+				</a> <a class="btn btn-sb btn-sm" th:href="@{/perm/add}"> <i
 					class="bi bi-plus-lg"></i> 권한 등록
 				</a>
 			</div>
@@ -73,7 +73,7 @@
 
 						<!-- 목록 -->
 						<a th:each="item : ${authList}"
-							th:href="@{/auth/list(autId=${item.autId})}" class="role-item"
+							th:href="@{/perm/list(autId=${item.autId})}" class="role-item"
 							th:classappend="${selectedRole != null and item.autId == selectedRole.autId} ? ' sel'">
 							<span class="rm-code" th:text="${item.autName}">ROLE_ADMIN</span>
 							<span class="sb-badge sb-badge--gray"> <span
@@ -107,11 +107,11 @@
 							</div>
 							<div class="right" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
 								</span> <a class="btn btn-ghost btn-sm"
-									th:href="@{/auth/edit(autId=${selectedRole.autId})}"> <i
+									th:href="@{/perm/edit(autId=${selectedRole.autId})}"> <i
 									class="bi bi-pencil"></i> 수정
 								</a>
 								<!-- 삭제는 POST form -->
-								<form th:action="@{/auth/delete}" method="post"
+								<form th:action="@{/perm/delete}" method="post"
 									style="display: inline"
 									onsubmit="return confirm('정말 이 권한을 삭제하시겠습니까?');">
 									<input type="hidden" name="autId"

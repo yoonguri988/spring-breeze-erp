@@ -33,14 +33,10 @@ public class SecurityConfig {
 				    .requestMatchers("/root/**").hasRole("ROOT")
 				    // ─── ADMIN 이상 ──────────────────
 				    .requestMatchers("/admin/**").hasAnyRole("ROOT", "ADMIN")
-				    // ─── 사원 파트: 조회는 로그인만, 관리는 ADMIN ─────
-					.requestMatchers("/emp/add", "/emp/resetPass", 
-						"/emp/checkEmail", "/emp/checkMobile",
-						"/emp/checkEmpNo").hasAnyRole("ROOT", "ADMIN")
-					// ─── 직급/권한 관리 (ADMIN 전용) ────────────────
-				    .requestMatchers(
-				        "/auth/list", "/auth/add", "/auth/edit", "/auth/delete",
-				        "/auth/emp", "/auth/grant", "/auth/revoke", "/pos/**").hasRole("ADMIN")
+					// ─── 사원/직급/권한 관리 (ADMIN 전용) ────────────────
+				    .requestMatchers("/emp/add", "/emp/resetPass",
+							"/emp/checkEmail", "/emp/checkMobile",
+							"/emp/checkEmpNo", "/perm/**", "/pos/**").hasRole("ADMIN")
 				    // ─── 그 외 ────────────────
 				    .anyRequest().permitAll())
 				
@@ -86,7 +82,6 @@ public class SecurityConfig {
 					return;
 				}
 			}
-
 			response.sendRedirect(request.getContextPath() + "/");
 		};
 	}

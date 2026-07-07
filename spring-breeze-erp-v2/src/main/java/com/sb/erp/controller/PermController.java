@@ -15,7 +15,7 @@ import com.sb.erp.service.AuthService;
 import com.sb.erp.service.EmpService;
 
 @Controller
-public class AuthPermController {
+public class PermController {
 
 	@Autowired AuthService authService;
 	@Autowired EmpService empService;
@@ -23,7 +23,7 @@ public class AuthPermController {
 	// ─── 권한 관리 ─────────────────
 
 	// 권한 목록 (부여 사원 수 포함)
-	@GetMapping("/auth/list")
+	@GetMapping("/perm/list")
 	public String list(@RequestParam(required = false) Integer autId, Model model) {
 	    // 좌측: 권한 목록 (사원 수 포함)
 	    List<AuthPermDto> authList = authService.selectAll();
@@ -38,39 +38,39 @@ public class AuthPermController {
 	        }
 	    }
 
-	    return "auth/list";
+	    return "perm/list";
 	}
 
 	// 권한 등록 폼
-	@GetMapping("/auth/add")
+	@GetMapping("/perm/add")
 	public String addForm() {
-		return "auth/add";
+		return "perm/add";
 	}
 
-	@PostMapping("/auth/add")
+	@PostMapping("/perm/add")
 	public String addProcess(AuthPermDto dto) {
 		authService.insert(dto);
-		return "redirect:/auth/list";
+		return "redirect:/perm/list";
 	}
 
 	// 권한 수정 폼
-	@GetMapping("/auth/edit")
+	@GetMapping("/perm/edit")
 	public String editForm(@RequestParam int autId, Model model) {
 		model.addAttribute("auth", authService.selectOneById(autId));
-		return "auth/edit";
+		return "perm/edit";
 	}
 
-	@PostMapping("/auth/edit")
+	@PostMapping("/perm/edit")
 	public String editProcess(AuthPermDto dto) {
 		authService.update(dto);
-		return "redirect:/auth/list";
+		return "redirect:/perm/list";
 	}
 
 	// 권한 삭제
-	@PostMapping("/auth/delete")
+	@PostMapping("/perm/delete")
 	public String delete(@RequestParam int autId) {
 		authService.delete(autId);
-		return "redirect:/auth/list";
+		return "redirect:/perm/list";
 	}
 
 	
@@ -79,25 +79,25 @@ public class AuthPermController {
 	
 
 	// 사원별 권한 관리 화면 (사원의 권한 목록)
-	@GetMapping("/auth/emp")
+	@GetMapping("/perm/emp")
 	public String empAuthList(@RequestParam int empId, Model model) {
 		model.addAttribute("emp", empService.selectByEmpId(empId));
 		model.addAttribute("authList", authService.selectAuthsByEmpId(empId));
 		model.addAttribute("allAuths", authService.selectAll());
-		return "auth/emp";
+		return "perm/emp";
 	}
 
 	// 권한 부여
-	@PostMapping("/auth/grant")
+	@PostMapping("/perm/grant")
 	public String grant(EmpAuthDto dto) {
 		authService.grantAuth(dto);
-		return "redirect:/auth/emp?empId=" + dto.getEmpId();
+		return "redirect:/perm/emp?empId=" + dto.getEmpId();
 	}
 
 	// 권한 회수
-	@PostMapping("/auth/revoke")
+	@PostMapping("/perm/revoke")
 	public String revoke(EmpAuthDto dto) {
 		authService.revokeAuth(dto);
-		return "redirect:/auth/emp?empId=" + dto.getEmpId();
+		return "redirect:/perm/emp?empId=" + dto.getEmpId();
 	}
 }
