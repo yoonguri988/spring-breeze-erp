@@ -1,26 +1,35 @@
 package com.sb.erp.controller;
 
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
 import com.sb.erp.dto.ApprFormDto;
+import com.sb.erp.dto.ApprLineDto;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.ApprDocService;
+import com.sb.erp.service.DeptService;
+import com.sb.erp.service.EmpService;
 
 @Controller
+@RequestMapping("/appr")
 public class ApprDocController {
 	
 	@Autowired ApprDocService service;
+	@Autowired DeptService deptService;
+	@Autowired EmpService empService;
 	
 	
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
@@ -46,14 +55,33 @@ public class ApprDocController {
 		return service.getForm(params);
 	}
 	
-	
-	@GetMapping("/appr/write_doc")
-	public String writeDoc(Model model, Principal principal) {
+	// 문서 작성 폼
+	@GetMapping("/write_doc")
+	public String writeDoc(Model model,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
+		// 데이터 넣고 페이지 들어갈때 값 가져와서 삽입
 		ApprDocDto dto = new ApprDocDto();
-		dto.setEmpId(1);
-		ApprDocInitResponseDto result = service.initResponse(dto);
+		dto.setEmpId(userDetails.getUser().getEmpId());
 		
+		ApprDocInitResponseDto result = service.initResponse(dto);
 		model.addAttribute("dto", result);
+		return "appr/write_doc";
+	}
+	
+	// 문서 작성 처리
+	@PostMapping("/write_doc")
+	public String writeDoc_post(ApprDocDto dto,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
+		
+		dto.setEmpId(userDetails.getUser().getEmpId());
+		dto.setComId(userDetails.getUser().getComId());
+		
+		boolean result = service.insertLines(dto);
+		
+		// 위 호출에서 성공시
+		if(result) {
+			return "redirect:/appr/list_doc";
+		}
 		return "appr/write_doc";
 	}
 	
@@ -61,12 +89,13 @@ public class ApprDocController {
 	
 	////////////////////////////문서 조회 처리 파트 /////////////////////////////
 	
-	@GetMapping("/appr/list_doc")
-	public String listDoc(Model model) {
+	@GetMapping("/list_doc")
+	public String listDoc(Model model,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
 		
 		// 로그인 유저 정보 가져오기 (emp_id)
 		ApprDocDto dto = new ApprDocDto(); 
-		dto.setEmpId(41); // 일단 임시값으로 넣음
+		dto.setEmpId(userDetails.getUser().getEmpId());
 		
 		// 각각 구성 넣어 보내기
 		Map<String, Object> docCnts = service.selectDocCnt(dto);
@@ -81,5 +110,20 @@ public class ApprDocController {
 	}
 	
 	////////////////////////////문서 조회 처리 파트 /////////////////////////////
+	
+	//////////////////////////// 결재선 파트 ///////////////////////////////
+	
+	@GetMapping("/getApprLines")
+	@ResponseBody
+	public List<ApprLineDto> getApprLines(@RequestParam("isImportant") boolean isImportant,
+				@AuthenticationPrincipal CustomUserDetails userDetails)	{
+		ApprDocDto dto = new ApprDocDto();
+		dto.setEmpId(userDetails.getUser().getEmpId());
+		
+		return service.approversByEmpId(dto);
+	}
+	
+	
+	//////////////////////////// 결재선 파트 ///////////////////////////////
 	
 }

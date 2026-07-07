@@ -53,7 +53,11 @@
 	
 	<!-- 결재 문서 insert -->
 	<insert id="insertDoc" parameterType="ApprDocDto">
+		<selectKey keyProperty="docId" resultType="int" order="BEFORE">
+			select appr_doc_seq.nextval from dual
+		</selectKey>
 		insert into appr_doc(
+			doc_id,
 			emp_id,
 			for_id,
 			for_version,
@@ -63,6 +67,7 @@
 			doc_status,
 			is_important)
 		values(
+			#{docId},
 			#{empId},
 			#{forId},
 			#{forVersion},
@@ -141,5 +146,32 @@
 		order by
 			d.created_at desc
 	</select>
+	
+	<!-- 기안자 상사들 목록 조회 -->
+	<select id="approversByEmpId" parameterType="ApprDocDto" resultType="ApprLineDto">
+		select
+			e.emp_id,
+			e.emp_name,
+			p.pos_name
+		from
+			employee e
+		join
+			emp_position p on e.pos_id = p.pos_id
+		where
+			e.dept_id = (select dept_id from employee where emp_id = #{empId})
+			and e.emp_id != #{empId}
+		order by
+			p.pos_order desc
+	</select>
+	
+	<!-- 최종 결재 승인,반려 등 문서상태 변경 -->
+	<update id="updateDocStatus" parameterType="ApprDocDto">
+		update
+			appr_doc
+		set
+			doc_status = #{docStatus}
+		where
+			doc_id = #{docId}
+	</update>
 	
 </mapper>

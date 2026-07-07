@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.ApprLineMapper">
+
+	<!-- 결재선 저장 -->
+	<insert id="insertLine" parameterType="ApprLineDto">
+		insert into appr_line(
+			doc_id,
+			emp_id,
+			lin_order,
+			lin_status
+		)
+		values(
+			#{docId},
+			#{empId},
+			#{linOrder},
+			#{linStatus}
+		)
+	</insert>
+	
+	<!-- 해당 결재자의 상태 변경 -->
+	<update id="updateLineStatus" parameterType="ApprLineDto">
+		update
+			appr_line
+		set
+			lin_status = #{linStatus},
+			lin_approved = #{linApproved}
+		where
+			doc_id = #{docId}
+			and emp_id = #{empId}
+	</update>
+	
+	<!-- 다음 결재 순서 있는지 조회 -->
+	<select id="selectLineByOrder" resultType="ApprLineDto">
+		select
+			lin_id,
+			doc_id,
+			emp_id,
+			lin_order,
+			lin_status
+		from
+			appr_line
+		where
+			doc_id = #{docId}
+			and lin_order = #{linOrder}
+	</select>
+</mapper>

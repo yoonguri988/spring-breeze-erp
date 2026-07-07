@@ -30,12 +30,13 @@
 
 	<form th:action="@{/appr/write_doc}" method="post" onsubmit="return checkForm()">
 		<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+		<div id="hiddenApprLines"></div>
 		
 		<!-- 데이터 바인딩 -->
 		<input type="hidden" id="comId" th:value="${dto.comId}"/>
 		<input type="hidden" id="empId" th:value="${dto.empId}"/>
 	
-		<div class="sb-card">
+		<div class="sb-card mb-4">
 			<div class="sb-card__head">
 				<h2>문서 정보</h2>
 			</div>
@@ -152,6 +153,7 @@
 								   id="lineTable" style="font-size: 13px;">
 								   	<thead class="table-bottom">
 								   		<tr class="border-bottom">
+								   			<th style="width: 5%"></th>
 								   			<th style="width: 15%">순서</th>
 								   			<th style="width: 35%">결재자</th>
 								   			<th style="width: 25%">직책</th>
@@ -175,7 +177,7 @@
 				<div class="mt-2">
 					<textarea name="docContent" rows="10" cols="40"
 							  class="form-control" id="forContent"></textarea>
-					<div class="form-text text-faint mt-2">
+					<div class="form-text text-faint mt-2 ms-2">
 						선택한 결재 서식 프레임워크가 실시간으로 주입
 					</div>
 					<div id="err_docContent" class="text-danger fw-semibold mt-1"
@@ -185,9 +187,9 @@
 					
 					<div class="sb-divider"></div>
 					
-					<div class="d-flex justify-content-between align-items-center">
-						<button type="button" class="btn btn-ghost border" th:onclick="|location.href='@/appr/list_doc'|">취소</button>
+					<div class="d-flex justify-content-end align-items-center p-3">
 						<div class="d-flex gap-2">
+							<button type="button" class="btn btn-ghost border" th:onclick="|location.href='@/appr/list_doc'|">취소</button>
 							<button type="submit" class="btn btn-primary px-4"
 									style="background-color: #0d6efd; border-color: #0d6efd;">
 									<i class="bi bi-floppy"></i> 저장
@@ -247,7 +249,7 @@
 		
 		// 페이지 로드시 해당 회사에 등록된 양식 리스트 로딩
 		if(loginComId){
-			fetch(`/getFormList?comId=${encodeURIComponent(loginComId)}`)
+			fetch(`/appr/getFormList?comId=${encodeURIComponent(loginComId)}`)
 			.then(response => response.json())
 			.then(data => {
 				if(data && data.length > 0){
@@ -282,7 +284,7 @@
 			const selectedVersion = selectedOption.getAttribute("data-version");
 			
 			// 상세 조회
-			fetch(`/getFormDetail?forId=${encodeURIComponent(selectedFormId)}&forVersion=${encodeURIComponent(selectedVersion)}`)
+			fetch(`/appr/getFormDetail?forId=${encodeURIComponent(selectedFormId)}&forVersion=${encodeURIComponent(selectedVersion)}`)
 			.then(response => response.json())
 			.then(data => {
 				if(data && data.forContent){
@@ -302,7 +304,9 @@
 		// 빈칸 체크할 요소들 매핑 {key : value}
 		// 아래처럼 매핑 안하면 일일이 하나씩 getElementById 를써서 비교하고 변경해야함
 		const fields = [
-			{ id: "forSelect", errId: "err_form"}
+			{ id: "formSelect", errId: "err_form"},
+			{ id: "docTitle", errId: "err_docTitle"},
+			{ id: "forContent", errId: "err_docContent"}
 		];
 		
 		let result = true;
@@ -357,6 +361,175 @@
 	}
 	
 	/////////////////////////////// 빈칸 처리 ///////////////////////////////
+	
+	/////////////////////////////// 스위치 제어 로직 ///////////////////////////////
+	
+	document.addEventListener("DOMContentLoaded", function(){
+		const isImportantSwitch = document.getElementById("isImportantSwitch");
+		const isImportantInput = document.getElementById("isImportant");
+		const lineTableBody = document.getElementById("lineTableBody");
+		const hiddenContainer = document.getElementById("hiddenApprLines");
+		const treeBox = document.querySelector(".tree-box");
+		
+		let selectedLines = [];
+		
+		// 부서 트리
+		function loadDeptTree(){
+			fetch('/dept/getDeptTree')
+			.then(response => response.json())
+			.then(data => renderDeptTree(data))
+			.catch(err => console.error("부서트리 조회 실패",err));
+		}
+		
+		function renderDeptTree(data){
+			// parentId 기준으로 자식 그룹핑
+			const byParent = {};
+			data.forEach(d => {
+				const key = d.parentId || 0;
+				if(!byParent[key]){
+					byParent[key] = [];
+				}
+				byParent[key].push(d);
+			});
+			
+			treeBox.innerHTML = '<ul class="dept-tree list-unstyled ps-2"></ul>'
+			const rootUl = treeBox.querySelector("ul");
+			
+			function buildUl(parentId, ul){
+				(byParent[parentId] || []).forEach(dept => {
+					const li = document.createElement("li");
+					li.innerHTML = `
+						<span class="dept-node" data-dept-id="${dept.deptId}" style="cursor:pointer;">
+						<i class="bi bi-folder"></i> ${dept.deptName}
+							<span class="text-muted">(${dept.empCount})</span>
+						</span>
+					`;
+					ul.appendChild(li);
+					
+					if(byParent[dept.deptId]){
+						const childUl = document.createElement("ul");
+						childUl.className = "list-unstyled ps-3";
+						li.appendChild(childUl);
+						buildUl(dept.deptId, childUl);
+					}
+				});
+			}
+			buildUl(0, rootUl);
+			
+			// 부서 클릭시 사원 목록 표시
+			treeBox.querySelectorAll(".dept-node").forEach(node => {
+				node.addEventListener("click", function(e){
+					e.stopPropagation();
+					const deptId = this.getAttribute("data-dept-id");
+					loadDeptEmps(deptId);
+				});
+			});
+		}
+		
+		// 부서 클릭시 사원 목록 표시 함수
+		let empListBox;
+		function loadDeptEmps(deptId){
+			fetch(`/dept/getDeptEmps?deptId=${encodeURIComponent(deptId)}`)
+			.then(response => response.json())
+			.then(data => renderEmpList(data))
+			.catch(err => console.error("사원목록 조회 실패", err));
+		}
+		
+		function renderEmpList(emps){
+			if(!empListBox){
+				empListBox = document.createElement("div");
+				empListBox.className = "emp-list-box mt-2 border rounded p-2";
+				empListBox.style.maxHeight = "150px";
+				empListBox.style.overflowY = "auto";
+				treeBox.parentElement.appendChild(empListBox);
+			}
+			empListBox.innerHTML = "";
+			emps.forEach(emp => {
+				const div = document.createElement("div");
+				div.className = "form-check";
+				div.innerHTML = `
+					<input class="form-check-input emp-check" type="checkbox"
+						   value="${emp.empId}" data-emp-name="${emp.empName}" data-pos-name="${emp.posName}"
+						   id="emp_${emp.empId}"/>
+					<label class="form-check-label" for="emp_${emp.empId}">
+						${emp.empName} (${emp.posName})
+					</label>
+				`;
+				empListBox.appendChild(div);
+			});
+		}
+		
+		// 체크된 사원을 결재선에 추가
+		const addBtn = document.querySelectorAll(".col-md-1 button")[0];
+		const removeBtn = document.querySelectorAll(".col-md-1 button")[1];
+	    
+		addBtn.removeAttribute("disabled");
+		addBtn.addEventListener("click", function(){
+			if(!empListBox) return;
+			empListBox.querySelectorAll(".emp-check:checked").forEach(chk => {
+				const empId = parseInt(chk.value);
+				if(selectedLines.some(l => l.empId === empId)) return; // 중복 방지
+				selectedLines.push({
+					empId: empId,
+					empName: chk.getAttribute("data-emp-name"),
+					posName: chk.getAttribute("data-pos-name")
+				});
+				chk.checked = false;
+			});
+			renderApprovalLine();
+		});
+		
+		// 선택된 결재선에서 제거
+		removeBtn.removeAttribute("disabled");
+		removeBtn.addEventListener("click", function(){
+			const checkedRows = lineTableBody.querySelectorAll(".line-check:checked");
+			const removeIds = Array.from(checkedRows).map(chk => parseInt(chk.value));
+			selectedLines = selectedLines.filter(l => !removeIds.includes(l.empId));
+			renderApprovalLine();
+		});
+		
+		
+	    // 결재선 테이블 렌더링 및 바인딩
+	    function renderApprovalLine(){
+	    	lineTableBody.innerHTML = "";
+	    	hiddenContainer.innerHTML = "";
+	    	
+	    	selectedLines.forEach((line, index) => {
+	    		
+	    		const order = index + 1;
+	    		const status = index === 0 ? 'WAI' : 'NOT';
+	    		const statusBadge = status === 'WAI' ?
+	    				'<span class="badge bg-warning">대기</span>' :
+	    				'<span class="badge bg-secondary">대기예정</span>';
+	    		
+	    		const tr = document.createElement("tr");
+	    		tr.innerHTML = `
+	    			<td><input type="checkbox" class="line-check" value="${line.empId}"/></td>
+	    			<td class="fw-semibold">${order}</td>
+	    			<td>${line.empName}(${line.empId})</td>
+	    			<td><span class="badge bg-light text-dark border">${line.posName}</span></td>
+	    			<td>${statusBadge}</td>
+	    		`;
+	    		lineTableBody.appendChild(tr);
+	    		
+	    		// name 속성 매핑 구조
+	    		hiddenContainer.innerHTML += `
+	    			<input type="hidden" name="apprLines[${index}].linOrder" value="${order}"/>
+	    			<input type="hidden" name="apprLines[${index}].empId" value="${line.empId}"/>
+	    			<input type="hidden" name="apprLines[${index}].linStatus" value="${status}"/>
+	    		`;	
+	    	});
+	    }
+	    
+	    isImportantSwitch.addEventListener("change", function(){
+	        isImportantInput.value = this.checked ? "1" : "0";
+	    });
+	    
+	    // 최초 로드시 기본 결재선 출력
+	    loadDeptTree();
+	});
+	
+	/////////////////////////////// 스위치 제어 로직 ///////////////////////////////
 	
 	
 </script>

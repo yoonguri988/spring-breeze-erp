@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
 import com.sb.erp.dto.ApprFormDto;
+import com.sb.erp.dto.ApprLineDto;
 
 public interface ApprDocService {
 	
@@ -19,4 +20,9 @@ public interface ApprDocService {
 	public Map<String, Object> selectDocCnt(ApprDocDto dto);
 	public List<Map<String, Object>> selectMyHistoryDocs(ApprDocDto dto);
 	public List<Map<String, Object>> selectMyTodoDocs(ApprDocDto dto);
+	
+	// 결재선 관련 파트
+	public List<ApprLineDto> approversByEmpId(ApprDocDto dto);
+	public int updateDocStatus(ApprDocDto dto);
+	public boolean insertLines(ApprDocDto dto);
 }

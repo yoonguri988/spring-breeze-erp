@@ -5,16 +5,20 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.dao.ApprDocMapper;
+import com.sb.erp.dao.ApprLineMapper;
 import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
 import com.sb.erp.dto.ApprFormDto;
+import com.sb.erp.dto.ApprLineDto;
 
 @Service
 public class ApprDocServiceImpl implements ApprDocService{
 
 	@Autowired ApprDocMapper dao;
+	@Autowired ApprLineMapper lineDao;
 	
 	// 작성하려는 사용자의 회사 양식
 	@Override
@@ -57,5 +61,42 @@ public class ApprDocServiceImpl implements ApprDocService{
 	public List<Map<String, Object>> selectMyTodoDocs(ApprDocDto dto) {
 		return dao.selectMyTodoDocs(dto);
 	}
+
+	// 상사들 다 가져오기
+	@Override
+	public List<ApprLineDto> approversByEmpId(ApprDocDto dto) {
+		return dao.approversByEmpId(dto);
+	}
+
+	// 결재 문서 상태 수정
+	@Override
+	public int updateDocStatus(ApprDocDto dto) {
+		return dao.updateDocStatus(dto);
+	}
+
+	@Override
+	@Transactional
+	public boolean insertLines(ApprDocDto dto) {
+		
+		// 문서 데이터 넣기
+		dao.insertDoc(dto);
+		
+		// 새로 채번된 문서 id 막기
+		int docId = dto.getDocId();
+		
+		// 폼에서 넘어온 결재선 데이터 추출
+		List<ApprLineDto> lineList = dto.getApprLines();
+		
+		// 결재선 순차 적재
+		if(lineList != null && !lineList.isEmpty()) {
+			for(ApprLineDto line : lineList) {
+				line.setDocId(docId);
+				lineDao.insertLine(line);
+			}
+		}
+		return true;
+	}
+	
+	
 	
 }
