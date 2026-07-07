@@ -3,6 +3,8 @@ package com.sb.erp.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,17 +14,18 @@ import com.sb.erp.dto.ProjectMemberDto;
 import com.sb.erp.service.ProjectMemberService;
 
 @Controller
+@RequestMapping("/proj")
 public class ProjectMemberController {
 	@Autowired ProjectMemberService service;
 	
 	
-	@RequestMapping(value="/proj/proj_member" ,method=RequestMethod.GET)
-	public String list(int pro_id, Model model) {
-		 model.addAttribute("list", service.select(pro_id));
-		 model.addAttribute("pro_id", pro_id);
+	@GetMapping("/proj_member")
+	public String list(@RequestParam("pro_id") int proId, Model model) {
+		 model.addAttribute("list", service.select(proId));
+		 model.addAttribute("pro_id", proId);
 		return "proj/proj_member";} //프로젝트 참여인원 조회
 	
-	  @RequestMapping(value="/proj/proj_member_create",method=RequestMethod.POST) 
+	  @PostMapping("/proj_member_create") 
 	  public String insert(ProjectMemberDto dto,RedirectAttributes rttr) { 
 		  String result="프로젝트 멤버 추가 실패";
 		  if(service.insert(dto)>0) {result="프로젝트 멤버 추가 성공";}
@@ -30,12 +33,12 @@ public class ProjectMemberController {
 		  return "redirect:/proj/proj_member?pro_id="+dto.getProjectProId(); } //프로젝트 멤버 추가
 	 
 	
-	@RequestMapping(value="/proj/proj_member_delete",method=RequestMethod.GET) 
-	public String delete(@RequestParam("pm_id")int pm_id, @RequestParam("pro_id") int pro_id,
+	@GetMapping("/proj_member_delete") 
+	public String delete(@RequestParam("pm_id")int pmId, @RequestParam("pro_id") int proId,
 			RedirectAttributes rttr) {
 		String result="프로젝트 멤버 삭제 실패";
-		if(service.delete(pm_id)>0) {result="프로젝트 멤버 삭제 성공";}
+		if(service.delete(pmId)>0) {result="프로젝트 멤버 삭제 성공";}
 		rttr.addFlashAttribute("result",result);
-		return "redirect:/proj/proj_member?pro_id="+pro_id;}//프로젝트 멤버 삭제
+		return "redirect:/proj/proj_member?pro_id="+proId;}//프로젝트 멤버 삭제
 
 }

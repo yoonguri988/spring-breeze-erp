@@ -1,45 +1,51 @@
 package com.sb.erp.service;
 
-import java.util.HashMap;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sb.erp.api.DiscordApi;
+import com.sb.erp.api.OpenAiGpt;
 import com.sb.erp.dao.ProjectMapper;
+import com.sb.erp.dto.ProjectAnalysisDto;
 import com.sb.erp.dto.ProjectDto;
 import com.sb.erp.dto.ProjectSearchDto;
 
 @Service
 public class ProjectServiceImpl implements ProjectService{
 	@Autowired ProjectMapper dao;
+	@Autowired private OpenAiGpt openAi;
+	@Autowired private DiscordApi discordApi;
 
 	//프로젝트 등록
 	@Override public int insert(ProjectDto dto) {  return dao.insert(dto); }
 
 	//상태별 조회
-	@Override public List<ProjectDto> selectByStatus(String pro_status) 
-	{  return dao.selectByStatus(pro_status); }
+	@Override public List<ProjectDto> selectByStatus(String proStatus) 
+	{  return dao.selectByStatus(proStatus); }
 
 	//프로젝트 상세보기
-	@Override public ProjectDto select(int pro_id) {  return dao.select(pro_id); }
+	@Override public ProjectDto select(int proId) {  return dao.select(proId); }
 	
 	//프로젝트 삭제
-	@Override public int delete(int pro_id) {  
+	@Override public int delete(int proId) {  
 		 //1.태스크 삭제
-		  dao.deleteTaskByProjectId(pro_id);
+		  dao.deleteTaskByProjectId(proId);
 
 	     // 2. 프로젝트 멤버 삭제
-		  dao.deleteMemberByProjectId(pro_id);
+		  dao.deleteMemberByProjectId(proId);
 
 		 // 3. 프로젝트 삭제
-		return  dao.deleteProject(pro_id); }
+		return  dao.deleteProject(proId); }
 	
 	//프로젝트 수정
 	@Override public int edit(ProjectDto dto) {  return dao.update(dto); }
 	
 	//프로젝트 수정뷰
-	@Override public ProjectDto editView(int pro_id) {  return dao.select(pro_id); }
+	@Override public ProjectDto editView(int proId) {  return dao.select(proId); }
 
 	/*paging*/
 	@Override public List<ProjectDto> selectAll(ProjectSearchDto search) {
@@ -53,5 +59,27 @@ public class ProjectServiceImpl implements ProjectService{
 	@Override public List<ProjectDto> selectByPeriod(String startDate, String endDate) {  return dao.selectByPeriod(startDate, endDate); }
 	
 	//프로젝트명 검색
-	@Override public List<ProjectDto> searchByKeyword(String keyword) {  return dao.searchByKeyword(keyword); } 
+	@Override public List<ProjectDto> searchByKeyword(String keyword) {  return dao.searchByKeyword(keyword); }
+
+	//Ai 결과 보고서
+	@Override public ProjectAnalysisDto projectAnalysis(Integer proId) {
+		ProjectAnalysisDto dto = dao.projectAnalysis(proId);
+		if(dto==null) {return null;}
+		long remainDays = ChronoUnit.DAYS.between(LocalDate.now(), dto.getEndDate());
+		if(remainDays<0) {remainDays=0;}
+		dto.setRemainDays(remainDays);
+		return dto;
+	}
+
+	@Override public String analyzeProject(Integer proId) {
+		ProjectAnalysisDto dto = projectAnalysis(proId);
+		if(dto==null) {return "프로젝트 정보를 찾을 수 없습니다.";}
+		
+		
+		String result = openAi.analyzeProject(dto);
+		if(result.contains("HIGH")) {discordApi.sendMessage("🚨 프로젝트 위험 감지 🚨\n\n" + result);}
+				return result;
+				
+	} 
+	
 }

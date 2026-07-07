@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.sb.erp.dto.ProjectAnalysisDto;
 import com.sb.erp.dto.ProjectDto;
 import com.sb.erp.dto.ProjectSearchDto;
 
@@ -14,15 +15,15 @@ public interface ProjectMapper {
 	public int insert(ProjectDto dto);
 	
 	//프로젝트 상태별 리스트
-	public List<ProjectDto> selectByStatus(String pro_status);
+	public List<ProjectDto> selectByStatus(String proStatus);
 	
 	//프로젝트 상세보기
-	public ProjectDto select(int pro_id);
+	public ProjectDto select(int proId);
 	
 	//프로젝트 삭제
-	public int deleteTaskByProjectId(int pro_id);
-	public int deleteMemberByProjectId(int pro_id);
-	public int deleteProject(int pro_id);
+	public int deleteTaskByProjectId(int proId);
+	public int deleteMemberByProjectId(int proId);
+	public int deleteProject(int proId);
 	
 	//프로젝트 수정
 	public int update(ProjectDto dto);
@@ -36,4 +37,7 @@ public interface ProjectMapper {
 	
 	//프로젝트명 검색
 	public List<ProjectDto> searchByKeyword(@Param("keyword") String keyword);
+	
+	//Ai 프로젝트 분석용
+	public ProjectAnalysisDto projectAnalysis(Integer proId);
 }
