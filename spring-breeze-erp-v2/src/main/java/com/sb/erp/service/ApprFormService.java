@@ -18,7 +18,6 @@ public interface ApprFormService {
 	public ApprFormDto selectFormAll(ApprFormDto dto);
 	public int insertForm(ApprFormDto dto);
 	public int updateForm(ApprFormDto dto);
-	public int updateFormNewVersion(ApprFormDto dto);
 	public int deleteForm(ApprFormDto dto);
 	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto); 
 	public String findByCode(ApprFormDto dto);

@@ -1,9 +1,11 @@
 package com.sb.erp.service;
 
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.dao.ApprFormMapper;
 import com.sb.erp.dto.ApprFormDto;
@@ -48,16 +50,31 @@ public class ApprFormServiceImpl implements ApprFormService {
 	}
 
 	@Override
+	@Transactional
 	public int updateForm(ApprFormDto dto) {
 		
-		return dao.updateForm(dto);
+		// 원본 데이터 넣기
+		ApprFormDto original = dao.selectFormAll(dto);
+		
+		// 삭제 혹은 수정으로 인한 데이터 변조시 방어
+		if(original == null) {
+			throw new ConcurrentModificationException("이미 다른 사용자에 의해 수정,삭제된 양식입니다");
+		}
+		
+		// insert, update 분기점 확인 / 데이터가 바뀌었는지 원본과 대조
+		boolean test = !original.getForTitle().equals(dto.getForTitle())
+					|| !original.getForContent().equals(dto.getForContent());
+		
+		// 확인후 처리
+		if(test) { // 중요 데이터가 바뀌었을경우 version +1 처리
+			dto.setCreatedAt(original.getCreatedAt());
+			return dao.updateFormNewVersion(dto);
+		}
+		else { // 중요 데이터가 바뀌지 않았을경우 일반 update 처리
+			return dao.updateForm(dto);
+		}
 	}
 	
-	@Override
-	public int updateFormNewVersion(ApprFormDto dto) {
-		
-		return dao.updateFormNewVersion(dto);
-	}
 	
 	@Override
 	public int deleteForm(ApprFormDto dto) {
