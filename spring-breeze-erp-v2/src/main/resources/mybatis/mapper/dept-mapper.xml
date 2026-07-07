@@ -225,4 +225,11 @@
 		SET DEPT_STATUS = 'PENDING_DELETE'
 		WHERE DEPT_ID = #{deptId}
 	</update>
+	<!-- 이관 이력 화면의 원부서/대상부서 필터 select box용 — 부서 상태 무관 전체 -->
+	<select id="selectAllDeptsByComId" resultType="deptDto">
+		SELECT *
+		FROM department
+		WHERE com_id = #{comId}
+		ORDER BY dept_name
+	</select>
 </mapper>

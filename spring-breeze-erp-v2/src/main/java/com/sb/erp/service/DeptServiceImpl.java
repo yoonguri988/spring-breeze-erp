@@ -131,4 +131,9 @@ public class DeptServiceImpl implements DeptService {
 		return dao.softDelete(deptId);
 	}
 
+	@Override
+	public List<DeptDto> getAllDeptsByComId(Integer comId) {
+		return dao.selectAllDeptsByComId(comId);
+	}
+
 }

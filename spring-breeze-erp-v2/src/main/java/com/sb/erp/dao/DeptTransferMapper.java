@@ -41,6 +41,6 @@ public interface DeptTransferMapper {
 
 	List<PendingDeptDto> findPendingTransferDepts(@Param("comId") Integer comId, @Param("keyword") String keyword);
 
-
+	List<DeptDto> findAllDeptsByCompany(Integer comId);
 
 }

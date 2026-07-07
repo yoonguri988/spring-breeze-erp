@@ -28,4 +28,6 @@ public interface DeptService {
 
 	public int softDelete(int deptId);
 
+	public List<DeptDto> getAllDeptsByComId(Integer comId);
+
 }

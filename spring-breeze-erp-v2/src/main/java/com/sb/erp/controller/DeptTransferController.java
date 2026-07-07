@@ -14,17 +14,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.sb.erp.dto.DeptDto;
 import com.sb.erp.dto.DeptTransferExecuteForm;
 import com.sb.erp.dto.DeptTransferImpactDto;
+import com.sb.erp.dto.DeptTransferLogDto;
+import com.sb.erp.dto.DeptTransferLogSearchDto;
 import com.sb.erp.dto.PendingDeptDto;
 import com.sb.erp.security.CustomUserDetails;
+import com.sb.erp.service.DeptService;
 import com.sb.erp.service.DeptTransferService;
+import com.sb.erp.util.PagingUtil;
 
 @Controller
 @RequestMapping("/dept/transfer")
 @PreAuthorize("hasRole('ADMIN')")
 public class DeptTransferController {
 	@Autowired DeptTransferService service;
+	@Autowired DeptService deptService;
 	
     /** Authentication의 principal에서 로그인한 관리자의 회사(com_id)를 꺼낸다. */
     private Integer resolveComId(Authentication authentication) {
@@ -99,4 +105,38 @@ public class DeptTransferController {
         model.addAttribute("keyword", keyword);
         return "dept/transfer/pending";
     }
+    
+    /**
+     * 부서 이관 이력 화면 — 원부서/대상부서/처리일자/AI제안여부 필터.
+     * @ModelAttribute 로 GET 쿼리스트링(originDeptId, targetDeptId, aiRecommended, dateFrom, dateTo)을 바로 바인딩.
+     */
+    @GetMapping("/log")
+    public String transferLog(@ModelAttribute DeptTransferLogSearchDto search,
+                               Authentication authentication,
+                               Model model) {
+        Integer comId = resolveComId(authentication);
+        
+        if (search.getDateFrom() == null || search.getDateFrom().isBlank()) {
+        	search.setDateFrom(java.time.LocalDate.now().minusDays(30).toString());
+        }
+        if (search.getDateTo() == null || search.getDateTo().isBlank()) {
+        	search.setDateTo(java.time.LocalDate.now().toString());
+        }
+        
+        int listtotal = service.listTotal(comId, search);
+        PagingUtil paging = new PagingUtil(listtotal, search.getPstartno(), search.getOnepagelist(), 10);
+        
+        // 부서 이관 이력 조회
+        List<DeptTransferLogDto> logs = service.searchTransferLogs(comId, search);
+        // 해당 회사의 부서 목록 조회
+        List<DeptDto> deptOptions = deptService.getAllDeptsByComId(comId);
+ 
+        model.addAttribute("paging", paging);
+        model.addAttribute("logs", logs);
+        model.addAttribute("deptOptions", deptOptions);
+        model.addAttribute("search", search);
+        return "dept/transfer/log";
+    }
+    
+    
 }

@@ -33,7 +33,7 @@ public class SecurityConfig {
 				    .requestMatchers("/emp/add", "/emp/resetPass",
 							"/emp/checkEmail", "/emp/checkMobile",
 							"/emp/checkEmpNo", "/perm/**", "/pos/**",
-							"/dept/transfer/pending","/dept/transfer/list" 
+							"/dept/transfer/pending","/dept/transfer/list","/dept/transfer/log" 
 					).hasRole("ADMIN")
 				    // ─── 로그인만 하면 접근 가능 ───────────
 				    .requestMatchers("/auth/updatePass", "/", "/emp/list", 

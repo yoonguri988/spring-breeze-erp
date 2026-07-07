@@ -17,6 +17,7 @@ import com.sb.erp.dto.DeptDto;
 import com.sb.erp.dto.DeptTransferExecuteForm;
 import com.sb.erp.dto.DeptTransferImpactDto;
 import com.sb.erp.dto.DeptTransferLogDto;
+import com.sb.erp.dto.DeptTransferLogSearchDto;
 import com.sb.erp.dto.EmpTransferDto;
 import com.sb.erp.dto.EmployeeTransferItemForm;
 import com.sb.erp.dto.PendingDeptDto;
@@ -151,4 +152,14 @@ public class DeptTransferServiceImpl implements DeptTransferService {
 		return dao.findPendingTransferDepts(comId, keyword);
 	}
 
+	@Override
+	public List<DeptTransferLogDto> searchTransferLogs(Integer comId, DeptTransferLogSearchDto search) {
+		search.setPstartno((search.getPstartno() - 1) * search.getOnepagelist());
+		return logDao.searchTransferLogs(comId, search);
+	}
+
+	@Override
+	public int listTotal(Integer comId, DeptTransferLogSearchDto search) {
+		return logDao.listTotal(comId, search);
+	}
 }

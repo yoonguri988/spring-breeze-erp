@@ -35,4 +35,6 @@ public interface DeptMapper {
 
 	int softDelete(int deptId);
 
+	List<DeptDto> selectAllDeptsByComId(Integer comId);
+
 }
