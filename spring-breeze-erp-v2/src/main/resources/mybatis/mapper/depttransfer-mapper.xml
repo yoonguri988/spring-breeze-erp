@@ -93,19 +93,36 @@
       AND dept_id != #{deptId}
     ORDER BY dept_name
 </select>
+<!-- 이관 취소 업데이트 -->
 <update id="updateActiveById">
 	UPDATE DEPARTMENT
 	SET DEPT_STATUS = 'ACTIVE'
 	WHERE DEPT_ID = #{deptId}
 </update>
+<!-- 부서 이관 확정 -->
 <update id="markDeleted">
 	UPDATE DEPARTMENT
 	SET DEPT_STATUS = 'DELETED'
 	WHERE DEPT_ID = #{deptId} 
 </update>
+<!-- 부서 이관 진행 (사원 부서 업데이트) -->
 <update id="updateEmployeeDept">
 	UPDATE employee
     SET dept_id = #{newDeptId}
     WHERE emp_id = #{empId}
 </update>
+<!-- 이관 대기(PENDING_DELETE) 부서 목록  -->
+<select id="findPendingTransferDepts" resultType="PendingDeptDto">
+	SELECT
+	    d.dept_id, d.dept_name, d.dept_code, d.updated_at,
+	    (SELECT COUNT(*) FROM employee e WHERE e.dept_id = d.dept_id) AS emp_count
+	FROM department d
+	WHERE d.com_id = #{comId}
+	  AND d.dept_status = 'PENDING_DELETE'
+	<if test="keyword != null and keyword != ''">
+	  AND (UPPER(d.dept_name) LIKE '%' || UPPER(#{keyword}) || '%'
+	       OR UPPER(d.dept_code) LIKE '%' || UPPER(#{keyword}) || '%')
+	</if>
+	ORDER BY d.updated_at DESC
+</select>
 </mapper>

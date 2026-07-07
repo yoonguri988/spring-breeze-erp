@@ -1,5 +1,7 @@
 package com.sb.erp.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -14,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.DeptTransferExecuteForm;
 import com.sb.erp.dto.DeptTransferImpactDto;
+import com.sb.erp.dto.PendingDeptDto;
 import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.DeptTransferService;
 
@@ -78,5 +81,22 @@ public class DeptTransferController {
             return "redirect:/dept/transfer/list?deptId=" + form.getDeptId();
         }
         return "redirect:/dept/list";
+    }
+    
+    /**
+     * 이관 대기(PENDING_DELETE) 부서 목록 페이지.
+     * 이관 도중 다른 화면으로 이동했다가도, 여기로 다시 들어와 어떤 부서가 이관 대기중인지
+     * 찾아서 재진입할 수 있도록 하는 진입점.
+     */
+    @GetMapping("/pending")
+    public String pendingList(@RequestParam(required = false) String keyword,
+                               Authentication authentication,
+                               Model model) {
+        Integer comId = resolveComId(authentication);
+        List<PendingDeptDto> pendingDepts = service.getPendingTransferDepts(comId, keyword);
+ 
+        model.addAttribute("pendingDepts", pendingDepts);
+        model.addAttribute("keyword", keyword);
+        return "dept/transfer/pending";
     }
 }

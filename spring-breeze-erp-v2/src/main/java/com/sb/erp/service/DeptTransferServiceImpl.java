@@ -19,6 +19,7 @@ import com.sb.erp.dto.DeptTransferImpactDto;
 import com.sb.erp.dto.DeptTransferLogDto;
 import com.sb.erp.dto.EmpTransferDto;
 import com.sb.erp.dto.EmployeeTransferItemForm;
+import com.sb.erp.dto.PendingDeptDto;
 import com.sb.erp.dto.ResvImpactDto;
 import com.sb.erp.exception.DeptTransferException;
 
@@ -143,6 +144,11 @@ public class DeptTransferServiceImpl implements DeptTransferService {
         if (remaining == 0) {
             dao.markDeleted(oldDeptId);
         }		
+	}
+
+	@Override
+	public List<PendingDeptDto> getPendingTransferDepts(Integer comId, String keyword) {
+		return dao.findPendingTransferDepts(comId, keyword);
 	}
 
 }

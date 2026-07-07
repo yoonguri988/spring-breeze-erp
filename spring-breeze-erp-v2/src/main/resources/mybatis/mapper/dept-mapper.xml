@@ -9,7 +9,7 @@
 		select count(*) from
 		department
 		where com_id = #{comId}
-		AND DEPT_STATUS = 'ACTIVE'
+		AND DEPT_STATUS != 'DELETED'
 	</select>
 
 	<!-- 부서 전체 조회 -->
@@ -21,7 +21,7 @@
 		        dept_id
 		    FROM department
 		    WHERE com_id = #{comId}
-		    AND DEPT_STATUS = 'ACTIVE'
+		    AND DEPT_STATUS != 'DELETED'
 		    UNION ALL
 		    SELECT 
 		        dp.ancestor_id, 
@@ -29,7 +29,7 @@
 		        dp.root_id
 		    FROM dept_path dp
 		    JOIN department d ON d.parent_id = dp.descendant_id
-		    WHERE D.DEPT_STATUS = 'ACTIVE'
+		    WHERE D.DEPT_STATUS != 'DELETED'
 		),
 		dept_order (dept_id, parent_id, sort_path) AS (
 		    SELECT 
@@ -39,7 +39,7 @@
 		    FROM department
 		    WHERE parent_id IS NULL 
 		    AND com_id = #{comId}
-		    AND DEPT_STATUS = 'ACTIVE'
+		    AND DEPT_STATUS != 'DELETED'
 		    UNION ALL
 		    SELECT 
 		        d.dept_id,
@@ -47,7 +47,7 @@
 		        o.sort_path || '-' || LPAD(TO_CHAR(d.dept_id), 5, '0')
 		    FROM department d
 		    JOIN dept_order o ON d.parent_id = o.dept_id
-		    WHERE DEPT_STATUS = 'ACTIVE'
+		    WHERE DEPT_STATUS != 'DELETED'
 		)
 		SELECT
 		    d.dept_id, d.dept_name, d.dept_code,
@@ -63,7 +63,7 @@
 		LEFT JOIN department dp_parent ON dp_parent.dept_id = d.parent_id
 		LEFT JOIN employee leader      ON leader.emp_id = d.emp_id
 		LEFT JOIN employee e           ON e.dept_id = dp.descendant_id
-		WHERE D.DEPT_STATUS = 'ACTIVE'
+		WHERE D.DEPT_STATUS != 'DELETED'
 		GROUP BY
 		    d.dept_id, d.dept_name, d.dept_code, d.depth, d.sort_order, d.parent_id,
 		    dp_parent.dept_name, d.emp_id, leader.emp_name, o.sort_path
@@ -78,7 +78,7 @@
 		        dept_id,
 		        dept_id
 		    FROM department
-		    WHERE DEPT_STATUS = 'ACTIVE'
+		    WHERE DEPT_STATUS != 'DELETED'
 		    UNION ALL
 		    SELECT 
 		        dp.ancestor_id, 
@@ -86,7 +86,7 @@
 		        dp.root_id
 		    FROM dept_path dp
 		    JOIN department d ON d.parent_id = dp.descendant_id
-		    AND D.DEPT_STATUS = 'ACTIVE'
+		    AND D.DEPT_STATUS != 'DELETED'
 		),
 		dept_order (dept_id, parent_id, sort_path) AS (
 		    SELECT 
@@ -95,7 +95,7 @@
 		        CAST(LPAD(TO_CHAR(dept_id), 5, '0') AS VARCHAR2(255))
 		    FROM department
 		    WHERE parent_id IS NULL
-		    AND DEPT_STATUS = 'ACTIVE'
+		    AND DEPT_STATUS != 'DELETED'
 		    UNION ALL
 		    SELECT 
 		        d.dept_id,
@@ -103,7 +103,7 @@
 		        o.sort_path || '-' || LPAD(TO_CHAR(d.dept_id), 5, '0')
 		    FROM department d
 		    JOIN dept_order o ON d.parent_id = o.dept_id
-		    AND D.DEPT_STATUS = 'ACTIVE'
+		    AND D.DEPT_STATUS != 'DELETED'
 		)
 		SELECT
 		    d.dept_id, d.dept_name, d.dept_code,
@@ -123,7 +123,7 @@
 		LEFT JOIN emp_position leader_p ON leader_p.pos_id = leader.pos_id
 		LEFT JOIN employee e            ON e.dept_id = dp.descendant_id
 		WHERE d.dept_id = #{deptId}
-		AND D.DEPT_STATUS = 'ACTIVE'
+		AND D.DEPT_STATUS != 'DELETED'
 		GROUP BY
 		    d.dept_id, d.dept_name, d.dept_code, d.depth, d.sort_order, d.com_id, d.parent_id,
 		    dp_parent.dept_name, d.emp_id, leader.emp_name, leader.emp_no, leader_p.pos_name, o.sort_path
@@ -136,7 +136,7 @@
 		coalesce(max(sort_order), 0)
 		from department
 		where com_id = #{comId}
-		AND DEPT_STATUS = 'ACTIVE'
+		AND DEPT_STATUS != 'DELETED'
 		and (parent_id = #{parentId} OR (parent_id IS NULL AND #{parentId} IS
 		NULL))
 	</select>
@@ -158,7 +158,7 @@
 		select count(*) from
 		department
 		where parent_id = #{deptId}
-		AND DEPT_STATUS = 'ACTIVE'
+		AND DEPT_STATUS != 'DELETED'
 	</select>
 
 	<!-- 부서 삭제 -->
@@ -189,13 +189,13 @@
 		select dept_id
 		from department
 		where parent_id = #{deptId}
-		AND DEPT_STATUS = 'ACTIVE'
+		AND DEPT_STATUS != 'DELETED'
 		union all
 		select d.dept_id
 		from department d
 		join childTree c
 		on d.parent_id = c.dept_id
-		AND D.DEPT_STATUS = 'ACTIVE'
+		AND D.DEPT_STATUS != 'DELETED'
 		)
 		SELECT dept_id FROM childTree
 	</select>
@@ -203,9 +203,9 @@
 	<!-- 부서 통계 데이터 조회 -->
 	<select id="selectStats" resultType="StatsDeptDto">
 		SELECT
-        (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND DEPT_STATUS = 'ACTIVE') AS deptTotal,
-        (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND depth = 1 AND DEPT_STATUS = 'ACTIVE') AS dept1Total,
-        (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND depth in (2,3) AND DEPT_STATUS = 'ACTIVE') AS dept2Total,
+        (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND DEPT_STATUS != 'DELETED') AS deptTotal,
+        (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND depth = 1 AND DEPT_STATUS != 'DELETED') AS dept1Total,
+        (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND depth in (2,3) AND DEPT_STATUS != 'DELETED') AS dept2Total,
         (SELECT COUNT(*) FROM employee WHERE com_id = #{comId} AND emp_status = '재직') AS empTotal
         from DUAL
 	</select>
@@ -216,7 +216,7 @@
 		JOIN DEPARTMENT D
 		ON E.DEPT_ID = D.DEPT_ID
 		WHERE E.DEPT_ID = #{deptId}
-		AND D.DEPT_STATUS = 'ACTIVE'
+		AND D.DEPT_STATUS != 'DELETED'
 	</select>
 	
 	<!-- 부서 임시 삭제 soft delete -->

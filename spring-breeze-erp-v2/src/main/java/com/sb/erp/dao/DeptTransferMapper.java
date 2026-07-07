@@ -9,6 +9,7 @@ import com.sb.erp.dto.ApprDocImpactDto;
 import com.sb.erp.dto.ApprLineImpactDto;
 import com.sb.erp.dto.DeptDto;
 import com.sb.erp.dto.EmpTransferDto;
+import com.sb.erp.dto.PendingDeptDto;
 import com.sb.erp.dto.ResvImpactDto;
 
 @Mapper
@@ -37,6 +38,8 @@ public interface DeptTransferMapper {
 	int markDeleted(Integer deptId);
 
 	int updateEmployeeDept(@Param("empId") Integer empId, @Param("newDeptId") Integer newDeptId);
+
+	List<PendingDeptDto> findPendingTransferDepts(@Param("comId") Integer comId, @Param("keyword") String keyword);
 
 
 
