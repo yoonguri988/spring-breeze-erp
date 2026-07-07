@@ -672,3 +672,35 @@ CREATE INDEX fk_reservation_resource1_idx  ON reservation (res_id);
 -- 시간대 충돌 감지 조회에 자주 쓰이는 복합 인덱스
 -- (같은 자원(res_id)에 대해 특정 시간대와 겹치는 예약이 있는지 조회할 때 사용)
 CREATE INDEX ix_reservation_res_time ON reservation (res_id, start_dt, end_dt);
+
+-- ==========================================
+-- 15. 부서 이관 이력 (dept_transfer_log)
+-- ==========================================
+
+CREATE TABLE dept_transfer_log (
+  log_id            NUMBER NOT NULL,
+  com_id            NUMBER NOT NULL,
+  origin_dept_id    NUMBER NOT NULL,
+  target_dept_id    NUMBER NOT NULL,
+  emp_id            NUMBER NOT NULL,
+  ai_recommended    VARCHAR2(1) DEFAULT 'N' NOT NULL,  -- AI 추천을 그대로 수용했는지 (Y/N)
+  ai_reason         VARCHAR2(1000),                    -- AI가 준 추천 사유 (없으면 NULL)
+  handover_snapshot CLOB,                               -- 이관 시점의 결재/자원 텍스트 요약 스냅샷
+  created_by        NUMBER NOT NULL,                    -- 처리한 관리자 emp_id
+  created_at        DATE DEFAULT SYSDATE NOT NULL,
+  CONSTRAINT pk_dept_transfer_log PRIMARY KEY (log_id),
+  CONSTRAINT ck_dtl_ai_recommended CHECK (ai_recommended IN ('Y', 'N')),
+  CONSTRAINT fk_dtl_com          FOREIGN KEY (com_id)         REFERENCES company (com_id),
+  CONSTRAINT fk_dtl_origin_dept  FOREIGN KEY (origin_dept_id) REFERENCES department (dept_id),
+  CONSTRAINT fk_dtl_target_dept FOREIGN KEY (target_dept_id) REFERENCES department (dept_id),
+  CONSTRAINT fk_dtl_emp          FOREIGN KEY (emp_id)         REFERENCES employee (emp_id),
+  CONSTRAINT fk_dtl_created_by   FOREIGN KEY (created_by)     REFERENCES employee (emp_id)
+);
+ 
+CREATE INDEX fk_dtl_com_idx          ON dept_transfer_log (com_id);
+CREATE INDEX fk_dtl_origin_dept_idx  ON dept_transfer_log (origin_dept_id);
+CREATE INDEX fk_dtl_target_dept_idx ON dept_transfer_log (target_dept_id);
+CREATE INDEX fk_dtl_emp_idx          ON dept_transfer_log (emp_id);
+CREATE INDEX fk_dtl_created_by_idx   ON dept_transfer_log (created_by);
+ 
+CREATE SEQUENCE seq_dept_transfer_log START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
