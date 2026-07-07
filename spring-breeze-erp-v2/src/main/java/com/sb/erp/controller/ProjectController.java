@@ -5,6 +5,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -215,5 +219,31 @@ public class ProjectController {
 	@ResponseBody
 	public String analyzeProject(@RequestParam Integer proId) {
 		return service.analyzeProject(proId);
+	}
+	
+	@GetMapping("/weekly-report")
+	public ResponseEntity<byte[]> downloadWeeklyReport(
+	        @RequestParam("pro_id") int proId,
+	        Authentication authentication) {
+
+	    EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
+	    boolean isAdmin = authentication.getAuthorities().stream()
+	            .anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
+
+	    ProjectDto project = service.select(proId);
+
+	    // 생성자 또는 관리자만 열람 가능
+	    if (!isAdmin && project.getEmpId() != loginEmp.getEmpId()) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	    }
+
+	    String role = isAdmin ? "MANAGER" : "DEVELOPER";
+
+	    byte[] pdf = service.createWeeklyReport(proId, role);
+
+	    return ResponseEntity.ok()
+	            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=weekly_report.pdf")
+	            .contentType(MediaType.APPLICATION_PDF)
+	            .body(pdf);
 	}
 }

@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.sb.erp.dto.ProjectAnalysisDto;
 import com.sb.erp.dto.ProjectDto;
 import com.sb.erp.dto.ProjectSearchDto;
+import com.sb.erp.dto.WeeklyReportDto;
 
 @Mapper
 public interface ProjectMapper {
@@ -40,4 +41,7 @@ public interface ProjectMapper {
 	
 	//Ai 프로젝트 분석용
 	public ProjectAnalysisDto projectAnalysis(Integer proId);
+	
+	//주간 보고서용
+	public WeeklyReportDto weeklyReport(Integer proId);
 }
