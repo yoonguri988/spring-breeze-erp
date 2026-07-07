@@ -17,13 +17,13 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
 	@Override public int insert(ProjectMemberDto dto) {  return dao.insert(dto); }
 	
 	//프로젝트 멤버 삭제
-	@Override public int delete(int pm_id) {  return dao.delete(pm_id); }
+	@Override public int delete(int pmId) {  return dao.delete(pmId); }
 	
 	//프로젝트 참여 인원 조회
-	@Override public List<ProjectMemberDto> select(int pro_id) { return dao.select(pro_id); }
+	@Override public List<ProjectMemberDto> select(int proId) { return dao.select(proId); }
 	
 	//해당 프로젝트에 참여 중인 멤버 목록
-	@Override public List<ProjectMemberDto> selectByproject(int project_pro_id) {  return dao.selectByproject(project_pro_id); }
+	@Override public List<ProjectMemberDto> selectByproject(int projectProId) {  return dao.selectByproject(projectProId); }
 	
 	//프로젝트 등록-메버 이름,유효성 체크
 	@Override public ProjectMemberDto selectOne(int pmId) {  return dao.selectOne(pmId); }
