@@ -97,11 +97,6 @@
 				
 				<div class="mt-4">
 					<label for="forContent" class="sb-form-label">양식 내용</label>
-					<!-- <textarea class="form-control"
-							  id="forContent" name="forContent" rows="12"
-							  placeholder="소속 : 생산1팀 &#10; 직급 : 사원 &#10; 성명 : 홍길동 &#10;"
-							  style="font-family: 'Courier New', Courier, monospace;
-							  		 background-color: #fafafa; resize: vertical;">소속 : &#10;직급 : &#10;성명 : </textarea> -->
 					<div class="mb-2 d-flex gap-2 align-items-center">
 						<label class="sb-form-label mb-0">추천 양식 프레임 주입</label>
 						<button type="button" class="btn btn-sm btn-outline-primary"
@@ -165,7 +160,6 @@
 							['view', ['fullscreen', 'codeview']]
 						]
 					});
-					console.log("써머노트 구동테스트");
 				}
 			}, 50);
 		})();
@@ -406,7 +400,6 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 			}
 			
 			if(value !== ""){
-				//`/searchCompany?company=${encodeURIComponent(value)}`
 				fetch(`/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}`)
 				.then( response => response.json() )
 				.then( data => {

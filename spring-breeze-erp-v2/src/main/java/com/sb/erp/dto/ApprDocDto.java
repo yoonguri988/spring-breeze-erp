@@ -19,6 +19,5 @@ public class ApprDocDto {
 	private boolean isImportant;
 	private int docRevision;
 	
-	private String docName; // 이거 왜쓴지 기억이 안남 작성하다 필요없는거같으면 지우기
-	private List<ApprLineDto> apprLines;
+	private List<ApprLineDto> apprLines; // 결재선 받아올 용도
 }
