@@ -17,13 +17,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprFormSearchDto;
 import com.sb.erp.dto.CompanyDto;
-import com.sb.erp.service.ApprService;
+import com.sb.erp.service.ApprFormService;
 import com.sb.erp.service.CompanyService;
 import com.sb.erp.util.PagingUtil;
 
 @Controller
-public class ApprController {
-	@Autowired ApprService appr;
+public class ApprFormController { 
+	@Autowired ApprFormService appr;
 	@Autowired CompanyService com;
 	
 	// 회사 검색 기능
@@ -73,22 +73,25 @@ public class ApprController {
 	// required = false : 필수 값이 아니라고 설정
     // defaultValue = "" : 값이 안 넘어오면 디폴트값 지정
 	@RequestMapping( value = "/appr/list_form", method = RequestMethod.GET)
-	public String searchForms(ApprFormSearchDto search, Model model){
-		//1) 검색 조건이 null
-		boolean isEmpty = !search.hasSearchCondition();
+	public String searchForms(ApprFormSearchDto search, Model model,
+							  @RequestParam( value = "page", defaultValue = "1") int page){
 		
 		int totalCnt = 0;
 	    List<ApprFormDto> list = new ArrayList<>();
 	    PagingUtil paging;
 	    
-	    //2) 검색 조건이 null, 쿼리 실행 자체를 안함
-	    if(isEmpty) {
-	    	paging = new PagingUtil(0, search.getPstartno());
-	    }else {
+	    //2) 검색 조건이 null이 아닐때 실행
+	    if(search.hasSearchCondition() || page > 1) {
+	    	
 	    	// 전체 양식 수
 	    	totalCnt = appr.listFormCnt(search);
-	    	paging = new PagingUtil(totalCnt, search.getPstartno());
+	    	paging = new PagingUtil(totalCnt, page);
+	    	int offset = (page - 1) * paging.getOnepagelist();
+	    	search.setPstartno(offset);
+	    	
 	    	list = appr.selectFormList(search);
+	    } else {
+	    	paging = new PagingUtil(0, page);
 	    }
 		
 		// jsp로 데이터 보내기
@@ -118,9 +121,17 @@ public class ApprController {
 	
 	// 양식 상세보기
 	@RequestMapping( value = "/appr/detail_form", method = RequestMethod.GET)
-	public String detail(int forId, Model model) {
+	public String detail(Model model,
+						 @RequestParam("forId") int forId,
+						 @RequestParam("forVersion") int forVersion) {
 		
-		ApprFormDto dto = appr.selectFormAll(forId);
+		// 받아온 값 dto 에 저장하여 select문으로 데이터 가져옴
+		ApprFormDto param = new ApprFormDto();
+		param.setForId(forId);
+		param.setForVersion(forVersion);
+		
+		ApprFormDto dto = appr.selectFormAll(param);
+
 		dto.setComName(appr.getCompanyName(dto.getComId()));
 		
 		model.addAttribute("dto", dto);
@@ -129,10 +140,16 @@ public class ApprController {
 	
 	// 양식 수정 폼
 	@RequestMapping( value = "/appr/update_form", method = RequestMethod.GET)
-	public String update(int forId, Model model) {
+	public String update(Model model,
+						 @RequestParam("forId") int forId,
+						 @RequestParam("forVersion") int forVersion) {
+		
+		ApprFormDto param = new ApprFormDto();
+		param.setForId(forId);
+		param.setForVersion(forVersion);
 		
 		// 클릭한 해당 양식의 id값으로 데이터 담아서 jsp value들 채울 용도
-		ApprFormDto dto = appr.selectFormAll(forId);
+		ApprFormDto dto = appr.selectFormAll(param);
 		dto.setComName(appr.getCompanyName(dto.getComId()));
 				
 		// update_form.jsp 로 데이터 보내기
@@ -143,63 +160,38 @@ public class ApprController {
 	// 양식 수정 처리
 	@RequestMapping( value = "/appr/update_form", method = RequestMethod.POST)
 	public String update_post(ApprFormDto dto, Model model) {
+		
 		// 양식 수정 성공
 		if(appr.updateForm(dto) > 0) {
 			return "redirect:/appr/list_form";
 		}
+		
+		ApprFormDto fail = new ApprFormDto();
+		fail.setForId(dto.getForId());
+		fail.setForVersion(dto.getForVersion());
+		
+		ApprFormDto result = appr.selectFormAll(fail);
+		
+		if(result != null) {
+			result.setComName(appr.getCompanyName(result.getComId()));
+		}
+		
+		model.addAttribute("dto", result);
 		return "appr/update_form";
 	}
 	
 	// 양식 삭제 처리
 	@RequestMapping("/appr/delete")
-	public String delete(int forId) {
-		appr.deleteForm(forId);
-		return "appr/list_form";
+	public String delete(@RequestParam("forId") int forId,
+						 @RequestParam("forVersion") int forVersion) {
+		
+		ApprFormDto dto = new ApprFormDto();
+		dto.setForId(forId);
+		dto.setForVersion(forVersion);
+		
+		appr.deleteForm(dto);
+		return "redirect:/appr/list_form";
 	}
 	
 	
 }
-
-
-//// 양식 리스트 입력한 값 찾기 -> 2차 프로젝트때 다시 시도.....
-//@RequestMapping( value = "/searchForms", method = RequestMethod.GET)
-//@ResponseBody
-//public Map<String, Object> searchForms(@RequestParam("keyword") String keyword,
-//									 @RequestParam("company") String comId,
-//									 @RequestParam( value = "forStatus", required = false) String status,
-//									 @RequestParam( value = "page", defaultValue = "1") int page){
-//	ApprFormSearchDto dto = new ApprFormSearchDto();
-//	dto.setComId(
-//			(comId == null || comId.isBlank()) ?
-//			null : Integer.parseInt(comId)
-//			);
-//	dto.setForStatus(
-//			(status == null || status.isBlank()) ?
-//			null : Boolean.parseBoolean(status)
-//			);
-//	dto.setKeyword(keyword);
-//	dto.setPage(page);
-//	dto.setPageSize(10); // 한 페이지당 몇개들어갈건지
-//	
-//	//int totalCnt = appr.listFormCnt(dto);
-//	
-//	List<ApprFormDto> list = appr.selectFormList(dto);
-//	int totalCnt = appr.listFormCnt(dto); 
-//	
-//	int pagetotal = (totalCnt == 0) ? 1 : (int) Math.ceil((double)totalCnt/ dto.getPageSize()); // 전체 페이지 수
-//	int pageNum = 10; // 하단에 보여줄 버튼? 수
-//	int start = ((page - 1) / pageNum) * pageNum + 1;
-//	int end = Math.min(start + pageNum - 1, pagetotal);
-//	
-//	Map<String, Object> paging = new HashMap<>();
-//	paging.put("current", page);
-//	paging.put("pagetotal", pagetotal );
-//	paging.put("start", start);
-//	paging.put("end", end);
-//	
-//	Map<String, Object> result = new HashMap<>();
-//	result.put("list", list);
-//	result.put("paging", paging);
-//	
-//	return result;
-//}
