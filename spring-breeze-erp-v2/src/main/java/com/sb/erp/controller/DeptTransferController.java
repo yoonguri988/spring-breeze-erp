@@ -1,0 +1,82 @@
+package com.sb.erp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.sb.erp.dto.DeptTransferExecuteForm;
+import com.sb.erp.dto.DeptTransferImpactDto;
+import com.sb.erp.security.CustomUserDetails;
+import com.sb.erp.service.DeptTransferService;
+
+@Controller
+@RequestMapping("/dept/transfer")
+@PreAuthorize("hasRole('ADMIN')")
+public class DeptTransferController {
+	@Autowired DeptTransferService service;
+	
+    /** Authentication의 principal에서 로그인한 관리자의 회사(com_id)를 꺼낸다. */
+    private Integer resolveComId(Authentication authentication) {
+    	CustomUserDetails auth = (CustomUserDetails)authentication.getPrincipal();
+    	return auth.getUser().getComId();
+    }
+	
+    /** Authentication의 principal에서 로그인한 관리자의 emp_id를 꺼낸다 (이관 처리자 감사기록용). */
+    private Integer resolveEmpId(Authentication authentication) {
+    	CustomUserDetails auth = (CustomUserDetails)authentication.getPrincipal();
+    	return auth.getUser().getEmpId();
+    }
+	
+	
+	@GetMapping("list")
+	public String list(@RequestParam Integer deptId, Authentication authentication, Model model) throws IllegalAccessException {
+		// 영향도 조회
+	    int comId = resolveComId(authentication); 
+	    DeptTransferImpactDto impact = service.getImpact(comId, deptId);
+	    
+	    model.addAttribute("impact", impact);
+	    model.addAttribute("comId", comId);
+		return "dept/transfer/list";
+	}
+	
+    /** 이관 취소 — 부서를 다시 ACTIVE 상태로 되돌림 */
+    @PostMapping("/cancel")
+    public String cancel(@RequestParam Integer deptId, Authentication authentication, RedirectAttributes rttr) throws IllegalAccessException {
+    	String msg = "부서 이관을 취소 처리하는데 실패했습니다.";
+    	
+    	int result = service.cancelTransfer(resolveComId(authentication), deptId);
+    	if(result > 0) { msg = "부서 삭제를 취소 했습니다."; }
+    	rttr.addFlashAttribute("msg", msg);
+        return "redirect:/dept/list";
+    }
+    
+    /** 이관 최종 실행 (단일 트랜잭션, 실패 시 전체 롤백) */
+    @PostMapping("/execute")
+    public String execute(@ModelAttribute DeptTransferExecuteForm form,
+                           Authentication authentication,
+                           RedirectAttributes redirectAttributes) throws IllegalAccessException {
+        // 화면에서 넘어온 comId는 신뢰하지 않고, 인증 정보의 comId로 강제 치환한다
+        // (다른 회사 comId를 조작해서 보내는 요청을 막기 위함)
+    	Integer comId = resolveComId(authentication);
+    	Integer empId = resolveEmpId(authentication);
+        form.setComId(comId);
+ 
+        try {
+        	service.executeTransfer(form, empId);
+            redirectAttributes.addFlashAttribute("message", "사원 이관이 완료되었습니다.");
+        } catch (Exception e) {
+            // 실패 원인을 사용자에게 그대로 전달 (전체 롤백은 서비스의 @Transactional 이 보장)
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/dept/transfer/list?deptId=" + form.getDeptId();
+        }
+        return "redirect:/dept/list";
+    }
+}
