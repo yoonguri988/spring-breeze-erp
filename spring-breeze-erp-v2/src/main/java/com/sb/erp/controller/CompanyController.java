@@ -1,14 +1,21 @@
 package com.sb.erp.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +31,7 @@ import com.sb.erp.dto.EmpDto;
 import com.sb.erp.dto.StatsComDto;
 import com.sb.erp.dto.StatsDeptDto;
 import com.sb.erp.exception.FileUploadException;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.CompanyService;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
@@ -32,10 +40,12 @@ import com.sb.erp.util.FileUploadDto;
 import com.sb.erp.util.FileUploadType;
 import com.sb.erp.util.FileUploadUtil;
 import com.sb.erp.util.PagingUtil;
+import com.sb.erp.util.SecurityUtil;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
+@RequestMapping("/com")
 public class CompanyController {
 	@Autowired CompanyService service;
 	@Autowired EmpService empService;
@@ -43,13 +53,15 @@ public class CompanyController {
 	@Autowired DeptService deptService;
 	
 	// 회사 등록
-	@RequestMapping(value="/com/add", method= RequestMethod.GET)
+	@GetMapping("/add")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String addForm() {
 		return "/com/form";
 	}
 	
 	//회사 등록 기능
-	@RequestMapping(value="/com/add", method= RequestMethod.POST)
+	@PostMapping("/add")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String add(CompanyDto dto, 
 			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
 			RedirectAttributes rttr) {
@@ -70,8 +82,9 @@ public class CompanyController {
 	}
 	
 	// 회사 사업자 번호 중복 체크 (ajax)
-	@RequestMapping(value="/com/checkBizNo", method = RequestMethod.GET)
+	@GetMapping("/checkBizNo")
 	@ResponseBody
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public Map<String, Object> checkBizNo(String bizNo){
 		Map<String, Object> res = new HashMap<>();
 		CompanyDto dto = service.isDuplicateBizNo(bizNo);
@@ -83,45 +96,56 @@ public class CompanyController {
 	}
 	
 	// 회사 목록 조회
-	@RequestMapping(value="/com/list", method= RequestMethod.GET)
-	public String list(ComSearchDto search, Model model, HttpSession session) {
-		Integer empId = (Integer) session.getAttribute("empId");
-		//만약 로그인 사용자가 시스템 관리자가 아닌 경우
-		//1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-	    AuthPermDto root = permService.selectByEmpId(empId);
-		
-	    if(!root.getAutName().equals("ROOT")) return "redirect:/com/my";
+	@GetMapping("/list")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+	public String list(ComSearchDto search, Model model, Authentication auth) {
+		if (!SecurityUtil.isAdminOrRoot(auth)) {
+	        return "redirect:/com/my";
+	    }
 		
 		int listtotal = service.listTotal(search);
-		PagingUtil paging = new PagingUtil(listtotal, search.getPstarValue(), search.getOnepagelist(), 10);
+		// 검색 조건이 null
+		boolean isEmpty = !search.hasSearchCondition();
+		
+		List<CompanyDto> list = new ArrayList<>();
+		PagingUtil paging;
+		
+		if(isEmpty) {
+	    	paging = new PagingUtil(0, search.getPstartno());
+		}else {
+			paging = new PagingUtil(listtotal, search.getPstartno(), search.getOnepagelist(), 10);
+			list = service.list(search);
+		}
+		
 		//통계 데이터
 		StatsComDto stats = service.selectStats();
-		
 		model.addAttribute("stats", stats);
 		model.addAttribute("paging", paging);
-		model.addAttribute("items", service.list(search));
+		model.addAttribute("items", list);
 		return "/com/list";
 	}
 	
 	// 검색 조회 목록 상위 5개 (ajax)
-	@RequestMapping(value="/com/suggest", method=RequestMethod.GET)
+	@GetMapping("/suggest")
 	@ResponseBody
 	public List<CompanyDto> suggest(@RequestParam("keyword") String keyword) {
 	    return service.getSuggest(keyword);
 	}
 	
 	// 회사 수정 폼
-	@RequestMapping(value="/com/edit", method = RequestMethod.GET)
+	@GetMapping("/edit")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String editForm(int comId, Model model) {
 		model.addAttribute("com", service.selectOneById(comId));
-		model.addAttribute("items", deptService.selectOrgTree(comId));
 		return "/com/edit";
 	}
 	
 	// 회사 수정 기능
-	@RequestMapping(value="/com/edit", method = RequestMethod.POST)
+	@PostMapping("/edit")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public String edit(CompanyDto dto, 
 			@RequestParam(value="logoFile", required=false) MultipartFile logoFile,
+			Authentication auth,
 			RedirectAttributes rttr) {
 		String msg = "회사 정보 수정에 실패 하였습니다.";
 		// 새 파일을 안 올렸을 때 기존 로고 URL을 유지하기 위해 수정 전 데이터를 먼저 조회
@@ -147,11 +171,26 @@ public class CompanyController {
 		}
 		
 		rttr.addFlashAttribute("msg", msg);
-		return "redirect:/com/list";
+		
+		// 권한 문자열만 추출해서 비교
+		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+	    Set<String> authNames = user.getAuthorities().stream()
+	            .map(GrantedAuthority::getAuthority)
+	            .collect(Collectors.toSet());
+
+	    boolean isRoot = authNames.contains("ROOT");
+	    
+	    if(isRoot) {
+	    	return "redirect:/com/list";
+	    } else {
+	    	return "redirect:/com/my";
+	    }
+		
 	}
 	
 	// 회사 삭제 폼
-	@RequestMapping(value="/com/delete", method = RequestMethod.GET)
+	@GetMapping("/delete")
+	@PreAuthorize("hasAuthority('ROOT')")
 	public String deleteModal(@RequestParam("comId") Integer comId, Model model) {
 	    CompanyDto dto = service.selectOneById(comId);
 	    model.addAttribute("com", dto);
@@ -159,23 +198,15 @@ public class CompanyController {
 	}
 	
 	// 회사 삭제 기능
-	@RequestMapping(value="/com/delete", method = RequestMethod.POST)
+	@PostMapping("/delete")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@ResponseBody
 	public Map<String, Object> delete(Authentication auth, EmpDto dto) {
 	    Map<String, Object> result = new HashMap<>();
-	    
-	    EmpDto emp = empService.selectByEmpEmail(auth.getName());
-	    //1. 로그인한 사용자가 관리자가 아닌 경우
-	    //1-1. 로그인사용자가 ROOT(시스템관리자) 인가?
-	    AuthPermDto root = permService.selectByEmpId(emp.getEmpId());
-	    
-	    // ROOT(시스템 관리자) 아닌 경우
-	    if(!root.getAutName().equals("ROOT")) {
-	        throw new IllegalStateException("시스템 관리자 외에는 회사를 삭제할 수 없습니다.");
-	    }
 
 	    //2. 관리자가 입력한 비밀번호가 일치 하지 않을 경우
-	    dto.setEmpId(emp.getEmpId());
+	    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+	    dto.setEmpId(user.getUser().getEmpId());
 	    boolean matched = empService.matchPassword(dto);
 	    if (!matched) {
 	        result.put("success", false);
@@ -189,7 +220,7 @@ public class CompanyController {
 	}
 	
 	// 회사 정보 상세 조회
-	@RequestMapping(value="/com/detail", method=RequestMethod.GET)
+	@GetMapping("/detail")
 	public String myDetail(@RequestParam("comId") int comId,
 						   Model model) {
 		//통계 데이터
@@ -204,7 +235,7 @@ public class CompanyController {
 	}
 	
 	// 내 회사 정보 조회
-	@RequestMapping(value="/com/my", method=RequestMethod.GET)
+	@GetMapping("/my")
 	public String mycom(Principal prinipal, HttpSession session, Model model) {
 		Integer empId = (Integer) session.getAttribute("empId");
 		Integer comId = (Integer) session.getAttribute("comId");

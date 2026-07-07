@@ -101,6 +101,19 @@ window.addEventListener("load",function(){
                 <td class="sb-hr-cell tnum"><fmt:formatDate value="${dto.taskCreatedAt}" pattern="yyyy-MM-dd"/></td>
               </tr>
             </c:forEach>
+            <div class="d-flex justify-content-center py-3" style="border-top:1px solid var(--sb-border)" th:if="${paging != null}">
+    <ul class="pagination pagination-sm mb-0">
+      <li class="page-item" th:if="${paging.start > paging.bottomlist}">
+        <a th:href="@{/proj/proj_list(pstartno=${paging.start-1}, keyword=${param.keyword}, proStatus=${param.proStatus}, startDate=${param.startDate}, endDate=${param.endDate}, searched=true)}" class="page-link">이전</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(paging.start, paging.end)}" th:classappend="${i==paging.current} ? 'active' : ''">
+        <a th:href="@{/proj/proj_list(pstartno=${i}, keyword=${param.keyword}, proStatus=${param.proStatus}, startDate=${param.startDate}, endDate=${param.endDate}, searched=true)}" class="page-link" th:text="${i}"></a>
+      </li>
+      <li class="page-item" th:if="${paging.pagetotal > paging.end}">
+        <a th:href="@{/proj/proj_list(pstartno=${paging.end+1}, keyword=${param.keyword}, proStatus=${param.proStatus}, startDate=${param.startDate}, endDate=${param.endDate}, searched=true)}" class="page-link">다음</a>
+      </li>
+    </ul>
+  </div>
           </tbody>
         </table>
         <c:if test="${empty list}">

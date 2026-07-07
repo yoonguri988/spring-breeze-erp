@@ -3,14 +3,6 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head lang="ko"><title>sidebar fragment</title></head>
 <body>
-<!--
-  [변경점]
-  - <%@ taglib ... %> 지시어들은 모두 제거.
-    Thymeleaf 는 별도 taglib 선언이 필요 없고, <html> 태그에 xmlns:sec 네임스페이스만
-    선언해주면 sec: 관련 속성을 바로 사용할 수 있다. (thymeleaf-extras-springsecurity6 의존성 필요)
-  - 전체 내용을 th:fragment="sidebar" 로 감싸서,
-    메인 레이아웃에서 th:replace="~{fragments/sidebar :: sidebar}" 형태로 재사용.
--->
 <th:block th:fragment="sidebar">
 
     <div class="sb-brand">
@@ -18,22 +10,49 @@
         <div class="sb-brand__name">SB<b>erp</b></div>
     </div>
 
+	<th:block th:with="isRoot=${#authorization.expression('hasAuthority(''ROOT'')')}">
+	<th:block th:with="isAdmin=${#authorization.expression('hasAuthority(''ROOT'') or hasRole(''ADMIN'')')}">
+
     <nav class="sb-nav" id="sbNav">
-        <!-- [변경점] ${pageContext.request.contextPath}/xxx -> th:href="@{/xxx}" -->
         <a class="sb-nav__item" data-page="dashboard" data-tip="대시보드" th:href="@{/}">
             <i class="bi bi-grid-1x2-fill"></i><span class="sb-nav__label">대시보드</span>
         </a>
 
         <div class="sb-nav__section">조직 관리</div>
-        <a class="sb-nav__item" data-page="company" data-tip="회사 • 부서 관리" th:href="@{/com/list}">
-            <i class="bi bi-building"></i><span class="sb-nav__label">회사 • 부서 관리</span>
+
+        <!-- 관리자 : 회사·부서 통합 관리 -->
+	    <a class="sb-nav__item" data-page="company" data-tip="회사 • 부서 관리" th:if="${isRoot}" th:href="@{/com/list}">
+	        <i class="bi bi-building"></i><span class="sb-nav__label">회사 • 부서 관리</span>
+	    </a>
+	
+	    <!-- 일반 사용자 : 내 회사 정보 -->
+	    <a class="sb-nav__item" data-page="company" data-tip="내 회사 정보" th:href="@{/com/my}">
+	        <i class="bi bi-building"></i><span class="sb-nav__label">내 회사 정보</span>
+	    </a>
+	
+	    <a class="sb-nav__item" data-page="company" data-tip="회사 내 부서 조회" th:href="@{/dept/list}">
+	        <i class="bi bi-diagram-3"></i><span class="sb-nav__label">회사 내 부서 조회</span>
+	    </a>
+	    
+	    <!-- 일반 사용자 : 내 부서 정보 -->
+	    <a class="sb-nav__item" data-page="department" data-tip="내 부서 정보" th:href="@{/dept/detail}">
+	        <i class="bi bi-tag"></i><span class="sb-nav__label">내 부서 정보</span>
+	    </a>
+
+        <!-- jsj -->
+        <!-- 차후 관리자/일반 사용자 권한 나누기 -->
+        <a class="sb-nav__item" data-page="employees" data-tip="사원 관리" th:href="@{/emp/list}">
+            <i class="bi bi-people"></i><span class="sb-nav__label">사원 관리</span>
         </a>
-        <a class="sb-nav__item" data-page="employees" data-tip="사원관리" th:href="@{/emp/list}">
-            <i class="bi bi-people"></i><span class="sb-nav__label">사원관리</span>
+
+        <a class="sb-nav__item" data-page="position" data-tip="직급 관리" th:if="${isAdmin}" th:href="@{/pos/list}">
+            <i class="bi bi-briefcase"></i><span class="sb-nav__label">직급 관리</span>
         </a>
-        <!-- <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" th:href="@{/auth/list}">
-            <i class="bi bi-shield-lock"></i><span class="sb-nav__label">권한 관리</span>
-        </a> -->
+
+        <a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" th:if="${isAdmin}" th:href="@{/perm/list}">
+        	<i class="bi bi-shield-lock"></i><span class="sb-nav__label">권한 관리</span>
+        </a>
+        <!-- jsj -->
 
         <div class="sb-nav__section">업무</div>
         <a class="sb-nav__item" data-page="documents" data-tip="전자결재" th:href="@{/appr/list_form}">
@@ -77,8 +96,8 @@
       Thymeleaf 에서는 sec:authorize(조건) + th:with(변수 추출)를 한 태그에서 같이 처리 가능.
     -->
     <div class="sb-sidebar__foot" sec:authorize="isAuthenticated()"
-         th:with="empName=${#authentication.principal.dto.empName},
-                   posName=${#authentication.principal.dto.posName}">
+         th:with="empName=${#authentication.principal.user.empName},
+                   posName=${#authentication.principal.user.posName}">
         <div class="sb-userchip" data-bs-toggle="dropdown">
             <div class="sb-avatar" th:text="${#strings.substring(empName, 0, 1)}">S</div>
             <div class="sb-userchip__meta">

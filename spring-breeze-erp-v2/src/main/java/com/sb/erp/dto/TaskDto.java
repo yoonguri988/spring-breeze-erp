@@ -1,25 +1,23 @@
 package com.sb.erp.dto;
 
-import java.util.Date;
-
-import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalDate;
 
 import lombok.Data;
 
 @Data
 public class TaskDto {
-	private int taskId;
-	private int proId;
-	private int comId;
+	private Integer taskId;
+	private Integer proId;
+	private Integer comId;
 	private String taskName;
 	private String taskDesc;
 	private String taskStatus;
-	private int pmId;
-	private String pmIdName;
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date taskStartDate;
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date taskEndDate;
-	private Date taskCreatedAt;
-	private Date taskUpdatedAt;
+	private Integer pmId;
+	private String pmName;
+	private LocalDate taskStartDate;
+	private LocalDate taskEndDate;
+	private LocalDate actualStartDate; // 실제 착수일
+	private LocalDate actualEndDate; //실제 완요일
+	private LocalDate createdAt;
+	private LocalDate updatedAt;
 }

@@ -8,23 +8,24 @@
   select *
   from company c
   join (
-    select c.com_id, count(e.emp_id) as emp_count
-    from company c
-    left join employee e on c.com_id = e.com_id
-    group by c.com_id
+    select c2.com_id, count(e2.emp_id) as emp_count
+    from company c2
+    left join employee e2 on c2.com_id = e2.com_id
+    group by c2.com_id
    ) t
    on t.com_id = c.com_id 
   <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
-  	and (c.com_name like concat('%', #{keyword},'%') or c.biz_no like concat('%', #{keyword},'%'))
+	and (c.com_name like '%' || #{keyword} || '%'
+	     or c.biz_no like '%' || #{keyword} || '%')  
   </if>
-  <if test="industCode != null and industCode != ''">
-  	and c.indust_code = #{industCode}
+  <if test="industryGrpCode != null and industryGrpCode != ''">
+  	and c.industry_grp_code = #{industryGrpCode}
   </if>
   </where>
   order by c.com_id desc
-  limit #{pstarValue}, #{onepagelist}
+  OFFSET #{pstartno} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
   </select>
   <!-- 회사 여러개 조회 -->
   <select id="listTotal" resultType="int" parameterType="ComSearchDto">
@@ -32,10 +33,11 @@
   <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">
-  	and (com_name like concat('%', #{keyword},'%') or biz_no like concat('%', #{keyword},'%'))
+	and (com_name like '%' || #{keyword} || '%'
+	     or biz_no like '%' || #{keyword} || '%')  
   </if>
-  <if test="industCode != null and industCode != ''">
-  	and indust_code = #{industCode}
+  <if test="industryGrpCode != null and industryGrpCode != ''">
+  	and industry_grp_code = #{industryGrpCode}
   </if>
   </where>
   </select>
@@ -44,17 +46,17 @@
     FROM company
     <where>
     <if test="keyword != null and keyword != ''">
-    and (com_name LIKE CONCAT('%', #{keyword}, '%')
-           OR biz_no LIKE CONCAT('%', #{keyword}, '%'))
+	  and (com_name like '%' || #{keyword} || '%'
+	    or biz_no like '%' || #{keyword} || '%')  
     </if>
     </where>
     ORDER BY com_name ASC
-    LIMIT 5
+    OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY
   </select>
   <!-- 회사 등록 -->
   <insert id="insert" parameterType="CompanyDto">
-  insert into company (com_name, indust_code, indust_name, com_ceo, biz_no, com_tel, com_logo)
-  values (#{comName}, #{industCode}, #{industName}, #{comCeo}, #{bizNo}, #{comTel}, #{comLogo})
+  insert into company (com_name, industry_code, industry_grp_code, com_ceo, biz_no, com_tel, com_logo)
+  values (#{comName}, #{industryCode}, #{industryGrpCode}, #{comCeo}, #{bizNo}, #{comTel}, #{comLogo, jdbcType=VARCHAR})
   </insert>
   <select id="selectByBizNo" parameterType="string" resultType="CompanyDto">
   select * from company
@@ -68,12 +70,14 @@
   <!-- 회사 정보 수정 -->
   <update id="update" parameterType="CompanyDto">
     update company
-    set com_name = #{comName}
-        ,com_ceo = #{comCeo}
-        ,indust_code = #{industCode}
-        ,indust_name = #{industName}
-        ,com_tel = #{comTel}
-        <if test="comLogo != null">,com_logo   = #{comLogo}</if>
+    <set>
+    	<if test="comName != null">com_name = #{comName},</if>
+    	<if test="comCeo != null">com_ceo = #{comCeo},</if>
+    	<if test="industryGrpCode != null">industry_grp_code = #{industryGrpCode},</if>
+    	<if test="industryCode != null">industry_code = #{industryCode},</if>
+    	<if test="comTel != null">com_tel = #{comTel},</if>
+        <if test="comLogo != null">com_logo   = #{comLogo},</if>
+    </set>
     where com_id = #{comId}
   </update>
   <!-- 회사 삭제 -->
@@ -83,11 +87,14 @@
   </delete>
   <!-- 회사 통계 -->
   <select id="selectStats" resultType="StatsComDto">
-    SELECT 
+	SELECT 
 	    (SELECT COUNT(*) FROM company) AS com_total,
 	    (SELECT COUNT(*) FROM employee) AS emp_total,
-	    (SELECT COUNT(DISTINCT indust_code) FROM company) AS indust_total,
-	    (SELECT com_name FROM company ORDER BY created_at DESC LIMIT 1) AS com_latest
+	    (SELECT COUNT(DISTINCT industry_code) FROM company) AS indust_total,
+	    (SELECT com_name FROM company 
+	      ORDER BY created_at DESC 
+	      FETCH FIRST 1 ROWS ONLY) AS com_latest
+	FROM dual
   </select>
   <!-- 회원 id를 통해 내 회사 정보 조회 -->
   <select id="selectOneByEmpId" resultType="CompanyDto" parameterType="int">

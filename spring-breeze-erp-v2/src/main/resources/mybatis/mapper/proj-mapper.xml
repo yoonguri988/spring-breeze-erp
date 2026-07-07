@@ -9,7 +9,7 @@
     from project p
     join employee e on p.emp_id = e.emp_id
     join company c on p.com_id = c.com_id
-    where p.pro_name like concat('%', #{keyword}, '%')
+    where p.pro_name like '%' || #{keyword} || '%'
     order by p.pro_id desc
 	</select>
 	
@@ -18,7 +18,7 @@
 	  insert into project(com_id, pro_name, pro_desc, emp_id, pro_status,
                            start_date, end_date, created_at, updated_at )
       values(#{comId}, #{proName}, #{proDesc}, #{empId}, #{proStatus},
-               #{startDate}, #{endDate}, CURDATE(), CURDATE())
+               #{startDate}, #{endDate}, SYSDATE, SYSDATE)
 	</insert> 
 	
 	 <!-- 프로젝트 상태별 조회 (참여인원 포함) -->
@@ -54,7 +54,7 @@
         	and p.com_id = #{comId} 
         	</if>
         	<if test="keyword != null and keyword != ''">
-        	and p.pro_name like concat('%', #{keyword}, '%')
+        	and p.pro_name like '%' || #{keyword} || '%'
         	</if>
         	<if test="proStatus != null and proStatus != ''">
         	and p.pro_status = #{proStatus}
@@ -67,7 +67,7 @@
         	</if>
         </where>
         order by p.pro_id desc
-        limit #{pstartno}, #{onepagelist}
+        OFFSET #{pstartno} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
     </select>
     
 	<select id="selectCnt" resultType="int">
@@ -80,7 +80,7 @@
             AND p.com_id = #{comId}
         </if>
         <if test="keyword != null and keyword != ''">
-            AND p.pro_name LIKE CONCAT('%', #{keyword}, '%')
+            AND p.pro_name LIKE '%' || #{keyword} || '%'
         </if>
         <if test="proStatus != null and proStatus != ''">
             AND p.pro_status = #{proStatus}
@@ -117,7 +117,7 @@
        pro_status = #{proStatus}, 
        start_date = #{startDate}, 
        end_date = #{endDate}, 
-       updated_at = CURDATE()
+       updated_at = SYSDATE
        where pro_id = #{proId}
     </update>
     
@@ -130,6 +130,29 @@
       and p.end_date &gt;= #{startDate}
     order by p.pro_id desc
 	</select>
+	
+	<!-- ai 분석 결과 -> sql에서 계산 처리 -->
+	<select id="projectAnalysis" resultType="ProjectAnalysisDto" parameterType="int">
+<![CDATA[
+	select 
+	p.pro_id as proId,
+	p.pro_name as projectName,
+	p.end_date as endDate,
+	nvl(count(t.task_id),0) as totalTask,
+	nvl(sum(case when t.task_status='TODO' then 1 end), 0) as todoCount,
+	nvl(sum(case when t.task_status='DOING' then 1 end), 0) as doingCount,
+	nvl(sum(case when t.task_status='DONE' then 1 end), 0) as doneCount,
+	nvl(sum(case when t.task_status <> 'DONE' and t.task_end_date < SYSDATE then 1 end), 0) as delayCount,
+	case when count(t.task_id)=0 then 0
+	else round(sum(case when t.task_status = 'DONE' then 1 else 0 end) / count(t.task_id) * 100)
+	end as progressRate
+	from project p 
+	left join task t on p.pro_id=t.pro_id
+	where p.pro_id=#{proId}
+	group by p.pro_id, p.pro_name, p.end_date
+]]>
+	</select>
+	
 </mapper>
 <!--회사별 목록조회
 	<select id="selectAllByComId" resultType="ProjectDto" parameterType="ProjectSearchDto">

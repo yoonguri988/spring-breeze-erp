@@ -31,4 +31,6 @@ public interface DeptMapper {
 
 	StatsDeptDto selectStats(int comId);
 
+	int countByDept(int deptId);
+
 }
