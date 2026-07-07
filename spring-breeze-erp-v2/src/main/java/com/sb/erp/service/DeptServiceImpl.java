@@ -63,13 +63,11 @@ public class DeptServiceImpl implements DeptService {
 
 	@Override
 	public int delete(int deptId) {
+		// 2차추가기능: 기존 삭제 버튼 클릭시 완전 삭제 -> soft delete로 변경 
 		if (dao.countChildren(deptId) > 0) {
 	        throw new IllegalStateException("하위 부서가 존재하여 삭제할 수 없습니다.");
 	    }
-	    // 사원 연결 후 활성화
-	     if (dao.countByDept(deptId) > 0) {
-	         throw new IllegalStateException("소속 사원이 존재하여 삭제할 수 없습니다.");
-	     }
+		
 		return dao.delete(deptId);
 	}
 
@@ -121,6 +119,16 @@ public class DeptServiceImpl implements DeptService {
 	    CompanyDto com = comDao.selectOneById(dept.getComId());
 	    chain.add(0, com.getComName());
 	    return chain;
+	}
+
+	@Override
+	public int countEmployees(int deptId) {
+		return dao.countByDept(deptId);
+	}
+
+	@Override
+	public int softDelete(int deptId) {
+		return dao.softDelete(deptId);
 	}
 
 }
