@@ -115,6 +115,12 @@ public class ApprDocServiceImpl implements ApprDocService{
 	public ApprDocDto selectDocDetail(int docId) {
 		return dao.selectDocDetail(docId);
 	}
+
+	// docId로 결재선 가져오기
+	@Override
+	public List<ApprLineDto> selectLinesByDocId(int docId) {
+		return lineDao.selectLinesByDocId(docId);
+	}
 	
 	
 	

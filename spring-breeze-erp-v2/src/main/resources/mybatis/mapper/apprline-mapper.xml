@@ -49,7 +49,7 @@
 	
 	
 	<!-- 라인 목록 조회 -->
-	<select id="selectLinesByDocId" parameterType="ApprLineDto" resultType="ApprLineDto">
+	<select id="selectLinesByDocId" parameterType="int" resultType="ApprLineDto">
 		select
 			l.lin_id,
 			l.doc_id,

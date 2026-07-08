@@ -26,6 +26,7 @@ public interface ApprDocService {
 	public List<ApprLineDto> approversByEmpId(ApprDocDto dto);
 	public int updateDocStatus(ApprDocDto dto);
 	public boolean insertLines(ApprDocDto dto);
+	public List<ApprLineDto> selectLinesByDocId(int docId);
 	
 	// 페이징
 	public int selectMyHistoryDocsCnt(ApprDocDto dto);

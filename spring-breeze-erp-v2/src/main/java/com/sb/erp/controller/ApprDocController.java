@@ -152,11 +152,20 @@ public class ApprDocController {
 						    @RequestParam("docId") int docId,
 							Model model) {
 		
+		// docId 사용하여 문서 정보 가져옴
 		ApprDocDto doc = service.selectDocDetail(docId);
+		// 결재선 가져오기
+		List<ApprLineDto> lines = service.selectLinesByDocId(docId);
 		
-		// 결재선 가져와야함
-		// 로그인 한사람 정보 가져와야함
-		//
+		// 로그인 한사람 empId 가져와야함
+		int empId = userDetails.getUser().getEmpId();
+		// 전체 결재선 목록에 결재상태가 'WAI' 인 데이터가 있나 검증
+		boolean canProcess = lines.stream()
+				.anyMatch(l -> l.getEmpId() == empId && "WAI".equals(l.getLinStatus()));
+		
+		model.addAttribute("doc", doc);
+		model.addAttribute("lines", lines);
+		model.addAttribute("canProcess", canProcess);
 		
 		return "appr/detail_doc";
 	}
