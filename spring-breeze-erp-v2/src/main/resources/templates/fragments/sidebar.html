@@ -57,13 +57,15 @@
 					<!-- 관리자 : 직급/권한/인사 평가 관리 -->
 					<a class="sb-nav__item" data-page="position" data-tip="직급 관리" th:if="${isAdmin}" th:href="@{/pos/list}">
 						<i class="bi bi-briefcase"></i>
-						<span class="sb-nav__label">직급관리</span>
+						<span class="sb-nav__label">직급 관리</span>
 					</a>
 					<a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" th:if="${isAdmin}" th:href="@{/perm/list}">
-						<i class="bi bi-shield-lock"></i><span class="sb-nav__label">권한 관리</span>
+						<i class="bi bi-shield-lock"></i>
+						<span class="sb-nav__label">권한 관리</span>
 					</a>
 					<a class="sb-nav__item" data-page="evaluation" data-tip="인사 평가 관리" th:if="${isAdmin}" th:href="@{/eval/period/list}" >
-						<i class="bi bi-clipboard-check"></i><span class="sb-nav__label">인사 평가</span>
+						<i class="bi bi-clipboard-check"></i>
+						<span class="sb-nav__label">인사 평가</span>
 					</a>
 
 
