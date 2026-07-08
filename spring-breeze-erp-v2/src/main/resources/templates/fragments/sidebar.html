@@ -86,24 +86,20 @@
             <i class="bi bi-collection"></i>
             <span class="sb-nav__label">자원 관리</span>
         </a>
-        <a class="sb-nav__item" data-page="reservation" data-tip="예약 내역" th:href="@{/resv/list}">
+        <a class="sb-nav__item" data-page="reservation" data-tip="내 자원 예약 확인" th:href="@{/resv/list}">
             <i class="bi bi-calendar2-check"></i>
-            <span class="sb-nav__label">예약 내역</span>
+            <span class="sb-nav__label">내 자원 예약 확인</span>
         </a>
-
-        <a class="sb-nav__item" data-page="approval" data-tip="예약 승인 관리" th:href="@{/admin/approval/list}"
-           sec:authorize="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')">
+        <a th:if="${isAdmin}" class="sb-nav__item" data-page="reservation" data-tip="자원 예약 관리" th:href="@{/resv/list}">
+            <i class="bi bi-calendar2-check"></i>
+            <span class="sb-nav__label">자원 예약 관리</span>
+        </a>
+        <a th:if="${isAdmin}" class="sb-nav__item" data-page="approval" data-tip="예약 승인 관리" th:href="@{/resv/appr/list}">
             <i class="bi bi-clipboard-check"></i>
-            <span class="sb-nav__label">예약 승인 관리</span>
+            <span class="sb-nav__label">관리자 자원 예약 관리</span>
         </a>
         <!-- cyj -->
     </nav>
-    <!--
-      [변경점]
-      원본은 <sec:authorize isAuthenticated()> 안에
-      <sec:authentication var="empName"/> 를 별도로 선언해서 썼지만,
-      Thymeleaf 에서는 sec:authorize(조건) + th:with(변수 추출)를 한 태그에서 같이 처리 가능.
-    -->
     <div class="sb-sidebar__foot" sec:authorize="isAuthenticated()"
          th:with="empName=${#authentication.principal.user.empName},
                    posName=${#authentication.principal.user.posName}">

@@ -11,21 +11,22 @@ import com.sb.erp.dto.StatsResvDto;
 @Mapper
 public interface ReservationMapper {
 
-	List<ResvDto> selectReservationList(ResvSearchDto search);
+	List<ResvDto> selectAll(ResvSearchDto search);
     
-    int selectReservationCount(ResvSearchDto search);
+    int selectCount(ResvSearchDto search);
     
-    ResvDto selectReservationDetail(int revId);
+    ResvDto selectOneById(int revId);
     
-    void insertReservation(ResvDto ResvDto);
+    int insert(ResvDto ResvDto);
 
-    void updateReservation(ResvDto ResvDto);
+    int update(ResvDto ResvDto);
 
-    void deleteReservation(int revId);
+    int delete(int revId);
     
-    void updateStatus(ResvDto ResvDto);
-
     StatsResvDto countByStats(ResvSearchDto search);
     
     int countReservationsByResourceId(int resId);
+
+	int updateApprove(ResvDto resvDto);
+	int updateReject(ResvDto ResvDto);
 }

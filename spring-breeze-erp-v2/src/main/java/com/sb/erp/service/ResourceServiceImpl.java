@@ -51,4 +51,9 @@ public class ResourceServiceImpl implements ResourceService {
 	public ResDto isDuplicateResCode(ResDto resDto) {
 		return dao.selectByResCode(resDto);
 	}
+
+	@Override
+	public List<ResDto> getResListForResv(ResSearchDto search) {
+		return dao.selectResListForResv(search);
+	}
 }

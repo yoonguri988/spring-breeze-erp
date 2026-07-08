@@ -33,6 +33,10 @@ public class ResvDto {
     //?
     private String resName;
     private String resCode;
+    private String resType;
+    private String location;
+    
     private String empName;
     private String deptName;
+    private String approvedEmpName;
 }

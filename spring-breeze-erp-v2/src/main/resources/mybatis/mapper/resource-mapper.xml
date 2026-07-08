@@ -90,4 +90,11 @@
 		WHERE COM_ID = #{comId} 
 		AND RES_CODE = #{resCode}
 	</select>
+	<!-- 예약 할 수 있는 회사의 자원 정보 -->
+	<select id="selectResListForResv" resultType="ResDto" parameterType="ResSearchDto">
+		SELECT *
+		FROM COM_RESOURCE CR
+		WHERE CR.COM_ID = #{comId}
+		AND CR.RES_STATUS = 'AVAILABLE' -- 사용가능 
+	</select>
 </mapper>

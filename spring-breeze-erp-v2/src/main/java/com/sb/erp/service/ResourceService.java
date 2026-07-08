@@ -24,4 +24,7 @@ public interface ResourceService {
 
     // 자원코드 중복 체크
 	ResDto isDuplicateResCode(ResDto resDto);
+
+	// 예약 할 수 있는 회사의 자원 정보
+	List<ResDto> getResListForResv(ResSearchDto search);
 }

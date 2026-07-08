@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>관리자 자원 예약 승인 관리</title>
+</head>
+<body>
+<main layout:fragment="content" class="sb-content">
+  <div class="sb-page-head">
+    <div class="sb-page-head__txt">
+      <div class="sb-breadcrumb">
+        <a th:href="@{/resv/list}">자원 관리</a>
+        <i class="bi bi-chevron-right"></i> 예약 승인 관리
+      </div>
+      <h1>관리자 자원 예약 승인 관리</h1>
+      <p>대기 중인 예약 요청을 검토하고 승인 또는 반려할 수 있습니다.</p>
+    </div>
+  </div>
+
+  <!-- [반려 사유 미입력 등 에러] -->
+  <div th:if="${param.error != null and param.error[0] == 'noReason'}" class="sb-alert sb-alert--danger mb-3">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> 반려 사유를 입력해야 합니다.
+  </div>
+
+  <div class="sb-card">
+    <div class="sb-card__head">
+      <h2>예약 요청 목록</h2>
+      <div class="right">
+        <div class="sb-segment">
+          <a th:href="@{/resv/appr/list}"
+             th:classappend="${#strings.isEmpty(status)} ? 'active'">전체</a>
+          <a th:href="@{/resv/appr/list(status='WAI')}"
+             th:classappend="${status == 'WAI'} ? 'active'">
+             <i class="bi bi-hourglass-split"></i> 대기</a>
+          <a th:href="@{/resv/appr/list(status='APP')}"
+             th:classappend="${status == 'APP'} ? 'active'">
+             <i class="bi bi-check-circle"></i> 승인</a>
+          <a th:href="@{/resv/appr/list(status='REJ')}"
+             th:classappend="${status == 'REJ'} ? 'active'">
+             <i class="bi bi-x-circle"></i> 반려</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 검색/필터 툴바 : 자원유형 + 예약기간(시작~종료) -->
+    <form th:action="@{/resv/list}" method="get" class="sb-toolbar sb-search-form">
+      <input type="hidden" name="status" th:value="${search?.status}"/>
+
+      <div class="sb-field">
+        <select name="resType" class="form-select form-select-sm" style="width:140px">
+          <option value="">자원유형 전체</option>
+          <option value="ROOM"      th:selected="${search?.resType == 'ROOM'}">회의실</option>
+          <option value="EQUIPMENT" th:selected="${search?.resType == 'EQUIPMENT'}">장비</option>
+          <option value="VEHICLE"   th:selected="${search?.resType == 'VEHICLE'}">차량</option>
+        </select>
+      </div>
+
+      <div class="sb-field sb-field--date">
+        <i class="bi bi-calendar-event"></i>
+        <input type="date" name="startDt" class="form-control form-control-sm" th:value="${search?.startDt}" />
+      </div>
+      <span class="text-faint" style="font-size:12.5px">~</span>
+      <div class="sb-field">
+        <input type="date" name="endDt" class="form-control form-control-sm" th:value="${search?.endDt}" />
+      </div>
+
+      <div class="sb-field sb-field--search grow">
+        <i class="bi bi-search"></i>
+        <input type="text" name="keyword" class="form-control form-control-sm"
+               placeholder="자원명으로 검색" th:value="${search?.keyword}" />
+      </div>
+
+      <button type="submit" class="btn btn-sb btn-sm">검색</button>
+
+      <!-- 안내 문구 : 항상 다음 줄에 전체 너비로 줄바꿈 -->
+      <div class="sb-search-note">
+        <i class="bi bi-info-circle"></i>
+        처리일자를 지정하지 않으면 기본으로 <b>최근 30일</b>만 조회합니다. 전체 기간을 보려면 시작일을 더 과거로 넓혀서 조회하세요.
+      </div>
+    </form>
+
+    <div class="sb-card__body--flush">
+      <table class="sb-table">
+        <thead>
+          <tr>
+            <th>예약 ID</th>
+            <th>자원명</th>
+            <th>유형</th>
+            <th>부서</th>
+            <th>요청자</th>
+            <th class="num">수량</th>
+            <th>예약기간</th>
+            <th>상태</th>
+            <th>요청일</th>
+            <th class="text-end">관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:if="${#lists.isEmpty(list)}">
+            <td colspan="10" class="text-center text-faint py-4">예약 요청 내역이 없습니다.</td>
+          </tr>
+          <tr th:each="r : ${list}">
+            <td th:text="${r.revId}"></td>
+            <td><b th:text="${r.resName}"></b></td>
+
+            <td>
+              <span th:switch="${r.resType}">
+                <span th:case="'ROOM'"      class="sb-badge sb-badge--blue"><i class="bi bi-door-open"></i> 회의실</span>
+                <span th:case="'EQUIPMENT'" class="sb-badge sb-badge--violet"><i class="bi bi-tools"></i> 장비</span>
+                <span th:case="'VEHICLE'"   class="sb-badge sb-badge--cyan"><i class="bi bi-truck"></i> 차량</span>
+                <span th:case="*" class="sb-badge sb-badge--gray" th:text="${r.resType}"></span>
+              </span>
+            </td>
+
+            <td th:text="${r.deptName}"></td>
+            <td th:text="${r.empName}"></td>
+            <td class="num" th:text="${r.quantity}"></td>
+
+            <!-- 예약기간 : START_DT ~ END_DT -->
+            <td>
+              <div style="font-size:12.5px; line-height:1.5">
+                <div th:text="${r.startDt}"></div>
+                <div class="text-faint">~ <span th:text="${r.endDt}"></span></div>
+              </div>
+            </td>
+
+            <td>
+              <span th:switch="${r.status}">
+                <span th:case="'WAI'" class="sb-badge sb-badge--amber">대기</span>
+                <span th:case="'APP'" class="sb-badge sb-badge--green">승인</span>
+                <span th:case="'REJ'" class="sb-badge sb-badge--red">반려</span>
+                <span th:case="*" class="sb-badge" th:text="${r.status}"></span>
+              </span>
+            </td>
+
+            <td th:text="${r.createdAt}"></td>
+
+            <td class="text-end">
+              <th:block th:if="${r.status == 'WAI'}">
+                <form th:action="@{/resv/appr/approve}" method="post" class="d-inline">
+                  <input type="hidden" name="revId" th:value="${r.revId}">
+                  <button type="submit" class="btn btn-sb btn-sm">승인</button>
+                </form>
+                <!-- 반려 버튼 : data-rev-id 로 revId를 넘기면 resv-reject-modal fragment의 스크립트가 처리 -->
+                <button type="button" class="btn btn-ghost btn-sm text-danger btn-reject"
+                        data-bs-toggle="modal" data-bs-target="#rejectModal"
+                        th:data-rev-id="${r.revId}">반려</button>
+              </th:block>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 페이지네이션 -->
+  <div class="d-flex align-items-center justify-content-between px-3 py-2"
+       style="border-top:1px solid var(--sb-border)">
+    <span class="text-faint" style="font-size:12.5px">
+      총 <b th:text="${paging?.listtotal ?: 0}"></b>개 예약 건수
+    </span>
+    <nav th:if="${(paging?.pagetotal ?: 0) > 1}" aria-label="페이지 이동">
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" th:classappend="${paging.start <= 1} ? 'disabled'">
+          <a class="page-link"
+             th:href="@{/resv/list(status=${search?.status}, resType=${search?.resType}, startDate=${search?.startDate}, endDate=${search?.endDate}, keyword=${search?.keyword}, onepagelist=${paging.onepagelist}, pstartno=${paging.start - 1})}"
+             aria-label="이전"><i class="bi bi-chevron-left"></i></a>
+        </li>
+        <li class="page-item" th:each="p : ${#numbers.sequence(paging.start, paging.end)}"
+            th:classappend="${p == paging.current} ? 'active'">
+          <a class="page-link"
+             th:href="@{/resv/list(status=${search?.status}, resType=${search?.resType}, startDate=${search?.startDate}, endDate=${search?.endDate}, keyword=${search?.keyword}, onepagelist=${paging.onepagelist}, pstartno=${p})}"
+             th:text="${p}"></a>
+        </li>
+        <li class="page-item" th:classappend="${paging.end >= paging.pagetotal} ? 'disabled'">
+          <a class="page-link"
+             th:href="@{/resv/list(status=${search?.status}, resType=${search?.resType}, startDate=${search?.startDate}, endDate=${search?.endDate}, keyword=${search?.keyword}, onepagelist=${paging.onepagelist}, pstartno=${paging.end + 1})}"
+             aria-label="다음"><i class="bi bi-chevron-right"></i></a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- [분리] 반려 사유 입력 모달 : fragments/resv-reject-modal.html 에서 불러옴 -->
+  <div th:replace="~{resv/appr/rejectModal :: rejectModal}"></div>
+</main>
+
+<th:block layout:fragment="script">
+  <div th:replace="~{resv/appr/rejectModal :: rejectModalScript}"></div>
+</th:block>
+</body>
+</html>

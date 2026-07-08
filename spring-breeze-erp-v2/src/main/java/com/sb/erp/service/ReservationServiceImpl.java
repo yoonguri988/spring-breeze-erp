@@ -17,49 +17,35 @@ public class ReservationServiceImpl implements ReservationService {
     private ReservationMapper dao;
 
     @Override
-    public List<ResvDto> getReservationList(ResvSearchDto search) {
+    public List<ResvDto> getResvList(ResvSearchDto search) {
         search.setPstartno((search.getPstartno()-1)*search.getOnepagelist());
-        List<ResvDto> reservationList = dao.selectReservationList(search);
-        return reservationList;
+        List<ResvDto> list = dao.selectAll(search);
+        return list;
     }
 
     @Override
-    public int getReservationCount(ResvSearchDto search) {
-        int totalCount = dao.selectReservationCount(search);
-        return totalCount;
+    public int getResvCount(ResvSearchDto search) {
+        return dao.selectCount(search);
     }
 
     @Override
-    public ResvDto getReservationDetail(int revId) {
-        ResvDto ResvDto = dao.selectReservationDetail(revId);
-        return ResvDto;
+    public ResvDto getResvDetail(int revId) {
+        return dao.selectOneById(revId);
     }
 
     @Override
-    public void insertReservation(ResvDto ResvDto) {
-    	dao.insertReservation(ResvDto);
+    public int insert(ResvDto ResvDto) {
+    	return dao.insert(ResvDto);
     }
 
     @Override
-    public void updateReservation(ResvDto ResvDto) {
-        dao.updateReservation(ResvDto);
+    public int update(ResvDto ResvDto) {
+    	return dao.update(ResvDto);
     }
 
     @Override
-    public void deleteReservation(int revId) {
-        dao.deleteReservation(revId);
-    }
-
-    @Override
-    public void updateStatus(int revId, String status, String remark) {
-       
-        ResvDto ResvDto = new ResvDto();
-        ResvDto.setRevId(revId);
-        ResvDto.setStatus(status);
-        ResvDto.setRemark(remark);
-
-       
-        dao.updateStatus(ResvDto);
+    public int delete(int revId) {
+    	return dao.delete(revId);
     }
 
     @Override
@@ -71,4 +57,14 @@ public class ReservationServiceImpl implements ReservationService {
     public int countReservationsByResourceId(int resId) {
         return dao.countReservationsByResourceId(resId);
     }
+
+	@Override
+	public int updateApprove(ResvDto resvDto) {
+		return dao.updateApprove(resvDto);
+	}
+
+	@Override
+	public int updateReject(ResvDto resvDto) {
+		return dao.updateReject(resvDto);
+	}
 }

@@ -31,4 +31,6 @@ public class ResDto {
     private String updatedAt;
     
     private Integer resvCount;
+    private Integer totQuantity;
+    private Integer availQuantity;
 }

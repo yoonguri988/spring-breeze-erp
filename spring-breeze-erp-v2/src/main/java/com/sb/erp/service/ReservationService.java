@@ -7,24 +7,25 @@ import com.sb.erp.dto.ResvSearchDto;
 import com.sb.erp.dto.StatsResvDto;
 
 public interface ReservationService {
+	// 자원 예약 조회
+    List<ResvDto> getResvList(ResvSearchDto search);
+    // 자원 예약 전체 갯수
+    int getResvCount(ResvSearchDto search);
 
-    List<ResvDto> getReservationList(ResvSearchDto search);
+    ResvDto getResvDetail(int revId);
 
-    int getReservationCount(ResvSearchDto search);
+    int insert(ResvDto ResvDto);
 
-    ResvDto getReservationDetail(int revId);
+    int update(ResvDto ResvDto);
 
-    void insertReservation(ResvDto ResvDto);
-
-    void updateReservation(ResvDto ResvDto);
-
-    void deleteReservation(int revId);
-
-    void updateStatus(int revId, String status, String remark);
+    int delete(int revId);
 
     // 통계 (전체/승인/대기/반려)
     StatsResvDto countByStats(ResvSearchDto search);
 
     // 예약 관리에서 예약 된 자원이 있는지 확인
     int countReservationsByResourceId(int resId);
+    
+    int updateApprove(ResvDto resvDto);
+    int updateReject(ResvDto resvDto);
 }
