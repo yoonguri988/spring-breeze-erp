@@ -22,7 +22,6 @@
 		where
 			for_code = #{forCode}
 			and com_id = #{comId}
-			and is_deleted = 0
 		<if test="forId != null and forId != '' and forId != 0">
 			and for_id != #{forId}
 		</if>

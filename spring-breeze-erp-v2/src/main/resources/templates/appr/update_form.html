@@ -230,7 +230,7 @@ window.addEventListener("load", function(){
 		
 		if(value !== "") {
 			// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
-			fetch(`/searchCompany?company=${encodeURIComponent(value)}`)
+			fetch(`/appr/searchCompany?company=${encodeURIComponent(value)}`)
 			.then(response => response.json())
 			.then(data => {
 				companyDropdown.innerHTML = ""; // 기존 목록 비우기
@@ -403,7 +403,7 @@ window.addEventListener("load", function(){
 			}
 			
 			if(value !== ""){
-				fetch(`/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}`)
+				fetch(`/appr/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}`)
 				.then( response => response.json() )
 				.then( data => {
 					
