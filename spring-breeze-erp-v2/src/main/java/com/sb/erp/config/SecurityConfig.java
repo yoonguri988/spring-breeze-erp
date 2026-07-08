@@ -28,7 +28,7 @@ public class SecurityConfig {
 					// ─── 로그인만 하면 접근 가능 ───────────
 					.requestMatchers("/auth/updatePass", "/", "/emp/list", 
 					"/emp/detail", "/emp/edit", "/emp/editPass",
-					"/com/**", "/dept/**").authenticated()
+					"/com/**", "/dept/**","/proj/**").authenticated()
 					// ─── ROOT 전용 ────────────────────────
 				    .requestMatchers("/root/**").hasRole("ROOT")
 				    // ─── ADMIN 이상 ──────────────────
