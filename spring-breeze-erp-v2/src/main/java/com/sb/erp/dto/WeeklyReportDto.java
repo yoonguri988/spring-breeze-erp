@@ -14,6 +14,8 @@ public class WeeklyReportDto {
 	private Integer completedThisWeek;
 	private Integer delayTaskCount;
 	private Integer progressRate;
+	private Integer doneTaskCount;
+	private Integer notDoneTaskCount;
 	
 	//통계
 	private Double avgTaskDays;
