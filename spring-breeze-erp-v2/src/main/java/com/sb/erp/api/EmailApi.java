@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 public class EmailApi {
 
 	// 1. 보내는 쪽
-	@Value("${gmail.host}")      private String host;      // smtp.gmail.com
-	@Value("${gmail.user}")      private String user;      // mdfy0308@gmail.com
-	@Value("${gmail.password}")  private String password;  // 구글 앱 비밀번호
+	@Value("${google.host}")      private String host;      // smtp.gmail.com
+	@Value("${google.user}")      private String user;      // mdfy0308@gmail.com
+	@Value("${google.password}")  private String password;  // 구글 앱 비밀번호
 
 	// 2. 이메일 보내기
 	public void sendMail(String subject, String content, String to) {
@@ -55,7 +55,7 @@ public class EmailApi {
 					+ "</p>"
 					+ "<div style='margin-top:30px; text-align:center;'>"
 					+ "<a href='https://d2big.com' style='display:inline-block; background-color:#005bac; color:#fff; padding:12px 24px; border-radius:4px; text-decoration:none; font-size:14px;'>홈페이지 바로가기</a>"
-					+ "</div>" 
+					+ "</div>"
 					+ "<hr style='margin:40px 0; border:none; border-top:1px solid #eee;'>"
 					+ "<p style='font-size:12px; color:#888; text-align:center;'>이 메일은 자동 발송된 안내 메일입니다.<br>문의: <a href='mailto:mdfy0308@gmail.com' style='color:#005bac; text-decoration:none;'>mdfy0308@naver.com</a></p>"
 					+ "</div>"

@@ -16,6 +16,7 @@ import com.sb.erp.util.SecurityUtil;
 public class EmpServiceImpl implements EmpService {
 	@Autowired EmpMapper dao;
 	@Autowired PasswordEncoder passEncoder;
+	@Autowired EmailApi emailApi;
 	
 	
 	// ─── 조회 ────────────────────────────
@@ -65,10 +66,12 @@ public class EmpServiceImpl implements EmpService {
 		//////
 		result = dao.insert(dto);
 		
-		if(result >0 ) {  
-					
-			/* 메일보내기  */ 
-			// 가이드 메일(가입 즉시), 5일 후에 확인 메일 재발송
+		if(result > 0) {
+			// 메일 보내기
+			String subject = "신입사원 " + dto.getEmpName() + "님을 환영합니다.";
+			String content = "첨부된 회사 가이드 링크를 확인하세요.";
+			String to = dto.getEmpEmail();
+			emailApi.sendMail(subject, content, to);
 		}
 		return result;
 	}
