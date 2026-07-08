@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.sb.erp.dto.MyWeeklyReportDto;
 import com.sb.erp.dto.ProjectAnalysisDto;
 import com.sb.erp.dto.ProjectDto;
 import com.sb.erp.dto.ProjectSearchDto;
@@ -42,6 +43,10 @@ public interface ProjectMapper {
 	//Ai 프로젝트 분석용
 	public ProjectAnalysisDto projectAnalysis(Integer proId);
 	
-	//주간 보고서용
+	//주간 보고서용-팀장용
 	public WeeklyReportDto weeklyReport(Integer proId);
+	
+	//주간 보고서용으로 가져올 프로젝트들
+	public List<Integer>selectActiveProjectIds();
+	
 }

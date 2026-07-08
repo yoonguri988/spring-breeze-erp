@@ -151,7 +151,7 @@
 	]]>
 	</select>
 	
-	<!-- 주간보고서용 api ->sql에서 계산 처리 -->
+	<!-- 주간보고서용(팀장) api ->sql에서 계산 처리 -->
 	<select id="weeklyReport" resultType="WeeklyReportDto" parameterType="int">
 	<![CDATA[
 	select
@@ -164,6 +164,8 @@
 	    and t.actual_end_date >= trunc(sysdate,'IW') - 7
 	    and t.actual_end_date <  trunc(sysdate,'IW')
 	    then 1 end), 0) as completedThisWeek,
+	nvl(sum(case when t.task_status = 'DONE' then 1 else 0 end), 0) as doneTaskCount,
+	nvl(sum(case when t.task_status <> 'DONE' then 1 else 0 end), 0) as notDoneTaskCount,    
     nvl(sum(case when t.task_status <> 'DONE' and t.task_end_date < sysdate then 1 end), 0) as delayTaskCount,
 	nvl(round(sum(case when t.task_status = 'DONE' then 1 else 0 end) / count(t.task_id) * 100), 0) as progressRate,
 	nvl(round(avg(case when t.actual_start_date is not null and t.actual_end_date is not null
@@ -175,6 +177,11 @@
 	where p.pro_id = #{proId}
 	group by p.pro_id, p.pro_name, p.end_date
 	]]>
+	</select>
+	
+	<!-- 프로젝 아 뭐 생각도 안나 -->
+	<select id="selectActiveProjectIds" resultType="int">
+	select pro_id from project where pro_status IN ('TODO','DOING')
 	</select>
 	
 </mapper>

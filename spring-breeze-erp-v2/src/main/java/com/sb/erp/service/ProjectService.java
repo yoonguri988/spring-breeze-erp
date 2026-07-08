@@ -42,7 +42,9 @@ public interface ProjectService {
 	public ProjectAnalysisDto projectAnalysis(Integer proId);
 	public String analyzeProject(Integer proId);
 	
-	//주간 보고서용
+	//주간 보고서용-팀장용
 	public WeeklyReportDto weeklyReport(Integer proId);
-	public byte[] createWeeklyReport(Integer proId, String role); 
+	
+	//주간 보고서용으로 가져올 프로젝트들
+	public List<Integer>selectActiveProjectIds();
 }

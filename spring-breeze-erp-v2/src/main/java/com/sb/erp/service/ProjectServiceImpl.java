@@ -91,9 +91,7 @@ public class ProjectServiceImpl implements ProjectService{
 	    return dto;
 	} 
 	
-	@Override public byte[] createWeeklyReport(Integer proId, String role) {
-		 WeeklyReportDto dto = weeklyReport(proId);
-	    return reportApi.createWeeklyReport(dto, role);
-	}
+	//주간 보고서용으로 가져올 프로젝트들
+	@Override public List<Integer> selectActiveProjectIds() {  return dao.selectActiveProjectIds(); }
 	
 }
