@@ -142,7 +142,7 @@
 		where
 			l.emp_id = #{empId}
 			and l.lin_status = 'WAI'
-			and d.doc_status = 'ING'
+			and d.doc_status in ('ING','WAI')
 		order by
 			d.created_at desc
 	</select>

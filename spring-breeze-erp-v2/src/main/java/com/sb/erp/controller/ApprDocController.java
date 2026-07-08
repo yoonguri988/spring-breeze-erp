@@ -18,8 +18,11 @@ import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprLineDto;
+import com.sb.erp.dto.DeptDto;
+import com.sb.erp.dto.EmpDto;
 import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.ApprDocService;
+import com.sb.erp.service.CompanyService;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
 
@@ -51,7 +54,7 @@ public class ApprDocController {
 		Map<String, Object> params = new HashMap<>();
 		params.put("forId", forId);
 		params.put("forVersion", forVersion);
-		
+
 		return service.getForm(params);
 	}
 	
@@ -121,6 +124,20 @@ public class ApprDocController {
 		dto.setEmpId(userDetails.getUser().getEmpId());
 		
 		return service.approversByEmpId(dto);
+	}
+	
+	// 결재선 지정용 부서 트리
+	@GetMapping("/getDeptTree")
+	@ResponseBody
+	public List<DeptDto> getDeptTree(@AuthenticationPrincipal CustomUserDetails userDetails){
+		return deptService.selectOrgTree(userDetails.getUser().getComId());
+	}
+	
+	// 특정 부서 소속 사원 목록
+	@GetMapping("/getDeptEmps")
+	@ResponseBody
+	public List<EmpDto> getDeptEmps(@RequestParam("deptId") int deptId) {
+		return empService.selectByDeptId(deptId);
 	}
 	
 	

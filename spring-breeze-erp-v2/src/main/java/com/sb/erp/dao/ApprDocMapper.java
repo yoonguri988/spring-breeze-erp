@@ -16,7 +16,7 @@ public interface ApprDocMapper {
 	// 문서 작성 파트
 	public List<ApprFormDto> findForm(ApprDocDto dto);
 	public ApprDocInitResponseDto initResponse(ApprDocDto dto);
-	public ApprDocDto insertDoc(ApprDocDto dto);
+	public int insertDoc(ApprDocDto dto);
 	public ApprFormDto getForm(Map<String,Object> map);
 	
 	// 문서 조회 파트

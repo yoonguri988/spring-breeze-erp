@@ -170,8 +170,8 @@
 									  class="sb-badge sb-badge--green">승인</span>
 								<span th:if="${doc.docStatus == 'REJ'}"
 									  class="sb-badge sb-badge--red">반려</span>
-								<span th:if="${doc.docStatus == 'ING'}"
-									  class="sb-badge sb-badge--blue">진행</span>
+								<span th:if="${doc.docStatus == 'WAI'}"
+									  class="sb-badge sb-badge--amber">대기</span>
 							</td>
 							<td style="text-align: center;">
 								<button type="button" class="btn btn-ghost btn-sm"

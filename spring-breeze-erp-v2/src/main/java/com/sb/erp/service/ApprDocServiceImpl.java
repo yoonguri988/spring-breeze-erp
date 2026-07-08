@@ -40,7 +40,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 
 	// 결재 문서 작성
 	@Override
-	public ApprDocDto insertDoc(ApprDocDto dto) {
+	public int insertDoc(ApprDocDto dto) {
 		return dao.insertDoc(dto);
 	}
 
