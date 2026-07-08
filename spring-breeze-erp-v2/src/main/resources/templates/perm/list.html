@@ -106,7 +106,7 @@
 									th:text="${selectedRole.autName}">ROLE_ADMIN</span>
 							</div>
 							<div class="right" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
-								</span> <a class="btn btn-ghost btn-sm"
+								<a class="btn btn-ghost btn-sm"
 									th:href="@{/perm/edit(autId=${selectedRole.autId})}"> <i
 									class="bi bi-pencil"></i> 수정
 								</a>
@@ -122,21 +122,12 @@
 								</form>
 							</div>
 						</div>
-
-						<div class="rm-note">
-							<i class="bi bi-hdd-network"></i>
-							<div>
-								이 권한으로 접근 가능한 기능·메뉴는 <b>애플리케이션 서버(Java)</b>에서 권한 검사로 처리됩니다. 본 화면은
-								권한을 등록·관리하고, 해당 권한이 <b>누구에게 부여되었는지</b>를 확인하는 용도입니다.
-							</div>
-						</div>
-
 						<div class="rm-sub">
 							<h3>이 권한이 부여된 사원</h3>
-							<span class="sub"> <span th:text="${#lists.size(empList)}">0</span>명
+							<span class="sub">
+								<span th:text="${#lists.size(empList)}">0</span>명
 							</span>
 						</div>
-
 						<div class="sb-card__body--flush">
 							<table class="sb-table">
 								<thead>

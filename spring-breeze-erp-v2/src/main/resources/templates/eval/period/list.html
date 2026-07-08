@@ -154,17 +154,23 @@
 								class="sb-table__name" th:text="${period.title}">2026년 상반기
 									정기평가</a></td>
 							<td class="tnum text-faint"><span
-								th:text="${period.startDate}">2026-01-01</span> ~ <span
+								th:text="${period.startDate}">2026-01-01</span> - <span
 								th:text="${period.endDate}">2026-06-30</span></td>
-							<td><span th:switch="${period.periodStatus}"> <span
-									th:case="'READY'" class="sb-badge sb-badge--gray"><span
-										class="pip"></span>준비</span> <span th:case="'OPEN'"
-									class="sb-badge sb-badge--green"><span class="pip"></span>진행
-										중</span> <span th:case="'CLOSED'" class="sb-badge sb-badge--amber"><span
-										class="pip"></span>마감</span> <span th:case="'REPORTED'"
-									class="sb-badge sb-badge--blue"><span class="pip"></span>AI
-										리포트</span>
-							</span></td>
+							<td>
+								<span th:switch="${period.periodStatus}">
+									<span th:case="'READY'" class="sb-badge sb-badge--amber">
+									<span class="pip"></span>준비
+								</span>
+								<span th:case="'OPEN'" class="sb-badge sb-badge--green">
+									<span class="pip"></span>진행중
+								</span>
+								<span th:case="'CLOSED'" class="sb-badge sb-badge--red">
+									<span class="pip"></span>마감
+								</span>
+								<span th:case="'REPORTED'" class="sb-badge sb-badge--blue">
+									<span class="pip"></span>AI 리포트</span>
+								</span>
+							</td>
 							<td class="num">
 								<div class="d-flex justify-content-end gap-1">
 									<a
