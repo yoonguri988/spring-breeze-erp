@@ -81,6 +81,7 @@
         </a>
 
         <div class="sb-nav__section">자산</div>
+        <!-- cyj -->
         <a class="sb-nav__item" data-page="resources" data-tip="자원 관리" th:href="@{/res/list}">
             <i class="bi bi-collection"></i>
             <span class="sb-nav__label">자원 관리</span>
@@ -90,16 +91,12 @@
             <span class="sb-nav__label">예약 내역</span>
         </a>
 
-        <!--
-          [변경점]
-          <sec:authorize access="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')"> ... </sec:authorize>
-          -> sec:authorize 속성 하나로 대체 (SpEL 표현식은 그대로 사용 가능)
-        -->
         <a class="sb-nav__item" data-page="approval" data-tip="예약 승인 관리" th:href="@{/admin/approval/list}"
            sec:authorize="hasAuthority('ROOT') or hasRole('ROLE_ADMIN')">
             <i class="bi bi-clipboard-check"></i>
             <span class="sb-nav__label">예약 승인 관리</span>
         </a>
+        <!-- cyj -->
     </nav>
     <!--
       [변경점]

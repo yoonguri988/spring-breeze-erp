@@ -2,21 +2,21 @@ package com.sb.erp.service;
 
 import java.util.List;
 
-import com.sb.erp.dto.ReservationDto;
+import com.sb.erp.dto.ResvDto;
 import com.sb.erp.dto.ResvSearchDto;
 import com.sb.erp.dto.StatsResvDto;
 
 public interface ReservationService {
 
-    List<ReservationDto> getReservationList(ResvSearchDto search);
+    List<ResvDto> getReservationList(ResvSearchDto search);
 
     int getReservationCount(ResvSearchDto search);
 
-    ReservationDto getReservationDetail(int revId);
+    ResvDto getReservationDetail(int revId);
 
-    void insertReservation(ReservationDto reservationDto);
+    void insertReservation(ResvDto ResvDto);
 
-    void updateReservation(ReservationDto reservationDto);
+    void updateReservation(ResvDto ResvDto);
 
     void deleteReservation(int revId);
 

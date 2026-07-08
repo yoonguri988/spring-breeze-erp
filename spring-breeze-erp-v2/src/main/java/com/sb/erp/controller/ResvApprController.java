@@ -8,7 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.sb.erp.dto.ReservationDto;
+import com.sb.erp.dto.ResvDto;
 import com.sb.erp.dto.ResvSearchDto;
 import com.sb.erp.dto.StatsResvDto;
 import com.sb.erp.service.ReservationService;
@@ -33,7 +33,7 @@ public class ResvApprController {
 
         int totalCount = resvService.getReservationCount(search);
         PagingUtil paging = new PagingUtil(totalCount, curPage);
-        List<ReservationDto> reservationList = resvService.getReservationList(search);
+        List<ResvDto> reservationList = resvService.getReservationList(search);
         StatsResvDto stats = resvService.countByStats(search);
 
         model.addAttribute("reservationList", reservationList);

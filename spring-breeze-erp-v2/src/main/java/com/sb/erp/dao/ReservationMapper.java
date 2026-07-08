@@ -4,26 +4,26 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.sb.erp.dto.ReservationDto;
+import com.sb.erp.dto.ResvDto;
 import com.sb.erp.dto.ResvSearchDto;
 import com.sb.erp.dto.StatsResvDto;
 
 @Mapper
 public interface ReservationMapper {
 
-	List<ReservationDto> selectReservationList(ResvSearchDto search);
+	List<ResvDto> selectReservationList(ResvSearchDto search);
     
     int selectReservationCount(ResvSearchDto search);
     
-    ReservationDto selectReservationDetail(int revId);
+    ResvDto selectReservationDetail(int revId);
     
-    void insertReservation(ReservationDto reservationDto);
+    void insertReservation(ResvDto ResvDto);
 
-    void updateReservation(ReservationDto reservationDto);
+    void updateReservation(ResvDto ResvDto);
 
     void deleteReservation(int revId);
     
-    void updateStatus(ReservationDto reservationDto);
+    void updateStatus(ResvDto ResvDto);
 
     StatsResvDto countByStats(ResvSearchDto search);
     

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.sb.erp.dto.ResSearchDto;
-import com.sb.erp.dto.ReservationDto;
-import com.sb.erp.dto.ResourceDto;
+import com.sb.erp.dto.ResvDto;
+import com.sb.erp.dto.ResDto;
 import com.sb.erp.dto.ResvSearchDto;
 import com.sb.erp.service.ReservationService;
 import com.sb.erp.service.ResourceService;
@@ -46,7 +46,7 @@ public class ReservationController {
 
         int totalCount = reservationService.getReservationCount(search);
         PagingUtil paging = new PagingUtil(totalCount, curPage);
-        List<ReservationDto> reservationList = reservationService.getReservationList(search);
+        List<ResvDto> reservationList = reservationService.getReservationList(search);
 
         model.addAttribute("reservationList", reservationList);
         model.addAttribute("paging", paging);
@@ -64,22 +64,22 @@ public class ReservationController {
                              HttpSession session,
                              Model model) {
         ResSearchDto search = buildResourceSearch(getLoginComId(session));
-        List<ResourceDto> resourceList = resourceService.getResourceList(search);
+        List<ResDto> resourceList = resourceService.getResourceList(search);
         model.addAttribute("resourceList", resourceList);
 
         if (resId != null) {
-            ResourceDto resourceDto = resourceService.getResourceDetail(resId);
+            ResDto resourceDto = resourceService.getResourceDetail(resId);
             model.addAttribute("resource", resourceDto);
         }
         return "resv/reservationInsert";
     }
 
     @RequestMapping(value = "/insert", method = RequestMethod.POST)
-    public String insert(ReservationDto reservationDto, HttpSession session) {
-        reservationDto.setComId(getLoginComId(session));
-        reservationDto.setEmpId(getLoginEmpId(session));
+    public String insert(ResvDto ResvDto, HttpSession session) {
+        ResvDto.setComId(getLoginComId(session));
+        ResvDto.setEmpId(getLoginEmpId(session));
 
-        reservationService.insertReservation(reservationDto);
+        reservationService.insertReservation(ResvDto);
         return "redirect:/resv/list";
     }
 
@@ -87,34 +87,34 @@ public class ReservationController {
     public String updateForm(@RequestParam("id") int revId,
                              HttpSession session,
                              Model model) {
-        ReservationDto reservationDto = reservationService.getReservationDetail(revId);
-        if (!canManagePendingReservation(reservationDto, session)) {
+        ResvDto ResvDto = reservationService.getReservationDetail(revId);
+        if (!canManagePendingReservation(ResvDto, session)) {
             return "redirect:/resv/list?error=notAllowed";
         }
 
-        model.addAttribute("reservation", reservationDto);
+        model.addAttribute("reservation", ResvDto);
         model.addAttribute("resourceList", resourceService.getResourceList(buildResourceSearch(getLoginComId(session))));
         return "resv/reservationUpdate";
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)
-    public String update(ReservationDto reservationDto, HttpSession session) {
-        ReservationDto original = reservationService.getReservationDetail(reservationDto.getRevId());
+    public String update(ResvDto ResvDto, HttpSession session) {
+        ResvDto original = reservationService.getReservationDetail(ResvDto.getRevId());
         if (!canManagePendingReservation(original, session)) {
             return "redirect:/resv/list?error=notAllowed";
         }
 
-        reservationDto.setComId(original.getComId());
-        reservationDto.setEmpId(original.getEmpId());
-        reservationDto.setStatus(original.getStatus());
-        reservationService.updateReservation(reservationDto);
+        ResvDto.setComId(original.getComId());
+        ResvDto.setEmpId(original.getEmpId());
+        ResvDto.setStatus(original.getStatus());
+        reservationService.updateReservation(ResvDto);
         return "redirect:/resv/list";
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public String delete(@RequestParam("revId") int revId, HttpSession session) {
-        ReservationDto reservationDto = reservationService.getReservationDetail(revId);
-        if (!canManagePendingReservation(reservationDto, session)) {
+        ResvDto ResvDto = reservationService.getReservationDetail(revId);
+        if (!canManagePendingReservation(ResvDto, session)) {
             return "redirect:/resv/list?error=notAllowed";
         }
 
@@ -130,18 +130,18 @@ public class ReservationController {
         return search;
     }
 
-    private boolean canManagePendingReservation(ReservationDto reservationDto, HttpSession session) {
-        if (reservationDto == null) {
+    private boolean canManagePendingReservation(ResvDto ResvDto, HttpSession session) {
+        if (ResvDto == null) {
             return false;
         }
-        if (reservationDto.getComId() != getLoginComId(session)) {
+        if (ResvDto.getComId() != getLoginComId(session)) {
             return false;
         }
-        if (!"WAI".equals(reservationDto.getStatus())) {
+        if (!"WAI".equals(ResvDto.getStatus())) {
             return false;
         }
         return hasAdminAuthority(SecurityContextHolder.getContext().getAuthentication())
-                || reservationDto.getEmpId() == getLoginEmpId(session);
+                || ResvDto.getEmpId() == getLoginEmpId(session);
     }
 
     private int getLoginComId(HttpSession session) {
