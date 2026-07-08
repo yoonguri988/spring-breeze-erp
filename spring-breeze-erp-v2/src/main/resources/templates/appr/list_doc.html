@@ -102,42 +102,45 @@
 	</div>
 	
 	<!-- 상단 검색바 -->
-	<div class="sb-card mb-4">
+	<form class="sb-card mb-4" method="get" th:action="@{/appr/list_doc}">
+		<input type="hidden" name="tab" th:value="${activeTab}"/>
 		<div class="sb-toolbar">
 			<div class="sb-field sb-field--search">
 				<i class="bi bi-search"></i>
-				<input type="text" id="searchKeyword"
+				<input type="text" name="keyword" th:value="${keyword}"
 					   placeholder="문서 번호, 제목, 기안자 검색"/>
 			</div>
 			<div class="sb-header__spacer"></div>
 			<div class="sb-field">
-				<select class="form-select" id="searchStatus">
+				<select class="form-select" name="status" onchange="submit()">
 					<option value="">전체 상태</option>
-					<option value="WAI">대기</option>
-					<option value="PRO">진행</option>
-					<option value="APP">승인</option>
-					<option value="REJ">반려</option>
+					<option value="ING" th:selected="${status == 'ING'}">진행</option>
+					<option value="APP" th:selected="${status == 'APP'}">승인</option>
+					<option value="REJ" th:selected="${status == 'REJ'}">반려</option>
 				</select>
 			</div>
+			<button type="submit" class="btn btn-sb">검색</button>
 		</div>
-	</div>
+	</form>
 	
 	<!-- 탭 메뉴 -->
 	<div class="sb-tabs">
-		<div class="sb-tab active" data-tab="tab-my-history">
-			<i class="bi bi-archive-fill"></i> 내가 결재했던 모든 문서
-			<span class="sb-nav__badge bg-secondary text-white"
-				  th:text="${hisDocs != null ? hisDocs.size() : 0}">0</span>
-		</div>
-		<div class="sb-tab" data-tab="tab-my-todo">
-			<i class="bi bi-file-earmark-check-fill"></i> 내가 결재해야 할 문서
-			<span class="sb-nav__badge"
-				  th:text="${todoDocs != null ? todoDocs.size() : 0}">0</span>
-		</div>
+		<a th:href="@{/appr/list_doc(tab='history', keyword=${keyword}, status=${status})}"
+		   class="sb-tab" th:classappend="${activeTab == 'history'} ? 'active'">
+		   <i class="bi bi-archive-fill"></i> 모든 문서
+		   <span class="sb-nav__badge bg-secondary text-white" th:text="${docCnts.TOTALCNT}">0</span>
+		</a>
+		<a th:href="@{/appr/list_doc(tab='todo', keyword=${keyword}, status=${status})}"
+		   class="sb-tab" th:classappend="${activeTab == 'todo'} ? 'active'">
+		   <i class="bi bi-file-earmark-check-fill"></i> 결재해야 할 모든 문서
+		   <span class="sb-nav__badge" th:text="${myTodoCnt}">0</span>
+		</a>
 	</div>
 	
+
 	<!-- 내가 했던 문서 -->
-	<div id="tab-my-history" class="sb-tab-panel active">
+	<div id="tab-my-history" class="sb-tab-panel"
+		 th:classappend="${activeTab == 'history' || activeTab == null} ? 'active'">
 		<div class="sb-card">
 			<div class="sb-card__body sb-card__body--flush">
 				<table class="sb-table align-middle">
@@ -167,11 +170,14 @@
 							<td class="tnum text-soft" th:text="${doc.createdAt}">0000-00-00</td>
 							<td>
 								<span th:if="${doc.docStatus == 'APP'}"
-									  class="sb-badge sb-badge--green">승인</span>
+									  class="sb-badge sb-badge--green">
+									  <span class="pip"></span>승인</span>
 								<span th:if="${doc.docStatus == 'REJ'}"
-									  class="sb-badge sb-badge--red">반려</span>
-								<span th:if="${doc.docStatus == 'WAI'}"
-									  class="sb-badge sb-badge--amber">대기</span>
+									  class="sb-badge sb-badge--red">
+									  <span class="pip"></span>반려</span>
+								<span th:if="${doc.docStatus == 'ING'}"
+									  class="sb-badge sb-badge--amber">
+									  <span class="pip"></span>진행</span>
 							</td>
 							<td style="text-align: center;">
 								<button type="button" class="btn btn-ghost btn-sm"
@@ -197,7 +203,8 @@
 	</div>
 	
 	<!-- 내가 해야되는 문서 -->
-	<div id="tab-my-todo" class="sb-tab-panel">
+	<div id="tab-my-todo" class="sb-tab-panel"
+		 th:classappend="${activeTab == 'todo'} ? 'active'">
 		<div class="sb-card">
 			<div class="sb-card__body sb-card__body--flush">
 				<table class="sb-table align-middle">
@@ -249,46 +256,26 @@
 			</div>
 		</div>
 	</div>
+	<div class="d-flex justify-content-center mt-4">
+        <ul class="pagination" id="pagingUl">
+            <li class="page-item" th:if="${paging.start > 1}">
+                <a class="page-link"
+                   th:href="@{/appr/list_doc(tab=${activeTab}, keyword=${keyword}, status=${status}, page=${paging.start -1})}">이전</a>
+            </li>
+            <th:block th:each="i : ${#numbers.sequence(paging.start, paging.end)}">
+	            <li class="page-item" th:classappend="${paging.current == i} ? 'active' : ''">
+	                <a class="page-link"
+	                   th:href="@{/appr/list_doc(tab=${activeTab}, keyword=${keyword}, status=${status}, page=${i})}"
+	                   th:text="${i}"></a>
+	            </li>
+			</th:block>
+            <li class="page-item" th:if="${paging.end < paging.pagetotal}">
+                <a class="page-link" th:href="@{/appr/list_doc(tab=${activeTab}, keyword=${keyword}, status=${status}, page=${paging.end +1})}">다음</a>
+            </li>
+        </ul>
+    </div>
 </div>
 
-<script>
-
-	//////////////////////////// 했던 / 해야될 문서 탭 처리 파트 //////////////////////
-	
-	// html 문서가 모두 로드 되면 실행
-	document.addEventListener("DOMContentLoaded", function(){ 
-		
-		var tabs = document.querySelectorAll('.sb-tab');
-		var panels = document.querySelectorAll('.sb-tab-panel');
-		
-		tabs.forEach(function(tab) {
-			tab.addEventListener('click', function(){
-				
-				// 탭, 패널 초기화
-				tabs.forEach(function(t) {
-					t.classList.remove('active');
-				});
-				panels.forEach(function(p) {
-					p.classList.remove('active');
-				});
-				
-				// 누른 탭에만 추가
-				tab.classList.add('active');
-				
-				// data-tab 의 속성값을 읽어옴 
-				var targetId = tab.getAttribute('data-tab');
-				
-				var targetPanel = document.getElementById(targetId);
-				if(targetPanel){
-					targetPanel.classList.add('active');
-				}
-			});
-		});
-	});
-	
-	//////////////////////////// 했던 / 해야될 문서 탭 처리 파트 //////////////////////
-
-</script>
 </main>
 </body>
 </html>

@@ -53,12 +53,20 @@
         	<i class="bi bi-shield-lock"></i><span class="sb-nav__label">권한 관리</span>
         </a>
         <!-- jsj -->
-
+		
         <div class="sb-nav__section">업무</div>
-        <a class="sb-nav__item" data-page="documents" data-tip="전자결재" th:href="@{/appr/list_form}">
-            <i class="bi bi-file-earmark-text"></i><span class="sb-nav__label">전자문서 · 결재</span>
+		<!-- KJY -->
+		<!-- 관리자 전용 양식 관리 -->
+        <a class="sb-nav__item" data-page="documents" data-tip="전자결재" th:href="@{/appr/list_form}" th:if="${isRoot}">
+            <i class="bi bi-sliders"></i><span class="sb-nav__label">결재 양식 관리</span>
             <!-- <span class="sb-nav__badge">5</span> -->
         </a>
+        <!-- 전자 결재 파트 / 관리자 파트도 따로 만들 예정 -->
+        <a class="sb-nav__item" data-page="documents" data-tip="전자결재" th:href="@{/appr/list_doc}">
+            <i class="bi bi-pencil-square	"></i><span class="sb-nav__label">전자결재 기안</span>
+            <!-- <span class="sb-nav__badge">5</span> -->
+        </a>
+        <!-- KJY -->
         <a class="sb-nav__item" data-page="projects" data-tip="프로젝트" th:href="@{/proj/proj_list}">
             <i class="bi bi-kanban"></i>
             <span class="sb-nav__label">프로젝트 및 태스크</span>

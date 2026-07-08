@@ -91,10 +91,10 @@
 				<div class="row g-4 align-items-center">
 					<div class="col-md-6">
 						<label for="docStatus" class="sb-form-label">문서 상태</label>
-						<input type="text" class="form-control bg-light" id="docStatus" value="대기 (WAI)" readonly/>
-						<input type="hidden" name="docStatus" value="WAI"/>
+						<input type="text" class="form-control bg-light" id="docStatus" value="진행중 (ING)" readonly/>
+						<input type="hidden" name="docStatus" value="ING"/>
 						<div class="form-text text-secondary mt-1">
-							기본 상태는 '대기' 상태로 설정되어있습니다.
+							결재 진행중
 						</div>
 					</div>
 				
@@ -387,7 +387,7 @@
 		
 		// 부서 트리
 		function loadDeptTree(){
-			fetch('/dept/getDeptTree')
+			fetch('/appr/getDeptTree')
 			.then(response => response.json())
 			.then(data => renderDeptTree(data))
 			.catch(err => console.error("부서트리 조회 실패",err));
@@ -460,7 +460,7 @@
 		// 위 부서 클릭 사원 목록 표시 기능 함수
 		let currentEmpList = [];
 		function loadDeptEmps(deptId){
-			fetch(`/dept/getDeptEmps?deptId=${encodeURIComponent(deptId)}`)
+			fetch(`/appr/getDeptEmps?deptId=${encodeURIComponent(deptId)}`)
 			.then(response => response.json())
 			.then(data => {
 				currentEmpList = data;

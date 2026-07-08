@@ -21,4 +21,9 @@ public class ApprDocDto {
 	
 	private String empName; // 리스트 기안자 출력 용도
 	private List<ApprLineDto> apprLines; // 결재선 받아올 용도
+	
+	private String searchKeyword;
+	private String searchStatus;
+	private int pstartno = 1;
+	private int onepagelist = 10;
 }

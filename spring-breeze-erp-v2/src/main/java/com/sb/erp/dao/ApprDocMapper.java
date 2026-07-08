@@ -23,9 +23,14 @@ public interface ApprDocMapper {
 	public Map<String, Object> selectDocCnt(ApprDocDto dto);
 	public List<Map<String, Object>> selectMyHistoryDocs(ApprDocDto dto);
 	public List<Map<String, Object>> selectMyTodoDocs(ApprDocDto dto);
+	public ApprDocDto selectDocDetail(int docId);
 	
 	// 결재선 관련 파트
 	public List<ApprLineDto> approversByEmpId(ApprDocDto dto);
 	public int updateDocStatus(ApprDocDto dto);
+	
+	// 페이징
+	public int selectMyHistoryDocsCnt(ApprDocDto dto);
+	public int selectMyTodoDocsCnt(ApprDocDto dto);
 	
 }

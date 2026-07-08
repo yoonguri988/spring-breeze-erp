@@ -1,6 +1,5 @@
 package com.sb.erp.service;
 
-import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,14 +55,16 @@ public class ApprFormServiceImpl implements ApprFormService {
 		// 원본 데이터 넣기
 		ApprFormDto original = dao.selectFormAll(dto);
 		
-		// 삭제 혹은 수정으로 인한 데이터 변조시 방어
-		if(original == null) {
-			throw new ConcurrentModificationException("이미 다른 사용자에 의해 수정,삭제된 양식입니다");
-		}
+		// 공백 줄바꿈 이것저것 다빼고 순수 택스트만 비교해야 버전이 안올라감.....
+		String origContent = original.getForContent() == null ? "" : original.getForContent().replaceAll("\\s+","");
+		String dtoContent = dto.getForContent() == null ? "" :dto.getForContent().replaceAll("\\s+", "");
+		
+		String origTitle = original.getForTitle() == null ? "" : original.getForTitle().replaceAll("\\s+","");
+		String dtoTitle = dto.getForTitle() == null ? "" :dto.getForTitle().replaceAll("\\s+", "");
 		
 		// insert, update 분기점 확인 / 데이터가 바뀌었는지 원본과 대조
-		boolean test = !original.getForTitle().equals(dto.getForTitle())
-					|| !original.getForContent().equals(dto.getForContent());
+		boolean test = !origContent.equals(dtoContent)
+					|| !origTitle.equals(dtoTitle);
 		
 		// 확인후 처리
 		if(test) { // 중요 데이터가 바뀌었을경우 version +1 처리

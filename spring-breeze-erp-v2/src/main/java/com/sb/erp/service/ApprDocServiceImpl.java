@@ -74,6 +74,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 		return dao.updateDocStatus(dto);
 	}
 
+	// 결재선 insert
 	@Override
 	@Transactional
 	public boolean insertLines(ApprDocDto dto) {
@@ -95,6 +96,24 @@ public class ApprDocServiceImpl implements ApprDocService{
 			}
 		}
 		return true;
+	}
+
+	// 모든 문서 카운트
+	@Override
+	public int selectMyHistoryDocsCnt(ApprDocDto dto) {
+		return dao.selectMyHistoryDocsCnt(dto);
+	}
+
+	// 본인차례 결재 문서 카운트
+	@Override
+	public int selectMyTodoDocsCnt(ApprDocDto dto) {
+		return dao.selectMyTodoDocsCnt(dto);
+	}
+
+	// 상세 페이지 docId 로 데이터 가져오기 
+	@Override
+	public ApprDocDto selectDocDetail(int docId) {
+		return dao.selectDocDetail(docId);
 	}
 	
 	

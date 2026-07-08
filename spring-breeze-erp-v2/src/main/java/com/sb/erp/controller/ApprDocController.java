@@ -22,9 +22,9 @@ import com.sb.erp.dto.DeptDto;
 import com.sb.erp.dto.EmpDto;
 import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.ApprDocService;
-import com.sb.erp.service.CompanyService;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EmpService;
+import com.sb.erp.util.PagingUtil;
 
 @Controller
 @RequestMapping("/appr")
@@ -88,31 +88,80 @@ public class ApprDocController {
 		return "appr/write_doc";
 	}
 	
-	////////////////////////////문서 작성 처리 파트 /////////////////////////////
+	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
 	
-	////////////////////////////문서 조회 처리 파트 /////////////////////////////
+	//////////////////////////// 문서 조회 처리 파트 /////////////////////////////
 	
 	@GetMapping("/list_doc")
 	public String listDoc(Model model,
+			@RequestParam(defaultValue = "history") String tab,
+			@RequestParam(required = false) String keyword,
+			@RequestParam(required = false) String status,
+			@RequestParam(defaultValue = "1") int page,
 			@AuthenticationPrincipal CustomUserDetails userDetails) {
 		
 		// 로그인 유저 정보 가져오기 (emp_id)
 		ApprDocDto dto = new ApprDocDto(); 
 		dto.setEmpId(userDetails.getUser().getEmpId());
+		dto.setSearchKeyword(keyword);
+		dto.setSearchStatus(status);
 		
-		// 각각 구성 넣어 보내기
+		int myTodoCnt = service.selectMyTodoDocsCnt(dto);
+		
+		// 카운트
 		Map<String, Object> docCnts = service.selectDocCnt(dto);
-		List<Map<String, Object>> hisDocs = service.selectMyHistoryDocs(dto);
-		List<Map<String, Object>> todoDocs = service.selectMyTodoDocs(dto);
+
+		int totalCnt = "todo".equals(tab) ?
+				myTodoCnt :
+				service.selectMyHistoryDocsCnt(dto);
 		
+
+		PagingUtil paging = new PagingUtil(totalCnt, page);
+		dto.setPstartno(paging.getPstartno());
+		dto.setOnepagelist(paging.getOnepagelist());
+		
+		List<Map<String, Object>> hisDocs = List.of();
+		List<Map<String, Object>> todoDocs = List.of();
+		
+		if("todo".equals(tab)) {
+			todoDocs = service.selectMyTodoDocs(dto);
+		}
+		else {
+			hisDocs = service.selectMyHistoryDocs(dto);
+		}
+		
+		model.addAttribute("paging", paging);
 		model.addAttribute("docCnts", docCnts);
+		model.addAttribute("myTodoCnt", myTodoCnt);
 		model.addAttribute("hisDocs", hisDocs);
 		model.addAttribute("todoDocs", todoDocs);
+		model.addAttribute("activeTab", tab);
+		model.addAttribute("status", status);
+		model.addAttribute("keyword", keyword);
+		model.addAttribute("page", page);
 		
 		return "appr/list_doc";
 	}
 	
-	////////////////////////////문서 조회 처리 파트 /////////////////////////////
+	//////////////////////////// 문서 조회 처리 파트 /////////////////////////////
+
+	//////////////////////////// 문서 승인,반려 처리 ///////////////////////////////
+	
+	@GetMapping("/detail_doc")
+	public String detailDoc(@AuthenticationPrincipal CustomUserDetails userDetails,
+						    @RequestParam("docId") int docId,
+							Model model) {
+		
+		ApprDocDto doc = service.selectDocDetail(docId);
+		
+		// 결재선 가져와야함
+		// 로그인 한사람 정보 가져와야함
+		//
+		
+		return "appr/detail_doc";
+	}
+	
+	//////////////////////////// 문서 승인,반려 처리 ///////////////////////////////
 	
 	//////////////////////////// 결재선 파트 ///////////////////////////////
 	
