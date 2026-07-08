@@ -43,15 +43,11 @@ public class ProjectController {
 	@Autowired EmpService empService;
 	
 	@InitBinder
-	public void initBinder(WebDataBinder binder) {
+	public void initBinder(WebDataBinder binder) {//문자열 ->localdate로 변환
 		binder.registerCustomEditor(LocalDate.class, new PropertyEditorSupport() {
-			@Override
-			public void setAsText(String text) {
-				if (text == null || text.isBlank()) {
-					setValue(null);
-				} else {
-					setValue(LocalDate.parse(text));
-				}
+			@Override public void setAsText(String text) {
+				if (text == null || text.isBlank()) { setValue(null);
+				} else { setValue(LocalDate.parse(text)); }
 			}
 		});
 	}
@@ -120,25 +116,6 @@ public class ProjectController {
 	  return "redirect:/proj/proj_list";
 	}
 	
-	/*
-	 * @GetMapping("/proj_detail") public String select(int pro_id, Model
-	 * model,Authentication authentication) { //상세
-	 * model.addAttribute("dto",service.select(pro_id)); //프로젝트 상세조회
-	 * model.addAttribute("list", taskService.selectAll(pro_id)); //해당 태스크 리스트
-	 * model.addAttribute("memberList", memberService.select(pro_id)); //머더라 그
-	 * 머더라..그.. 멤버출력
-	 * 
-	 * 
-	 * 
-	 * 
-	 * //하드코딩 나중에 지워 EmpDto loginEmp = new EmpDto(); loginEmp.setEmpId(1); boolean
-	 * isAdmin = true; //여기까지 지우셈
-	 * 
-	 * model.addAttribute("loginEmpId", loginEmp.getEmpId()); //jsp에서 사용하게 보내줄거임
-	 * model.addAttribute("isAdmin",isAdmin);
-	 * 
-	 * return "proj/proj_detail"; }
-	 */
 	@GetMapping("/proj_detail")
 	public String select(@RequestParam("pro_id") int proId,
 	                      @RequestParam(defaultValue = "1") int pstartno,
@@ -161,9 +138,6 @@ public class ProjectController {
 	    model.addAttribute("list", taskService.selectAll(taskSearch));
 	    model.addAttribute("paging", paging);
 	    model.addAttribute("memberList", memberService.select(proId));
-
-
-
 	    model.addAttribute("loginEmpId", loginEmp.getEmpId());
 	    model.addAttribute("isAdmin", isAdmin);
 
@@ -215,35 +189,10 @@ public class ProjectController {
 		return "redirect:/proj/proj_list";
 	}
 	
-	@GetMapping("/analysis")
+	@GetMapping("/analysis") //API(1)-ai분석결과
 	@ResponseBody
 	public String analyzeProject(@RequestParam Integer proId) {
 		return service.analyzeProject(proId);
 	}
-	
-	@GetMapping("/weekly-report")
-	public ResponseEntity<byte[]> downloadWeeklyReport(
-	        @RequestParam("pro_id") int proId,
-	        Authentication authentication) {
 
-	    EmpDto loginEmp = empService.selectByEmpEmail(authentication.getName());
-	    boolean isAdmin = authentication.getAuthorities().stream()
-	            .anyMatch(a -> a.getAuthority().equals("ROOT") || a.getAuthority().equals("ROLE_ADMIN"));
-
-	    ProjectDto project = service.select(proId);
-
-	    // 생성자 또는 관리자만 열람 가능
-	    if (!isAdmin && project.getEmpId() != loginEmp.getEmpId()) {
-	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-	    }
-
-	    String role = isAdmin ? "MANAGER" : "DEVELOPER";
-
-	    byte[] pdf = service.createWeeklyReport(proId, role);
-
-	    return ResponseEntity.ok()
-	            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=weekly_report.pdf")
-	            .contentType(MediaType.APPLICATION_PDF)
-	            .body(pdf);
-	}
 }
