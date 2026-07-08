@@ -43,6 +43,7 @@
 		and com_id = #{comId}
     </update>
     
+    <!-- 목록(조건부) 조회 -->
     <select id="search" parameterType="EvalPeriodSearchDto" resultType="EvalPeriodDto">
 		select period_id, com_id, eval_year, eval_term, title, period_status,
 			TO_CHAR(start_date, 'YYYY-MM-DD') AS start_date,
@@ -69,6 +70,39 @@
              WHEN 'H1' THEN 1 
          END DESC,
          period_id DESC
+	</select>
+	
+	<!-- 상태 갯수 확인 -->
+	<select id="countByStatusAll" resultType="map">
+		select
+		count(case when period_status = 'READY' then 1 end) as "READY",
+		count(case when period_status = 'OPEN' then 1 end) as "OPEN",
+		count(case when period_status = 'CLOSED' then 1 end) as "CLOSED",
+		count(case when period_status = 'REPORTED' then 1 end) as "REPORTED"
+		from evaluation_period
+		where com_id = #{comId}
+	</select>
+
+	<!-- 중복 확인 -->
+	<select id="isDuplicate" resultType="boolean">
+		select count(*)
+		from evaluation_period
+		where com_id = #{comId}
+		and eval_year = #{evalYear}
+		and eval_term = #{evalTerm}
+	</select>
+
+	<!-- 데이터 카운트 -->
+	<select id="countEvalsByPeriodId" resultType="int">
+		select count(*)
+		from performance_evaluation
+		where period_id = #{periodId}
+	</select>
+
+	<select id="countReportsByPeriodId" resultType="int">
+		select count(*)
+		from evaluation_ai_report
+		where period_id = #{periodId}
 	</select>
 	
 </mapper>

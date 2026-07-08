@@ -33,10 +33,10 @@ public class SecurityConfig {
 				    .requestMatchers("/root/**").hasRole("ROOT")
 				    // ─── ADMIN 이상 ──────────────────
 				    .requestMatchers("/admin/**").hasAnyRole("ROOT", "ADMIN")
-					// ─── 사원/직급/권한 관리 (ADMIN 전용) ────────────────
+					// ─── 인사 관리 (ADMIN 전용) ────────────────
 				    .requestMatchers("/emp/add", "/emp/resetPass",
 							"/emp/checkEmail", "/emp/checkMobile",
-							"/emp/checkEmpNo", "/perm/**", "/pos/**").hasRole("ADMIN")
+							"/emp/checkEmpNo", "/perm/**", "/pos/**", "/eval/**").hasRole("ADMIN")
 				    // ─── 그 외 ────────────────
 				    .anyRequest().permitAll()
 				)
