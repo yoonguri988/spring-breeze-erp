@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout.html}">
+<head>
+	<title>결재 양식 관리</title>
+	<link rel="stylesheet" th:href="@{/css/summernote-lite.min.css}"/>
+</head>
+<body>
+
+<main layout:fragment="content">
+<div class="sb-content">
+	 <div class="sb-page-head">
+	 	<div class="sb-page-head__txt">
+	 		<div class="sb-breadcrumb">
+		 		<a th:href="@{/appr/list_form}">전자결재</a>
+		 		<i class="bi bi-chevron-right"></i>
+		 		<span>결재 기안</span>
+	 		</div>
+	 		<h1>결재 문서 작성</h1>
+	 		<p>선택한 양식으로 새로운 결재 문서를 기안합니다.</p>
+	 	</div>
+	 	<div class="sb-page-head__actions">
+		 	<button type="button" class="btn btn-ghost"
+		 			th:onclick="|location.href='@{/appr/list_doc}'|">
+		 			목록으로
+		 	</button>
+	 	</div>
+	 </div>
+
+	<form th:action="@{/appr/write_doc}" method="post" onsubmit="return checkForm()">
+		<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+		
+		<!-- 데이터 바인딩 -->
+		<input type="hidden" id="comId" th:value="${dto.comId}"/>
+		<input type="hidden" id="empId" th:value="${dto.empId}"/>
+	
+		<div class="sb-card">
+			<div class="sb-card__head">
+				<h2>문서 정보</h2>
+			</div>
+			
+			<div class="sb-card__body">	
+				<div class="row g-4 mb-4">
+					<div class="col-md-6">
+						<label for="forSelect"
+							   class="sb-form-label">결재 양식</label>
+						<select class="form-select" id="formSelect" name="forId">
+							<option value="">선택</option>
+						</select>
+						<div id="err_form" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 기안하실 결재 양식을 선택해주세요.
+						</div>
+						<div class="form-text text-faint mt-1">
+							문서에 사용할 결재 양식을 선택해주세요.
+						</div>
+					</div>
+				</div>
+					
+				<div class="row g-4 mb-4">
+					<div class="col-md-6">
+						<label for="docTitle" class="sb-form-label">문서 제목 <span class="text-danger">*</span></label>
+						<input type="text" class="form-control"
+							   id="docTitle" name="docTitle" placeholder="문서 제목을 입력하세요"/>
+						<div class="form-text text-faint mt-1">결재 문서의 제목을 입력하세요.</div>
+						<div id="err_docTitle" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 문서 제목을 입력해주세요
+						</div>
+					</div>
+					
+					<div class="col-md-6 d-flex gap-3 align-items-start">
+						<div class="flex-grow-1">
+							<label for="empName" class="sb-form-label">작성자 <span class="text-danger">*</span></label>
+							<input type="text" class="form-control bg-light" id="empName"
+								   th:value="|${dto.empName} (${dto.empId})|" readonly/>
+							<div class="form-text text-secondary mt-1">
+								현재 로그인한 사용자가 기본 작성자로 설정됩니다.
+							</div>
+						</div>
+						<div class="sb-info-box mt-4 col-md-5">
+							<i class="bi bi-info-circle-fill text-primary"></i> <strong>안내</strong><br>
+							중요 문서 지정 여부에 따라서 결재선의 수가 유동적으로 변경됩니다.
+						</div>
+					</div>
+				</div>
+				
+				<div class="row g-4 align-items-center">
+					<div class="col-md-6">
+						<label for="docStatus" class="sb-form-label">문서 상태</label>
+						<input type="text" class="form-control bg-light" id="docStatus" value="대기 (WAI)" readonly/>
+						<input type="hidden" name="docStatus" value="WAI"/>
+						<div class="form-text text-secondary mt-1">
+							기본 상태는 '대기' 상태로 설정되어있습니다.
+						</div>
+					</div>
+				
+					<div class="col-md-6">
+						<label class="sb-form-label">중요 문서 여부</label>
+						<div class="form-check form-switch mt-2">
+							<input class="form-check-input sb-checkbox" type="checkbox" id="isImportantSwitch"
+								   style="width: 44px; height: 22px; cursor:pointer;"/>
+							<input type="hidden" id="isImportant" name="isImportant" value="0"/>
+							<label class="form-check-label text-dark fw-semibold ms-2" for="isImportantSwitch"
+								   style="cursor: pointer; user-select: none; line-height:22px;">
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="sb-card mb-4">
+			<div class="sb-card__head">
+				<h2>결재선 지정</h2>
+				<p class="mb-0 text-secondary" style="font-size: 14px;">
+					중요 문서 체크 여부에 따라 시스템 권한 규칙대로 결재자가 자동 구성됩니다.
+				</p>
+			</div>
+			<div class="sb-card__body">
+				<div class="row g-3">
+					<div class="col-md-5">
+						<label class="sb-form-label">조직도 확인</label>
+						<div class="input-group mb-2">
+							<input type="text" class="form-control" placeholder="이름, 사번 검색" disabled>
+							<button class="btn btn-outline-secondary" type="button" disabled>
+								<i class="bi bi-search"></i>
+							</button>
+						</div>
+						<div class="tree-box bg-light text-muted d-flex align-items-center justify-content-center">
+							<div class="text-center">
+								<i class="bi bi-diagram-3 fs-3 d-block mb-1 text-secondary"></i>
+								<span style="font-size: 13px;">[[${dto.comName}]] 조직도 연계 활성됨</span>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-md-1 d-flex flex-colum justify-content-center align-items-center gap-2">
+						<button type="button" class="btn btn-sm btn-outline-secondary" style="width: 45px;" disabled>
+							<i class="bi bi-chevron-right"></i>
+						</button>
+						<button type="button" class="btn btn-sm btn-outline-secondary" style="width: 45px;" disabled>
+							<i class="bi bi-chevron-left"></i>
+						</button>
+					</div>
+					
+					<div class="col-md-6">
+						<label class="sb-form-label">선택된 결재선 (결재 순서)</label>
+						<div class="table-box">
+							<table class="table table-sm table-hover mb-0 align-middle text-center"
+								   id="lineTable" style="font-size: 13px;">
+								   	<thead class="table-bottom">
+								   		<tr class="border-bottom">
+								   			<th style="width: 15%">순서</th>
+								   			<th style="width: 35%">결재자</th>
+								   			<th style="width: 25%">직책</th>
+								   			<th style="width: 25%">상태(기본)</th>
+								   		</tr>
+								   	</thead>
+								   	<tbody id="lineTableBody">
+								   	</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="sb-card mb-4">
+			<div class="sb-card__head">
+				<h2>문서 내용</h2>
+			</div>
+			<div class="sb-card_body">
+				<div class="mt-2">
+					<textarea name="docContent" rows="10" cols="40"
+							  class="form-control" id="forContent"></textarea>
+					<div class="form-text text-faint mt-2">
+						선택한 결재 서식 프레임워크가 실시간으로 주입
+					</div>
+					<div id="err_docContent" class="text-danger fw-semibold mt-1"
+						 style="display: none; font-size: 14px;">
+						 문서 본문 내용을 작성해주세요.
+					</div>
+					
+					<div class="sb-divider"></div>
+					
+					<div class="d-flex justify-content-between align-items-center">
+						<button type="button" class="btn btn-ghost border" th:onclick="|location.href='@/appr/list_doc'|">취소</button>
+						<div class="d-flex gap-2">
+							<button type="submit" class="btn btn-primary px-4"
+									style="background-color: #0d6efd; border-color: #0d6efd;">
+									<i class="bi bi-floppy"></i> 저장
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+	
+	<!-- jquery 로드 -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	
+	<!-- js파일 로드 -->
+	<script th:src="@{/js/summernote-lite.min.js}"></script>
+	
+	<script>
+	/////////////////////////////// 웹 에디터 ///////////////////////////////
+	
+		(function(){
+			// 제이쿼리, 써머노트 메모리에 등록될때까지 확인
+			var initTimer = setInterval(function(){
+				if (typeof window.jQuery !== 'undefined' && window.jQuery.fn.summernote){
+					clearInterval(initTimer);
+					
+					// 써머노트 에디터 구동
+					window.jQuery('#forContent').summernote({
+						placeholder: '양식을 선택하시면 서식이 이곳에 자동으로 로드됩니다.',
+						tabsize: 2,
+						height: 400,
+						toolbar:[
+							['style',['style']],
+							['font', ['bold', 'italic', 'underline', 'clear']],
+							['color', ['color']],
+							['para', ['ul', 'ol', 'paragraph']],
+							['table', ['table']],
+							['insert', ['link', 'picture']],
+							['view', ['fullscreen', 'codeview']]
+						]
+					});
+				}
+			}, 50);
+		})();
+	
+	/////////////////////////////// 웹 에디터 ///////////////////////////////
+	</script>
+	
+</div>
+
+
+<script>
+
+	window.addEventListener("load", function(){
+		const loginComId = document.getElementById("comId").value;
+		const formSelect = document.getElementById("formSelect");
+		
+		// 페이지 로드시 해당 회사에 등록된 양식 리스트 로딩
+		if(loginComId){
+			fetch(`/getFormList?comId=${encodeURIComponent(loginComId)}`)
+			.then(response => response.json())
+			.then(data => {
+				if(data && data.length > 0){
+					data.forEach(form => {
+						// 활성화 상태 양식만
+						if(form.forStatus == 1 || form.forStatus === true){
+							let option = document.createElement("option");
+							option.value = form.forId;
+							option.textContent = form.forTitle;
+							// 복합키 대조
+							option.setAttribute("data-version", form.forVersion);
+							formSelect.appendChild(option);
+						}
+					});
+				}
+			})
+			.catch(error => {
+				console.error("양식 검사 실패", error);
+			});
+		}
+		
+		// 드롭다운 변경시 해당 양식 주입
+		formSelect.addEventListener("change", function(e){
+			const selectedFormId = e.target.value;
+			const selectedOption = e.target.options[e.target.selectedIndex];
+			
+			if(!selectedFormId){
+				window.jQuery('#forContent').summernote('code','');
+				return;
+			}
+			
+			const selectedVersion = selectedOption.getAttribute("data-version");
+			
+			// 상세 조회
+			fetch(`/getFormDetail?forId=${encodeURIComponent(selectedFormId)}&forVersion=${encodeURIComponent(selectedVersion)}`)
+			.then(response => response.json())
+			.then(data => {
+				if(data && data.forContent){
+					window.jQuery('#forContent').summernote('code', data.forContent);
+				}
+			})
+			.catch(error => {
+				alert("양식을 불러오는중 서버오류 발생");
+				console.error(error);
+			});
+		});
+	});
+
+	/////////////////////////////// 빈칸 처리 ///////////////////////////////
+	
+	function checkForm(){
+		// 빈칸 체크할 요소들 매핑 {key : value}
+		// 아래처럼 매핑 안하면 일일이 하나씩 getElementById 를써서 비교하고 변경해야함
+		const fields = [
+			{ id: "forSelect", errId: "err_form"}
+		];
+		
+		let result = true;
+		let focusElement = null;
+		
+		// 에러 초기화
+		fields.forEach(field => {
+			let id = document.getElementById(field.id);
+			let errId = document.getElementById(field.errId);
+			
+			// 테두리 제거
+			id.classList.remove("is-invalid");
+			if(field.focusId){
+				document.getElementById(field.focusId).classList.remove("is-invalid");
+			}
+			
+			// 에러 구문 제거
+			if(errId){
+				errId.style.display = "none";
+			}
+			
+			// 비어있는 값 체크
+			if(id.value.trim() == ""){
+				if(field.focusId){
+					document.getElementById(field.focusId).classList.add("is-invalid");
+				}
+				else{
+					id.classList.add("is-invalid");
+				}
+				
+				if(errId) {
+					errId.style.display = "block";
+				}
+				if(!focusElement){
+					focusElement = field.focusId ? document.getElementById(field.focusId) : id;
+				}
+				
+				result = false;
+			}
+			
+		});
+		// 양식 중복 인데 강제로 작성 눌렀을시 제어
+		if(!result){
+			if(focusElement){
+				focusElement.focus();
+			}
+				return false;
+		}
+
+		return true;
+
+	}
+	
+	/////////////////////////////// 빈칸 처리 ///////////////////////////////
+	
+	
+</script>
+</main>
+</body>
+</html>

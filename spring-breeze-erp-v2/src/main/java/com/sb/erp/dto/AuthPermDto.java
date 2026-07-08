@@ -4,8 +4,10 @@ import lombok.Data;
 
 @Data
 public class AuthPermDto {
+	
 	//공통
 	private int autId;
+	
 	//authority
 	private int comId;
 	private String autName;
