@@ -506,7 +506,6 @@ CREATE TABLE task (
   CONSTRAINT fk_task_project_member FOREIGN KEY (pm_id) REFERENCES project_member (pm_id),
   CONSTRAINT fk_task_parent FOREIGN KEY (parent_task_id) REFERENCES task (task_id) ON DELETE SET NULL
 );
-);
 
 CREATE SEQUENCE seq_task START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 
