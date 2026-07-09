@@ -3,7 +3,9 @@ package com.sb.erp.dao;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
+import com.sb.erp.dto.MyWeeklyReportDto;
 import com.sb.erp.dto.TaskDto;
 import com.sb.erp.dto.TaskSearchDto;
 
@@ -24,4 +26,13 @@ public interface TaskMapper {
 	
 	//태스크 상세
 	public TaskDto select(int taskId);
+	
+	//태스크 주간 보고서
+	public MyWeeklyReportDto myWeeklyReport(@Param("empId") int empId);
+	
+	//지연 태스크 목록
+	public List<String>delayedTaskNames(@Param("empId")int empId);
+	
+	//pdf보고서 생성
+	public byte[] createMyWeeklyReport(MyWeeklyReportDto dto);
 }
