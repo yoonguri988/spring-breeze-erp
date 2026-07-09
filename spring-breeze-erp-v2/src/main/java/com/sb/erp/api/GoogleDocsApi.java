@@ -1,13 +1,11 @@
 package com.sb.erp.api;
 
 import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -17,7 +15,6 @@ import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sb.erp.dto.WeeklyReportDto;
 
 @Component
 public class GoogleDocsApi {
@@ -113,42 +110,13 @@ public class GoogleDocsApi {
             throw new RuntimeException("PDF 표지 제거 실패: " + e.getMessage(), e);
         }
     }
+    //개발자용 pdf로 변환한 후에 사본은 삭제시켜주는 용도
     public void deleteDoc(String accessToken, String documentId) {
         restClient.delete()
                 .uri("https://www.googleapis.com/drive/v3/files/{fileId}", documentId)
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .toBodilessEntity();
-    }
-
-    public String uploadPdfToDrive(String accessToken, byte[] pdfBytes, String fileName) {
-        String boundary = "report" + System.currentTimeMillis();
-        String metadata = "{\"name\":\"" + fileName + "\",\"mimeType\":\"application/pdf\"}";
-
-        try {
-            ByteArrayOutputStream body = new ByteArrayOutputStream();
-            body.write(("--" + boundary + "\r\n").getBytes());
-            body.write("Content-Type: application/json; charset=UTF-8\r\n\r\n".getBytes());
-            body.write(metadata.getBytes());
-            body.write("\r\n".getBytes());
-            body.write(("--" + boundary + "\r\n").getBytes());
-            body.write("Content-Type: application/pdf\r\n\r\n".getBytes());
-            body.write(pdfBytes);
-            body.write("\r\n".getBytes());
-            body.write(("--" + boundary + "--").getBytes());
-
-            String response = restClient.post()
-                    .uri("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart")
-                    .header("Authorization", "Bearer " + accessToken)
-                    .contentType(MediaType.valueOf("multipart/related; boundary=" + boundary))
-                    .body(body.toByteArray())
-                    .retrieve()
-                    .body(String.class);
-
-            return objectMapper.readTree(response).path("id").asText();
-        } catch (Exception e) {
-            throw new RuntimeException("Drive 업로드 실패: " + e.getMessage(), e);
-        }
     }
     
 }
