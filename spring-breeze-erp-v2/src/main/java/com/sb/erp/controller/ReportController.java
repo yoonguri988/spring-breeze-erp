@@ -1,0 +1,36 @@
+package com.sb.erp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.sb.erp.api.ReportApi;
+import com.sb.erp.dto.MyWeeklyReportDto;
+import com.sb.erp.service.TaskService;
+import jakarta.servlet.http.HttpSession;
+
+@Controller
+@RequestMapping("/report")
+public class ReportController {
+	
+    @Autowired private TaskService taskService;
+    @Autowired private ReportApi reportApi;
+
+	@GetMapping("/my-weekly-report") //개인보고서 pdf
+    public ResponseEntity<byte[]> myReport(HttpSession session){
+    	Integer empId = (Integer) session.getAttribute("empId");
+    	MyWeeklyReportDto dto = taskService.myWeeklyReport(empId);
+        
+    	//태스크 없으면 나가주세요
+        if(dto == null || dto.getTotalTask() == 0) { return ResponseEntity.badRequest().build(); }
+        dto.setDelayedTaskNames( taskService.delayedTaskNames(empId) );
+        
+        byte[] pdf = reportApi.createMyWeeklyReport(dto);
+        return ResponseEntity.ok() .contentType(MediaType.APPLICATION_PDF)
+        						   .header("Content-Disposition", "attachment; filename=\"MyWeeklyReport.pdf\"")
+        						   .body(pdf);
+    }
+}

@@ -2,6 +2,7 @@ package com.sb.erp.service;
 
 import java.util.List;
 
+import com.sb.erp.dto.MyWeeklyReportDto;
 import com.sb.erp.dto.TaskDto;
 import com.sb.erp.dto.TaskSearchDto;
 
@@ -28,4 +29,12 @@ public interface TaskService {
 	//태스크 수정뷰
 	public TaskDto taskEditView(int taskId);
 	
+	//태스크 주간 보고서
+	public MyWeeklyReportDto myWeeklyReport(int empId);
+	
+	//지연 태스크 목록
+	public List<String>delayedTaskNames(int empId);
+	
+	//pdf보고서 생성
+	public byte[] createMyWeeklyReport(MyWeeklyReportDto dto);
 }
