@@ -30,7 +30,7 @@
 <!-- 사원 기준 미처리 예약 -->
 <select id="findPendingResvByDept" resultType="ResvImpactDto" parameterType="int">
 	SELECT
-      r.rev_id, r.status, r.req_date,
+      r.rev_id, r.status, r.start_dt, r.end_dt,
       e.emp_id, e.emp_name,
       res.res_id, res.res_name
 	FROM reservation r
@@ -38,7 +38,7 @@
     JOIN com_resource res ON r.res_id = res.res_id
     WHERE e.dept_id = #{deptId}
       AND r.status = 'WAI'
-	ORDER BY r.req_date ASC
+	ORDER BY r.start_dt ASC
 </select>
 <!-- 사원 기준 미완료 결재라인 -->
 <select id="findPendingApprLineByDept" resultType="ApprLineImpactDto" parameterType="int">

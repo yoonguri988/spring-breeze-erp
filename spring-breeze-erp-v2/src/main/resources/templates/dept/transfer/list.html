@@ -150,13 +150,14 @@
     <div class="sb-toolbar"><span class="fw-semibold">미처리 예약 (참고용)</span></div>
     <div class="sb-card__body--flush">
         <table class="sb-table">
-            <thead><tr><th>사원</th><th>자원</th><th>상태</th><th>요청일</th></tr></thead>
+            <thead><tr><th>사원</th><th>자원</th><th>상태</th><th>장비예약시작일</th><th>장비예약종료일</th></tr></thead>
             <tbody>
                 <tr th:each="r : ${impact.reservations}">
                     <td th:text="${r.empName}"></td>
                     <td th:text="${r.resName}"></td>
                     <td><span class="sb-badge sb-badge--amber" th:text="${r.status}"></span></td>
-                    <td th:text="${r.reqDate}"></td>
+                    <td th:text="${r.startDt}"></td>
+                    <td th:text="${r.endDt}"></td>
                 </tr>
             </tbody>
         </table>

@@ -28,11 +28,10 @@
             AND rv.status = #{status}
         </if>
         <if test="startDt != null and startDt != ''">
-            AND rv.start_dt <![CDATA[>=]]> #{startDt}
+            AND rv.updated_at <![CDATA[>=]]> #{startDt}
         </if>
         <if test="endDt != null and endDt != ''">
-            AND ( rv.end_dt <![CDATA[<]]> #{endDt}
-            OR rv.start_dt <![CDATA[>]]> #{endDt})
+            AND rv.updated_at <![CDATA[<]]>TO_DATE(#{endDt}, 'YYYY-MM-DD') + 1
         </if>
         ORDER BY rv.rev_id DESC
         OFFSET #{pstartno} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
@@ -57,11 +56,10 @@
             AND rv.status = #{status}
         </if>
         <if test="startDt != null and startDt != ''">
-            AND rv.start_dt <![CDATA[>=]]> #{startDt}
+            AND rv.updated_at <![CDATA[>=]]> #{startDt}
         </if>
         <if test="endDt != null and endDt != ''">
-            AND ( rv.end_dt <![CDATA[<]]> #{endDt}
-            OR rv.start_dt <![CDATA[>]]> #{endDt})
+            AND rv.updated_at <![CDATA[<]]>TO_DATE(#{endDt}, 'YYYY-MM-DD') + 1
         </if>
     </select>
 
@@ -69,7 +67,7 @@
     <select id="selectOneById" parameterType="int" resultType="ResvDto">
         SELECT
             rv.*,
-            r.res_name, r.res_code, r.res_type, r.location,
+            r.res_name, r.res_code, r.res_type, r.location, 
             e.emp_name, d.dept_name, ap.emp_name AS approvedEmpName
         FROM reservation rv
         JOIN com_resource r ON rv.res_id = r.res_id
@@ -87,8 +85,8 @@
         )
         VALUES (
             seq_reservation.NEXTVAL, #{resId}, #{comId}, #{empId}, #{quantity}, 'WAI',
-            TO_TIMESTAMP('2026-07-08T17:16', 'YYYY-MM-DD"T"HH24:MI'), 
-		    TO_TIMESTAMP('2026-07-11T17:16', 'YYYY-MM-DD"T"HH24:MI'),
+            TO_TIMESTAMP(#{startDt}, 'YYYY-MM-DD"T"HH24:MI'),
+        	TO_TIMESTAMP(#{endDt}, 'YYYY-MM-DD"T"HH24:MI'),
 		    #{remark}, SYSDATE, SYSDATE
         )
     </insert>
@@ -97,10 +95,9 @@
     <update id="update" parameterType="ResvDto">
         UPDATE reservation
         <set>
-        	<if test="resId != null">res_id = #{resId},</if>
         	<if test="quantity != null">quantity = #{quantity},</if>
-        	<if test="startDt != null">start_dt = #{startDt},</if>
-        	<if test="endDt != null">end_dt = #{endDt},</if>
+        	<if test="startDt != null">start_dt = TO_TIMESTAMP(#{startDt}, 'YYYY-MM-DD"T"HH24:MI'),</if>
+        	<if test="endDt != null">end_dt = TO_TIMESTAMP(#{endDt}, 'YYYY-MM-DD"T"HH24:MI'),</if>
         	<if test="remark != null">remark = #{remark},</if>
         </set>
         WHERE rev_id = #{revId}
@@ -154,4 +151,16 @@
           AND status IN ('WAI', 'APP')
     </select>
 
+	<!-- 특정 자원의 특정 기간에 이미 예약(대기+승인)된 수량 합계 -->
+	<select id="selectReservedQuantity" resultType="int">
+	    SELECT NVL(SUM(quantity), 0)
+	    FROM reservation
+	    WHERE res_id = #{resId}
+	      AND status IN ('WAI','APP')
+	      <if test="excludeRevId != null">
+	        AND rev_id != #{excludeRevId}  <!-- 수정(update) 시 자기 자신은 제외 -->
+	      </if>
+	      AND start_dt <![CDATA[<]]> TO_TIMESTAMP(#{endDt}, 'YYYY-MM-DD"T"HH24:MI')
+	      AND end_dt   <![CDATA[>]]> TO_TIMESTAMP(#{startDt}, 'YYYY-MM-DD"T"HH24:MI')
+	</select>
 </mapper>

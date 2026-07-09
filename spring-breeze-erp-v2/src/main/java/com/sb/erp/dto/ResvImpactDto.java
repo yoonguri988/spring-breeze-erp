@@ -14,5 +14,6 @@ public class ResvImpactDto {
     private Long resId;
     private String resName;
     private String status;
-    private String reqDate;
+    private String startDt;
+    private String endDt;
 }
