@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.EvalPeriodMapper;
@@ -14,6 +15,7 @@ import com.sb.erp.util.SecurityUtil;
 @Service
 public class EvalPeriodServiceImpl implements EvalPeriodService  {
 	@Autowired EvalPeriodMapper dao;
+	@Autowired @Lazy EvalReportService evalReportService;
 
 	// ─── 회차 조회 ────────────────────────────────────
 	@Override
@@ -74,14 +76,25 @@ public class EvalPeriodServiceImpl implements EvalPeriodService  {
 
 	@Override
 	public int reportPeriod(int periodId) {
-		// 회차 소유 확인
-		EvalPeriodDto period = selectByPeriodId(periodId);
-		if(period == null) { return -1; }
-		
-		// 현재 상태 확인
-		if (!"CLOSED".equals(period.getPeriodStatus())) { return -2; }
-		
-		return dao.updateStatus(periodId, "REPORTED", SecurityUtil.getCurrentComId());
+		 // 회차 소유 확인
+	    EvalPeriodDto period = selectByPeriodId(periodId);
+	    if (period == null) { return -1; }
+
+	    // 현재 상태 확인 (CLOSED에서만 REPORTED로 전환 가능)
+	    if (!"CLOSED".equals(period.getPeriodStatus())) { return -2; }
+
+	    // 상태 전환
+	    int result = dao.updateStatus(periodId, "REPORTED", SecurityUtil.getCurrentComId());
+	    if (result != 1) { return result; }
+
+	    // 자동 리포트 생성 (실패해도 상태 전환은 유지 - 관리자가 수동 재생성 가능)
+	    try {
+	        evalReportService.generateReports(periodId);
+	    } catch (Exception e) {
+	        // 로그만 남기고 진행 (수동 재생성 UI 있음)
+	        System.err.println("[EvalPeriod] 자동 리포트 생성 실패 periodId=" + periodId + ", err=" + e.getMessage());
+	    }
+	    return 1;
 	}
 	
 	

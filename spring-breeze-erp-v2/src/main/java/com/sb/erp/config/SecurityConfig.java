@@ -27,16 +27,14 @@ public class SecurityConfig {
 						"/auth/resetPass", "/auth/forgotResetPass").permitAll()
 					// ─── 로그인만 하면 접근 가능 ───────────
 					.requestMatchers("/auth/updatePass", "/", "/emp/list", 
-					"/emp/detail", "/emp/edit", "/emp/editPass",
-					"/com/**", "/dept/**").authenticated()
+					"/emp/detail", "/emp/edit", "/emp/editPass", "/com/**", "/dept/**", 
+					"/eval/report/my", "/eval/report/detail").authenticated()
 					// ─── ROOT 전용 ────────────────────────
 				    .requestMatchers("/root/**").hasRole("ROOT")
 				    // ─── ADMIN 이상 ──────────────────
-				    .requestMatchers("/admin/**").hasAnyRole("ROOT", "ADMIN")
-					// ─── 인사 관리 (ADMIN 전용) ────────────────
-				    .requestMatchers("/emp/add", "/emp/resetPass",
-							"/emp/checkEmail", "/emp/checkMobile",
-							"/emp/checkEmpNo", "/perm/**", "/pos/**", "/eval/**").hasRole("ADMIN")
+				    .requestMatchers("/admin/**", "/emp/add", "/emp/resetPass",
+							"/emp/checkEmail", "/emp/checkMobile", "/emp/checkEmpNo", 
+							"/perm/**", "/pos/**", "/eval/**").hasAnyRole("ROOT", "ADMIN")
 				    // ─── 그 외 ────────────────
 				    .anyRequest().permitAll()
 				)

@@ -50,23 +50,41 @@
 					</a>
 
 					<!-- 일반 사용자: 사원 관리 조회까지 -->
-					<a class="sb-nav__item" data-page="employees" data-tip="사원 관리" th:href="@{/emp/list}">
-						<i class="bi bi-people"></i><span
+					<a class="sb-nav__item" data-page="employees" data-tip="사원 관리"
+						th:href="@{/emp/list}"> <i class="bi bi-people"></i><span
 						class="sb-nav__label">사원 관리</span>
 					</a>
 					<!-- 관리자 : 직급/권한/인사 평가 관리 -->
-					<a class="sb-nav__item" data-page="position" data-tip="직급 관리" th:if="${isAdmin}" th:href="@{/pos/list}">
+					<a class="sb-nav__item" data-page="position" data-tip="직급 관리"
+						th:if="${isAdmin}" th:href="@{/pos/list}">
 						<i class="bi bi-briefcase"></i>
-						<span class="sb-nav__label">직급 관리</span>
+							<span class="sb-nav__label">직급 관리</span>
+						</a>
+						<a class="sb-nav__item" data-page="permissions" data-tip="권한 관리"
+						th:if="${isAdmin}" th:href="@{/perm/list}">
+							<i class="bi bi-shield-lock"></i>
+							<span class="sb-nav__label">권한 관리</span>
 					</a>
-					<a class="sb-nav__item" data-page="permissions" data-tip="권한 관리" th:if="${isAdmin}" th:href="@{/perm/list}">
-						<i class="bi bi-shield-lock"></i>
-						<span class="sb-nav__label">권한 관리</span>
-					</a>
-					<a class="sb-nav__item" data-page="evaluation" data-tip="인사 평가 관리" th:if="${isAdmin}" th:href="@{/eval/period/list}" >
-						<i class="bi bi-clipboard-check"></i>
-						<span class="sb-nav__label">인사 평가</span>
-					</a>
+					<div class="sb-nav__group">
+						<button type="button" class="sb-nav__item sb-nav__toggle collapsed" 
+						data-bs-toggle="collapse" data-bs-target="#navEvalSub"
+							aria-expanded="false" aria-controls="navEvalSub" data-tip="인사평가">
+							<i class="bi bi-clipboard-check"></i><span class="sb-nav__label">인사 평가</span>
+							<i class="bi bi-chevron-down sb-nav__caret sb-nav__label"></i>
+						</button>
+						<div id="navEvalSub" class="collapse sb-nav__submenu">
+							<a class="sb-nav__item" th:if="${isAdmin}" th:href="@{/eval/period/list}" data-tip="회차 관리">
+								<i class="bi bi-calendar-event"></i> <span class="sb-nav__label">회차 관리</span>
+							</a>
+							<a class="sb-nav__item" th:href="@{/eval/list}" data-tip="평가 작성">
+								<i class="bi bi-pencil-square"></i> <span class="sb-nav__label">평가 작성</span>
+							</a>
+							<a class="sb-nav__item" th:href="@{/eval/report/my}"
+								data-tip="내 평가 리포트"> <i class="bi bi-file-earmark-bar-graph"></i>
+								<span class="sb-nav__label">내 평가 리포트</span>
+							</a>
+						</div>
+					</div>
 
 
 					<div class="sb-nav__section">업무</div>
@@ -123,5 +141,30 @@
 					</div>
 				</div>
 			</th:block>
+
+			<!-- 메뉴 자동 펼침 -->
+			<script>
+				(function() {
+					var path = window.location.pathname;
+					if (path.indexOf('/eval/') === 0) {
+						var sub = document.getElementById('navEvalSub');
+						var btn = document
+								.querySelector('[data-bs-target="#navEvalSub"]');
+						if (sub)
+							sub.classList.add('show');
+						if (btn) {
+							btn.classList.remove('collapsed');
+							btn.setAttribute('aria-expanded', 'true');
+						}
+						// 현재 페이지 서브메뉴에 active 클래스 부여
+						document.querySelectorAll('#navEvalSub .sb-nav__item')
+								.forEach(function(a) {
+									var href = a.getAttribute('href');
+									if (href && path.indexOf(href) === 0)
+										a.classList.add('active');
+								});
+					}
+				})();
+			</script>
 </body>
 </html>
