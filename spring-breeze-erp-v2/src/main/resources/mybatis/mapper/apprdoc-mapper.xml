@@ -87,15 +87,17 @@
 		<result property="isImportant" column="is_important"/>
 		<result property="createdAt" column="created_at"/>
 		<result property="empName" column="emp_name"/>
+		<result property="linStatus" column="lin_status"/>
 	</resultMap>
 
 	<!-- 대시보드용 통계 -->
 	<select id="selectDocCnt" parameterType="ApprDocDto" resultType="map">
 		select
 			count(distinct case when d.emp_id = #{empId} or l.emp_id = #{empId} then d.doc_id end) as "TOTALCNT",
-			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'ING' then d.doc_id end) as "WAICNT",
 			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'APP' then d.doc_id end) as "APPCNT",
-			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'REJ' then d.doc_id end) as "REJCNT"
+			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'REJ' then d.doc_id end) as "REJCNT",
+			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'ING' then d.doc_id end) as "INGCNT",
+			count(distinct case when l.emp_id = #{empId} and d.doc_status = 'ING' and l.lin_status = 'WAI' then d.doc_id end) as "MYCNT"
 		from
 			appr_doc d
 		left join
@@ -104,7 +106,8 @@
 			d.emp_id = #{empId} or l.emp_id = #{empId}
 	</select>
 	
-	<!-- 내가 결재했던 모든 문서 조회 -->
+	<!-- 모든 문서 조회 -->
+	<!-- 모든 문서 조회 -->
 	<select id="selectMyHistoryDocs" parameterType="ApprDocDto" resultMap="apprDocResultMap">
 		select distinct
 			d.doc_id,
@@ -113,14 +116,23 @@
 			d.doc_status,
 			d.is_important,
 			d.created_at,
-			(select emp_name from employee where emp_id = d.emp_id) as emp_name
+			(select
+				emp_name
+			 from
+			 	employee
+			 where
+			 	 emp_id = d.emp_id) as emp_name,
+			(select
+				 lin_status
+			 from
+			 	 appr_line
+			 where
+			 	doc_id = d.doc_id and emp_id = #{empId}) as lin_status
 		from
 			appr_doc d
-		left join
-			appr_line l on d.doc_id = l.doc_id
 		where
-			d.emp_id = #{empId}
-			or (l.emp_id = #{empId} and l.lin_status in ('APP', 'REJ', 'WAI'))
+			(d.emp_id = #{empId}
+			or exists (select 1 from appr_line where doc_id = d.doc_id and emp_id = #{empId}))
 			<if test="searchStatus != null and searchStatus != ''">
 				and d.doc_status = #{searchStatus}
 			</if>
@@ -252,5 +264,20 @@
 			doc_id = #{docId}
 	</select>
 	
+	<!-- 낙관적 락 검증용 값 가져오기 -->
+	<select id="getRevision" parameterType="int" resultType="int">
+		select doc_revision from appr_doc where doc_id = #{docId}
+	</select>
+	
+	<!-- 검증용 쿼리문 -->
+	<update id="chkDocRevision" parameterType="ApprDocDto">
+		update
+			appr_doc
+		set
+			doc_revision = doc_revision + 1
+		where
+			doc_id = #{docId}
+			and doc_revision = #{docRevision}
+	</update>
 	
 </mapper>

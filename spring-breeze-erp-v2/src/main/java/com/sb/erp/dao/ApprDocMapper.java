@@ -33,4 +33,7 @@ public interface ApprDocMapper {
 	public int selectMyHistoryDocsCnt(ApprDocDto dto);
 	public int selectMyTodoDocsCnt(ApprDocDto dto);
 	
+	// 동시성 검증용
+	public int getRevision(int docId);
+	public int chkDocRevision(ApprDocDto dto);
 }

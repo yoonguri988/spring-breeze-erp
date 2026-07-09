@@ -1,5 +1,6 @@
 package com.sb.erp.service;
 
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
@@ -68,12 +69,6 @@ public class ApprDocServiceImpl implements ApprDocService{
 		return dao.approversByEmpId(dto);
 	}
 
-	// 결재 문서 상태 수정
-	@Override
-	public int updateDocStatus(ApprDocDto dto) {
-		return dao.updateDocStatus(dto);
-	}
-
 	// 결재선 insert
 	@Override
 	@Transactional
@@ -121,7 +116,71 @@ public class ApprDocServiceImpl implements ApprDocService{
 	public List<ApprLineDto> selectLinesByDocId(int docId) {
 		return lineDao.selectLinesByDocId(docId);
 	}
-	
-	
-	
+
+	// 결재 처리 로직
+	@Override
+	@Transactional
+	public void processLine(int docId, int empId, String action) {
+		
+		// 검증
+		ApprDocDto checkDoc = new ApprDocDto();
+		checkDoc.setDocRevision(dao.getRevision(docId));
+		checkDoc.setDocId(docId);
+		
+		// 테스트용 강제 오류내기
+		//checkDoc.setDocRevision(22);
+		
+		int check = dao.chkDocRevision(checkDoc);
+		if(check == 0) {
+			throw new ConcurrentModificationException("이미 결재가 진행되었거나 수정된 문서입니다");
+		}
+		
+		// 결재선 업데이트
+		ApprLineDto myLine = new ApprLineDto();
+		myLine.setDocId(docId);
+		myLine.setEmpId(empId);
+		myLine.setLinStatus(action);
+		lineDao.updateLineStatus(myLine);
+		
+		// 반려했을시 처리
+		if("REJ".equals(action)) {
+			ApprDocDto doc = new ApprDocDto();
+			doc.setDocId(docId);
+			doc.setDocStatus("REJ");
+			dao.updateDocStatus(doc);
+			return;
+		}
+		
+		// 승인했을시 다음 순서 있는지 확인
+		// 전체 결재선 라인 가져옴
+		List<ApprLineDto> lines = lineDao.selectLinesByDocId(docId);
+		// 현재 결재한 사용자 정보
+		ApprLineDto current = lines.stream()
+				// 결재선 데이터의 empId와 로그인한 사용자의 empId가 일치하는 데이터만 남김
+				.filter(l -> l.getEmpId() == empId)
+				// 위에서 남긴 데이터의 첫번째 데이터를 가져옴
+				.findFirst().orElseThrow();
+		
+		// 다음 결재자 정보
+		ApprLineDto next = lines.stream()
+				// 결재 순서가 내 순서보다 1 더 큰 데이터를 가져옴 
+				.filter(l -> l.getLinOrder() == current.getLinOrder() + 1)
+				// 조건에 맞는 결재자 정보 가져옴 / 없으면 null 담기
+				.findFirst().orElse(null);
+		
+		// 다음순서 있는지 검증
+		if(next != null) { // 있는경우
+			ApprLineDto nextLine = new ApprLineDto();
+			nextLine.setDocId(docId);
+			nextLine.setEmpId(next.getEmpId());
+			nextLine.setLinStatus("WAI");
+			lineDao.updateLineStatus(nextLine);
+		}
+		else { // 없는경우, 문서 최종 승인
+			ApprDocDto doc = new ApprDocDto();
+			doc.setDocId(docId);
+			doc.setDocStatus("APP");
+			dao.updateDocStatus(doc);
+		}
+	}
 }

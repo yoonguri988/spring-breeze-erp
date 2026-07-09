@@ -16,7 +16,7 @@ public interface ApprDocService {
 	public int insertDoc(ApprDocDto dto);
 	public ApprFormDto getForm(Map<String,Object> map);
 	
-	// 문서 조회 파트
+	// 문서 조회,처리 파트
 	public Map<String, Object> selectDocCnt(ApprDocDto dto);
 	public List<Map<String, Object>> selectMyHistoryDocs(ApprDocDto dto);
 	public List<Map<String, Object>> selectMyTodoDocs(ApprDocDto dto);
@@ -24,9 +24,9 @@ public interface ApprDocService {
 	
 	// 결재선 관련 파트
 	public List<ApprLineDto> approversByEmpId(ApprDocDto dto);
-	public int updateDocStatus(ApprDocDto dto);
 	public boolean insertLines(ApprDocDto dto);
 	public List<ApprLineDto> selectLinesByDocId(int docId);
+	public void processLine(int docId, int empId, String action);
 	
 	// 페이징
 	public int selectMyHistoryDocsCnt(ApprDocDto dto);

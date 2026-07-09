@@ -147,6 +147,7 @@ public class ApprDocController {
 
 	//////////////////////////// 문서 승인,반려 처리 ///////////////////////////////
 	
+	// 상세보기 폼
 	@GetMapping("/detail_doc")
 	public String detailDoc(@AuthenticationPrincipal CustomUserDetails userDetails,
 						    @RequestParam("docId") int docId,
@@ -168,6 +169,22 @@ public class ApprDocController {
 		model.addAttribute("canProcess", canProcess);
 		
 		return "appr/detail_doc";
+	}
+	
+	// 승인 처리
+	@PostMapping("/detail_doc/app")
+	public String detailDoc_app(@RequestParam("docId") int docId,
+				@AuthenticationPrincipal CustomUserDetails userDetails) {
+		service.processLine(docId, userDetails.getUser().getEmpId(), "APP");
+		return "redirect:/appr/detail_doc?docId=" + docId;
+	}
+	
+	// 반려 처리
+	@PostMapping("/detail_doc/rej")
+	public String detailDoc_rej(@RequestParam("docId") int docId,
+				@AuthenticationPrincipal CustomUserDetails userDetails) {
+		service.processLine(docId, userDetails.getUser().getEmpId(), "REJ");
+		return "redirect:/appr/detail_doc?docId=" + docId;
 	}
 	
 	//////////////////////////// 문서 승인,반려 처리 ///////////////////////////////

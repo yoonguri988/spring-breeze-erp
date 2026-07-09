@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/layout.html}">
 <head>
-	<title>결재 양식 관리</title>
+	<title>결재 문서 기안</title>
 	<link rel="stylesheet" th:href="@{/css/summernote-lite.min.css}"/>
 </head>
 <body>
@@ -13,7 +13,7 @@
 	 <div class="sb-page-head">
 	 	<div class="sb-page-head__txt">
 	 		<div class="sb-breadcrumb">
-		 		<a th:href="@{/appr/list_form}">전자결재</a>
+		 		<a th:href="@{/appr/list_doc}">전자결재</a>
 		 		<i class="bi bi-chevron-right"></i>
 		 		<span>결재 기안</span>
 	 		</div>
@@ -471,6 +471,18 @@
 		
 		function renderEmpList(emps){
 			empBox.innerHTML = "";
+			
+			// 사원 데이터가 없을때 처리
+			if(!emps || emps.length === 0){
+				empBox.innerHTML = `
+					<div class="text-muted text-center py-4 small">
+						<i class="bi bi-person-x fs-4 d-block mb-1"></i>
+						해당 부서에 소속된 사원이 없습니다.
+					</div>
+				`;
+				return;
+			}
+			
 			emps.forEach(emp => {
 				const already = slots.some(s => s && s.empId === emp.empId);
 				const div = document.createElement("div");

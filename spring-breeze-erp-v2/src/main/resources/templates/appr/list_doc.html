@@ -55,10 +55,10 @@
 				<i class="bi bi-hourglass-split fs-3"></i>
 				</div>
 				<div>
-					<div class="text-muted small fw-medium mb-1">대기</div>
+					<div class="text-muted small fw-medium mb-1">진행 중</div>
 					<div class="fs-4 fw-bold text-dark">
 						<span class="tnum"
-							  th:text="${docCnts != null ? docCnts.WAICNT : 0}">0</span>
+							  th:text="${docCnts != null ? docCnts.INGCNT : 0}">0</span>
 						<span class="fs-6 fw-normal text-secondary">건</span>
 					</div>
 				</div>
@@ -72,7 +72,7 @@
 				<i class="bi bi-check-lg fs-3"></i>
 				</div>
 				<div>
-					<div class="text-muted small fw-medium mb-1">승인</div>
+					<div class="text-muted small fw-medium mb-1">최종 승인</div>
 					<div class="fs-4 fw-bold text-dark">
 						<span class="tnum"
 						      th:text="${docCnts != null ? docCnts.APPCNT : 0}">0</span>
@@ -128,17 +128,18 @@
 		<a th:href="@{/appr/list_doc(tab='history', keyword=${keyword}, status=${status})}"
 		   class="sb-tab" th:classappend="${activeTab == 'history'} ? 'active'">
 		   <i class="bi bi-archive-fill"></i> 모든 문서
-		   <span class="sb-nav__badge bg-secondary text-white" th:text="${docCnts.TOTALCNT}">0</span>
 		</a>
 		<a th:href="@{/appr/list_doc(tab='todo', keyword=${keyword}, status=${status})}"
 		   class="sb-tab" th:classappend="${activeTab == 'todo'} ? 'active'">
 		   <i class="bi bi-file-earmark-check-fill"></i> 결재해야 할 모든 문서
-		   <span class="sb-nav__badge" th:text="${myTodoCnt}">0</span>
+		   <span th:if="${docCnts != null ? docCnts.MYCNT > 0 : false}"
+		   		 class="sb-nav__badge"
+		   		 th:text="${docCnts.MYCNT}">0</span>
 		</a>
 	</div>
 	
 
-	<!-- 내가 했던 문서 -->
+	<!-- 모든 문서 -->
 	<div id="tab-my-history" class="sb-tab-panel"
 		 th:classappend="${activeTab == 'history' || activeTab == null} ? 'active'">
 		<div class="sb-card">
@@ -171,13 +172,22 @@
 							<td>
 								<span th:if="${doc.docStatus == 'APP'}"
 									  class="sb-badge sb-badge--green">
-									  <span class="pip"></span>승인</span>
+									  <span class="pip"></span>최종 승인</span>
 								<span th:if="${doc.docStatus == 'REJ'}"
 									  class="sb-badge sb-badge--red">
 									  <span class="pip"></span>반려</span>
-								<span th:if="${doc.docStatus == 'ING'}"
+								<span th:if="${doc.docStatus == 'ING' and doc.linStatus == 'WAI'}"
 									  class="sb-badge sb-badge--amber">
-									  <span class="pip"></span>진행</span>
+									  <span class="pip"></span>결재 대기</span>
+								<span th:if="${doc.docStatus == 'ING' and doc.linStatus == 'NOT'}"
+									  class="sb-badge sb-badge--gray">
+									  <span class="pip"></span>순서 대기</span>
+								<span th:if="${doc.docStatus == 'ING' and doc.linStatus == 'APP'}"
+									  class="sb-badge sb-badge--blue">
+									  <span class="pip"></span>결재 완료</span>
+								<span th:if="${doc.docStatus == 'ING' and doc.linStatus == null}"
+									  class="sb-badge sb-badge--blue">
+									  <span class="pip"></span>진행 중</span>
 							</td>
 							<td style="text-align: center;">
 								<button type="button" class="btn btn-ghost btn-sm"
@@ -192,7 +202,7 @@
 							<td colspan="6">
 								<div class="sb-empty">
 									<i class="bi bi-folder-x"></i>
-									<p>여태까지 처리하거나 기안한 결재 문서가 없습니다.</p>
+									<p>조회된 결재 문서가 없습니다.</p>
 								</div>
 							</td>
 						</tr>
@@ -235,7 +245,7 @@
 									<span class="pip"></span>결재 대기
 								</span>
 							</td>
-							<td>
+							<td style="text-align: center;">
 								<button type="button" class="btn btn-ghost btn-sm"
 										th:onclick="|location.href='@{/appr/detail_doc(docId=${doc.docId})}'|">
 									<i class="bi bi-search"></i> 상세보기

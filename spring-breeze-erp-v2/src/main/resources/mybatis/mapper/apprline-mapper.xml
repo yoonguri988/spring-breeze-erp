@@ -26,7 +26,7 @@
 			appr_line
 		set
 			lin_status = #{linStatus},
-			lin_approved = #{linApproved}
+			lin_approved = sysdate
 		where
 			doc_id = #{docId}
 			and emp_id = #{empId}
@@ -56,6 +56,7 @@
 			l.emp_id,
 			l.lin_order,
 			l.lin_status,
+			to_char(l.lin_approved, 'YY-MM-DD HH24:MI') as lin_approved,
 			e.emp_name,
 			p.pos_name
 		from
