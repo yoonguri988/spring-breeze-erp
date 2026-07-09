@@ -45,9 +45,26 @@
 
     <!-- 자원 상세 -->
     <select id="selectResourceDetail" parameterType="int" resultType="ResDto">
-        SELECT *
-        FROM COM_RESOURCE
-        WHERE res_id = #{resId}
+        SELECT 
+          R.RES_ID, R.COM_ID, R.RES_CODE, R.RES_NAME, R.RES_TYPE, 
+		  R.QUANTITY, R.LOCATION, R.CAPACITY, R.RES_STATUS, 
+		  E.EMP_ID AS managerEmpId, E.EMP_NAME AS managerEmpName, E.EMP_NO AS managerEmpNo,
+		  EP.POS_ID AS managerPosId, EP.POS_NAME AS managerPosName,  
+		  R.REMARK, 
+		  R.CREATED_AT, R.UPDATED_AT,
+		  COUNT(RV.REV_ID) AS RESV_COUNT
+        FROM COM_RESOURCE R
+        LEFT JOIN RESERVATION RV ON R.RES_ID = RV.RES_ID
+        LEFT JOIN EMPLOYEE E ON R.MANAGER_EMP_ID = E.EMP_ID
+        LEFT JOIN EMP_POSITION EP ON EP.POS_ID = E.POS_ID
+        WHERE R.RES_ID = #{resId}
+		GROUP BY R.RES_ID, R.COM_ID, R.RES_CODE, R.RES_NAME, R.RES_TYPE, 
+		  R.QUANTITY, R.LOCATION, R.CAPACITY, R.RES_STATUS, 
+		  E.EMP_ID, E.EMP_NAME, E.EMP_NO,
+		  EP.POS_ID, EP.POS_NAME,
+		  R.REMARK, 
+		  R.CREATED_AT, R.UPDATED_AT
+        ORDER BY R.res_id DESC
     </select>
 
     <!-- 자원 등록 -->
@@ -95,6 +112,7 @@
 		SELECT *
 		FROM COM_RESOURCE CR
 		WHERE CR.COM_ID = #{comId}
-		AND CR.RES_STATUS = 'AVAILABLE' -- 사용가능 
+		AND CR.RES_STATUS = 'AVAILABLE' -- 사용가능
+		AND CR.QUANTITY > 0 
 	</select>
 </mapper>

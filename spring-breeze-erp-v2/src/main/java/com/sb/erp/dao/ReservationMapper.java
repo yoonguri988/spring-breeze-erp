@@ -29,4 +29,7 @@ public interface ReservationMapper {
 
 	int updateApprove(ResvDto resvDto);
 	int updateReject(ResvDto ResvDto);
+
+	// 같은 기간에 이미 예약된 수량 합계 조회
+	int selectReservedQuantity(ResvSearchDto dto);
 }

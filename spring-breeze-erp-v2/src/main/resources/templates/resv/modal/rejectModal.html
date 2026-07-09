@@ -4,7 +4,7 @@
   <div th:fragment="rejectModal" class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form th:action="@{/resv/appr/reject}" method="post" id="rejectForm" novalidate>
+        <form th:action="@{/admin/resv/reject}" method="post" id="rejectForm" novalidate>
           <div class="modal-header">
             <h5 class="modal-title">예약 반려</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -18,8 +18,10 @@
             </span>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">취소</button>
-            <button type="submit" class="btn btn-danger">반려 처리</button>
+            <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">닫기</button>
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-x-lg"></i> 반려 처리
+            </button>
           </div>
         </form>
       </div>
@@ -37,8 +39,8 @@
       const rejectMsg    = document.getElementById('rejectReasonMsg');
       const rejectRevId  = document.getElementById('rejectRevId');
 
-      // 반려 버튼(class="btn-reject" data-rev-id="...") 클릭 시 모달의 hidden revId 채우기
-      document.querySelectorAll('.btn-reject').forEach(function (btn) {
+      // 반려 버튼(class="btn-reject-resv" data-rev-id="...") 클릭 시 모달의 hidden revId 채우기
+      document.querySelectorAll('.btn-reject-resv').forEach(function (btn) {
         btn.addEventListener('click', function () {
           rejectRevId.value = this.dataset.revId;
         });

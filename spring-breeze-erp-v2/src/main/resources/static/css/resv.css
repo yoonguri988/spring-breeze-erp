@@ -66,3 +66,19 @@
   color: var(--sb-red);
 }
 .sb-field-msg i { flex: 0 0 auto; }
+
+/* ==========================================================================
+   resv_appr — 관리자 승인/반려 모달
+   ========================================================================== */
+
+/* [신규] 승인 확인 모달용 sb-confirm-box 변형
+   - emp.css 의 기본 .sb-confirm-box 는 danger(빨강) 톤 고정
+   - 승인은 위험 액션이 아니므로 accent(파랑) 톤으로 오버라이드
+*/
+.sb-confirm-box--accent {
+  background: var(--sb-accent-soft);
+  border-color: var(--sb-accent-soft-2);
+}
+.sb-confirm-box--accent .sb-confirm-box__icon {
+  color: var(--sb-accent);
+}

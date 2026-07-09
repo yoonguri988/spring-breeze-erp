@@ -28,4 +28,7 @@ public interface ReservationService {
     
     int updateApprove(ResvDto resvDto);
     int updateReject(ResvDto resvDto);
+    
+    //
+	int getReservedQuantity(ResvSearchDto search);
 }

@@ -10,8 +10,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class ResvSearchDto {
-	private int comId;
+	private Integer comId;
 	private Integer empId;
+	private Integer resId;
+	private Integer excludeRevId;
 	
 	private String status;
 	private String resType;

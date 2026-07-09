@@ -28,13 +28,13 @@ public class SecurityConfig {
 					// ─── ROOT 전용 ────────────────────────
 				    .requestMatchers("/root/**").hasAuthority("ROOT")
 				    // ─── ADMIN 이상 ──────────────────
-				    .requestMatchers("/admin/**").hasAnyAuthority("ROOT", "ROLE_ADMIN")
+//				    .requestMatchers("/admin/**").hasAnyAuthority("ROOT", "ROLE_ADMIN")
 					// ─── 사원/직급/권한 관리 (ADMIN 전용) ────────────────
 				    .requestMatchers("/emp/add", "/emp/resetPass",
 							"/emp/checkEmail", "/emp/checkMobile",
 							"/emp/checkEmpNo", "/perm/**", "/pos/**",
 							"/dept/transfer/pending","/dept/transfer/list","/dept/transfer/log",
-							"/resv/appr/**"
+							"/admin/**"
 					).hasRole("ADMIN")
 				    // ─── 로그인만 하면 접근 가능 ───────────
 				    .requestMatchers("/auth/updatePass", "/", "/emp/list", 
