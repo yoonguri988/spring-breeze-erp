@@ -3,69 +3,75 @@ package com.sb.erp.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.sb.erp.dto.ReservationDto;
+import com.sb.erp.dto.ResvDto;
 import com.sb.erp.dto.ResvSearchDto;
 import com.sb.erp.dto.StatsResvDto;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.ReservationService;
 import com.sb.erp.util.PagingUtil;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("/admin/approval")
+@RequestMapping("/resv/appr")
 public class ResvApprController {
-    @Autowired private ReservationService resvService;
+    @Autowired private ReservationService service;
 
     @RequestMapping("/list")
-    public String list(@RequestParam(value = "status", required = false) String status,
-                       @RequestParam(value = "page", required = false, defaultValue = "1") int curPage,
-                       HttpSession session,
-                       Model model) {
-        ResvSearchDto search = new ResvSearchDto();
-        search.setComId(getLoginComId(session));
-        search.setStatus(status);
-        search.setPstartno(curPage);
+    public String list(ResvSearchDto search, Model model, Authentication auth) {
+    	// 현재 로그인 사용자 정보
+    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+    	search.setComId(user.getUser().getComId());
 
-        int totalCount = resvService.getReservationCount(search);
-        PagingUtil paging = new PagingUtil(totalCount, curPage);
-        List<ReservationDto> reservationList = resvService.getReservationList(search);
-        StatsResvDto stats = resvService.countByStats(search);
+    	if (search.getStartDt() == null || search.getStartDt().isBlank()) {
+    		search.setStartDt(java.time.LocalDate.now().minusDays(30).toString());
+        }
+        if (search.getEndDt() == null || search.getEndDt().isBlank()) {
+        	search.setEndDt(java.time.LocalDate.now().toString());
+        }
+    	
+        int listtotal = service.getResvCount(search);
+        PagingUtil paging = new PagingUtil(listtotal, search.getPstartno());
+        List<ResvDto> list = service.getResvList(search);
+        StatsResvDto stats = service.countByStats(search);
 
-        model.addAttribute("reservationList", reservationList);
-        model.addAttribute("status", status);
+        model.addAttribute("list", list);
+        model.addAttribute("search", search);
         model.addAttribute("paging", paging);
+        
         model.addAttribute("totalCount", stats.getResvTotal());
         model.addAttribute("waitCount", stats.getWaiTotal());
         model.addAttribute("approveCount", stats.getAppTotal());
         model.addAttribute("rejectCount", stats.getRejTotal());
 
-        return "resv/approvalList";
+        return "resv/appr/list";
     }
 
-    @RequestMapping("/approve")
-    public String approve(@RequestParam("revId") int revId) {
-        resvService.updateStatus(revId, "APP", null);
-        return "redirect:/admin/approval/list";
+    @PostMapping("/approve")
+    public String approve(ResvDto resvDto, Authentication auth) {
+    	// 현재 로그인 사용자 정보
+    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+    	resvDto.setApprovedEmpId(user.getUser().getEmpId());
+    	
+    	int result = service.updateApprove(resvDto);
+        return "redirect:/resv/appr/list";
     }
 
-    @RequestMapping("/reject")
-    public String reject(@RequestParam("revId") int revId,
-                         @RequestParam("rejectReason") String rejectReason) {
-        if (rejectReason == null || rejectReason.trim().isEmpty()) {
-            return "redirect:/admin/approval/list?error=noReason";
-        }
+    @PostMapping("/reject")
+    public String reject(ResvDto resvDto, Authentication auth) {
+    	// 현재 로그인 사용자 정보
+    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+    	resvDto.setApprovedEmpId(user.getUser().getEmpId());
 
-        resvService.updateStatus(revId, "REJ", rejectReason);
-        return "redirect:/admin/approval/list";
-    }
-
-    private int getLoginComId(HttpSession session) {
-        Object comId = session.getAttribute("comId");
-        return comId instanceof Integer ? (Integer) comId : 1;
+        int result = service.updateReject(resvDto);
+        return "redirect:/resv/appr/list";
     }
 }

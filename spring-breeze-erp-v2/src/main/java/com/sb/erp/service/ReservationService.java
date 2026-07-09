@@ -2,29 +2,30 @@ package com.sb.erp.service;
 
 import java.util.List;
 
-import com.sb.erp.dto.ReservationDto;
+import com.sb.erp.dto.ResvDto;
 import com.sb.erp.dto.ResvSearchDto;
 import com.sb.erp.dto.StatsResvDto;
 
 public interface ReservationService {
+	// 자원 예약 조회
+    List<ResvDto> getResvList(ResvSearchDto search);
+    // 자원 예약 전체 갯수
+    int getResvCount(ResvSearchDto search);
 
-    List<ReservationDto> getReservationList(ResvSearchDto search);
+    ResvDto getResvDetail(int revId);
 
-    int getReservationCount(ResvSearchDto search);
+    int insert(ResvDto ResvDto);
 
-    ReservationDto getReservationDetail(int revId);
+    int update(ResvDto ResvDto);
 
-    void insertReservation(ReservationDto reservationDto);
-
-    void updateReservation(ReservationDto reservationDto);
-
-    void deleteReservation(int revId);
-
-    void updateStatus(int revId, String status, String remark);
+    int delete(int revId);
 
     // 통계 (전체/승인/대기/반려)
     StatsResvDto countByStats(ResvSearchDto search);
 
     // 예약 관리에서 예약 된 자원이 있는지 확인
     int countReservationsByResourceId(int resId);
+    
+    int updateApprove(ResvDto resvDto);
+    int updateReject(ResvDto resvDto);
 }
