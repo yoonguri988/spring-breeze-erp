@@ -54,13 +54,12 @@ public class EmailApi {
 					+ content 
 					+ "</p>"
 					+ "<div style='margin-top:30px; text-align:center;'>"
-					+ "<a href='https://d2big.com' style='display:inline-block; background-color:#005bac; color:#fff; padding:12px 24px; border-radius:4px; text-decoration:none; font-size:14px;'>홈페이지 바로가기</a>"
+					+ "<a href='http://localhost:8282/' style='display:inline-block; background-color:#005bac; color:#fff; padding:12px 24px; border-radius:4px; text-decoration:none; font-size:14px;'>홈페이지 바로가기</a>"
 					+ "</div>"
 					+ "<hr style='margin:40px 0; border:none; border-top:1px solid #eee;'>"
 					+ "<p style='font-size:12px; color:#888; text-align:center;'>이 메일은 자동 발송된 안내 메일입니다.<br>문의: <a href='mailto:mdfy0308@gmail.com' style='color:#005bac; text-decoration:none;'>mdfy0308@naver.com</a></p>"
 					+ "</div>"
 					, "text/html; charset=UTF-8");
-
 			Transport.send(message);
 			System.out.println("....... successfully .......");
 		} catch (Exception e) {

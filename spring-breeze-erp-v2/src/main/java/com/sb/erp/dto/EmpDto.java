@@ -30,6 +30,8 @@ public class EmpDto {
     // ─── 조인 조회용 표시 필드 ──────────────────────────────
     private String posName;    // 직급명
     private String deptName;   // 부서명
+	  public String ComName;	// 회사명
+	
 	
 }
 
