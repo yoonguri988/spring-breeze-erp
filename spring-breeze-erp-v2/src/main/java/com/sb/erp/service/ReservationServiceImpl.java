@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.ReservationMapper;
-import com.sb.erp.dto.ReservationDto;
+import com.sb.erp.dto.ResvDto;
 import com.sb.erp.dto.ResvSearchDto;
 import com.sb.erp.dto.StatsResvDto;
 
@@ -17,49 +17,35 @@ public class ReservationServiceImpl implements ReservationService {
     private ReservationMapper dao;
 
     @Override
-    public List<ReservationDto> getReservationList(ResvSearchDto search) {
+    public List<ResvDto> getResvList(ResvSearchDto search) {
         search.setPstartno((search.getPstartno()-1)*search.getOnepagelist());
-        List<ReservationDto> reservationList = dao.selectReservationList(search);
-        return reservationList;
+        List<ResvDto> list = dao.selectAll(search);
+        return list;
     }
 
     @Override
-    public int getReservationCount(ResvSearchDto search) {
-        int totalCount = dao.selectReservationCount(search);
-        return totalCount;
+    public int getResvCount(ResvSearchDto search) {
+        return dao.selectCount(search);
     }
 
     @Override
-    public ReservationDto getReservationDetail(int revId) {
-        ReservationDto reservationDto = dao.selectReservationDetail(revId);
-        return reservationDto;
+    public ResvDto getResvDetail(int revId) {
+        return dao.selectOneById(revId);
     }
 
     @Override
-    public void insertReservation(ReservationDto reservationDto) {
-    	dao.insertReservation(reservationDto);
+    public int insert(ResvDto ResvDto) {
+    	return dao.insert(ResvDto);
     }
 
     @Override
-    public void updateReservation(ReservationDto reservationDto) {
-        dao.updateReservation(reservationDto);
+    public int update(ResvDto ResvDto) {
+    	return dao.update(ResvDto);
     }
 
     @Override
-    public void deleteReservation(int revId) {
-        dao.deleteReservation(revId);
-    }
-
-    @Override
-    public void updateStatus(int revId, String status, String remark) {
-       
-        ReservationDto reservationDto = new ReservationDto();
-        reservationDto.setRevId(revId);
-        reservationDto.setStatus(status);
-        reservationDto.setRemark(remark);
-
-       
-        dao.updateStatus(reservationDto);
+    public int delete(int revId) {
+    	return dao.delete(revId);
     }
 
     @Override
@@ -71,4 +57,14 @@ public class ReservationServiceImpl implements ReservationService {
     public int countReservationsByResourceId(int resId) {
         return dao.countReservationsByResourceId(resId);
     }
+
+	@Override
+	public int updateApprove(ResvDto resvDto) {
+		return dao.updateApprove(resvDto);
+	}
+
+	@Override
+	public int updateReject(ResvDto resvDto) {
+		return dao.updateReject(resvDto);
+	}
 }
