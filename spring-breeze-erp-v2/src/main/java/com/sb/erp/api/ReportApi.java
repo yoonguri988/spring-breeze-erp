@@ -15,8 +15,6 @@ public class ReportApi {
 	@Autowired private OpenAiGpt openAiGpt;
 	@Autowired private GoogleDocsApi googleDocsApi;
 	
-	
-	
 	    // 역할별 템플릿 문서 ID (구글 docs에서 미리 만들어둔 문서)
 		// https://docs.google.com/document/d/1LtPrMMW0UqF6Dks-Fg_j3t9wJsRgseGp8yMC_XIvHko/edit?tab=t.0 팀장용
 		// https://docs.google.com/document/d/1YcvPLTg2601gLI-Ri0t3F3eOd34XqY-sQOU78UvDoQM/edit?tab=t.0 사원용
@@ -35,7 +33,7 @@ public class ReportApi {
        	
         //placeholder 치환
         Map<String, Object> values=new HashMap<>();
-        //공통 주간보고서용
+        
         values.put("{{projectName}}", dto.getProjectName());
         values.put("{{endDate}}", String.valueOf(dto.getEndDate()));
         values.put("{{totalTask}}", String.valueOf(dto.getTotalTask()+"개"));
@@ -74,8 +72,8 @@ public class ReportApi {
 	        Map<String, Object> values = new HashMap<>();
 	        values.put("{{empName}}", dto.getEmpName());
 	        values.put("{{totalTask}}", dto.getTotalTask() + "개");
-	        values.put("{{doneTaskCount}}", dto.getDoneTaskCount() + "개");       // 추가
-	        values.put("{{notDoneTaskCount}}", dto.getNotDoneTaskCount() + "개"); // 추가
+	        values.put("{{doneTaskCount}}", dto.getDoneTaskCount() + "개");       
+	        values.put("{{notDoneTaskCount}}", dto.getNotDoneTaskCount() + "개"); 
 	        values.put("{{completedThisWeek}}", dto.getCompletedThisWeek() + "개");
 	        values.put("{{delayTaskCount}}", dto.getDelayTaskCount() + "개");
 	        values.put("{{progressRate}}", dto.getProgressRate() + "%");
@@ -95,6 +93,6 @@ public class ReportApi {
 
 	        return pdfBytes;
 	    }
-	 //결과들
+	    //중첩 recod - Ai가 생성한 보고서 텍스트 5개의 항목을 담는 데이터 묶음(dto)
 		 public record ReportSections(String summary, String risks, String priorities, String recommendation, String techIssues) {}
 }
