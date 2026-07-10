@@ -33,4 +33,8 @@ public interface DeptMapper {
 
 	int countByDept(int deptId);
 
+	int softDelete(int deptId);
+
+	List<DeptDto> selectAllDeptsByComId(Integer comId);
+
 }

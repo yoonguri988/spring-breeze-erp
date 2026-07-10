@@ -8,45 +8,52 @@ import org.springframework.stereotype.Service;
 
 import com.sb.erp.dao.ResourceMapper;
 import com.sb.erp.dto.ResSearchDto;
-import com.sb.erp.dto.ResourceDto;
+import com.sb.erp.dto.ResDto;
 
 @Service
 public class ResourceServiceImpl implements ResourceService {
 
-    @Autowired
-    private ResourceMapper resourceDao;
+    @Autowired private ResourceMapper dao;
 
     @Override
-    public List<ResourceDto> getResourceList(ResSearchDto search) {
+    public List<ResDto> getResourceList(ResSearchDto search) {
     	search.setPstartno((search.getPstartno()-1)*search.getOnepagelist());
-        List<ResourceDto> resourceList = resourceDao.selectResourceList(search);
+        List<ResDto> resourceList = dao.selectResourceList(search);
         return resourceList;
     }
 
     @Override
     public int getResourceCount(ResSearchDto search) {
-        int totalCount = resourceDao.selectResourceCount(search);
-        return totalCount;
+        return dao.selectResourceCount(search);
     }
 
     @Override
-    public ResourceDto getResourceDetail(int resId) {
-        ResourceDto resourceDto = resourceDao.selectResourceDetail(resId);
-        return resourceDto;
+    public ResDto getResourceDetail(int resId) {
+        return dao.selectResourceDetail(resId);
     }
 
     @Override
-    public void insertResource(ResourceDto resourceDto) {
-        resourceDao.insertResource(resourceDto);
+    public int insertResource(ResDto resDto) {
+    	return dao.insertResource(resDto);
     }
 
     @Override
-    public void updateResource(ResourceDto resourceDto) {
-        resourceDao.updateResource(resourceDto);
+    public int updateResource(ResDto resDto) {
+    	return dao.updateResource(resDto);
     }
 
     @Override
-    public void deleteResource(int resId) {
-        resourceDao.deleteResource(resId);
+    public int deleteResource(int resId) {
+    	return dao.deleteResource(resId);
     }
+
+	@Override
+	public ResDto isDuplicateResCode(ResDto resDto) {
+		return dao.selectByResCode(resDto);
+	}
+
+	@Override
+	public List<ResDto> getResListForResv(ResSearchDto search) {
+		return dao.selectResListForResv(search);
+	}
 }

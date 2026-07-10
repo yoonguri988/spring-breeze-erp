@@ -8,12 +8,15 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.sb.erp.api.OpenAiGpt;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprFormSearchDto;
 import com.sb.erp.dto.CompanyDto;
@@ -22,12 +25,14 @@ import com.sb.erp.service.CompanyService;
 import com.sb.erp.util.PagingUtil;
 
 @Controller
+@RequestMapping("/appr")
 public class ApprFormController { 
 	@Autowired ApprFormService appr;
 	@Autowired CompanyService com;
+	@Autowired OpenAiGpt gpt;
 	
 	// 회사 검색 기능
-	@RequestMapping( value = "/searchCompany", method = RequestMethod.GET)
+	@GetMapping("/searchCompany")
 	@ResponseBody
 	public List<CompanyDto> searchCompany(@RequestParam("company") String company){
 		//return appr.searchCompany(company);
@@ -35,7 +40,7 @@ public class ApprFormController {
 	}
 	
 	// 양식 코드 중복 검사 기능
-	@RequestMapping( value = "/checkCode", method = RequestMethod.GET)
+	@GetMapping("/checkCode")
 	@ResponseBody
 	public Map<String,Object> checkCode(@RequestParam("code") String code,
 										@RequestParam("comId") String comId,
@@ -72,7 +77,7 @@ public class ApprFormController {
 	// 양식 리스트 입력한 값 찾기
 	// required = false : 필수 값이 아니라고 설정
     // defaultValue = "" : 값이 안 넘어오면 디폴트값 지정
-	@RequestMapping( value = "/appr/list_form", method = RequestMethod.GET)
+	@GetMapping("/list_form")
 	public String searchForms(ApprFormSearchDto search, Model model,
 							  @RequestParam( value = "page", defaultValue = "1") int page){
 		
@@ -104,23 +109,28 @@ public class ApprFormController {
 
 	
 	// 양식 작성 폼
-	@RequestMapping( value = "/appr/write_form", method = RequestMethod.GET)
+	@GetMapping("/write_form")
 	public String writeForm() {
 		return "appr/write_form";
 	}
 	
 	// 양식 작성 처리
-	@RequestMapping( value = "/appr/write_form", method = RequestMethod.POST)
-	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr) {
-		// 양식 작성 성공
-		if(appr.insertForm(dto) > 0) {
-			return "redirect:/appr/list_form";
+	@PostMapping("/write_form")
+	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr, Model model) {
+		try {
+			// 양식 작성 성공
+			if(appr.insertForm(dto) > 0) {
+				return "redirect:/appr/list_form";
+			}
+		} catch (IllegalArgumentException e) {
+			model.addAttribute("errorMsg", e.getMessage());
+			model.addAttribute("dto", dto);
 		}
 		return "appr/write_form";
 	}
 	
 	// 양식 상세보기
-	@RequestMapping( value = "/appr/detail_form", method = RequestMethod.GET)
+	@GetMapping("/detail_form")
 	public String detail(Model model,
 						 @RequestParam("forId") int forId,
 						 @RequestParam("forVersion") int forVersion) {
@@ -139,7 +149,7 @@ public class ApprFormController {
 	}
 	
 	// 양식 수정 폼
-	@RequestMapping( value = "/appr/update_form", method = RequestMethod.GET)
+	@GetMapping("/update_form")
 	public String update(Model model,
 						 @RequestParam("forId") int forId,
 						 @RequestParam("forVersion") int forVersion) {
@@ -158,7 +168,7 @@ public class ApprFormController {
 	}
 	
 	// 양식 수정 처리
-	@RequestMapping( value = "/appr/update_form", method = RequestMethod.POST)
+	@PostMapping("/update_form")
 	public String update_post(ApprFormDto dto, Model model) {
 		
 		// 양식 수정 성공
@@ -181,7 +191,7 @@ public class ApprFormController {
 	}
 	
 	// 양식 삭제 처리
-	@RequestMapping("/appr/delete")
+	@GetMapping("/delete")
 	public String delete(@RequestParam("forId") int forId,
 						 @RequestParam("forVersion") int forVersion) {
 		
@@ -193,5 +203,22 @@ public class ApprFormController {
 		return "redirect:/appr/list_form";
 	}
 	
+	// openAi 호출
+	@PostMapping("/formSchema")
+	@ResponseBody
+	public Map<String, Object> formSchema(@RequestBody Map<String, String> body) {
+		String userPrompt = body.get("prompt");
+		Map<String, Object> result = new HashMap<>();
+		
+		try {
+			String schemaJson = gpt.formSchema(userPrompt);
+			result.put("success", true);
+			result.put("schema", schemaJson);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("message", "AI 양식 생성에 실패했습니다");
+		}
+		return result;
+	}
 	
 }

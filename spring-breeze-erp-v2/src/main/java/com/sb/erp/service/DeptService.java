@@ -24,4 +24,10 @@ public interface DeptService {
 
 	public Object getAncestorChain(int deptId);
 
+	public int countEmployees(int deptId);
+
+	public int softDelete(int deptId);
+
+	public List<DeptDto> getAllDeptsByComId(Integer comId);
+
 }

@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/layout.html}">
 <head>
-	<title>결재 양식 관리</title>
+	<title>결재 문서 기안</title>
 	<link rel="stylesheet" th:href="@{/css/summernote-lite.min.css}"/>
 </head>
 <body>
@@ -13,7 +13,7 @@
 	 <div class="sb-page-head">
 	 	<div class="sb-page-head__txt">
 	 		<div class="sb-breadcrumb">
-		 		<a th:href="@{/appr/list_form}">전자결재</a>
+		 		<a th:href="@{/appr/list_doc}">전자결재</a>
 		 		<i class="bi bi-chevron-right"></i>
 		 		<span>결재 기안</span>
 	 		</div>
@@ -30,12 +30,14 @@
 
 	<form th:action="@{/appr/write_doc}" method="post" onsubmit="return checkForm()">
 		<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+		<div id="hiddenApprLines"></div>
 		
 		<!-- 데이터 바인딩 -->
 		<input type="hidden" id="comId" th:value="${dto.comId}"/>
 		<input type="hidden" id="empId" th:value="${dto.empId}"/>
+		<input type="hidden" id="forVersion" name="forVersion" value=""/>
 	
-		<div class="sb-card">
+		<div class="sb-card mb-4">
 			<div class="sb-card__head">
 				<h2>문서 정보</h2>
 			</div>
@@ -89,10 +91,10 @@
 				<div class="row g-4 align-items-center">
 					<div class="col-md-6">
 						<label for="docStatus" class="sb-form-label">문서 상태</label>
-						<input type="text" class="form-control bg-light" id="docStatus" value="대기 (WAI)" readonly/>
-						<input type="hidden" name="docStatus" value="WAI"/>
+						<input type="text" class="form-control bg-light" id="docStatus" value="진행중 (ING)" readonly/>
+						<input type="hidden" name="docStatus" value="ING"/>
 						<div class="form-text text-secondary mt-1">
-							기본 상태는 '대기' 상태로 설정되어있습니다.
+							결재 진행중
 						</div>
 					</div>
 				
@@ -115,52 +117,25 @@
 			<div class="sb-card__head">
 				<h2>결재선 지정</h2>
 				<p class="mb-0 text-secondary" style="font-size: 14px;">
-					중요 문서 체크 여부에 따라 시스템 권한 규칙대로 결재자가 자동 구성됩니다.
+					중요 문서는 3명, 일반 문서는 1명의 결재자를 순서대로 지정합니다.
 				</p>
 			</div>
 			<div class="sb-card__body">
 				<div class="row g-3">
-					<div class="col-md-5">
-						<label class="sb-form-label">조직도 확인</label>
-						<div class="input-group mb-2">
-							<input type="text" class="form-control" placeholder="이름, 사번 검색" disabled>
-							<button class="btn btn-outline-secondary" type="button" disabled>
-								<i class="bi bi-search"></i>
-							</button>
+					<div class="col-md-6">
+						<label class="sb-form-label">조직도에서 선택</label>
+						<div class="tree-box bg-light">
+							<!-- 부서 트리 렌더링 위치 -->
 						</div>
-						<div class="tree-box bg-light text-muted d-flex align-items-center justify-content-center">
-							<div class="text-center">
-								<i class="bi bi-diagram-3 fs-3 d-block mb-1 text-secondary"></i>
-								<span style="font-size: 13px;">[[${dto.comName}]] 조직도 연계 활성됨</span>
-							</div>
-						</div>
-					</div>
-					
-					<div class="col-md-1 d-flex flex-colum justify-content-center align-items-center gap-2">
-						<button type="button" class="btn btn-sm btn-outline-secondary" style="width: 45px;" disabled>
-							<i class="bi bi-chevron-right"></i>
-						</button>
-						<button type="button" class="btn btn-sm btn-outline-secondary" style="width: 45px;" disabled>
-							<i class="bi bi-chevron-left"></i>
-						</button>
+						<div id="deptEmpBox" class="appr-emp-box mt-2"></div>
 					</div>
 					
 					<div class="col-md-6">
-						<label class="sb-form-label">선택된 결재선 (결재 순서)</label>
-						<div class="table-box">
-							<table class="table table-sm table-hover mb-0 align-middle text-center"
-								   id="lineTable" style="font-size: 13px;">
-								   	<thead class="table-bottom">
-								   		<tr class="border-bottom">
-								   			<th style="width: 15%">순서</th>
-								   			<th style="width: 35%">결재자</th>
-								   			<th style="width: 25%">직책</th>
-								   			<th style="width: 25%">상태(기본)</th>
-								   		</tr>
-								   	</thead>
-								   	<tbody id="lineTableBody">
-								   	</tbody>
-							</table>
+						<label class="sb-form-label">결재선 (순서대로 클릭하여 배치)</label>
+						<div id="apprSlots" class="appr-slots"></div>
+						<div id="err_apprLine" class="text-danger fw-semibold mt-2"
+							 style="display: none; font-size: 14px;">
+							 결재선을 모두 지정해주세요.
 						</div>
 					</div>
 				</div>
@@ -171,11 +146,11 @@
 			<div class="sb-card__head">
 				<h2>문서 내용</h2>
 			</div>
-			<div class="sb-card_body">
+			<div class="sb-card__body">
 				<div class="mt-2">
 					<textarea name="docContent" rows="10" cols="40"
 							  class="form-control" id="forContent"></textarea>
-					<div class="form-text text-faint mt-2">
+					<div class="form-text text-faint mt-2 ms-2">
 						선택한 결재 서식 프레임워크가 실시간으로 주입
 					</div>
 					<div id="err_docContent" class="text-danger fw-semibold mt-1"
@@ -185,9 +160,9 @@
 					
 					<div class="sb-divider"></div>
 					
-					<div class="d-flex justify-content-between align-items-center">
-						<button type="button" class="btn btn-ghost border" th:onclick="|location.href='@/appr/list_doc'|">취소</button>
+					<div class="d-flex justify-content-end align-items-center p-3">
 						<div class="d-flex gap-2">
+							<button type="button" class="btn btn-ghost border" th:onclick="|location.href='@{/appr/list_doc}'|">취소</button>
 							<button type="submit" class="btn btn-primary px-4"
 									style="background-color: #0d6efd; border-color: #0d6efd;">
 									<i class="bi bi-floppy"></i> 저장
@@ -241,13 +216,14 @@
 
 <script>
 
+	/////////////////////////////// 양식 ///////////////////////////////
 	window.addEventListener("load", function(){
 		const loginComId = document.getElementById("comId").value;
 		const formSelect = document.getElementById("formSelect");
 		
 		// 페이지 로드시 해당 회사에 등록된 양식 리스트 로딩
 		if(loginComId){
-			fetch(`/getFormList?comId=${encodeURIComponent(loginComId)}`)
+			fetch(`/appr/getFormList?comId=${encodeURIComponent(loginComId)}`)
 			.then(response => response.json())
 			.then(data => {
 				if(data && data.length > 0){
@@ -276,13 +252,17 @@
 			
 			if(!selectedFormId){
 				window.jQuery('#forContent').summernote('code','');
+				document.getElementById("forVersion").value = "";
 				return;
 			}
 			
 			const selectedVersion = selectedOption.getAttribute("data-version");
 			
+			// 양식 버전 넘기기
+			document.getElementById("forVersion").value = selectedVersion;
+			
 			// 상세 조회
-			fetch(`/getFormDetail?forId=${encodeURIComponent(selectedFormId)}&forVersion=${encodeURIComponent(selectedVersion)}`)
+			fetch(`/appr/getFormDetail?forId=${encodeURIComponent(selectedFormId)}&forVersion=${encodeURIComponent(selectedVersion)}`)
 			.then(response => response.json())
 			.then(data => {
 				if(data && data.forContent){
@@ -295,6 +275,8 @@
 			});
 		});
 	});
+	
+	/////////////////////////////// 양식 ///////////////////////////////
 
 	/////////////////////////////// 빈칸 처리 ///////////////////////////////
 	
@@ -302,7 +284,9 @@
 		// 빈칸 체크할 요소들 매핑 {key : value}
 		// 아래처럼 매핑 안하면 일일이 하나씩 getElementById 를써서 비교하고 변경해야함
 		const fields = [
-			{ id: "forSelect", errId: "err_form"}
+			{ id: "formSelect", errId: "err_form"},
+			{ id: "docTitle", errId: "err_docTitle"},
+			{ id: "forContent", errId: "err_docContent"}
 		];
 		
 		let result = true;
@@ -344,6 +328,16 @@
 			}
 			
 		});
+		
+		// 결재선 검증
+		if(!window.isApprLineComplete()){
+			document.getElementById("err_apprLine").style.display = "block";
+			result = false;
+		}
+		else {
+			document.getElementById("err_apprLine").style.display = "none";
+		}
+		
 		// 양식 중복 인데 강제로 작성 눌렀을시 제어
 		if(!result){
 			if(focusElement){
@@ -357,6 +351,235 @@
 	}
 	
 	/////////////////////////////// 빈칸 처리 ///////////////////////////////
+	
+	/////////////////////////////// 결재선 파트 ///////////////////////////////
+	
+	document.addEventListener("DOMContentLoaded", function(){
+		const isImportantSwitch = document.getElementById("isImportantSwitch");
+		const isImportantInput = document.getElementById("isImportant");
+		const hiddenContainer = document.getElementById("hiddenApprLines");
+		const treeBox = document.querySelector(".tree-box");
+		const slotContainer = document.getElementById("apprSlots");
+		const empBox = document.getElementById("deptEmpBox")
+		
+		// 슬롯 배열
+		let slots = [null];
+		
+		function slotCount() {
+			return isImportantSwitch.checked ? 3 : 1;
+		}
+		
+		// 슬롯 개수 맞추기 (중요 문서 스위치)
+		function syncSlotCount(){
+			const n = slotCount();
+			if(slots.length > n){
+				slots = slots.slice(0, n); // 초과분 제거
+			}
+			else {
+				while(slots.length < n) {
+					// 부족한부분 채우기
+					slots.push(null);
+				}
+			}
+			renderSlots();
+			renderEmpList(currentEmpList); // disabled 상태 갱신
+		}
+		
+		// 부서 트리
+		function loadDeptTree(){
+			fetch('/appr/getDeptTree')
+			.then(response => response.json())
+			.then(data => renderDeptTree(data))
+			.catch(err => console.error("부서트리 조회 실패",err));
+		}
+		
+		/* 이런식으로 데이터가 나옴
+		[
+			{deptId: 1 , parentId: 0, deptName: "본사", empCount: 5},
+			{deptId: 2 , parentId: 1, deptName: "영업팀", empCount: 3},
+			{deptId: 3 , parentId: 1, deptName: "개발팀", empCount: 4},
+		]
+		*/
+		
+		function renderDeptTree(data){
+			/*
+				
+				parentId 기준으로 byParent라는 객체를 만들어 그룹으로 묶음
+			
+				byParent = {
+					0 : [본사],
+					1 : [영업팀, 개발팀]
+				}
+			*/
+			const byParent = {};
+			data.forEach(d => {
+				const key = d.parentId || 0;
+				if(!byParent[key]){
+					byParent[key] = [];
+				}
+				byParent[key].push(d);
+			});
+			
+			treeBox.innerHTML = '<ul class="dept-tree list-unstyled ps-2"></ul>'
+			const rootUl = treeBox.querySelector("ul");
+			
+			// 재귀 함수 parentId 기준으로 0번 부모 밑의 자식을 그림
+			function buildUl(parentId, ul){
+				(byParent[parentId] || []).forEach(dept => {
+					const li = document.createElement("li");
+					li.innerHTML = `
+						<span class="dept-node" data-dept-id="${dept.deptId}" style="cursor:pointer;">
+						<i class="bi bi-folder"></i> ${dept.deptName}
+							<span class="text-muted">(${dept.empCount})</span>
+						</span>
+					`;
+					ul.appendChild(li);
+					
+					// 이 부서 밑에 자식 부서가 있으면
+					if(byParent[dept.deptId]){
+						const childUl = document.createElement("ul");
+						childUl.className = "list-unstyled ps-3";
+						li.appendChild(childUl);
+						buildUl(dept.deptId, childUl); // 재귀 호출로 자식들 그림
+					}
+				});
+			}
+			// 최상위부터 시작 (parentId = 0)
+			buildUl(0, rootUl);
+			
+			// 부서 클릭시 사원 목록 표시
+			treeBox.querySelectorAll(".dept-node").forEach(node => {
+				node.addEventListener("click", function(e){
+					e.stopPropagation();
+					const deptId = this.getAttribute("data-dept-id");
+					loadDeptEmps(deptId);
+				});
+			});
+		}
+		
+		// 위 부서 클릭 사원 목록 표시 기능 함수
+		let currentEmpList = [];
+		function loadDeptEmps(deptId){
+			fetch(`/appr/getDeptEmps?deptId=${encodeURIComponent(deptId)}`)
+			.then(response => response.json())
+			.then(data => {
+				currentEmpList = data;
+				renderEmpList(data);
+			})
+			.catch(err => console.error("사원목록 조회 실패", err));
+		}
+		
+		function renderEmpList(emps){
+			empBox.innerHTML = "";
+			
+			// 사원 데이터가 없을때 처리
+			if(!emps || emps.length === 0){
+				empBox.innerHTML = `
+					<div class="text-muted text-center py-4 small">
+						<i class="bi bi-person-x fs-4 d-block mb-1"></i>
+						해당 부서에 소속된 사원이 없습니다.
+					</div>
+				`;
+				return;
+			}
+			
+			emps.forEach(emp => {
+				const already = slots.some(s => s && s.empId === emp.empId);
+				const div = document.createElement("div");
+				div.className = "appr-emp-row" + (already ? " disabled" : "");
+				div.innerHTML = `
+					<span>${emp.empName}</span>
+					<span class="pos-chip">${emp.posName}</span>
+				`;
+				// 이미 등록된 상태가 아니면 emp데이터를 다음 슬롯에 추가
+				if(!already){
+					div.addEventListener("click", () => addToNextSlot(emp));
+				}
+				empBox.appendChild(div);
+			});
+		}
+		
+		// 빈 슬롯 중 가장 앞 순서에 채우기
+		function addToNextSlot(emp){
+			const idx = slots.findIndex(s => s === null);
+			// 초과해서 슬롯 넣으려는 경우 막기
+			if(idx === -1){
+				alert("이미 모든 결재선이 지정되었습니다. 제외 후 다시 지정해주세요");
+				return;
+			}
+			slots[idx] = {
+				empId: emp.empId,
+				empName: emp.empName,
+				posName: emp.posName
+			};
+			renderSlots();
+			renderEmpList(currentEmpList);
+		}
+		
+		// 슬롯 클릭시 제외
+		function removeSlot(idx){
+			slots[idx] = null;
+			renderSlots();
+			renderEmpList(currentEmpList);
+		}
+			
+	    // 결재선 테이블 렌더링 및 바인딩
+	    function renderSlots(){
+	    	slotContainer.innerHTML = "";
+	    	hiddenContainer.innerHTML = "";
+	    	
+	    	slots.forEach((slot, i) => {
+	    		const order = i + 1;
+	    		const status = i === 0 ? 'WAI' : 'NOT';
+	    		const div = document.createElement("div");
+	    		div.className = "appr-slot" + (slot ? " filled" : "");
+	    		div.innerHTML = slot ?
+	    			`<span class="appr-slot__badge">${order}</span>
+	    			 <span class="appr-slot__body">${slot.empName}
+	    			 	<span class="appr-slot__pos">${slot.posName}</span>
+	    			 </span>` :
+	    			`<span class="appr-slot__badge">${order}</span>
+	    			 <span class="appr-slot__body appr-slot__empty">${order}차 결재자를 선택해주세요</span>
+	    			`;
+	    		if(slot){
+	    			div.addEventListener("click", () => removeSlot(i));
+	    		}
+	    		slotContainer.appendChild(div);	    		
+	    	
+	    		if(slot){
+		    		// name 속성 매핑 구조
+		    		hiddenContainer.innerHTML += `
+		    			<input type="hidden" name="apprLines[${i}].linOrder" value="${order}"/>
+		    			<input type="hidden" name="apprLines[${i}].empId" value="${slot.empId}"/>
+		    			<input type="hidden" name="apprLines[${i}].linStatus" value="${status}"/>
+		    		`;	
+		    		
+		    		/*  이런식으로 매핑
+		    			appeLines[0] = { lineOrder : 1, empId : 102, linStatus: "WAI" }
+		    			appeLines[1] = { lineOrder : 2, empId : 103, linStatus: "NOT" }
+		    			appeLines[2] = { lineOrder : 3, empId : 104, linStatus: "NOT" }
+		    		*/
+	    		}
+	    		
+	    	});
+	    }
+	    
+	    // 모든 슬롯이 채워졌는지 검증
+	    window.isApprLineComplete = function(){
+	    	return slots.every(s => s!== null);
+	    }
+	    
+	    isImportantSwitch.addEventListener("change", function(){
+	        isImportantInput.value = this.checked ? "1" : "0";
+	        syncSlotCount();
+	    });
+	    
+	    // 최초 로드시 기본 결재선 출력
+	    renderSlots();
+	    loadDeptTree();
+	});
+	
+	/////////////////////////////// 결재선 파트 ///////////////////////////////
 	
 	
 </script>

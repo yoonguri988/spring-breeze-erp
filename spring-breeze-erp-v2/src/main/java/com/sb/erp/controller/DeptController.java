@@ -105,13 +105,22 @@ public class DeptController {
 	@PostMapping("/delete")
 	public String delete_post(int deptId, RedirectAttributes rttr) {
 		DeptDto dto = service.selectOneById(deptId);
+	    int empCount = service.countEmployees(deptId);
 		try {
-			service.delete(deptId);
-			rttr.addFlashAttribute("msg", "부서 삭제 성공.");
+			// 사원 정보 0명이면, 진짜 부서삭제
+			if(empCount == 0) {
+				service.delete(deptId);
+				rttr.addFlashAttribute("msg", "부서 삭제 성공.");
+				return "redirect:/dept/list?comId=" + dto.getComId();
+			}
 		} catch (IllegalStateException e) {
 			rttr.addFlashAttribute("msg", e.getMessage());
 		}
-		return "redirect:/dept/list?comId="+dto.getComId();
+		//소속사원이 있는 경우: 즉시 삭제 대신 PENDING_DELETE로 전환
+		service.softDelete(deptId);
+		rttr.addFlashAttribute("msg", "사원이 존재해 사원 부서이관 페이지로 이동합니다.");
+		// 사원 부서 이관 목록 페이지로 이동 [추가 생성 예정]
+	    return "redirect:/dept/transfer/list?deptId=" + deptId; 
 	}
 	
 	// 부서 상세 조회

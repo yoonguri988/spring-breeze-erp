@@ -1,165 +1,168 @@
 package com.sb.erp.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.sb.erp.dto.ResDto;
 import com.sb.erp.dto.ResSearchDto;
-import com.sb.erp.dto.ReservationDto;
-import com.sb.erp.dto.ResourceDto;
+import com.sb.erp.dto.ResvDto;
 import com.sb.erp.dto.ResvSearchDto;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.ReservationService;
 import com.sb.erp.service.ResourceService;
 import com.sb.erp.util.PagingUtil;
 
-import jakarta.servlet.http.HttpSession;
-
 @Controller
 @RequestMapping("/resv")
 public class ReservationController {
-    @Autowired private ReservationService reservationService;
-    @Autowired private ResourceService resourceService;
+    @Autowired private ReservationService service;
+    @Autowired private ResourceService resService;
 
-    @RequestMapping("/list")
-    public String list(@RequestParam(value = "status", required = false) String status,
-                       @RequestParam(value = "page", required = false, defaultValue = "1") int curPage,
-                       @RequestParam(value = "error", required = false) String error,
-                       HttpSession session,
-                       Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAdmin = hasAdminAuthority(auth);
+    // 내 예약 목록
+    @GetMapping("/my")
+    public String my_list(ResvSearchDto search, Authentication auth, Model model) {
+    	// 현재 로그인 사용자 정보
+    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+    	search.setComId(user.getUser().getComId());
+    	search.setEmpId(user.getUser().getEmpId());
+    	
+    	if (search.getStartDt() == null || search.getStartDt().isBlank()) {
+    		search.setStartDt(java.time.LocalDate.now().minusDays(30).toString());
+    	}
+    	if (search.getEndDt() == null || search.getEndDt().isBlank()) {
+    		search.setEndDt(java.time.LocalDate.now().toString());
+    	}
+    	
+    	int listtotal = service.getResvCount(search);
+    	PagingUtil paging = new PagingUtil(listtotal, search.getPstartno());
+    	List<ResvDto> list = service.getResvList(search);
+    	
+    	model.addAttribute("list", list);
+    	model.addAttribute("paging", paging);
+    	model.addAttribute("search", search);
+    	
+    	return "resv/my";
+    }
 
-        ResvSearchDto search = new ResvSearchDto();
-        search.setComId(getLoginComId(session));
-        search.setStatus(status);
-        search.setPstartno(curPage);
-        if (!isAdmin) {
-            search.setEmpId(getLoginEmpId(session));
+    @GetMapping("/insert")
+    public String insertForm(Authentication auth, Model model) {
+    	// 현재 로그인 사용자 정보
+    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+    	
+    	ResSearchDto search = new ResSearchDto();
+    	search.setComId(user.getUser().getComId());
+    	
+    	// 예약 할 수 있는 회사의 자원 정보
+    	// TODO: 자원 정보에 대해 더 디테일하게 갯수 체크 해야될 것 같음
+        List<ResDto> resList = resService.getResListForResv(search);
+        model.addAttribute("resList", resList);
+
+        return "resv/insert";
+    }
+
+    @PostMapping("/insert")
+    public String insert(Authentication auth, ResvDto resvDto, RedirectAttributes rttr) {
+    	// 현재 로그인 사용자 정보
+    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+    	resvDto.setEmpId(user.getUser().getEmpId());
+    	resvDto.setComId(user.getUser().getComId());
+    	
+    	try {
+            service.insert(resvDto);
+        } catch (IllegalStateException e) {
+            // 예: "해당 기간에 예약 가능한 수량이 부족합니다. (남은 수량: 2개)"
+        	rttr.addFlashAttribute("toastMsg", e.getMessage());
+        	rttr.addFlashAttribute("toastKind", "warn");
+        	rttr.addFlashAttribute("toastField", "quantity"); // 문제 필드 지목 (선택사항)
+            return "redirect:/resv/insert";
+        } catch (IllegalArgumentException e) {
+        	rttr.addFlashAttribute("toastMsg", e.getMessage());
+        	rttr.addFlashAttribute("toastKind", "warn");
+            return "redirect:/resv/insert";
         }
 
-        int totalCount = reservationService.getReservationCount(search);
-        PagingUtil paging = new PagingUtil(totalCount, curPage);
-        List<ReservationDto> reservationList = reservationService.getReservationList(search);
+    	rttr.addFlashAttribute("toastMsg", "예약이 신청되었습니다.");
+    	rttr.addFlashAttribute("toastKind", "ok");
+        return "redirect:/resv/my";
+    }
+    
+    @GetMapping("/edit")
+    public String edit_get(Authentication auth, Integer revId, Model model) {
+        ResvDto resv = service.getResvDetail(revId);
+        ResDto dto = resService.getResourceDetail(resv.getResId());
+        model.addAttribute("resource", dto);
+        model.addAttribute("resv", resv);
+    	return "resv/edit";
+    }
+    
+    @PostMapping("/edit")
+    public String edit_post(ResvDto dto) {
+    	int result = service.update(dto);
+    	return "redirect:/resv/my";
+    }
+    
+    @GetMapping("/detail")
+    public String detail_get(Authentication auth, Integer revId, Model model) {
+    	// 현재 로그인 사용자 정보
+    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+	    Set<String> authNames = user.getAuthorities().stream()
+	            .map(GrantedAuthority::getAuthority)
+	            .collect(Collectors.toSet());
 
-        model.addAttribute("reservationList", reservationList);
-        model.addAttribute("paging", paging);
-        model.addAttribute("status", status);
-        model.addAttribute("error", error);
+	    boolean isAdmin = authNames.contains("ROLE_ADMIN");
+    	
+        ResvDto resv = service.getResvDetail(revId);
+        ResDto dto = resService.getResourceDetail(resv.getResId());
+        model.addAttribute("resource", dto);
+        model.addAttribute("resv", resv);
+        
         model.addAttribute("isAdmin", isAdmin);
-        model.addAttribute("loginEmpId", getLoginEmpId(session));
-        model.addAttribute("roleLabel", isAdmin ? "ADMIN" : "USER");
-
-        return "resv/reservationList";
+        model.addAttribute("empId", user.getUser().getEmpId());
+    	return "resv/detail";
     }
-
-    @RequestMapping(value = "/insert", method = RequestMethod.GET)
-    public String insertForm(@RequestParam(value = "resId", required = false) Integer resId,
-                             HttpSession session,
-                             Model model) {
-        ResSearchDto search = buildResourceSearch(getLoginComId(session));
-        List<ResourceDto> resourceList = resourceService.getResourceList(search);
-        model.addAttribute("resourceList", resourceList);
-
-        if (resId != null) {
-            ResourceDto resourceDto = resourceService.getResourceDetail(resId);
-            model.addAttribute("resource", resourceDto);
-        }
-        return "resv/reservationInsert";
+    
+    @PostMapping("/cancel")
+    public String cancel_post(Integer revId) {
+    	int result = service.delete(revId);
+    	return "redirect:/resv/my";
     }
+    
+    //기간 선택 후 실시간 잔여수량 조회
+    @GetMapping("/available")
+    @ResponseBody
+    public Map<String, Object> getAvailableQty(ResvSearchDto search, Authentication auth) {
+        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+        ResDto res = resService.getResourceDetail(search.getResId());
 
-    @RequestMapping(value = "/insert", method = RequestMethod.POST)
-    public String insert(ReservationDto reservationDto, HttpSession session) {
-        reservationDto.setComId(getLoginComId(session));
-        reservationDto.setEmpId(getLoginEmpId(session));
-
-        reservationService.insertReservation(reservationDto);
-        return "redirect:/resv/list";
-    }
-
-    @RequestMapping(value = "/update", method = RequestMethod.GET)
-    public String updateForm(@RequestParam("id") int revId,
-                             HttpSession session,
-                             Model model) {
-        ReservationDto reservationDto = reservationService.getReservationDetail(revId);
-        if (!canManagePendingReservation(reservationDto, session)) {
-            return "redirect:/resv/list?error=notAllowed";
+        // 소속 회사 재검증 (여기서도 반드시)
+        if (res == null || !res.getComId().equals(user.getUser().getComId())) {
+            throw new IllegalArgumentException("잘못된 자원 요청입니다.");
         }
 
-        model.addAttribute("reservation", reservationDto);
-        model.addAttribute("resourceList", resourceService.getResourceList(buildResourceSearch(getLoginComId(session))));
-        return "resv/reservationUpdate";
+        // 특정 자원의 특정 기간에 이미 예약(대기+승인)된 수량 합계
+        int reservedQty = service.getReservedQuantity(search);
+        int availableQty = res.getQuantity() - reservedQty;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalQuantity", res.getQuantity());
+        result.put("reservedQty", reservedQty);
+        result.put("availableQty", Math.max(availableQty, 0));
+        result.put("resStatus", res.getResStatus());
+        return result;
     }
-
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
-    public String update(ReservationDto reservationDto, HttpSession session) {
-        ReservationDto original = reservationService.getReservationDetail(reservationDto.getRevId());
-        if (!canManagePendingReservation(original, session)) {
-            return "redirect:/resv/list?error=notAllowed";
-        }
-
-        reservationDto.setComId(original.getComId());
-        reservationDto.setEmpId(original.getEmpId());
-        reservationDto.setStatus(original.getStatus());
-        reservationService.updateReservation(reservationDto);
-        return "redirect:/resv/list";
-    }
-
-    @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public String delete(@RequestParam("revId") int revId, HttpSession session) {
-        ReservationDto reservationDto = reservationService.getReservationDetail(revId);
-        if (!canManagePendingReservation(reservationDto, session)) {
-            return "redirect:/resv/list?error=notAllowed";
-        }
-
-        reservationService.deleteReservation(revId);
-        return "redirect:/resv/list";
-    }
-
-    private ResSearchDto buildResourceSearch(int comId) {
-        ResSearchDto search = new ResSearchDto();
-        search.setComId(comId);
-        search.setPstartno(1);
-        search.setOnepagelist(100);
-        return search;
-    }
-
-    private boolean canManagePendingReservation(ReservationDto reservationDto, HttpSession session) {
-        if (reservationDto == null) {
-            return false;
-        }
-        if (reservationDto.getComId() != getLoginComId(session)) {
-            return false;
-        }
-        if (!"WAI".equals(reservationDto.getStatus())) {
-            return false;
-        }
-        return hasAdminAuthority(SecurityContextHolder.getContext().getAuthentication())
-                || reservationDto.getEmpId() == getLoginEmpId(session);
-    }
-
-    private int getLoginComId(HttpSession session) {
-        Object comId = session.getAttribute("comId");
-        return comId instanceof Integer ? (Integer) comId : 1;
-    }
-
-    private int getLoginEmpId(HttpSession session) {
-        Object empId = session.getAttribute("empId");
-        return empId instanceof Integer ? (Integer) empId : 1;
-    }
-
-    private boolean hasAdminAuthority(Authentication auth) {
-        if (auth == null || auth.getAuthorities() == null) {
-            return false;
-        }
-        return auth.getAuthorities().stream()
-                .filter(authority -> authority != null && authority.getAuthority() != null)
-                .anyMatch(authority -> "ROOT".equals(authority.getAuthority()) || "ROLE_ADMIN".equals(authority.getAuthority()));
-    }
+    
 }

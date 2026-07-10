@@ -12,7 +12,7 @@
 	<div class="sb-page-head">
 		<div class="sb-page-head__txt">
 			<div class="sb-breadcrumb">
-				<a href="#">전자 결재</a>
+				<a th:href="@{/appr/list_form}">전자 결재</a>
 				<i class="bi bi-chevron-right"></i>
 				<span>양식 관리</span>
 			</div>
@@ -178,7 +178,7 @@
 			
 			if(value !== "") {
 				// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
-				fetch(`/searchCompany?company=${encodeURIComponent(value)}`)
+				fetch(`/appr/searchCompany?company=${encodeURIComponent(value)}`)
 				.then(response => response.json())
 				.then(data => {
 					companyDropdown.innerHTML = ""; // 기존 목록 비우기

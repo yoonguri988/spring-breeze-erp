@@ -1,7 +1,5 @@
 package com.sb.erp.service;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sb.erp.dao.NoticeMapper;
 import com.sb.erp.dto.NoticeDto;
 import com.sb.erp.dto.NoticeSearchDto;
-
-/* Service 구현체
- * Mapper 호출하여 실제 DB 작업 수행
- */
+import com.sb.erp.util.FileUploadDto;
+import com.sb.erp.util.FileUploadType;
+import com.sb.erp.util.FileUploadUtil;
 
 @Service
 public class NoticeServiceImpl implements NoticeService{
@@ -22,41 +19,39 @@ public class NoticeServiceImpl implements NoticeService{
 	    @Autowired	    NoticeMapper noticeMapper;
 
 	    @Override // 공지등록
-	    public int insert(NoticeDto dto , MultipartFile file) { 
-			String fileName   = "notice.png";
-			
-			if( !file.isEmpty() ) {
-				fileName   = file.getOriginalFilename();
-				String uploadPath = "C:/file/";
-				File       demp   = new File(uploadPath + fileName);  //파일경로
-				
-				try { file.transferTo(demp); }  // 파일옮기기
-				catch (IOException e) { e.printStackTrace(); } 
+	    public int insert(NoticeDto dto , MultipartFile file) {
+			if (file != null && !file.isEmpty()) {
+				FileUploadDto uploaded = FileUploadUtil.upload(file, FileUploadType.NOTICE_ATTACH);
+				dto.setBfile(uploaded.getFileUrl()); // DB에는 웹 접근용 URL을 저장 (/upload/notice/attach/xxxx.pdf)
 			}
-			
-			dto.setBfile(fileName);
+			// 첨부파일이 없으면 bfile은 null로 두고, insert 쿼리의 <if>가 알아서 컬럼을 생략한다.
 	        return noticeMapper.insert(dto);
 	    }
 
 	    @Override // 공지수정
 	    public int update(NoticeDto dto, MultipartFile file) {
-			String fileName = dto.getBfile();  // #1. 기본파일명으로 들어간거 넣어놓고
-			
-			if(  !file.isEmpty()) {
-				fileName = file.getOriginalFilename();
-				String uploadPath = "C:/file/";
-				File demp = new File(  uploadPath + fileName );
-				
-				try { file.transferTo(demp); }   //#2. 파일올리기
-				catch (IOException e) { e.printStackTrace(); }
-				
+			if (file != null && !file.isEmpty()) {
+				// 새 파일을 올리기 전에 기존 첨부파일 URL을 먼저 확보해둔다. (교체 후 정리용)
+				NoticeDto origin = noticeMapper.select(dto.getBno());
+				String oldFileUrl = origin != null ? origin.getBfile() : null;
+
+				FileUploadDto uploaded = FileUploadUtil.upload(file, FileUploadType.NOTICE_ATTACH);
+				dto.setBfile(uploaded.getFileUrl());
+
+				if (oldFileUrl != null && !oldFileUrl.isEmpty()) {
+					FileUploadUtil.delete(FileUploadUtil.resolveDiskPath(oldFileUrl)); // 교체된 옛 파일 정리
+				}
 			}
-			dto.setBfile(fileName);  // #3. 파일명셋팅
+			// 새 파일이 없으면 dto.getBfile()은 null → update 쿼리의 <if>가 기존 값을 그대로 유지시켜준다.
 	        return noticeMapper.update(dto);
 	    }
 
 	    @Override // 공지삭제
 	    public int delete(int bno) {
+			NoticeDto origin = noticeMapper.select(bno);
+			if (origin != null && origin.getBfile() != null && !origin.getBfile().isEmpty()) {
+				FileUploadUtil.delete(FileUploadUtil.resolveDiskPath(origin.getBfile())); // 게시글과 함께 첨부파일도 정리
+			}
 	        return noticeMapper.delete(bno);
 	    }
 
@@ -77,8 +72,8 @@ public class NoticeServiceImpl implements NoticeService{
 	    }
 
 	    @Override // 전체 카운트
-	    public int selectCount() {
-	        return noticeMapper.selectCount();
+	    public int selectCount(NoticeSearchDto search) {
+	        return noticeMapper.selectCount(search);
 	    }
 
 	    @Override // 검색+페이징
