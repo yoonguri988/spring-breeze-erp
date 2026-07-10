@@ -9,16 +9,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sb.erp.dao.ProjectMapper;
 import com.sb.erp.dao.TaskDependencyMapper;
+import com.sb.erp.dto.ProjectDto;
 import com.sb.erp.dto.TaskDto;
 
 @Service
 @Transactional
 public class TaskDependencyServiceImpl implements TaskDependencyService{
 	@Autowired TaskDependencyMapper dao;
+	@Autowired ProjectMapper projectMapper;
 	
 	//선행 태스크를 지정하여 태스크 생성
 	@Override public int insertWithParent(TaskDto dto) {  
+		
+		//프로젝트 done이면 태스크 못넣게
+		ProjectDto project = projectMapper.select(dto.getProId());
+		if (project != null && "DONE".equals(project.getProStatus())) {
+			throw new IllegalStateException("완료된 프로젝트에는 태스크를 추가할 수 없습니다.");
+		}
 		if(dto.getParentTaskId()!=null) {
 			List<TaskDto> tasks=dao.selectTaskDependencies(dto.getProId());
 			TaskDto parent = tasks.stream()
@@ -39,6 +48,11 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 	//태스크 일정 및 선행 태스크 수정
 	@Override public int updateTaskSchedule(TaskDto dto) {  
 		
+		 //프로젝트 done이면 태스크 못넣게
+		 ProjectDto project = projectMapper.select(dto.getProId());
+		 if (project != null && "DONE".equals(project.getProStatus())) {
+		        throw new IllegalStateException("완료된 프로젝트에는 태스크를 수정할 수 없습니다.");
+		 }
 		//1)순환 참조(데드락)방지 체크
 		if(dto.getParentTaskId()!=null && isCyclic(dto.getTaskId(),dto.getParentTaskId(),dto.getProId())) {
 			throw new IllegalArgumentException("일정 데드락 위험:순환 의존성을 형성할 수 없습니다.");
@@ -98,4 +112,7 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 		}
 		return false;
 	}
+	
+	//후속 작업 리스트
+	@Override public List<TaskDto> selectImpactTasks(int taskId) {  return dao.selectImpactTasks(taskId); }
 }
