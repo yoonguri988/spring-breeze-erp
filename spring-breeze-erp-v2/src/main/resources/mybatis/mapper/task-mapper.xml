@@ -92,4 +92,42 @@
 	order by t.task_end_date asc
 	]]>
 </select>
+
+<!-- 나의 태스크 목록 todo의 최신순 >doing안에서의 최신순 >done-->
+<select id="selectMyTasks" resultType="TaskDto" parameterType="TaskSearchDto">
+  select t.task_id, t.pro_id, p.pro_name as proName,
+         t.com_id, t.task_name, t.task_desc, t.task_status,
+         t.pm_id, t.task_start_date, t.task_end_date,
+         t.actual_start_date, t.actual_end_date,
+         t.created_at, t.updated_at, t.parent_task_id
+  from task t
+  join project_member pm on t.pm_id = pm.pm_id
+  join project p on t.pro_id = p.pro_id
+  where pm.emp_id = #{empId}
+    and t.com_id = #{comId}
+    <if test="taskStatus != null and taskStatus != ''">
+      and t.task_status = #{taskStatus}
+    </if>
+  order by
+    case t.task_status
+      when 'TODO'  then 1
+      when 'DOING' then 2
+      when 'DONE'  then 3
+      else 4
+    end,
+    t.task_id desc
+  OFFSET #{pstartno} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
+</select>
+
+<select id="selectMyTasksCount" resultType="int" parameterType="TaskSearchDto">
+  select count(*)
+  from task t
+  join project_member pm on t.pm_id = pm.pm_id
+  where pm.emp_id = #{empId}
+    and t.com_id = #{comId}
+    <if test="taskStatus != null and taskStatus != ''">
+      and t.task_status = #{taskStatus}
+    </if>
+</select>
+
 </mapper>

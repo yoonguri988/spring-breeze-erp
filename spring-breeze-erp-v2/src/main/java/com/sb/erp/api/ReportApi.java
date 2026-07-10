@@ -2,6 +2,7 @@ package com.sb.erp.api;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,13 @@ public class ReportApi {
 	        googleDocsApi.replacePlaceholders(accessToken, newDocId, values);
 
 	        byte[] pdfBytes = googleDocsApi.exportAsPdf(accessToken, newDocId); // 개발자용만 PDF 변환
-	        googleDocsApi.deleteDoc(accessToken, newDocId); // 사본은 다운로드 후 정리
+	        CompletableFuture.runAsync(() -> { //사본정리 성능개선
+	            try{
+	                googleDocsApi.deleteDoc(accessToken,newDocId);
+	            }catch(Exception e){
+	                e.printStackTrace();
+	            }
+	        });
 
 	        return pdfBytes;
 	    }

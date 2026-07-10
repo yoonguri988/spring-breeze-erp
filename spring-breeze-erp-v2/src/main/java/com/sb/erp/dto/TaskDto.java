@@ -20,4 +20,6 @@ public class TaskDto {
 	private LocalDate actualEndDate; //실제 완요일
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
+	private Integer parentTaskId;
+	private String proName;
 }

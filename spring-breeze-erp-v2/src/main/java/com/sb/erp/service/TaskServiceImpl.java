@@ -43,8 +43,11 @@ public class TaskServiceImpl implements TaskService {
 	
 	//pdf보고서 생성
 	@Override public byte[] createMyWeeklyReport(MyWeeklyReportDto dto) {
-	    return reportApi.createMyWeeklyReport(dto);
-	}
+	    return reportApi.createMyWeeklyReport(dto); }
+	
+	//내 태스크 목록조회 paging
+	@Override public List<TaskDto> selectMyTasks(TaskSearchDto search) {  return dao.selectMyTasks(search); }
+	@Override public int selectMyTasksCount(TaskSearchDto search) {  return dao.selectMyTasksCount(search); }
 
 
 	
