@@ -5,6 +5,9 @@
 <head lang="ko">
 <meta charset="UTF-8">
 <title>프로젝트 상세조회</title>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.css">
+<script src="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.umd.js"></script>
 </head>
 <body>
 <th:block layout:fragment="content">
@@ -14,7 +17,7 @@ window.addEventListener("load",function(){
 	console.log(result);
 
 	if(result=="프로젝트 수정 실패"||result=="태스크 등록 실패"||result=="태스크 삭제 실패"){alert(result); history.go(-1);}
-	else if (result.length!=0){alert(result);}
+	else if (result != null && result.length != 0){alert(result);}
 });
 </script>
 <main class="sb-content">
@@ -132,6 +135,16 @@ window.addEventListener("load",function(){
     </span>
   </div>
 </div>
+
+<div class="sb-card mt-3">
+  <div class="sb-card__head"><h2>태스크 진행 현황</h2></div>
+  <div class="sb-card__body">
+    <div id="gantt-wrapper">
+      <svg id="gantt"></svg>
+    </div>
+  </div>
+</div>
+
 <div class="sb-card mt-3" id="aiResultCard" style="display:none;">
   <div class="sb-card__head">
     <h2><i class="bi bi-stars"></i> AI 리스크 분석 결과</h2>
@@ -218,6 +231,57 @@ window.addEventListener("load", function () {
             btn.disabled = false;
         });
 
+    });
+
+});
+
+window.addEventListener("load", function () {
+
+    const proId = /*[[${dto.proId}]]*/ 0;
+
+    // 간트 차트
+    fetch(`/proj/gantt?pro_id=${proId}`)
+    .then(response => response.json())
+    .then(data => {
+
+        const ganttTasks = data.map(task => ({
+
+            id: String(task.taskId),
+            //이름이 튀어나와서..
+            name: task.taskName.length > 18
+            ? task.taskName.substring(0, 18) + "..."
+            : task.taskName,
+            //풀네임
+            fullName: task.taskName,
+            start: task.taskStartDate,
+            end: task.taskEndDate,
+            dependencies: task.parentTaskId 
+                ? String(task.parentTaskId)
+                : "",
+            progress:
+                task.taskStatus === "DONE" ? 100 :
+                task.taskStatus === "DOING" ? 50 :
+                0
+        }));
+
+        new Gantt("#gantt", ganttTasks, {
+            view_mode: "Week",
+            date_format: "YYYY-MM-DD",
+            language: "ko",
+
+            custom_popup_html: function(task) {
+                return `
+                    <div class="details-container">
+                        <h5>${task.fullName}</h5>
+                        <p>${task.start} ~ ${task.end}</p>
+                    </div>
+                `;
+            }
+        });
+
+    })
+    .catch(error => {
+        console.log("간트 차트 오류 : ", error);
     });
 
 });
