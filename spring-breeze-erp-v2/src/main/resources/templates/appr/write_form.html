@@ -5,6 +5,8 @@
 <head>
 	<title>결재 양식 관리</title>
 	<link rel="stylesheet" th:href="@{/css/summernote-lite.min.css}"/>
+   	<meta name="_csrf" th:content="${_csrf.token}"/>
+   	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 
