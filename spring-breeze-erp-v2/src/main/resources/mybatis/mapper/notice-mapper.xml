@@ -43,12 +43,11 @@
          e.emp_name as empName
   		from notice n
   		join employee e on n.emp_id = e.emp_id
-    <where>
+     where n.com_id = #{comId}
       <if test="keyword != null and keyword != ''">
         and (lower(n.btitle) like lower('%' || #{keyword} || '%')
              or lower(n.bcontent) like lower('%' || #{keyword} || '%'))
       </if>
-    </where>
     order by
     <choose>
       <when test="sortBy == 'views'">n.bhit desc</when>
@@ -58,20 +57,20 @@
   </select>
 
   <!-- 전체 카운트 -->
-  <select id="selectCount" resultType="int">
+  <select id="selectCount" resultType="int" parameterType="NoticeSearchDto">
     select count(*) from notice
+    where com_id = #{comId}
   </select>
 
   <!-- 검색 결과 카운트 -->
   <select id="selectCountNoticeList" resultType="int" parameterType="NoticeSearchDto">
     select count(*)
     from notice
-    <where>
+    where com_id = #{comId}
       <if test="keyword != null and keyword != ''">
         and (lower(btitle) like lower('%' || #{keyword} || '%')
              or lower(bcontent) like lower('%' || #{keyword} || '%'))
       </if>
-    </where>
   </select>
 
 </mapper>

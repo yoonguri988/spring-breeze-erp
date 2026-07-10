@@ -515,3 +515,62 @@ a { text-decoration: none; }
 .tnum { font-variant-numeric: tabular-nums; }
 .cursor-pointer { cursor: pointer; }
 .sb-hr-cell { color: var(--sb-ink-faint); font-size: 12.5px; }
+
+
+
+/* ═══════════════════════════════════════════
+   sidebar - 드롭다운 서브메뉴 (인사평가 그룹)
+   ═══════════════════════════════════════════ */
+
+.sb-nav .sb-nav__group {
+    position: relative;
+}
+
+/* button을 sb-nav__item과 동일하게 보이도록 (a 태그 셀렉터 회피용) */
+.sb-nav .sb-nav__toggle {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: transparent;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+}
+
+.sb-nav .sb-nav__toggle .sb-nav__caret {
+    margin-left: auto;
+    font-size: 14px;
+    transition: transform .2s ease;
+}
+
+.sb-nav .sb-nav__toggle[aria-expanded="true"] .sb-nav__caret {
+    transform: rotate(180deg);
+}
+
+.sb-nav .sb-nav__toggle.has-active-child {
+    color: var(--sb-accent, #6366f1);
+    font-weight: 600;
+}
+
+.sb-nav .sb-nav__submenu {
+    padding-left: 12px;
+    margin-left: 12px;
+    border-left: 1px solid var(--sb-border, #e5e7eb);
+}
+
+.sb-nav .sb-nav__submenu .sb-nav__item {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 13px;
+}
+
+.sb-nav .sb-nav__submenu .sb-nav__item.active {
+    color: var(--sb-accent, #6366f1);
+    font-weight: 600;
+}
+
+.sb-nav .sb-nav__submenu .sb-nav__item i {
+    font-size: 13px;
+}

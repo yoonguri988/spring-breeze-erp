@@ -39,8 +39,18 @@
     <!-- 자원 전체 개수 -->
     <select id="selectResourceCount" parameterType="ResSearchDto" resultType="int">
         SELECT COUNT(*)
-        FROM COM_RESOURCE
-        WHERE com_id = #{comId}
+        FROM COM_RESOURCE R
+        WHERE R.com_id = #{comId}
+        <if test="keyword != null and keyword != ''">
+            AND (R.res_name LIKE CONCAT('%', #{keyword}, '%')
+                 OR R.res_code LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="resType != null and resType != ''">
+            AND R.res_type = #{resType}
+        </if>
+        <if test="resStatus != null and resStatus != ''">
+            AND R.RES_STATUS = #{resStatus}
+        </if>
     </select>
 
     <!-- 자원 상세 -->
