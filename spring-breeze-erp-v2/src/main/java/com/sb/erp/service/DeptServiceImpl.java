@@ -11,6 +11,7 @@ import com.sb.erp.dao.CompanyMapper;
 import com.sb.erp.dao.DeptMapper;
 import com.sb.erp.dto.CompanyDto;
 import com.sb.erp.dto.DeptDto;
+import com.sb.erp.dto.DeptSearchDto;
 import com.sb.erp.dto.StatsDeptDto;
 
 @Service
@@ -134,6 +135,11 @@ public class DeptServiceImpl implements DeptService {
 	@Override
 	public List<DeptDto> getAllDeptsByComId(Integer comId) {
 		return dao.selectAllDeptsByComId(comId);
+	}
+
+	@Override
+	public DeptDto isDuplicateDeptCode(DeptSearchDto search) {
+		return dao.selectDeptCode(search);
 	}
 
 }

@@ -1,7 +1,9 @@
 package com.sb.erp.service;
 
 import java.util.List;
+
 import com.sb.erp.dto.DeptDto;
+import com.sb.erp.dto.DeptSearchDto;
 import com.sb.erp.dto.StatsDeptDto;
 
 public interface DeptService {
@@ -29,5 +31,7 @@ public interface DeptService {
 	public int softDelete(int deptId);
 
 	public List<DeptDto> getAllDeptsByComId(Integer comId);
+
+	public DeptDto isDuplicateDeptCode(DeptSearchDto search);
 
 }

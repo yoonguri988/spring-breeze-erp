@@ -1,5 +1,7 @@
 package com.sb.erp.controller;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,10 +14,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.CompanyDto;
 import com.sb.erp.dto.DeptDto;
+import com.sb.erp.dto.DeptSearchDto;
 import com.sb.erp.dto.StatsDeptDto;
 import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.CompanyService;
@@ -119,7 +123,6 @@ public class DeptController {
 		//소속사원이 있는 경우: 즉시 삭제 대신 PENDING_DELETE로 전환
 		service.softDelete(deptId);
 		rttr.addFlashAttribute("msg", "사원이 존재해 사원 부서이관 페이지로 이동합니다.");
-		// 사원 부서 이관 목록 페이지로 이동 [추가 생성 예정]
 	    return "redirect:/dept/transfer/list?deptId=" + deptId; 
 	}
 	
@@ -136,5 +139,18 @@ public class DeptController {
 		model.addAttribute("dept", service.selectOneById(deptId));
 		model.addAttribute("deptEmpList", empService.selectByDeptId(deptId));
 		return "/dept/detail";
+	}
+	
+	// 부서 코드 중복 체크 (ajax)
+	@GetMapping("/checkDeptCode")
+	@ResponseBody
+	public Map<String, Object> checkDeptCode(DeptSearchDto search){
+		Map<String, Object> res = new HashMap<>();
+		DeptDto dto = service.isDuplicateDeptCode(search);
+		
+		if(dto != null) res.put("duplicate", true);
+		else res.put("duplicate", false);
+		
+		return res;
 	}
 }

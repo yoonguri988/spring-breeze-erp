@@ -226,10 +226,17 @@
 		WHERE DEPT_ID = #{deptId}
 	</update>
 	<!-- 이관 이력 화면의 원부서/대상부서 필터 select box용 — 부서 상태 무관 전체 -->
-	<select id="selectAllDeptsByComId" resultType="deptDto">
+	<select id="selectAllDeptsByComId" resultType="DeptDto">
 		SELECT *
 		FROM department
 		WHERE com_id = #{comId}
 		ORDER BY dept_name
+	</select>
+	<!-- 부서 코드 중복 체크 -->
+	<select id="selectDeptCode" resultType="DeptDto" parameterType="DeptSearchDto">
+		SELECT *
+		FROM DEPARTMENT
+		WHERE COM_ID = #{comId}
+		  AND DEPT_CODE = #{deptCode}
 	</select>
 </mapper>
