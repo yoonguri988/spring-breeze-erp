@@ -30,6 +30,7 @@
 
 	<form th:action="@{/appr/write_form}" method="post" onsubmit="return checkForm()">
 		<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+		<input type="hidden" id="forSchema" name="forSchema"/>
 	
 		<div class="sb-card">
 			<div class="sb-card__head">
@@ -95,7 +96,52 @@
 					</div>
 				</div>
 				
-				<div class="mt-4">
+				<div class="sb-card mb-4">
+					<div class="sb-card__head">
+						<h2>작성 방식 선택</h2>
+					</div>
+					<div class="sb-card__body">
+						<div class="d-flex gap-3">
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="editMode" id="modeEditor" value="editor" checked/>
+								<label class="form-check-label" for="modeEditor">직접 작성</label>
+							</div>
+							<div class="form-check">
+								<input class="form-check-input" type="radio" name="editMode" id="modeAi" value="ai"/>
+								<label class="form-check-label" for="modeAi">AI로 자동 생성</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="sb-card mb-4" style="display: none;">
+					<div class="sb-card__head">
+						<h2>AI 양식 생성
+							<span class="badge bg-secondary"
+								  style="font-size: 10px;">ㅇㅅㅇ</span>
+						</h2>
+						<div class="sb-card__body">
+							<label class="sb-form-label">
+								원하는 양식을 설명하쇼...
+							</label>
+							<textarea id="aiPrompt" class="form-control" cols="20"
+									  rows="5" placeholder="뭐라 검색해야 하는거지??"></textarea>
+							<button type="button" class="btn btn-sm btn-outline-primary mt-2" id="aiGenerateBtn">
+								<i class="bi bi-starts"></i> AI로 필드 생성
+							</button>
+							<div id="aiLoading" style="display: none;"
+								 class="text-secondary small mt-2">
+								 <i class="bi bi-hourglass-split"></i> AI가 양식을 설계하는 중입니다.
+							</div>
+							<div id="aiPreview" style="display: none;" class="mt-3">
+								<label class="sb-form-label">생성된 필드 미리보기</label>
+								<div id="aiFieldList" class="d-flex flex-column gap-2"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="mt-4" id="contentEditorBox">
 					<label for="forContent" class="sb-form-label">양식 내용</label>
 					<div class="mb-2 d-flex gap-2 align-items-center">
 						<label class="sb-form-label mb-0">추천 양식 프레임 주입</label>
@@ -305,14 +351,25 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 	/////////////////////////////// 빈칸 처리 ///////////////////////////////
 	
 	function checkForm(){
+	
+		// AI 토글인지 판별
+		const isAiMode = document.getElementById("modeAi").checked;
+	
 		// 빈칸 체크할 요소들 매핑 {key : value}
 		// 아래처럼 매핑 안하면 일일이 하나씩 getElementById 를써서 비교하고 변경해야함
 		const fields = [
 			{ id: "forCode", errId: "err_forCode"},
 			{ id: "forTitle", errId: "err_forTitle"},
 			{ id: "comId", errId: "err_comId", focusId: "comName"},
-			{ id: "forContent", errId: "err_forContent"}
 		];
+		
+		// 둘중 하나는 입력된지 확인해야함
+		if(isAiMode){
+			fields.push({ id: "forSchema", errId: "err_forContent", focusId: "aiPrompt" });
+		}
+		else{
+			fields.push({ id: "forContent", errId: "err_forContent", isEditor: true });
+		}
 		
 		let result = true;
 		let focusElement = null;
@@ -322,8 +379,19 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 			let id = document.getElementById(field.id);
 			let errId = document.getElementById(field.errId);
 			
-			// 테두리 제거
-			id.classList.remove("is-invalid");
+			if(!id) {return;}
+			
+			// 테두리 제거 및 에러 초기화
+			if(field.isEditor){
+				const editorElement = id.nextElementSibling;
+				if(editorElement && editorElement.classList.contains('note-editor')){
+					editorElement.classList.remove("is-invalid");
+				}
+			}		
+			else{
+				id.classList.remove("is-invalid");	
+			}
+			
 			if(field.focusId){
 				document.getElementById(field.focusId).classList.remove("is-invalid");
 			}
@@ -333,10 +401,34 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 				errId.style.display = "none";
 			}
 			
+			let isEmpty = false;
+			
+			if(field.isEditor){
+				// summernot 에디터 빈값 체크
+				const editorCode = window.jQuery('#' + field.id).summernote('code');
+				// 에디터가 완전히 비었거나 태그만 남은경우
+				isEmpty = window.jQuery('#' + field.id).summernote('isEmpty') ||
+						  editorCode === '' ||
+						  editorCode === '<p><br></p>';
+			}
+			else {
+				// 일반 textarea 체크
+				isEmpty = id.value.trim() == "";
+			}
+			
 			// 비어있는 값 체크
-			if(id.value.trim() == ""){
-				if(field.focusId){
-					document.getElementById(field.focusId).classList.add("is-invalid");
+			if(isEmpty){
+				if(field.isEditor){
+					const editorElement = id.nextElementSibling;
+					if(editorElement && editorElement.classList.contains('note-editor')){
+						editorElement.classList.add("is-invalid");
+					}
+				}
+				else if(field.focusId){
+					const fTarget = document.getElementById(field.focusId);
+					if(fTarget){
+						fTarget.classList.add("is-invalid");
+					}
 				}
 				else{
 					id.classList.add("is-invalid");
@@ -358,7 +450,7 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 			if(focusElement){
 				focusElement.focus();
 			}
-				return false;
+			return false;
 		}
 
 		if(!valid){
@@ -517,6 +609,102 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 	});
 	
 	/////////////////////////////// 회사 이름 검색 ///////////////////////////////
+	
+	/////////////////////////////// 양식 선택 토글 ///////////////////////////////
+	
+	document.querySelectorAll('input[name="editMode"]').forEach(radio => {
+		radio.addEventListener("change", function(){
+			const isAi = this.value === "ai";
+			
+			// AI 영역 / 에디터 영역 토글
+			document.querySelector('#contentEditorBox').style.display = isAi ? "none" : "block";
+			document.getElementById("aiPreview").closest(".sb-card").style.display = isAi ? "block" : "none";
+			
+			if(isAi){ // 반대 모드에서 넘어온값 비우기
+				window.jQuery('#forContent').summernote('code', '');
+			}
+			else{
+				document.getElementById("forSchema").value = "";
+				document.getElementById("aiPreview").style.display = "none";
+				document.getElementById("aiFieldList").innerHTML = "";
+			}
+		});
+	});
+	
+	
+	/////////////////////////////// 양식 선택 토글 ///////////////////////////////
+	
+	/////////////////////////////// openAi 호출 ///////////////////////////////
+	
+	document.getElementById("aiGenerateBtn").addEventListener("click", function(){
+		const prompt = document.getElementById("aiPrompt").value.trim();
+		if(!prompt){
+			alert("원하시는 양식에 대한 설명을 입력해주세요");
+			return;
+		}
+		
+		const btn = this;
+		const loading = document.getElementById("aiLoading");
+		btn.disabled = true;
+		loading.style.display = "block";
+		
+		fetch("/appr/formSchema", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				[document.querySelector('meta[name="_csrf_header"]').content]:
+					document.querySelector('meta[name="_csrf"]').content
+			},
+			body: JSON.stringify({ prompt })
+		})
+		.then(response => response.json())
+		.then(data => {
+			if(!data.success){
+				alert(data.message || "AI 양식 생성에 실패했습니다.");
+				return;
+			}
+			renderAiPreview(data.schema);
+			document.getElementById("forSchema").value = data.schema;
+		})
+		.catch(err => {
+			console.error("AI 양식 생성 오류", err);
+			alert("서버 오류로 AI 양식 생성에 실패했습니다.");
+		})
+		.finally(() => {
+			btn.disabled = false;
+			loading.style.display = "none";
+		})
+	});
+	
+	function renderAiPreview(schemaJsonStr){
+		let schema;
+		try {
+			schema = JSON.parse(schemaJsonStr);
+		} catch(e) {
+			console.error("JSON 파싱 실패", e);
+			alert("AI 응답을 해석하지 못했습니다. 다시 시도해주세요.");
+			return;
+		}
+		
+		const preview = document.getElementById("aiPreview");
+		const list = document.getElementById("aiFieldList");
+		list.innerHTML = "";
+		
+		(schema.fields || []).forEach(field => {
+			const div = document.createElement("div");
+			div.className = "d-flex align-items-center gap-2 p-2 border rounded";
+			div.innerHTML = `
+				<span class="badge bg-light text-dark border">${field.type}</span>
+				<span class="fw-semibold">${field.label}</span>
+				<span class="text-muted small">(${field.key})</span>
+				${field.required ? '<span class="badge bg-danger ms-auto">필수</span>' : ''}
+			`;
+			list.appendChild(div);
+		});
+		preview.style.display = "block";
+	}
+	
+	/////////////////////////////// openAi 호출 ///////////////////////////////
 </script>
 </main>
 </body>

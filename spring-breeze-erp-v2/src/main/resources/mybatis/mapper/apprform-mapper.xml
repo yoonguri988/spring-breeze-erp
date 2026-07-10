@@ -50,6 +50,7 @@
 			for_code,
 			for_title,
 			for_content,
+			for_schema,
 			for_status
 		)
 		values (
@@ -57,6 +58,7 @@
 			#{forCode},
 			#{forTitle},
 			#{forContent},
+			#{forSchema, jdbcType=VARCHAR},
 			#{forStatus}
 		)
 	</insert>
@@ -69,6 +71,7 @@
 			for_code = #{forCode},
 			for_title = #{forTitle},
 			for_content = #{forContent},
+			for_schema = #{forSchema, jdbcType=VARCHAR},
 			for_status = #{forStatus}
 		where for_id = #{forId} and for_version = #{forVersion}
 	</update>
@@ -81,6 +84,7 @@
         for_code, 
         for_title, 
         for_content, 
+        for_schema,
         for_status, 
         created_at, 
         for_version
@@ -90,6 +94,7 @@
         #{forCode},
         #{forTitle},
         #{forContent},
+        #{forSchema, jdbcType=VARCHAR}
         #{forStatus},
         TO_DATE(#{createdAt}, 'YYYY-MM-DD HH24:MI:SS'),
         (SELECT NVL(MAX(for_version), 0) + 1 

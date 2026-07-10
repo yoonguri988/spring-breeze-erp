@@ -15,6 +15,19 @@ import com.sb.erp.dto.CompanySearchDto;
 public class ApprFormServiceImpl implements ApprFormService {
 	@Autowired ApprFormMapper dao;  
 	
+	// 양식 content, schema 정상적으로 들어가있는지 방어코드
+	private void contentXor(ApprFormDto dto) {
+		boolean hasContent = dto.getForContent() != null &&
+				!dto.getForContent().isBlank();
+		boolean hasSchema = dto.getForSchema() != null &&
+				!dto.getForSchema().isBlank();
+		
+		// 둘중 하나는 있어야 오류안뱉고 넘어감
+		if(hasContent == hasSchema) {
+			throw new IllegalArgumentException("양식 내용은 에디터 작성 또는 AI 생성중 하나만 선택해야 합니다.");
+		}
+	}
+	
 	@Override
 	public String getCompanyName(int comId) {
 		return dao.getCompanyName(comId);
@@ -45,12 +58,16 @@ public class ApprFormServiceImpl implements ApprFormService {
 			dto.setForStatus(false);
 		}
 		
+		contentXor(dto);
+		
 		return dao.insertForm(dto);
 	}
 
 	@Override
 	@Transactional
 	public int updateForm(ApprFormDto dto) {
+		
+		contentXor(dto);
 		
 		// 원본 데이터 넣기
 		ApprFormDto original = dao.selectFormAll(dto);

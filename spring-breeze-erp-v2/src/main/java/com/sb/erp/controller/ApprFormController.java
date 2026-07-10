@@ -10,11 +10,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.sb.erp.api.OpenAiGpt;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprFormSearchDto;
 import com.sb.erp.dto.CompanyDto;
@@ -27,6 +29,7 @@ import com.sb.erp.util.PagingUtil;
 public class ApprFormController { 
 	@Autowired ApprFormService appr;
 	@Autowired CompanyService com;
+	@Autowired OpenAiGpt gpt;
 	
 	// 회사 검색 기능
 	@GetMapping("/searchCompany")
@@ -113,10 +116,15 @@ public class ApprFormController {
 	
 	// 양식 작성 처리
 	@PostMapping("/write_form")
-	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr) {
-		// 양식 작성 성공
-		if(appr.insertForm(dto) > 0) {
-			return "redirect:/appr/list_form";
+	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr, Model model) {
+		try {
+			// 양식 작성 성공
+			if(appr.insertForm(dto) > 0) {
+				return "redirect:/appr/list_form";
+			}
+		} catch (IllegalArgumentException e) {
+			model.addAttribute("errorMsg", e.getMessage());
+			model.addAttribute("dto", dto);
 		}
 		return "appr/write_form";
 	}
@@ -195,5 +203,22 @@ public class ApprFormController {
 		return "redirect:/appr/list_form";
 	}
 	
+	// openAi 호출
+	@PostMapping("/formSchema")
+	@ResponseBody
+	public Map<String, Object> formSchema(@RequestBody Map<String, String> body) {
+		String userPrompt = body.get("prompt");
+		Map<String, Object> result = new HashMap<>();
+		
+		try {
+			String schemaJson = gpt.formSchema(userPrompt);
+			result.put("success", true);
+			result.put("schema", schemaJson);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("message", "AI 양식 생성에 실패했습니다");
+		}
+		return result;
+	}
 	
 }
