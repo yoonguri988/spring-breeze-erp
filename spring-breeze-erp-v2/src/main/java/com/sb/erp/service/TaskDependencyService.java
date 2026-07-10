@@ -16,4 +16,7 @@ public interface TaskDependencyService {
 	   
 	   //벌크 연쇄 업데이트
 	   public void updateBatchTaskSchedule(List<TaskDto> list);
+	   
+	   //후속 작업
+	   public List<TaskDto> selectImpactTasks(int taskId);
 }
