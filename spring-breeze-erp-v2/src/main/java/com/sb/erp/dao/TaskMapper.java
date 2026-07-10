@@ -14,7 +14,7 @@ public interface TaskMapper {
 	//태스크 등록
 	public int insert(TaskDto dto);
 	
-	//태스크 페이징
+	//해당 프로젝트-태스크 페이징
 	public List<TaskDto> selectAll(TaskSearchDto search);
 	public int selectCnt (int proId);
 	
@@ -35,4 +35,8 @@ public interface TaskMapper {
 	
 	//pdf보고서 생성
 	public byte[] createMyWeeklyReport(MyWeeklyReportDto dto);
+	
+	//내 태스크 목록조회
+	public List<TaskDto> selectMyTasks(TaskSearchDto search);
+	public int selectMyTasksCount(TaskSearchDto search);
 }
