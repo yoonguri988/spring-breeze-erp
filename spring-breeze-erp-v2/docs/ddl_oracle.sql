@@ -141,6 +141,11 @@ END;
 /
  
 CREATE INDEX fk_department_department1_idx ON department (parent_id);
+-- com_id + dept_status + parent_id 복합 인덱스
+-- (특정 회사, ACTIVE 상태 부서만 조회 후 트리 순회하는 패턴에 최적)
+CREATE INDEX idx_department_com_status_parent ON department (com_id, dept_status, parent_id);
+-- dept_status 필터링까지 인덱스에서 처리
+CREATE INDEX idx_department_parent_status ON department (parent_id, dept_status);
 
 -- ==========================================
 -- 3. 직급 (emp_position)

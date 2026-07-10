@@ -125,6 +125,7 @@ public class OcrNaverApi {
         dto.setComCeo(getFieldText(fieldMap, "comCeo"));
         dto.setStartDt(normalizeDate(getFieldText(fieldMap, "startDt")));
         dto.setIndustryGrpText(getFieldText(fieldMap, "industryGrpCode"));
+        dto.setIndustryCodeText(getFieldText(fieldMap, "industryCode"));
         return dto;
     }
     

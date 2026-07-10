@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
 import com.sb.erp.dto.DeptDto;
+import com.sb.erp.dto.DeptSearchDto;
 import com.sb.erp.dto.StatsDeptDto;
 
 @Mapper
@@ -36,5 +38,7 @@ public interface DeptMapper {
 	int softDelete(int deptId);
 
 	List<DeptDto> selectAllDeptsByComId(Integer comId);
+
+	DeptDto selectDeptCode(DeptSearchDto search);
 
 }

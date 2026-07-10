@@ -69,7 +69,6 @@
                         <label class="sb-form-label">
                             업종 <span style="color:var(--sb-red)">*</span>
                         </label>
-                        <!-- [변경점 · 방향 확정] KSIC 8개 대분류 단일 select로 교체, 기존 값 th:selected로 프리셋 -->
                         <select class="form-select" id="industryGrpCode" name="industryGrpCode"
                                 onchange="syncIndustryCode()" required>
                             <option value="">-- 업종 선택 --</option>
@@ -81,13 +80,24 @@
                             <option value="J" th:selected="${com.industryGrpCode == 'J'}">정보통신업</option>
                             <option value="K" th:selected="${com.industryGrpCode == 'K'}">금융 및 보험업</option>
                             <option value="M" th:selected="${com.industryGrpCode == 'M'}">전문, 과학 및 기술 서비스업</option>
+                            <option value="N" th:selected="${com.industryGrpCode == 'N'}">사업시설관리, 사업지원 및 임대 서비스업</option>
+                            <option value="S" th:selected="${com.industryGrpCode == 'S'}">협회 및 단체, 수리 및 기타 개인 서비스업</option>
                         </select>
                         <div class="text-faint mt-1" style="font-size:12px">
-                            대분류를 바꾸면 세부코드가 자동으로 갱신됩니다.
+                            대분류를 바꾸면 세부업종 목록이 갱신됩니다.
                         </div>
                     </div>
 
-                    <input type="hidden" id="industryCode" name="industryCode" th:value="${com.industryCode}"/>
+                    <!-- industryCode : industryGrpCode에 종속되는 세부업종 select -->
+                    <div class="col-md-6">
+                        <label class="sb-form-label">
+                            세부 업종 <span style="color:var(--sb-red)">*</span>
+                        </label>
+                        <select class="form-select" id="industryCode" name="industryCode" disabled required>
+                            <option value="">-- 업종을 먼저 선택하세요 --</option>
+                        </select>
+                        <div class="invalid-feedback" id="eIndustryCode">세부 업종을 선택하세요.</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -181,6 +191,10 @@
         </div>
     </form>
 </div><!-- /tab-info -->
+
+<!-- 업종 대분류/세부업종 공용 매핑 (form.html, edit.html, com-ocr.js 공용) -->
+<script th:src="@{/js/industry-code.js}"></script>
+
 <script th:inline="javascript">
 (function () {
     "use strict";
@@ -246,12 +260,17 @@
         });
     });
 
-    /* 대분류 선택 시 세부코드(industryCode) 자동 파생: "대분류+01" 규칙 */
+    /* 업종 대분류(industryGrpCode) → 세부업종(industryCode) select 렌더링은
+       공용 모듈(js/industry-code.js)의 IndustryCode.renderOptions()를 사용한다. */
+
+    /* 대분류 select onchange 핸들러: 대분류가 바뀌면 세부업종은 새로 선택하도록 초기화 */
     function syncIndustryCode() {
-        const grp = document.getElementById('industryGrpCode').value;
-        document.getElementById('industryCode').value = grp ? (grp + '01') : '';
+        IndustryCode.renderOptions('industryGrpCode', 'industryCode', '');
     }
     window.syncIndustryCode = syncIndustryCode;
+
+    /* 최초 로드 시 저장된 세부업종 값을 그대로 선택 상태로 복원 */
+    IndustryCode.renderOptions('industryGrpCode', 'industryCode', /*[[${com.industryCode}]]*/ '');
 
     function previewLogo(input) {
         const file = input.files && input.files[0];
@@ -274,7 +293,7 @@
     function resetForm() {
         // 업종: DB에 저장된 값으로 복원
         document.getElementById('industryGrpCode').value = /*[[${com.industryGrpCode ?: ''}]]*/ '';
-        document.getElementById('industryCode').value    = /*[[${com.industryCode ?: ''}]]*/ '';
+        IndustryCode.renderOptions('industryGrpCode', 'industryCode', /*[[${com.industryCode ?: ''}]]*/ '');
 
         // 텍스트 필드 복원
         document.getElementById('comName').value = /*[[${com.comName ?: ''}]]*/ '';
@@ -306,6 +325,14 @@
             valid = false;
         } else {
             setValid(grpSel);
+        }
+
+        const codeSel = document.getElementById('industryCode');
+        if (!codeSel.value) {
+            setInvalid(codeSel, '세부 업종을 선택하세요.');
+            valid = false;
+        } else {
+            setValid(codeSel);
         }
 
         const comNameEl = document.getElementById('comName');

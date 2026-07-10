@@ -5,15 +5,11 @@
 <mapper namespace="com.sb.erp.dao.CompanyMapper">
   <!-- 회사 여러개 조회 -->
   <select id="selectAll" resultType="CompanyDto" parameterType="ComSearchDto">
-  select *
-  from company c
-  join (
-    select c2.com_id, count(e2.emp_id) as emp_count
-    from company c2
-    left join employee e2 on c2.com_id = e2.com_id
-    group by c2.com_id
-   ) t
-   on t.com_id = c.com_id 
+	SELECT c.*,
+	       (SELECT COUNT(e.emp_id) 
+	        FROM employee e 
+	        WHERE e.com_id = c.com_id) AS emp_count
+	FROM company c
   <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
   <if test="keyword != null and keyword != ''">

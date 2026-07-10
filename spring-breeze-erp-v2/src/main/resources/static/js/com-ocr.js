@@ -3,28 +3,11 @@
    회사 등록(com/add) 전용: 사업자등록증 OCR 자동입력 모달 로직.
    app.js(SB.toast)를 사용하며, com/add.html 인라인 스크립트가 window에 노출한
    syncIndustryCode() / checkBizNo()를 그대로 재사용합니다.
+   업종 대분류/세부업종 매핑 및 렌더링은 공용 모듈 js/industry-code.js(IndustryCode)를
+   사용하므로, 이 스크립트보다 industry-code.js가 먼저 로드되어 있어야 합니다.
    ========================================================================== */
 (function () {
   "use strict";
-
-  /* select의 한글 라벨 <-> 코드 매핑 (industryGrpCode select와 동일해야 함) */
-  const INDUSTRY_MAP = {
-    "제조업": "C",
-    "건설업": "F",
-    "도매 및 소매업": "G",
-    "운수 및 창고업": "H",
-    "숙박 및 음식점업": "I",
-    "정보통신업": "J",
-    "금융 및 보험업": "K",
-    "전문, 과학 및 기술 서비스업": "M"
-  };
-
-  function mapIndustryGrpCode(text) {
-    if (!text) return "";
-    if (INDUSTRY_MAP[text]) return INDUSTRY_MAP[text];
-    const key = Object.keys(INDUSTRY_MAP).find((k) => text.includes(k) || k.includes(text));
-    return key ? INDUSTRY_MAP[key] : "";
-  }
 
   function resetOcrModal() {
     document.getElementById("ocrFile").value = "";
@@ -35,6 +18,7 @@
       document.getElementById(id).value = "";
     });
     document.getElementById("ocrIndustryGrpCode").value = "";
+    IndustryCode.renderOptions("ocrIndustryGrpCode", "ocrIndustryCode", "");
   }
 
   function handleOcrFile(e) {
@@ -73,11 +57,20 @@
             document.getElementById("ocrComCeo").value = d.comCeo || "";
             document.getElementById("ocrStartDt").value = d.startDt || "";
 
-            const code = mapIndustryGrpCode(d.industryGrpText);
-            document.getElementById("ocrIndustryGrpCode").value = code;
-            document.getElementById("ocrIndustryRaw").textContent = d.industryGrpText
-                ? 'OCR 인식 원문: "' + d.industryGrpText + '"' + (code ? "" : " (자동 매칭 실패 - 직접 선택해주세요)")
-                : "";
+            const grpCode = IndustryCode.matchGrpFromText(d.industryGrpText);
+            document.getElementById("ocrIndustryGrpCode").value = grpCode;
+
+            const detailCode = IndustryCode.matchCodeFromText(grpCode, d.industryCodeText);
+            IndustryCode.renderOptions("ocrIndustryGrpCode", "ocrIndustryCode", detailCode, "인식된 값");
+
+            const rawLines = [];
+            if (d.industryGrpText) {
+                rawLines.push('업종 인식 원문: "' + IndustryCode.escapeHtml(d.industryGrpText) + '"' + (grpCode ? "" : " (자동 매칭 실패 - 직접 선택해주세요)"));
+            }
+            if (d.industryCodeText) {
+                rawLines.push('세부업종 인식 원문: "' + IndustryCode.escapeHtml(d.industryCodeText) + '"' + (detailCode ? "" : " (자동 매칭 실패 - 직접 선택해주세요)"));
+            }
+            document.getElementById("ocrIndustryRaw").innerHTML = rawLines.join("<br>");
 
             resultFields.style.display = "";
             applyBtn.disabled = false;
@@ -100,15 +93,15 @@
     document.getElementById("comCeo").value  = document.getElementById("ocrComCeo").value.trim();
     document.getElementById("startDt").value = document.getElementById("ocrStartDt").value;
 
-    const grp = document.getElementById("ocrIndustryGrpCode").value;
+    const grp  = document.getElementById("ocrIndustryGrpCode").value;
+    const code = document.getElementById("ocrIndustryCode").value;
     document.getElementById("industryGrpCode").value = grp;
-    if (typeof window.syncIndustryCode === "function") window.syncIndustryCode();
+    IndustryCode.renderOptions("industryGrpCode", "industryCode", code);
 
     /* 값이 바뀌었으니 진위확인 스냅샷 무효화 로직(input 리스너)을 정상 트리거 */
     ["bizNo", "comCeo", "startDt"].forEach((id) => {
       document.getElementById(id).dispatchEvent(new Event("input", { bubbles: true }));
     });
-    document.getElementById("industryGrpCode").dispatchEvent(new Event("change", { bubbles: true }));
 
     /* 사업자번호 중복 체크 자동 실행 */
     if (typeof window.checkBizNo === "function") window.checkBizNo();
@@ -124,11 +117,13 @@
     const fileEl   = document.getElementById("ocrFile");
     const applyBtn = document.getElementById("ocrApplyBtn");
     const modalEl  = document.getElementById("ocrModal");
+    const grpEl    = document.getElementById("ocrIndustryGrpCode");
     if (!fileEl || !applyBtn || !modalEl) return; // 모달이 없는 페이지에서는 조용히 종료
 
     fileEl.addEventListener("change", handleOcrFile);
     applyBtn.addEventListener("click", applyOcrToForm);
     modalEl.addEventListener("hidden.bs.modal", resetOcrModal);
+    if (grpEl) grpEl.addEventListener("change", () => IndustryCode.renderOptions("ocrIndustryGrpCode", "ocrIndustryCode", ""));
   }
 
   if (document.readyState === "loading") {

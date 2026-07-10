@@ -15,10 +15,8 @@
                 <i class="bi bi-chevron-right"></i>
                 <a th:href="@{/com/my}">회사 정보</a>
                 <i class="bi bi-chevron-right"></i>
-                <!-- [변경점] 본문 텍스트에 그냥 ${...} 쓰면 안 찍힘 -> th:text -->
                 <span th:text="${com.comName}"></span>
             </div>
-            <!-- [변경점] "${com.comName} 회사 정보"처럼 정적 텍스트와 섞인 부분은 문자열 + 연산으로 이어붙임 -->
             <h1 th:text="${com.comName} + ' 회사 정보'"></h1>
             <p th:text="${com.comName} + ' 회사의 기본 정보와 조직도를 확인합니다.'"></p>
         </div>
@@ -106,12 +104,6 @@
                         <div class="mc-info-icon"><i class="bi bi-tag"></i></div>
                         <div>
                             <div class="mc-info-label">업종</div>
-                            <!--
-                              [변경점]
-                              ${com.industName} 는 DB에 없는 필드라서 list.html/edit.html과 동일하게
-                              industryGrpCode(KSIC 대분류)를 th:switch로 직접 한글명 매핑.
-                              괄호 안에는 세부코드(industryCode, 예: C01)를 그대로 노출.
-                            -->
                             <div class="mc-info-val">
                                 <span th:switch="${com.industryGrpCode}">
                                     <th:block th:case="'C'">제조업</th:block>
@@ -122,10 +114,40 @@
                                     <th:block th:case="'J'">정보통신업</th:block>
                                     <th:block th:case="'K'">금융 및 보험업</th:block>
                                     <th:block th:case="'M'">전문, 과학 및 기술 서비스업</th:block>
+                                    <th:block th:case="'N'">사업시설관리, 사업지원 및 임대 서비스업</th:block>
+                                    <th:block th:case="'S'">협회 및 단체, 수리 및 기타 개인 서비스업</th:block>
                                     <th:block th:case="*">미분류</th:block>
                                 </span>
-                                <span class="text-faint" style="font-weight:500"
-                                      th:text="'(' + ${com.industryCode} + ')'"></span>
+                                <span class="text-faint" style="font-weight:500">
+                                    <span th:switch="${com.industryCode}">
+                                        <th:block th:case="'10120'">· 육류 가공 및 저장 처리업</th:block>
+                                        <th:block th:case="'20421'">· 계면활성제 제조업</th:block>
+                                        <th:block th:case="'26290'">· 기타 전자부품 제조업</th:block>
+                                        <th:block th:case="'41221'">· 단독주택 건설업</th:block>
+                                        <th:block th:case="'42111'">· 도로 건설업</th:block>
+                                        <th:block th:case="'45111'">· 국산 승용차 판매업</th:block>
+                                        <th:block th:case="'46900'">· 상품 종합 도매업</th:block>
+                                        <th:block th:case="'47190'">· 기타 종합 소매업</th:block>
+                                        <th:block th:case="'49110'">· 철도 운송업</th:block>
+                                        <th:block th:case="'52941'">· 소화물 전문 운송업(택배)</th:block>
+                                        <th:block th:case="'55101'">· 호텔업</th:block>
+                                        <th:block th:case="'56111'">· 한식 음식점업</th:block>
+                                        <th:block th:case="'58222'">· 응용 소프트웨어 개발 및 공급업</th:block>
+                                        <th:block th:case="'62010'">· 컴퓨터 프로그래밍 서비스업</th:block>
+                                        <th:block th:case="'63910'">· 뉴스 제공업</th:block>
+                                        <th:block th:case="'64121'">· 은행업</th:block>
+                                        <th:block th:case="'64992'">· 신탁업 및 집합투자업</th:block>
+                                        <th:block th:case="'70112'">· 지주회사</th:block>
+                                        <th:block th:case="'71531'">· 기타 엔지니어링서비스업</th:block>
+                                        <th:block th:case="'72911'">· 사업시설 유지관리 서비스업</th:block>
+                                        <th:block th:case="'74110'">· 인력 공급 및 고용 알선업</th:block>
+                                        <th:block th:case="'75291'">· 여행사업</th:block>
+                                        <th:block th:case="'94120'">· 산업 및 전문가 단체</th:block>
+                                        <th:block th:case="'95120'">· 컴퓨터 및 주변기기 수리업</th:block>
+                                        <th:block th:case="*"></th:block>
+                                    </span>
+                                    (<span th:text="${com.industryCode}"></span>)
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -141,23 +163,14 @@
                 </div>
                 <div class="sb-card__body--flush">
                     <div class="mc-org">
-                        <!--
-                          [변경점]
-                          <c:forEach var="dept" items="${deptList}"> -> th:each="dept : ${deptList}"
-                          <c:choose>로 depth별 curTone을 c:set 하던 부분 -> th:with 중첩 삼항식으로 한 번에 계산.
-                          class="depth-${dept.depth} tone-${curTone}"처럼 문자열에 EL 섞어 쓰던 부분
-                          -> 문자열 + 연산자로 이어붙인 th:class.
-                        -->
                         <div th:each="dept : ${deptList}"
                              th:with="curTone=${dept.depth == 0} ? 'blue' : (${dept.depth == 1} ? 'green' : (${dept.depth == 2} ? 'amber' : 'cyan'))"
                              th:class="'mc-org-row depth-' + ${dept.depth} + ' tone-' + ${curTone}">
                             <div class="mc-org-icon">
-                                <!-- [변경점] class="bi ${dept.depth == 1 ? 'bi-diagram-3-fill' : 'bi-people-fill'}" -> th:class -->
                                 <i th:class="'bi ' + (${dept.depth == 1} ? 'bi-diagram-3-fill' : 'bi-people-fill')"></i>
                             </div>
                             <div class="mc-org-name">
                                 <span th:text="${dept.deptName}"></span>
-                                <!-- [변경점] <c:if test="${not empty dept.leaderName}"> -> th:if + #strings.isEmpty(null-safe) -->
                                 <span th:if="${not #strings.isEmpty(dept.leaderName)}" class="mc-org-lead"
                                       th:text="${dept.leaderName} + ' 부서장'"></span>
                             </div>

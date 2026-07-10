@@ -13,4 +13,5 @@ public class OcrResultDto {
     private String comCeo;         // 대표자명
     private String startDt;         // 개업일자 -> yyyy-MM-dd 로 정규화
     private String industryGrpText; // 업종
+    private String industryCodeText; // 세부업종
 }
