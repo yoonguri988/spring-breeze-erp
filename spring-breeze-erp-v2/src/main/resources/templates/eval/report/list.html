@@ -133,9 +133,8 @@
                                 </div>
                             </div>
                             <div class="text-center">
-                                <div th:text="${r.grade}"
-                                     th:classappend="'grade-badge grade-' + ${r.grade}"
-                                     style="font-size:24px;font-weight:800;padding:4px 12px;border-radius:8px;background:var(--sb-bg-2)">S</div>
+                                <div th:text="${r.grade}" class="sb-grade sb-grade--sm"
+									th:classappend="'sb-grade--' + ${#strings.toLowerCase(r.grade)}">S</div>
                                 <div class="text-faint" style="font-size:11px;margin-top:2px">등급</div>
                             </div>
                         </div>
