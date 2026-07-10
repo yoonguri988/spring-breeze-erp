@@ -26,26 +26,21 @@ public class SecurityConfig {
 						"/api/**", "/auth/login", "/auth/confirm",
 						"/auth/resetPass", "/auth/forgotResetPass").permitAll()
 					// ─── ROOT 전용 ────────────────────────
-				    .requestMatchers("/root/**").hasAuthority("ROOT")
-				    // ─── ADMIN 이상 ──────────────────
-//				    .requestMatchers("/admin/**").hasAnyAuthority("ROOT", "ROLE_ADMIN")
+				  .requestMatchers("/root/**").hasAuthority("ROOT")
+				  // ─── ADMIN 이상 ──────────────────
+				  .requestMatchers("/admin/**").hasAnyAuthority("ROOT", "ROLE_ADMIN")
 					// ─── 사원/직급/권한 관리 (ADMIN 전용) ────────────────
-				    .requestMatchers("/emp/add", "/emp/resetPass",
-							"/emp/checkEmail", "/emp/checkMobile",
-							"/emp/checkEmpNo", "/perm/**", "/pos/**",
+				  .requestMatchers("/emp/add", "/emp/resetPass", "/emp/checkEmail", 
+              "/emp/checkMobile", "/emp/checkEmpNo", "/perm/**", "/pos/**",
 							"/dept/transfer/pending","/dept/transfer/list","/dept/transfer/log",
-							"/admin/**"
-					).hasRole("ADMIN")
-				    // ─── 로그인만 하면 접근 가능 ───────────
-				    .requestMatchers("/auth/updatePass", "/", "/emp/list", 
-				    		"/emp/detail", "/emp/edit", "/emp/editPass",
-				    		"/com/**", "/dept/**",
-							"/appr/**",
-				    		"/res/**", "/resv/**",
-				    		"/proj/**", "/notice/**"
-				    		).authenticated()
-				    // ─── 그 외 ────────────────
-				    .anyRequest().permitAll()
+							"/admin/**").hasRole("ADMIN")
+				  // ─── 로그인만 하면 접근 가능 ───────────
+				   .requestMatchers("/auth/updatePass", "/", "/emp/list", 
+				    		"/emp/detail", "/emp/edit", "/emp/editPass", 
+                "/com/**", "/dept/**", "/appr/**", 
+                "/res/**", "/resv/**", "/proj/**", "/notice/**").authenticated()
+				   // ─── 그 외 ────────────────
+				   .anyRequest().permitAll()
 				)
 				// 권한이 없는 페이지(403)에 접근했을 경우
 				.exceptionHandling(ex -> ex.accessDeniedHandler((request, response, accessDeniedException) -> {
