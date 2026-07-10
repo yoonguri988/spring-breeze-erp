@@ -25,10 +25,6 @@ public class SecurityConfig {
 					.requestMatchers("/css/**", "/js/**", "/images/**", 
 						"/api/**", "/auth/login", "/auth/confirm",
 						"/auth/resetPass", "/auth/forgotResetPass").permitAll()
-					// ─── 로그인만 하면 접근 가능 ───────────
-					.requestMatchers("/auth/updatePass", "/", "/emp/list", 
-					"/emp/detail", "/emp/edit", "/emp/editPass",
-					"/com/**", "/dept/**", "/proj/**", "/appr/**").authenticated()
 					// ─── ROOT 전용 ────────────────────────
 				    .requestMatchers("/root/**").hasAuthority("ROOT")
 				    // ─── ADMIN 이상 ──────────────────
@@ -44,7 +40,9 @@ public class SecurityConfig {
 				    .requestMatchers("/auth/updatePass", "/", "/emp/list", 
 				    		"/emp/detail", "/emp/edit", "/emp/editPass",
 				    		"/com/**", "/dept/**",
-				    		"/res/**", "/resv/**"
+							"/appr/**",
+				    		"/res/**", "/resv/**",
+				    		"/proj/**", "/notice/**"
 				    		).authenticated()
 				    // ─── 그 외 ────────────────
 				    .anyRequest().permitAll()

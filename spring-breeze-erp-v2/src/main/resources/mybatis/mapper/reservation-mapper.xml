@@ -41,6 +41,7 @@
     <select id="selectCount" parameterType="ResvSearchDto" resultType="int">
         SELECT COUNT(*)
         FROM reservation rv
+        LEFT JOIN COM_RESOURCE R ON R.RES_ID = RV.RES_ID
         WHERE rv.com_id = #{comId}
         <if test="resType != null and resType != ''">
             AND r.res_type = #{resType}

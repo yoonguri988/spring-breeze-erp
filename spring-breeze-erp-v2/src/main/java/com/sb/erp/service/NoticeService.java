@@ -16,7 +16,7 @@ public interface NoticeService {
 	    int updateHit(int bno);
 	    
 	    List<NoticeDto> selectAll(NoticeSearchDto search);
-	    int selectCount();
+	    int selectCount(NoticeSearchDto search);
 	    
 	    List<NoticeDto> selectNoticeList(NoticeSearchDto search);
 	    long selectCountNoticeList(NoticeSearchDto search);

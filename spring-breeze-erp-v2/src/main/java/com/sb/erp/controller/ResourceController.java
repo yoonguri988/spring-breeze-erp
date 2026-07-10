@@ -42,7 +42,7 @@ public class ResourceController {
     public String list(ResSearchDto search, Authentication auth, Model model) {
     	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
     	search.setComId(user.getUser().getComId());
-    	search.setResStatus("AVAILABLE");
+    	if(search != null || search.getResStatus().equals("")) search.setResStatus("AVAILABLE");
     	
 		int listtotal = service.getResourceCount(search);
 		// 검색 조건이 null

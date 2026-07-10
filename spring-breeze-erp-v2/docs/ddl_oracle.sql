@@ -21,6 +21,8 @@ DROP TABLE evaluation_ai_report CASCADE CONSTRAINTS;
 DROP TABLE performance_evaluation CASCADE CONSTRAINTS;
 DROP TABLE evaluation_period CASCADE CONSTRAINTS;
 
+DROP TABLE dept_transfer_log CASCADE CONSTRAINTS;
+
 
 -- 기존 시퀀스 삭제 (필요 시 주석 해제 후 사용)
 DROP SEQUENCE seq_company;
@@ -43,6 +45,7 @@ DROP SEQUENCE seq_period;
 DROP SEQUENCE seq_eval;
 DROP SEQUENCE seq_report;
 
+DROP SEQUENCE seq_dept_transfer_log;
 
 -- 기존 트리거 삭제 (필요 시 주석 해제 후 사용)
 DROP TRIGGER trg_period_updated;
@@ -268,7 +271,7 @@ CREATE TABLE appr_form (
   com_id      NUMBER NOT NULL,
   for_code    VARCHAR2(50) NOT NULL,
   for_title   VARCHAR2(50) NOT NULL,
-  for_content CLOB NOT NULL,
+  for_content CLOB,
   for_schema CLOB,
   for_status  NUMBER(1) NOT NULL,
   is_deleted  NUMBER(1) DEFAULT 0 NOT NULL,
@@ -280,7 +283,11 @@ CREATE TABLE appr_form (
   CONSTRAINT fk_appr_form_company1
     FOREIGN KEY (com_id) REFERENCES company (com_id),
   CONSTRAINT chk_appr_form_status CHECK (for_status IN (0,1)),
-  CONSTRAINT chk_appr_form_delete CHECK (is_deleted IN (0,1))
+  CONSTRAINT chk_appr_form_delete CHECK (is_deleted IN (0,1)),
+  CONSTRAINT ck_appr_form_content_xor CHECK (
+    (for_content IS NOT NULL AND for_schema IS NULL)
+    OR
+    (for_content IS NULL AND for_schema IS NOT NULL))
 );
  
 CREATE SEQUENCE appr_form_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
@@ -990,3 +997,5 @@ BEGIN
     :NEW.updated_at := SYSDATE;
 END;
 /
+
+COMMIT;

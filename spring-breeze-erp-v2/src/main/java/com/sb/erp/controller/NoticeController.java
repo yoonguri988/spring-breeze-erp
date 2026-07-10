@@ -1,9 +1,9 @@
 package com.sb.erp.controller;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.sb.erp.dto.NoticeDto;
 import com.sb.erp.dto.NoticeSearchDto;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.NoticeService;
 import com.sb.erp.util.PagingUtil;
 
@@ -27,18 +28,12 @@ public class NoticeController {
     
     //공지 목록 조회
     @GetMapping("/list")
-    public String list(NoticeSearchDto search, Model model) {
-		
-		/*
-		 * int totalCnt = 0; PagingUtil paging = null;
-		 * 
-		 * List<NoticeDto> notices = Collections.emptyList();
-		 * 
-		 * boolean isEmpty = !search.hasSearchCondition(); if(!isEmpty) { totalCnt =
-		 * noticeService.selectCount(); paging = new PagingUtil( totalCnt ,
-		 * search.getPstartno()); notices = noticeService.selectAll(search); }
-		 */
-        int totalCnt = noticeService.selectCount();
+    public String list(NoticeSearchDto search,
+    		Authentication auth, Model model) {
+    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+    	search.setComId(user.getUser().getComId());
+    	
+        int totalCnt = noticeService.selectCount(search);
         PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
         List<NoticeDto> notices = noticeService.selectAll(search);
 		
@@ -54,9 +49,10 @@ public class NoticeController {
     public String insertNoticeView() { return "notice/write"; } 
     
     //공지 등록 처리
+    // 첨부파일은 선택사항이므로 required=false (안 붙이면 파일 없는 공지 등록 시 400 에러가 났음)
     @PostMapping("/write")
-    public String insertNotice(NoticeDto dto, 
-			@RequestParam("file")  MultipartFile file, HttpSession session) {
+    public String insertNotice(NoticeDto dto,
+			@RequestParam(value = "file", required = false) MultipartFile file, HttpSession session) {
     	Integer empId = (Integer) session.getAttribute("empId");
     	Integer comId = (Integer) session.getAttribute("comId");
     	
@@ -77,8 +73,8 @@ public class NoticeController {
     
     //공지 수정 처리
     @PostMapping("/edit")
-    public String update(NoticeDto dto, 
-			@RequestParam("file")  MultipartFile file, HttpSession session) {
+    public String update(NoticeDto dto,
+			@RequestParam(value = "file", required = false) MultipartFile file, HttpSession session) {
     	Integer empId = (Integer) session.getAttribute("empId");
     	Integer comId = (Integer) session.getAttribute("comId");
     	

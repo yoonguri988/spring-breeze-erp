@@ -30,7 +30,7 @@ public interface NoticeMapper {
    public List<NoticeDto> selectAll(NoticeSearchDto search); 
     
     // 전체 카운트
-   public int selectCount(); 
+   public int selectCount(NoticeSearchDto search); 
     
     /* 검색 + 페이징 */
     // XML의 selectNoticeList와 매칭

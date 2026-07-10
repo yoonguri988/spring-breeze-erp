@@ -6,48 +6,43 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sb.erp.exception.FileUploadException;
 
+import jakarta.annotation.PostConstruct;
+
 /**
- * 파일 업로드 공통 유틸. (정적 메서드만 제공, 인스턴스화 불필요)
+ * 파일 업로드 공통 유틸. (컨트롤러/서비스에서는 정적 메서드로만 호출)
  *
  * 사용법:
  *   FileUploadDto result = FileUploadUtil.upload(multipartFile, FileUploadType.COMPANY_LOGO);
  *   company.setComLogoUrl(result.getFileUrl());   // DB 저장용 URL
  *
- * 저장 위치(baseDir)는 기본값으로 servlet-context.xml 의 /upload/** 매핑 경로(C:/file/)와 동일하게 맞춰뒀다.
- * 운영/개발 환경마다 경로가 다르면 classpath:config/upload.properties 파일을 만들어 아래 키로 덮어쓸 수 있다.
- *
- *   upload.baseDir=C:/file/
- *   upload.urlPrefix=/upload/
+ * 주의: 저장된 파일을 브라우저에서 "/upload/company/logo/xxx.png" 로 접근하려면
+ * WebUploadConfig(WebMvcConfigurer) 에서 upload.path ↔ resource.path 를 리소스 핸들러로
+ * 매핑해줘야 한다. (같이 전달한 WebUploadConfig.java 참고)
  */
+@Component
 public class FileUploadUtil {
 
-    private static String baseDir = "C:/file/";
-    private static String urlPrefix = "/upload/";
+    private static String urlPrefix;
+    private static String baseDir;
 
-    static {
-        try (InputStream is = FileUploadUtil.class.getClassLoader()
-                .getResourceAsStream("config/upload.properties")) {
-            if (is != null) {
-                Properties props = new Properties();
-                props.load(is);
-                baseDir = props.getProperty("upload.baseDir", baseDir);
-                urlPrefix = props.getProperty("upload.urlPrefix", urlPrefix);
-            }
-        } catch (IOException e) {
-            // config/upload.properties 가 없으면 기본값(servlet-context.xml과 동일 경로) 사용
-        }
-        if (!baseDir.endsWith("/")) baseDir += "/";
-        if (!urlPrefix.endsWith("/")) urlPrefix += "/";
-    }
+    @Value("${upload.path}")
+    private String urlPrefixValue;
 
-    private FileUploadUtil() {
+    @Value("${resource.path}")
+    private String baseDirValue;
+
+    @PostConstruct
+    private void init() {
+        urlPrefix = urlPrefixValue.endsWith("/") ? urlPrefixValue : urlPrefixValue + "/";
+        baseDir = baseDirValue.endsWith("/") ? baseDirValue : baseDirValue + "/";
     }
 
     /** 검증 + 저장을 한 번에 처리. 보통 컨트롤러에서 이 메서드만 호출하면 됨 */
@@ -80,18 +75,32 @@ public class FileUploadUtil {
             throw new FileUploadException("허용되지 않는 파일 형식입니다. (Content-Type 불일치: " + contentType + ")");
         }
 
-        // png/jpg/webp는 매직바이트(파일 헤더)로 한번 더 확인해 확장자 위장을 막는다.
-        // svg는 텍스트(XML) 기반이라 매직바이트 검사 대상에서 제외.
+        // 이미지 확장자는 매직바이트(파일 헤더)로 한번 더 확인해 확장자 위장을 막는다.
+        // svg, hwp/hwpx 등 텍스트/문서 포맷은 아래 isValidFileSignature에서 지원하지 않는 확장자만
+        // 검사 대상에서 제외한다. (지원 확장자를 넓히고 싶으면 isValidFileSignature에 case만 추가)
         if (!ext.equals("svg")) {
             try {
                 byte[] header = readHeader(file, 12);
-                if (!isValidImageSignature(header, ext)) {
+                if (!isValidFileSignature(header, ext)) {
                     throw new FileUploadException("파일 내용이 손상되었거나 확장자를 위장한 파일입니다.");
                 }
             } catch (IOException e) {
                 throw new FileUploadException("파일을 읽는 중 오류가 발생했습니다.", e);
             }
         }
+    }
+
+    /**
+     * 이전에 upload()가 돌려준 fileUrl(예: /upload/notice/attach/xxxx.pdf)을
+     * 다시 디스크 절대경로로 변환한다. 첨부파일 교체(update)/삭제 시 기존 파일을 정리할 때 사용.
+     * (FileUploadDto.savedPath를 DB에 별도로 저장해두지 않는 경우를 위한 보조 메서드)
+     */
+    public static String resolveDiskPath(String fileUrl) {
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            return null;
+        }
+        String relative = fileUrl.startsWith(urlPrefix) ? fileUrl.substring(urlPrefix.length()) : fileUrl;
+        return Paths.get(baseDir, relative).toString();
     }
 
     /** 검증이 끝난 파일을 디스크에 저장하고 결과를 반환 (validate를 먼저 호출했다는 전제) */
@@ -155,7 +164,7 @@ public class FileUploadUtil {
         return header;
     }
 
-    private static boolean isValidImageSignature(byte[] header, String ext) {
+    private static boolean isValidFileSignature(byte[] header, String ext) {
         if (header == null) {
             return false;
         }
@@ -174,6 +183,32 @@ public class FileUploadUtil {
                 return header.length >= 12
                     && header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F'
                     && header[8] == 'W' && header[9] == 'E' && header[10] == 'B' && header[11] == 'P';
+            case "gif":
+                return header.length >= 6
+                    && header[0] == 'G' && header[1] == 'I' && header[2] == 'F'
+                    && header[3] == '8' && (header[4] == '7' || header[4] == '9') && header[5] == 'a';
+            case "pdf":
+                return header.length >= 4
+                    && header[0] == '%' && header[1] == 'P' && header[2] == 'D' && header[3] == 'F';
+            // docx/xlsx/pptx/hwpx는 내부적으로 zip 포맷이라 zip과 같은 시그니처를 사용한다.
+            case "zip":
+            case "docx":
+            case "xlsx":
+            case "pptx":
+            case "hwpx":
+                return header.length >= 4
+                    && (header[0] & 0xFF) == 0x50 && (header[1] & 0xFF) == 0x4B
+                    && ((header[2] & 0xFF) == 0x03 || (header[2] & 0xFF) == 0x05 || (header[2] & 0xFF) == 0x07);
+            // doc/xls/ppt(구 바이너리 오피스 포맷)와 구버전 hwp는 OLE 복합 문서 시그니처를 공유한다.
+            case "doc":
+            case "xls":
+            case "ppt":
+            case "hwp":
+                return header.length >= 8
+                    && (header[0] & 0xFF) == 0xD0 && (header[1] & 0xFF) == 0xCF
+                    && (header[2] & 0xFF) == 0x11 && (header[3] & 0xFF) == 0xE0
+                    && (header[4] & 0xFF) == 0xA1 && (header[5] & 0xFF) == 0xB1
+                    && (header[6] & 0xFF) == 0x1A && (header[7] & 0xFF) == 0xE1;
             default:
                 return false;
         }
