@@ -58,6 +58,19 @@
         </div>
       </div>
 
+      <!-- 선행 작업 지정 -->
+      <div class="mb-3">
+        <label for="parent_task_id" class="sb-form-label">
+          선행 작업 <span class="text-faint" style="font-weight:400;font-size:12px">(선택, 이 작업이 끝나야 시작 가능)</span>
+        </label>
+        <select id="parent_task_id" name="parentTaskId" class="form-select">
+          <option value="">-- 선행 작업 없음 --</option>
+          <option th:each="t : ${taskList}" th:value="${t.taskId}"
+                  th:text="'[' + ${t.taskStatus} + '] ' + ${t.taskName} + ' (~' + ${#temporals.format(t.taskEndDate, 'yyyy-MM-dd')} + ')'">
+          </option>
+        </select>
+      </div>
+
       <div class="row g-3 mb-4">
         <div class="col-md-6">
           <label for="task_start_date" class="sb-form-label">시작일</label>

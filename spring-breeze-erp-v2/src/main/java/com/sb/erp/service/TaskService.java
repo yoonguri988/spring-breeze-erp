@@ -37,4 +37,8 @@ public interface TaskService {
 	
 	//pdf보고서 생성
 	public byte[] createMyWeeklyReport(MyWeeklyReportDto dto);
+	
+	//내 태스크 목록조회
+	public List<TaskDto> selectMyTasks(TaskSearchDto search);
+	public int selectMyTasksCount(TaskSearchDto search);
 }
