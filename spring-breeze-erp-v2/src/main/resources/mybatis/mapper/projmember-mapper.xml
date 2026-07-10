@@ -46,6 +46,6 @@ where pm.pm_id = #{pmId}
 	select pm.pm_id, e.emp_name
 	from project_member pm
 	join employee e on pm.emp_id = e.emp_id
-	where pm.project_pro_id = #{ProId}
+	where pm.project_pro_id = #{value}
 </select>
 </mapper>
