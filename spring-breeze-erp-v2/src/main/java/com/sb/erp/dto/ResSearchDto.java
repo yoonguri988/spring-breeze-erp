@@ -23,7 +23,8 @@ public class ResSearchDto {
 	// 검색 조건이 비어있는지 확인 여부
 	public boolean hasSearchCondition() {
 		return (keyword != null && !keyword.isEmpty())
-	            || (resType != null && !resType.isEmpty());
+	            || (resType != null && !resType.isEmpty())
+				|| (resStatus != null && !resStatus.isEmpty());
 	        // 검색 필드 추가될 때마다 여기에 || 조건 추가
 	}
 }

@@ -55,20 +55,35 @@ window.addEventListener("load", function(){
                     th:text="${dto.bcontent}" required></textarea>
         </div>
 
-        <div class="col-12" th:if="${dto.bfile != null and !#strings.isEmpty(dto.bfile)}">
-          <label for="bfile" class="sb-form-label">기존파일</label>
-          <input type="text" id="bfile" name="bfile"
-                 th:value="${dto.bfile}" readonly class="form-control">
-        </div>
+        <!--
+          dto.bfile은 이제 FileUploadUtil이 만들어준 fileUrl(예: /upload/notice/attach/xxxx.pdf) 그대로다.
+          "bfile"이라는 이름의 폼 필드로 다시 제출할 필요는 없다 — 새 파일을 안 올리면
+          컨트롤러에서 dto.bfile을 건드리지 않고, 매퍼의 <if test="bfile != null ...">가
+          알아서 DB의 기존 값을 그대로 유지해주기 때문. 여기서는 미리보기 용도로만 보여준다.
+        -->
+        <div class="col-12"
+             th:if="${dto.bfile != null and !#strings.isEmpty(dto.bfile)}"
+             th:with="attExt=${#strings.toLowerCase(#strings.substringAfter(dto.bfile,'.'))}">
+          <label class="sb-form-label">기존 첨부파일</label>
+          <div class="mt-1">
+            <img th:if="${attExt == 'png' or attExt == 'jpg' or attExt == 'jpeg' or attExt == 'gif' or attExt == 'webp'}"
+                 th:src="@{${dto.bfile}}" th:alt="${dto.btitle}"
+                 class="img-fluid rounded" style="max-width:200px">
 
-        <div class="col-12" th:if="${dto.bfile != null and !#strings.isEmpty(dto.bfile)}">
-          <img th:src="@{'/upload/' + ${dto.bfile}}" th:alt="${dto.btitle}"
-               class="img-fluid" style="max-width:200px">
+            <a th:unless="${attExt == 'png' or attExt == 'jpg' or attExt == 'jpeg' or attExt == 'gif' or attExt == 'webp'}"
+               th:href="@{${dto.bfile}}" class="btn btn-sb-soft btn-sm" target="_blank" rel="noopener">
+                <i class="bi bi-paperclip"></i>
+                현재 첨부파일 보기 (<span th:text="${'.' + attExt}"></span>)
+            </a>
+          </div>
+          <div class="form-text">새 파일을 첨부하면 기존 첨부파일은 교체(삭제)됩니다.</div>
         </div>
 
         <div class="col-12">
           <label for="file" class="sb-form-label">파일 첨부</label>
-          <input type="file" id="file" name="file" class="form-control">
+          <input type="file" id="file" name="file" class="form-control"
+                 accept=".png,.jpg,.jpeg,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.hwp,.hwpx,.zip">
+          <div class="form-text">이미지 · pdf · office 문서 · hwp · zip, 최대 10MB</div>
         </div>
       </div>
 
