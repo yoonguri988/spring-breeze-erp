@@ -13,11 +13,6 @@
             <div class="sb-breadcrumb">
                 <a th:href="@{/}">홈</a>
                 <i class="bi bi-chevron-right"></i>
-                <!--
-                  [참고] 원본 그대로 유지했습니다만, 이 링크가 /dept/detail?deptId=...로
-                  현재 페이지 자기 자신을 가리키고 있습니다(목록이 아니라). 의도한 게 맞는지 확인해주세요.
-                  목록으로 보내려던 거라면 @{/dept/list(comId=${dept.comId})} 가 맞을 것 같습니다.
-                -->
                 <a th:href="@{/dept/detail(deptId=${dept.deptId})}">부서 상세 현황</a>
                 <i class="bi bi-chevron-right"></i>
                 <span th:text="${dept.deptName}"></span>
