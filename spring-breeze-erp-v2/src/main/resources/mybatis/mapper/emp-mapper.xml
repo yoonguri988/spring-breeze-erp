@@ -75,14 +75,18 @@
 	<!-- jsj : 사원 등록, emp_id는 트리거가 시퀀스로 자동 등록(제외) -->
 	<insert id="insert" parameterType="EmpDto">
 		insert into employee
-		(emp_no, emp_pass, emp_name, 
-		dept_id, pos_id, com_id, 
+		(emp_no, emp_pass, emp_name,
+		dept_id, pos_id, com_id,
 		emp_email, emp_mobile, emp_status, hire_date)
 		values
-		(#{empNo}, #{empPass}, #{empName},
-		#{deptId}, #{posId}, #{comId}, 
+		(#{empNo}, #{empPass},
+		#{empName},
+		#{deptId}, #{posId}, #{comId},
 		#{empEmail}, #{empMobile}, #{empStatus},
 		to_date(#{hireDate}, 'YYYY-MM-DD'))
+		<selectKey keyProperty="empId" resultType="int" order="AFTER">
+			select seq_employee.currval from dual
+		</selectKey>
 	</insert>
 
 	<!-- jsj : 사원 정보 수정 -->
@@ -129,7 +133,9 @@
 		and e.com_id = a.com_id
 		where e.com_id = #{comId}
 	</select>
-
+	
+	
+	<!-- jsj: 3일 전 등록된 미발송 사원 및 회사 정보 조회 -->
 	
 
 	<!-- cyj: 비밀번호 찾기시 해당하는 사원정보가 있는지 확인 -->
