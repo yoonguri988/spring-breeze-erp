@@ -98,13 +98,30 @@
                     </div>
 
                     <div class="mb-4">
-                    	<label for="forContent" class="sb-form-label">양식 내용</label>
-                        <textarea name="forContent" rows="10" cols="40"
-						      	  class="form-control" id="forContent"
-						      	  th:text="${dto.forContent}"></textarea>
-                        <div id="err_forContent" class="text-danger fw-semibold mt-1"
-							 style="display: none; font-size: 14px;">
-							 양식 내용을 입력해주세요
+						<div id="schemaDataHolder" th:if="${dto.forSchema != null}" 
+							 th:attr="data-schema=${dto.forSchema}" style="display: none;"></div>
+						<input type="hidden" id="forSchema" name="forSchema" value=""/> 
+							
+						<!-- 스키마 기반 -->
+						<div id="schemaEditorWrap" style="display: none;">
+							<label class="sb-form-label">양식 필드 구성</label>
+							<div id="schemaFieldList" class="d-flex flex-column gap-2"></div>
+							<button type="button" class="btn btn-sm btn-outline-primary mt-2"
+									id="addFieldBtn">
+								<i class="bi bi-plus-lg"></i> 필드 추가
+							</button>
+						</div>
+							
+						<!-- 기존 에디터 방식 -->
+						<div id="contentEditorWrap">	
+	                    	<label for="forContent" class="sb-form-label">양식 내용</label>
+	                        <textarea name="forContent" rows="10" cols="40"
+							      	  class="form-control" id="forContent"
+							      	  th:text="${dto.forContent}"></textarea>
+	                        <div id="err_forContent" class="text-danger fw-semibold mt-1"
+								 style="display: none; font-size: 14px;">
+								 양식 내용을 입력해주세요
+							</div>
 						</div>
                     </div>
                     
@@ -211,84 +228,181 @@
 </div>
 <script>
 
-let valid = false;
+let valid = true;
+let originalCode = "";
 
-/////////////////////////////// 회사 이름 검색 ///////////////////////////////
-
-window.addEventListener("load", function(){
+	/////////////////////////////// 스키마 파싱 ///////////////////////////////
 	
-	let companySearch = document.getElementById("comName");
-	let comId = document.getElementById("comId");
-	let companyDropdown = document.getElementById("companyDropdown");
-	
-	// 입력 할때마다 실행
-	companySearch.addEventListener("keyup", function(e){
-		let value = e.target.value.trim();
+	window.addEventListener("load", function(){
+		const holder = document.getElementById("schemaDataHolder");
+		if(!holder) return;
 		
-		if(value !== "") {
-			// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
-			fetch(`/appr/searchCompany?company=${encodeURIComponent(value)}`)
-			.then(response => response.json())
-			.then(data => {
-				companyDropdown.innerHTML = ""; // 기존 목록 비우기
-				
-				if(data && data.length > 0){
-					companyDropdown.style.display = "block";
-					
-					data.forEach(item => {
-						let btn = document.createElement("button");
-						btn.type = "button";
-						btn.className = "dropdown-item d-flex justify-content-between align-items-center";
-						
-						// 태그 생성
-						let nameSpan = document.createElement("span");
-						// 생성된 태그에 클래스 추가
-						nameSpan.className = "company-name";
-						// 회사이름
-						btn.textContent = item.comName;
-						
-						// 위와 동일, 사업자 번호 파트
-						let bizSpan = document.createElement("span");
-						bizSpan.className = "text-muted small ms-2";
-						bizSpan.textContent = item.bizNo;
-						
-						// 삽입
-						btn.appendChild(nameSpan);
-						btn.appendChild(bizSpan);
-						
-						// 검색해서 나온 회사 이름 클릭
-						btn.addEventListener("click", function(){
-							companySearch.value = item.comName; // 회사이름 넣기
-							comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
-							companyDropdown.style.display = "none"; // 드롭다운 닫기
-						});
-						companyDropdown.appendChild(btn);
-					});
-				}
-				else{ // 검색결과 없을때
-					companyDropdown.innerHTML = "<span class='dropdown-item text-muted disabled'>검색 결과가 없습니다.</span>";
-					companyDropdown.style.display = "block";
-				}
-			})
-			.catch(error => {
-				console.error("회사 검색 오류:",error);
-				companyDropdown.style.display = "none";
-			});
-		}
-		else{ // 입력란 비어있을때 처리
-			comId.value = "";
-			companyDropdown.innerHTML = "";
-			companyDropdown.style.display = "none";
+		isSchemaMode = true;
+		document.getElementById("schemaEditorWrap").style.display = "block";
+		document.getElementById("contentEditorWrap").style.display = "none";
+		
+		const schema = JSON.parse(holder.getAttribute("data-schema"));
+		schema.fields.forEach(f => addFieldRow(f));
+	});
+	
+	function addFieldRow(field = {}){
+		const list = document.getElementById("schemaFieldList");
+		const row = document.createElement("div");
+		row.className = "border rounded p-3 schema-field-row";
+		
+		row.innerHTML = `
+			<div class="row g-2">
+				<div class="col-md-4">
+					<label class="sb-form-label small mb-1">필드 라벨</label>
+					<input type="text" class="form-control form-control-sm schema-label" value="${field.label || ''}"/>
+				</div>
+				<div class="col-md-3">
+					<label class="sb-form-label small mb-1">타입</label>
+					<select class="form-select form-select-sm schema-type">
+						${['text','textarea','date','number','select'].map(t =>
+							`<option value="${t}" ${field.type===t?'selected':''}>${t}</option>`).join('')}
+					</select>
+				</div>
+				<div class="col-md-3">
+					<label class="sb-form-label small mb-1">key</label>
+					<input type="text" class="form-control form-control-sm schema-key" value="${field.key || ''}"/>
+				</div>
+				<div class="col-md-2 d-flex align-items-end">
+					<div class="form-check">
+						<input type="checkbox" class="form-check-input schema-required" ${field.required?'checked':''}/>
+						<label class="form-check-label small">필수</label>
+					</div>
+				</div>
+			</div>
+			<div class="mt-2 schema-options-wrap" style="display:${field.type==='select'?'block':'none'};">
+				<label class="sb-form-label small mb-1">선택지 (쉼표로 구분)</label>
+				<input type="text" class="form-control form-control-sm schema-options"
+					   value="${(field.options||[]).join(', ')}"/>
+			</div>
+			<button type="button" class="btn btn-sm btn-outline-danger mt-2 schema-remove-btn">
+				<i class="bi bi-trash3"></i> 필드 삭제
+			</button>
+		`;
+		
+		// 타입이 select로 바뀌면 옵션 입력창 보이기
+		const typeSelect = row.querySelector(".schema-type");
+		const optionsWrap = row.querySelector(".schema-options-wrap");
+		typeSelect.addEventListener("change", function(){
+			optionsWrap.style.display = this.value === "select" ? "block" : "none";
+		});
+		
+		row.querySelector(".schema-remove-btn").addEventListener("click", function(){
+			row.remove();
+		});
+
+		list.appendChild(row);
+	}
+	
+	document.getElementById("addFieldBtn").addEventListener("click", function(){
+		addFieldRow();
+	});
+	
+	/////////////////////////////// 스키마 파싱 ///////////////////////////////
+	
+	/////////////////////////////// 파싱된거 도로 JSON에 넣기 ///////////////////////////////
+	
+	function buildSchemaFromEditor(){
+		const rows = document.querySelectorAll(".schema-field-row");
+		const fields = Array.from(rows).map(row => {
+			const type = row.querySelector(".schema-type").value;
+			const field = {
+				key: row.querySelector(".schema-key").value.trim(),
+				label: row.querySelector(".schema-label").value.trim(),
+				type: type,
+				required: row.querySelector(".schema-required").checked
+			};
+			if(type === "select"){
+				field.options = row.querySelector(".schema-options").value
+					.split(",").map(s => s.trim()).filter(s => s !== "");
+			}
+			return field;
+		});
+		return JSON.stringify({ fields });
+	}
+	
+	/////////////////////////////// 파싱된거 도로 JSON에 넣기 ///////////////////////////////
+
+	/////////////////////////////// 회사 이름 검색 ///////////////////////////////
+
+	window.addEventListener("load", function(){
+		
+		let companySearch = document.getElementById("comName");
+		let comId = document.getElementById("comId");
+		let companyDropdown = document.getElementById("companyDropdown");
+		
+		// 입력 할때마다 실행
+		companySearch.addEventListener("keyup", function(e){
+			let value = e.target.value.trim();
 			
-		}
+			if(value !== "") {
+				// 데이터를 /searchCompany 경로에 company라는 이름으로 보냄
+				fetch(`/appr/searchCompany?company=${encodeURIComponent(value)}`)
+				.then(response => response.json())
+				.then(data => {
+					companyDropdown.innerHTML = ""; // 기존 목록 비우기
+					
+					if(data && data.length > 0){
+						companyDropdown.style.display = "block";
+						
+						data.forEach(item => {
+							let btn = document.createElement("button");
+							btn.type = "button";
+							btn.className = "dropdown-item d-flex justify-content-between align-items-center";
+							
+							// 태그 생성
+							let nameSpan = document.createElement("span");
+							// 생성된 태그에 클래스 추가
+							nameSpan.className = "company-name";
+							// 회사이름
+							btn.textContent = item.comName;
+							
+							// 위와 동일, 사업자 번호 파트
+							let bizSpan = document.createElement("span");
+							bizSpan.className = "text-muted small ms-2";
+							bizSpan.textContent = item.bizNo;
+							
+							// 삽입
+							btn.appendChild(nameSpan);
+							btn.appendChild(bizSpan);
+							
+							// 검색해서 나온 회사 이름 클릭
+							btn.addEventListener("click", function(){
+								companySearch.value = item.comName; // 회사이름 넣기
+								comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
+								companyDropdown.style.display = "none"; // 드롭다운 닫기
+							});
+							companyDropdown.appendChild(btn);
+						});
+					}
+					else{ // 검색결과 없을때
+						companyDropdown.innerHTML = "<span class='dropdown-item text-muted disabled'>검색 결과가 없습니다.</span>";
+						companyDropdown.style.display = "block";
+					}
+				})
+				.catch(error => {
+					console.error("회사 검색 오류:",error);
+					companyDropdown.style.display = "none";
+				});
+			}
+			else{ // 입력란 비어있을때 처리
+				comId.value = "";
+				companyDropdown.innerHTML = "";
+				companyDropdown.style.display = "none";
+				
+			}
+		});
+		// 입력창 외부공간 클릭시 정리
+		document.addEventListener("click", function(e){
+			if(e.target !== companySearch && e.target !== companyDropdown){
+				companyDropdown.style.display = "none";
+			}
+		});
 	});
-	// 입력창 외부공간 클릭시 정리
-	document.addEventListener("click", function(e){
-		if(e.target !== companySearch && e.target !== companyDropdown){
-			companyDropdown.style.display = "none";
-		}
-	});
-});
 	
 	///////////////////// 양식 삭제 재확인 /////////////////////
 	
@@ -306,70 +420,95 @@ window.addEventListener("load", function(){
 	/////////////////////////////// 빈칸 처리 ///////////////////////////////
 	
 	function checkForm(){
+	
 		// 빈칸 체크할 요소들 매핑 {key : value}
 		// 아래처럼 매핑 안하면 일일이 하나씩 getElementById 를써서 비교하고 변경해야함
 		const fields = [
 			{ id: "forCode", errId: "err_forCode"},
 			{ id: "forTitle", errId: "err_forTitle"},
-			{ id: "comId", errId: "err_comId", focusId: "companySearch"},
-			{ id: "forContent", errId: "err_forContent"}
+			{ id: "comId", errId: "err_comId", focusId: "comName"}
 		];
+		
+		if(!isSchemaMode){
+			fields.push({ id: "forContent", errId: "err_forContent", isEditor: true});
+		}
 		
 		let result = true;
 		let focusElement = null;
 		
-		// 에러 초기화
 		fields.forEach(field => {
 			let id = document.getElementById(field.id);
 			let errId = document.getElementById(field.errId);
+			if(!id) return;
 			
-			// 테두리 제거
-			id.classList.remove("is-invalid");
+			// 테두리/에러 초기화
+			if(field.isEditor){
+				const editorElement = id.nextElementSibling;
+				if(editorElement && editorElement.classList.contains('note-editor')){
+					editorElement.classList.remove("is-invalid");
+				}
+			}
+			else {
+				id.classList.remove("is-invalid");
+			}
 			if(field.focusId){
 				document.getElementById(field.focusId).classList.remove("is-invalid");
 			}
-			
-			// 에러 구문 제거
-			if(errId){
-				errId.style.display = "none";
+			if(errId) errId.style.display = "none";
+		
+			// 빈값 체크
+			let isEmpty;
+			if(field.isEditor){
+				const editorCode = window.jQuery('#' + field.id).summernote('code');
+				isEmpty = window.jQuery('#' + field.id).summernote('isEmpty') ||
+						  editorCode === '' || editorCode === '<p><br></p>';
+			}
+			else {
+				isEmpty = id.value.trim() === "";
 			}
 			
-			// 비어있는 값 체크
-			if(id.value.trim() == ""){
-				if(field.focusId){
+			if(isEmpty){
+				if(field.isEditor){
+					const editorElement = id.nextElementSibling;
+					if(editorElement && editorElement.classList.contains('note-editor')){
+						editorElement.classList.add("is-invalid");
+					}
+				}
+				else if(field.focusId){
 					document.getElementById(field.focusId).classList.add("is-invalid");
 				}
-				else{
+				else {
 					id.classList.add("is-invalid");
 				}
-				
-				if(errId) {
-					errId.style.display = "block";
-				}
+				if(errId) errId.style.display = "block";
 				if(!focusElement){
 					focusElement = field.focusId ? document.getElementById(field.focusId) : id;
 				}
-				
 				result = false;
 			}
-			
 		});
-		// 양식 중복 인데 강제로 작성 눌렀을시 제어
-		if(!valid){
-			alert("중복된 양식코드는 사용할수 없습니다.");
-			document.getElementById("forCode").focus();
+		
+		if(isSchemaMode){
+			const rows = document.querySelectorAll(".schema-field-row");
+			if(rows.length === 0){
+				alert("최소 1개 이상의 필드가 필요합니다.");
+				result = false;
+			}
+			// JSON으로 조립하여 실제 제출값에 반영
+			document.getElementById("forSchema").value = buildSchemaFromEditor();
+		}
+	
+		if(!result){
+			if(focusElement) focusElement.focus();
 			return false;
 		}
 		
-		if(!result){
-			if(focusElement){
-				focusElement.focus();
-			}
-				return false;
+		if(!valid){
+			alert("중복된 양식 코드는 사용할 수 없습니다.");
+			document.getElementById("forCode").focus();
+			return false;
 		}
-
 		return true;
-
 	}
 	
 	/////////////////////////////// 빈칸 처리 ///////////////////////////////
@@ -378,11 +517,21 @@ window.addEventListener("load", function(){
 	
 	window.addEventListener("load", function(){
 		let forCode = document.getElementById("forCode"); // forCode 가져오기
+		originalCode = forCode.value.trim();
 		let tforCode = document.querySelector(".tforCode"); // 입력 결과 출력할 부분 가져오기
 		
 		// 입력할때마다 호출 
 		forCode.addEventListener("keyup", function(e){
 			let value = e.target.value.trim(); // 빈칸제외 forCode의 입력값 가져오기
+			
+			// 원래 양식 코드 그대로 들어오면 그냥 통과처리
+			if(value === originalCode){
+				tforCode.textContent = "";
+				tforCode.className = "tforCode";
+				forCode.classList.remove("is-valid", "is-invalid");
+				valid = true;
+				return;
+			}
 			
 			// 양식 중복 검색할 회사 값 가져오기
 			let comIdElement = document.getElementById("comId");
