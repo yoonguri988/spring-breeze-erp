@@ -94,7 +94,7 @@
         #{forCode},
         #{forTitle},
         #{forContent},
-        #{forSchema, jdbcType=VARCHAR}
+        #{forSchema, jdbcType=VARCHAR},
         #{forStatus},
         TO_DATE(#{createdAt}, 'YYYY-MM-DD HH24:MI:SS'),
         (SELECT NVL(MAX(for_version), 0) + 1 
