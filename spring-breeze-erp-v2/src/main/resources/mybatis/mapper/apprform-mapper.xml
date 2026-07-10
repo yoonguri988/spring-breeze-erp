@@ -22,7 +22,6 @@
 		where
 			for_code = #{forCode}
 			and com_id = #{comId}
-			and is_deleted = 0
 		<if test="forId != null and forId != '' and forId != 0">
 			and for_id != #{forId}
 		</if>
@@ -51,6 +50,7 @@
 			for_code,
 			for_title,
 			for_content,
+			for_schema,
 			for_status
 		)
 		values (
@@ -58,6 +58,7 @@
 			#{forCode},
 			#{forTitle},
 			#{forContent},
+			#{forSchema, jdbcType=VARCHAR},
 			#{forStatus}
 		)
 	</insert>
@@ -70,33 +71,36 @@
 			for_code = #{forCode},
 			for_title = #{forTitle},
 			for_content = #{forContent},
+			for_schema = #{forSchema, jdbcType=VARCHAR},
 			for_status = #{forStatus}
 		where for_id = #{forId} and for_version = #{forVersion}
 	</update>
 	
 	<!-- 결재 양식 수정 / 양식이 수정되었을때 ( 버전 o ) -->
 	<insert id="updateFormNewVersion" parameterType="ApprFormDto">
-		insert into appr_form
-		(
-			for_id,
-			com_id,
-			for_code,
-			for_title,
-			for_content, 
-			for_status,
-			created_at,
-			for_version 
-		)
-		values (
-			#{forId},
-			#{comId},
-			#{forCode},
-			#{forTitle},
-			#{forContent},
-			#{forStatus},
-			to_date(#{createdAt}, 'YYYY-MM-DD HH24:MI:SS"."' ) ,
-			#{forVersion}+1
-		)
+		INSERT INTO appr_form (
+        for_id, 
+        com_id, 
+        for_code, 
+        for_title, 
+        for_content, 
+        for_schema,
+        for_status, 
+        created_at, 
+        for_version
+    ) VALUES (
+        appr_form_seq.nextval,
+        #{comId},
+        #{forCode},
+        #{forTitle},
+        #{forContent},
+        #{forSchema, jdbcType=VARCHAR}
+        #{forStatus},
+        TO_DATE(#{createdAt}, 'YYYY-MM-DD HH24:MI:SS'),
+        (SELECT NVL(MAX(for_version), 0) + 1 
+         FROM appr_form 
+         WHERE com_id = #{comId} AND for_code = #{forCode})
+    )
 	</insert>
 	
 	<!-- 결재 양식 삭제 -->

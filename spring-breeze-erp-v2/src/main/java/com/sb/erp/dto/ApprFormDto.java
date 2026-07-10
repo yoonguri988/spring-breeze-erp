@@ -14,6 +14,7 @@ public class ApprFormDto {
 	private int forVersion;
 	private String createdAt;
 	private String updatedAt;
+	private String forSchema;
 	
 	private String comName;
 }
