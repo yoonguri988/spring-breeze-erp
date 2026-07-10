@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sb.erp.dao.TaskDependencyMapper">
+
+<!-- 선행 태스크 지정하여 태스크 생성 (task_id는 trg_task_bi 트리거가 자동 채움) -->
+<insert id="insertWithParent" parameterType="TaskDto">
+	insert into task (pro_id , com_id , task_name , task_desc , task_status , pm_id , 
+	task_start_date , task_end_date , parent_task_id , created_at , updated_at)
+	values(#{proId} , #{comId} , #{taskName} , #{taskDesc} , #{taskStatus} , #{pmId},
+	 #{taskStartDate}, #{taskEndDate}, #{parentTaskId}, SYSDATE, SYSDATE)
+</insert>
+
+<!-- 태스크 의존성 트리 조회 (선행 -> 후행 순으로 정렬) -->
+<select id="selectTaskDependencies" parameterType="int" resultType="TaskDto">
+	<![CDATA[
+	WITH task_hierarchy (
+		task_id, pro_id, pm_id, com_id, task_name, task_desc, task_status,
+		task_start_date, task_end_date, parent_task_id, task_path
+	) AS (
+		SELECT 
+			task_id, pro_id, pm_id, com_id, task_name, task_desc, task_status,
+			task_start_date, task_end_date, parent_task_id,
+			CAST(task_id AS VARCHAR2(200))
+		FROM task
+		WHERE pro_id = #{proId} AND parent_task_id IS NULL
+
+		UNION ALL
+
+		SELECT 
+			t.task_id, t.pro_id, t.pm_id, t.com_id, t.task_name, t.task_desc, t.task_status,
+			t.task_start_date, t.task_end_date, t.parent_task_id,
+			th.task_path || ',' || t.task_id
+		FROM task t
+		INNER JOIN task_hierarchy th ON t.parent_task_id = th.task_id
+		WHERE t.pro_id = #{proId}
+	)
+	SELECT * FROM task_hierarchy ORDER BY task_path
+	]]>
+</select>
+
+<!-- 태스크 일정 및 선행 태스크 수정 (updated_at은 trg_task_bu 트리거가 자동 처리) -->
+<update id="updateSchedule" parameterType="TaskDto">
+	update task set
+	task_name = #{taskName},
+	task_desc = #{taskDesc},
+	task_status = #{taskStatus},
+	task_start_date = #{taskStartDate},
+	task_end_date = #{taskEndDate},
+	parent_task_id = #{parentTaskId}
+	where task_id = #{taskId}
+</update>
+
+<!-- 벌크 연쇄 업데이트: 후속 지연 일정들을 PL/SQL 블록으로 한 번에 갱신 -->
+<update id="updateBatchTaskSchedule" parameterType="list">
+	<![CDATA[
+	BEGIN
+	]]>
+	<foreach collection="list" item="item">
+		UPDATE task
+		SET 
+			task_start_date = #{item.taskStartDate},
+			task_end_date = #{item.taskEndDate}
+		WHERE task_id = #{item.taskId};
+	</foreach>
+	<![CDATA[
+	END;
+	]]>
+</update>
+
+</mapper>
