@@ -6,10 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sb.erp.api.ReportApi;
 import com.sb.erp.dto.MyWeeklyReportDto;
 import com.sb.erp.service.TaskService;
+
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -32,5 +34,14 @@ public class ReportController {
         return ResponseEntity.ok() .contentType(MediaType.APPLICATION_PDF)
         						   .header("Content-Disposition", "attachment; filename=\"MyWeeklyReport.pdf\"")
         						   .body(pdf);
+    }
+    
+    @GetMapping("/my-weekly-report/check") //태스크 존재여부 확인
+    @ResponseBody
+    public ResponseEntity<Boolean> checkAvailable(HttpSession session) {
+        Integer empId = (Integer) session.getAttribute("empId");
+        MyWeeklyReportDto dto = taskService.myWeeklyReport(empId);
+        boolean available = (dto != null && dto.getTotalTask() > 0);
+        return ResponseEntity.ok(available);
     }
 }
