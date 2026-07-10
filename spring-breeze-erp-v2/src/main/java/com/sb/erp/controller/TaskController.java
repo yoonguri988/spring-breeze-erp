@@ -1,20 +1,26 @@
 package com.sb.erp.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.ProjectMemberDto;
 import com.sb.erp.dto.TaskDto;
+import com.sb.erp.dto.TaskSearchDto;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.EmpService;
 import com.sb.erp.service.ProjectMemberService;
+import com.sb.erp.service.TaskDependencyService;
 import com.sb.erp.service.TaskService;
+import com.sb.erp.util.PagingUtil;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -24,10 +30,12 @@ public class TaskController {
 	@Autowired TaskService service;
 	@Autowired ProjectMemberService memberservice;
 	@Autowired EmpService empservice;
-
+	@Autowired TaskDependencyService dependencyService; 
+	
 	@GetMapping("/task_create")
 	public String createFrom(@RequestParam("project_pro_id") int projectProId, Model model) {
 		model.addAttribute("memberlist",memberservice.selectByproject(projectProId));
+		model.addAttribute("taskList", dependencyService.selectTaskDependencies(projectProId));
 		model.addAttribute("pro_id",projectProId);
 		return "proj/task_create"; // 프로젝트 멤버 이름 출력
 	}
@@ -36,21 +44,24 @@ public class TaskController {
 	 public String create(TaskDto dto,RedirectAttributes rttr, HttpSession session) {
 		 Integer comId = (Integer) session.getAttribute("comId");
 		 
-		 
 		 dto.setComId(comId); //해당회사의
 		 ProjectMemberDto member = memberservice.selectOne(dto.getPmId());
 		 if (member == null) { //방어코드
 			 rttr.addFlashAttribute("result", "유효하지 않은 담당자입니다.");
 			 return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();
 		 }
-		 
-		//  dto.setPmIdName(member.getEmpName());
-		 
-		 String result="태스크 등록 실패";
-		 if(service.insert(dto)>0) {result="태스크 등록 성공";}
-		 rttr.addFlashAttribute("result",result);
-		 return "redirect:/proj/proj_detail?pro_id="+dto.getProId();
-	 	} // 태스크 등록
+	 
+		String result = "태스크 등록 실패";
+		try {
+			if (dependencyService.insertWithParent(dto) > 0) {   // service.insert 대신 이걸로 교체
+				result = "태스크 등록 성공";
+			}
+		} catch (IllegalArgumentException e) {
+			result = e.getMessage();   // "시작일은 선행 작업 종료일 이후여야 합니다" 같은 메시지 그대로 전달
+		}
+
+		rttr.addFlashAttribute("result", result);
+		return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();} // 태스크 등록
 	
 	  @GetMapping("/task_detail") 
 	 public String view(@RequestParam("task_id") int taskId,Model model) {
@@ -83,4 +94,33 @@ public class TaskController {
 		  rttr.addFlashAttribute("result",result);
 		  return "redirect:/proj/proj_detail?pro_id="+proId;
 	  }// 태스크 삭제
+	  
+	  
+	    @GetMapping("/task_list")
+	    public String myList(TaskSearchDto search, Model model,Authentication auth) {
+	    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+	    	int empId =user.getUser().getEmpId();
+	    	int comId = user.getUser().getComId();
+	    	
+	    	   search.setEmpId(empId);
+	    	   search.setComId(comId);
+
+	        int totalCnt = service.selectMyTasksCount(search);
+	        PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
+	        List<TaskDto> tasks = service.selectMyTasks(search);
+
+	        model.addAttribute("search", search);
+	        model.addAttribute("tasks", tasks);
+	        model.addAttribute("paging", paging);
+	        model.addAttribute("totalCnt", totalCnt);
+	        return "proj/task_list";
+	    }// 내 태스크 목록 조회
+		
+		// 태스크 의존성 매니저 화면
+		@GetMapping("/task_dependency")
+		public String dependencyView(@RequestParam("pro_id") int proId, Model model) {
+			model.addAttribute("proId", proId);
+			model.addAttribute("memberlist", memberservice.selectByproject(proId));
+			return "proj/task_dependency";
+		}
 }
