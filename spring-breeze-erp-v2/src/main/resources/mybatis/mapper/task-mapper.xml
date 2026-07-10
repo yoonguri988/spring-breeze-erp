@@ -52,6 +52,44 @@
 
 <!-- 태스크 삭제 -->
 <delete id="delete" parameterType="int">
-delete from task where task_id =#{taskId}
+	delete from task where task_id =#{taskId}
 </delete>
+
+<!-- 주간보고서용(개발자) -->
+<select id="myWeeklyReport" resultType="MyWeeklyReportDto">
+ <![CDATA[
+    select
+        e.emp_id as empId,
+        e.emp_name as empName,
+        nvl(count(t.task_id), 0) as totalTask,
+        nvl(sum(case when t.task_status = 'DONE' then 1 else 0 end), 0) as doneTaskCount,
+        nvl(sum(case when t.task_status <> 'DONE' then 1 else 0 end), 0) as notDoneTaskCount,
+        nvl(sum(case when t.task_status = 'DONE'
+            and t.actual_end_date >= trunc(sysdate,'IW') - 7
+            and t.actual_end_date <  trunc(sysdate,'IW')
+            then 1 end), 0) as completedThisWeek,
+        nvl(sum(case when t.task_status <> 'DONE' and t.task_end_date < sysdate then 1 end), 0) as delayTaskCount,
+        nvl(round(sum(case when t.task_status = 'DONE' then 1 else 0 end) / count(t.task_id) * 100), 0) as progressRate,
+        nvl(round(avg(case when t.actual_start_date is not null and t.actual_end_date is not null
+            then t.actual_end_date - t.actual_start_date end), 1), 0) as avgTaskDays,
+        nvl(round(avg(case when t.actual_end_date > t.task_end_date
+            then t.actual_end_date - t.task_end_date end)), 0) as avgDelayDays
+    from task t
+    join project_member pm on t.pm_id = pm.pm_id
+    join employee e on pm.emp_id = e.emp_id
+    where e.emp_id = #{empId}
+    group by e.emp_id, e.emp_name
+    ]]>
+</select>
+	
+<!-- 지연 태스크 이름 목록 -->
+<select id="delayedTaskNames" resultType="String">
+	<![CDATA[
+	select t.task_name
+	from task t
+	join project_member pm on t.pm_id = pm.pm_id
+	where pm.emp_id = #{empId} and t.task_status <> 'DONE' and t.task_end_date < sysdate
+	order by t.task_end_date asc
+	]]>
+</select>
 </mapper>

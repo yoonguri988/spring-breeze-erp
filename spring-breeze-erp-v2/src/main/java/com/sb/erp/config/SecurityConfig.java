@@ -28,15 +28,24 @@ public class SecurityConfig {
 					// ─── 로그인만 하면 접근 가능 ───────────
 					.requestMatchers("/auth/updatePass", "/", "/emp/list", 
 					"/emp/detail", "/emp/edit", "/emp/editPass",
-					"/com/**", "/dept/**", "/appr/**").authenticated()
+					"/com/**", "/dept/**", "/proj/**", "/appr/**").authenticated()
 					// ─── ROOT 전용 ────────────────────────
-				    .requestMatchers("/root/**").hasRole("ROOT")
+				    .requestMatchers("/root/**").hasAuthority("ROOT")
 				    // ─── ADMIN 이상 ──────────────────
-				    .requestMatchers("/admin/**").hasAnyRole("ROOT", "ADMIN")
+//				    .requestMatchers("/admin/**").hasAnyAuthority("ROOT", "ROLE_ADMIN")
 					// ─── 사원/직급/권한 관리 (ADMIN 전용) ────────────────
 				    .requestMatchers("/emp/add", "/emp/resetPass",
 							"/emp/checkEmail", "/emp/checkMobile",
-							"/emp/checkEmpNo", "/perm/**", "/pos/**").hasRole("ADMIN")
+							"/emp/checkEmpNo", "/perm/**", "/pos/**",
+							"/dept/transfer/pending","/dept/transfer/list","/dept/transfer/log",
+							"/admin/**"
+					).hasRole("ADMIN")
+				    // ─── 로그인만 하면 접근 가능 ───────────
+				    .requestMatchers("/auth/updatePass", "/", "/emp/list", 
+				    		"/emp/detail", "/emp/edit", "/emp/editPass",
+				    		"/com/**", "/dept/**",
+				    		"/res/**", "/resv/**"
+				    		).authenticated()
 				    // ─── 그 외 ────────────────
 				    .anyRequest().permitAll()
 				)

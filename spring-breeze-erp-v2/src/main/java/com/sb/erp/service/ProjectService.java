@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import com.sb.erp.dto.ProjectAnalysisDto;
 import com.sb.erp.dto.ProjectDto;
 import com.sb.erp.dto.ProjectSearchDto;
+import com.sb.erp.dto.WeeklyReportDto;
 
 public interface ProjectService {
 	//프로젝트 등록
@@ -40,4 +41,10 @@ public interface ProjectService {
 	//Ai 분석 결과
 	public ProjectAnalysisDto projectAnalysis(Integer proId);
 	public String analyzeProject(Integer proId);
+	
+	//주간 보고서용-팀장용
+	public WeeklyReportDto weeklyReport(Integer proId);
+	
+	//주간 보고서용으로 가져올 프로젝트들
+	public List<Integer>selectActiveProjectIds();
 }
