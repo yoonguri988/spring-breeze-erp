@@ -171,9 +171,13 @@ public class ApprFormController {
 	@PostMapping("/update_form")
 	public String update_post(ApprFormDto dto, Model model) {
 		
-		// 양식 수정 성공
-		if(appr.updateForm(dto) > 0) {
-			return "redirect:/appr/list_form";
+		try {
+			// 양식 수정 성공
+			if(appr.updateForm(dto) > 0) {
+				return "redirect:/appr/list_form";
+			}
+		} catch (IllegalArgumentException e) {
+			model.addAttribute("errorMsg", e.getMessage());
 		}
 		
 		ApprFormDto fail = new ApprFormDto();

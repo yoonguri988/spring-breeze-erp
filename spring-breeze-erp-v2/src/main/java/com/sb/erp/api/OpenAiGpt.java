@@ -92,7 +92,7 @@ public class OpenAiGpt {
 			{
 				"key": "필드의 영문 식별자 (snake_case)",
 				"label": "필드의 한글 라벨",
-				"type": "text, textarea, data, number, select 중 하나",
+				"type": "text, textarea, date, number, select 중 하나",
 				"required": true 또는 false,
 				"options": ["select 타입일 때만 존재하는 선택지 배열"]
 			}
