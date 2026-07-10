@@ -9,6 +9,7 @@
 <body>
 
 <main layout:fragment="content">
+<script th:src="@{/js/appr-schema.js}"></script>
 <div class="sb-content">
 	 <div class="sb-page-head">
 	 	<div class="sb-page-head__txt">
@@ -148,15 +149,20 @@
 			</div>
 			<div class="sb-card__body">
 				<div class="mt-2">
-					<textarea name="docContent" rows="10" cols="40"
-							  class="form-control" id="forContent"></textarea>
-					<div class="form-text text-faint mt-2 ms-2">
-						선택한 결재 서식 프레임워크가 실시간으로 주입
+					<div id="summernoteWrap">
+						<textarea name="docContent" rows="10" cols="40"
+								  class="form-control" id="forContent"></textarea>
+						<div class="form-text text-faint mt-2 ms-2">
+							선택한 결재 서식 프레임워크가 실시간으로 주입
+						</div>
+						<div id="err_docContent" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 문서 본문 내용을 작성해주세요.
+						</div>
 					</div>
-					<div id="err_docContent" class="text-danger fw-semibold mt-1"
-						 style="display: none; font-size: 14px;">
-						 문서 본문 내용을 작성해주세요.
-					</div>
+					
+					<!-- 스키마 기반일때 들어올 부분 -->
+					<div id="dynamicFormBox" style="display:none;"></div>
 					
 					<div class="sb-divider"></div>
 					
@@ -252,7 +258,6 @@
 			
 			if(!selectedFormId){
 				window.jQuery('#forContent').summernote('code','');
-				document.getElementById("forVersion").value = "";
 				return;
 			}
 			
@@ -265,8 +270,14 @@
 			fetch(`/appr/getFormDetail?forId=${encodeURIComponent(selectedFormId)}&forVersion=${encodeURIComponent(selectedVersion)}`)
 			.then(response => response.json())
 			.then(data => {
-				if(data && data.forContent){
-					window.jQuery('#forContent').summernote('code', data.forContent);
+				// 스키마 일시
+				if(data.forSchema){
+					renderDynamicForm(JSON.parse(data.forSchema));
+				}
+				// 기존 content 일시
+				else{
+					showSummernote();
+					window.jQuery('#forContent').summernote('code', data.forContent || '');
 				}
 			})
 			.catch(error => {
@@ -275,6 +286,26 @@
 			});
 		});
 	});
+	
+	// 스키마
+	function renderDynamicForm(schema){
+		let currentFormSchema = schema;
+		
+		document.getElementById("summernoteWrap").style.display = "none";
+		const box = document.getElementById("dynamicFormBox");
+		box.style.display = "block";
+		
+		// 각 필드에 맞는 input을 문자열로 만들어서 다넣기
+		box.innerHTML = schema.fields.map(f => renderSchema(f, true)).join('');
+	}
+	
+	// content 
+	function showSummernote(){
+		currentFormSchema = null;
+		document.getElementById("summernoteWrap").style.display = "block";
+		document.getElementById("dynamicFormBox").style.display = "none";
+	}
+	
 	
 	/////////////////////////////// 양식 ///////////////////////////////
 
@@ -286,8 +317,11 @@
 		const fields = [
 			{ id: "formSelect", errId: "err_form"},
 			{ id: "docTitle", errId: "err_docTitle"},
-			{ id: "forContent", errId: "err_docContent"}
 		];
+		
+		if(!currentFormSchema){
+			fields.push({ id: "forContent", errId: "err_docContent"});
+		}
 		
 		let result = true;
 		let focusElement = null;
@@ -328,6 +362,22 @@
 			}
 			
 		});
+		
+		if(currentFormSchema){
+			let valid = true;
+			currentFormSchema.fields.forEach(f => {
+				if(f.required){
+					const el = document.getElementById(`dyn_${f.key}`);
+					if(!el || el.value.trim() === ""){
+						valid = false;
+						el?.classList.add("is-invalid");
+					}
+				}
+			});
+			if(!valid) { return false; }
+			
+			document.getElementById("forContent").value = buildHtmlFromSchema(currentFormSchema);
+		}
 		
 		// 결재선 검증
 		if(!window.isApprLineComplete()){
