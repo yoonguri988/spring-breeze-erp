@@ -7,11 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sb.erp.dto.NoticeDto;
 import com.sb.erp.dto.NoticeSearchDto;
 
-/* Service 계층 인터페이스
- * 비즈니스 로직 정의
- * Service → Mapper → XML로 DB CRUD 수행
- */
-
 public interface NoticeService {
 	
 		int insert(NoticeDto dto, MultipartFile file);

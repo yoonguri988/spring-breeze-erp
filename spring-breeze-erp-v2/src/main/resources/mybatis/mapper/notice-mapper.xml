@@ -1,94 +1,77 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
-"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.NoticeMapper">
 
-  <!-- ✅ resultMap 추가: DB 컬럼명과 DTO 필드명 매핑 -->
-<!--   <resultMap id="noticeResultMap" type="NoticeDto">
-    <id property="bno" column="bno"/>
-    <result property="btitle" column="btitle"/>
-    <result property="bcontent" column="bcontent"/>
-    <result property="bhit" column="bhit"/>
-    <result property="bfile" column="bfile"/>
-    <result property="createdAt" column="created_at"/>
-    
-    <result property="updatedAt" column="updated_at"/>
-    <result property="empId" column="emp_id"/>
-    <result property="comId" column="com_id"/>
-  </resultMap> -->
-
-  <!-- 공지 게시글 등록 (insert 구문 포함) -->
-  <!-- ✅ PK(bno) 자동 생성 후 DTO에 매핑되도록 옵션 추가 -->
-  <insert id="insert" parameterType="NoticeDto" >
+  <!-- 공지 게시글 등록 (bno는 trg_notice_bi 트리거가 자동 채움) -->
+  <insert id="insert" parameterType="NoticeDto">
     insert into notice (btitle, bcontent, emp_id, com_id
-    	<if test="bfile != null and bfile != ''">, bfile</if>
-    )  
+      <if test="bfile != null and bfile != ''">, bfile</if>
+    )
     values (#{btitle}, #{bcontent}, #{empId}, #{comId}
-    	<if test="bfile != null and bfile != ''">, #{bfile}</if>
+      <if test="bfile != null and bfile != ''">, #{bfile}</if>
     )
   </insert>
-  
+
   <!-- 상세 페이지 조회 -->
   <select id="select" resultType="NoticeDto" parameterType="int">
     select * from notice where bno = #{bno}
   </select>
-  
+
   <!-- 조회수 증가 -->
   <update id="updateHit" parameterType="int">
     update notice set bhit = bhit + 1 where bno = #{bno}
   </update>
-  
+
   <!-- 삭제 -->
   <delete id="delete" parameterType="int">
     delete from notice where bno = #{bno}
   </delete>
-  
+
   <!-- 공지 수정 -->
   <update id="update" parameterType="NoticeDto">
     update notice
     set btitle   = #{btitle}
         , bcontent = #{bcontent}
-        <if test="bfile != null and bfile != ''">, bfile    = #{bfile}</if>
+        <if test="bfile != null and bfile != ''">, bfile = #{bfile}</if>
     where bno = #{bno}
   </update>
-  
-  <!-- 페이징 -->
+
+  <!-- 페이징 목록 조회 -->
   <select id="selectAll" resultType="NoticeDto" parameterType="NoticeSearchDto">
-    select * from notice
+      select n.bno, n.btitle, n.bcontent, n.bfile, n.bhit,
+         n.emp_id, n.com_id, n.created_at, n.updated_at,
+         e.emp_name as empName
+  		from notice n
+  		join employee e on n.emp_id = e.emp_id
     <where>
-    	<if test="keyword != null and keyword != ''">
-    	and (lower(btitle) like lower(CONCAT('%', #{keyword}, '%'))
-           or lower(bcontent) like lower(CONCAT('%', #{keyword}, '%')))
-    	</if>
+      <if test="keyword != null and keyword != ''">
+        and (lower(n.btitle) like lower('%' || #{keyword} || '%')
+             or lower(n.bcontent) like lower('%' || #{keyword} || '%'))
+      </if>
     </where>
-    order by bno desc
-    <if test="sortBy == 'new'">, created_at desc</if>
-    <if test="sortBy == 'views'">, created_at desc</if>
-    limit #{pstartno}, #{onepagelist}
+    order by
+    <choose>
+      <when test="sortBy == 'views'">n.bhit desc</when>
+      <otherwise>n.created_at desc</otherwise>
+    </choose>
+    OFFSET #{pstartno} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
   </select>
 
   <!-- 전체 카운트 -->
   <select id="selectCount" resultType="int">
     select count(*) from notice
   </select>
-  
-  <!-- 공지글 페이징 + 검색 (제목/내용) -->
-  <!-- <select id="selectNoticeList" resultType="NoticeDto" parameterType="NoticeSearchDto">
-    select * from notice
-    <where>
-    	<if test="keyword != null and keyword != ''">
-    	and (lower(btitle) like lower(CONCAT('%', #{keyword}, '%'))
-           or lower(bcontent) like lower(CONCAT('%', #{keyword}, '%')))
-    	</if>
-    </where>
-    limit #{pstartno}, #{onepagelist}
-  </select> 
-   -->
+
   <!-- 검색 결과 카운트 -->
   <select id="selectCountNoticeList" resultType="int" parameterType="NoticeSearchDto">
-    select count(*) as total_count
+    select count(*)
     from notice
-    where (lower(btitle) like lower(CONCAT('%', #{keyword}, '%'))
-           or lower(bcontent) like lower(CONCAT('%', #{keyword}, '%')))
-  </select>  
+    <where>
+      <if test="keyword != null and keyword != ''">
+        and (lower(btitle) like lower('%' || #{keyword} || '%')
+             or lower(bcontent) like lower('%' || #{keyword} || '%'))
+      </if>
+    </where>
+  </select>
+
 </mapper>

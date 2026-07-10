@@ -12,10 +12,6 @@ import com.sb.erp.dao.NoticeMapper;
 import com.sb.erp.dto.NoticeDto;
 import com.sb.erp.dto.NoticeSearchDto;
 
-/* Service 구현체
- * Mapper 호출하여 실제 DB 작업 수행
- */
-
 @Service
 public class NoticeServiceImpl implements NoticeService{
 	
