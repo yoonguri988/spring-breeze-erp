@@ -22,4 +22,11 @@ public class TaskDto {
 	private LocalDate updatedAt;
 	private Integer parentTaskId;
 	private String proName;
+	
+	//프로젝트 기간
+	private LocalDate startDate;
+	private LocalDate endDate;
+	
+    // 지연 여부
+    private boolean delayed;
 }
