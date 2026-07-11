@@ -72,12 +72,16 @@
 			    </span>
 			</td>
 			<td>
-			    <span th:if="${dto.delayed}" class="sb-badge sb-badge--red">
-			        <i class="bi bi-exclamation-triangle-fill"></i>
-			        지연
-			    </span>
-			
-			    <span th:unless="${dto.delayed}" class="text-muted">-</span>
+			   <span th:if="${dto.parentTaskId != null and dto.parentTaskStatus != 'DONE'}" 
+				      class="sb-badge sb-badge--gray">
+				  <i class="bi bi-lock-fill"></i> 대기중
+				</span>
+				<span th:if="${dto.delayed and (dto.parentTaskId == null or dto.parentTaskStatus == 'DONE')}" 
+				      class="sb-badge sb-badge--red">
+				  <i class="bi bi-exclamation-triangle-fill"></i> 지연
+				</span>
+				<span th:if="${!dto.delayed and (dto.parentTaskId == null or dto.parentTaskStatus == 'DONE')}" 
+				      class="text-muted">-</span>
 			</td>
             <td class="sb-hr-cell tnum" th:text="${#temporals.format(dto.taskStartDate, 'yyyy-MM-dd')} + ' ~ ' + ${#temporals.format(dto.taskEndDate, 'yyyy-MM-dd')}"></td>
             <td class="sb-hr-cell tnum" th:text="${#temporals.format(dto.createdAt, 'yyyy-MM-dd')}"></td>
