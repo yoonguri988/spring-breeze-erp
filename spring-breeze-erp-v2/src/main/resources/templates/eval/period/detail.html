@@ -177,20 +177,19 @@
 						</h2>
 					</div>
 					<div class="sb-card__body">
-
 						<!-- 상태 흐름 안내 -->
-						<div class="sb-flow mb-3">
-							<div class="sb-flow__step"
-								th:classappend="${period.periodStatus == 'READY'} ? 'sb-flow__step--active'">준비</div>
+						<div class="sb-flow mb-3" th:with="st=${period.periodStatus}">
+							<div class="sb-flow-step"
+								th:classappend="${st == 'READY' ? 'sb-flow-step-active' : 'sb-flow-step-done'}">준비</div>
 							<i class="bi bi-chevron-right"></i>
-							<div class="sb-flow__step"
-								th:classappend="${period.periodStatus == 'OPEN'} ? 'sb-flow__step--active'">진행</div>
+							<div class="sb-flow-step"
+								th:classappend="${st == 'OPEN' ? 'sb-flow-step-active' : (st == 'READY' ? '' : 'sb-flow-step-done')}">진행</div>
 							<i class="bi bi-chevron-right"></i>
-							<div class="sb-flow__step"
-								th:classappend="${period.periodStatus == 'CLOSED'} ? 'sb-flow__step--active'">마감</div>
+							<div class="sb-flow-step"
+								th:classappend="${st == 'CLOSED' ? 'sb-flow-step-active' : (st == 'REPORTED' ? 'sb-flow-step-done' : '')}">마감</div>
 							<i class="bi bi-chevron-right"></i>
-							<div class="sb-flow__step"
-								th:classappend="${period.periodStatus == 'REPORTED'} ? 'sb-flow__step--active'">리포트</div>
+							<div class="sb-flow-step"
+								th:classappend="${st == 'REPORTED' ? 'sb-flow-step-active' : ''}">리포트</div>
 						</div>
 
 						<!-- READY → OPEN -->
@@ -235,7 +234,8 @@
 
 						<!-- 안내 문구 -->
 						<div class="text-faint mt-3" style="font-size: 12px">
-							<i class="bi bi-info-circle me-1"></i> 상태는 순차적으로만 전환할 수 있으며, 이전 상태로 되돌릴 수 없습니다.
+							<i class="bi bi-info-circle me-1"></i> 상태는 순차적으로만 전환할 수 있으며, 이전
+							상태로 되돌릴 수 없습니다.
 						</div>
 					</div>
 				</div>

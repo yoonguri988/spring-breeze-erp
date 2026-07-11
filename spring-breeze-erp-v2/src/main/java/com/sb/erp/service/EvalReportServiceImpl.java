@@ -14,6 +14,7 @@ import com.sb.erp.dto.openai.ReportContent;
 import com.sb.erp.dao.EvalReportMapper;
 import com.sb.erp.dto.EvalPeriodDto;
 import com.sb.erp.dto.EvalReportDto;
+import com.sb.erp.dto.EvalReportSearchDto;
 import com.sb.erp.util.SecurityUtil;
 
 @Service
@@ -38,10 +39,9 @@ public class EvalReportServiceImpl implements EvalReportService {
 	// Mock 리포트 모델 표기 
 	private static final String MOCK_MODEL_NAME = "mock-analyzer-v1";
 	
-	/**
-	 * GPT 응답이 사용 가능한지 검증함. 
-	 * 요약문이 비어있지 않은가, 감성 3개가 모두 있고 합이 대략 100.0인가
-	 */
+	// GPT 응답이 사용 가능한지 검증함. 
+	// 요약문이 비어있지 않은가, 감성 3개가 모두 있고 합이 대략 100.0인가
+
 	private boolean isValidGptResult(ReportContent r) {
 		if (r.summary() == null || r.summary().isBlank())
 			return false;
@@ -85,6 +85,25 @@ public class EvalReportServiceImpl implements EvalReportService {
 	public List<EvalReportDto> selectMyAll() {
 		return dao.selectByEmpId(SecurityUtil.getCurrentEmpId());
 	}
+	
+	@Override
+	public EvalReportDto selectLatestByEmpId(int empId) {
+	    return dao.selectLatestByEmpId(empId, SecurityUtil.getCurrentComId());
+	}
+	
+	@Override
+	public List<EvalReportDto> searchByPeriod(EvalReportSearchDto search) {
+	    search.setComId(SecurityUtil.getCurrentComId());
+	    return dao.searchByPeriod(search);
+	}
+
+	@Override
+	public int countByPeriodSearch(EvalReportSearchDto search) {
+	    search.setComId(SecurityUtil.getCurrentComId());
+	    return dao.countByPeriodSearch(search);
+	}
+	
+	
 
 	// ─── 생성/재생성 ───────────────────────────────
 	@Override

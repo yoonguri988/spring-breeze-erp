@@ -13,29 +13,31 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.sb.erp.dto.EvalPeriodDto;
 import com.sb.erp.dto.EvalPeriodSearchDto;
 import com.sb.erp.dto.EvalReportDto;
+import com.sb.erp.dto.EvalReportSearchDto;
+import com.sb.erp.service.DeptService;
 import com.sb.erp.service.EvalPeriodService;
 import com.sb.erp.service.EvalReportService;
+import com.sb.erp.util.PagingUtil;
 import com.sb.erp.util.SecurityUtil;
 
 @Controller
 public class EvalReportController {
 	@Autowired EvalReportService evalReportService;
 	@Autowired EvalPeriodService evalPeriodService;
+	@Autowired DeptService deptService;
 
-
-	// ─── 회차별 리포트 목록 (관리자용) ─────────────
-	// periodId 필수. 없으면 회차 관리 화면으로 유도.
+	// ─── 회차별 리포트 목록 (관리자용, 검색 + 페이징) ─────────────
 	@GetMapping("/eval/report/list")
-	public String list(@RequestParam(required = false) Integer periodId,
-	                   Model model, RedirectAttributes ra) {
+	public String list(EvalReportSearchDto search, Model model, RedirectAttributes ra) {
 
 	    // periodId 미지정 → 회차 관리 화면으로 리다이렉트
-	    if (periodId == null) {
-	        ra.addFlashAttribute("infoMsg", "회차를 먼저 선택하세요. 마감된 회차의 상세 화면에서 'AI 리포트 보기'로 진입할 수 있습니다.");
+	    if (search.getPeriodId() == null) {
+	        ra.addFlashAttribute("infoMsg", 
+	            "회차를 먼저 선택하세요. 마감된 회차의 상세 화면에서 'AI 리포트 보기'로 진입할 수 있습니다.");
 	        return "redirect:/eval/period/list";
 	    }
 
-	    EvalPeriodDto period = evalPeriodService.selectByPeriodId(periodId);
+	    EvalPeriodDto period = evalPeriodService.selectByPeriodId(search.getPeriodId());
 	    if (period == null) {
 	        ra.addFlashAttribute("errorMsg", "존재하지 않는 회차입니다.");
 	        return "redirect:/eval/period/list";
@@ -45,16 +47,28 @@ public class EvalReportController {
 	    String status = period.getPeriodStatus();
 	    if (!"CLOSED".equals(status) && !"REPORTED".equals(status)) {
 	        ra.addFlashAttribute("errorMsg", "마감(CLOSED) 이상 상태의 회차만 리포트를 조회할 수 있습니다.");
-	        return "redirect:/eval/period/detail?periodId=" + periodId;
+	        return "redirect:/eval/period/detail?periodId=" + search.getPeriodId();
 	    }
 
-	    List<EvalReportDto> reports = evalReportService.selectByPeriodId(periodId);
-	    int totalEvals = evalPeriodService.countEvalsByPeriodId(periodId);
+	    // 페이징 계산 (12개씩)
+	    int currentPage = (search.getPage() == null || search.getPage() < 1) ? 1 : search.getPage();
+	    int total = evalReportService.countByPeriodSearch(search);
+	    PagingUtil paging = new PagingUtil(total, currentPage, 12, 10);
+
+	    // 페이징 값 세팅 후 조회
+	    search.setPstartno(paging.getPstartno());
+	    search.setOnepagelist(paging.getOnepagelist());
+	    List<EvalReportDto> reports = evalReportService.searchByPeriod(search);
+
+	    int totalEvals = evalPeriodService.countEvalsByPeriodId(search.getPeriodId());
 
 	    model.addAttribute("period", period);
 	    model.addAttribute("reports", reports);
-	    model.addAttribute("reportCount", reports.size());
+	    model.addAttribute("reportCount", total); // 필터 후 총 건수
 	    model.addAttribute("totalEvals", totalEvals);
+	    model.addAttribute("paging", paging);
+	    model.addAttribute("search", search);
+	    model.addAttribute("deptList", deptService.selectAll());
 	    return "eval/report/list";
 	}
 

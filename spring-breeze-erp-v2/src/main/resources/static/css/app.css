@@ -167,6 +167,15 @@ a { text-decoration: none; }
   background: var(--sb-accent-soft-2); color: var(--sb-accent);
   font-weight: 700; display: grid; place-items: center; font-size: 13px;
 }
+
+/* 대형 아바타 (프로필) */
+.sb-avatar--xl {
+	width: 72px;
+	height: 72px;
+	font-size: 28px;
+	border-radius: 50%;
+}
+
 .sb-userchip__meta { overflow: hidden; line-height: 1.25; }
 .sb-userchip__meta b { font-size: 13px; display: block; }
 .sb-userchip__meta span { font-size: 11.5px; color: var(--sb-ink-faint); }
@@ -319,6 +328,78 @@ a.sb-card {
 .sb-stat__delta.down { color: var(--sb-red); }
 .sb-stat__delta.flat { color: var(--sb-ink-faint); }
 
+
+/* ─── 상태 흐름 (sb-flow) ─────────────────────────────────
+   단계 파이프라인 UI. 회차 상태(READY → OPEN → CLOSED → REPORTED),
+   결재 단계 등 순차 진행형 상태 표시에 사용.
+   - 기본: 회색, 옅게
+   - -done: 완료된 단계 (초록 체크, 연한 배경)
+   - -active: 현재 단계 (강조, 액센트 배경 + 진한 테두리)
+   
+   ※ Thymeleaf 전처리기가 __를 특수 문법으로 해석하는 문제 회피를 위해
+     BEM __/-- 대신 단일 하이픈 사용 (프로젝트 다른 클래스는 BEM 유지)
+─────────────────────────────────────────────────────── */
+.sb-flow {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	padding: 8px 4px;
+}
+
+.sb-flow > .bi {
+	color: var(--sb-ink-faint);
+	font-size: 14px;
+}
+
+.sb-flow-step {
+	flex: 1;
+	min-width: 60px;
+	text-align: center;
+	padding: 8px 10px;
+	border-radius: var(--sb-radius-sm);
+	border: 1px solid var(--sb-border);
+	background: var(--sb-surface);
+	color: var(--sb-ink-faint);
+	font-size: 13px;
+	font-weight: 550;
+	transition: all .15s ease;
+	position: relative;
+}
+
+/* 완료된 단계 */
+.sb-flow-step-done {
+	background: var(--sb-green-soft);
+	border-color: var(--sb-green);
+	color: var(--sb-green);
+	font-weight: 600;
+}
+
+.sb-flow-step-done::before {
+	content: "\F26B";  /* bi-check */
+	font-family: "bootstrap-icons";
+	margin-right: 3px;
+	font-weight: 700;
+}
+
+/* 현재 단계 */
+.sb-flow-step-active {
+	background: var(--sb-accent);
+	border-color: var(--sb-accent);
+	color: #fff;
+	font-weight: 700;
+	box-shadow: 0 0 0 3px var(--sb-accent-soft),
+	            var(--sb-shadow-sm);
+	transform: translateY(-1px);
+}
+
+.sb-flow-step-active::before {
+	content: "\F287";  /* bi-circle-fill (작은 점) */
+	font-family: "bootstrap-icons";
+	margin-right: 4px;
+	font-size: 8px;
+	vertical-align: middle;
+}
 
 
 /* tone helpers for icon bubbles */
