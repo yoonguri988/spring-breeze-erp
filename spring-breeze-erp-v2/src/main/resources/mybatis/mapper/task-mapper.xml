@@ -99,10 +99,12 @@
          t.com_id, t.task_name, t.task_desc, t.task_status,
          t.pm_id, t.task_start_date, t.task_end_date,
          t.actual_start_date, t.actual_end_date,
-         t.created_at, t.updated_at, t.parent_task_id
+         t.created_at, t.updated_at, t.parent_task_id,
+         pt.task_status as parentTaskStatus
   from task t
   join project_member pm on t.pm_id = pm.pm_id
   join project p on t.pro_id = p.pro_id
+  left join task pt on t.parent_task_id = pt.task_id
   where pm.emp_id = #{empId}
     and t.com_id = #{comId}
     <if test="taskStatus != null and taskStatus != ''">
