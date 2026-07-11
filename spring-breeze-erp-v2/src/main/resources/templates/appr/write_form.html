@@ -118,16 +118,15 @@
 				
 				<div class="sb-card mb-4" style="display: none;">
 					<div class="sb-card__head">
-						<h2>AI 양식 생성
-							<span class="badge bg-secondary"
-								  style="font-size: 10px;">ㅇㅅㅇ</span>
-						</h2>
+						<h2>AI 양식 생성</h2>
+					</div>
 						<div class="sb-card__body">
-							<label class="sb-form-label">
-								원하는 양식을 설명하쇼...
-							</label>
-							<textarea id="aiPrompt" class="form-control" cols="20"
-									  rows="5" placeholder="뭐라 검색해야 하는거지??"></textarea>
+							<div class="d-flex flex-column mb-3">
+								<label class="sb-form-label">원하는 양식을 설명하세요</label>
+								<textarea id="aiPrompt" class="form-control"
+										  rows="3" placeholder="외부 교육/세미나 비용 청구 양식 만들어줘. 신청자, 교육일, 기관명, 총비용, 상세내용 필드 필요해."></textarea>
+							</div>
+							
 							<button type="button" class="btn btn-sm btn-outline-primary mt-2" id="aiGenerateBtn">
 								<i class="bi bi-stars"></i> AI로 필드 생성
 							</button>
@@ -141,7 +140,7 @@
 							</div>
 						</div>
 					</div>
-				</div>
+
 				
 				<div class="mt-4" id="contentEditorBox">
 					<label for="forContent" class="sb-form-label">양식 내용</label>

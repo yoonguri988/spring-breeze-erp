@@ -25,8 +25,10 @@
 		update
 			appr_line
 		set
-			lin_status = #{linStatus},
-			lin_approved = sysdate
+			lin_status = #{linStatus}
+		<if test="linStatus == 'APP' or linStatus == 'REJ'">
+			, lin_approved = sysdate
+		</if>
 		where
 			doc_id = #{docId}
 			and emp_id = #{empId}

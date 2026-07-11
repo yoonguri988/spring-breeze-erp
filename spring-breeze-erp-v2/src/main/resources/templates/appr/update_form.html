@@ -265,7 +265,10 @@ let originalCode = "";
 				</div>
 				<div class="col-md-3">
 					<label class="sb-form-label small mb-1">key</label>
-					<input type="text" class="form-control form-control-sm schema-key" value="${field.key || ''}"/>
+					<input type="text" class="form-control form-control-sm schema-key"
+						   value="${field.key || ''}" pattern="[a-zA-Z_][a-zA-Z0-9_]*"
+						   placeholder="예: trip_reason"/>
+					<div class="text-danger small key-err" style="display: none;">영문/숫자/언더바만 입력 가능합니다.</div>
 				</div>
 				<div class="col-md-2 d-flex align-items-end">
 					<div class="form-check">
@@ -283,6 +286,18 @@ let originalCode = "";
 				<i class="bi bi-trash3"></i> 필드 삭제
 			</button>
 		`;
+		
+		// key 입력 필터링
+		const keyInput = row.querySelector(".schema-key");
+		const keyErr = row.querySelector(".key-err");
+		keyInput.addEventListener("input", function(){
+			const filtered = this.value.replace(/[^a-zA-Z0-9_]/g, '');
+			if(filtered !== this.value){
+				this.value = filtered;
+				keyErr.style.display = "block";
+				setTimeout(() => keyErr.style.display = "none", 1500);
+			}
+		});
 		
 		// 타입이 select로 바뀌면 옵션 입력창 보이기
 		const typeSelect = row.querySelector(".schema-type");
@@ -310,8 +325,9 @@ let originalCode = "";
 		const rows = document.querySelectorAll(".schema-field-row");
 		const fields = Array.from(rows).map(row => {
 			const type = row.querySelector(".schema-type").value;
+			const key = row.querySelector(".schema-key").value.trim();
 			const field = {
-				key: row.querySelector(".schema-key").value.trim(),
+				key: key,
 				label: row.querySelector(".schema-label").value.trim(),
 				type: type,
 				required: row.querySelector(".schema-required").checked
@@ -488,12 +504,25 @@ let originalCode = "";
 			}
 		});
 		
+		// 스키마 검증
 		if(isSchemaMode){
 			const rows = document.querySelectorAll(".schema-field-row");
 			if(rows.length === 0){
 				alert("최소 1개 이상의 필드가 필요합니다.");
 				result = false;
 			}
+				
+			const keys = Array.from(rows).map(r => r.querySelector(".schema-key").value.trim());
+			if(keys.some(k => k === "")){
+				alert("모든 필드의 key 값을 입력해주세요.")
+				result = false;
+			}
+			
+			if(new Set(keys).size !== keys.length){
+				alert("key 값이 중복되었습니다. 각 필드는 고유한 key를 가져야 합니다.");
+				result = false;
+			}
+			
 			// JSON으로 조립하여 실제 제출값에 반영
 			document.getElementById("forSchema").value = buildSchemaFromEditor();
 		}
