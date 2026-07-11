@@ -10,174 +10,174 @@
 
 <main layout:fragment="content">
 <script th:src="@{/js/appr-schema.js}"></script>
-<div class="sb-content">
-	 <div class="sb-page-head">
-	 	<div class="sb-page-head__txt">
-	 		<div class="sb-breadcrumb">
-		 		<a th:href="@{/appr/list_doc}">전자결재</a>
-		 		<i class="bi bi-chevron-right"></i>
-		 		<span>결재 기안</span>
-	 		</div>
-	 		<h1>결재 문서 작성</h1>
-	 		<p>선택한 양식으로 새로운 결재 문서를 기안합니다.</p>
-	 	</div>
-	 	<div class="sb-page-head__actions">
-		 	<button type="button" class="btn btn-ghost"
-		 			th:onclick="|location.href='@{/appr/list_doc}'|">
-		 			목록으로
-		 	</button>
-	 	</div>
-	 </div>
+ <div class="sb-page-head">
+ 	<div class="sb-page-head__txt">
+ 		<div class="sb-breadcrumb">
+	 		<a th:href="@{/appr/list_doc}">전자결재</a>
+	 		<i class="bi bi-chevron-right"></i>
+	 		<span>결재 기안</span>
+ 		</div>
+ 		<h1>결재 문서 작성</h1>
+ 		<p>선택한 양식으로 새로운 결재 문서를 기안합니다.</p>
+ 	</div>
+ 	<div class="sb-page-head__actions">
+	 	<button type="button" class="btn btn-ghost"
+	 			th:onclick="|location.href='@{/appr/list_doc}'|">
+	 			목록으로
+	 	</button>
+ 	</div>
+ </div>
 
-	<form th:action="@{/appr/write_doc}" method="post" onsubmit="return checkForm()">
-		<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-		<div id="hiddenApprLines"></div>
-		
-		<!-- 데이터 바인딩 -->
-		<input type="hidden" id="comId" th:value="${dto.comId}"/>
-		<input type="hidden" id="empId" th:value="${dto.empId}"/>
-		<input type="hidden" id="forVersion" name="forVersion" value=""/>
+<form th:action="@{/appr/write_doc}" method="post" onsubmit="return checkForm()">
+	<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+	<div id="hiddenApprLines"></div>
 	
-		<div class="sb-card mb-4">
-			<div class="sb-card__head">
-				<h2>문서 정보</h2>
+	<!-- 데이터 바인딩 -->
+	<input type="hidden" id="comId" th:value="${dto.comId}"/>
+	<input type="hidden" id="empId" th:value="${dto.empId}"/>
+	<input type="hidden" id="posOrder" th:value="${dto.posOrder}"/>
+	<input type="hidden" id="forVersion" name="forVersion" value=""/>
+
+	<div class="sb-card mb-4">
+		<div class="sb-card__head">
+			<h2>문서 정보</h2>
+		</div>
+		
+		<div class="sb-card__body">	
+			<div class="row g-4 mb-4">
+				<div class="col-md-6">
+					<label for="forSelect"
+						   class="sb-form-label">결재 양식</label>
+					<select class="form-select" id="formSelect" name="forId">
+						<option value="">선택</option>
+					</select>
+					<div id="err_form" class="text-danger fw-semibold mt-1"
+						 style="display: none; font-size: 14px;">
+						 기안하실 결재 양식을 선택해주세요.
+					</div>
+					<div class="form-text text-faint mt-1">
+						문서에 사용할 결재 양식을 선택해주세요.
+					</div>
+				</div>
+			</div>
+				
+			<div class="row g-4 mb-4">
+				<div class="col-md-6">
+					<label for="docTitle" class="sb-form-label">문서 제목 <span class="text-danger">*</span></label>
+					<input type="text" class="form-control"
+						   id="docTitle" name="docTitle" placeholder="문서 제목을 입력하세요"/>
+					<div class="form-text text-faint mt-1">결재 문서의 제목을 입력하세요.</div>
+					<div id="err_docTitle" class="text-danger fw-semibold mt-1"
+						 style="display: none; font-size: 14px;">
+						 문서 제목을 입력해주세요
+					</div>
+				</div>
+				
+				<div class="col-md-6 d-flex gap-3 align-items-start">
+					<div class="flex-grow-1">
+						<label for="empName" class="sb-form-label">작성자 <span class="text-danger">*</span></label>
+						<input type="text" class="form-control bg-light" id="empName"
+							   th:value="|${dto.empName} (${dto.empId})|" readonly/>
+						<div class="form-text text-secondary mt-1">
+							현재 로그인한 사용자가 기본 작성자로 설정됩니다.
+						</div>
+					</div>
+					<div class="sb-info-box mt-4 col-md-5">
+						<i class="bi bi-info-circle-fill text-primary"></i> <strong>안내</strong><br>
+						중요 문서 지정 여부에 따라서 결재선의 수가 유동적으로 변경됩니다.
+					</div>
+				</div>
 			</div>
 			
-			<div class="sb-card__body">	
-				<div class="row g-4 mb-4">
-					<div class="col-md-6">
-						<label for="forSelect"
-							   class="sb-form-label">결재 양식</label>
-						<select class="form-select" id="formSelect" name="forId">
-							<option value="">선택</option>
-						</select>
-						<div id="err_form" class="text-danger fw-semibold mt-1"
-							 style="display: none; font-size: 14px;">
-							 기안하실 결재 양식을 선택해주세요.
-						</div>
-						<div class="form-text text-faint mt-1">
-							문서에 사용할 결재 양식을 선택해주세요.
-						</div>
+			<div class="row g-4 align-items-center">
+				<div class="col-md-6">
+					<label for="docStatus" class="sb-form-label">문서 상태</label>
+					<input type="text" class="form-control bg-light" id="docStatus" value="진행중 (ING)" readonly/>
+					<input type="hidden" name="docStatus" value="ING"/>
+					<div class="form-text text-secondary mt-1">
+						결재 진행중
 					</div>
 				</div>
-					
-				<div class="row g-4 mb-4">
-					<div class="col-md-6">
-						<label for="docTitle" class="sb-form-label">문서 제목 <span class="text-danger">*</span></label>
-						<input type="text" class="form-control"
-							   id="docTitle" name="docTitle" placeholder="문서 제목을 입력하세요"/>
-						<div class="form-text text-faint mt-1">결재 문서의 제목을 입력하세요.</div>
-						<div id="err_docTitle" class="text-danger fw-semibold mt-1"
-							 style="display: none; font-size: 14px;">
-							 문서 제목을 입력해주세요
-						</div>
+			
+				<div class="col-md-6">
+					<label class="sb-form-label">중요 문서 여부</label>
+					<div class="form-check form-switch mt-2">
+						<input class="form-check-input sb-checkbox" type="checkbox" id="isImportantSwitch"
+							   style="width: 44px; height: 22px; cursor:pointer;"/>
+						<input type="hidden" id="isImportant" name="isImportant" value="0"/>
+						<label class="form-check-label text-dark fw-semibold ms-2" for="isImportantSwitch"
+							   style="cursor: pointer; user-select: none; line-height:22px;">
+						</label>
 					</div>
-					
-					<div class="col-md-6 d-flex gap-3 align-items-start">
-						<div class="flex-grow-1">
-							<label for="empName" class="sb-form-label">작성자 <span class="text-danger">*</span></label>
-							<input type="text" class="form-control bg-light" id="empName"
-								   th:value="|${dto.empName} (${dto.empId})|" readonly/>
-							<div class="form-text text-secondary mt-1">
-								현재 로그인한 사용자가 기본 작성자로 설정됩니다.
-							</div>
-						</div>
-						<div class="sb-info-box mt-4 col-md-5">
-							<i class="bi bi-info-circle-fill text-primary"></i> <strong>안내</strong><br>
-							중요 문서 지정 여부에 따라서 결재선의 수가 유동적으로 변경됩니다.
-						</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="sb-card mb-4">
+		<div class="sb-card__head">
+			<h2>결재선 지정</h2>
+			<p class="mb-0 text-secondary" style="font-size: 14px;">
+				중요 문서는 3명, 일반 문서는 1명의 결재자를 순서대로 지정합니다.
+			</p>
+		</div>
+		<div class="sb-card__body">
+			<div class="row g-3">
+				<div class="col-md-6">
+					<label class="sb-form-label">조직도에서 선택</label>
+					<div class="tree-box bg-light">
+						<!-- 부서 트리 렌더링 위치 -->
+					</div>
+					<div id="deptEmpBox" class="appr-emp-box mt-2"></div>
+				</div>
+				
+				<div class="col-md-6">
+					<label class="sb-form-label">결재선 (순서대로 클릭하여 배치)</label>
+					<div id="apprSlots" class="appr-slots"></div>
+					<div id="err_apprLine" class="text-danger fw-semibold mt-2"
+						 style="display: none; font-size: 14px;">
+						 결재선을 모두 지정해주세요.
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="sb-card mb-4">
+		<div class="sb-card__head">
+			<h2>문서 내용</h2>
+		</div>
+		<div class="sb-card__body">
+			<div class="mt-2">
+				<div id="summernoteWrap">
+					<textarea name="docContent" rows="10" cols="40"
+							  class="form-control" id="forContent"></textarea>
+					<div class="form-text text-faint mt-2 ms-2">
+						선택한 결재 서식 프레임워크가 실시간으로 주입
+					</div>
+					<div id="err_docContent" class="text-danger fw-semibold mt-1"
+						 style="display: none; font-size: 14px;">
+						 문서 본문 내용을 작성해주세요.
 					</div>
 				</div>
 				
-				<div class="row g-4 align-items-center">
-					<div class="col-md-6">
-						<label for="docStatus" class="sb-form-label">문서 상태</label>
-						<input type="text" class="form-control bg-light" id="docStatus" value="진행중 (ING)" readonly/>
-						<input type="hidden" name="docStatus" value="ING"/>
-						<div class="form-text text-secondary mt-1">
-							결재 진행중
-						</div>
-					</div>
+				<!-- 스키마 기반일때 들어올 부분 -->
+				<div id="dynamicFormBox" style="display:none;"></div>
 				
-					<div class="col-md-6">
-						<label class="sb-form-label">중요 문서 여부</label>
-						<div class="form-check form-switch mt-2">
-							<input class="form-check-input sb-checkbox" type="checkbox" id="isImportantSwitch"
-								   style="width: 44px; height: 22px; cursor:pointer;"/>
-							<input type="hidden" id="isImportant" name="isImportant" value="0"/>
-							<label class="form-check-label text-dark fw-semibold ms-2" for="isImportantSwitch"
-								   style="cursor: pointer; user-select: none; line-height:22px;">
-							</label>
-						</div>
+				<div class="sb-divider"></div>
+				
+				<div class="d-flex justify-content-end align-items-center p-3">
+					<div class="d-flex gap-2">
+						<button type="button" class="btn btn-ghost border" th:onclick="|location.href='@{/appr/list_doc}'|">취소</button>
+						<button type="submit" class="btn btn-primary px-4"
+								style="background-color: #0d6efd; border-color: #0d6efd;">
+								<i class="bi bi-floppy"></i> 저장
+						</button>
 					</div>
 				</div>
 			</div>
 		</div>
-		
-		<div class="sb-card mb-4">
-			<div class="sb-card__head">
-				<h2>결재선 지정</h2>
-				<p class="mb-0 text-secondary" style="font-size: 14px;">
-					중요 문서는 3명, 일반 문서는 1명의 결재자를 순서대로 지정합니다.
-				</p>
-			</div>
-			<div class="sb-card__body">
-				<div class="row g-3">
-					<div class="col-md-6">
-						<label class="sb-form-label">조직도에서 선택</label>
-						<div class="tree-box bg-light">
-							<!-- 부서 트리 렌더링 위치 -->
-						</div>
-						<div id="deptEmpBox" class="appr-emp-box mt-2"></div>
-					</div>
-					
-					<div class="col-md-6">
-						<label class="sb-form-label">결재선 (순서대로 클릭하여 배치)</label>
-						<div id="apprSlots" class="appr-slots"></div>
-						<div id="err_apprLine" class="text-danger fw-semibold mt-2"
-							 style="display: none; font-size: 14px;">
-							 결재선을 모두 지정해주세요.
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<div class="sb-card mb-4">
-			<div class="sb-card__head">
-				<h2>문서 내용</h2>
-			</div>
-			<div class="sb-card__body">
-				<div class="mt-2">
-					<div id="summernoteWrap">
-						<textarea name="docContent" rows="10" cols="40"
-								  class="form-control" id="forContent"></textarea>
-						<div class="form-text text-faint mt-2 ms-2">
-							선택한 결재 서식 프레임워크가 실시간으로 주입
-						</div>
-						<div id="err_docContent" class="text-danger fw-semibold mt-1"
-							 style="display: none; font-size: 14px;">
-							 문서 본문 내용을 작성해주세요.
-						</div>
-					</div>
-					
-					<!-- 스키마 기반일때 들어올 부분 -->
-					<div id="dynamicFormBox" style="display:none;"></div>
-					
-					<div class="sb-divider"></div>
-					
-					<div class="d-flex justify-content-end align-items-center p-3">
-						<div class="d-flex gap-2">
-							<button type="button" class="btn btn-ghost border" th:onclick="|location.href='@{/appr/list_doc}'|">취소</button>
-							<button type="submit" class="btn btn-primary px-4"
-									style="background-color: #0d6efd; border-color: #0d6efd;">
-									<i class="bi bi-floppy"></i> 저장
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+	</div>
 	</form>
 	
 	<!-- jquery 로드 -->
@@ -217,12 +217,14 @@
 	/////////////////////////////// 웹 에디터 ///////////////////////////////
 	</script>
 	
-</div>
 
 
 <script>
 
 	/////////////////////////////// 양식 ///////////////////////////////
+	
+	let currentFormSchema = null;
+	
 	window.addEventListener("load", function(){
 		const loginComId = document.getElementById("comId").value;
 		const formSelect = document.getElementById("formSelect");
@@ -289,7 +291,7 @@
 	
 	// 스키마
 	function renderDynamicForm(schema){
-		let currentFormSchema = schema;
+		currentFormSchema = schema;
 		
 		document.getElementById("summernoteWrap").style.display = "none";
 		const box = document.getElementById("dynamicFormBox");
@@ -310,6 +312,21 @@
 	/////////////////////////////// 양식 ///////////////////////////////
 
 	/////////////////////////////// 빈칸 처리 ///////////////////////////////
+	
+	function buildHtmlFromSchema(schema){
+		let rows = "";
+		schema.fields.forEach(f => {
+			const val = document.getElementById(`dyn_${f.key}`).value;
+			rows += `<tr><th>${f.label}</th><td>${val}</td></tr>`
+		});
+		return `<div class="appr-table-wrap">
+					<table class="appr-table">
+						<tbody>
+							${rows}
+						</tbody>
+					</table>
+				</div>`
+	}
 	
 	function checkForm(){
 		// 빈칸 체크할 요소들 매핑 {key : value}
@@ -364,19 +381,20 @@
 		});
 		
 		if(currentFormSchema){
-			let valid = true;
+			let schemaValid = true;
 			currentFormSchema.fields.forEach(f => {
 				if(f.required){
 					const el = document.getElementById(`dyn_${f.key}`);
 					if(!el || el.value.trim() === ""){
-						valid = false;
+						schemaValid = false;
 						el?.classList.add("is-invalid");
 					}
 				}
 			});
-			if(!valid) { return false; }
-			
-			document.getElementById("forContent").value = buildHtmlFromSchema(currentFormSchema);
+			if(!schemaValid) { result = false; }
+			else {
+				document.getElementById("forContent").value = buildHtmlFromSchema(currentFormSchema);
+			}
 		}
 		
 		// 결재선 검증
@@ -522,18 +540,26 @@
 		function renderEmpList(emps){
 			empBox.innerHTML = "";
 			
+			const myEmpId = parseInt(document.getElementById("empId").value);
+			const myPosOrder = parseInt(document.getElementById("posOrder").value);
+			
+			// 본인, 본인과 같은 직급 제외
+			const filtered = emps.filter(emp =>
+				emp.empId !== myEmpId && emp.posOrder > myPosOrder
+			);
+			
 			// 사원 데이터가 없을때 처리
-			if(!emps || emps.length === 0){
+			if(!filtered || filtered.length === 0){
 				empBox.innerHTML = `
 					<div class="text-muted text-center py-4 small">
 						<i class="bi bi-person-x fs-4 d-block mb-1"></i>
-						해당 부서에 소속된 사원이 없습니다.
+						선택 가능한 상급자가 없습니다.
 					</div>
 				`;
 				return;
 			}
 			
-			emps.forEach(emp => {
+			filtered.forEach(emp => {
 				const already = slots.some(s => s && s.empId === emp.empId);
 				const div = document.createElement("div");
 				div.className = "appr-emp-row" + (already ? " disabled" : "");
