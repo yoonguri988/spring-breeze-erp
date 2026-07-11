@@ -105,14 +105,16 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 			}
 			final Integer currentFindId = pointer;
 			pointer = list.stream()
-					.filter(t -> t.getTaskId().equals(currentFindId))
-					.map(TaskDto::getParentTaskId)
-					.findFirst()
-					.orElse(null);
+			        .filter(t -> t.getTaskId().equals(currentFindId))
+			        .findFirst()
+			        .map(TaskDto::getParentTaskId)
+			        .orElse(null);
 		}
 		return false;
 	}
 	
 	//후속 작업 리스트
 	@Override public List<TaskDto> selectImpactTasks(int taskId) {  return dao.selectImpactTasks(taskId); }
+	
+	
 }
