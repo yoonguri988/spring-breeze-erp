@@ -401,6 +401,20 @@ a.sb-card {
 	vertical-align: middle;
 }
 
+/* 실패한 단계 */
+.sb-flow-step-failed {
+	background: var(--sb-red-soft);
+	border-color: var(--sb-red);
+	color: var(--sb-red);
+	font-weight: 600;
+}
+
+.sb-flow-step-failed::before {
+	content: "\F62A";  /* bi-x (또는 F659 bi-exclamation) */
+	font-family: "bootstrap-icons";
+	margin-right: 3px;
+	font-weight: 700;
+}
 
 /* tone helpers for icon bubbles */
 .tone-blue   { background: var(--sb-accent-soft); color: var(--sb-accent); }

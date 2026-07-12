@@ -114,10 +114,11 @@ public class EvalReportServiceImpl implements EvalReportService {
 			return -1;
 		}
 
-		// CLOSED 또는 REPORTED만 리포트 생성 가능
+		// REPORTING(배치 오케스트레이터가 이미 전환), 또는 REPORTED(재생성)만 허용
+		// CLOSED는 이제 진입점이 아님 — 배치 서비스가 REPORTING으로 먼저 전환하고 호출함
 		String status = period.getPeriodStatus();
-		if (!"CLOSED".equals(status) && !"REPORTED".equals(status)) {
-			return -2;
+		if (!"REPORTING".equals(status) && !"REPORTED".equals(status)) {
+		    return -2;
 		}
 
 		// 회차 내 사원별 평가 집계 조회

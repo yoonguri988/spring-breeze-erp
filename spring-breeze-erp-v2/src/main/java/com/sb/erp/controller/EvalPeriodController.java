@@ -8,18 +8,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.sb.erp.dao.EvalMapper;
+import com.sb.erp.dao.EvalReportMapper;
 import com.sb.erp.dto.EvalPeriodDto;
 import com.sb.erp.dto.EvalPeriodSearchDto;
 import com.sb.erp.service.EvalPeriodService;
+import com.sb.erp.dto.ReportProgressDto;
 
 @Controller
 public class EvalPeriodController {
 	@Autowired EvalPeriodService evalPeriodService;
+	@Autowired EvalMapper evaluationMapper;
+	@Autowired EvalReportMapper evalReportMapper;
 
 	// ─── 회차 조회 ────────────────────────────────────
 	// 목록 조회(필터)
@@ -177,6 +183,24 @@ public class EvalPeriodController {
 		ra.addFlashAttribute("successMsg", "AI 분석을 시작합니다.");
 		return "redirect:/eval/period/detail?periodId=" + periodId;
 	}
+	
+	// ─── 리포트 진행률 조회 ─────────────────────────────
+	@GetMapping("/eval/period/{periodId}/status")
+	@ResponseBody
+	public ReportProgressDto getReportProgress(@PathVariable int periodId) {
+	    // 회차 존재 및 소유권 확인 (evalPeriodService가 comId 격리 담당)
+	    EvalPeriodDto period = evalPeriodService.selectByPeriodId(periodId);
+	    if (period == null) {
+	        return new ReportProgressDto("NOT_FOUND", 0, 0);
+	    }
+	    
+	    // 이 지점에 도달했다는 건 회차가 내 회사 소유라는 뜻
+	    // 따라서 아래 count 쿼리는 comId 없이 안전 (매퍼가 이미 그렇게 짜여있음)
+	    int completed = evalReportMapper.countByPeriodId(periodId);
+	    int total = evaluationMapper.countDistinctTargetsByPeriodId(periodId);
+	    
+	    return new ReportProgressDto(period.getPeriodStatus(), completed, total);
+	}
 
 
 	// ─── 중복 확인 ────────────────────────────────────
@@ -187,6 +211,9 @@ public class EvalPeriodController {
 		result.put("duplicate", evalPeriodService.isDuplicate(evalYear, evalTerm));
 		return result;							
 	}
+	
+	
+
 
 
 }
