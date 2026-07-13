@@ -38,6 +38,9 @@ public interface EvalMapper {
 	// 회차의 평가 대상 사원 수 — 리포트 진행률 산정
 	int countDistinctTargetsByPeriodId(@Param("periodId") int periodId);
 	
+	// 회차의 미제출 평가 건수 (DRAFT 상태 등 SUBMITTED가 아닌 것) — 회차 마감 검증용
+	int countUnsubmittedByPeriod(@Param("periodId") int periodId);
+	
 	
 	// ─── 평가 등록/수정 ──────────────────────────
 
