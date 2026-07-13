@@ -5,29 +5,29 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sb.erp.api.OpenAiClient;
 import com.sb.erp.dto.openai.ChatMessage;
 import com.sb.erp.dto.openai.ReportContent;
+import com.sb.erp.dao.EvalPeriodMapper;
 import com.sb.erp.dao.EvalReportMapper;
 import com.sb.erp.dto.EvalPeriodDto;
 import com.sb.erp.dto.EvalReportDto;
 import com.sb.erp.dto.EvalReportSearchDto;
 import com.sb.erp.util.SecurityUtil;
 
-@Service
+import lombok.RequiredArgsConstructor;
+
+@Service @RequiredArgsConstructor
 public class EvalReportServiceImpl implements EvalReportService {
 
-	@Autowired
-	EvalReportMapper dao;
-	@Autowired
-	EvalPeriodService evalPeriodService;
-	@Autowired
-	OpenAiClient openAiClient;
-	// 실제 GPT 사용 시 모델 이름
-	private static final String REAL_MODEL_NAME = "gpt-4o-mini";
+    private final EvalReportMapper dao;
+    private final EvalPeriodMapper evalPeriodMapper;
+    private final OpenAiClient openAiClient;
+
+    // 실제 GPT 사용 시 모델 이름
+    private static final String REAL_MODEL_NAME = "gpt-4o-mini";
 
 	// 가중치 (합계 1.00)
 	private static final BigDecimal W_PERFORMANCE = new BigDecimal("0.40");
@@ -109,22 +109,23 @@ public class EvalReportServiceImpl implements EvalReportService {
 	@Override
 	public int generateReports(int periodId) {
 		// 회차 소유/존재 확인 (comId 격리 포함)
-		EvalPeriodDto period = evalPeriodService.selectByPeriodId(periodId);
+		EvalPeriodDto period = evalPeriodMapper.selectByPeriodId(periodId, SecurityUtil.getCurrentComId());
 		if (period == null) {
-			return -1;
+		    System.err.println("[EvalReport] 실패(-1): 회차 없음 periodId=" + periodId);
+		    return -1;
 		}
 
-		// REPORTING(배치 오케스트레이터가 이미 전환), 또는 REPORTED(재생성)만 허용
-		// CLOSED는 이제 진입점이 아님 — 배치 서비스가 REPORTING으로 먼저 전환하고 호출함
 		String status = period.getPeriodStatus();
 		if (!"REPORTING".equals(status) && !"REPORTED".equals(status)) {
+		    System.err.println("[EvalReport] 실패(-2): 허용되지 않은 상태 status=" + status 
+		            + " (REPORTING/REPORTED만 가능) periodId=" + periodId);
 		    return -2;
 		}
 
-		// 회차 내 사원별 평가 집계 조회
 		List<Map<String, Object>> aggregates = dao.selectAggregatesByPeriod(periodId);
 		if (aggregates == null || aggregates.isEmpty()) {
-			return -3;
+		    System.err.println("[EvalReport] 실패(-3): 집계 대상 없음 (SUBMITTED 상태 평가 부재) periodId=" + periodId);
+		    return -3;
 		}
 
 		// 사원별 리포트 생성 (기존 존재 시 update)
@@ -144,16 +145,22 @@ public class EvalReportServiceImpl implements EvalReportService {
 
 	@Override
 	public int regenerateReport(int periodId, int empId) {
-		EvalPeriodDto period = evalPeriodService.selectByPeriodId(periodId);
+		EvalPeriodDto period = evalPeriodMapper.selectByPeriodId(periodId, SecurityUtil.getCurrentComId());
 		if (period == null) {
-			return -1;
+		    System.err.println("[EvalReport] 재생성 실패(-1): 회차 없음 periodId=" + periodId);
+		    return -1;
 		}
 
 		String status = period.getPeriodStatus();
-		if (!"CLOSED".equals(status) && !"REPORTED".equals(status)) {
-			return -2;
+		// REPORTED만 허용:
+		// - CLOSED/REPORTING/REPORTING_FAILED는 배치 시스템이 관장 (개별 우회 금지)
+		// - 개별 재생성은 완료된 리포트를 수정하는 도구
+		if (!"REPORTED".equals(status)) {
+		    System.err.println("[EvalReport] 재생성 실패(-2): 허용되지 않은 상태 status=" + status 
+		            + " (REPORTED만 가능) periodId=" + periodId);
+		    return -2;
 		}
-
+		
 		// 해당 사원의 집계만 찾기 (전체 집계 조회 후 필터링)
 		List<Map<String, Object>> aggregates = dao.selectAggregatesByPeriod(periodId);
 		for (Map<String, Object> agg : aggregates) {
@@ -169,7 +176,11 @@ public class EvalReportServiceImpl implements EvalReportService {
 				return 1;
 			}
 		}
-		return -3; // 해당 사원 평가가 없음
+		
+		// 실무에서는 System.out/err 대신 SLF4J를 쓴다고 함(참고)
+		System.err.println("[EvalReport] 재생성 실패(-3): 해당 사원의 평가가 없음 periodId=" + periodId 
+		        + " empId=" + empId);
+		return -3;
 	}
 
 	// ─── 리포트 생성 로직 ───

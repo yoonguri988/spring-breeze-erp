@@ -65,6 +65,7 @@ window.addEventListener("load", function(){
 
         <div class="flex-grow-1 d-flex flex-column" style="min-width:0">
           <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            <span th:if="${n.urgent}" class="sb-badge sb-badge-urgent">📌</span>
             <a th:href="@{/notice/detail(bno=${n.bno})}" class="text-decoration-none text-dark" th:text="${n.btitle}">제목</a>
           </div>
           <div class="text-faint" style="font-size:12px;margin-top:2px">

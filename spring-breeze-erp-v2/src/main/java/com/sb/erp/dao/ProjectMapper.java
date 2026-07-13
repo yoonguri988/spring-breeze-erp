@@ -16,8 +16,15 @@ public interface ProjectMapper {
 	// 프로젝트 등록
 	public int insert(ProjectDto dto);
 	
-	//프로젝트 상태별 리스트
-	public List<ProjectDto> selectByStatus(String proStatus);
+	/*
+	 * //프로젝트 상태별 리스트 public List<ProjectDto> selectByStatus(String proStatus);
+	 * 
+	 * //기간조회 public List<ProjectDto> selectByPeriod(@Param("startDate") String
+	 * startDate, @Param("endDate") String endDate);
+	 * 
+	 * //프로젝트명 검색 public List<ProjectDto> searchByKeyword(@Param("keyword") String
+	 * keyword);
+	 */
 	
 	//프로젝트 상세보기
 	public ProjectDto select(int proId);
@@ -33,12 +40,7 @@ public interface ProjectMapper {
 	/* paging */
 	public List<ProjectDto> selectAll(ProjectSearchDto search);
 	public int selectCnt(ProjectSearchDto search);
-	
-	//기간조회
-	public List<ProjectDto> selectByPeriod(@Param("startDate") String startDate, @Param("endDate") String endDate);
-	
-	//프로젝트명 검색
-	public List<ProjectDto> searchByKeyword(@Param("keyword") String keyword);
+
 	
 	//Ai 프로젝트 분석용
 	public ProjectAnalysisDto projectAnalysis(Integer proId);

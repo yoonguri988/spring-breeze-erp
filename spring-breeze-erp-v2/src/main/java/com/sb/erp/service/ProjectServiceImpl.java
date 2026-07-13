@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.api.DiscordApi;
 import com.sb.erp.api.OpenAiGpt;
@@ -26,14 +27,28 @@ public class ProjectServiceImpl implements ProjectService{
 	//프로젝트 등록
 	@Override public int insert(ProjectDto dto) {  return dao.insert(dto); }
 
-	//상태별 조회
-	@Override public List<ProjectDto> selectByStatus(String proStatus) 
-	{  return dao.selectByStatus(proStatus); }
+	/*
+	 * //상태별 조회
+	 * 
+	 * @Override public List<ProjectDto> selectByStatus(String proStatus) { return
+	 * dao.selectByStatus(proStatus); }
+	 * 
+	 * //기간조회
+	 * 
+	 * @Override public List<ProjectDto> selectByPeriod(String startDate, String
+	 * endDate) { return dao.selectByPeriod(startDate, endDate); }
+	 * 
+	 * //프로젝트명 검색
+	 * 
+	 * @Override public List<ProjectDto> searchByKeyword(String keyword) { return
+	 * dao.searchByKeyword(keyword); }
+	 */
 
 	//프로젝트 상세보기
 	@Override public ProjectDto select(int proId) {  return dao.select(proId); }
 	
 	//프로젝트 삭제
+	@Transactional //세 쿼리 다 성공 → 트랜잭션 커밋 (전부 반영)
 	@Override public int delete(int proId) {  
 		 // 1. 태스크 삭제
 		  dao.deleteTaskByProjectId(proId);
@@ -57,12 +72,6 @@ public class ProjectServiceImpl implements ProjectService{
 	}
 	
     @Override public int selectCnt(ProjectSearchDto search) { return dao.selectCnt(search); }
-    
-    //기간조회
-	@Override public List<ProjectDto> selectByPeriod(String startDate, String endDate) {  return dao.selectByPeriod(startDate, endDate); }
-	
-	//프로젝트명 검색
-	@Override public List<ProjectDto> searchByKeyword(String keyword) {  return dao.searchByKeyword(keyword); }
 
 	//Ai 결과 보고서
 	@Override public ProjectAnalysisDto projectAnalysis(Integer proId) {

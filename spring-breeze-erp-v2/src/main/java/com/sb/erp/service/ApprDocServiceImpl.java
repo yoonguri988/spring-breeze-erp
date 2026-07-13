@@ -14,12 +14,15 @@ import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprLineDto;
+import com.sb.erp.dto.DeptDto;
 
 @Service
 public class ApprDocServiceImpl implements ApprDocService{
 
 	@Autowired ApprDocMapper dao;
 	@Autowired ApprLineMapper lineDao;
+	@Autowired DeptService deptDao;
+	
 	
 	// 작성하려는 사용자의 회사 양식
 	@Override
@@ -42,6 +45,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 	// 결재 문서 작성
 	@Override
 	public int insertDoc(ApprDocDto dto) {
+
 		return dao.insertDoc(dto);
 	}
 
@@ -184,8 +188,20 @@ public class ApprDocServiceImpl implements ApprDocService{
 		}
 	}
 
+	// 결재선
 	@Override
 	public List<ApprLineDto> selectDeptEmpsForLines(int deptId) {
 		return dao.selectDeptEmpsForLines(deptId);
+	}
+
+	// 결재선 선택가능 인원 카운트
+	@Override
+	public List<DeptDto> cntApprovers(int deptId, int empId) {
+		List<DeptDto> chain = deptDao.selectAncestorDepts(deptId);
+		for (DeptDto d : chain) {
+			int cnt = dao.cntApprovers(d.getDeptId(), empId);
+			d.setEmpCount(cnt); // 부서 총인원 값을 선택가능 인원으로 씀
+		}
+		return chain;
 	}
 }

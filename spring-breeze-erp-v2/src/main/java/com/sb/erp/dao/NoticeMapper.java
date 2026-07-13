@@ -26,16 +26,24 @@ public interface NoticeMapper {
    public int updateHit(int bno);
     
     /* 페이징 */
-    // XML의 selectPaging와 매칭
+    // 일반 목록 
    public List<NoticeDto> selectAll(NoticeSearchDto search); 
     
     // 전체 카운트
    public int selectCount(NoticeSearchDto search); 
     
     /* 검색 + 페이징 */
-    // XML의 selectNoticeList와 매칭
-   public List<NoticeDto> selectNoticeList(NoticeSearchDto search);
+    // 페이징 계산용 카운트
+  // public List<NoticeDto> selectNoticeList(NoticeSearchDto search);
     
     // 검색 결과 카운트
    public long selectCountNoticeList(NoticeSearchDto search);
+   
+   // 긴급 공지 리스트
+   public List<NoticeDto> selectUrgentNotices(NoticeSearchDto search);
+   
+   // 긴급 공지 갯수 체크용
+   public int countUrgentNotices(Integer comId);
+   
+   
 }

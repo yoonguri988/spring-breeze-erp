@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.EvalPeriodDto;
-import com.sb.erp.dto.EvalPeriodSearchDto;
 import com.sb.erp.dto.EvalReportDto;
 import com.sb.erp.dto.EvalReportSearchDto;
 import com.sb.erp.service.DeptService;
@@ -108,8 +107,24 @@ public class EvalReportController {
 	// ─── 관리자 수동 트리거: 회차 전체 리포트 재생성 ───
 	@PostMapping("/eval/report/generate")
 	public String generate(@RequestParam int periodId, RedirectAttributes ra) {
-		int result = evalReportService.generateReports(periodId);
-		return handleGenerateResult(result, periodId, ra);
+	    // 배치 흐름을 통해 실행 (REPORTED 상태에서도 진입 가능)
+	    // - 웹 스레드 blocking 방지, 폴링 UI로 진행률 표시
+	    // - 상태 전환: REPORTED → REPORTING → REPORTED (또는 REPORTING_FAILED)
+	    int result = evalPeriodService.reportPeriod(periodId);
+	    
+	    if (result == -1) {
+	        ra.addFlashAttribute("errorMsg", "존재하지 않는 회차입니다.");
+	        return "redirect:/eval/report/list";
+	    }
+	    if (result == -2) {
+	        ra.addFlashAttribute("errorMsg", "현재 상태에서는 리포트를 재생성할 수 없습니다. "
+	                + "평가 진행 중이거나 이미 리포트 생성이 진행 중인 회차는 재생성 불가입니다.");
+	        return "redirect:/eval/report/list?periodId=" + periodId;
+	    }
+	    
+	    ra.addFlashAttribute("successMsg", "리포트 재생성을 시작합니다. 진행률은 회차 상세 페이지에서 확인하실 수 있습니다.");
+	    // 폴링 UI가 있는 회차 상세로 리다이렉트
+	    return "redirect:/eval/period/detail?periodId=" + periodId;
 	}
 
 

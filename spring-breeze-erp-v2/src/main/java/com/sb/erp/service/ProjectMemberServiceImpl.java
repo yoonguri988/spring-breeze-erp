@@ -14,7 +14,11 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
 	@Autowired ProjectMemberMapper dao;
 	
 	//프로젝트 멤버 추가
-	@Override public int insert(ProjectMemberDto dto) {  return dao.insert(dto); }
+	@Override public int insert(ProjectMemberDto dto) { 
+	    if (dao.existsMember(dto) > 0) {
+	        throw new IllegalArgumentException("이미 프로젝트에 참여 중인 사원입니다.");
+	    }
+		return dao.insert(dto); }
 	
 	//프로젝트 멤버 삭제
 	@Override public int delete(int pmId) {  return dao.delete(pmId); }

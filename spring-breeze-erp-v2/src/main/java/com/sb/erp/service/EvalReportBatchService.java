@@ -41,13 +41,12 @@ public class EvalReportBatchService {
 			int result = evalReportService.generateReports(periodId);
 
 			if (result == 1) {
-				// 성공: REPORTED로 전환
-				evalPeriodMapper.updateStatus(periodId, "REPORTED", comId);
-				System.out.println("[ReportBatch] 완료 periodId=" + periodId);
+			    evalPeriodMapper.updateStatus(periodId, "REPORTED", comId);
+			    System.out.println("[ReportBatch] 완료 periodId=" + periodId);
 			} else {
-				// generateReports가 실패 코드 반환 (-1, -2, -3 등)
-				evalPeriodMapper.updateStatus(periodId, "REPORTING_FAILED", comId);
-				System.err.println("[ReportBatch] 실패 코드 " + result + " periodId=" + periodId);
+			    evalPeriodMapper.updateStatus(periodId, "REPORTING_FAILED", comId);
+			    System.err.println("[ReportBatch] 실패 코드 " + result + " (" 
+			            + describeGenerateResult(result) + ") periodId=" + periodId);
 			}
 
 		} catch (Exception e) {
@@ -62,5 +61,16 @@ public class EvalReportBatchService {
 				System.err.println("[ReportBatch] 상태 업데이트도 실패: " + statusEx.getMessage());
 			}
 		}
+	}
+	
+	/* generateReports 실패 코드 → 사람이 읽는 이유 문자열 매핑.
+	 로그 출력에 사용. UI 메시지는 컨트롤러에서 별도 처리. */
+	private String describeGenerateResult(int code) {
+	    switch (code) {
+	        case -1: return "회차 없음";
+	        case -2: return "허용되지 않은 상태";
+	        case -3: return "집계 대상 없음 (SUBMITTED 평가 부재)";
+	        default: return "알 수 없음";
+	    }
 	}
 }

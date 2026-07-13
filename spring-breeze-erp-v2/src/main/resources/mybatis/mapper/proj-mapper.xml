@@ -2,17 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dao.ProjectMapper">
 
-	<!-- 프로젝트명 조회 -->
-	<select id="searchByKeyword" parameterType="String" resultType="ProjectDto">
-    select p.*, e.emp_name,
-           (select count(*) from project_member pm where pm.project_pro_id = p.pro_id) as memberCnt
-    from project p
-    join employee e on p.emp_id = e.emp_id
-    join company c on p.com_id = c.com_id
-    where p.pro_name like '%' || #{keyword} || '%'
-    order by p.pro_id desc
-	</select>
-	
 	<!-- 프로젝트 생성 -->
 	<insert id="insert" parameterType="ProjectDto">
 	  insert into project(com_id, pro_name, pro_desc, emp_id, pro_status,
@@ -21,16 +10,6 @@
                #{startDate}, #{endDate}, SYSDATE, SYSDATE)
 	</insert> 
 	
-	 <!-- 프로젝트 상태별 조회 (참여인원 포함) -->
-    <select id="selectByStatus" parameterType="String" resultType="ProjectDto">
-        select p.*, e.emp_name,
-               (select count(*) from project_member pm where pm.project_pro_id = p.pro_id) as memberCnt
-        from project p
-        join employee e on p.emp_id = e.emp_id
-        join company c on p.com_id = c.com_id
-        where p.pro_status = #{proStatus}
-        order by p.pro_id desc
-    </select>
 
     <!-- 프로젝트 상세페이지 (참여인원 포함) -->
     <select id="select" resultType="ProjectDto" parameterType="int">
@@ -120,16 +99,6 @@
        updated_at = SYSDATE
        where pro_id = #{proId}
     </update>
-    
-    <!-- 기간조회 (&lt;=) == <= , ($gt;=) == >= -->
-    <select id="selectByPeriod" resultType="ProjectDto">
-    select p.*, e.emp_name as empName, 
-           (select count(*) from project_member pm where pm.project_pro_id = p.pro_id) as memberCnt
-    from project p join employee e on p.emp_id = e.emp_id
-    where p.start_date &lt;= #{endDate}
-      and p.end_date &gt;= #{startDate}
-    order by p.pro_id desc
-	</select>
 	
 	<!-- 리스크 예측용 api -> sql에서 계산 처리 -->
 	<select id="projectAnalysis" resultType="ProjectAnalysisDto" parameterType="int">
@@ -185,6 +154,44 @@
 	</select>
 	
 </mapper>
+
+
+<!-- 	 프로젝트명 조회
+	<select id="searchByKeyword" parameterType="String" resultType="ProjectDto">
+    select p.*, e.emp_name,
+           (select count(*) from project_member pm where pm.project_pro_id = p.pro_id) as memberCnt
+    from project p
+    join employee e on p.emp_id = e.emp_id
+    join company c on p.com_id = c.com_id
+    where p.pro_name like '%' || #{keyword} || '%'
+    order by p.pro_id desc
+	</select>
+	
+    프로젝트 상태별 조회 (참여인원 포함)
+    <select id="selectByStatus" parameterType="String" resultType="ProjectDto">
+        select p.*, e.emp_name,
+               (select count(*) from project_member pm where pm.project_pro_id = p.pro_id) as memberCnt
+        from project p
+        join employee e on p.emp_id = e.emp_id
+        join company c on p.com_id = c.com_id
+        where p.pro_status = #{proStatus}
+        order by p.pro_id desc
+    </select>
+	
+	    
+    기간조회 (&lt;=) == <= , ($gt;=) == >=
+    <select id="selectByPeriod" resultType="ProjectDto">
+    select p.*, e.emp_name as empName, 
+           (select count(*) from project_member pm where pm.project_pro_id = p.pro_id) as memberCnt
+    from project p join employee e on p.emp_id = e.emp_id
+    where p.start_date &lt;= #{endDate}
+      and p.end_date &gt;= #{startDate}
+    order by p.pro_id desc
+	</select>
+	 -->
+
+
+
 <!--회사별 목록조회
 	<select id="selectAllByComId" resultType="ProjectDto" parameterType="ProjectSearchDto">
     select p.*, e.emp_name,
