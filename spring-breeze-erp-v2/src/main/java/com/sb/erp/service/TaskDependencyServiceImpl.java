@@ -48,6 +48,9 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 	//태스크 일정 및 선행 태스크 수정
 	@Override public int updateTaskSchedule(TaskDto dto) {  
 		
+		 // 연쇄 일정 계산 중 동시 수정 방지를 위해 프로젝트 태스크 잠금(FOR UPDATE)
+	    dao.lockProjectTasks(dto.getProId());
+		
 		 //프로젝트 done이면 태스크 못넣게
 		 ProjectDto project = projectMapper.select(dto.getProId());
 		 if (project != null && "DONE".equals(project.getProStatus())) {

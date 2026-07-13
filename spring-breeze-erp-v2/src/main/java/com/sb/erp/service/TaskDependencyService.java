@@ -19,4 +19,5 @@ public interface TaskDependencyService {
 	   
 	   //후속 작업
 	   public List<TaskDto> selectImpactTasks(int taskId);
+
 }
