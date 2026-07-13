@@ -1,9 +1,10 @@
 package com.sb.erp.util;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
 import com.sb.erp.security.CustomUserDetails;
-import org.springframework.stereotype.Component;
 
 public class SecurityUtil {
 
@@ -43,5 +44,16 @@ public class SecurityUtil {
 	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	    return isAdminOrRoot(auth);
 	}
+	
+	// 대상 데이터(targetComId)가 현재 로그인 유저의 회사와 같은지 검증.
+	// 관리자/ROOT는 회사 상관없이 통과, 아니면 comId 불일치 시 예외 발생.
+	public static void checkComIdAccess(Integer targetComId) {
+	    if (isAdmin()) return; // 관리자는 검증 생략
 
+	    int currentComId = getCurrentComId();
+	    if (targetComId == null || !targetComId.equals(currentComId)) {
+	        throw new AccessDeniedException("접근 권한이 없습니다.");
+	    }
+	}
+	
 }
