@@ -49,6 +49,9 @@ public class TaskServiceImpl implements TaskService {
 	@Override public List<TaskDto> selectMyTasks(TaskSearchDto search) {  return dao.selectMyTasks(search); }
 	@Override public int selectMyTasksCount(TaskSearchDto search) {  return dao.selectMyTasksCount(search); }
 
+	//태스크 목록
+	@Override public List<TaskDto> selectTaskList(int proId) {  return dao.selectTaskList(proId); }
+
 
 	
 	

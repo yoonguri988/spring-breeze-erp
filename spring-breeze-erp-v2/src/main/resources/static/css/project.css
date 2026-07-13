@@ -68,3 +68,31 @@
     text-align: right;
     margin-top: 20px;
 }
+
+.flow-box{
+    border:1px solid #ddd;
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:12px;
+    background:#fff;
+}
+
+.current-flow{
+    border:2px solid #4f7cff;
+}
+
+.flow-title{
+    font-weight:700;
+    margin-bottom:10px;
+}
+
+.flow-task{
+    padding:8px 0;
+}
+
+.flow-arrow{
+    text-align:center;
+    font-size:24px;
+    color:#999;
+    margin:8px 0;
+}

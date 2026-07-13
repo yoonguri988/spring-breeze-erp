@@ -3,50 +3,49 @@
 <mapper namespace="com.sb.erp.dao.TaskDependencyMapper">
 
 <!-- 선행 태스크 지정하여 태스크 생성 (task_id는 trg_task_bi 트리거가 자동 채움) -->
+<!-- parent_task_id->null 값 허용인데 실제 null값 들어오면 오류> 자바-DB 통신 과정버그라고 함> 해결책>jdbcType=INTEGER -->
 <insert id="insertWithParent" parameterType="TaskDto">
 	insert into task (pro_id , com_id , task_name , task_desc , task_status , pm_id , 
 	task_start_date , task_end_date , parent_task_id , created_at , updated_at)
 	values(#{proId} , #{comId} , #{taskName} , #{taskDesc} , #{taskStatus} , #{pmId},
-	 #{taskStartDate}, #{taskEndDate}, #{parentTaskId}, SYSDATE, SYSDATE)
+	 #{taskStartDate}, #{taskEndDate}, #{parentTaskId, jdbcType=INTEGER}, SYSDATE, SYSDATE)
 </insert>
 
 <!-- 태스크 의존성 트리 조회 (선행 -> 후행 순으로 정렬) -->
 <select id="selectTaskDependencies" parameterType="int" resultType="TaskDto">
 	<![CDATA[
-	WITH task_hierarchy (
+	with task_hierarchy (
 		task_id, pro_id, pm_id, com_id, task_name, task_desc, task_status,
 		task_start_date, task_end_date, parent_task_id, task_path
-	) AS (
-		SELECT 
+	) as (
+		select 
 			task_id, pro_id, pm_id, com_id, task_name, task_desc, task_status,
 			task_start_date, task_end_date, parent_task_id,
-			CAST(task_id AS VARCHAR2(200))
-		FROM task
-		WHERE pro_id = #{proId} AND parent_task_id IS NULL
-
+			CAST(task_id as VARCHAR2(200))
+		from task
+		where pro_id = #{proId} AND parent_task_id IS NULL
 		UNION ALL
-
-		SELECT 
+		select 
 			t.task_id, t.pro_id, t.pm_id, t.com_id, t.task_name, t.task_desc, t.task_status,
 			t.task_start_date, t.task_end_date, t.parent_task_id,
 			th.task_path || ',' || t.task_id
-		FROM task t
+		from task t
 		INNER JOIN task_hierarchy th ON t.parent_task_id = th.task_id
-		WHERE t.pro_id = #{proId}
+		where t.pro_id = #{proId}
 	)
-	SELECT * FROM task_hierarchy ORDER BY task_path
+	select * from task_hierarchy order by task_path
 	]]>
 </select>
 
 <!-- 태스크 일정 및 선행 태스크 수정 (updated_at은 trg_task_bu 트리거가 자동 처리) -->
-<update id="updateSchedule" parameterType="TaskDto">
+<update id="updateTaskSchedule" parameterType="TaskDto">
 	update task set
 	task_name = #{taskName},
 	task_desc = #{taskDesc},
 	task_status = #{taskStatus},
 	task_start_date = #{taskStartDate},
 	task_end_date = #{taskEndDate},
-	parent_task_id = #{parentTaskId}
+	parent_task_id = #{parentTaskId, jdbcType=INTEGER}
 	where task_id = #{taskId}
 </update>
 
@@ -66,5 +65,23 @@
 	END;
 	]]>
 </update>
+
+<!-- 후속 작업 조회 -->
+<select id="selectImpactTasks" parameterType="int" resultType="TaskDto">
+<![CDATA[
+SELECT
+    task_id,
+    task_name,
+    task_status,
+    task_start_date,
+    task_end_date,
+    parent_task_id,
+    LEVEL AS depth
+FROM task
+START WITH parent_task_id = #{taskId}
+CONNECT BY PRIOR task_id = parent_task_id
+ORDER BY LEVEL
+]]>
+</select>
 
 </mapper>
