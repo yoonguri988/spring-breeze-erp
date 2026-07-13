@@ -41,7 +41,7 @@
 <!-- 태스크 상세 목록조회 -->
 <select id="select" parameterType="int" resultType="TaskDto">
 	select t.task_id, t.pro_id, t.task_name, t.task_desc, t.task_status,
-	em.emp_name as pmName, t.task_start_date, t.task_end_date
+	em.emp_name as pmName, t.task_start_date, t.task_end_date, t.parent_task_id
 	from task t
 	join project p on t.pro_id = p.pro_id
 	join company c on p.com_id = c.com_id
@@ -99,10 +99,12 @@
          t.com_id, t.task_name, t.task_desc, t.task_status,
          t.pm_id, t.task_start_date, t.task_end_date,
          t.actual_start_date, t.actual_end_date,
-         t.created_at, t.updated_at, t.parent_task_id
+         t.created_at, t.updated_at, t.parent_task_id,
+         pt.task_status as parentTaskStatus
   from task t
   join project_member pm on t.pm_id = pm.pm_id
   join project p on t.pro_id = p.pro_id
+  left join task pt on t.parent_task_id = pt.task_id
   where pm.emp_id = #{empId}
     and t.com_id = #{comId}
     <if test="taskStatus != null and taskStatus != ''">
@@ -128,6 +130,18 @@
     <if test="taskStatus != null and taskStatus != ''">
       and t.task_status = #{taskStatus}
     </if>
+</select>
+
+<!-- 한프로젝트의 모든 태스크 -->
+<select id="selectTaskList" resultType="TaskDto" parameterType="int">
+select    
+t.task_id, t.task_name, t.task_start_date, t.task_end_date, t.parent_task_id, e.emp_name, p.start_date, p.end_date
+from task t
+join project_member pm on t.pm_id = pm.pm_id
+join employee e on pm.emp_id=e.emp_id
+join project p on t.pro_id=p.pro_id
+where t.pro_id=#{proId}
+order by t.task_start_date
 </select>
 
 </mapper>

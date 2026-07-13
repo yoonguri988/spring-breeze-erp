@@ -5,7 +5,7 @@
 <head>
     <title>회사 관리</title>
 </head>
-<body>
+<body data-page="comlist">
 <main layout:fragment="content" class="sb-content"
       th:with="kw=${param.keyword != null} ? ${param.keyword[0]} : '',
                ic=${param.industryGrpCode != null} ? ${param.industryGrpCode[0]} : ''">

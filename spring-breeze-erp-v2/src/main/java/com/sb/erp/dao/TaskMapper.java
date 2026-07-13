@@ -39,4 +39,8 @@ public interface TaskMapper {
 	//내 태스크 목록조회
 	public List<TaskDto> selectMyTasks(TaskSearchDto search);
 	public int selectMyTasksCount(TaskSearchDto search);
+	
+	//태스크 목록
+	public List<TaskDto> selectTaskList(int proId);
+	
 }

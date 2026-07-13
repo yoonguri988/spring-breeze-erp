@@ -28,27 +28,24 @@
 					<div class="sb-nav__section">조직 관리</div>
 
 					<!-- cyj -->
-					<!-- 관리자 : 회사·부서 통합 관리 -->
-					<a class="sb-nav__item" data-page="company" data-tip="회사 • 부서 관리"
-						th:if="${isRoot}" th:href="@{/com/list}"> <i
-						class="bi bi-building-fill-gear"></i><span class="sb-nav__label">회사
-							• 부서 관리</span>
-					</a>
-
-					<!-- 일반 사용자 : 내 회사 정보 -->
-					<a class="sb-nav__item" data-page="company" data-tip="내 회사 정보"
-						th:href="@{/com/my}"> <i class="bi bi-building"></i><span
-						class="sb-nav__label">내 회사 정보</span>
-					</a> <a class="sb-nav__item" data-page="company" data-tip="회사 내 부서 조회"
-						th:href="@{/dept/list}"> <i class="bi bi-diagram-3"></i><span
-						class="sb-nav__label">회사 내 부서 조회</span>
-					</a>
-
-					<!-- 일반 사용자 : 내 부서 정보 -->
-					<a class="sb-nav__item" data-page="department" data-tip="내 부서 정보"
-						th:href="@{/dept/detail}"> <i class="bi bi-tag"></i><span
-						class="sb-nav__label">내 부서 정보</span>
-					</a>
+			        <!-- 관리자 : 회사·부서 통합 관리 -->
+				    <a class="sb-nav__item" data-page="comlist" data-tip="회사 • 부서 관리" th:if="${isRoot}" th:href="@{/com/list}">
+				        <i class="bi bi-building-fill-gear"></i><span class="sb-nav__label">회사 • 부서 관리</span>
+				    </a>
+				
+				    <!-- 일반 사용자 : 내 회사 정보 -->
+				    <a class="sb-nav__item" data-page="commypage" data-tip="내 회사 정보" th:href="@{/com/my}">
+				        <i class="bi bi-building"></i><span class="sb-nav__label">내 회사 정보</span>
+				    </a>
+				
+				    <a class="sb-nav__item" data-page="company" data-tip="회사 내 부서 조회" th:href="@{/dept/list}">
+				        <i class="bi bi-diagram-3"></i><span class="sb-nav__label">회사 내 부서 조회</span>
+				    </a>
+			
+				    <!-- 일반 사용자 : 내 부서 정보 -->
+				    <a class="sb-nav__item" data-page="department" data-tip="내 부서 정보" th:href="@{/dept/detail}">
+				        <i class="bi bi-tag"></i><span class="sb-nav__label">내 부서 정보</span>
+				    </a>
 
 					<!-- 회사 관리자: 부서 이관 대상 관리 -->
 					<a class="sb-nav__item" data-page="department"

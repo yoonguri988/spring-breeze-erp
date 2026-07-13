@@ -19,5 +19,11 @@ public interface TaskDependencyMapper {
    
    //벌크 연쇄 업데이트
    public void updateBatchTaskSchedule(List<TaskDto> list);
+   
+   //후속 작업
+   public List<TaskDto> selectImpactTasks(int taskId);
+   
+   //병목 탐색기(추후 사용 예정)
+   public List<TaskDto> findCriticalPath(int proId);
 	
 }
