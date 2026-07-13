@@ -178,7 +178,11 @@ public class TaskController {
 		  String result= "태스크 수정 실패";
 		    try {
 		        if(dependencyService.updateTaskSchedule(dto) > 0) { result = "태스크 수정 성공"; }
-		    } catch(IllegalArgumentException e) { result = e.getMessage(); }
+		    } catch(IllegalArgumentException | IllegalStateException e) 
+		    // 멀티캐치: 순환참조(IllegalArgumentException), 완료된 프로젝트/동시수정 락 타임아웃(IllegalStateException)
+		    // 예상된 예외만 여기서 잡아서 사용자에게 메시지로 안내.
+		    // Exception으로 넓게 잡지 않는 이유: 의도치 않은 버그(NPE 등)까지 숨겨버리면 디버깅이 어려워지기 때문
+		    { result = e.getMessage(); }
 			rttr.addFlashAttribute("result",result);
 			return "redirect:/proj/task_detail?task_id="+dto.getTaskId();
 	  } //태스크 수정폼

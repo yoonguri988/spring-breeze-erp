@@ -89,8 +89,9 @@ ORDER BY LEVEL
 <select id="lockProjectTasks" parameterType="int" resultType="int">
     SELECT task_id
     FROM task
-    WHERE pro_id = #{proId}
-    FOR UPDATE
+    START WITH task_id = #{taskId}
+    CONNECT BY PRIOR task_id = parent_task_id
+    FOR UPDATE WAIT 5
 </select>
 
 </mapper>
