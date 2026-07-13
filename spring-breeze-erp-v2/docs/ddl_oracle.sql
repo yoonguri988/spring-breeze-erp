@@ -276,7 +276,7 @@ CREATE TABLE appr_form (
   com_id      NUMBER NOT NULL,
   for_code    VARCHAR2(50) NOT NULL,
   for_title   VARCHAR2(50) NOT NULL,
-  for_content CLOB,
+  for_content CLOB NULL,
   for_schema CLOB,
   for_status  NUMBER(1) NOT NULL,
   is_deleted  NUMBER(1) DEFAULT 0 NOT NULL,
@@ -759,7 +759,7 @@ CREATE TABLE evaluation_period (
     CONSTRAINT pk_period PRIMARY KEY (period_id),
     CONSTRAINT fk_period_com FOREIGN KEY (com_id) REFERENCES company (com_id),
 
-    CONSTRAINT ck_period_status CHECK (period_status IN ('READY', 'OPEN', 'CLOSED', 'REPORTED')),
+    CONSTRAINT ck_period_status CHECK (period_status IN ('READY', 'OPEN', 'CLOSED', 'REPORTING', 'REPORTING_FAILED', 'REPORTED')),
     CONSTRAINT ck_period_term CHECK (eval_term IN ('H1', 'H2', 'ANNUAL')),
     CONSTRAINT ck_period_date CHECK (end_date >= start_date),
     CONSTRAINT ck_period_year CHECK (eval_year BETWEEN 2000 AND 2100),
