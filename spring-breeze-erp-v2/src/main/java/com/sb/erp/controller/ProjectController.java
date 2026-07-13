@@ -105,6 +105,7 @@ public class ProjectController {
 	                      @RequestParam(defaultValue = "1") int pstartno,
 	                      Model model, Authentication auth) {
 		ProjectDto dto = service.select(proId);
+		SecurityUtil.checkComIdAccess(dto.getComId());
 		
 		CustomUserDetails user = (CustomUserDetails)auth.getPrincipal();
 		
@@ -138,7 +139,7 @@ public class ProjectController {
 	public String editView(@RequestParam("pro_id") int proId, Model model, Authentication auth) { //수정뷰
 		
 	    ProjectDto dto = service.select(proId);
-
+	    SecurityUtil.checkComIdAccess(dto.getComId());
 	    boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 	    boolean isCreator = dto.getEmpId() == SecurityUtil.getCurrentEmpId();
 
@@ -154,7 +155,7 @@ public class ProjectController {
 
 		CustomUserDetails user = (CustomUserDetails)auth.getPrincipal();
 		ProjectDto origin = service.select(dto.getProId());
-
+		SecurityUtil.checkComIdAccess(dto.getComId());
 		 boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 
 		if (!isAdmin && origin.getEmpId() != user.getUser().getEmpId()) {
@@ -172,6 +173,7 @@ public class ProjectController {
 	public String delete(@RequestParam("pro_id") int proId, RedirectAttributes rttr, Authentication auth) {
 		CustomUserDetails user = (CustomUserDetails)auth.getPrincipal();
 		ProjectDto dto = service.select(proId);
+		SecurityUtil.checkComIdAccess(dto.getComId());
 		int empId = user.getUser().getEmpId();
 		
 		boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
