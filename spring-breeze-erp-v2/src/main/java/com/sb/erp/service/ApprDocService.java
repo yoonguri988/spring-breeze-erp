@@ -3,10 +3,13 @@ package com.sb.erp.service;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprLineDto;
+import com.sb.erp.dto.DeptDto;
 
 public interface ApprDocService {
 	
@@ -28,6 +31,7 @@ public interface ApprDocService {
 	public List<ApprLineDto> selectLinesByDocId(int docId);
 	public void processLine(int docId, int empId, String action);
 	public List<ApprLineDto> selectDeptEmpsForLines(int deptId);
+	public List<DeptDto> cntApprovers(int deptId, int empId);
 	
 	// 페이징
 	public int selectMyHistoryDocsCnt(ApprDocDto dto);
