@@ -49,6 +49,7 @@
              or lower(n.bcontent) like lower('%' || #{keyword} || '%'))
       </if>
     order by
+    	case when n.bcontent like '%긴급%' then 0 else 1 end,
     <choose>
       <when test="sortBy == 'views'">n.bhit desc</when>
       <otherwise>n.created_at desc</otherwise>
