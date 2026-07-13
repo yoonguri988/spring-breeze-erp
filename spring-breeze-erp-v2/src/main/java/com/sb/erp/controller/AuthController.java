@@ -34,7 +34,11 @@ public class AuthController {
 	
 	// 로그인 페이지로 이동
 	@GetMapping("/login")
-	public String login() {
+	public String login(Authentication auth) {
+	    // 이미 로그인된 사용자면 로그인 페이지 접근 차단 → 메인으로 리다이렉트
+	    if (auth != null && auth.isAuthenticated()) {
+	        return "redirect:/"; // 실제 메인/대시보드 경로에 맞게 수정
+	    }
 		return "/auth/login";
 	}
 	
