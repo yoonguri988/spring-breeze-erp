@@ -1,20 +1,5 @@
 @charset "UTF-8";
 
-/* ==========================================================================
-   SBerp — dashboard.css  (로그인 후 진입하는 대시보드 페이지 전용 스타일)
-   view/index.jsp(html) 에서 사용
-   app.css 에 추가하지 않고 별도 파일로 분리
-   (--sb-* 색상/보더/쉐도우 변수와 sb-card / sb-stat / sb-badge / sb-table /
-    sb-progress / sb-avstack / tone-* 등은 공용 app.css 에서 정의된 것을 그대로 사용)
-
-   [리비전 메모]
-   - 카드/그리드 폭을 Bootstrap col 시스템 대신 CSS Grid(fr/minmax)로 직접
-     지정해 화면 크기와 무관하게 "카드별로 정해진 비율/최소폭"을 유지하도록 변경
-   - flex/grid item 은 기본적으로 min-width: auto 라서, 내부에 폭이 큰 콘텐츠가
-     있으면 부모가 줄어들 때 카드 밖으로 삐져나갈 수 있음 → min-width:0 을
-     각 컨테이너에 명시해 "줄어들 땐 줄바꿈, 넘치지는 않음"이 되도록 처리
-   ========================================================================== */
-
 /* ──────────────────────────────────────────────────────────
    페이지 헤더 고정 (상단 sb-header 바로 아래 sticky)
    sb-content의 좌우 패딩(24px 28px)을 음수 마진으로 상쇄해
@@ -63,40 +48,63 @@
 .sb-stat__delta { flex-wrap: wrap; }
 
 /* ──────────────────────────────────────────────────────────
-   본문 2단 그리드 (좌: 결재/프로젝트, 우: 평가/공지/예약)
-   2fr : 1fr 비율을 고정하되, minmax(0, …) 로 자식이 필요할 때
-   내부 콘텐츠 폭만큼 부모를 밀어내지 않고 항상 트랙 폭에 맞춰 줄어들게 함
+   본문 2×2 그리드
+   - 1행: 결재 대기함(좌) / 공지사항(우)
+   - 2행: 내 프로젝트(좌) / 오늘의 자원예약(우)
+   grid-template-areas 로 카드를 행 단위로 짝지어 배치하면, 각 행은
+   grid 기본 동작(align-items: stretch)에 의해 그 행에서 가장 높은
+   카드에 맞춰 같은 행의 다른 카드도 함께 늘어난다. 즉 "결재대기함 ↔
+   공지사항", "내 프로젝트 ↔ 오늘의 자원예약" 이 각각 쌍으로 높이가
+   맞춰지고, 남는 세로 공간은 카드 본문(.sb-card__body)이 흡수한다.
    ────────────────────────────────────────────────────────── */
 .db-main-grid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-areas:
+    "approvals notices"
+    "projects  reservations";
   gap: 18px;
-  align-items: start;
 }
-.db-col {
+.db-card--approvals    { grid-area: approvals; }
+.db-card--notices      { grid-area: notices; }
+.db-card--projects     { grid-area: projects; }
+.db-card--reservations { grid-area: reservations; }
+
+.db-card {
+  min-width: 0;         /* grid item 기본값(min-width:auto) 때문에 넓은 자식이
+                            카드 밖으로 넘치는 것을 방지 */
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  min-width: 0;   /* grid item 기본값(min-width:auto) 때문에 넓은 자식이
-                     컬럼/카드 밖으로 넘치는 것을 방지 */
+}
+.db-card > .sb-card__body,
+.db-card > .sb-card__body--flush {
+  flex: 1 1 auto;        /* 같은 행의 짝이 더 높을 때 남는 공간을 흡수 */
 }
 
 @media (max-width: 900px) {
-  .db-main-grid { grid-template-columns: 1fr; }
+  .db-main-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "approvals"
+      "notices"
+      "projects"
+      "reservations";
+  }
+  /* 1열로 쌓이면 행 정렬을 맞출 필요가 없으므로 카드가 억지로 늘어나지 않게 복원 */
+  .db-card > .sb-card__body,
+  .db-card > .sb-card__body--flush { flex: 0 0 auto; }
 }
 
-/* 대시보드 카드 공통 — 카드 헤더(제목/부제/버튼)가 좁아지면 줄바꿈되도록 보강.
+/* 카드 헤더(제목/부제/버튼)가 좁아지면 줄바꿈되도록 보강.
    app.css 의 .sb-card__head 자체는 다른 페이지에서도 쓰는 공용 스타일이라
    건드리지 않고, 대시보드 카드에만 db-card 클래스로 범위를 좁혀 재정의 */
-.db-card { min-width: 0; }
 .db-card > .sb-card__head {
   flex-wrap: wrap;
   row-gap: 6px;
 }
 .db-card > .sb-card__head h2 { min-width: 0; }
 .db-card > .sb-card__body,
-.db-card > .sb-card__body--flush,
-.db-card .sb-card__body {
+.db-card > .sb-card__body--flush {
   min-width: 0;
 }
 
