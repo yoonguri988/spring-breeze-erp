@@ -234,9 +234,19 @@
      - 같은 사원을 여러 평가자가 평가할 수 있으므로 distinct 필수
      - 리포트는 대상 사원당 1개 생성되므로 이 값이 리포트 목표 총원 -->
 	<select id="countDistinctTargetsByPeriodId" resultType="int">
-	select count(distinct target_emp_id)
-	from performance_evaluation
-	where period_id = #{periodId}
+		select count(distinct target_emp_id)
+		from performance_evaluation
+		where period_id = #{periodId}
+	</select>
+	
+	<!-- 회차의 미제출 평가 건수. SUBMITTED가 아닌 평가 카운트.
+     - 회차 CLOSED 전환 시 검증에 사용
+     - 미제출이 하나라도 있으면 마감 불가-->
+	<select id="countUnsubmittedByPeriod" resultType="int">
+		select count(*)
+		from performance_evaluation
+		where period_id = #{periodId}
+		and eval_status &lt;&gt; 'SUBMITTED'
 	</select>
 
 	<!-- 평가 등록 -->

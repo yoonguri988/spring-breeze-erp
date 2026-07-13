@@ -3,22 +3,25 @@ package com.sb.erp.service;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import com.sb.erp.dao.EvalMapper;
 import com.sb.erp.dao.EvalPeriodMapper;
 import com.sb.erp.dto.EvalPeriodDto;
 import com.sb.erp.dto.EvalPeriodSearchDto;
 import com.sb.erp.util.SecurityUtil;
 
-@Service
+import lombok.RequiredArgsConstructor;
+
+@Service @RequiredArgsConstructor
 public class EvalPeriodServiceImpl implements EvalPeriodService {
-	@Autowired EvalPeriodMapper dao;
-	@Autowired @Lazy EvalReportBatchService evalReportBatchService;
+
+    private final EvalPeriodMapper dao;
+    private final EvalReportBatchService evalReportBatchService;
+    private final EvalMapper evalMapper;
 
 	// ─── 회차 조회 ────────────────────────────────────
 	@Override
@@ -53,53 +56,67 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 	// 이하 회차 상태 업데이트
 	@Override
 	public int openPeriod(int periodId) {
-		// 회차 소유 확인
-		EvalPeriodDto period = selectByPeriodId(periodId); // 이미 comId 검증 포함
-		if (period == null) {
-			return -1;
-		}
+	    EvalPeriodDto period = selectByPeriodId(periodId);
+	    if (period == null) {
+	        System.err.println("[EvalPeriod] 개시 실패(-1): 회차 없음 periodId=" + periodId);
+	        return -1;
+	    }
 
-		// 현재 상태 확인
-		if (!"READY".equals(period.getPeriodStatus())) {
-			return -2;
-		}
+	    if (!"READY".equals(period.getPeriodStatus())) {
+	        System.err.println("[EvalPeriod] 개시 실패(-2): 허용되지 않은 상태 status=" 
+	                + period.getPeriodStatus() + " (READY만 가능) periodId=" + periodId);
+	        return -2;
+	    }
 
-		// 상태 변경
-		return dao.updateStatus(periodId, "OPEN", SecurityUtil.getCurrentComId());
+	    return dao.updateStatus(periodId, "OPEN", SecurityUtil.getCurrentComId());
 	}
 
 	@Override
 	public int closePeriod(int periodId) {
-		// 회차 소유 확인
-		EvalPeriodDto period = selectByPeriodId(periodId);
-		if (period == null) {
-			return -1;
-		}
+	    EvalPeriodDto period = selectByPeriodId(periodId);
+	    if (period == null) {
+	        System.err.println("[EvalPeriod] 마감 실패(-1): 회차 없음 periodId=" + periodId);
+	        return -1;
+	    }
 
-		// 현재 상태 확인
-		if (!"OPEN".equals(period.getPeriodStatus())) {
-			return -2;
-		}
+	    if (!"OPEN".equals(period.getPeriodStatus())) {
+	        System.err.println("[EvalPeriod] 마감 실패(-2): 허용되지 않은 상태 status=" 
+	                + period.getPeriodStatus() + " (OPEN만 가능) periodId=" + periodId);
+	        return -2;
+	    }
 
-		return dao.updateStatus(periodId, "CLOSED", SecurityUtil.getCurrentComId());
+	    int unsubmitted = evalMapper.countUnsubmittedByPeriod(periodId);
+	    if (unsubmitted > 0) {
+	        System.err.println("[EvalPeriod] 마감 실패(-3): 미제출 평가 " + unsubmitted 
+	                + "건 존재 periodId=" + periodId);
+	        return -3;
+	    }
+
+	    return dao.updateStatus(periodId, "CLOSED", SecurityUtil.getCurrentComId());
 	}
 
 	@Override
 	@Transactional
 	public int reportPeriod(int periodId) {
-		// 회차 소유 확인
-		EvalPeriodDto period = selectByPeriodId(periodId);
-		if (period == null) {
-			return -1;
-		}
+	    EvalPeriodDto period = selectByPeriodId(periodId);
+	    if (period == null) {
+	        System.err.println("[EvalPeriod] 리포트 개시 실패(-1): 회차 없음 periodId=" + periodId);
+	        return -1;
+	    }
 
-		// 상태 확인: CLOSED(첫 시도) 또는 REPORTING_FAILED(재시도)에서만 가능
-		// - REPORTING 상태에서 또 부르는 건 방지 (이미 진행 중)
-		// - REPORTED에서 다시 부르는 건 방지 (완료된 것)
-		String status = period.getPeriodStatus();
-		if (!"CLOSED".equals(status) && !"REPORTING_FAILED".equals(status)) {
-			return -2;
-		}
+	    String status = period.getPeriodStatus();
+	 // 진입 허용 상태:
+	 // - CLOSED: 최초 발행 (평가 마감 직후)
+	 // - REPORTING_FAILED: 실패 후 재시도
+	 // - REPORTED: 완료 리포트 전체 재생성 (프롬프트 튜닝, 데이터 수정 후 등)
+	 // REPORTING은 배치 진행 중이므로 중복 진입 금지.
+	 if (!"CLOSED".equals(status)
+	     && !"REPORTING_FAILED".equals(status)
+	     && !"REPORTED".equals(status)) {
+	     System.err.println("[EvalPeriod] 리포트 개시 실패(-2): 허용되지 않은 상태 status=" + status 
+	             + " periodId=" + periodId);
+	     return -2;
+	 }
 
 		int comId = SecurityUtil.getCurrentComId();
 
