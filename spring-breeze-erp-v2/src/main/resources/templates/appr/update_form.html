@@ -41,34 +41,34 @@
                    
                    <div class="sb-card__body">
                        <div class="row g-4 mb-4">
-                       	<div class="col-md-6">
-                            <label for="forCode" class="sb-form-label">양식 코드</label>
-                            <input type="text" class="form-control"
-								   id="forCode" name="forCode" th:value="${dto.forCode}"/>
-                            <div class="form-text text-faint mt-1">ex) TEST-01</div>
-                            <div id="err_forCode" class="text-danger fw-semibold mt-1"
-								 style="display: none; font-size: 14px;">
-								 양식 코드를 입력해주세요
-							</div>
-							<div class="tforCode"></div>
-                       	</div>
-                        <div class="col-md-6 position-relative">
-                            <label for="comName"
-                            	   class="sb-form-label">회사</label>
-                            <div class="sb-search" style="max-width: 100%;">
-                            	<i class="bi bi-building"></i>
-	                            <input type="text" id="comName"
-	                            	   th:value="${dto.comName}" autocomplete="off"/>
-                          	    </div>
-                            <input type="hidden" id="comId" name="comId" th:value="${dto.comId}" />	
-                            <div id="err_comId" class="text-danger fw-semibold mt-1"
-								 style="display: none; font-size: 14px;">
-								 추가할 회사를 선택해주세요
-							</div>
-                            <div class="ac-list" id="companyDropdown"></div>
-                        </div>
-                       </div>
-                   
+	                       <div class="col-md-6">
+		                           <label for="forCode" class="sb-form-label">양식 코드</label>
+		                           <input type="text" class="form-control"
+									  	  id="forCode" name="forCode" th:value="${dto.forCode}"/>
+		                           <div class="form-text text-faint mt-1">ex) TEST-01</div>
+		                           <div id="err_forCode" class="text-danger fw-semibold mt-1"
+									 	style="display: none; font-size: 14px;">
+										양식 코드를 입력해주세요
+								</div>
+								<div class="tforCode"></div>
+	                       	</div>
+	                        <div class="col-md-6 position-relative">
+	                            <label for="comName" class="sb-form-label">양식 추가할 회사</label>
+	                            <div class="ac-wrap">
+		                            <div class="sb-search">
+		                            	<i class="bi bi-building"></i>
+			                            <input type="text" id="comName"
+			                            	   th:value="${dto.comName}" placeholder="회사이름 입력" autocomplete="off"/>
+	                          	    </div>
+	                          	    <div class="ac-list" id="companyDropdown"></div>
+	                          	</div>
+	                            <input type="hidden" id="comId" name="comId" th:value="${dto.comId}" />	
+	                            <div id="err_comId" class="text-danger fw-semibold mt-1"
+									 style="display: none; font-size: 14px;">
+									 추가할 회사를 선택해주세요
+								</div>
+	                       	</div>
+                     	</div>
 
                    <div class="row g-4 mb-4">
                        <div class="col-md-6">
@@ -83,18 +83,25 @@
                        </div>
                        <div class="col-md-6">
                            <label class="sb-form-label">활성화 여부</label>
-                           <div class="form-check form-switch mt-2">
-                               <input class="form-check-input sb-checkbox"
-                               	   type="checkbox" id="forStatus" name="forStatus"
-                               	   style="width: 40px; height: 20px;"
-                               	   th:checked="${dto.forStatus == true}">
-                               <input type="hidden" name="_forStatus" value="off"/>
-                               <label class="form-check-label text-dark fw-semibold ms-2"
-                               	   for="forStatus"
-                               	   style="cursor: pointer; user-select: none;">활성화</label>
-                           </div>
+							<div class="sb-info-box d-flex align-items-center justify-content-start gap-5">
+								<div>
+									<strong>양식 활성화</strong>
+									<div class="form-text text-secondary mt-1 mb-0" style="font-size: 13px;">
+										활성화된 양식만 문서 작성 시 선택 목록에 나타납니다.
+									</div>
+								</div>
+								<div class="form-check form-switch mb-0 flex-shrink-0">
+									<input class="form-check-input sb-checkbox"
+										   type="checkbox" id="forStatus" name="forStatus"
+										   style="width: 40px; height: 20px;"
+										   th:checked="${dto.forStatus == true}"/>
+	                                <input type="hidden" name="forStatus" value="off"/>
+								</div>
+							</div>
                        </div>
                    </div>
+
+
 
                    <div class="mb-4">
 					<div id="schemaDataHolder" th:if="${dto.forSchema != null}" 
@@ -183,7 +190,7 @@
 		            </div>
 		        </div>
 		    </div>
-		</div>	
+		</div>
 	</form>
 
 	<!-- jquery 로드 -->
@@ -389,6 +396,8 @@ let originalCode = "";
 								companySearch.value = item.comName; // 회사이름 넣기
 								comId.value = item.comId; // insert구문 실행위해 com_id 값 넣기
 								companyDropdown.style.display = "none"; // 드롭다운 닫기
+								// 회사가 선택되면 재검증
+								if(window.checkFormCode) window.checkFormCode();
 							});
 							companyDropdown.appendChild(btn);
 						});
@@ -544,14 +553,15 @@ let originalCode = "";
 	
 	window.addEventListener("load", function(){
 		let forCode = document.getElementById("forCode"); // forCode 가져오기
-		originalCode = forCode.value.trim();
 		let tforCode = document.querySelector(".tforCode"); // 입력 결과 출력할 부분 가져오기
+		let comIdElement = document.getElementById("comId");
 		
-		// 입력할때마다 호출 
-		forCode.addEventListener("keyup", function(e){
-			let value = e.target.value.trim(); // 빈칸제외 forCode의 입력값 가져오기
+		// 검증 로직
+		function checkFormCode(){
+			let value = forCode.value.trim();
+			let comIdVal = comIdElement ? comIdElement.value.trim() : "";
 			
-			// 원래 양식 코드 그대로 들어오면 그냥 통과처리
+			// 원래 코드 그대로면 통과 처리
 			if(value === originalCode){
 				tforCode.textContent = "";
 				tforCode.className = "tforCode";
@@ -560,14 +570,12 @@ let originalCode = "";
 				return;
 			}
 			
-			// 양식 중복 검색할 회사 값 가져오기
-			let comIdElement = document.getElementById("comId");
-			let comIdVal = comIdElement ? comIdElement.value.trim() : "" ;
-			
 			valid = false; // 초기화
 			
 			// 양식 검사에 회사의 id값이 필요해 먼저 하도록 유도
 			if(comIdVal === ""){
+				// 값이 아직 없거나 회사 선택 이벤트에서 호출된경우 리턴
+				if(value === "") return;
 				tforCode.textContent = "양식을 추가할 회사를 먼저 검색하여 선택해주세요.";
 				tforCode.className = "text-danger fw-semibold mt-1 tforCode";
 				forCode.classList.remove("is-valid");
@@ -575,42 +583,48 @@ let originalCode = "";
 				return;
 			}
 			
-			if(value !== ""){
-				fetch(`/appr/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}`)
-				.then( response => response.json() )
-				.then( data => {
-					
-					// 초기화
-					tforCode.className = "fw-semibold mt-1 tforCode";
-	                forCode.classList.remove("is-valid", "is-invalid");
-	                
-					if(data.checkCode){
-						tforCode.textContent = "사용 가능한 양식코드 입니다" ;
-						tforCode.classList.add("valid-feedback");
-						forCode.classList.add("is-valid");
-						valid = true;
-					}
-					else{
-						tforCode.textContent = "중복된 양식코드 입니다" ;
-						tforCode.classList.add("invalid-feedback");
-						forCode.classList.add("is-invalid");
-						valid = false;
-					}
-				}).catch( err => {
-					tforCode.textContent = "서버 오류" ;
-					tforCode.classList.add("invalid-feedback");
-					forCode.classList.add("is-invalid");
-					valid = false;
-				})
-			}
-			else{
+			if(value === ""){
 				tforCode.textContent = "";
 				tforCode.className = "tforCode";
 				forCode.classList.remove("is-valid", "is-invalid");
-				valid = false;
+				return;
 			}
-		})
-	})
+		
+			fetch(`/appr/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}`)
+			.then( response => response.json() )
+			.then( data => {
+				
+				// 초기화
+				tforCode.className = "fw-semibold mt-1 tforCode";
+                forCode.classList.remove("is-valid", "is-invalid");
+                
+				if(data.checkCode){
+					tforCode.textContent = "사용 가능한 양식코드 입니다" ;
+					tforCode.classList.add("valid-feedback");
+					forCode.classList.add("is-valid");
+					valid = true;
+				}
+				else{
+					tforCode.textContent = "중복된 양식코드 입니다" ;
+					tforCode.classList.add("invalid-feedback");
+					forCode.classList.add("is-invalid");
+					valid = false;
+				}
+			})
+			.catch( err => {
+				tforCode.textContent = "서버 오류" ;
+				tforCode.classList.add("invalid-feedback");
+				forCode.classList.add("is-invalid");
+				valid = false;
+			});
+		}
+		
+		// 양식 코드 입력시
+		forCode.addEventListener("keyup", checkFormCode);
+		
+		// 바깥에도 호출할수 있게 노출
+		window.checkFormCode = checkFormCode;
+	});
 	
 	/////////////////////////////// 양식 중복 처리 ///////////////////////////////
 	
