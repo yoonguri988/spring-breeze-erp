@@ -183,4 +183,9 @@ public class ApprDocServiceImpl implements ApprDocService{
 			dao.updateDocStatus(doc);
 		}
 	}
+
+	@Override
+	public List<ApprLineDto> selectDeptEmpsForLines(int deptId) {
+		return dao.selectDeptEmpsForLines(deptId);
+	}
 }

@@ -11,4 +11,5 @@ public class ApprDocInitResponseDto {
 	private String posName;
 	private String deptName;
 	private String comName;
+	private int posOrder;
 }

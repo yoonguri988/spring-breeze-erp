@@ -28,6 +28,7 @@ public interface ApprDocMapper {
 	// 결재선 관련 파트
 	public List<ApprLineDto> approversByEmpId(ApprDocDto dto);
 	public int updateDocStatus(ApprDocDto dto);
+	public List<ApprLineDto> selectDeptEmpsForLines(int deptId); 
 	
 	// 페이징
 	public int selectMyHistoryDocsCnt(ApprDocDto dto);

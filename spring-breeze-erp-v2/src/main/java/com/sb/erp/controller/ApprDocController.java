@@ -19,11 +19,9 @@ import com.sb.erp.dto.ApprDocInitResponseDto;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprLineDto;
 import com.sb.erp.dto.DeptDto;
-import com.sb.erp.dto.EmpDto;
 import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.ApprDocService;
 import com.sb.erp.service.DeptService;
-import com.sb.erp.service.EmpService;
 import com.sb.erp.util.PagingUtil;
 
 @Controller
@@ -32,7 +30,6 @@ public class ApprDocController {
 	
 	@Autowired ApprDocService service;
 	@Autowired DeptService deptService;
-	@Autowired EmpService empService;
 	
 	
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
@@ -205,14 +202,14 @@ public class ApprDocController {
 	@GetMapping("/getDeptTree")
 	@ResponseBody
 	public List<DeptDto> getDeptTree(@AuthenticationPrincipal CustomUserDetails userDetails){
-		return deptService.selectOrgTree(userDetails.getUser().getComId());
+		return deptService.selectAncestorDepts(userDetails.getUser().getDeptId());
 	}
 	
 	// 특정 부서 소속 사원 목록
 	@GetMapping("/getDeptEmps")
 	@ResponseBody
-	public List<EmpDto> getDeptEmps(@RequestParam("deptId") int deptId) {
-		return empService.selectByDeptId(deptId);
+	public List<ApprLineDto> getDeptEmps(@RequestParam("deptId") int deptId) {
+		return service.selectDeptEmpsForLines(deptId);
 	}
 	
 	
