@@ -40,7 +40,7 @@
 
 <!-- 태스크 상세 목록조회 -->
 <select id="select" parameterType="int" resultType="TaskDto">
-	select t.task_id, t.pro_id, t.task_name, t.task_desc, t.task_status,
+	select t.task_id, t.pro_id, t.pm_id, t.task_name, t.task_desc, t.task_status,
 	em.emp_name as pmName, t.task_start_date, t.task_end_date, t.parent_task_id
 	from task t
 	join project p on t.pro_id = p.pro_id

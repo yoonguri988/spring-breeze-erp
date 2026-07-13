@@ -54,10 +54,10 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 	    try {
 	        dao.lockProjectTasks(dto.getTaskId());
 	    } catch (Exception e) {
-	    	// 여기서는 Exception으로 잡아도 안전함: 이 시점에 터질 수 있는 예외는 
-	        // "락 획득 실패(타임아웃)" 딱 하나뿐이라 의미가 명확하기 때문.
-	        // → 넓게 잡는 게 항상 나쁜 건 아니고, "예상 가능한 예외가 확실히 하나뿐"일 때는 괜찮음.
-	        throw new IllegalStateException("다른 사용자가 이 태스크의 일정을 수정 중입니다. 잠시 후 다시 시도해주세요.");
+    	 // 여기서는 Exception으로 잡아도 안전함: 이 시점에 터질 수 있는 예외는 
+         // "락 획득 실패(타임아웃)" 딱 하나뿐이라 의미가 명확하기 때문.
+         // → 넓게 잡는 게 항상 나쁜 건 아니고, "예상 가능한 예외가 확실히 하나뿐"일 때는 괜찮음.
+         throw new IllegalStateException("다른 사용자가 이 태스크의 일정을 수정 중입니다. 잠시 후 다시 시도해주세요.");
 	    }
 		 //프로젝트 done이면 태스크 못넣게
 		 ProjectDto project = projectMapper.select(dto.getProId());
