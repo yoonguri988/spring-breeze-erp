@@ -15,7 +15,6 @@ import com.sb.erp.security.CustomUserDetails;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 	// http 경로 설정
 	@Bean
@@ -42,7 +41,7 @@ public class SecurityConfig {
                 "/com/**", "/dept/**", "/appr/**", 
                 "/res/**", "/resv/**", "/proj/**", "/notice/**").authenticated()
 				   // ─── 그 외 ────────────────
-				   .anyRequest().permitAll()
+				   //.anyRequest().permitAll()
 				)
 				// 권한이 없는 페이지(403)에 접근했을 경우
 				.exceptionHandling(ex -> ex.accessDeniedHandler((request, response, accessDeniedException) -> {
