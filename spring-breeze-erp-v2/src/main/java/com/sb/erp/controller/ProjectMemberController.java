@@ -27,7 +27,7 @@ public class ProjectMemberController {
 	@GetMapping("/proj_member")
 	public String list(@RequestParam("pro_id") int proId, Model model,Authentication auth) {
 		ProjectDto project = projectService.select(proId);
-
+		SecurityUtil.checkComIdAccess(project.getComId());
 		boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		boolean isCreator = project.getEmpId() == SecurityUtil.getCurrentEmpId();
 
@@ -42,8 +42,10 @@ public class ProjectMemberController {
 	  public String insert(ProjectMemberDto dto,RedirectAttributes rttr, Authentication auth) { 
 		    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		    int empId = user.getUser().getEmpId();
-		    
+
 			ProjectDto project = projectService.select(dto.getProjectProId());
+			SecurityUtil.checkComIdAccess(project.getComId());
+			
 			boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 			boolean isCreator = project.getEmpId() == empId;
 
@@ -51,10 +53,18 @@ public class ProjectMemberController {
 				rttr.addFlashAttribute("result","프로젝트 생성자 또는 관리자만 멤버를 추가할 수 있습니다.");
 				return "redirect:/proj/proj_member?pro_id=" + dto.getProjectProId();
 			}
-		  
-		  String result="프로젝트 멤버 추가 실패";
-		  if(service.insert(dto)>0) {result="프로젝트 멤버 추가 성공";}
-		  rttr.addFlashAttribute("result",result);
+			
+			try {
+			    String result = "프로젝트 멤버 추가 실패";
+			    if (service.insert(dto) > 0) {
+			        result = "프로젝트 멤버 추가 성공";
+			    }
+			    rttr.addFlashAttribute("result", result);
+
+			} catch (IllegalArgumentException e) {
+			    rttr.addFlashAttribute("result", e.getMessage());
+			}
+
 		  return "redirect:/proj/proj_member?pro_id="+dto.getProjectProId(); } //프로젝트 멤버 추가
 	 
 	
@@ -65,6 +75,7 @@ public class ProjectMemberController {
 		   CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		    int empId = user.getUser().getEmpId();
 		ProjectDto project = projectService.select(proId);
+		SecurityUtil.checkComIdAccess(project.getComId());
 		boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		boolean isCreator = project.getEmpId() == empId;
 
