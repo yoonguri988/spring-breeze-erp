@@ -79,9 +79,13 @@ public class ApprFormServiceImpl implements ApprFormService {
 		String origTitle = original.getForTitle() == null ? "" : original.getForTitle().replaceAll("\\s+","");
 		String dtoTitle = dto.getForTitle() == null ? "" :dto.getForTitle().replaceAll("\\s+", "");
 		
+		String origSchema = original.getForSchema() == null ? "" : original.getForSchema().replaceAll("\\s+", "");
+		String dtoSchema = dto.getForSchema() == null ? "" : dto.getForSchema().replaceAll("\\s+", "");
+		
 		// insert, update 분기점 확인 / 데이터가 바뀌었는지 원본과 대조
 		boolean test = !origContent.equals(dtoContent)
-					|| !origTitle.equals(dtoTitle);
+					|| !origTitle.equals(dtoTitle)
+					|| !origSchema.equals(dtoSchema);
 		
 		// 확인후 처리
 		if(test) { // 중요 데이터가 바뀌었을경우 version +1 처리

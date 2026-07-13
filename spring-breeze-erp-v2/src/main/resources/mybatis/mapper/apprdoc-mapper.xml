@@ -37,6 +37,7 @@
 			e.emp_id,
 			e.emp_name,
 			p.pos_name,
+			p.pos_order,
 			c.com_id,
 			c.com_name,
 			d.dept_id,
@@ -153,11 +154,9 @@
 		select count(distinct d.doc_id)
 		from
 			appr_doc d
-		left join
-			appr_line l on d.doc_id = l.doc_id
 		where
 			d.emp_id = #{empId}
-			or (l.emp_id = #{empId} and l.lin_status in ('APP', 'REJ'))
+			or exists (select 1 from appr_line where doc_id = d.doc_id and emp_id = #{empId})
 			<if test="searchStatus != null and searchStatus != ''">
 				and d.doc_status = #{searchStatus}
 			</if>
@@ -279,5 +278,23 @@
 			doc_id = #{docId}
 			and doc_revision = #{docRevision}
 	</update>
+	
+	<!-- 결재선 지정용 -->
+	<select id="selectDeptEmpsForLines" parameterType="int" resultType="ApprLineDto">
+		select
+			e.emp_id,
+			e.emp_name,
+			p.pos_name,
+			p.pos_order
+		from
+			employee e
+		join
+			emp_position p on e.pos_id = p.pos_id
+		join
+			department d on e.dept_id = d.dept_id
+		where
+			d.dept_id = #{deptId} or d.parent_id = #{deptId}
+	</select>
+	
 	
 </mapper>

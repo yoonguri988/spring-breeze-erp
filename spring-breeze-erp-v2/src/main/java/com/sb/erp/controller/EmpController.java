@@ -20,6 +20,8 @@ import com.sb.erp.service.EmpService;
 import com.sb.erp.service.PosService;
 import com.sb.erp.util.PagingUtil;
 import com.sb.erp.util.SecurityUtil;
+import com.sb.erp.dto.EvalReportDto;
+import com.sb.erp.service.EvalReportService;
 
 @Controller
 public class EmpController {
@@ -28,6 +30,7 @@ public class EmpController {
 	@Autowired PosService posService;
 	@Autowired DeptService deptService;
 	@Autowired PasswordEncoder passEncoder;
+	@Autowired EvalReportService evalReportService;
 	
 	
 	// ─── 목록 조회 (검색 + 페이징) ────────────────────
@@ -67,23 +70,29 @@ public class EmpController {
 	
 	
 	// ─── 상세 조회 ──────────────────────────────────
+	// ─── 상세 조회 ──────────────────────────────────
 	@GetMapping("/emp/detail")
 	public String detail(@RequestParam int empId, Model model) {
-		int loginEmpId = SecurityUtil.getCurrentEmpId();
+	    int loginEmpId = SecurityUtil.getCurrentEmpId();
 	    boolean isAdmin = SecurityUtil.isAdmin();
-		
-	    // 본인이 혹은 관리자 여부 확인
+	    
+	    // 본인 혹은 관리자 여부 확인
 	    if (empId != loginEmpId && !isAdmin) {
 	        return "redirect:/emp/detail?empId=" + loginEmpId;
 	    }
 	    
-		EmpDto emp = empService.selectByEmpId(empId);
-		model.addAttribute("emp", emp);
+	    EmpDto emp = empService.selectByEmpId(empId);
+	    model.addAttribute("emp", emp);
 
-		// 본인 여부 판별용 loginEmpId 전달
-		model.addAttribute("loginEmpId", loginEmpId);
-		model.addAttribute("isAdmin", isAdmin);
-		return "emp/detail";
+	    // 최근 AI 리포트 임베드 (관리자/본인 모두 노출)
+	    // - 리포트가 아직 없는 사원이면 null → 템플릿에서 th:if로 카드 자체를 안 그림
+	    EvalReportDto latestReport = evalReportService.selectLatestByEmpId(empId);
+	    model.addAttribute("latestReport", latestReport);
+
+	    // 본인 여부 판별용 loginEmpId 전달
+	    model.addAttribute("loginEmpId", loginEmpId);
+	    model.addAttribute("isAdmin", isAdmin);
+	    return "emp/detail";
 	}
 	
 	

@@ -8,161 +8,159 @@
 <body>
 
 <main layout:fragment="content">
-<div class="sb-content">
-	<div class="sb-page-head">
-		<div class="sb-page-head__txt">
-			<div class="sb-breadcrumb">
-				<a th:href="@{/appr/list_form}">전자 결재</a>
-				<i class="bi bi-chevron-right"></i>
-				<span>양식 관리</span>
-			</div>
-			<h1>결재 양식 관리</h1>
-			<p>시스템 내 결재 양식을 조회하고 관리</p>
+<div class="sb-page-head">
+	<div class="sb-page-head__txt">
+		<div class="sb-breadcrumb">
+			<a th:href="@{/appr/list_form}">전자 결재</a>
+			<i class="bi bi-chevron-right"></i>
+			<span>양식 관리</span>
 		</div>
-		<div class="sb-page-head__actions">
-			<button type="button" class="btn btn-sb"
-					th:onclick="|location.href='@{/appr/write_form}'|">
-					<i class="bi bi-plus-lg"></i> 양식 등록
-			</button>
-		</div>
+		<h1>결재 양식 관리</h1>
+		<p>시스템 내 결재 양식을 조회하고 관리</p>
 	</div>
-	<!-- 검색 / 필터 툴바 (실제 GET 검색 폼) -->
-	<div class="sb-card mb-4">
-		<div class="sb-card__body">
-			<form method="GET" th:action="@{/appr/list_form}" id="searchForm">
-				<div class="row g-3">	
-					<!--  검색 조건1 : 양식코드 또는 제목 -->		
-					<div class="col-md-4">
-						<label for="keyword" class="sb-form-label">키워드 검색</label>
-						<div class="sb-search">
-							<i class="bi bi-search"></i>
-							<input type="text" id="keyword" name="keyword"
-								   placeholder="양식 코드 또는 제목" th:value="${search.keyword}">
-						</div>
-					</div>
-					<!--  검색 조건2 : 회사명 또는 사업자 번호 검색 -->		
-					<div class="col-md-4 position-relative">
-						<label for="comName" class="sb-form-label">회사</label>
-						<div class="sb-search">
-							<i class="bi bi-building"></i>
-							<input type="text" id="comName" name="comName" th:value="${search.comName}"
-								   placeholder="회사명" autocomplete="off" />
-							<input type="hidden" id="comId" name="comId" th:value="${search.comId}"/>
-						</div>
-						<div class="ac-list" id="companyDropdown"></div>
-					</div>
-					
-					<div class="col-md-4">
-						<label for="forStatus" class="sb-form-label">활성화 여부</label>
-						<select class="form-select" id="forStatus" name="forStatus">
-							<option value="" th:selected="${search.forStatus == null}">전체</option>
-							<option value="true" th:selected="${search.forStatus == true}">활성화</option>
-							<option value="false" th:selected="${search.forStatus == false}">비활성화</option>
-						</select>
-					</div>
-					<div class="col-12 d-flex justify-content-between align-items-center mt-3">
-						<div id="search-error" class="text-danger small fw-bold"
-							 style="display : none;">
-							 <i class="bi bi-exclamation-circle-fill"></i> 키워드 또는 회사 중 하나는 입력해야 합니다.
-						</div>
-	 					<div class="ms-auto d-flex gap-2">
-		                    <button type="submit" class="btn btn-sb-soft btn-sm">
-								<i class="bi bi-search"></i> 검색
-							</button>					
-				            <a th:if="${search.keyword != null and !#strings.isEmpty(search.keyword)}"
-				               class="btn btn-ghost btn-sm"
-				               th:href="@{/appr/list_form}">초기화</a>
-		                </div>
-	                </div>
-				</div>
-			</form>
-		</div>
+	<div class="sb-page-head__actions">
+		<button type="button" class="btn btn-sb"
+				th:onclick="|location.href='@{/appr/write_form}'|">
+				<i class="bi bi-plus-lg"></i> 양식 등록
+		</button>
 	</div>
-	
-	<div class="sb-card">
-		<div class="sb-card_body sb-card__body--flush">
-			<div class="table-responsive">
-				<table class="sb-table">
-					<thead>
-						<tr>
-							<th class="num">번호</th>
-							<th>양식 코드</th>
-							<th>양식 제목</th>
-							<th>회사</th>
-							<th>사용 여부</th>
-							<th>생성일</th>
-							<th>수정일</th>
-							<th class="text-center">관리</th>
-						</tr>
-					</thead>
-					<tbody id="formTbody">
-					
-						<tr th:if="${#lists.isEmpty(list)}">
-							<td colspan="8">
-								<div class="sb-empty">
-									<i class="bi bi-inbox text-faint"></i>
-									<p>검색 결과가 없습니다.</p>
-								</div>
-							</td>
-						</tr>
-						
-						<tr th:unless="${#lists.isEmpty(list)}"
-							th:each="item, status : ${list}">
-							<td class="num text-faint"
-							    th:text="${paging.listtotal - ((paging.current -1) * paging.onepagelist) - status.index}">1</td>
-							<td class="fw-bold text-dark"
-							    th:text="${item.forCode}">양식 코드</td>
-							<td th:text="${item.forTitle}">양식 제목</td>
-							<td class="text-soft" th:text="${item.comName}">회사명</td>
-							<td>
-								<span class="sb-badge"
-									  th:classappend="${item.forStatus} ? 'sb-badge--green' : 'sb-badge--gray'">
-									<span class="pip"></span>
-									<span th:text="${item.forStatus} ? '활성화' : '비활성화'">상태</span>
-								</span>
-							</td>
-							<td class="text-faint tnum" th:text="${item.createdAt}">생성일</td>
-							<td class="text-faint tnum" th:text="${item.updatedAt}">수정일</td>
-							
-							<td>
-								<div class="d-flex justify-content-center gap-1">
-									<a th:href="@{/appr/detail_form(forId=${item.forId}, forVersion=${item.forVersion})}"
-									   class="btn btn-sb-soft btn-xs px-2 py-1" style="font-size: 11px;">
-									   <i class="bi bi-eye"></i> 상세보기
-									</a>
-									<a th:href="@{/appr/update_form(forId=${item.forId}, forVersion=${item.forVersion})}"
-									   class="btn btn-sb-soft btn-xs px-2 py-1" style="font-size: 11px;">
-									   <i class="bi bi-pencil-square"></i> 수정
-									</a>
-								</div>
-							</td>
-						</tr>
-						
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-	
-	<div class="d-flex justify-content-center mt-4">
-        <ul class="pagination" id="pagingUl">
-            <li class="page-item" th:if="${paging.start > 1}">
-                <a class="page-link"
-                   th:href="@{/appr/list_form(keyword=${search.keyword}, comId=${search.comId}, forStatus=${search.forStatus}, page=${paging.start -1})}">이전</a>
-            </li>
-            <th:block th:each="i : ${#numbers.sequence(paging.start, paging.end)}">
-	            <li class="page-item" th:classappend="${paging.current == i} ? 'active' : ''">
-	                <a class="page-link"
-	                   th:href="@{/appr/list_form(keyword=${search.keyword}, comId=${search.comId}, forStatus=${search.forStatus}, page=${i})}"
-	                   th:text="${i}"></a>
-	            </li>
-			</th:block>
-            <li class="page-item" th:if="${paging.end < paging.pagetotal}">
-                <a class="page-link" th:href="@{/appr/list_form(keyword=${search.keyword}, comId=${search.comId}, forStatus=${search.forStatus}, page=${paging.end +1})}">다음</a>
-            </li>
-        </ul>
-    </div>
 </div>
+<!-- 검색 / 필터 툴바 (실제 GET 검색 폼) -->
+<div class="sb-card mb-4">
+	<div class="sb-card__body">
+		<form method="GET" th:action="@{/appr/list_form}" id="searchForm">
+			<div class="row g-3">	
+				<!--  검색 조건1 : 양식코드 또는 제목 -->		
+				<div class="col-md-4">
+					<label for="keyword" class="sb-form-label">키워드 검색</label>
+					<div class="sb-search">
+						<i class="bi bi-search"></i>
+						<input type="text" id="keyword" name="keyword"
+							   placeholder="양식 코드 또는 제목" th:value="${search.keyword}">
+					</div>
+				</div>
+				<!--  검색 조건2 : 회사명 또는 사업자 번호 검색 -->		
+				<div class="col-md-4 position-relative">
+					<label for="comName" class="sb-form-label">회사</label>
+					<div class="sb-search">
+						<i class="bi bi-building"></i>
+						<input type="text" id="comName" name="comName" th:value="${search.comName}"
+							   placeholder="회사명" autocomplete="off" />
+						<input type="hidden" id="comId" name="comId" th:value="${search.comId}"/>
+					</div>
+					<div class="ac-list" id="companyDropdown"></div>
+				</div>
+				
+				<div class="col-md-4">
+					<label for="forStatus" class="sb-form-label">활성화 여부</label>
+					<select class="form-select" id="forStatus" name="forStatus">
+						<option value="" th:selected="${search.forStatus == null}">전체</option>
+						<option value="true" th:selected="${search.forStatus == true}">활성화</option>
+						<option value="false" th:selected="${search.forStatus == false}">비활성화</option>
+					</select>
+				</div>
+				<div class="col-12 d-flex justify-content-between align-items-center mt-3">
+					<div id="search-error" class="text-danger small fw-bold"
+						 style="display : none;">
+						 <i class="bi bi-exclamation-circle-fill"></i> 키워드 또는 회사 중 하나는 입력해야 합니다.
+					</div>
+ 					<div class="ms-auto d-flex gap-2">
+	                    <button type="submit" class="btn btn-sb-soft btn-sm">
+							<i class="bi bi-search"></i> 검색
+						</button>					
+			            <a th:if="${search.keyword != null and !#strings.isEmpty(search.keyword)}"
+			               class="btn btn-ghost btn-sm"
+			               th:href="@{/appr/list_form}">초기화</a>
+	                </div>
+                </div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="sb-card">
+	<div class="sb-card_body sb-card__body--flush">
+		<div class="table-responsive">
+			<table class="sb-table">
+				<thead>
+					<tr>
+						<th class="num">번호</th>
+						<th>양식 코드</th>
+						<th>양식 제목</th>
+						<th>회사</th>
+						<th>사용 여부</th>
+						<th>생성일</th>
+						<th>수정일</th>
+						<th class="text-center">관리</th>
+					</tr>
+				</thead>
+				<tbody id="formTbody">
+				
+					<tr th:if="${#lists.isEmpty(list)}">
+						<td colspan="8">
+							<div class="sb-empty">
+								<i class="bi bi-inbox text-faint"></i>
+								<p>검색 결과가 없습니다.</p>
+							</div>
+						</td>
+					</tr>
+					
+					<tr th:unless="${#lists.isEmpty(list)}"
+						th:each="item, status : ${list}">
+						<td class="num text-faint"
+						    th:text="${paging.listtotal - ((paging.current -1) * paging.onepagelist) - status.index}">1</td>
+						<td class="fw-bold text-dark"
+						    th:text="${item.forCode}">양식 코드</td>
+						<td th:text="${item.forTitle}">양식 제목</td>
+						<td class="text-soft" th:text="${item.comName}">회사명</td>
+						<td>
+							<span class="sb-badge"
+								  th:classappend="${item.forStatus} ? 'sb-badge--green' : 'sb-badge--gray'">
+								<span class="pip"></span>
+								<span th:text="${item.forStatus} ? '활성화' : '비활성화'">상태</span>
+							</span>
+						</td>
+						<td class="text-faint tnum" th:text="${item.createdAt}">생성일</td>
+						<td class="text-faint tnum" th:text="${item.updatedAt}">수정일</td>
+						
+						<td>
+							<div class="d-flex justify-content-center gap-1">
+								<a th:href="@{/appr/detail_form(forId=${item.forId}, forVersion=${item.forVersion})}"
+								   class="btn btn-sb-soft btn-xs px-2 py-1" style="font-size: 11px;">
+								   <i class="bi bi-eye"></i> 상세보기
+								</a>
+								<a th:href="@{/appr/update_form(forId=${item.forId}, forVersion=${item.forVersion})}"
+								   class="btn btn-sb-soft btn-xs px-2 py-1" style="font-size: 11px;">
+								   <i class="bi bi-pencil-square"></i> 수정
+								</a>
+							</div>
+						</td>
+					</tr>
+					
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<div class="d-flex justify-content-center mt-4">
+       <ul class="pagination" id="pagingUl">
+           <li class="page-item" th:if="${paging.start > 1}">
+               <a class="page-link"
+                  th:href="@{/appr/list_form(keyword=${search.keyword}, comId=${search.comId}, forStatus=${search.forStatus}, page=${paging.start -1})}">이전</a>
+           </li>
+           <th:block th:each="i : ${#numbers.sequence(paging.start, paging.end)}">
+            <li class="page-item" th:classappend="${paging.current == i} ? 'active' : ''">
+                <a class="page-link"
+                   th:href="@{/appr/list_form(keyword=${search.keyword}, comId=${search.comId}, forStatus=${search.forStatus}, page=${i})}"
+                   th:text="${i}"></a>
+            </li>
+		</th:block>
+           <li class="page-item" th:if="${paging.end < paging.pagetotal}">
+               <a class="page-link" th:href="@{/appr/list_form(keyword=${search.keyword}, comId=${search.comId}, forStatus=${search.forStatus}, page=${paging.end +1})}">다음</a>
+           </li>
+       </ul>
+   </div>
 
 <script>
 	///////////////////// 회사 이름이랑 일치하는거 출력 /////////////////////

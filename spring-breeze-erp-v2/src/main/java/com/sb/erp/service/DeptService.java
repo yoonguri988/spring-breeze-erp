@@ -33,5 +33,8 @@ public interface DeptService {
 	public List<DeptDto> getAllDeptsByComId(Integer comId);
 
 	public DeptDto isDuplicateDeptCode(DeptSearchDto search);
+	
+	// KJY 조직도 범위 제한
+	public List<DeptDto> selectAncestorDepts(int deptId);
 
 }

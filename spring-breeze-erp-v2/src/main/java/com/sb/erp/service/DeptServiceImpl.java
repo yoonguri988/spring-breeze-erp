@@ -142,4 +142,17 @@ public class DeptServiceImpl implements DeptService {
 		return dao.selectDeptCode(search);
 	}
 
+	// KJY 조직도 범위 제한
+	@Override
+	public List<DeptDto> selectAncestorDepts(int deptId) {
+		List<DeptDto> chain = new ArrayList<>();
+		DeptDto dept = dao.selectOneById(deptId);
+		chain.add(0, dept);
+		while(dept.getParentId() != 0) {
+			dept = dao.selectOneById(dept.getParentId());
+			chain.add(0, dept);
+		}
+		return chain;
+	}
+
 }

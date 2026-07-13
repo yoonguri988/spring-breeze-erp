@@ -27,6 +27,7 @@ public interface ApprDocService {
 	public boolean insertLines(ApprDocDto dto);
 	public List<ApprLineDto> selectLinesByDocId(int docId);
 	public void processLine(int docId, int empId, String action);
+	public List<ApprLineDto> selectDeptEmpsForLines(int deptId);
 	
 	// 페이징
 	public int selectMyHistoryDocsCnt(ApprDocDto dto);

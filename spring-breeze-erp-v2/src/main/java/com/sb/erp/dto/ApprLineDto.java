@@ -14,4 +14,5 @@ public class ApprLineDto {
 	// 조회용
 	private String empName;
 	private String posName; 
+	private int posOrder;
 }

@@ -135,9 +135,6 @@
 	</select>
 	
 	
-	<!-- jsj: 3일 전 등록된 미발송 사원 및 회사 정보 조회 -->
-	
-
 	<!-- cyj: 비밀번호 찾기시 해당하는 사원정보가 있는지 확인 -->
 	<select id="selectForVerify" parameterType="EmpDto" resultType="EmpDto">
 		select *

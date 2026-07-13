@@ -32,8 +32,8 @@ function renderSchema(field, editable){
 			: `<div class="view-val view-val-empty">텍스트</div>`;
 	}
 	
-	return `<div class="mb-3">
-		<label class="sb-form-label">${field.label} ${req}</label>
+	return `<div class="appr-dyn-field">
+		<label>${field.label} ${req}</label>
 		${inputHtml}
 	</div>`;
 }

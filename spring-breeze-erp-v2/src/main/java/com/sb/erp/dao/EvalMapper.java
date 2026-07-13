@@ -11,8 +11,6 @@ import com.sb.erp.dto.EvalDto;
 public interface EvalMapper {
 
 	// ─── 평가 조회 ────────────────────────────────
-
-	
 	// 특정 회차에서 평가자가 평가할 대상 목록
 	// (부서원 목록 + 이미 작성한 평가 상태 조인)
 	// 대시보드 카드 UI용
@@ -36,7 +34,10 @@ public interface EvalMapper {
 
 	// 회차 내 평가자별 진행률 (제출 완료 수)
 	int countSubmittedByEvaluator(@Param("periodId") int periodId, @Param("evaluatorId") int evaluatorId);
-
+	
+	// 회차의 평가 대상 사원 수 — 리포트 진행률 산정
+	int countDistinctTargetsByPeriodId(@Param("periodId") int periodId);
+	
 	
 	// ─── 평가 등록/수정 ──────────────────────────
 
