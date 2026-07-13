@@ -1,5 +1,8 @@
 package com.sb.erp.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -8,7 +11,7 @@ public class NoticeSearchDto {
 	private Integer comId;
 	private String keyword;
 	private String sortBy = "new";
-	
+	private List<Integer> pinnedBnos = new ArrayList<>();// 긴급 공지 상단 고정 시 제외할 bno 목록
 	// 페이징
 	private int pstartno = 1;
 	private int onepagelist = 10;

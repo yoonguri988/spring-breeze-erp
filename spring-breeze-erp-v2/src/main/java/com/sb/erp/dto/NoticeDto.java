@@ -1,6 +1,8 @@
 package com.sb.erp.dto; 
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.Data;
 
@@ -20,6 +22,7 @@ public class NoticeDto { //notice
 	private Integer empId;
 	private Integer comId;
 	private String empName;
+	public boolean isUrgent() {return bcontent!=null && bcontent.contains("긴급");} //외부에서 호출할것이기 때문에 public으로 
 }
 
 
