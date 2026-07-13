@@ -202,7 +202,10 @@ public class ApprDocController {
 	@GetMapping("/getDeptTree")
 	@ResponseBody
 	public List<DeptDto> getDeptTree(@AuthenticationPrincipal CustomUserDetails userDetails){
-		return deptService.selectAncestorDepts(userDetails.getUser().getDeptId());
+		return service.cntApprovers(
+				userDetails.getUser().getDeptId(),
+				userDetails.getUser().getEmpId()
+		);
 	}
 	
 	// 특정 부서 소속 사원 목록

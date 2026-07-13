@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
@@ -29,6 +30,8 @@ public interface ApprDocMapper {
 	public List<ApprLineDto> approversByEmpId(ApprDocDto dto);
 	public int updateDocStatus(ApprDocDto dto);
 	public List<ApprLineDto> selectDeptEmpsForLines(int deptId); 
+	public int cntApprovers(@Param("deptId") int deptId,
+							@Param("empId") int empId);
 	
 	// 페이징
 	public int selectMyHistoryDocsCnt(ApprDocDto dto);

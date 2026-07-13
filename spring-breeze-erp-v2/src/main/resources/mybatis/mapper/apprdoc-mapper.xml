@@ -296,5 +296,22 @@
 			d.dept_id = #{deptId} or d.parent_id = #{deptId}
 	</select>
 	
+	<!-- 결재선 지정 가능 인원수 / 사용자 본인 빼고, 본인보다 직급 높은사람들 -->
+	<select id="cntApprovers" resultType="int">
+		select count(*)
+		from
+			employee e
+		join
+			emp_position p on e.pos_id = p.pos_id
+		where
+			e.dept_id = #{deptId}
+			and e.emp_id != #{empId}
+			and p.pos_order > (
+				select pp.pos_order
+				from employee ee
+				join emp_position pp on ee.pos_id = pp.pos_id
+				where ee.emp_id = #{empId}
+			)
+	</select>
 	
 </mapper>

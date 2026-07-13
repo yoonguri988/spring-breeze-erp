@@ -37,77 +37,79 @@
 	<input type="hidden" id="empId" th:value="${dto.empId}"/>
 	<input type="hidden" id="posOrder" th:value="${dto.posOrder}"/>
 	<input type="hidden" id="forVersion" name="forVersion" value=""/>
+	<input type="hidden" name="docStatus" value="ING"/>
 
-	<div class="sb-card mb-4">
-		<div class="sb-card__head">
-			<h2>문서 정보</h2>
-		</div>
+	<div class="row g-4 mb-4">
+		<div class="col-lg-8">
+			<div class="sb-card h-100">
+				<div class="sb-card__head">
+					<h2>문서 정보</h2>
+				</div>
 		
-		<div class="sb-card__body">	
-			<div class="row g-4 mb-4">
-				<div class="col-md-6">
-					<label for="forSelect"
-						   class="sb-form-label">결재 양식</label>
-					<select class="form-select" id="formSelect" name="forId">
-						<option value="">선택</option>
-					</select>
-					<div id="err_form" class="text-danger fw-semibold mt-1"
-						 style="display: none; font-size: 14px;">
-						 기안하실 결재 양식을 선택해주세요.
-					</div>
-					<div class="form-text text-faint mt-1">
-						문서에 사용할 결재 양식을 선택해주세요.
-					</div>
-				</div>
-			</div>
-				
-			<div class="row g-4 mb-4">
-				<div class="col-md-6">
-					<label for="docTitle" class="sb-form-label">문서 제목 <span class="text-danger">*</span></label>
-					<input type="text" class="form-control"
-						   id="docTitle" name="docTitle" placeholder="문서 제목을 입력하세요"/>
-					<div class="form-text text-faint mt-1">결재 문서의 제목을 입력하세요.</div>
-					<div id="err_docTitle" class="text-danger fw-semibold mt-1"
-						 style="display: none; font-size: 14px;">
-						 문서 제목을 입력해주세요
-					</div>
-				</div>
-				
-				<div class="col-md-6 d-flex gap-3 align-items-start">
-					<div class="flex-grow-1">
-						<label for="empName" class="sb-form-label">작성자 <span class="text-danger">*</span></label>
-						<input type="text" class="form-control bg-light" id="empName"
-							   th:value="|${dto.empName} (${dto.empId})|" readonly/>
-						<div class="form-text text-secondary mt-1">
-							현재 로그인한 사용자가 기본 작성자로 설정됩니다.
+				<div class="sb-card__body">	
+					<div class="mb-4">
+						<label for="formSelect"
+							   class="sb-form-label">결재 양식</label>
+						<select class="form-select" id="formSelect" name="forId">
+							<option value="">선택</option>
+						</select>
+						<div id="err_form" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 기안하실 결재 양식을 선택해주세요.
+						</div>
+						<div class="form-text text-faint mt-1">
+							문서에 사용할 결재 양식을 선택해주세요.<br>
+							양식을 선택하면 문서내용이 나타납니다.
 						</div>
 					</div>
-					<div class="sb-info-box mt-4 col-md-5">
-						<i class="bi bi-info-circle-fill text-primary"></i> <strong>안내</strong><br>
-						중요 문서 지정 여부에 따라서 결재선의 수가 유동적으로 변경됩니다.
+						
+					<div class="mb-4">
+						<label for="docTitle" class="sb-form-label">문서 제목 <span class="text-danger">*</span></label>
+						<input type="text" class="form-control"
+							   id="docTitle" name="docTitle" placeholder="문서 제목을 입력하세요"/>
+						<div class="form-text text-faint mt-1">결재 문서의 제목을 입력하세요.</div>
+						<div id="err_docTitle" class="text-danger fw-semibold mt-1"
+							 style="display: none; font-size: 14px;">
+							 문서 제목을 입력해주세요
+						</div>
+					</div>
+						
+					<div class="sb-info-box d-flex align-items-center justify-content-between gap-3">
+						<div>
+							<strong>중요 문서 여부</strong>
+							<div class="form-text text-secondary mt-1 mb-0" style="font-size: 13px;">
+								중요 문서로 지정하면 결재선의 수가 유동적으로 변경됩니다.
+							</div>
+						</div>
+						<div class="form-check form-switch mb-0 flex-shrink-0">
+							<input class="form-check-input sb-checkbox" type="checkbox" id="isImportantSwitch"
+								   style="width: 44px; height: 22px; cursor:pointer;"/>
+							<input type="hidden" id="isImportant" name="isImportant" value="0"/>
+						</div>
 					</div>
 				</div>
 			</div>
-			
-			<div class="row g-4 align-items-center">
-				<div class="col-md-6">
-					<label for="docStatus" class="sb-form-label">문서 상태</label>
-					<input type="text" class="form-control bg-light" id="docStatus" value="진행중 (ING)" readonly/>
-					<input type="hidden" name="docStatus" value="ING"/>
-					<div class="form-text text-secondary mt-1">
-						결재 진행중
-					</div>
+		</div>
+	
+		<div class="col-lg-4">
+			<div class="sb-card h-100">
+				<div class="sb-card__head">
+					<h2>작성자 정보</h2>
 				</div>
-			
-				<div class="col-md-6">
-					<label class="sb-form-label">중요 문서 여부</label>
-					<div class="form-check form-switch mt-2">
-						<input class="form-check-input sb-checkbox" type="checkbox" id="isImportantSwitch"
-							   style="width: 44px; height: 22px; cursor:pointer;"/>
-						<input type="hidden" id="isImportant" name="isImportant" value="0"/>
-						<label class="form-check-label text-dark fw-semibold ms-2" for="isImportantSwitch"
-							   style="cursor: pointer; user-select: none; line-height:22px;">
-						</label>
+				<div class="sb-card__body">
+					<div class="mb-3">
+						<label class="sb-form-label text-soft">작성자</label>
+						<div class="fw-bold text-dark" th:text="|${dto.empName} (${dto.empId})|">이름</div>
+						<div class="form-text text-secondary mt-1">
+							로그인한 사용자가 기본 작성자로 설정됩니다.
+						</div>
+					</div>
+					<div class="border-top pt-3">
+						<label class="sb-form-label text-soft">문서 상태</label>
+						<div>
+							<span class="sb-badge sb-badge--blue">진행중 (ING)</span>
+						</div>
+						<div class="form-text text-secondary mt-1">결재 진행중</div>
 					</div>
 				</div>
 			</div>
@@ -143,7 +145,7 @@
 		</div>
 	</div>
 	
-	<div class="sb-card mb-4">
+	<div class="sb-card mb-4" id="docContentCard" style="display: none;">
 		<div class="sb-card__head">
 			<h2>문서 내용</h2>
 		</div>
@@ -253,15 +255,21 @@
 			});
 		}
 		
+		const docContentCard = document.getElementById("docContentCard");
+		
 		// 드롭다운 변경시 해당 양식 주입
 		formSelect.addEventListener("change", function(e){
 			const selectedFormId = e.target.value;
 			const selectedOption = e.target.options[e.target.selectedIndex];
 			
 			if(!selectedFormId){
+				docContentCard.style.display = "none";
 				window.jQuery('#forContent').summernote('code','');
 				return;
 			}
+			
+			// 양식이 선택되면 보이게
+			docContentCard.style.display = "block";
 			
 			const selectedVersion = selectedOption.getAttribute("data-version");
 			
@@ -457,7 +465,10 @@
 		function loadDeptTree(){
 			fetch('/appr/getDeptTree')
 			.then(response => response.json())
-			.then(data => renderDeptTree(data))
+			.then(data => {
+				renderDeptTree(data)
+				checkApprovers();
+			})
 			.catch(err => console.error("부서트리 조회 실패",err));
 		}
 		
@@ -468,6 +479,45 @@
 			{deptId: 3 , parentId: 1, deptName: "개발팀", empCount: 4},
 		]
 		*/
+		
+		// 최고 직급자 판단하고 예외처리
+		function checkApprovers(){
+			const myEmpId = parseInt(document.getElementById("empId").value);
+			const myPosOrder = parseInt(document.getElementById("posOrder").value);
+			
+			const deptIds = Array.from(document.querySelectorAll(".dept-node"))
+				.map(node => node.getAttribute("data-dept-id"));
+			
+			/*
+				Promise
+				위쪽 부서와 사원 목록을 가져올때 하나씩 왕복으로 처리하지않고
+				병렬 방식으로 요청을 보내고
+				모든 요청이 다 끝나면 하나로 합쳐줌
+				지금처럼 비교해야하는게 많은경우에 사용함
+			*/
+			Promise.all(deptIds.map(id =>
+				fetch(`/appr/getDeptEmps?deptId=${id}`)
+				.then(response => response.json())
+			))
+			.then(data => {
+				const result = data.some(emps =>
+					emps.some(emp => emp.empId !== myEmpId && emp.posOrder > myPosOrder)
+				);
+				
+				if(!result){
+					treeBox.innerHTML = `
+						<div class="text-center text-muted py-4 small">
+							<i class="bi bi-info-circle d-block mb-1 fs-5"></i>
+							최고 직급자는 결재선 지정 없이 문서를 기안할 수 없습니다.<br>
+							관리자에게 문의해주세요.
+						</div>
+					`;
+					document.getElementById("apprSlots").innerHTML = "";
+					document.getElementById("deptEmpBox").style.display = "none";
+				}
+			})
+			.catch(err => console.error("직급 확인 실패", err));
+		}
 		
 		function renderDeptTree(data){
 			/*
@@ -498,7 +548,7 @@
 					li.innerHTML = `
 						<span class="dept-node" data-dept-id="${dept.deptId}" style="cursor:pointer;">
 						<i class="bi bi-folder"></i> ${dept.deptName}
-							<span class="text-muted">(${dept.empCount})</span>
+							<span class="text-muted dept-count" data-dept-id="${dept.deptId}">(${dept.empCount})</span>
 						</span>
 					`;
 					ul.appendChild(li);
