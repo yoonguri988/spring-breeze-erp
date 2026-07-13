@@ -9,10 +9,13 @@
 		select period_id,
 		com_id, eval_year, eval_term, title, period_status,
 		TO_CHAR(start_date, 'YYYY-MM-DD') AS start_date,
-		TO_CHAR(end_date, 'YYYY-MM-DD') AS end_date,
-		TO_CHAR(created_at, 'YYYY-MM-DD') AS created_at,
+		TO_CHAR(end_date,
+		'YYYY-MM-DD') AS end_date,
+		TO_CHAR(created_at, 'YYYY-MM-DD') AS
+		created_at,
 		TO_CHAR(updated_at, 'YYYY-MM-DD') AS updated_at
-		from evaluation_period
+		from
+		evaluation_period
 		where period_id = #{periodId}
 		and com_id = #{comId}
 	</select>
@@ -30,14 +33,17 @@
 	<!-- 회차 정보 수정 -->
 	<update id="update" parameterType="EvalPeriodDto">
 		update evaluation_period
-		set title = #{title},
+		set
+		title = #{title},
 		eval_year = #{evalYear},
 		eval_term = #{evalTerm},
 		start_date = TO_DATE(#{startDate}, 'YYYY-MM-DD'),
-		end_date = TO_DATE(#{endDate},
+		end_date =
+		TO_DATE(#{endDate},
 		'YYYY-MM-DD')
 		where period_id = #{periodId}
-		and com_id = #{comId}
+		and
+		com_id = #{comId}
 	</update>
 
 	<!-- 상태 전환 -->
@@ -54,10 +60,13 @@
 		resultType="EvalPeriodDto">
 		select period_id, com_id, eval_year, eval_term, title, period_status,
 		TO_CHAR(start_date, 'YYYY-MM-DD') AS start_date,
-		TO_CHAR(end_date, 'YYYY-MM-DD') AS end_date,
-		TO_CHAR(created_at, 'YYYY-MM-DD') AS created_at,
+		TO_CHAR(end_date,
+		'YYYY-MM-DD') AS end_date,
+		TO_CHAR(created_at, 'YYYY-MM-DD') AS
+		created_at,
 		TO_CHAR(updated_at, 'YYYY-MM-DD') AS updated_at
-		from evaluation_period
+		from
+		evaluation_period
 		<where>
 			com_id = #{comId}
 			<if test="evalYear != null">
@@ -73,7 +82,8 @@
 		order by eval_year DESC,
 		CASE eval_term
 		WHEN 'ANNUAL' THEN 3
-		WHEN 'H2' THEN 2
+		WHEN 'H2'
+		THEN 2
 		WHEN 'H1' THEN 1
 		END DESC,
 		period_id DESC
@@ -82,16 +92,13 @@
 	<!-- 상태 갯수 확인 -->
 	<select id="countByStatusAll" resultType="map">
 		select
-		count(case when
-		period_status = 'READY' then 1 end) as "READY",
-		count(case when
-		period_status = 'OPEN' then 1 end) as "OPEN",
-		count(case when
-		period_status = 'CLOSED' then 1 end) as "CLOSED",
-		count(case when
-		period_status = 'REPORTED' then 1 end) as "REPORTED"
-		from
-		evaluation_period
+		count(case when period_status = 'READY' then 1 end) as "READY",
+		count(case when period_status = 'OPEN' then 1 end) as "OPEN",
+		count(case when period_status = 'CLOSED' then 1 end) as "CLOSED",
+		count(case when period_status = 'REPORTING_FAILED' then 1 end) as
+		"REPORTING_FAILED",
+		count(case when period_status = 'REPORTED' then 1 end) as "REPORTED"
+		from evaluation_period
 		where com_id = #{comId}
 	</select>
 

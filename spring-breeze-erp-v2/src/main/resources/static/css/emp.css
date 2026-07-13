@@ -130,9 +130,10 @@ section.emp_detail div.profileBox {
 }
 
 section.emp_detail div.sb-avatar {
-    width: 64px;
-    height: 64px;
-    font-size: 26px;
+    width: 72px;
+    height: 72px;
+    font-size: 28px;
+    border-radius: 50%;
 }
 
 section.emp_detail div.sumInfoBox1 p {
@@ -202,44 +203,7 @@ section.emp_edit form input.rdOnly {
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 */
 
-section.emp_resetPass div.profileBox {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 24px;
-}
 
-
-section.emp_resetPass div.sumInfoBox1 p:first-child {
-    margin-bottom: 4px;
-    font-size: 16px;
-}
-
-section.emp_resetPass div.prfBadgeBox {
-    display: flex;
-    justify-content: start;
-    align-items: center;
-}
-
-section.emp_resetPass div.sumInfoBox2 {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 24px;
-}
-
-section.emp_resetPass div.sumInfoBox2 div {
-    width: 150px;
-    min-width: fit-content;
-    margin-right: 20px;
-}
-
-section.emp_resetPass div.sumInfoBox2 p {
-    margin-bottom: 4px;
-    font-size: 12px;
-    font-weight: bold;
-
-}
 
 /* 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

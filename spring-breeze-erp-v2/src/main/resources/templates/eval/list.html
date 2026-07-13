@@ -162,7 +162,6 @@
         </div>
 
         <div class="row g-3">
-
             <div th:if="${#lists.isEmpty(targets)}" class="col-12">
                 <div class="sb-card">
                     <div class="sb-empty" style="padding:60px 20px">
@@ -172,7 +171,7 @@
                 </div>
             </div>
 
-            <div th:each="target : ${targets}" class="col-12 col-md-6 col-lg-4">
+            <div th:each="target : ${targets}" class="col-12 col-md-4 col-lg-3">
                 <div class="sb-card eval-target-card">
                     <div class="sb-card__body">
                         <div class="d-flex align-items-center gap-3 mb-3">
@@ -209,25 +208,25 @@
                         <div class="d-grid gap-2">
                             <a th:if="${target.evalStatus == null}"
                                th:href="@{/eval/add(periodId=${period.periodId},targetEmpId=${target.targetEmpId})}"
-                               class="btn btn-sb btn-sm">
+                               class="btn btn-sb btn-sm d-block text-center">
                                 <i class="bi bi-pencil"></i>
                                 평가 작성
                             </a>
                             <a th:if="${target.evalStatus == 'DRAFT'}"
                                th:href="@{/eval/edit(evalId=${target.evalId})}"
-                               class="btn btn-sb btn-sm">
+                               class="btn btn-sb btn-sm d-block text-center">
                                 <i class="bi bi-pencil"></i>
                                 이어서 작성
                             </a>
                             <a th:if="${target.evalStatus == 'SUBMITTED' and period.periodStatus == 'OPEN'}"
                                th:href="@{/eval/edit(evalId=${target.evalId})}"
-                               class="btn btn-ghost btn-sm">
+                               class="btn btn-ghost btn-sm d-block text-center">
                                 <i class="bi bi-pencil"></i>
                                 수정
                             </a>
                             <a th:if="${target.evalStatus == 'SUBMITTED'}"
                                th:href="@{/eval/detail(evalId=${target.evalId})}"
-                               class="btn btn-ghost btn-sm">
+                               class="btn btn-ghost btn-sm d-block text-center">
                                 <i class="bi bi-eye"></i>
                                 제출한 평가 보기
                             </a>
