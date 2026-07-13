@@ -83,7 +83,7 @@ window.addEventListener("load",function(){
       <div class="sb-card__head">
         <h2>태스크목록</h2>
         <div class="right">
-          <a th:href="@{/proj/task_create(project_pro_id=${dto.proId})}" class="btn btn-sb btn-sm"><i class="bi bi-plus-lg"></i> 태스크추가</a>
+          <a th:href="@{/proj/task_create(project_pro_id=${dto.proId})}" class="btn btn-sb btn-sm"><i class="bi bi-check2-square"></i> 태스크추가</a>
         </div>
       </div>
       <div class="sb-card__body--flush">
@@ -124,7 +124,15 @@ window.addEventListener("load",function(){
 </div>
 
 <div class="sb-card mt-3">
-  <div class="sb-card__head"><h2>참여인원</h2></div>
+  <div class="sb-card__head"><h2>참여인원</h2>
+    <div class="right">
+		<a th:if="${isAdmin or dto.empId == loginEmpId}"
+		   th:href="@{/proj/proj_member(pro_id=${dto.proId})}" 
+		   class="btn btn-sb btn-sm">
+		    <i class="bi bi-people"></i> 참여인원 관리
+		</a>
+    </div>
+  </div>
   <div class="sb-card__body">
     <div class="sb-avstack mb-2">
       <span class="sb-avatar" th:each="m : ${memberList}" th:title="${m.empName}" th:text="${#strings.substring(m.empName,0,1)}"></span>

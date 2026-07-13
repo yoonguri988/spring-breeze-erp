@@ -22,6 +22,8 @@ public class TaskDto {
 	private LocalDate updatedAt;
 	private Integer parentTaskId;
 	private String proName;
+	private Integer depth; //후속작업 목록-트리 구조를 보여주기 위한 용도
+	private String parentTaskStatus; //부모 태스크의 상태
 	
 	//프로젝트 기간
 	private LocalDate startDate;
@@ -29,4 +31,5 @@ public class TaskDto {
 	
     // 지연 여부
     private boolean delayed;
+    
 }
