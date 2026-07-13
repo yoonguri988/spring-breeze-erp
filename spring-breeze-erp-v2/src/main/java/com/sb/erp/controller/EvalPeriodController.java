@@ -148,21 +148,26 @@ public class EvalPeriodController {
 	
 	@PostMapping("/eval/period/close")
 	public String closePeriod(@RequestParam int periodId, RedirectAttributes ra) {
-	   
-		int result = evalPeriodService.closePeriod(periodId);
-		
-		if (result == -1) {
-		    ra.addFlashAttribute("errorMsg", "존재하지 않는 회차입니다.");
-		    return "redirect:/eval/period/list";
-		}
-		
-		if (result == -2) {
-		    ra.addFlashAttribute("errorMsg", "OPEN 상태의 회차만 마감할 수 있습니다.");
-		    return "redirect:/eval/period/detail?periodId=" + periodId;
-		}
-		
-		ra.addFlashAttribute("successMsg", "회차를 마감했습니다.");
-		return "redirect:/eval/period/detail?periodId=" + periodId;
+	    int result = evalPeriodService.closePeriod(periodId);
+	    
+	    if (result == -1) {
+	        ra.addFlashAttribute("errorMsg", "존재하지 않는 회차입니다.");
+	        return "redirect:/eval/period/list";
+	    }
+	    
+	    if (result == -2) {
+	        ra.addFlashAttribute("errorMsg", "OPEN 상태의 회차만 마감할 수 있습니다.");
+	        return "redirect:/eval/period/detail?periodId=" + periodId;
+	    }
+	    
+	    if (result == -3) {
+	        ra.addFlashAttribute("errorMsg", 
+	            "아직 제출되지 않은 평가가 있습니다. 모든 평가가 제출된 후 마감해주세요.");
+	        return "redirect:/eval/period/detail?periodId=" + periodId;
+	    }
+	    
+	    ra.addFlashAttribute("successMsg", "회차를 마감했습니다.");
+	    return "redirect:/eval/period/detail?periodId=" + periodId;
 	}
 	
 	@PostMapping("/eval/period/report")
@@ -176,7 +181,7 @@ public class EvalPeriodController {
 		}
 		
 		if (result == -2) {
-		    ra.addFlashAttribute("errorMsg", "CLOSED 상태의 회차만 분석할 수 있습니다.");
+		    ra.addFlashAttribute("errorMsg", "현재 상태에서는 AI 분석을 시작할 수 없습니다.");
 		    return "redirect:/eval/period/detail?periodId=" + periodId;
 		}
 		
