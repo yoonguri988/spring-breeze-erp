@@ -26,4 +26,5 @@ public interface ProjectMemberService {
 	
 	//사원 이름,번호 조회
 	public List<EmpDto> searchEmpForProject(@Param("comId") int comId, @Param("keyword") String keyword);
+	
 }

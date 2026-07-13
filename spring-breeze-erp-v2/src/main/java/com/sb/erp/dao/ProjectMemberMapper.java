@@ -27,4 +27,7 @@ public interface ProjectMemberMapper {
 	
 	//사원 이름,번호 조회
 	public List<EmpDto> searchEmpForProject(@Param("comId") int comId, @Param("keyword") String keyword);
+	
+	// 프로젝트에 동일한 사원이 이미 참여 중인지 확인 
+	public int existsMember(ProjectMemberDto dto);
 }

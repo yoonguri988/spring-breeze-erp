@@ -48,4 +48,12 @@ where pm.pm_id = #{pmId}
 	join employee e on pm.emp_id = e.emp_id
 	where pm.project_pro_id = #{value}
 </select>
+
+<!-- 중복 사원 검사 -->
+<select id="existsMember" parameterType="ProjectMemberDto" resultType="int">
+    SELECT COUNT(*)
+    FROM project_member
+    WHERE project_pro_id = #{projectProId}
+      AND emp_id = #{empId}
+</select>
 </mapper>

@@ -45,7 +45,7 @@ public class TaskController {
 		int empId = user.getUser().getEmpId();
 
 		ProjectDto project = projectService.select(projectProId);
-
+		SecurityUtil.checkComIdAccess(project.getComId());
 		boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		boolean isCreator = project.getEmpId() == empId;
 		boolean isMember = memberservice.select(projectProId).stream()
@@ -69,7 +69,7 @@ public class TaskController {
 	    int comId = user.getUser().getComId();
 	    
 	    ProjectDto project = projectService.select(dto.getProId());
-	    
+	    SecurityUtil.checkComIdAccess(project.getComId());
 	    boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 	    boolean isCreator = project.getEmpId() == empId;
 	    boolean isMember = memberservice.select(dto.getProId()).stream()
@@ -106,6 +106,7 @@ public class TaskController {
 	 
 	  // 회사 소속 검증: ROOT/ADMIN이 아니면 자기 회사 프로젝트의 태스크만 접근 가능
 	  ProjectDto project = projectService.select(dto.getProId());
+	  SecurityUtil.checkComIdAccess(project.getComId());
 	  if (!SecurityUtil.isAdminOrRoot(auth)
 	          && project.getComId() != SecurityUtil.getCurrentComId()) {
 	      throw new AccessDeniedException("접근 권한이 없습니다.");
@@ -137,6 +138,7 @@ public class TaskController {
 
 		 TaskDto task = service.select(taskId);
 		 ProjectDto project = projectService.select(task.getProId());
+		 SecurityUtil.checkComIdAccess(project.getComId());
 		 ProjectMemberDto assignee = memberservice.selectOne(task.getPmId());
 
 		 boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
@@ -161,6 +163,7 @@ public class TaskController {
 		  //수정 권한 검증: ROOT/ADMIN, 프로젝트 생성자, 담당자 본인만 가능
 		  TaskDto original = service.select(dto.getTaskId());
 		  ProjectDto project = projectService.select(original.getProId());
+		  SecurityUtil.checkComIdAccess(project.getComId());
 		  ProjectMemberDto assignee = memberservice.selectOne(original.getPmId());
 		  
 		  boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
@@ -175,7 +178,11 @@ public class TaskController {
 		  String result= "태스크 수정 실패";
 		    try {
 		        if(dependencyService.updateTaskSchedule(dto) > 0) { result = "태스크 수정 성공"; }
-		    } catch(IllegalArgumentException e) { result = e.getMessage(); }
+		    } catch(IllegalArgumentException | IllegalStateException e) 
+		    // 멀티캐치: 순환참조(IllegalArgumentException), 완료된 프로젝트/동시수정 락 타임아웃(IllegalStateException)
+		    // 예상된 예외만 여기서 잡아서 사용자에게 메시지로 안내.
+		    // Exception으로 넓게 잡지 않는 이유: 의도치 않은 버그(NPE 등)까지 숨겨버리면 디버깅이 어려워지기 때문
+		    { result = e.getMessage(); }
 			rttr.addFlashAttribute("result",result);
 			return "redirect:/proj/task_detail?task_id="+dto.getTaskId();
 	  } //태스크 수정폼
@@ -187,6 +194,7 @@ public class TaskController {
 		  int empId = user.getUser().getEmpId();
 		  // 삭제 권한 검증: ROOT/ADMIN, 프로젝트 생성자만 가능 (담당자 본인은 제외)
 		  ProjectDto project = projectService.select(proId);
+		  SecurityUtil.checkComIdAccess(project.getComId());
 		  boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		  boolean isCreator = project.getEmpId() == empId;
 
@@ -237,7 +245,7 @@ public class TaskController {
 		public List<TaskDto> gantt(@RequestParam("pro_id") int proId, Authentication auth){
 			
 		    ProjectDto project = projectService.select(proId);
-
+		    SecurityUtil.checkComIdAccess(project.getComId());
 		    if (!SecurityUtil.isAdminOrRoot(auth)
 		            && project.getComId() != SecurityUtil.getCurrentComId()) {
 		        throw new AccessDeniedException("접근 권한이 없습니다.");
