@@ -112,7 +112,7 @@
 	nvl(sum(case when t.task_status = 'DOING' then 1 end), 0) as doingCount,
 	nvl(sum(case when t.task_status = 'DONE' then 1 end), 0) as doneCount,
 	nvl(sum(case when t.task_status <> 'DONE' and t.task_end_date < sysdate then 1 end), 0) as delayCount,
-	nvl(round(sum(case when t.task_status = 'DONE' then 1 else 0 end) / count(t.task_id) * 100), 0) as progressRate
+	NVL( ROUND( SUM(CASE WHEN t.task_status='DONE' THEN 1 ELSE 0 END) / NULLIF(COUNT(t.task_id),0) *100 ), 0 ) AS progressRate
 	from project p
 	left join task t on p.pro_id = t.pro_id
 	where p.pro_id = #{proId}
