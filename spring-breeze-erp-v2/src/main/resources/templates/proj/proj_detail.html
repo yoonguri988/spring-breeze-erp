@@ -233,7 +233,11 @@ window.addEventListener("load", function () {
             console.error(error);
 
             loading.style.display = "none";
-            resultText.textContent = "AI 분석 중 오류가 발생했습니다.";
+            if (error.message === "접근 권한이 없습니다.") {
+                alert(error.message);
+                card.style.display = "none";   // 결과 카드도 숨김
+                return;
+            }
         })
         .finally(() => {
             btn.disabled = false;

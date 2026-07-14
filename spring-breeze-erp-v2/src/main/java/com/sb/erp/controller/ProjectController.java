@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -191,7 +193,7 @@ public class ProjectController {
 	
 	@GetMapping("/analysis") //API(1)-ai분석결과
 	@ResponseBody
-	public String analyzeProject(@RequestParam Integer proId, Authentication auth) {
+	public ResponseEntity<String> analyzeProject(@RequestParam Integer proId, Authentication auth) {
 		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		int empId = user.getUser().getEmpId();
 	    ProjectDto project = service.select(proId);
@@ -202,10 +204,11 @@ public class ProjectController {
 	            .anyMatch(m -> m.getEmpId() == SecurityUtil.getCurrentEmpId());
 
 	    if (!isAdmin && !isCreator && !isMember) {
-	        throw new AccessDeniedException("접근 권한이 없습니다.");
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                .body("접근 권한이 없습니다.");
 	    }
 		
-		return service.analyzeProject(proId);
+		return  ResponseEntity.ok(service.analyzeProject(proId));
 	}
 
 }
