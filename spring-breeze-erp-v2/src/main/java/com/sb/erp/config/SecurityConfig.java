@@ -39,7 +39,7 @@ public class SecurityConfig {
 				   .requestMatchers("/auth/updatePass", "/", "/emp/list", 
 				    		"/emp/detail", "/emp/edit", "/emp/editPass", 
                 "/com/**", "/dept/**", "/appr/**", 
-                "/res/**", "/resv/**", "/proj/**", "/notice/**").authenticated()
+                "/res/**", "/resv/**", "/proj/**", "/notice/**","/report/**").authenticated()
 				   // ─── 그 외 ────────────────
 				   //.anyRequest().permitAll()
 				)
