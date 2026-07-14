@@ -58,11 +58,14 @@ public class ProjectController {
 	    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 	    int comId = user.getUser().getComId();
 		//권한 체크
-		if (!SecurityUtil.isAdminOrRoot(auth)) {
-			 search.setComId(comId);
-		} else {
-			search.setComId(null);
-		}
+	    boolean isRoot = auth.getAuthorities().stream()
+	            .anyMatch(a -> "ROOT".equals(a.getAuthority()));
+
+	    if (!isRoot) {
+	        search.setComId(comId);
+	    } else {
+	        search.setComId(null);
+	    }
 		    model.addAttribute("search", search);
 		if(!search.isSearched()) {return "proj/proj_list";}
 
