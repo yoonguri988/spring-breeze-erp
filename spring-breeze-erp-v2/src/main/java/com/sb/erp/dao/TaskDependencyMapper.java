@@ -27,6 +27,6 @@ public interface TaskDependencyMapper {
    public List<TaskDto> findCriticalPath(int proId);
    
    //동일 프로젝트의 태스크를 수정하는 동안 다른 사용자의 동시 수정을 방지하기 위해 행 잠금 획득
-   public int lockProjectTasks(int proId);
+   public List<Integer> lockProjectTasks(int taskId);
 	
 }
