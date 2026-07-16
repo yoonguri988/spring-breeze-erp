@@ -229,6 +229,8 @@ document.addEventListener("DOMContentLoaded", function () {
         infoQuantity.textContent = data.availableQty + " / " + data.totalQuantity;
  
         if (data.availableQty <= 0) {
+          infoStatus.textContent = statusMap["DISABLED"].text;
+          infoStatus.className = "sb-badge sb-badge--" + statusMap["DISABLED"].tone;
           setFieldError(qtyInput, quantityMsg, true, "해당 기간에는 예약 가능한 수량이 없습니다.");
         }
         validateQuantity();
