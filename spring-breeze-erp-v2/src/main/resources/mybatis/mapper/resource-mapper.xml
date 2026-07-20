@@ -17,8 +17,8 @@
         LEFT JOIN EMP_POSITION EP ON EP.POS_ID = E.POS_ID
         WHERE R.com_id = #{comId}
         <if test="keyword != null and keyword != ''">
-            AND (R.res_name LIKE CONCAT('%', #{keyword}, '%')
-                 OR R.res_code LIKE CONCAT('%', #{keyword}, '%'))
+			AND (R.res_name LIKE '%' || #{keyword} || '%'
+			     OR R.res_code LIKE '%' || #{keyword} || '%')
         </if>
         <if test="resType != null and resType != ''">
             AND R.res_type = #{resType}
@@ -42,8 +42,8 @@
         FROM COM_RESOURCE R
         WHERE R.com_id = #{comId}
         <if test="keyword != null and keyword != ''">
-            AND (R.res_name LIKE CONCAT('%', #{keyword}, '%')
-                 OR R.res_code LIKE CONCAT('%', #{keyword}, '%'))
+			AND (R.res_name LIKE '%' || #{keyword} || '%'
+			     OR R.res_code LIKE '%' || #{keyword} || '%')
         </if>
         <if test="resType != null and resType != ''">
             AND R.res_type = #{resType}

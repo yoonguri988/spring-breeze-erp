@@ -91,7 +91,7 @@
         <div class="col-6 col-md-2">
           <select name="resStatus" class="form-select">
             <option value="" th:selected="${#strings.isEmpty(search.resStatus)}">전체 상태</option>
-            <option value="AVAILABLE" th:selected="${search.resStatus == 'AVAILABLE' or search.resStatus == ''}">사용가능</option>
+            <option value="AVAILABLE" th:selected="${search.resStatus == 'AVAILABLE'}">사용가능</option>
             <option value="MAINTENANCE" th:selected="${search.resStatus == 'MAINTENANCE'}">점검중</option>
             <option value="DISABLED" th:selected="${search.resStatus == 'DISABLED'}">사용중지</option>
           </select>
