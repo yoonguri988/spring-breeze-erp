@@ -85,7 +85,10 @@ public class DeptServiceImpl implements DeptService {
 	        }
 	        // depth 재계산
 	        if (dto.getParentId() != 0) {
-	        	DeptDto newParent = dao.selectOneById(cur.getParentId());
+	        	DeptDto newParent = dao.selectOneById(dto.getParentId());
+	        	if (newParent == null) {
+	        	    throw new IllegalArgumentException("이동할 상위 부서가 존재하지 않습니다.");
+	        	}
 	        	dto.setDepth(newParent.getDepth() + 1);
 	        } else {
 	        	dto.setDepth(0);

@@ -107,7 +107,7 @@ CREATE TABLE department (
   depth       NUMBER,
   sort_order  NUMBER,
   emp_id      NUMBER,
-  dept_status VARCHAR2(100),
+  dept_status VARCHAR2(100) DEFAULT 'ACTIVE',
   created_at  DATE DEFAULT SYSDATE,
   updated_at  DATE DEFAULT SYSDATE,
   CONSTRAINT pk_department PRIMARY KEY (dept_id),

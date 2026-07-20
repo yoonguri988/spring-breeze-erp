@@ -184,7 +184,10 @@ public class EmpServiceImpl implements EmpService {
 		return dao.selectAuthByEmpId(empId);
 	}
 	
-	
+	// 비밀번호 분실시 본인 확인 - EMP_ID로만 조회해서 업데이트
+	@Override
+	public int updatePassByEmpIdOnly(EmpDto dto) {
+		return dao.updatePassByEmpIdOnly(dto);
 	
 	// ─── 민감 정보 마스킹 ─────────────────────────
 	// 목록 조회 응답에만 사용 / 관리자 외 사용자에게 개인정보 노출 최소화.

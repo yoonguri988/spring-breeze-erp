@@ -213,8 +213,15 @@ public class CompanyController {
 	        return result;
 	    }
 
-	    service.delete(dto.getComId());
-	    result.put("success", true);
+	    try {
+	        service.delete(dto.getComId());
+	        result.put("success", true);
+	    } catch (IllegalArgumentException e) {
+	        // 하위 부서 존재 등 비즈니스 로직 검증 실패
+	        result.put("success", false);
+	        result.put("message", e.getMessage());
+	    }
+	    
 	    return result;
 	}
 	

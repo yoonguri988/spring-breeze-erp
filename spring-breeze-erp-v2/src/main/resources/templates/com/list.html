@@ -391,11 +391,19 @@
                     .then(data => {
                         if (data.success) {
                             location.href = LIST_URL;
-                        } else {
+                            return;
+                        }
+
+                        if (data.reason === "AUTH") {
+                            // 비밀번호 오류 → 모달 안 인라인 표시 (재입력 유도)
                             pwErrMsg.textContent = data.message;
                             pwErr.style.display = "";
                             empPass.classList.add("is-invalid");
                             empPass.focus();
+                        } else {
+                            // 비즈니스 규칙 위반 (예: 하위 부서 존재) → 모달 닫고 토스트로 분리 표시
+                            modal.hide();
+                            SB.toast(data.message, "warn");
                         }
                     })
                     .catch(() => alert("삭제 처리 중 오류가 발생했습니다."));
