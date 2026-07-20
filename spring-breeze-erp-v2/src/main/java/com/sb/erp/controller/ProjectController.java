@@ -114,14 +114,17 @@ public class ProjectController {
 		
 		CustomUserDetails user = (CustomUserDetails)auth.getPrincipal();
 		
-		// 회사 소속 검증
-	    if (!SecurityUtil.isAdminOrRoot(auth)
-	            && dto.getComId() != user.getUser().getComId()) {
-	        throw new AccessDeniedException("접근 권한이 없습니다.");
-	    }
+
 
 		boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
+		boolean isCreator = dto.getEmpId() == user.getUser().getEmpId();
 
+		boolean isMember = memberService.select(proId).stream()
+		        .anyMatch(m -> m.getEmpId() == user.getUser().getEmpId());
+
+		if (!isAdmin && !isCreator && !isMember) {
+		    throw new AccessDeniedException("접근 권한이 없습니다.");
+		}
 	    // 태스크 페이징 처리
 	    int taskTotalCnt = taskService.selectCnt(proId);
 	    PagingUtil paging = new PagingUtil(taskTotalCnt, pstartno);
@@ -200,6 +203,7 @@ public class ProjectController {
 		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		int empId = user.getUser().getEmpId();
 	    ProjectDto project = service.select(proId);
+	    SecurityUtil.checkComIdAccess(project.getComId());
 	    boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 	    boolean isCreator = project.getEmpId() == empId;
 

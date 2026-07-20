@@ -19,8 +19,9 @@ public class ApiScheduled {
     @Autowired private ProjectService projectService;
     @Autowired private ReportApi reportApi;
 	
-	@Scheduled(cron = "0 0 9 * * MON") // 매주 월요일 9시
+	@Scheduled(initialDelay = 10000, fixedDelay = Long.MAX_VALUE) 
 	// initialDelay = 10000, fixedDelay = Long.MAX_VALUE 바로 테스트할거면 이거
+	// cron = "0 0 9 * * MON"  매주 월요일 9시
 	// https://docs.google.com/document/u/0/
 	public void autoCreateWeeklyReports() {
         List<Integer> proIds = projectService.selectActiveProjectIds(); // status IN ('TODO','DOING')
@@ -44,7 +45,7 @@ public class ApiScheduled {
 
         log.info("주간보고서 자동생성 완료 - 성공:{} 실패:{}", success, fail);
     }
-	///////CDY/////// */
+	///////CDY///////*/
 	
 	
 }
