@@ -58,4 +58,7 @@ public interface EmpMapper {
 
 	// 비밀번호 분실 - session(empId) 기반, 본인확인 후에만 진입 가능
 	public EmpDto selectAuthByEmpId(int empId);
+
+	// 비밀번호 분실시 본인 확인 - EMP_ID로만 조회해서 업데이트
+	public int updatePassByEmpIdOnly(EmpDto dto);
 }

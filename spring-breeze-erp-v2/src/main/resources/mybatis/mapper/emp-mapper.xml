@@ -193,4 +193,11 @@
 		join department   d on e.dept_id = d.dept_id
 		where e.emp_id = #{empId}
 	</select>
+	
+	<!-- cyj: 비밀번호 분실시 본인 확인 - EMP_ID로만 조회해서 업데이트 -->
+	<update id="updatePassByEmpIdOnly" parameterType="EmpDto">
+		update employee
+		   set emp_pass = #{empPass}
+		 where emp_id = #{empId}
+	</update>
 </mapper>

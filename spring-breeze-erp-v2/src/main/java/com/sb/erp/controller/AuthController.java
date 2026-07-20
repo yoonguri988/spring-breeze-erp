@@ -89,7 +89,7 @@ public class AuthController {
 		
 		EmpDto dto = new EmpDto();
 		dto.setEmpPass(passEncoder.encode(empPass)); dto.setEmpId(empId);
-		empService.updatePassByEmpId(dto);
+		empService.updatePassByEmpIdOnly(dto);
 		
 		// 1회용 처리 — 재사용 방지
 		session.removeAttribute("empId"); 

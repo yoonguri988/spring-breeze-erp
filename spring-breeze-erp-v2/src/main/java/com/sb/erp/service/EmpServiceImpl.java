@@ -176,5 +176,11 @@ public class EmpServiceImpl implements EmpService {
 	public Object selectAuthByEmpId(int empId) {
 		return dao.selectAuthByEmpId(empId);
 	}
+	
+	// 비밀번호 분실시 본인 확인 - EMP_ID로만 조회해서 업데이트
+	@Override
+	public int updatePassByEmpIdOnly(EmpDto dto) {
+		return dao.updatePassByEmpIdOnly(dto);
+	}
 
 }

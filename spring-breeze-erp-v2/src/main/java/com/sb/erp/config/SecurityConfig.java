@@ -25,13 +25,13 @@ public class SecurityConfig {
 						// ─── 정적 리소스 + 인증 관련 ───────────
 						.requestMatchers("/css/**", "/js/**", "/images/**", 
 								"/api/**", "/auth/login", "/auth/confirm",
-								"/auth/resetPass", "/auth/forgotResetPass").permitAll()
+								"/auth/resetPass", "/auth/forgotResetPass","/auth/updatePass").permitAll()
 						// ─── ROOT 전용 ────────────────────────
 						.requestMatchers("/root/**").hasAuthority("ROOT")
 						// ─── ADMIN 이상 ───────────────────────
 						.requestMatchers("/admin/**").hasAnyAuthority("ROOT", "ROLE_ADMIN")
 						// ─── 로그인만 하면 접근 가능 ───────────
-						.requestMatchers("/auth/updatePass", "/", "/emp/list", "/emp/detail", "/emp/edit",
+						.requestMatchers("/", "/emp/list", "/emp/detail", "/emp/edit",
 								"/emp/editPass", "/com/**", "/dept/**", "/appr/**", "/res/**", "/resv/**", 
 								"/proj/**", "/notice/**", "/eval/report/detail", "/eval/report/my","/report/**").authenticated()
 						// ─── 사원/직급/권한/평가 관리 (ADMIN 전용) ────────────────
