@@ -46,12 +46,11 @@ public class TaskController {
 
 		ProjectDto project = projectService.select(projectProId);
 		SecurityUtil.checkComIdAccess(project.getComId());
-		boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		boolean isCreator = project.getEmpId() == empId;
 		boolean isMember = memberservice.select(projectProId).stream()
 		        .anyMatch(m -> m.getEmpId() == empId);
 
-		if (!isAdmin && !isCreator && !isMember) {
+		if (!isCreator && !isMember) {
 		    throw new AccessDeniedException("접근 권한이 없습니다.");
 		}
 		
@@ -70,12 +69,11 @@ public class TaskController {
 	    
 	    ProjectDto project = projectService.select(dto.getProId());
 	    SecurityUtil.checkComIdAccess(project.getComId());
-	    boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 	    boolean isCreator = project.getEmpId() == empId;
 	    boolean isMember = memberservice.select(dto.getProId()).stream()
 	            .anyMatch(m -> m.getEmpId() == empId);
 	    
-	    if (!isAdmin && !isCreator && !isMember) {
+	    if (!isCreator && !isMember) {
 	        throw new AccessDeniedException("접근 권한이 없습니다.");
 	    }
 	    
@@ -107,10 +105,6 @@ public class TaskController {
 	  // 회사 소속 검증: ROOT/ADMIN이 아니면 자기 회사 프로젝트의 태스크만 접근 가능
 	  ProjectDto project = projectService.select(dto.getProId());
 	  SecurityUtil.checkComIdAccess(project.getComId());
-	  if (!SecurityUtil.isAdminOrRoot(auth)
-	          && project.getComId() != SecurityUtil.getCurrentComId()) {
-	      throw new AccessDeniedException("접근 권한이 없습니다.");
-	  }
 	  
 	  model.addAttribute("dto",dto);
 	  model.addAttribute("pro_id", dto.getProId());
@@ -141,11 +135,10 @@ public class TaskController {
 		 SecurityUtil.checkComIdAccess(project.getComId());
 		 ProjectMemberDto assignee = memberservice.selectOne(task.getPmId());
 
-		 boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		 boolean isCreator = project.getEmpId() == empId;
 		 boolean isAssignee = assignee != null && assignee.getEmpId() == empId;
 
-		 if (!isAdmin && !isCreator && !isAssignee) {
+		 if (!isCreator && !isAssignee) {
 		     throw new AccessDeniedException("접근 권한이 없습니다.");
 		 }
 		 
@@ -166,12 +159,11 @@ public class TaskController {
 		  SecurityUtil.checkComIdAccess(project.getComId());
 		  ProjectMemberDto assignee = memberservice.selectOne(original.getPmId());
 		  
-		  boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		  boolean isCreator = project.getEmpId() == empId;
 		  boolean isAssignee = assignee != null && assignee.getEmpId() == empId;
 		  
-		  if (!isAdmin && !isCreator && !isAssignee) {
-			  rttr.addFlashAttribute("result", "담당자, 프로젝트 생성자 또는 관리자만 수정할 수 있습니다.");
+		  if (!isCreator && !isAssignee) {
+			  rttr.addFlashAttribute("result", "담당자, 프로젝트 생성자만 수정할 수 있습니다.");
 			  return "redirect:/proj/task_detail?task_id="+dto.getTaskId();
 		  }
 		  
@@ -195,11 +187,10 @@ public class TaskController {
 		  // 삭제 권한 검증: ROOT/ADMIN, 프로젝트 생성자만 가능 (담당자 본인은 제외)
 		  ProjectDto project = projectService.select(proId);
 		  SecurityUtil.checkComIdAccess(project.getComId());
-		  boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		  boolean isCreator = project.getEmpId() == empId;
 
-		  if (!isAdmin && !isCreator) {
-			  rttr.addFlashAttribute("result", "프로젝트 생성자 또는 관리자만 삭제할 수 있습니다.");
+		  if (!isCreator) {
+			  rttr.addFlashAttribute("result", "프로젝트 생성자만 삭제할 수 있습니다.");
 			  return "redirect:/proj/proj_detail?pro_id="+proId;
 		  }
 		  
@@ -246,10 +237,7 @@ public class TaskController {
 			
 		    ProjectDto project = projectService.select(proId);
 		    SecurityUtil.checkComIdAccess(project.getComId());
-		    if (!SecurityUtil.isAdminOrRoot(auth)
-		            && project.getComId() != SecurityUtil.getCurrentComId()) {
-		        throw new AccessDeniedException("접근 권한이 없습니다.");
-		    }
+
 			return dependencyService.selectTaskDependencies(proId);
 		}//간트차트
 }
