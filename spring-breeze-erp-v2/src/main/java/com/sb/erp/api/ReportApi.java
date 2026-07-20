@@ -21,7 +21,7 @@ public class ReportApi {
 		// https://docs.google.com/document/d/1YcvPLTg2601gLI-Ri0t3F3eOd34XqY-sQOU78UvDoQM/edit?tab=t.0 사원용
 	   private static final String TEMPLATE_MANAGER_DOC_ID = "1LtPrMMW0UqF6Dks-Fg_j3t9wJsRgseGp8yMC_XIvHko";
 	   private static final String TEMPLATE_DEVELOPER_DOC_ID = "1YcvPLTg2601gLI-Ri0t3F3eOd34XqY-sQOU78UvDoQM";
-	 
+	  // private static final String TARGET_FOLDER_ID ="https://drive.google.com/drive/u/0/folders/1I2BQgF0xYZLmj0TGgadTVjDjGBuueKhA";
 	   //관리자용
 	   public void createReport(WeeklyReportDto dto) {
 		   
