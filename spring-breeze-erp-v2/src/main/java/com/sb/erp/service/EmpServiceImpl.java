@@ -38,7 +38,14 @@ public class EmpServiceImpl implements EmpService {
 	@Override
 	public List<EmpDto> search(EmpSearchDto dto) {
 		dto.setComId(SecurityUtil.getCurrentComId());
-		return dao.search(dto);
+		
+		List<EmpDto> list = dao.search(dto);
+	    
+	    // 관리자가 아니면 민감 정보 마스킹 (이메일, 연락처, 입사일)
+	    if (!SecurityUtil.isAdmin()) {
+	        list.forEach(this::maskSensitiveFields);
+	    }
+	    return list;
 	}
 
 	// 페이징
@@ -175,6 +182,37 @@ public class EmpServiceImpl implements EmpService {
 	@Override
 	public Object selectAuthByEmpId(int empId) {
 		return dao.selectAuthByEmpId(empId);
+	}
+	
+	
+	
+	// ─── 민감 정보 마스킹 ─────────────────────────
+	// 목록 조회 응답에만 사용 / 관리자 외 사용자에게 개인정보 노출 최소화.
+
+	private void maskSensitiveFields(EmpDto emp) {
+	    emp.setEmpEmail(maskEmail(emp.getEmpEmail()));
+	    emp.setEmpMobile(maskMobile(emp.getEmpMobile()));
+	    emp.setHireDate(maskHireDate(emp.getHireDate()));
+	}
+
+	// 이메일: emp00013@sbis.co.kr → e***@sbis.co.kr
+	private String maskEmail(String email) {
+	    if (email == null || email.isEmpty()) return email;
+	    int at = email.indexOf('@');
+	    if (at <= 0) return "***";
+	    return email.charAt(0) + "***" + email.substring(at);
+	}
+
+	// 전화번호: 010-1145-4014 → 010-****-4014
+	private String maskMobile(String mobile) {
+	    if (mobile == null) return null;
+	    return mobile.replaceFirst("(\\d{2,3})-\\d{3,4}-(\\d{4})", "$1-****-$2");
+	}
+
+	// 입사일: 7은 연월까지만, 4는 년도까지만
+	private String maskHireDate(String hireDate) {
+	    if (hireDate == null || hireDate.length() < 4) return hireDate;
+	    return hireDate.substring(0, 4);
 	}
 
 }
