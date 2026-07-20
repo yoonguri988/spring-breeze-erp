@@ -33,7 +33,8 @@ public class SecurityConfig {
 						// ─── 로그인만 하면 접근 가능 ───────────
 						.requestMatchers("/", "/emp/list", "/emp/detail", "/emp/edit",
 								"/emp/editPass", "/com/**", "/dept/**", "/appr/**", "/res/**", "/resv/**", 
-								"/proj/**", "/notice/**", "/eval/report/detail", "/eval/report/my","/report/**").authenticated()
+								"/proj/**", "/notice/**", "/eval/report/detail", "/eval/report/my","/report/**",
+								"/upload/**").authenticated()
 						// ─── 사원/직급/권한/평가 관리 (ADMIN 전용) ────────────────
 						.requestMatchers("/emp/add", "/emp/resetPass", "/emp/checkEmail", "/emp/checkMobile",
 								"/emp/checkEmpNo", "/perm/**", "/pos/**", "/dept/transfer/pending",
