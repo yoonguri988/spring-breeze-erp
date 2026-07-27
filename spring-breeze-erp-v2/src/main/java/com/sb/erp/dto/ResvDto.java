@@ -30,7 +30,7 @@ public class ResvDto {
     private String createdAt;
     private String updatedAt;
     
-    //?
+    //
     private String resName;
     private String resCode;
     private String resType;

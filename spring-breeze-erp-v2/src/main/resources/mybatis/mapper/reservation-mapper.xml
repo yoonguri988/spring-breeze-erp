@@ -164,4 +164,37 @@
 	      AND start_dt <![CDATA[<]]> TO_TIMESTAMP(#{endDt}, 'YYYY-MM-DD"T"HH24:MI')
 	      AND end_dt   <![CDATA[>]]> TO_TIMESTAMP(#{startDt}, 'YYYY-MM-DD"T"HH24:MI')
 	</select>
+	
+	<!-- 알림 발송 대상 조회 -->
+	<select id="selectNoShowTargets" resultType="ResvAlertDto">
+        SELECT
+            r.rev_id, 
+            res.res_id, res.res_code, res.res_name, res.res_type,
+            e.emp_id, e.emp_name, e.emp_mobile,
+            r.start_dt, r.end_dt, r.return_dt
+        FROM reservation r
+        JOIN com_resource res ON res.res_id = r.res_id
+        JOIN employee     e   ON e.emp_id   = r.emp_id
+        WHERE r.status = 'APP'
+          AND r.noshow_alert_at IS NULL
+          AND (
+                -- 차량 / 장비 : 반납 예정시간이 지났는데 반납 처리가 안 된 경우
+                (res.res_type IN ('VEHICLE','EQUIPMENT')
+                 AND r.end_dt <![CDATA[<]]> SYSTIMESTAMP
+                 AND r.return_dt IS NULL)
+             OR
+                -- 회의실 : 시작시간은 지났고 종료시간 전인데 이용 흔적이 없는 경우
+                (res.res_type = 'ROOM'
+                 AND r.start_dt <![CDATA[<]]> SYSTIMESTAMP
+                 AND r.end_dt <![CDATA[>]]> SYSTIMESTAMP
+                 AND r.return_dt IS NULL)
+              )
+        ORDER BY r.end_dt ASC
+    </select>
+ 	<!-- 알림 발송 완료 처리 (중복 발송 방지 플래그 세팅) -->
+    <update id="updateAlertSent">
+        UPDATE reservation
+           SET noshow_alert_at = SYSTIMESTAMP
+         WHERE rev_id = #{revId}
+    </update>
 </mapper>

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,10 +14,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sb.erp.api.ApiCoolSms;
 import com.sb.erp.api.BizNoVerifyApi;
 import com.sb.erp.api.OcrNaverApi;
 import com.sb.erp.dto.BizNoVerifyDto;
 import com.sb.erp.dto.OcrResultDto;
+
+import net.nurigo.java_sdk.exceptions.CoolsmsException;
 
 @Controller
 @RequestMapping("/api/util")
@@ -55,5 +59,16 @@ public class ApiUtilController {
 	        resultMap.put("message", e.getMessage());
 	    }
 	    return resultMap;
+	}
+	
+	/**
+	 * 문자메시지 전송 (COOLSMS) 
+	 */
+	@Autowired ApiCoolSms apiCoolSms;
+	
+	@PostMapping("/smsapi")
+	@ResponseBody
+	public String sms_api(@RequestParam String to) throws CoolsmsException {
+		return apiCoolSms.phoneNumber(to);
 	}
 }

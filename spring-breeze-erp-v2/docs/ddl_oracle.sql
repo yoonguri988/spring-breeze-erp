@@ -1004,3 +1004,79 @@ END;
 /
 
 COMMIT;
+
+-- ═══════════════════════════════════════════════════════════
+
+--  email_send_log
+
+--  - 온보딩/알림 이메일 발송 이력 (Audit Trail)
+
+--  - 목적:
+
+--    · 중복 발송 방지 (UNIQUE(emp_id, mail_type))
+
+--    · 실패 이력 추적 (status='F', error_msg)
+
+--    · afterCommit 이후 서버 다운 등으로 누락된 건 스케줄러가 재발송할 근거
+
+--  - Oracle 18c XE 기준
+
+-- ═══════════════════════════════════════════════════════════
+
+
+create table email_send_log (
+    log_id      number(10)      not null,
+    emp_id      number(10)      not null,
+    mail_type   varchar2(30)    not null,   -- 'WELCOME' | 'FOLLOWUP_3DAY' | ...
+
+    status      char(1)         default 'P' not null,  -- P(rocessing) | S(uccess) | F(ail)
+
+    sent_at     date            default sysdate not null,
+    error_msg   varchar2(500),
+    created_at  date            default sysdate not null,
+    updated_at  date            default sysdate not null,
+
+    constraint pk_email_send_log         primary key (log_id),
+    constraint fk_esl_emp                foreign key (emp_id) references employee(emp_id),
+    constraint uk_esl_emp_type           unique (emp_id, mail_type),
+    constraint ck_esl_status             check (status in ('P', 'S', 'F')),
+    constraint ck_esl_mail_type          check (mail_type in ('WELCOME', 'FOLLOWUP_3DAY'))
+);
+
+comment on table  email_send_log             is '온보딩/알림 이메일 발송 이력';
+comment on column email_send_log.mail_type   is '이메일 종류 (WELCOME=환영, FOLLOWUP_3DAY=3일 적응)';
+comment on column email_send_log.status      is 'P=처리중, S=성공, F=실패';
+comment on column email_send_log.error_msg   is '실패 시 예외 메시지 (VARCHAR 500 자름)';
+
+create sequence seq_email_log start with 1 increment by 1 nocache;
+
+-- 스케줄러 조회 성능용 인덱스 (mail_type + sent_at)
+
+create index idx_esl_type_date on email_send_log(mail_type, sent_at);
+
+-- 확장 시 mail_type check 제약을 늘리려면:
+
+-- alter table email_send_log drop constraint ck_esl_mail_type;
+
+-- alter table email_send_log add constraint ck_esl_mail_type
+
+--   check (mail_type in ('WELCOME', 'FOLLOWUP_3DAY', 'PASSWORD_RESET', ...));
+
+
+commit;
+
+-- 1) DDL 실행 후
+
+-- select * from user_tables where table_name = 'EMAIL_SEND_LOG';
+-- select * from user_sequences where sequence_name = 'SEQ_EMAIL_LOG';
+-- select * from user_constraints where table_name = 'EMAIL_SEND_LOG';
+
+-- ==========================================
+-- 자원예약 노쇼/반납지연 자동 경고 봇
+-- reservation 테이블 변경 스크립트
+-- ==========================================
+ 
+ALTER TABLE reservation ADD (noshow_alert_at TIMESTAMP);
+ 
+COMMENT ON COLUMN reservation.noshow_alert_at IS
+  '노쇼/반납지연 AI 알림 발송 일시 (NULL=미발송, 값 있으면 재발송하지 않음)';

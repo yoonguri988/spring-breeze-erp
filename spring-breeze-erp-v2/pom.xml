@@ -165,6 +165,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
+		<!-- COOLSMS -->
+		<!-- Source: https://mvnrepository.com/artifact/net.nurigo/javaSDK -->
+		<dependency>
+		    <groupId>net.nurigo</groupId>
+		    <artifactId>javaSDK</artifactId>
+		    <version>2.2</version>
+		    <scope>compile</scope>
+		</dependency>
+		<!-- COOLSMS -->
 
 	</dependencies>
 

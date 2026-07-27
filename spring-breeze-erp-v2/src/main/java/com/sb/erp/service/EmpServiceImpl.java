@@ -188,7 +188,7 @@ public class EmpServiceImpl implements EmpService {
 	@Override
 	public int updatePassByEmpIdOnly(EmpDto dto) {
 		return dao.updatePassByEmpIdOnly(dto);
-	
+	}
 	// ─── 민감 정보 마스킹 ─────────────────────────
 	// 목록 조회 응답에만 사용 / 관리자 외 사용자에게 개인정보 노출 최소화.
 
