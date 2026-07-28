@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +21,11 @@ import com.sb.erp.api.OpenAiGpt;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprFormSearchDto;
 import com.sb.erp.dto.CompanyDto;
+import com.sb.erp.dto.EmpDto;
+import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.ApprFormService;
 import com.sb.erp.service.CompanyService;
+import com.sb.erp.service.EmpService;
 import com.sb.erp.util.PagingUtil;
 
 @Controller
@@ -30,6 +34,7 @@ public class ApprFormController {
 	@Autowired ApprFormService appr;
 	@Autowired CompanyService com;
 	@Autowired OpenAiGpt gpt;
+	@Autowired EmpService empService;
 	
 	// 회사 검색 기능
 	@GetMapping("/searchCompany")
@@ -195,16 +200,33 @@ public class ApprFormController {
 	}
 	
 	// 양식 삭제 처리
-	@GetMapping("/delete")
-	public String delete(@RequestParam("forId") int forId,
-						 @RequestParam("forVersion") int forVersion) {
+	@PostMapping("/deleteFormConfirm")
+	@ResponseBody
+	public Map<String, Object> delete(@RequestParam("forId") int forId,
+									  @RequestParam("forVersion") int forVersion,
+								 	  @RequestParam("empPass") String empPass,
+								  	  @AuthenticationPrincipal CustomUserDetails userDetails) {
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		EmpDto emp = new EmpDto();
+		emp.setEmpId(userDetails.getUser().getEmpId());
+		emp.setEmpPass(empPass);
+		
+		boolean matched = empService.matchPassword(emp);
+		if(!matched) {
+			result.put("success", false);
+			result.put("message", "비밀번호가 올바르지 않습니다.");
+			return result;
+		}
 		
 		ApprFormDto dto = new ApprFormDto();
 		dto.setForId(forId);
 		dto.setForVersion(forVersion);
-		
 		appr.deleteForm(dto);
-		return "redirect:/appr/list_form";
+
+		result.put("success", true);
+		return result;
 	}
 	
 	// openAi 호출
@@ -231,5 +253,7 @@ public class ApprFormController {
 	public List<ApprFormDto> getFormVersions(@RequestParam("forId") int forId) {
 		return appr.selectFormVersions(forId);
 	}
+	
+	
 	
 }

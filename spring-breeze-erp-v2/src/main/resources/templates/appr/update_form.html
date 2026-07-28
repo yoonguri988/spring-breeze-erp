@@ -205,6 +205,29 @@
 		    </div>
 		</div>
 	</form>
+	
+	<!-- 삭제 비밀번호 모달 -->
+	<div class="modal fade" id="deleteModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title"><i class="bi bi-shield-lock"></i> 관리자 확인</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<p class="text-soft mb-3">양식을 삭제하려면 본인 계정의 비밀번호를 입력해주세요.</p>
+					<input type="password" class="form-control" id="deleteInput" placeholder="비밀번호"/>
+					<div id="deleteErr" class="text-danger small mt-2" style="display: none;"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-ghost" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-danger" id="deleteConfirmBtn">
+						<i class="bi bi-trash3"></i> 삭제
+					</button>
+				</div>
+			</div> 
+		</div>
+	</div>
 
 	<!-- jquery 로드 -->
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -442,7 +465,7 @@ let originalCode = "";
 	
 	///////////////////// 버전 이력 /////////////////////
 
-	window.addEventListener("load", function(){
+	function loadVersionHistory(){
 		const forId = document.getElementsByName("forId")[0].value;
 		const currentVersion = parseInt(document.getElementsByName("forVersion")[0].value);
 		const box = document.getElementById("versionHistoryList");
@@ -487,23 +510,94 @@ let originalCode = "";
 		.catch(err => {
 			box.innerHTML = `<div class="text-center text-danger py-3 small">이력을 불러오지 못했습니다.</div>`;
 		})
-	});
+	};
+	
+	window.addEventListener("load", loadVersionHistory);
+	window.addEventListener("refreshVersionHistory", loadVersionHistory);
 	
 	///////////////////// 버전 이력 /////////////////////
 	
 	
-	///////////////////// 양식 삭제 재확인 /////////////////////
+	///////////////////// 양식 삭제 모달 /////////////////////
 	
-	function deleteForm(forId,forVersion){
-		if(confirm("양식을 삭제하시겠습니까?")){
-			location.href = "/appr/delete?forId=" + forId + "&forVersion=" + forVersion;						
+	let deleteTarget = null; // 삭제 대상
+	let deleteModalInstance = null;
+	
+	function deleteForm(forId, forVersion){
+		deleteTarget = {forId, forVersion};
+		
+		document.getElementById("deleteInput").value = "";
+		document.getElementById("deleteErr").style.display = "none";
+		
+		if(!deleteModalInstance){
+			deleteModalInstance = new bootstrap.Modal(document.getElementById("deleteModal"));
 		}
-		else{
-			console.log("취소 확인");
-		}
+		deleteModalInstance.show();
 	}
 	
-	///////////////////// 양식 삭제 재확인 /////////////////////
+	document.getElementById("deleteConfirmBtn").addEventListener("click", function(){
+		if(!deleteTarget) return;
+		
+		const pwInput = document.getElementById("deleteInput");
+		const errBox = document.getElementById("deleteErr");
+		const pw = pwInput.value;
+		
+		if(!pw){
+			errBox.textContent = "비밀번호를 입력해주세요.";
+			errBox.style.display = "block";
+			return;
+		}
+		
+		const btn = this;
+		btn.disabled = true;
+		
+		const params = new URLSearchParams();
+		params.append("forId", deleteTarget.forId);
+		params.append("forVersion", deleteTarget.forVersion);
+		params.append("empPass", pw);
+		
+		const csrfInput = document.querySelector('input[name="_csrf"]');
+		if(csrfInput){
+			params.append(csrfInput.name, csrfInput.value);
+		}
+		
+		fetch("/appr/deleteFormConfirm", {
+			method: "POST",
+			headers: { "Content-Type": "application/x-www-form-urlencoded" },
+			body: params
+		})
+		.then(res => res.json())
+		.then(data => {
+			btn.disabled = false;
+			
+			if(!data.success){
+				errBox.textContent = data.message || "삭제에 실패했습니다.";
+				errBox.style.display = "block";
+				return;
+			}
+			
+			deleteModalInstance.hide();
+			
+			const currentForId = document.getElementsByName("forId")[0].value;
+			const currentVersion = parseInt(document.getElementsByName("forVersion")[0].value);
+			
+			// 지금 편집중인 버전을 삭제 한경우 -> list_form
+			if(deleteTarget.forId == currentForId && deleteTarget.forVersion === currentVersion){
+				location.href = "/appr/list_form";
+			}
+			// 다른 버전 삭제한 경우 -> 버전 이력만 갱신
+			else{
+				window.dispatchEvent(new Event("refreshVersionHistory"));
+			}
+		})
+		.catch(err => {
+			btn.disabled = false;
+			errBox.textContent = "서버 오류가 발생했습니다.";
+			errBox.style.display = "block";
+		})
+	})
+	
+	///////////////////// 양식 삭제 모달 /////////////////////
 	
 	/////////////////////////////// 빈칸 처리 ///////////////////////////////
 	
