@@ -1,5 +1,6 @@
 package com.sb.erp.controller;
 
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
@@ -71,7 +73,9 @@ public class ApprDocController {
 	// 문서 작성 처리
 	@PostMapping("/write_doc")
 	public String writeDoc_post(ApprDocDto dto,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			RedirectAttributes rttr,
+			Model model) {
 		
 		dto.setEmpId(userDetails.getUser().getEmpId());
 		dto.setComId(userDetails.getUser().getComId());
@@ -80,8 +84,15 @@ public class ApprDocController {
 		
 		// 위 호출에서 성공시
 		if(result) {
+			rttr.addFlashAttribute("toastType", "success");
+			rttr.addFlashAttribute("toastMsg", "결재 문서가 기안되었습니다.");
 			return "redirect:/appr/list_doc";
 		}
+		
+		ApprDocInitResponseDto reload = service.initResponse(dto);
+		model.addAttribute("dto", reload);
+		model.addAttribute("toastType", "error");
+		model.addAttribute("toastMsg", "결재 문서 기안에 실패했습니다.");
 		return "appr/write_doc";
 	}
 	
@@ -171,16 +182,32 @@ public class ApprDocController {
 	// 승인 처리
 	@PostMapping("/detail_doc/app")
 	public String detailDoc_app(@RequestParam("docId") int docId,
-				@AuthenticationPrincipal CustomUserDetails userDetails) {
-		service.processLine(docId, userDetails.getUser().getEmpId(), "APP");
+				@AuthenticationPrincipal CustomUserDetails userDetails,
+				RedirectAttributes rttr) {
+		try {
+			service.processLine(docId, userDetails.getUser().getEmpId(), "APP");
+			rttr.addFlashAttribute("toastType", "success");
+			rttr.addFlashAttribute("toastMsg", "결재를 승인했습니다.");
+		} catch (ConcurrentModificationException e) {
+			rttr.addFlashAttribute("toastType", "error");
+			rttr.addFlashAttribute("toastMsg", e.getMessage());
+		}
 		return "redirect:/appr/detail_doc?docId=" + docId;
 	}
 	
 	// 반려 처리
 	@PostMapping("/detail_doc/rej")
 	public String detailDoc_rej(@RequestParam("docId") int docId,
-				@AuthenticationPrincipal CustomUserDetails userDetails) {
-		service.processLine(docId, userDetails.getUser().getEmpId(), "REJ");
+				@AuthenticationPrincipal CustomUserDetails userDetails,
+				RedirectAttributes rttr) {
+		try {
+			service.processLine(docId, userDetails.getUser().getEmpId(), "REJ");
+			rttr.addFlashAttribute("toastType", "success");
+			rttr.addFlashAttribute("toastMsg", "결재를 반려했습니다.");
+		} catch (ConcurrentModificationException e) {
+			rttr.addFlashAttribute("toastType", "error");
+			rttr.addFlashAttribute("toastMsg", e.getMessage());
+		}
 		return "redirect:/appr/detail_doc?docId=" + docId;
 	}
 	

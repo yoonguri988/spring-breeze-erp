@@ -9,6 +9,18 @@
 <body>
 
 <main layout:fragment="content">
+
+	<!-- 토스트 / 안내 문구 -->
+	<div class="toast-container position-fixed bottom-0 end-0 p-3"
+		 style="z-index: 1080;" id="toastContainer"></div>
+	<div id="flashToastData"
+		 th:if="${toastMsg}"
+		 th:attr="data-type=${toastType} ?: 'info', data-msg=${toastMsg}"
+		 style="display: none;"></div>
+	<script th:src="@{/js/appr-toast.js}"></script>
+	
+	
+
 	<div class="sb-page-head">
 		<div class="sb-page-head__txt">
 			<div class="sb-breadcrumb">
@@ -577,6 +589,7 @@ let originalCode = "";
 			}
 			
 			deleteModalInstance.hide();
+			showToast('success', '양식이 삭제되었습니다.');
 			
 			const currentForId = document.getElementsByName("forId")[0].value;
 			const currentVersion = parseInt(document.getElementsByName("forVersion")[0].value);

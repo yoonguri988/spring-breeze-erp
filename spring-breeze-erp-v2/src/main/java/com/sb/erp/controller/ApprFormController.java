@@ -125,10 +125,13 @@ public class ApprFormController {
 		try {
 			// 양식 작성 성공
 			if(appr.insertForm(dto) > 0) {
+				rttr.addFlashAttribute("toastType", "success");
+				rttr.addFlashAttribute("toastMsg", "결재 양식이 등록되었습니다.");
 				return "redirect:/appr/list_form";
 			}
 		} catch (IllegalArgumentException e) {
-			model.addAttribute("errorMsg", e.getMessage());
+			model.addAttribute("toastType", "error");
+			model.addAttribute("toastMsg", e.getMessage());
 			model.addAttribute("dto", dto);
 		}
 		return "appr/write_form";
@@ -174,14 +177,17 @@ public class ApprFormController {
 	
 	// 양식 수정 처리
 	@PostMapping("/update_form")
-	public String update_post(ApprFormDto dto, Model model) {
+	public String update_post(ApprFormDto dto, Model model, RedirectAttributes rttr) {
 		
 		try {
 			// 양식 수정 성공
 			if(appr.updateForm(dto) > 0) {
+				rttr.addFlashAttribute("toastType", "success");
+				rttr.addFlashAttribute("toastMsg", "결재 양식이 수정되었습니다.");
 				return "redirect:/appr/list_form";
 			}
 		} catch (IllegalArgumentException e) {
+			model.addAttribute("toastType", "error");
 			model.addAttribute("errorMsg", e.getMessage());
 		}
 		
