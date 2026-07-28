@@ -179,6 +179,7 @@
 	                       </span>
 	                   </div>
 	               </div>
+	               
 	
 	               <div class="sb-card__body bg-light border-top">
 	               	<div class="d-flex gap-2 align-items-start">
@@ -189,6 +190,18 @@
 		                </div>
 		            </div>
 		        </div>
+		        
+                <div class="sb-card mb-4">
+               		<div class="sb-card__head">
+               			<h2>버전 이력</h2>
+               			<p class="mb-0 text-secondary" style="font-size: 12px;">버전별로 개별 삭제할 수 있습니다.</p>
+               		</div>
+               		<div class="sb-card__body sb-card__body--flush">
+               			<div id="versionHistoryList" class="d-flex flex-column">
+               				<div class="text-center text-muted py-3 small">불러오는 중...</div>
+               			</div>
+               		</div>
+               </div>
 		    </div>
 		</div>
 	</form>
@@ -427,6 +440,58 @@ let originalCode = "";
 		});
 	});
 	
+	///////////////////// 버전 이력 /////////////////////
+
+	window.addEventListener("load", function(){
+		const forId = document.getElementsByName("forId")[0].value;
+		const currentVersion = parseInt(document.getElementsByName("forVersion")[0].value);
+		const box = document.getElementById("versionHistoryList");
+		
+		fetch(`/appr/getFormVersions?forId=${encodeURIComponent(forId)}`)
+		.then(res => res.json())
+		.then(data => {
+			box.innerHTML = "";
+			
+			if(!data || data.length === 0){
+				box.innerHTML = `<div class="text-center text-muted py-3 small">이력이 없습니다.</div>`;
+				return;
+			}
+			
+			data.forEach(v => {
+				const isCurrent = v.forVersion === currentVersion;
+				const isDeleted = v.deleted === true || v.deleted === "true";
+				
+				const row = document.createElement("div");
+				row.className = "d-flex justify-content-between align-items-center px-3 py-2 border-bottom";
+				row.innerHTML = `
+					<div>
+						<span class="fw-semibold">v${v.forVersion}</span>
+						${isCurrent ? '<span class="sb-badge sb-badge--blue ms-1" style="font-size:10px;">보는 중</span>' : ''}
+						${isDeleted ? '<span class="sb-badge sb-badge--gray ms-1" style="font-size:10px;">삭제됨</span>' : ''}
+						<div class="text-soft" style="font-size: 11px;">${v.createdAt ?? ''}</div>
+					</div>
+				`;
+				
+				if(!isDeleted){
+					const btn = document.createElement("button");
+					btn.type = "button";
+					btn.className = "btn btn-ghost btn-sm text-danger";
+					btn.innerHTML = '<i class="bi bi-trash3"></i>';
+					btn.addEventListener("click", () => deleteForm(v.forId, v.forVersion));
+					row.appendChild(btn);
+				}
+				
+				box.appendChild(row);
+			});
+		})
+		.catch(err => {
+			box.innerHTML = `<div class="text-center text-danger py-3 small">이력을 불러오지 못했습니다.</div>`;
+		})
+	});
+	
+	///////////////////// 버전 이력 /////////////////////
+	
+	
 	///////////////////// 양식 삭제 재확인 /////////////////////
 	
 	function deleteForm(forId,forVersion){
@@ -590,7 +655,8 @@ let originalCode = "";
 				return;
 			}
 		
-			fetch(`/appr/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}`)
+			const currentForId = document.querySelector('input[name="forId"]').value;
+			fetch(`/appr/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}&forId=${encodeURIComponent(currentForId)}`)
 			.then( response => response.json() )
 			.then( data => {
 				

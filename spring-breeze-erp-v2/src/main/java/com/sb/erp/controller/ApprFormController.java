@@ -225,4 +225,11 @@ public class ApprFormController {
 		return result;
 	}
 	
+	// 특정 양식 전체 버전 이력 조회 (버전별 삭제)
+	@GetMapping("/getFormVersions")
+	@ResponseBody
+	public List<ApprFormDto> getFormVersions(@RequestParam("forId") int forId) {
+		return appr.selectFormVersions(forId);
+	}
+	
 }
