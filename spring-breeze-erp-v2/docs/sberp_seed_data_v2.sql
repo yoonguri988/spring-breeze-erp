@@ -2179,3 +2179,7 @@ ALTER SEQUENCE seq_com_resource RESTART START WITH 101;
 ALTER SEQUENCE seq_reservation  RESTART START WITH 101;
 
 COMMIT;
+
+UPDATE authority
+SET aut_name = 'ROLE_'||aut_name
+WHERE aut_name != 'ROOT';

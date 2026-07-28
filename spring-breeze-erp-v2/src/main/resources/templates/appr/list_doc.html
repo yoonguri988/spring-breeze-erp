@@ -158,7 +158,7 @@
 					<tr th:each="doc : ${hisDocs}">
 						<td class="tnum fw-semibold" th:text="${doc.docId}">1</td>
 						<td>
-							<span th:if="${doc.isImportant == 1}"
+							<span th:if="${doc.isImportant}"
 								  class="badge bg-danger me-1"
 								  style="font-size: 11px;">중요</span>
 							<span class="sb-table__name"
@@ -231,7 +231,7 @@
 					<tr th:each=" doc : ${todoDocs}">
 						<td class="tnum fw-semibold" th:text="${doc.docId}">0</td>
 						<td>
-							<span th:if="${doc.isImportant == 1}" class="badge bg-danger me-1"
+							<span th:if="${doc.isImportant}" class="badge bg-danger me-1"
 								  style="font-size: 11px;">중요</span>
 							<span class="sb-table__name" th:text="${doc.docTitle}">결재 문서 제목</span>
 						</td>
