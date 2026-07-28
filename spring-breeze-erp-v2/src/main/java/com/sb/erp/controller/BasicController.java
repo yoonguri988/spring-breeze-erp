@@ -31,8 +31,11 @@ public class BasicController {
 	    
 	    model.addAttribute("user", user);
 	    model.addAttribute("today", LocalDate.now());
-		return "index"; 
-		
+	   
+		return "dashboard/index"; 
+		// return "dashboard/exec"; // 임원 
+  		// return "dashboard/sysadmin"; // 시스템관리자 
+  		// return "dashboard/admin"; // 관리자
 	}
 	
 }

@@ -60,15 +60,4 @@ public class ApiUtilController {
 	    }
 	    return resultMap;
 	}
-	
-	/**
-	 * 문자메시지 전송 (COOLSMS) 
-	 */
-	@Autowired ApiCoolSms apiCoolSms;
-	
-	@PostMapping("/smsapi")
-	@ResponseBody
-	public String sms_api(@RequestParam String to) throws CoolsmsException {
-		return apiCoolSms.phoneNumber(to);
-	}
 }
