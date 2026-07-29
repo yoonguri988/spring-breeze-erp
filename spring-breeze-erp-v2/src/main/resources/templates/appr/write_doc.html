@@ -622,11 +622,16 @@
 			
 			filtered.forEach(emp => {
 				const already = slots.some(s => s && s.empId === emp.empId);
+				const initial = emp.empName ? emp.empName.charAt(0) : "?";
 				const div = document.createElement("div");
 				div.className = "appr-emp-row" + (already ? " disabled" : "");
 				div.innerHTML = `
-					<span>${emp.empName}</span>
-					<span class="pos-chip">${emp.posName}</span>
+					<span class="appr-emp-row__avatar">${initial}</span>
+					<span class="appr-emp-row__info">
+						<span>${emp.empName}</span>
+						<span class="pos-chip">${emp.posName}</span>
+					</span>
+					${already ? '<i class="bi bi-check-circle-fill added-check"></i>' : ''}
 				`;
 				// 이미 등록된 상태가 아니면 emp데이터를 다음 슬롯에 추가
 				if(!already){
@@ -672,9 +677,11 @@
 	    		div.className = "appr-slot" + (slot ? " filled" : "");
 	    		div.innerHTML = slot ?
 	    			`<span class="appr-slot__badge">${order}</span>
-	    			 <span class="appr-slot__body">${slot.empName}
+	    			 <span class="appr-slot__body">
+	    			 	${slot.empName}
 	    			 	<span class="appr-slot__pos">${slot.posName}</span>
-	    			 </span>` :
+	    			 </span>
+	    			 <i class="bi bi-x-lg text-danger"></i>` :
 	    			`<span class="appr-slot__badge">${order}</span>
 	    			 <span class="appr-slot__body appr-slot__empty">${order}차 결재자를 선택해주세요</span>
 	    			`;
