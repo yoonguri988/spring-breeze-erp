@@ -301,3 +301,26 @@
 	border-color: var(--sb-accent);
 	box-shadow: 0 0 0 3px var(--sb-accent-soft);
 }
+
+.ai-loading-box {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	border: 1px solid #e3ddfb;
+	background: linear-gradient(90deg, #f4f1fe, #eef2ff, #f4f1fe);
+	background-size: 200% 100%;
+	animation: aiShimmer 1.8s ease-in-out infinite;
+}
+
+.ai-loading-text {
+	font-size: 13px;
+	font-weight: 600;
+	color: #6c4fd6;
+}
+
+@keyframes aiShimmer {
+	0% { background-position: 0% 50%; }
+	100% { background-position: 200% 50%; }
+}

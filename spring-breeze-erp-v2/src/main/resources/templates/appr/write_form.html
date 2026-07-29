@@ -144,9 +144,11 @@
 						<button type="button" class="btn btn-sm btn-outline-primary mt-2" id="aiGenerateBtn">
 							<i class="bi bi-stars"></i> AI로 필드 생성
 						</button>
-						<div id="aiLoading" style="display: none;"
-							 class="text-secondary small mt-2">
-							 <i class="bi bi-hourglass-split"></i> AI가 양식을 설계하는 중입니다.
+						<div id="aiLoading" style="display: none;" class="ai-loading-box mt-2">
+							 <div class="ai-loading-spinner">
+								<div class="spinner-grow spinner-grow-sm text-primary" role="status"></div>
+							 </div>
+							 <span id="aiLoadingMsg" class="ai-loading-text">프롬프트를 분석하고 있습니다.</span>
 						</div>
 						<div id="aiPreview" style="display: none;" class="mt-3">
 							<label class="sb-form-label">생성된 필드 미리보기</label>
@@ -657,7 +659,15 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 	
 	/////////////////////////////// openAi 호출 ///////////////////////////////
 	
+	const AI_LOADING_PHRASES = [
+		"프롬프트를 분석 중",
+		"필요한 필드를 구성 중",
+		"입력 항목의 유효성 정리 중",
+		"거의 완료됨"
+	];
+	
 	document.getElementById("aiGenerateBtn").addEventListener("click", function(){
+		const promptInput = document.getElementById("aiPrompt");
 		const prompt = document.getElementById("aiPrompt").value.trim();
 		if(!prompt){
 			alert("원하시는 양식에 대한 설명을 입력해주세요");
@@ -666,8 +676,19 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 		
 		const btn = this;
 		const loading = document.getElementById("aiLoading");
+		const loadingMsg = document.getElementById("aiLoadingMsg");
+		
 		btn.disabled = true;
+		promptInput.disabled = true;
 		loading.style.display = "block";
+		
+		// 상태 메시지 순환
+		let phraseIdx = 0;
+		loadingMsg.textContent = AI_LOADING_PHRASES[0];
+		const phraseTimer = setInterval( () => {
+			phraseIdx = (phraseIdx + 1) % AI_LOADING_PHRASES.length;
+			loadingMsg.textContent = AI_LOADING_PHRASES[phraseIdx];
+		}, 1400);
 		
 		fetch("/appr/formSchema", {
 			method: "POST",
@@ -692,7 +713,9 @@ let valid = false; // 강제 입력시 막아줄 전역 변수
 			alert("서버 오류로 AI 양식 생성에 실패했습니다.");
 		})
 		.finally(() => {
+			clearInterval(phraseTimer);
 			btn.disabled = false;
+			promptInput.disabled = false;
 			loading.style.display = "none";
 		})
 	});
