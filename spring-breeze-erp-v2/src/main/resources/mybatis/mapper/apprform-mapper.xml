@@ -98,7 +98,7 @@
         #{forContent},
         #{forSchema, jdbcType=VARCHAR},
         #{forStatus},
-        TO_DATE(#{createdAt}, 'YYYY-MM-DD HH24:MI:SS'),
+        sysdate,
         (SELECT NVL(MAX(for_version), 0) + 1 
          FROM appr_form 
          WHERE for_id = #{forId})
