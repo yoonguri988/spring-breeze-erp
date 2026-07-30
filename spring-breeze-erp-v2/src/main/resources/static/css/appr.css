@@ -164,7 +164,7 @@
 	flex: 1 1 auto;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	gap: 8px;
 }
 
 .appr-emp.row.disabled .appr-emp-row__avatar {
@@ -176,6 +176,11 @@
 	flex: 0 0 auto;
 	color: var(--sb-accent);
 	font-size: 15px;
+}
+
+.pos-chip--leave {
+	background: var(--sb-amber-soft, #fff3cd);
+	color: var(--sb-amber, #b98900);
 }
 
 /* 결재선 타임라인 */

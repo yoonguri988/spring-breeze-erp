@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,9 +21,11 @@ import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprLineDto;
+import com.sb.erp.dto.ApprLineRequestDto;
 import com.sb.erp.dto.DeptDto;
 import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.ApprDocService;
+import com.sb.erp.service.ApprLineRequestService;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.util.PagingUtil;
 
@@ -32,6 +35,7 @@ public class ApprDocController {
 	
 	@Autowired ApprDocService service;
 	@Autowired DeptService deptService;
+	@Autowired ApprLineRequestService lineReqService;
 	
 	
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
@@ -138,6 +142,11 @@ public class ApprDocController {
 			hisDocs = service.selectMyHistoryDocs(dto);
 		}
 		
+		if("request".equals(tab)) {
+			model.addAttribute("pendingRequests", lineReqService.getPendingRequests());
+		}
+		
+		model.addAttribute("pendingCnt", lineReqService.countPending());
 		model.addAttribute("paging", paging);
 		model.addAttribute("docCnts", docCnts);
 		model.addAttribute("myTodoCnt", myTodoCnt);
@@ -240,6 +249,60 @@ public class ApprDocController {
 	@ResponseBody
 	public List<ApprLineDto> getDeptEmps(@RequestParam("deptId") int deptId) {
 		return service.selectDeptEmpsForLines(deptId);
+	}
+	
+	// 결재선 변경 요청 등록
+	@PostMapping("/requsetLineChange")
+	@ResponseBody
+	public Map<String, Object> requestLineChange(
+			@RequestParam("docId") int docId,
+			@RequestParam("linId") int linId,
+			@RequestParam("oriEmpId") int oriEmpId,
+			@RequestParam("reqReason") String reqReason,
+			@AuthenticationPrincipal CustomUserDetails userDetails){
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		ApprLineRequestDto dto = new ApprLineRequestDto();
+		dto.setDocId(docId);
+		dto.setLinId(linId);
+		dto.setOriEmpId(oriEmpId);
+		dto.setReqEmpId(userDetails.getUser().getEmpId());
+		dto.setReqReason(reqReason);
+		
+		lineReqService.requestChange(dto);
+		result.put("succescc", true);
+		return result;
+	}
+	
+	// 관리자 승인
+	@PostMapping("/approveLineChange")
+	@ResponseBody
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT)")
+	public Map<String, Object> approveLineChange(
+			@RequestParam("reqId") int reqId,
+			@RequestParam("newEmpId") int newEmpId,
+			@AuthenticationPrincipal CustomUserDetails userDetails){
+	
+		Map<String, Object> result = new HashMap<>();
+		boolean success = lineReqService.approveRequest(reqId, newEmpId, newEmpId);
+		result.put("success", success);
+		if(!success) result.put("message", "이미 처리되었거나 존재하지 않는 요청입니다.");
+		return result;
+	}
+	
+	// 관리자 반려
+	@PostMapping("/rejectLineChange")
+	@ResponseBody
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+	public Map<String, Object> rejectLineChange(
+			@RequestParam("reqId") int reqId,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
+		
+		Map<String, Object> result = new HashMap<>();
+		boolean success = lineReqService.rejectRequest(reqId, reqId);
+		result.put("success", success);
+		return result;
 	}
 	
 	

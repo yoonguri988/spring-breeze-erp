@@ -622,6 +622,7 @@
 			
 			filtered.forEach(emp => {
 				const already = slots.some(s => s && s.empId === emp.empId);
+				const onLeave = emp.empStatus === "휴직";
 				const initial = emp.empName ? emp.empName.charAt(0) : "?";
 				const div = document.createElement("div");
 				div.className = "appr-emp-row" + (already ? " disabled" : "");
@@ -630,12 +631,22 @@
 					<span class="appr-emp-row__info">
 						<span>${emp.empName}</span>
 						<span class="pos-chip">${emp.posName}</span>
+						${onLeave ? '<span class="pos-chip pos-chip--leave">휴직중</span>' : ''}
 					</span>
 					${already ? '<i class="bi bi-check-circle-fill added-check"></i>' : ''}
 				`;
 				// 이미 등록된 상태가 아니면 emp데이터를 다음 슬롯에 추가
 				if(!already){
-					div.addEventListener("click", () => addToNextSlot(emp));
+					div.addEventListener("click", () => {
+						// 휴직중인 사람 선택시 확인
+						if(onLeave){
+							const confirmed = confirm(
+								`${emp.empName}님은 현재 휴직중입니다. \n휴직중인 사원을 결재선에 지정하시겠습니까?`
+							)
+							if(!confirmed) return;
+						}
+						addToNextSlot(emp)
+					});
 				}
 				empBox.appendChild(div);
 			});

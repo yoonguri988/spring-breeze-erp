@@ -144,6 +144,14 @@
 	   		 class="sb-nav__badge"
 	   		 th:text="${docCnts.MYCNT}">0</span>
 	</a>
+	<!-- 관리자 전용 -->
+	<a th:if="${isRoot}"
+	   th:href="@{/appr/list_doc(tab='request')}"
+	   class="sb-tab" th:classappend="${activeTab == 'request'} ? 'active'">
+	   <i class="bi bi-person-gear"></i> 결재선 변경 요청
+	   <span th:if="${pendingCnt != null and pendingCnt > 0}"
+	   		 class="sb-nav__badge" th:text="${pendingCnt}">0</span>
+	</a>
 </div>
 
 
@@ -274,6 +282,39 @@
 		</div>
 	</div>
 </div>
+
+<!-- 결재선 변경 요청 탭 -->
+<div id="tab-request" class="sb-tab-panel" th:classappend="${activeTab == 'request'} ? 'active'"
+	 th:if="${activeTab == 'request'}">
+	<div class="sb-card">
+		<div class="sb-card__body sb-card__body--flush">
+			<table class="sb-table align-middle">
+				<thead>
+					<tr>
+						<th>문서</th>
+						<th>기존 결재자</th>
+						<th>요청자</th>
+						<th>사유</th>
+						<th>유청일</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:if="${pendingRequest == null or pendingRequests.isEmpty()}">
+						<td colspan="6" class="text-center text-muted py-4">대기중인 요청이 없습니다.</td>
+					</tr>
+					<tr th:each="req : ${pendingRequests}">
+						<td th:text="${req.docTitle}"></td>
+						<td th:text="${req.oriEmpName}"></td>
+						<td th:text="${req.reqEmpName}"></td>
+						<td th:text="${req.reqReason}"></td>
+						<td class="tnum text-soft" th:text="${req.createdAt}"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
 <div class="d-flex justify-content-center mt-4">
        <ul class="pagination" id="pagingUl">
            <li class="page-item" th:if="${paging.start > 1}">

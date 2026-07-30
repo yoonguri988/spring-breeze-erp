@@ -89,6 +89,7 @@
 		<result property="createdAt" column="created_at"/>
 		<result property="empName" column="emp_name"/>
 		<result property="linStatus" column="lin_status"/>
+		<result property="empStatus" column="emp_status"/>
 	</resultMap>
 
 	<!-- 대시보드용 통계 -->
@@ -223,7 +224,8 @@
 		select
 			e.emp_id,
 			e.emp_name,
-			p.pos_name
+			p.pos_name,
+			e.emp_status
 		from
 			employee e
 		join
@@ -231,6 +233,7 @@
 		where
 			e.dept_id = (select dept_id from employee where emp_id = #{empId})
 			and e.emp_id != #{empId}
+			and e.emp_status != '퇴직'
 		order by
 			p.pos_order desc
 	</select>
@@ -284,13 +287,15 @@
 			e.emp_id,
 			e.emp_name,
 			p.pos_name,
-			p.pos_order
+			p.pos_order,
+			e.emp_status
 		from
 			employee e
 		join
 			emp_position p on e.pos_id = p.pos_id
 		where
 			e.dept_id = #{deptId}
+			and e.emp_status != '퇴직'
 	</select>
 	
 	<!-- 결재선 지정 가능 인원수 / 사용자 본인 빼고, 본인보다 직급 높은사람들 -->
@@ -303,6 +308,7 @@
 		where
 			e.dept_id = #{deptId}
 			and e.emp_id != #{empId}
+			and e.emp_status != '퇴직'
 			and p.pos_order > (
 				select pp.pos_order
 				from employee ee
