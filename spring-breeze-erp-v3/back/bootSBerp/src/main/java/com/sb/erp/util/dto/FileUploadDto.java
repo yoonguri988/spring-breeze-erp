@@ -1,10 +1,12 @@
-package com.sb.erp.util;
+package com.sb.erp.util.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
-@AllArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class FileUploadDto {
 	private String originalFileName; // 사용자가 올린 원본 파일명 (예: my_logo.png)
     private String savedFileName;    // 서버에 저장된 파일명 (UUID, 예: 3f2a1c....png)

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+//Response
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class StatsComDto {
 	private int comTotal;

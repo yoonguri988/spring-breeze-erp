@@ -1,51 +1,34 @@
 package com.sb.erp.com.controller;
 
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.sb.erp.com.dto.ComSearchDto;
-import com.sb.erp.com.dto.CompanyDto;
 import com.sb.erp.com.dto.CompanyDto.CompanyRequestDto;
 import com.sb.erp.com.dto.CompanyDto.CompanyResponseDto;
+import com.sb.erp.com.dto.CompanySearchDto;
 import com.sb.erp.com.dto.StatsComDto;
 import com.sb.erp.com.service.CompanyService;
-import com.sb.erp.com.service.CompanyService_v2;
-//import com.sb.erp.dept.dto.DeptDto;
-//import com.sb.erp.dept.dto.StatsDeptDto;
-import com.sb.erp.dept.service.DeptService;
-//import com.sb.erp.emp.dto.EmpDto;
-import com.sb.erp.emp.service.EmpService;
-import com.sb.erp.global.security.CustomUserDetails;
-//import com.sb.erp.util.dto.FileUploadDto;
+import com.sb.erp.global.exception.FileUploadException;
+import com.sb.erp.util.dto.FileUploadDto;
 import com.sb.erp.util.dto.FileUploadType;
 import com.sb.erp.util.dto.FileUploadUtil;
-//import com.sb.erp.util.dto.PagingUtil;
-import com.sb.erp.util.dto.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -59,7 +42,7 @@ import lombok.RequiredArgsConstructor;
 
 @Tag(name="Company REST API", description = "회사 관리 REST API")
 @RestController
-@RequestMapping("/api/com")
+@RequestMapping("/api/company")
 @RequiredArgsConstructor
 @CrossOrigin(origins="*")
 public class CompanyController {
@@ -68,20 +51,110 @@ public class CompanyController {
 	//private final PermService permService;
 //	private final DeptService deptService;
 	
-	// 회사 등록
-//	@GetMapping("/add")
-//	//@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
-//	public String addForm() {
-//		return "/com/form";
-//	}
-	
-	//회사 등록 기능
-	@Operation(summary = "회사 등록", description = "새로운 회사를 등록합니다.") // swagger
+	// 회사 등록 기능 POST  /api/company
+	@Operation(summary = "회사 등록", description = "새로운 회사를 등록합니다.")
 	@PostMapping
 	public ResponseEntity<CompanyResponseDto> createCompany(@RequestBody CompanyRequestDto requestDto) {
-		CompanyResponseDto response = service.add(requestDto);
+		CompanyResponseDto response = service.createCompany(requestDto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response); // 201
 	}
+	
+	// 회사 단건 조회 GET /api/company/{id}
+	@Operation(summary = "회사 단건 조회", description = "회사 ID로 특정 회사 정보를 조회합니다.")
+	@GetMapping("/{id}")
+	public ResponseEntity<CompanyResponseDto> getCompany(@PathVariable("id") Long id) {
+		CompanyResponseDto response = service.getCompany(id);
+		return ResponseEntity.ok(response); // 200
+	}
+	
+	// 회사 목록 조회 (검색 + 페이징) GET  /api/company/search=?
+	@Operation(summary = "회사 목록 조회", description = "검색조건에 맞는 회사 목록을 조회합니다.")
+	@GetMapping
+	public ResponseEntity<List<CompanyResponseDto>> getCompanies(CompanySearchDto search) {
+		return ResponseEntity.ok(service.getAllCompanies(search));
+	}
+	
+	// 회사 수정 PUT /api/company/{id}
+	@Operation(summary = "회사 수정", description = "회사 정보를 수정합니다.")
+	@PutMapping("/{id}")
+	public ResponseEntity<CompanyResponseDto> updateCompany(@PathVariable("id") Long id,
+			@RequestBody CompanyRequestDto requestDto) {
+		return ResponseEntity.ok(service.updateCompany(id, requestDto));
+	}
+	
+	// 회사 삭제 DELETE /api/company/{id}
+	@Operation(summary = "회사 삭제", description = "회사를 삭제합니다.")
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteCompany(@PathVariable("id") Long id) {
+		service.deleteCompany(id);
+		return ResponseEntity.noContent().build(); // 204
+	}
+	
+	// 사업자 중복 체크 GET /api/company/check-bizno
+	@Operation(summary = "사업자번호 중복확인", description = "사업자등록번호 중복 여부를 확인합니다.")
+	@GetMapping("/check-bizno")
+	public ResponseEntity<Boolean> checkBizNo(@RequestParam("bizNo") String bizNo) {
+		return ResponseEntity.ok(service.checkBizNo(bizNo));
+	}
+	
+	// 회사명 자동완성 GET /api/company/suggest
+	@Operation(summary = "회사명 자동완성", description = "키워드로 회사명 상위 5건을 조회합니다.")
+	@GetMapping("/suggest")
+	public ResponseEntity<List<CompanySearchDto>> suggest(@RequestParam("keyword") String keyword) {
+		return ResponseEntity.ok(service.getSuggest(keyword));
+	}
+	
+	// 회사 통계 조회 GET /api/company/stats
+	@Operation(summary = "회사 통계 조회", description = "전체 회사수/임직원수/업종수 등 통계를 조회합니다.")
+	@GetMapping("/stats")
+	public ResponseEntity<StatsComDto> getStats() {
+		return ResponseEntity.ok(service.getStats());
+	}	
+	
+	// 회사 로고 업로드 POST  /api/company/logo
+	// 업로드 전용 API - 프론트에서 먼저 호출해 URL을 받은 뒤,
+	// 그 URL을 등록/수정 요청의 CompanyRequestDto.comLogo 에 담아서 보낸다)
+	@Operation(summary = "회사 로고 업로드", description = "로고 이미지를 업로드하고 접근 가능한 URL을 반환합니다.")
+	@PostMapping(value = "/logo", consumes = "multipart/form-data")
+	public ResponseEntity<?> uploadLogo(@RequestParam("logoFile") MultipartFile logoFile) {
+		try {
+			FileUploadDto result = FileUploadUtil.upload(logoFile, FileUploadType.COMPANY_LOGO);
+			return ResponseEntity.ok(result); // fileUrl 등 업로드 결과 반환
+		} catch (FileUploadException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+	
+	// 회사 상세 조회는 department 도메인 완성 전까지는 /{id} 단건조회와 내용이 완전히 같으므로
+	// 별도 엔드포인트로 분리하지 않는다. (deptStats/deptList가 채워질 때 아래처럼 확장 예정)
+	//
+	// @Operation(summary = "회사 상세 조회", description = "회사 정보 + 부서 통계/조직도를 조회합니다.")
+	// @GetMapping("/{id}/detail")
+	// public ResponseEntity<CompanyDetailResponse> getCompanyDetail(@PathVariable("id") Long id) {
+	// 	CompanyResponseDto company = companyService.getCompany(id);
+	// 	StatsDeptDto deptStats = deptService.selectStats(id);
+	// 	List<DeptDto> deptList = deptService.selectOrgTree(id);
+	// 	return ResponseEntity.ok(new CompanyDetailResponse(company, deptStats, deptList));
+	// }
+	
+	// 내 회사 정보 조회 (로그인한 사용자 소속 회사 + 부서 통계/조직도) - 부서 통계/조직도는 추후 추가 예정
+//	@Operation(summary = "내 회사 정보 조회", description = "로그인한 사용자가 소속된 회사 정보를 조회합니다.") // swagger
+//	@GetMapping("/my")
+//	public ResponseEntity<CompanyDetailResponse> getMyCompany(@AuthenticationPrincipal CustomUserDetails userDetails) {
+//		if (userDetails == null) {
+//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//		}
+// 
+//		Long comId = userDetails.getComId(); // TODO: 실제 필드/메서드명에 맞게 수정
+//		CompanyResponseDto company = companyService.getCompany(comId);
+// 
+//		// StatsDeptDto deptStats = deptService.selectStats(comId);
+//		// List<DeptDto> deptList = deptService.selectOrgTree(comId);
+// 
+//		return ResponseEntity.ok(new CompanyDetailResponse(company, null, null));
+//	}
+
+	
 	
 	// 회사 사업자 번호 중복 체크 (ajax)
 //	@GetMapping("/checkBizNo")

@@ -10,9 +10,9 @@ import com.sb.erp.com.dto.CompanyDto.CompanyResponseDto;
 
 public interface CompanyService_v2 {
 //	public List<CompanyResponseDto> list(CompanyRequestDto search);
-	
-	public int add(CompanyRequestDto dto);
-	
+//	
+//	public int add(CompanyRequestDto dto);
+//	
 //	public CompanyDto isDuplicateBizNo(String bizNo);
 //	
 //	public CompanyDto selectOneById(int comId);

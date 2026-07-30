@@ -1,4 +1,4 @@
-package com.sb.erp.util;
+package com.sb.erp.util.dto;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,8 +13,7 @@ import lombok.Getter;
  *   BOARD_ATTACH(Arrays.asList("png","jpg","jpeg","pdf","zip"), Arrays.asList(...), 10*1024*1024, "board/attach"),
  */
 
-@Getter
-@AllArgsConstructor
+@Getter @AllArgsConstructor
 public enum FileUploadType {
 	// 회사 로고 : PNG, JPG, SVG, WEBP / 최대 2MB
     COMPANY_LOGO(

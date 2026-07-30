@@ -2,19 +2,19 @@ package com.sb.erp.com.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.sb.erp.com.dto.ComSearchDto;
-import com.sb.erp.com.dto.CompanyDto;
-import com.sb.erp.com.dto.CompanyDto.CompanyRequestDto;
-import com.sb.erp.com.dto.StatsComDto;
-import com.sb.erp.com.repository.CompanyMapper;
+//
+//import com.sb.erp.com.dto.ComSearchDto;
+//import com.sb.erp.com.dto.CompanyDto;
+//import com.sb.erp.com.dto.CompanyDto.CompanyRequestDto;
+//import com.sb.erp.com.dto.StatsComDto;
+//import com.sb.erp.com.repository.CompanyMapper;
 //import com.sb.erp.dept.repository.DeptMapper;
 
 @Service
-public class CompanyServiceImpl implements CompanyService_v2 {
-	@Autowired CompanyMapper dao;
+public class CompanyServiceImpl_v2 implements CompanyService_v2 {
+//	@Autowired CompanyMapper dao;
 //	@Autowired DeptMapper deptDao;
 
 //	@Override
@@ -24,13 +24,13 @@ public class CompanyServiceImpl implements CompanyService_v2 {
 //		return dao.selectAll(dto);
 //	}
 
-	@Override
-	public int add(CompanyRequestDto dto) {
+//	@Override
+//	public int add(CompanyRequestDto dto) {
 //		if(dto.getBizNo() != null && dao.selectByBizNo(dto.getBizNo()) != null) {
 //			throw new IllegalArgumentException("중복된 사업자 번호");
 //		}
-		return dao.insert(dto);
-	}
+//		return dao.insert(dto);
+//	}
 
 //	@Override
 //	public CompanyDto isDuplicateBizNo(String bizNo) {

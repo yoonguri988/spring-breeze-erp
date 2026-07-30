@@ -1,4 +1,4 @@
-package com.sb.erp.config;
+package com.sb.erp.global.config;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;

@@ -4,11 +4,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sb.erp.dept.entity.Department;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -41,7 +45,7 @@ public class Company {
 	
 	@Column(length = 100)
 	private String comTel;
-	@Column(length = 500)
+	@Lob // 대용량 처리 - 이미지 
 	private String comLogo;
 		
 	@Column(name="CREATED_AT", nullable=false)
@@ -59,9 +63,9 @@ public class Company {
 		this.updatedAt = LocalDateTime.now();		
 	}
 	
-//	@OneToMany(mappedBy = "company")
-//	@Builder.Default
-//	private List<Department> departments = new ArrayList<>();
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Department> depts = new ArrayList<>();
 	
 //	@OneToMany(mappedBy = "company")
 //	@Builder.Default
