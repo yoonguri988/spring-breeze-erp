@@ -1,28 +1,40 @@
-package com.sb.erp.service;
+package com.sb.erp.com.service;
 
-import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.sb.erp.dto.ComSearchDto;
-import com.sb.erp.dto.CompanyDto;
-import com.sb.erp.dto.StatsComDto;
+import com.sb.erp.com.dto.CompanyDto.CompanyRequestDto;
+import com.sb.erp.com.dto.CompanyDto.CompanyResponseDto;
+import com.sb.erp.com.entity.Company;
+import com.sb.erp.com.repository.CompanyRepository;
 
-public interface CompanyService {
-	public List<CompanyDto> list(ComSearchDto search);
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class CompanyService {
+
+	private final CompanyRepository repo;
 	
-	public int add(CompanyDto dto);
-	public CompanyDto isDuplicateBizNo(String bizNo);
-	
-	public CompanyDto selectOneById(int comId);
-
-	public int update(CompanyDto dto);
-
-	public int delete(int comId);
-
-	public List<CompanyDto> getSuggest(String keyword);
-
-	public int listTotal(ComSearchDto search);
-
-	public StatsComDto selectStats();
-
-	public CompanyDto selectOneByEmpId(int empId);
+	@Transactional
+	public CompanyResponseDto add(CompanyRequestDto requestDto) {
+		if(requestDto.getBizNo() != null && repo.findByBizNo(requestDto.getBizNo()) != null) {
+			throw new IllegalArgumentException("중복된 사업자 번호");
+		}
+		
+		Company com = Company.builder()
+			       			 .industryGrpCode(requestDto.getIndustryGrpCode())
+			    			 .industryCode(requestDto.getIndustryCode())
+			    			 .comName(requestDto.getComName())
+			    			 .comCeo(requestDto.getComCeo())
+			    			 .bizNo(requestDto.getBizNo())
+			    			 .comTel(requestDto.getComTel())
+			    			 .comLogo(requestDto.getComLogo())
+			    			 .build();
+		
+		
+		Company savedCom = repo.save(com);
+		return new CompanyResponseDto(savedCom);
+	}
 }

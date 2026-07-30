@@ -30,7 +30,7 @@ import com.sb.erp.service.EmpService;
 @RequestMapping("/dept")
 public class DeptController {
 	@Autowired DeptService service;
-	@Autowired CompanyService comService;
+	@Autowired CompanyService_v2 comService;
 	@Autowired EmpService empService;
 	
 	// 부서 목록 

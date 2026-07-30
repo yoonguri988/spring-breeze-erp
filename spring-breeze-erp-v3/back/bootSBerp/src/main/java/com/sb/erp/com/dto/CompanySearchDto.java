@@ -1,10 +1,12 @@
-package com.sb.erp.dto;
+package com.sb.erp.com.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
-@AllArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class CompanySearchDto {
 	private int comId;
 	private String companyName;
