@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sb.erp.com.entity.Company;
+import com.sb.erp.emp.entity.Employee;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,7 +35,27 @@ public class Department {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_department")
 	@SequenceGenerator(name = "seq_department", sequenceName = "SEQ_DEPARTMENT", allocationSize = 1)
 	@Column(name = "DEPT_ID")
-	private Long id;
+	private Long deptId;
+	
+	// 회사
+	@ManyToOne
+	@JoinColumn(name="COM_ID", nullable = false)
+	private Company company;
+	
+	// 상위 부서 (자기참조)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PARENT_ID")
+	private Department parent;
+	
+	// 하위 부서 목록 (조직도 트리 구성용, DB 컬럼 아님)
+	@OneToMany(mappedBy = "parent")
+	@Builder.Default
+	private List<Department> children = new ArrayList<>();
+	
+	// 부서장(담당자)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "EMP_ID")
+	private Employee employee;
 	
 	@Column(name = "DEPT_NAME", length = 100)
 	private String deptName;
@@ -48,19 +69,15 @@ public class Department {
 	@Column(name = "SORT_ORDER")
 	private Integer sortOrder;
 	
-	// 부서장(담당자)
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name = "EMP_ID")
-//	private Employee manager;
-	
 	@Column(name = "DEPT_STATUS", length = 100)
 	private String deptStatus; // ACTIVE, PENDING_DELETE, DELETED
 	
-	@Column
+	@Column(name = "IS_DELETED", nullable = false)
 	private boolean deleted=false;
 	
 	@Column(name="CREATED_AT", nullable=false)
 	private LocalDateTime createdAt;
+	
 	@Column(name="UPDATED_AT", nullable=false)
 	private LocalDateTime updatedAt;
 	
@@ -80,20 +97,6 @@ public class Department {
 	void onUpdate() {
 		this.updatedAt = LocalDateTime.now();		
 	}
-
-	@ManyToOne
-	@JoinColumn(name="COMPANY_ID", nullable = false)
-	private Company company;
-	
-	// 상위 부서 (자기참조)
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "PARENT_ID")
-	private Department parent;
-	
-	// 하위 부서 목록 (조직도 트리 구성용, DB 컬럼 아님)
-	@OneToMany(mappedBy = "parent")
-	@Builder.Default
-	private List<Department> children = new ArrayList<>();
 	
 }
 /*

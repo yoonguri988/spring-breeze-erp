@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sb.erp.dept.entity.Department;
+import com.sb.erp.emp.entity.Employee;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -63,13 +64,14 @@ public class Company {
 		this.updatedAt = LocalDateTime.now();		
 	}
 	
+	// 연관 관계
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<Department> depts = new ArrayList<>();
 	
-//	@OneToMany(mappedBy = "company")
-//	@Builder.Default
-//	private List<Employee> employees = new ArrayList<>();
+	@OneToMany(mappedBy = "company")
+	@Builder.Default
+	private List<Employee> employees = new ArrayList<>();
 }
 /*
  * COM_ID            NOT NULL NUMBER        
