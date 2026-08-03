@@ -1,4 +1,4 @@
-package com.sb.erp.controller;
+package com.sb.erp.appr.controller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sb.erp.dto.ApprDocDto;
-import com.sb.erp.dto.ApprDocInitResponseDto;
-import com.sb.erp.dto.ApprFormDto;
-import com.sb.erp.dto.ApprLineDto;
-import com.sb.erp.dto.DeptDto;
-import com.sb.erp.security.CustomUserDetails;
-import com.sb.erp.service.ApprDocService;
-import com.sb.erp.service.DeptService;
-import com.sb.erp.util.PagingUtil;
+import com.sb.erp.appr.dto.ApprDocDto;
+import com.sb.erp.appr.dto.ApprDocInitResponseDto;
+import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.dto.ApprLineDto;
+import com.sb.erp.appr.service.ApprDocService;
+import com.sb.erp.dept.dto.DeptDto;
+import com.sb.erp.dept.service.DeptService;
+import com.sb.erp.global.security.CustomUserDetails;
+import com.sb.erp.util.dto.PagingUtil;
 
 @Controller
 @RequestMapping("/appr")

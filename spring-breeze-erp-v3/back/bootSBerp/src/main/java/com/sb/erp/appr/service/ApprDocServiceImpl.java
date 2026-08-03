@@ -1,4 +1,4 @@
-package com.sb.erp.service;
+package com.sb.erp.appr.service;
 
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -8,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sb.erp.dao.ApprDocMapper;
-import com.sb.erp.dao.ApprLineMapper;
-import com.sb.erp.dto.ApprDocDto;
-import com.sb.erp.dto.ApprDocInitResponseDto;
-import com.sb.erp.dto.ApprFormDto;
-import com.sb.erp.dto.ApprLineDto;
-import com.sb.erp.dto.DeptDto;
+import com.sb.erp.appr.dto.ApprDocDto;
+import com.sb.erp.appr.dto.ApprDocInitResponseDto;
+import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.dto.ApprLineDto;
+import com.sb.erp.appr.repository.ApprDocMapper;
+import com.sb.erp.appr.repository.ApprLineMapper;
+import com.sb.erp.dept.dto.DeptDto;
+import com.sb.erp.dept.service.DeptService;
 
 @Service
 public class ApprDocServiceImpl implements ApprDocService{

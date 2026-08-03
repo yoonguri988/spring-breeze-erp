@@ -1,4 +1,4 @@
-package com.sb.erp.controller;
+package com.sb.erp.appr.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.sb.erp.api.OpenAiGpt;
-import com.sb.erp.dto.ApprFormDto;
-import com.sb.erp.dto.ApprFormSearchDto;
-import com.sb.erp.dto.CompanyDto;
-import com.sb.erp.service.ApprFormService;
-import com.sb.erp.service.CompanyService;
-import com.sb.erp.util.PagingUtil;
+import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.dto.ApprFormSearchDto;
+import com.sb.erp.appr.service.ApprFormService;
+import com.sb.erp.com.dto.CompanyDto;
+import com.sb.erp.com.service.CompanyService;
+import com.sb.erp.global.integration.OpenAiGpt;
+import com.sb.erp.util.dto.PagingUtil;
 
 @Controller
 @RequestMapping("/appr")

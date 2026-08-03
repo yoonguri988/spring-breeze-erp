@@ -1,4 +1,4 @@
-package com.sb.erp.dto;
+package com.sb.erp.appr.dto;
 
 import lombok.Data;
 
