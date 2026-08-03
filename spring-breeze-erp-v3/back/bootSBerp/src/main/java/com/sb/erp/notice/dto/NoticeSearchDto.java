@@ -1,4 +1,4 @@
-package com.sb.erp.dto;
+package com.sb.erp.notice.dto; 
 
 import java.util.ArrayList;
 import java.util.List;
