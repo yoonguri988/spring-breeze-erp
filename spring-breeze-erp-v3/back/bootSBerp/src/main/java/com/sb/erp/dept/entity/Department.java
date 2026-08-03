@@ -7,6 +7,7 @@ import java.util.List;
 import com.sb.erp.com.entity.Company;
 import com.sb.erp.emp.entity.Employee;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,17 +42,7 @@ public class Department {
 	@ManyToOne
 	@JoinColumn(name="COM_ID", nullable = false)
 	private Company company;
-	
-	// 상위 부서 (자기참조)
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "PARENT_ID")
-	private Department parent;
-	
-	// 하위 부서 목록 (조직도 트리 구성용, DB 컬럼 아님)
-	@OneToMany(mappedBy = "parent")
-	@Builder.Default
-	private List<Department> children = new ArrayList<>();
-	
+		
 	// 부서장(담당자)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "EMP_ID")
@@ -97,6 +88,27 @@ public class Department {
 	void onUpdate() {
 		this.updatedAt = LocalDateTime.now();		
 	}
+	
+	// 상위 부서 (자기참조)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PARENT_ID")
+	private Department parent;
+	
+	// 하위 부서 목록 (조직도 트리 구성용, DB 컬럼 아님)
+	@OneToMany(mappedBy = "parent")
+	@Builder.Default
+	private List<Department> children = new ArrayList<>();
+
+	// 부서 삭제 이관 - 이동 전 부서
+	@OneToMany(mappedBy = "originDept", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<DeptTransferLog> originDepts = new ArrayList<>();
+
+	// 부서 삭제 이관 - 이동 후 부서
+	@OneToMany(mappedBy = "targetDept", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<DeptTransferLog> targetDepts = new ArrayList<>();
+	
 	
 }
 /*
