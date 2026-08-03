@@ -28,7 +28,7 @@ import com.sb.erp.util.PagingUtil;
 @RequestMapping("/appr")
 public class ApprFormController { 
 	@Autowired ApprFormService appr;
-	@Autowired CompanyService com;
+	@Autowired CompanyService_v2 com;
 	@Autowired OpenAiGpt gpt;
 	
 	// 회사 검색 기능
