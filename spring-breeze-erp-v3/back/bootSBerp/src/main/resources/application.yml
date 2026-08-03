@@ -34,7 +34,7 @@ spring:
 #mybatis:
 #  config-location: classpath:mybatis-config.xml
 #  mapper-locations: classpath:mapper/**/*.xml
-#  type-aliases-package: com.thejoa703.domain 
+#  type-aliases-package: com.sb.erp.domain 
 
 #jwt:
 #  issuer: thejoa703
@@ -46,6 +46,11 @@ spring:
 
 #file:
 #  upload-dir: uploads
+upload:
+  path: /upload         # 웹에서 접근할 URL prefix (fileUrl = /upload/**/**/파일명)
+resource:
+  path: C:/upload       # 실제 디스크 저장 경로 (운영 서버에서는 리눅스 절대경로로 교체)
+
 
 #server:
 #  port: 8484s

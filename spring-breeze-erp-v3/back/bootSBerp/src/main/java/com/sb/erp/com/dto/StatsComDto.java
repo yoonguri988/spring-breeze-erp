@@ -1,8 +1,13 @@
-package com.sb.erp.dto;
+package com.sb.erp.com.dto;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+//Response
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class StatsComDto {
 	private int comTotal;
 	private int empTotal;

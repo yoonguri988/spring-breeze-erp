@@ -1,4 +1,4 @@
-package com.sb.erp.dto;
+package com.sb.erp.api.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

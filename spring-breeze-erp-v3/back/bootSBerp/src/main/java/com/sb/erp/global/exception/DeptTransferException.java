@@ -1,4 +1,4 @@
-package com.sb.erp.exception;
+package com.sb.erp.global.exception;
 
 
 /*

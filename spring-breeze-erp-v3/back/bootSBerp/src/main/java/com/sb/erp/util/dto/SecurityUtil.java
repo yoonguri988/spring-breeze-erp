@@ -1,4 +1,4 @@
-package com.sb.erp.util;
+package com.sb.erp.util.dto;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;

@@ -21,7 +21,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 
 	@Autowired ApprDocMapper dao;
 	@Autowired ApprLineMapper lineDao;
-	@Autowired DeptService deptDao;
+	@Autowired DeptService_v2 deptDao;
 	
 	
 	// 작성하려는 사용자의 회사 양식
