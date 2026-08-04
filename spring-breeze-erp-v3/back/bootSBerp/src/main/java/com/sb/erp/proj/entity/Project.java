@@ -2,10 +2,20 @@ package com.sb.erp.proj.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.sb.erp.appr.entity.ApprDoc;
+import com.sb.erp.appr.entity.ApprForm;
 import com.sb.erp.com.entity.Company;
+import com.sb.erp.dept.entity.Department;
+import com.sb.erp.dept.entity.DeptTransferLog;
 import com.sb.erp.emp.entity.Employee;
+import com.sb.erp.res.entity.Resource;
+import com.sb.erp.resv.entity.Reservation;
+import com.sb.erp.task.entity.Task;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,10 +24,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,6 +39,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor 
+@Builder
 @Table(name="PROJECT")
 public class Project {
 	
@@ -79,6 +94,14 @@ public class Project {
 	void onUpdate() {
 		this.updatedAt = LocalDateTime.now();		
 	}
+	
+	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<ProjectMember> members = new ArrayList<>();
+
+	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Task> tasks = new ArrayList<>();
 	
 //	@Column(name="EMP_NAME")
 //	private String empName;
