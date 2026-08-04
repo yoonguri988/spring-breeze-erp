@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.dept.entity.Department;
 
@@ -57,8 +58,8 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 	
 	// 부서 순서 정렬
 	@Query("select coalesce(max(d.sortOrder), 0) from Department d "
-			 + "where d.company.id = :comId and d.deleted = false "
-			 + "and (:parentId is null and d.parent is null or d.parent.id = :parentId)")
+			+ "where d.company.id = :comId and d.deleted = false "
+			+ "and ((:parentId is null and d.parent is null) or d.parent.id = :parentId)")
 	Integer findMaxSortOrder(@Param("comId") Long comId, @Param("parentId") Long parentId);
 
 	// 부서 등록
@@ -94,6 +95,7 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 	
 	// 부서 소프트 삭제
 	@Modifying
+	@Transactional
 	@Query("update Department d set d.deptStatus = 'PENDING_DELETE' where d.deptId = :deptId")
 	int requestSoftDelete(@Param("deptId") Long deptId);
 

@@ -7,11 +7,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.dept.entity.Department;
 import com.sb.erp.emp.entity.Employee;
 
+@Repository
 public interface DeptTransferRepository extends JpaRepository<Department, Long> {
 
 	// 해당 부서가 자신이 속한 회사의 부서가 맞는지 확인

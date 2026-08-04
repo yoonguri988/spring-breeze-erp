@@ -22,7 +22,7 @@ public class CompanyDto {
 	// 회사 정보 - 응답 DTO
 	@Getter
 	public static class CompanyResponseDto {
-		private Long id;
+		private Long comId;
 		private String industryGrpCode;
 		private String industryCode;
 		private String comName;
@@ -36,7 +36,7 @@ public class CompanyDto {
 
 		// insert, update, select 결과물
 		public CompanyResponseDto(Company company) { 
-			this.id = company.getComId();
+			this.comId = company.getComId();
 			this.industryGrpCode = company.getIndustryGrpCode();
 			this.industryCode = company.getIndustryCode();
 			this.comName = company.getComName();

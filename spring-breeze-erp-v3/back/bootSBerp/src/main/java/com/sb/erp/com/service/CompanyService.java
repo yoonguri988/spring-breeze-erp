@@ -112,7 +112,7 @@ public class CompanyService {
 
 	public List<CompanySearchDto> getSuggest(String keyword) {
 		return repo.findTop5ByComNameContainingOrderByComNameAsc(keyword).stream()
-				.map(com -> new CompanySearchDto(com.getId().intValue(), com.getComName()))
+				.map(com -> new CompanySearchDto(com.getComId().intValue(), com.getComName()))
 				.collect(Collectors.toList());
 	}
 
