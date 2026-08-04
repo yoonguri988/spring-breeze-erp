@@ -7,25 +7,16 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.sb.erp.appr.dto.ApprFormDto;
 import com.sb.erp.appr.dto.ApprFormSearchDto;
-import com.sb.erp.com.dto.CompanySearchDto;
 
 @Mapper
 public interface ApprFormMapper {
 	
-	// 공통 
-	public List<CompanySearchDto> searchCompany(String keyword);	
-	public String getCompanyName(int comId);
+	// 목록 검색 + 페이징 / 최신 버전만
+	List<ApprFormDto> selectFormList(ApprFormSearchDto dto);
 	
-	// 페이징 기능
-	public int listFormCnt(ApprFormSearchDto dto);
+	// 목록 검색 전체 개수 / 페이징
+	int listFormCnt(ApprFormSearchDto dto);
 	
-	// 양식 파트
-	public ApprFormDto selectFormAll(ApprFormDto dto);
-	public int insertForm(ApprFormDto dto);
-	public int updateForm(ApprFormDto dto);
-	public int deleteForm(ApprFormDto dto);
-	public int updateFormNewVersion(ApprFormDto dto);
-	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto);
-	public String findByCode(ApprFormDto dto);
-	
+	// 양식 코드 중복 확인 / 본인 제외
+	String findByCode(ApprFormDto dto);
 }
