@@ -9,8 +9,13 @@ import com.sb.erp.appr.entity.ApprForm;
 import com.sb.erp.dept.entity.Department;
 import com.sb.erp.dept.entity.DeptTransferLog;
 import com.sb.erp.emp.entity.Employee;
+import com.sb.erp.notice.entity.Notice;
+import com.sb.erp.perm.entity.Authority;
+import com.sb.erp.pos.entity.Position;
+import com.sb.erp.proj.entity.Project;
 import com.sb.erp.res.entity.Resource;
 import com.sb.erp.resv.entity.Reservation;
+import com.sb.erp.task.entity.Task;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -81,14 +86,14 @@ public class Company {
 	private List<DeptTransferLog> deptTransferLog = new ArrayList<>();
 	
 	// 권한 authority
-//	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-//	@Builder.Default
-//	private List<Authority> auths = new ArrayList<>();
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Authority> auths = new ArrayList<>();
 	
 	// emp_position
-//	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-//	@Builder.Default
-//	private List<EmpPosition> empPositions = new ArrayList<>();
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Position> empPositions = new ArrayList<>();
 
 	// 직원
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -111,19 +116,19 @@ public class Company {
 	private List<ApprForm> apprForms = new ArrayList<>();
 	
 	// 프로젝트
-//	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-//	@Builder.Default
-//	private List<Project> projects = new ArrayList<>();
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Project> projects = new ArrayList<>();
 	
 	// 태스크
-//	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-//	@Builder.Default
-//	private List<Task> tasks = new ArrayList<>();
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Task> tasks = new ArrayList<>();
 	
 	// 공지
-//	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-//	@Builder.Default
-//	private List<Notice> notices = new ArrayList<>();
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Notice> notices = new ArrayList<>();
 	
 	//자원
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
