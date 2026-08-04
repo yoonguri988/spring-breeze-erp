@@ -2,6 +2,8 @@ package com.sb.erp.appr.entity;
 
 import java.time.LocalDateTime;
 
+import com.sb.erp.emp.entity.Employee;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,8 +43,9 @@ public class ApprLine {
 	@JoinColumn(name = "doc_id", nullable = false)
 	private ApprDoc apprDoc;
 	
-	@Column(name = "emp_id", nullable = false)
-	private Long empId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "emp_id", nullable = false)
+	private Employee employee;
 	
 	@Column(name = "lin_order", nullable = false)
 	private Integer linOrder;

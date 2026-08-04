@@ -2,6 +2,9 @@ package com.sb.erp.appr.entity;
 
 import java.time.LocalDateTime;
 
+import com.sb.erp.com.entity.Company;
+import com.sb.erp.emp.entity.Employee;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -37,9 +40,6 @@ public class ApprDoc {
 	@Column(name = "doc_id")
 	private Long docId;
 	
-	@Column(name = "emp_id", nullable = false)
-	private Long empId;
-	
 	// appr_form 복합키 두 컬럼 같이 묶기
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns({
@@ -48,8 +48,13 @@ public class ApprDoc {
 	})
 	private ApprForm apprForm;
 	
-	@Column(name = "com_id", nullable = false)
-	private Long comId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "emp_id", nullable = false)
+	private Employee employee;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "com_id", nullable = false)
+	private Company company;
 	
 	@Column(name = "doc_title", nullable = false, length = 100)
 	private String docTitle;
