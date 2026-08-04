@@ -1,4 +1,4 @@
-package com.sb.erp.api;
+package com.sb.erp.global.integration;
 
 import java.util.List;
 import java.util.Map;
@@ -11,8 +11,8 @@ import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sb.erp.dto.AiRecomDto;
-import com.sb.erp.dto.DeptDto;
+import com.sb.erp.api.dto.response.AiRecomResponse;
+import com.sb.erp.dept.dto.response.DeptResponse;
 
 @Component
 public class OpenAiRecomClient {
@@ -33,7 +33,7 @@ public class OpenAiRecomClient {
      * @param candidates      휴리스틱 필터링을 거친 이관 후보 부서 목록 (이 안에서만 고르도록 강제)
      * @return 추천 결과, 실패/후보없음/환각 응답인 경우 null
      */
-	public AiRecomDto recommend(String deptName, String pendingDocTitles, List<DeptDto> candidates) {
+	public AiRecomResponse recommend(String deptName, String pendingDocTitles, List<DeptResponse> candidates) {
         if (candidates == null || candidates.isEmpty()) {
             return null; // 추천할 후보 자체가 없음
         }
@@ -75,7 +75,7 @@ public class OpenAiRecomClient {
             String reason = parsed.hasNonNull("reason") ? parsed.path("reason").asText() : null;
  
             // 환각 방지: 후보 목록에 없는 deptId를 답했다면 추천 자체를 버린다
-            DeptDto matched = candidates.stream()
+            DeptResponse matched = candidates.stream()
                     .filter(c -> c.getDeptId() == targetDeptId)
                     .findFirst()
                     .orElse(null);
@@ -83,11 +83,7 @@ public class OpenAiRecomClient {
                 return null;
             }
  
-            AiRecomDto dto = new AiRecomDto();
-            dto.setTargetDeptId(targetDeptId);
-            dto.setTargetDeptName(matched.getDeptName());
-            dto.setReason(reason);
-            return dto;
+            return new AiRecomResponse(targetDeptId, matched.getDeptName(), reason);
         } catch (Exception e) {
             // AI 실패는 전체 흐름을 막지 않는다 — 관리자가 수동 선택
             return null;

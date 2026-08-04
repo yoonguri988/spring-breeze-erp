@@ -1,4 +1,4 @@
-package com.sb.erp.service;
+package com.sb.erp.emp.service;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,12 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.sb.erp.dao.EmpMapper;
-import com.sb.erp.dto.EmpAuthDto;
-import com.sb.erp.dto.EmpDto;
-import com.sb.erp.dto.EmpSearchDto;
+import com.sb.erp.emp.dao.EmpMapper;
+import com.sb.erp.emp.dto.EmpAuthDto;
+import com.sb.erp.emp.dto.EmpDto;
+import com.sb.erp.emp.dto.EmpSearchDto;
 import com.sb.erp.util.SecurityUtil;
-import com.sb.erp.service.EmailService;
+import com.sb.erp.emp.service.EmailService;
 
 @Service
 public class EmpServiceImpl implements EmpService {

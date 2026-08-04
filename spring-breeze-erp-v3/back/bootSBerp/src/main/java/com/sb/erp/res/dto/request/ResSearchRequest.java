@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter @Setter
 public class ResSearchRequest {
-	private Integer comId;
+	private Long comId;
 	private String keyword;
 	private String resType;
 	private String resStatus;

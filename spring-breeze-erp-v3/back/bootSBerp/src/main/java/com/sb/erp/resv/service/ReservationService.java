@@ -1,34 +1,35 @@
-package com.sb.erp.service;
+package com.sb.erp.resv.service;
 
 import java.util.List;
 
-import com.sb.erp.dto.ResvDto;
-import com.sb.erp.dto.ResvSearchDto;
-import com.sb.erp.dto.StatsResvDto;
+import com.sb.erp.resv.dto.reponse.ResvResponse;
+import com.sb.erp.resv.dto.reponse.StatsResvResponse;
+import com.sb.erp.resv.dto.request.ResvRequest;
+import com.sb.erp.resv.dto.request.ResvSearchRequest;
 
 public interface ReservationService {
 	// 자원 예약 조회
-    List<ResvDto> getResvList(ResvSearchDto search);
+    List<ResvResponse> getResvList(ResvSearchRequest search);
     // 자원 예약 전체 갯수
-    int getResvCount(ResvSearchDto search);
+    int getResvCount(ResvSearchRequest search);
 
-    ResvDto getResvDetail(int revId);
+    ResvResponse getResvDetail(int revId);
 
-    int insert(ResvDto ResvDto);
+    int insert(ResvRequest ResvDto);
 
-    int update(ResvDto ResvDto);
+    int update(ResvRequest ResvDto);
 
     int delete(int revId);
 
     // 통계 (전체/승인/대기/반려)
-    StatsResvDto countByStats(ResvSearchDto search);
+    StatsResvResponse countByStats(ResvSearchRequest search);
 
     // 예약 관리에서 예약 된 자원이 있는지 확인
     int countReservationsByResourceId(int resId);
     
-    int updateApprove(ResvDto resvDto);
-    int updateReject(ResvDto resvDto);
+    int updateApprove(ResvRequest resvDto);
+    int updateReject(ResvRequest resvDto);
     
     //
-	int getReservedQuantity(ResvSearchDto search);
+	int getReservedQuantity(ResvSearchRequest search);
 }
