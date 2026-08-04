@@ -36,7 +36,7 @@ public class CompanyDto {
 
 		// insert, update, select 결과물
 		public CompanyResponseDto(Company company) { 
-			this.id = company.getId();
+			this.id = company.getComId();
 			this.industryGrpCode = company.getIndustryGrpCode();
 			this.industryCode = company.getIndustryCode();
 			this.comName = company.getComName();

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sb.erp.appr.entity.ApprDoc;
+import com.sb.erp.appr.entity.ApprForm;
 import com.sb.erp.dept.entity.Department;
 import com.sb.erp.dept.entity.DeptTransferLog;
 import com.sb.erp.emp.entity.Employee;
@@ -34,7 +36,7 @@ public class Company {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_company")
 	@SequenceGenerator(name="seq_company", sequenceName="SEQ_COMPANY", allocationSize=1)
 	@Column(name="COM_ID")
-	private Long id;
+	private Long comId;
 	
 	@Column(length = 100, nullable = false)
 	private String industryGrpCode;
@@ -99,14 +101,14 @@ public class Company {
 //	private List<EvaluationPeriod> evalPeriods = new ArrayList<>();
 
 	// 결재 문서
-//	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-//	@Builder.Default
-//	private List<ApprDoc> apprDocs = new ArrayList<>();
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<ApprDoc> apprDocs = new ArrayList<>();
 	
 	// 결재 양식
-//	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-//	@Builder.Default
-//	private List<ApprForm> apprForms = new ArrayList<>();
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<ApprForm> apprForms = new ArrayList<>();
 	
 	// 프로젝트
 //	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
