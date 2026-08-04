@@ -9,8 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
-
 import com.sb.erp.emp.entity.Employee;
 
 /**
@@ -85,7 +83,8 @@ public class EvalReport {
     
     // ── AI 생성 콘텐츠 ──
 
-    @Column(name = "ai_summary", length = 4000)
+    @Lob
+    @Column(name = "ai_summary")
     private String aiSummary;
 
     
