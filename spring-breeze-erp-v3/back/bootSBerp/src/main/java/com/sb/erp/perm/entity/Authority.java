@@ -1,10 +1,11 @@
 package com.sb.erp.perm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import com.sb.erp.com.entity.Company;
 
@@ -23,15 +24,14 @@ import com.sb.erp.com.entity.Company;
  */
 @Entity
 @Table(name = "authority")
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Authority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_authority")
     @SequenceGenerator(name = "seq_authority", sequenceName = "SEQ_AUTHORITY", allocationSize = 1)
     @Column(name = "aut_id")
-    private Integer autId;
+    private Long autId;
 
     @Column(name = "aut_name", length = 50, nullable = false)
     private String autName;
@@ -40,13 +40,4 @@ public class Authority {
     @JoinColumn(name = "com_id", nullable = false)
     private Company company;
 
-    @Builder
-    public Authority(String autName, Company company) {
-        this.autName = autName;
-        this.company = company;
-    }
-
-    public void updateName(String autName) {
-        this.autName = autName;
-    }
 }
