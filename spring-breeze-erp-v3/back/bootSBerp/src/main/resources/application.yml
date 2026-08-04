@@ -30,11 +30,10 @@ spring:
 #      - optional:application-oauth.yml
 #      - optional:file:.env[.properties]
 
-
-#mybatis:
-#  config-location: classpath:mybatis-config.xml
-#  mapper-locations: classpath:mapper/**/*.xml
-#  type-aliases-package: com.sb.erp.domain 
+mybatis:
+  config-location: classpath:mybatis-config.xml
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.sb.erp.**.dto
 
 #jwt:
 #  issuer: thejoa703
