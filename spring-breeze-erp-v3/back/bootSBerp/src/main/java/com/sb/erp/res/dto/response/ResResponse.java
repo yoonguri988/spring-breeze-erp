@@ -1,22 +1,16 @@
-package com.sb.erp.res.dto;
+package com.sb.erp.res.dto.response;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@ToString
-public class ResDto {
+public class ResResponse {
     private Integer resId;           
     private Integer comId;           
     private String resCode;     
     private String resName;      
     private String resType;      
     private Integer quantity;
-    //추가된 컬럼
+    
     private String location;
     private Integer capacity;
     private String resStatus;
