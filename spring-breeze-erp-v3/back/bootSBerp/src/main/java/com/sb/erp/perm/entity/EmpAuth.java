@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.sb.erp.emp.entity.Employee;
+import com.sb.erp.auth.entity.Authority;
 
 /**
  * 사원-권한 매핑 Entity (emp_auth 테이블)
