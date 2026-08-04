@@ -73,10 +73,12 @@ public class Evaluation {
     @Column(name = "weighted_score", precision = 5, scale = 2)
     private BigDecimal weightedScore;
 
-    @Column(name = "strength_comment", length = 2000)
+    @Lob
+    @Column(name = "strength_comment")
     private String strengthComment;
 
-    @Column(name = "improvement_comment", length = 2000)
+    @Lob
+    @Column(name = "improvement_comment")
     private String improvementComment;
 
     @Column(name = "eval_status", length = 20, nullable = false)
