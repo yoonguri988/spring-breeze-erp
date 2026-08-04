@@ -5,14 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sb.erp.appr.entity.ApprDoc;
-import com.sb.erp.appr.entity.ApprForm;
 import com.sb.erp.com.entity.Company;
-import com.sb.erp.dept.entity.Department;
-import com.sb.erp.dept.entity.DeptTransferLog;
 import com.sb.erp.emp.entity.Employee;
-import com.sb.erp.res.entity.Resource;
-import com.sb.erp.resv.entity.Reservation;
 import com.sb.erp.task.entity.Task;
 
 import jakarta.persistence.CascadeType;
@@ -45,12 +39,12 @@ import lombok.Setter;
 public class Project {
 	
 	@Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "project_seq")
-    @SequenceGenerator(name = "project_seq", sequenceName = "PROJECT_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_project")
+    @SequenceGenerator(name = "seq_project", sequenceName = "SEQ_PROJECT", allocationSize = 1)
 	@Column(name="PRO_ID", nullable = false)
 	private Long proId;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="COM_ID", nullable = false)
 	private Company company;
 	
