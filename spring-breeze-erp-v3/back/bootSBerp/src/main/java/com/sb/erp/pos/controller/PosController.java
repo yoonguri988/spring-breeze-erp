@@ -1,83 +1,120 @@
-package com.sb.erp.controller;
+package com.sb.erp.pos.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.sb.erp.dto.PosDto;
-import com.sb.erp.service.PosService;
+import com.sb.erp.pos.dto.PosDto;
+import com.sb.erp.pos.dto.PosRestDto.PosRequestDto;
+import com.sb.erp.pos.dto.PosRestDto.PosResponseDto;
+import com.sb.erp.pos.service.PosService;
 
-@Controller
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/pos")
+@RequiredArgsConstructor
+@Tag(name = "직급 관리", description = "직급 CRUD, 중복검사 API")
 public class PosController {
 
-	@Autowired
-	PosService posService;
+	private final PosService posService;
 
-	// ─── 목록 조회 ────────────────────────
-	@GetMapping("/pos/list")
-	public String list(Model model) {
-		List<PosDto> posList = posService.selectAll();
-		model.addAttribute("posList", posList);
-		return "pos/list";
+
+	// ─── 전체 목록 ────────────────────────────
+	@Operation(summary = "직급 목록 조회")
+	@GetMapping
+	public ResponseEntity<List<PosResponseDto>> list() {
+		List<PosResponseDto> list = posService.selectAll()
+				.stream()
+				.map(PosResponseDto::new)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(list);
 	}
 
-	// ─── 등록 폼 ──────────────────────────
-	@GetMapping("/pos/add")
-	public String addForm() { return "pos/add"; }
 
-	// ─── 등록 처리 ────────────────────────
-	@PostMapping("/pos/add")
-	public String addProcess(PosDto dto) {
-		posService.insert(dto);
-		return "redirect:/pos/list";
-	}
-
-	// ─── 수정 폼 ──────────────────────────
-	@GetMapping("/pos/edit")
-	public String editForm(@RequestParam int posId, Model model) {
+	// ─── 단건 조회 ────────────────────────────
+	@Operation(summary = "직급 상세 조회")
+	@GetMapping("/{posId}")
+	public ResponseEntity<PosResponseDto> detail(@PathVariable int posId) {
 		PosDto pos = posService.selectOneById(posId);
 		if (pos == null) {
-			return "redirect:/pos/list";
+			return ResponseEntity.notFound().build();
 		}
-		model.addAttribute("pos", pos);
-		return "pos/edit";
+		return ResponseEntity.ok(new PosResponseDto(pos));
 	}
 
-	// ─── 수정 처리 ────────────────────────
-	@PostMapping("/pos/edit")
-	public String editProcess(PosDto dto) {
-		posService.update(dto);
-		return "redirect:/pos/list";
+
+	// ─── 등록 ─────────────────────────────────
+	@Operation(summary = "직급 등록")
+	@PostMapping
+	public ResponseEntity<?> add(@RequestBody PosRequestDto request) {
+		PosDto dto = request.toPosDto();
+		int result = posService.insert(dto);
+		if (result > 0) {
+			// selectKey로 채워진 posId로 재조회 → 완전한 응답 보장
+			PosDto saved = posService.selectOneById(dto.getPosId());
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(new PosResponseDto(saved));
+		}
+		return ResponseEntity.badRequest()
+				.body(Map.of("message", "등록에 실패했습니다."));
 	}
 
-	// ─── 삭제 처리 ────────────────────────
-	@PostMapping("/pos/delete")
-	public String delete(@RequestParam int posId, RedirectAttributes ra) {
+
+	// ─── 수정 ─────────────────────────────────
+	@Operation(summary = "직급 수정")
+	@PutMapping("/{posId}")
+	public ResponseEntity<?> edit(
+			@PathVariable int posId,
+			@RequestBody PosRequestDto request) {
+		PosDto dto = request.toPosDto();
+		dto.setPosId(posId);
+		int result = posService.update(dto);
+		if (result > 0) {
+			PosDto updated = posService.selectOneById(posId);
+			return ResponseEntity.ok(new PosResponseDto(updated));
+		}
+		return ResponseEntity.notFound().build();
+	}
+
+
+	// ─── 삭제 ─────────────────────────────────
+	@Operation(summary = "직급 삭제")
+	@DeleteMapping("/{posId}")
+	public ResponseEntity<Map<String, String>> delete(@PathVariable int posId) {
 		int result = posService.delete(posId);
 		if (result == -1) {
-			ra.addFlashAttribute("errorMsg", "이 직급을 사용중인 사원이 있습니다. 사원의 직급을 먼저 변경한 후 삭제해주세요.");
-		} else if (result == 0) {
-			ra.addFlashAttribute("errorMsg", "삭제할 직급을 찾을 수 없습니다.");
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body(Map.of("message", "이 직급을 사용중인 사원이 있어 삭제할 수 없습니다."));
 		}
-		return "redirect:/pos/list";
+		if (result == 0) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(Map.of("message", "삭제되었습니다."));
 	}
 
-	// ─── 중복 검사 ─────────────────
-	@GetMapping("/pos/checkCode")
-	@ResponseBody
-	public Map<String, Object> checkCode(@RequestParam String posCode,
+
+	// ─── 코드 중복 검사 ───────────────────────
+	@Operation(summary = "직급 코드 중복 검사")
+	@GetMapping("/check-code")
+	public ResponseEntity<Map<String, Boolean>> checkCode(
+			@RequestParam String posCode,
 			@RequestParam(required = false) Integer excludePosId) {
-		Map<String, Object> result = new HashMap<>();
-		result.put("duplicate", posService.isPosCodeDuplicate(posCode, excludePosId));
-		return result;
+		return ResponseEntity.ok(
+				Map.of("duplicate", posService.isPosCodeDuplicate(posCode, excludePosId)));
 	}
 }

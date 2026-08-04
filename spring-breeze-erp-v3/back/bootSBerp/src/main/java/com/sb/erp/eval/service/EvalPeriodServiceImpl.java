@@ -1,4 +1,4 @@
-package com.sb.erp.service;
+package com.sb.erp.eval.service;
 
 import java.util.List;
 import java.util.Map;
@@ -8,11 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.sb.erp.dao.EvalMapper;
-import com.sb.erp.dao.EvalPeriodMapper;
-import com.sb.erp.dto.EvalPeriodDto;
-import com.sb.erp.dto.EvalPeriodSearchDto;
-import com.sb.erp.util.SecurityUtil;
+import com.sb.erp.eval.repository.EvalMapper;
+import com.sb.erp.eval.repository.EvalPeriodMapper;
+import com.sb.erp.eval.dto.EvalPeriodDto;
+import com.sb.erp.eval.dto.EvalPeriodSearchDto;
+import com.sb.erp.util.dto.SecurityUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -156,6 +156,11 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 	@Override
 	public int countReportsByPeriodId(int periodId) {
 		return dao.countReportsByPeriodId(periodId);
+	}
+
+	@Override
+	public int countDistinctTargetsByPeriodId(int periodId) {
+		return evalMapper.countDistinctTargetsByPeriodId(periodId);
 	}
 
 }

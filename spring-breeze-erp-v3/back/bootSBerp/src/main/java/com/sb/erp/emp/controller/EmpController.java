@@ -1,239 +1,233 @@
-package com.sb.erp.controller;
+package com.sb.erp.emp.controller;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.sb.erp.dto.EmpDto;
-import com.sb.erp.dto.EmpSearchDto;
-import com.sb.erp.service.DeptService;
-import com.sb.erp.service.EmpService;
-import com.sb.erp.service.PosService;
-import com.sb.erp.util.PagingUtil;
-import com.sb.erp.util.SecurityUtil;
-import com.sb.erp.dto.EvalReportDto;
-import com.sb.erp.service.EvalReportService;
+import com.sb.erp.emp.dto.EmpDto;
+import com.sb.erp.emp.dto.EmpRestDto.EmpRequestDto;
+import com.sb.erp.emp.dto.EmpRestDto.EmpResponseDto;
+import com.sb.erp.emp.dto.EmpRestDto.PasswordChangeDto;
+import com.sb.erp.emp.dto.EmpSearchDto;
+import com.sb.erp.emp.service.EmpService;
+import com.sb.erp.eval.service.EvalReportService;
+import com.sb.erp.eval.dto.EvalReportDto;
+import com.sb.erp.eval.dto.EvalRestDto.ReportResponseDto;
+import com.sb.erp.util.dto.PagingUtil;
+import com.sb.erp.util.dto.SecurityUtil;
 
-@Controller
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/emp")
+@RequiredArgsConstructor
+@Tag(name = "사원 관리", description = "사원 CRUD, 비밀번호, 중복검사 API")
 public class EmpController {
 
-	@Autowired EmpService empService;
-	@Autowired PosService posService;
-	@Autowired DeptService deptService;
-	@Autowired PasswordEncoder passEncoder;
-	@Autowired EvalReportService evalReportService;
-	
-	
-	// ─── 목록 조회 (검색 + 페이징) ────────────────────
-	@GetMapping("/emp/list")
-	public String list(EmpSearchDto search, 
-			@RequestParam(value = "searched", required = false) String searched,
-			Model model) {
-		
-		boolean hasFilter = search.getDeptId() != null || search.getPosId() != null
-				|| (search.getEmpStatus() != null && !search.getEmpStatus().isEmpty())
-				|| (search.getKeyword() != null && !search.getKeyword().trim().isEmpty());
+	private final EmpService empService;
+	private final EvalReportService evalReportService;
 
-		if (searched != null && hasFilter) {
-			// 현재 페이지 보정
-			int currentPage = (search.getPage() == null || search.getPage() < 1) ? 1 : search.getPage();
 
-			// 전체 건수 → 페이징 계산
-			int total = empService.selectCnt(search);
-			PagingUtil paging = new PagingUtil(total, currentPage);
+	// ─── 목록 조회 (검색 + 페이징) ────────────────────────
+	@Operation(summary = "사원 목록 조회", description = "검색 조건과 페이징을 적용한 사원 목록")
+	@GetMapping
+	public ResponseEntity<Map<String, Object>> list(EmpSearchDto search) {
 
-			// 계산된 페이징 정보를 search에 세팅 후 조회
-			search.setPstartno(paging.getPstartno());
-			search.setOnepagelist(paging.getOnepagelist());
-			List<EmpDto> empList = empService.search(search);
+		int currentPage = (search.getPage() == null || search.getPage() < 1)
+				? 1 : search.getPage();
 
-			model.addAttribute("empList", empList);
-			model.addAttribute("paging", paging);
-		}
+		int total = empService.selectCnt(search);
+		PagingUtil paging = new PagingUtil(total, currentPage);
 
-		model.addAttribute("search", search);
-		model.addAttribute("posList", posService.selectAll());
-		model.addAttribute("deptList", deptService.selectAll());
-		model.addAttribute("loginEmpId", SecurityUtil.getCurrentEmpId());
-		model.addAttribute("isAdmin", SecurityUtil.isAdmin());
-		return "emp/list";
-	}
-	
-	
-	// ─── 상세 조회 ──────────────────────────────────
-	// ─── 상세 조회 ──────────────────────────────────
-	@GetMapping("/emp/detail")
-	public String detail(@RequestParam int empId, Model model) {
-	    int loginEmpId = SecurityUtil.getCurrentEmpId();
-	    boolean isAdmin = SecurityUtil.isAdmin();
-	    
-	    // 본인 혹은 관리자 여부 확인
-	    if (empId != loginEmpId && !isAdmin) {
-	        return "redirect:/emp/detail?empId=" + loginEmpId;
-	    }
-	    
-	    EmpDto emp = empService.selectByEmpId(empId);
-	    model.addAttribute("emp", emp);
+		search.setPstartno(paging.getPstartno());
+		search.setOnepagelist(paging.getOnepagelist());
 
-	    // 최근 AI 리포트 임베드 (관리자/본인 모두 노출)
-	    // - 리포트가 아직 없는 사원이면 null → 템플릿에서 th:if로 카드 자체를 안 그림
-	    EvalReportDto latestReport = evalReportService.selectLatestByEmpId(empId);
-	    model.addAttribute("latestReport", latestReport);
+		List<EmpResponseDto> list = empService.search(search)
+				.stream()
+				.map(EmpResponseDto::new)
+				.collect(Collectors.toList());
 
-	    // 본인 여부 판별용 loginEmpId 전달
-	    model.addAttribute("loginEmpId", loginEmpId);
-	    model.addAttribute("isAdmin", isAdmin);
-	    return "emp/detail";
-	}
-	
-	
-	// ─── 사원 등록 ──────────────────────────────────
-	@GetMapping("/emp/add")
-	public String addForm(Model model) {
-		model.addAttribute("posList", posService.selectAll());
-		model.addAttribute("deptList", deptService.selectAll());
-		return "emp/add";
+		return ResponseEntity.ok(Map.of(
+				"list", list,
+				"paging", paging
+		));
 	}
 
-	@PostMapping("/emp/add")
-	public String addProcess(EmpDto dto) {
-		empService.insert(dto);
-		return "redirect:/emp/list";
-	}
-	
-	
-	// ─── 사원 정보 수정 ─────────────────────────────
-	@GetMapping("/emp/edit")
-	public String editForm(@RequestParam int empId, Model model) {
+
+	// ─── 상세 조회 ────────────────────────────────────
+	@Operation(summary = "사원 상세 조회")
+	@GetMapping("/{empId}")
+	public ResponseEntity<Map<String, Object>> detail(
+			@Parameter(description = "사원 ID") @PathVariable int empId) {
+
 		int loginEmpId = SecurityUtil.getCurrentEmpId();
 		boolean isAdmin = SecurityUtil.isAdmin();
 
-		// 본인이 아니고 관리자도 아니면 본인 수정 화면으로
+		// 본인 또는 관리자만 조회 가능
 		if (empId != loginEmpId && !isAdmin) {
-			return "redirect:/emp/edit?empId=" + loginEmpId;
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
-		
-		model.addAttribute("emp", empService.selectByEmpId(empId));
-		model.addAttribute("posList", posService.selectAll());
-		model.addAttribute("deptList", deptService.selectAll());
-		model.addAttribute("isAdmin", isAdmin);
-		return "emp/edit";
+
+		EmpDto emp = empService.selectByEmpId(empId);
+		if (emp == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		EvalReportDto latestReport = evalReportService.selectLatestByEmpId(empId);
+
+		// HashMap 사용: null 허용 + 키 생략 가능
+		// Map.of()는 null 값 → NPE, 빈 문자열 → 프론트에서 타입 혼동
+		Map<String, Object> result = new HashMap<>();
+		result.put("emp", new EmpResponseDto(emp));
+		result.put("isAdmin", isAdmin);
+		result.put("isSelf", empId == loginEmpId);
+		if (latestReport != null) {
+			result.put("latestReport", new ReportResponseDto(latestReport));
+		}
+
+		return ResponseEntity.ok(result);
 	}
 
-	@PostMapping("/emp/edit")
-	public String editProcess(EmpDto dto) {
+
+	// ─── 사원 등록 ────────────────────────────────────
+	@Operation(summary = "사원 등록")
+	@PostMapping
+	public ResponseEntity<?> add(@RequestBody EmpRequestDto request) {
+
+		EmpDto dto = request.toEmpDto();
+		int result = empService.insert(dto);
+
+		if (result > 0) {
+			EmpDto saved = empService.selectByEmpId(dto.getEmpId());
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(new EmpResponseDto(saved));
+		}
+		return ResponseEntity.badRequest()
+				.body(Map.of("message", "등록에 실패했습니다."));
+	}
+
+
+	// ─── 사원 정보 수정 ───────────────────────────────
+	@Operation(summary = "사원 정보 수정")
+	@PutMapping("/{empId}")
+	public ResponseEntity<?> edit(
+			@PathVariable int empId,
+			@RequestBody EmpRequestDto request) {
+
 		int loginEmpId = SecurityUtil.getCurrentEmpId();
 		boolean isAdmin = SecurityUtil.isAdmin();
 
-		// 타인 정보 수정시도 차단
-		if (dto.getEmpId() != loginEmpId && !isAdmin) {
-			return "redirect:/emp/detail?empId=" + loginEmpId;
+		if (empId != loginEmpId && !isAdmin) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "수정 권한이 없습니다."));
 		}
-		
-		// 본인 수정 시 관리자만 수정 가능한 필드는 무시 (덮어쓰기 방지)
+
+		EmpDto dto = request.toEmpDto();
+		dto.setEmpId(empId);
+
+		// 일반 사원이 관리자 전용 필드를 변경하지 못하도록 보정
 		if (!isAdmin) {
-			// 현재 저장된 값으로 보정
-			EmpDto current = empService.selectByEmpId(dto.getEmpId());
+			EmpDto current = empService.selectByEmpId(empId);
 			dto.setEmpName(current.getEmpName());
 			dto.setDeptId(current.getDeptId());
 			dto.setPosId(current.getPosId());
 			dto.setEmpStatus(current.getEmpStatus());
 		}
-		
+
 		empService.update(dto);
-		return "redirect:/emp/detail?empId=" + dto.getEmpId();
-	}
-	
-	
-	// ─── 비밀번호 초기화 (관리자) ───────────────────
-	@GetMapping("/emp/resetPass")
-	public String resetPassForm(@RequestParam int empId, Model model) {
-		model.addAttribute("emp", empService.selectByEmpId(empId));
-		return "emp/resetPass";
+		EmpDto updated = empService.selectByEmpId(empId);
+		return ResponseEntity.ok(new EmpResponseDto(updated));
 	}
 
-	@PostMapping("/emp/resetPass")
-	public String resetPassProcess(@RequestParam int empId) {
-		empService.resetPassByEmpNo(empId);
-		return "redirect:/emp/detail?empId=" + empId;
-	}
-	
-	
-	
-	// ─── 비밀번호 변경 (본인) ────────────────────────
-	@GetMapping("/emp/editPass")
-	public String editPassForm(@RequestParam int empId, Model model) {
+
+	// ─── 비밀번호 변경 (본인) ─────────────────────────
+	@Operation(summary = "비밀번호 변경 (본인)")
+	@PutMapping("/{empId}/password")
+	public ResponseEntity<Map<String, String>> editPassword(
+			@PathVariable int empId,
+			@RequestBody PasswordChangeDto request) {
+
 		int loginEmpId = SecurityUtil.getCurrentEmpId();
-
-	    // 본인만 접근 가능 (관리자는 resetPass로)
-	    if (empId != loginEmpId) {
-	        return "redirect:/emp/detail?empId=" + loginEmpId;
-	    }
-	    
-		model.addAttribute("emp", empService.selectByEmpId(empId));
-		return "emp/editPass";
-	}
-
-	@PostMapping("/emp/editPass")
-	public String editPassProcess(@RequestParam int empId, 
-			@RequestParam String currentPass,
-			@RequestParam String editPass, 
-			@RequestParam String checkPass) {
-		
-		int loginEmpId = SecurityUtil.getCurrentEmpId();
-	   
-		// 본인만 (URL 조작 방어)
-	    if (empId != loginEmpId) {
-	        return "redirect:/emp/detail?empId=" + loginEmpId;
-	    }
-		
-		// 새 비밀번호 일치 확인
-		if (!editPass.equals(checkPass)) {
-			return "redirect:/emp/editPass?empId=" + empId;
+		if (empId != loginEmpId) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "본인만 변경할 수 있습니다."));
 		}
 
-		// 현재 비번 검증 + 새 비번 저장 (Service가 통합 처리)
-		int result = empService.changePassword(empId, currentPass, editPass);
-		if (result != 1) {
-			return "redirect:/emp/editPass?empId=" + empId;
+		// 새 비밀번호 확인 불일치
+		if (!request.getNewPass().equals(request.getCheckPass())) {
+			return ResponseEntity.badRequest()
+					.body(Map.of("message", "새 비밀번호가 일치하지 않습니다."));
 		}
 
-		return "redirect:/emp/detail?empId=" + empId;
-	}
-	
-	
-	
-	// ─── 중복 검사 ────────────────────────────
-	@GetMapping("/emp/checkEmail")
-	@ResponseBody
-	public Map<String, Object> checkEmail(@RequestParam String empEmail) {
-		Map<String, Object> result = new HashMap<>();
-		result.put("duplicate", empService.isEmailDuplicate(empEmail));
-		return result;
+		int result = empService.changePassword(empId, request.getCurrentPass(), request.getNewPass());
+
+		if (result == -1) {
+			return ResponseEntity.notFound().build();
+		}
+		if (result == 0) {
+			return ResponseEntity.badRequest()
+					.body(Map.of("message", "현재 비밀번호가 일치하지 않습니다."));
+		}
+		return ResponseEntity.ok(Map.of("message", "비밀번호가 변경되었습니다."));
 	}
 
-	@GetMapping("/emp/checkMobile")
-	@ResponseBody
-	public Map<String, Object> checkMobile(@RequestParam String empMobile) {
-		Map<String, Object> result = new HashMap<>();
-		result.put("duplicate", empService.isMobileDuplicate(empMobile));
-		return result;
+
+	// ─── 비밀번호 초기화 (관리자) ─────────────────────
+	@Operation(summary = "비밀번호 초기화 (관리자)")
+	@PutMapping("/{empId}/reset-password")
+	public ResponseEntity<Map<String, String>> resetPassword(@PathVariable int empId) {
+
+		if (!SecurityUtil.isAdmin()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "관리자만 초기화할 수 있습니다."));
+		}
+
+		int result = empService.resetPassByEmpNo(empId);
+		if (result > 0) {
+			return ResponseEntity.ok(Map.of("message", "비밀번호가 사번으로 초기화되었습니다."));
+		}
+		return ResponseEntity.notFound().build();
 	}
 
-	@GetMapping("/emp/checkEmpNo")
-	@ResponseBody
-	public Map<String, Object> checkEmpNo(@RequestParam String empNo) {
-		Map<String, Object> result = new HashMap<>();
-		result.put("duplicate", empService.isEmpNoDuplicate(empNo));
-		return result;
+
+	// ─── 중복 검사 ────────────────────────────────────
+	@Operation(summary = "이메일 중복 검사")
+	@GetMapping("/check-email")
+	public ResponseEntity<Map<String, Boolean>> checkEmail(
+			@RequestParam String empEmail) {
+		return ResponseEntity.ok(
+				Map.of("duplicate", empService.isEmailDuplicate(empEmail)));
+	}
+
+	@Operation(summary = "연락처 중복 검사")
+	@GetMapping("/check-mobile")
+	public ResponseEntity<Map<String, Boolean>> checkMobile(
+			@RequestParam String empMobile) {
+		return ResponseEntity.ok(
+				Map.of("duplicate", empService.isMobileDuplicate(empMobile)));
+	}
+
+	@Operation(summary = "사번 중복 검사")
+	@GetMapping("/check-empno")
+	public ResponseEntity<Map<String, Boolean>> checkEmpNo(
+			@RequestParam String empNo) {
+		return ResponseEntity.ok(
+				Map.of("duplicate", empService.isEmpNoDuplicate(empNo)));
 	}
 }

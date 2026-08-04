@@ -1,162 +1,140 @@
-package com.sb.erp.controller;
+package com.sb.erp.eval.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.sb.erp.dto.EvalPeriodDto;
-import com.sb.erp.dto.EvalReportDto;
-import com.sb.erp.dto.EvalReportSearchDto;
-import com.sb.erp.service.DeptService;
-import com.sb.erp.service.EvalPeriodService;
-import com.sb.erp.service.EvalReportService;
-import com.sb.erp.util.PagingUtil;
-import com.sb.erp.util.SecurityUtil;
+import com.sb.erp.eval.dto.EvalPeriodDto;
+import com.sb.erp.eval.dto.EvalReportDto;
+import com.sb.erp.eval.dto.EvalReportSearchDto;
+import com.sb.erp.eval.dto.EvalRestDto.PeriodResponseDto;
+import com.sb.erp.eval.dto.EvalRestDto.ReportResponseDto;
+import com.sb.erp.eval.service.EvalPeriodService;
+import com.sb.erp.eval.service.EvalReportService;
+import com.sb.erp.util.dto.PagingUtil;
+import com.sb.erp.util.dto.SecurityUtil;
 
-@Controller
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/eval-report")
+@RequiredArgsConstructor
+@Tag(name = "AI 인사평가 리포트", description = "리포트 조회, 생성, 재생성 API")
 public class EvalReportController {
-	@Autowired EvalReportService evalReportService;
-	@Autowired EvalPeriodService evalPeriodService;
-	@Autowired DeptService deptService;
 
-	// ─── 회차별 리포트 목록 (관리자용, 검색 + 페이징) ─────────────
-	@GetMapping("/eval/report/list")
-	public String list(EvalReportSearchDto search, Model model, RedirectAttributes ra) {
+	private final EvalReportService evalReportService;
+	private final EvalPeriodService evalPeriodService;
 
-	    // periodId 미지정 → 회차 관리 화면으로 리다이렉트
-	    if (search.getPeriodId() == null) {
-	        ra.addFlashAttribute("infoMsg", 
-	            "회차를 먼저 선택하세요. 마감된 회차의 상세 화면에서 'AI 리포트 보기'로 진입할 수 있습니다.");
-	        return "redirect:/eval/period/list";
-	    }
 
-	    EvalPeriodDto period = evalPeriodService.selectByPeriodId(search.getPeriodId());
-	    if (period == null) {
-	        ra.addFlashAttribute("errorMsg", "존재하지 않는 회차입니다.");
-	        return "redirect:/eval/period/list";
-	    }
+	// ─── 회차별 리포트 목록 (검색 + 페이징) ─────────
+	@Operation(summary = "회차별 리포트 목록", description = "periodId 필수. 검색, 부서필터, 페이징 지원")
+	@GetMapping
+	public ResponseEntity<?> list(EvalReportSearchDto search) {
 
-	    // CLOSED/REPORTED 상태만 리포트 조회 가능
-	    String status = period.getPeriodStatus();
-	    if (!"CLOSED".equals(status) && !"REPORTED".equals(status)) {
-	        ra.addFlashAttribute("errorMsg", "마감(CLOSED) 이상 상태의 회차만 리포트를 조회할 수 있습니다.");
-	        return "redirect:/eval/period/detail?periodId=" + search.getPeriodId();
-	    }
+		if (search.getPeriodId() == null) {
+			return ResponseEntity.badRequest()
+					.body(Map.of("message", "periodId는 필수입니다."));
+		}
 
-	    // 페이징 계산 (12개씩)
-	    int currentPage = (search.getPage() == null || search.getPage() < 1) ? 1 : search.getPage();
-	    int total = evalReportService.countByPeriodSearch(search);
-	    PagingUtil paging = new PagingUtil(total, currentPage, 12, 10);
+		EvalPeriodDto period = evalPeriodService.selectByPeriodId(search.getPeriodId());
+		if (period == null) {
+			return ResponseEntity.notFound().build();
+		}
 
-	    // 페이징 값 세팅 후 조회
-	    search.setPstartno(paging.getPstartno());
-	    search.setOnepagelist(paging.getOnepagelist());
-	    List<EvalReportDto> reports = evalReportService.searchByPeriod(search);
+		String status = period.getPeriodStatus();
+		if (!"CLOSED".equals(status) && !"REPORTED".equals(status)) {
+			return ResponseEntity.badRequest()
+					.body(Map.of("message", "마감(CLOSED) 이상 상태의 회차만 리포트를 조회할 수 있습니다."));
+		}
 
-	    int totalEvals = evalPeriodService.countEvalsByPeriodId(search.getPeriodId());
+		int currentPage = (search.getPage() == null || search.getPage() < 1) ? 1 : search.getPage();
+		int total = evalReportService.countByPeriodSearch(search);
+		PagingUtil paging = new PagingUtil(total, currentPage, 12, 10);
 
-	    model.addAttribute("period", period);
-	    model.addAttribute("reports", reports);
-	    model.addAttribute("reportCount", total); // 필터 후 총 건수
-	    model.addAttribute("totalEvals", totalEvals);
-	    model.addAttribute("paging", paging);
-	    model.addAttribute("search", search);
-	    model.addAttribute("deptList", deptService.selectAll());
-	    return "eval/report/list";
+		search.setPstartno(paging.getPstartno());
+		search.setOnepagelist(paging.getOnepagelist());
+
+		List<ReportResponseDto> reports = evalReportService.searchByPeriod(search)
+				.stream()
+				.map(ReportResponseDto::new)
+				.collect(Collectors.toList());
+
+		return ResponseEntity.ok(Map.of(
+				"period", new PeriodResponseDto(period),
+				"reports", reports,
+				"reportCount", total,
+				"paging", paging
+		));
 	}
 
 
-	// ─── 리포트 상세 (관리자/본인) ────────────────
-	@GetMapping("/eval/report/detail")
-	public String detail(@RequestParam int reportId,
-	                     Model model, RedirectAttributes ra) {
+	// ─── 리포트 상세 ─────────────────────────────
+	@Operation(summary = "리포트 상세 조회")
+	@GetMapping("/{reportId}")
+	public ResponseEntity<?> detail(@PathVariable int reportId) {
 
 		EvalReportDto report = evalReportService.selectByReportId(reportId);
 		if (report == null) {
-			ra.addFlashAttribute("errorMsg", "존재하지 않는 리포트입니다.");
-			return "redirect:/eval/report/list";
+			return ResponseEntity.notFound().build();
 		}
 
-		// 관리자 또는 본인만 조회 가능
 		int loginEmpId = SecurityUtil.getCurrentEmpId();
 		if (report.getEmpId() != loginEmpId && !SecurityUtil.isAdmin()) {
-			ra.addFlashAttribute("errorMsg", "본인 리포트만 조회할 수 있습니다.");
-			return "redirect:/eval/report/my";
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "본인 리포트만 조회할 수 있습니다."));
 		}
 
-		model.addAttribute("report", report);
-		return "eval/report/detail";
+		return ResponseEntity.ok(new ReportResponseDto(report));
 	}
 
 
-	// ─── 본인 리포트 이력 ─────────────────────────
-	@GetMapping("/eval/report/my")
-	public String my(Model model) {
-		List<EvalReportDto> reports = evalReportService.selectMyAll();
-		model.addAttribute("reports", reports);
-		return "eval/report/my";
+	// ─── 본인 리포트 이력 ────────────────────────
+	@Operation(summary = "본인 리포트 이력")
+	@GetMapping("/my")
+	public ResponseEntity<List<ReportResponseDto>> my() {
+		List<ReportResponseDto> reports = evalReportService.selectMyAll()
+				.stream()
+				.map(ReportResponseDto::new)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(reports);
 	}
 
 
-	// ─── 관리자 수동 트리거: 회차 전체 리포트 재생성 ───
-	@PostMapping("/eval/report/generate")
-	public String generate(@RequestParam int periodId, RedirectAttributes ra) {
-	    // 배치 흐름을 통해 실행 (REPORTED 상태에서도 진입 가능)
-	    // - 웹 스레드 blocking 방지, 폴링 UI로 진행률 표시
-	    // - 상태 전환: REPORTED → REPORTING → REPORTED (또는 REPORTING_FAILED)
-	    int result = evalPeriodService.reportPeriod(periodId);
-	    
-	    if (result == -1) {
-	        ra.addFlashAttribute("errorMsg", "존재하지 않는 회차입니다.");
-	        return "redirect:/eval/report/list";
-	    }
-	    if (result == -2) {
-	        ra.addFlashAttribute("errorMsg", "현재 상태에서는 리포트를 재생성할 수 없습니다. "
-	                + "평가 진행 중이거나 이미 리포트 생성이 진행 중인 회차는 재생성 불가입니다.");
-	        return "redirect:/eval/report/list?periodId=" + periodId;
-	    }
-	    
-	    ra.addFlashAttribute("successMsg", "리포트 재생성을 시작합니다. 진행률은 회차 상세 페이지에서 확인하실 수 있습니다.");
-	    // 폴링 UI가 있는 회차 상세로 리다이렉트
-	    return "redirect:/eval/period/detail?periodId=" + periodId;
+	// ─── 회차 전체 리포트 생성/재생성 ────────────────
+	@Operation(summary = "회차 전체 리포트 생성", description = "AI 배치 생성 시작")
+	@PostMapping("/generate")
+	public ResponseEntity<Map<String, String>> generate(@RequestParam int periodId) {
+		int result = evalPeriodService.reportPeriod(periodId);
+		if (result == -1) return ResponseEntity.notFound().build();
+		if (result == -2) return ResponseEntity.badRequest()
+				.body(Map.of("message", "현재 상태에서는 리포트를 생성/재생성할 수 없습니다."));
+		return ResponseEntity.ok(Map.of("message", "리포트 생성을 시작합니다."));
 	}
 
 
-	// ─── 관리자 수동 트리거: 특정 사원 리포트 개별 재생성 ───
-	@PostMapping("/eval/report/regenerate")
-	public String regenerate(@RequestParam int periodId,
-	                         @RequestParam int empId,
-	                         RedirectAttributes ra) {
+	// ─── 특정 사원 리포트 개별 재생성 ────────────────
+	@Operation(summary = "특정 사원 리포트 재생성")
+	@PostMapping("/regenerate")
+	public ResponseEntity<Map<String, String>> regenerate(
+			@RequestParam int periodId,
+			@RequestParam int empId) {
+
 		int result = evalReportService.regenerateReport(periodId, empId);
-		return handleGenerateResult(result, periodId, ra);
-	}
-
-
-	// ─── 결과 처리 헬퍼 ─────────────────────────
-	private String handleGenerateResult(int result, int periodId, RedirectAttributes ra) {
-		if (result == 1) {
-			ra.addFlashAttribute("successMsg", "AI 리포트를 생성했습니다.");
-			return "redirect:/eval/report/list?periodId=" + periodId;
-		}
-		if (result == -1) {
-			ra.addFlashAttribute("errorMsg", "존재하지 않는 회차입니다.");
-			return "redirect:/eval/report/list";
-		}
-		if (result == -2) {
-			ra.addFlashAttribute("errorMsg", "마감(CLOSED) 이상 상태의 회차에서만 리포트를 생성할 수 있습니다.");
-			return "redirect:/eval/report/list?periodId=" + periodId;
-		}
-		if (result == -3) {
-			ra.addFlashAttribute("errorMsg", "제출된 평가가 없어 리포트를 생성할 수 없습니다.");
-			return "redirect:/eval/report/list?periodId=" + periodId;
-		}
-		ra.addFlashAttribute("errorMsg", "리포트 생성 중 오류가 발생했습니다.");
-		return "redirect:/eval/report/list?periodId=" + periodId;
+		if (result == 1)  return ResponseEntity.ok(Map.of("message", "리포트를 재생성했습니다."));
+		if (result == -1) return ResponseEntity.notFound().build();
+		if (result == -2) return ResponseEntity.badRequest().body(Map.of("message", "마감 이상 상태에서만 가능합니다."));
+		if (result == -3) return ResponseEntity.badRequest().body(Map.of("message", "제출된 평가가 없습니다."));
+		return ResponseEntity.internalServerError().body(Map.of("message", "리포트 생성 중 오류가 발생했습니다."));
 	}
 }
