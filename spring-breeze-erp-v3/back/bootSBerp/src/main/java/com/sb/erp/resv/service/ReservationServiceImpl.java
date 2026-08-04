@@ -1,16 +1,17 @@
-package com.sb.erp.service;
+package com.sb.erp.resv.service;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sb.erp.dao.ReservationMapper;
-import com.sb.erp.dao.ResourceMapper;
-import com.sb.erp.dto.ResDto;
-import com.sb.erp.dto.ResvDto;
-import com.sb.erp.dto.ResvSearchDto;
-import com.sb.erp.dto.StatsResvDto;
+import com.sb.erp.res.dto.response.ResResponse;
+import com.sb.erp.res.repository.ResourceMapper;
+import com.sb.erp.resv.dto.reponse.ResvResponse;
+import com.sb.erp.resv.dto.reponse.StatsResvResponse;
+import com.sb.erp.resv.dto.request.ResvRequest;
+import com.sb.erp.resv.dto.request.ResvSearchRequest;
+import com.sb.erp.resv.repository.ReservationMapper;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -18,25 +19,25 @@ public class ReservationServiceImpl implements ReservationService {
     @Autowired private ResourceMapper resDao;
 
     @Override
-    public List<ResvDto> getResvList(ResvSearchDto search) {
+    public List<ResvResponse> getResvList(ResvSearchRequest search) {
         search.setPstartno((search.getPstartno()-1)*search.getOnepagelist());
-        List<ResvDto> list = dao.selectAll(search);
+        List<ResvResponse> list = dao.selectAll(search);
         return list;
     }
 
     @Override
-    public int getResvCount(ResvSearchDto search) {
+    public int getResvCount(ResvSearchRequest search) {
         return dao.selectCount(search);
     }
 
     @Override
-    public ResvDto getResvDetail(int revId) {
+    public ResvResponse getResvDetail(int revId) {
         return dao.selectOneById(revId);
     }
 
     @Override
-    public int insert(ResvDto dto) {
-    	ResDto res = resDao.selectResourceDetail(dto.getResId());
+    public int insert(ResvRequest dto) {
+    	ResResponse res = resDao.selectResourceDetail(dto.getResId());
         if (res == null || !res.getComId().equals(dto.getComId())) {
             throw new IllegalArgumentException("본인 회사의 자원만 예약할 수 있습니다.");
         }
@@ -44,14 +45,14 @@ public class ReservationServiceImpl implements ReservationService {
             throw new IllegalStateException("현재 사용할 수 없는 자원입니다.");
         }
         
-        ResvSearchDto search = new ResvSearchDto();
+        ResvSearchRequest search = new ResvSearchRequest();
         search.setResId(dto.getResId());
         search.setStartDt(dto.getStartDt());
         search.setEndDt(dto.getEndDt());
         
         // 같은 기간에 이미 예약된 수량 합계 조회
-        int reservedQty = dao.selectReservedQuantity(search);
-        int available = res.getQuantity() - reservedQty;
+        long reservedQty = dao.selectReservedQuantity(search);
+        long available = res.getQuantity() - reservedQty;
 
         if (dto.getQuantity() > available) {
             throw new IllegalStateException(
@@ -62,7 +63,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public int update(ResvDto ResvDto) {
+    public int update(ResvRequest ResvDto) {
     	return dao.update(ResvDto);
     }
 
@@ -72,7 +73,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public StatsResvDto countByStats(ResvSearchDto search) {
+    public StatsResvResponse countByStats(ResvSearchRequest search) {
         return dao.countByStats(search);
     }
     
@@ -82,17 +83,17 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
 	@Override
-	public int updateApprove(ResvDto resvDto) {
+	public int updateApprove(ResvRequest resvDto) {
 		return dao.updateApprove(resvDto);
 	}
 
 	@Override
-	public int updateReject(ResvDto resvDto) {
+	public int updateReject(ResvRequest resvDto) {
 		return dao.updateReject(resvDto);
 	}
 
 	@Override
-	public int getReservedQuantity(ResvSearchDto search) {
+	public int getReservedQuantity(ResvSearchRequest search) {
 		return dao.selectReservedQuantity(search);
 	}
 }

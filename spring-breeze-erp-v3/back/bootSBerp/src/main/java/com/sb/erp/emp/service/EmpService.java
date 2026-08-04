@@ -1,10 +1,10 @@
-package com.sb.erp.service;
+package com.sb.erp.emp.service;
 
 import java.util.List;
 
-import com.sb.erp.dto.EmpAuthDto;
-import com.sb.erp.dto.EmpDto;
-import com.sb.erp.dto.EmpSearchDto;
+import com.sb.erp.emp.dto.EmpAuthDto;
+import com.sb.erp.emp.dto.EmpDto;
+import com.sb.erp.emp.dto.EmpSearchDto;
 
 public interface EmpService {
 	

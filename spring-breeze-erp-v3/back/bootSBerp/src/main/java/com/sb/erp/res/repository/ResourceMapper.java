@@ -1,31 +1,31 @@
-package com.sb.erp.dao;
+package com.sb.erp.res.repository;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.sb.erp.dto.ResSearchDto;
-import com.sb.erp.dto.ResDto;
+import com.sb.erp.res.dto.request.ResRequest;
+import com.sb.erp.res.dto.request.ResSearchRequest;
+import com.sb.erp.res.dto.response.ResResponse;
 
 @Mapper
 public interface ResourceMapper {
 
-    List<ResDto> selectResourceList(ResSearchDto search);
+    List<ResResponse> selectResourceList(ResSearchRequest search);
 
-    int selectResourceCount(ResSearchDto search);
+    int selectResourceCount(ResSearchRequest search);
 
-    ResDto selectResourceDetail(int resId);
+    ResResponse selectResourceDetail(int resId);
 
-    int insertResource(ResDto resourceDto);
+    int insertResource(ResRequest resourceDto);
 
-    int updateResource(ResDto resourceDto);
+    int updateResource(ResRequest resourceDto);
 
     int deleteResource(int resId);
 
     // 자원코드 중복 체크
-	ResDto selectByResCode(ResDto resDto);
+    ResResponse selectByResCode(ResRequest resDto);
 
 	// 예약 할 수 있는 회사의 자원 정보
-	List<ResDto> selectResListForResv(ResSearchDto search);
+	List<ResResponse> selectResListForResv(ResSearchRequest search);
 }

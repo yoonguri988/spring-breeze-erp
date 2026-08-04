@@ -1,4 +1,4 @@
-package com.sb.erp.api;
+package com.sb.erp.global.integration;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.sb.erp.dao.ReservationMapper;
-import com.sb.erp.dto.ResvAlertDto;
+import com.sb.erp.api.dto.request.ResvAlertRequest;
+import com.sb.erp.api.dto.response.ResvAlertResponse;
+import com.sb.erp.resv.repository.ReservationMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,7 +68,7 @@ public class ApiScheduled {
 	// 운영 시 트래픽/AI 호출 비용을 고려해 주기 조정 가능 (여기서는 1분마다)
 //	@Scheduled(cron = "0 */1 * * * *")
 	public void noShowAutoAlert() {
-		List<ResvAlertDto> targets = resDao.selectNoShowTargets();
+		List<ResvAlertRequest> targets = resDao.selectNoShowTargets();
  
 		if (targets.isEmpty()) {
 			return;
@@ -77,7 +78,7 @@ public class ApiScheduled {
  
 		int success = 0, fail = 0;
  
-		for (ResvAlertDto dto : targets) {
+		for (ResvAlertRequest dto : targets) {
 			try {
 				String message = buildAlertMessage(dto);
 				apiCoolSms.sendMessage(dto.getEmpMobile(), message);
@@ -99,7 +100,7 @@ public class ApiScheduled {
 	/**
 	 * ChatGPT에게 넘길 프롬프트를 구성하고, 실패 시를 대비한 fallback 문구도 함께 만든다.
 	 */
-	private String buildAlertMessage(ResvAlertDto dto) {
+	private String buildAlertMessage(ResvAlertRequest dto) {
 		boolean isRoom = "ROOM".equals(dto.getResType());
  
 		String systemPrompt =

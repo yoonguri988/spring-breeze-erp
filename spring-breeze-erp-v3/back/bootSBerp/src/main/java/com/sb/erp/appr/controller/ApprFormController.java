@@ -20,7 +20,7 @@ import com.sb.erp.appr.dto.ApprFormDto;
 import com.sb.erp.appr.dto.ApprFormSearchDto;
 import com.sb.erp.appr.service.ApprFormService;
 import com.sb.erp.com.dto.CompanyDto;
-import com.sb.erp.com.service.CompanyService;
+import com.sb.erp.com.service.CompanyService_JPA;
 import com.sb.erp.global.integration.OpenAiGpt;
 import com.sb.erp.util.dto.PagingUtil;
 
@@ -28,7 +28,7 @@ import com.sb.erp.util.dto.PagingUtil;
 @RequestMapping("/appr")
 public class ApprFormController { 
 	@Autowired ApprFormService appr;
-	@Autowired CompanyService_v2 com;
+	@Autowired CompanyService com;
 	@Autowired OpenAiGpt gpt;
 	
 	// 회사 검색 기능

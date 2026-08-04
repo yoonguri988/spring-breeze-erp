@@ -1,4 +1,4 @@
-package com.sb.erp.api;
+package com.sb.erp.global.integration;
 
 import java.util.ArrayList;
 import java.util.HashMap;

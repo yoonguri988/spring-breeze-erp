@@ -1,13 +1,11 @@
 package com.sb.erp.dept.controller;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sb.erp.com.service.CompanyService;
-import com.sb.erp.dept.dto.DeptDto.DeptRequestDto;
-import com.sb.erp.dept.dto.DeptDto.DeptResponseDto;
 import com.sb.erp.dept.service.DeptService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,8 +17,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @CrossOrigin(origins="*")
 public class DeptController {
-	private final DeptService service;
-	private final CompanyService comService;
+	@Autowired DeptService service;
+	@Autowired CompanyService comService;
 	
 	// 부서 목록 GET /api/dept/list
 	

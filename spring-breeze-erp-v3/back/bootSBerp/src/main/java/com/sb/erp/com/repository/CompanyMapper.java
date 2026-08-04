@@ -5,30 +5,31 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.com.dto.CompanyDto.CompanyRequestDto;
-//import com.sb.erp.dto.ComSearchDto;
-//import com.sb.erp.dto.CompanyDto;
-//import com.sb.erp.dto.StatsComDto;
+import com.sb.erp.com.dto.request.ComRequest;
+import com.sb.erp.com.dto.request.CompanySearchRequest;
+import com.sb.erp.com.dto.response.ComResponse;
+import com.sb.erp.com.dto.response.StatsComResponse;
 
 @Mapper
 public interface CompanyMapper {
-//	public List<CompanyDto> selectAll(ComSearchDto search);
+	public List<ComResponse> selectAll(CompanySearchRequest search);
 
-	public int insert(CompanyRequestDto dto);
-//	public CompanyDto selectByBizNo(String bizNo);
-//
-//	public CompanyDto selectOneById(int comId);
-//
-//	public int update(CompanyDto dto);
-//
-//	public int delete(int comId);
-//
-//	public List<CompanyDto> selectSuggest(@Param("keyword") String keyword);
-//
-//	public int listTotal(ComSearchDto search);
-//
-//	public StatsComDto selectStats();
-//
-//	public CompanyDto selectOneByEmpId(int empId);
+	public int insert(ComRequest dto)
+	;
+	public ComResponse selectByBizNo(String bizNo);
+
+	public ComResponse selectOneById(long comId);
+
+	public int update(ComRequest dto);
+
+	public int delete(long comId);
+
+	public List<ComResponse> selectSuggest(@Param("keyword") String keyword);
+
+	public int listTotal(CompanySearchRequest search);
+
+	public StatsComResponse selectStats();
+
+	public ComResponse selectOneByEmpId(long empId);
 
 }
