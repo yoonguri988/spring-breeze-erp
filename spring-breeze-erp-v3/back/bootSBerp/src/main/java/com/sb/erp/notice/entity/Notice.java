@@ -28,12 +28,12 @@ import lombok.Setter;
 @Table(name="NOTICE")
 public class Notice {
 	@Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notice_seq")
-    @SequenceGenerator(name = "notice_seq", sequenceName = "NOTICE_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_notice")
+    @SequenceGenerator(name = "seq_notice", sequenceName = "SEQ_NOTICE", allocationSize = 1)
 	@Column(name="BNO", nullable = false)
 	private Integer bno; 
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="COM_ID", nullable = false)
 	private Company company;
 	
