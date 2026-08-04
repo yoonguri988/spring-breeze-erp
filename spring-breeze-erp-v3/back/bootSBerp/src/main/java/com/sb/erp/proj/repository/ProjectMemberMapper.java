@@ -1,12 +1,12 @@
-package com.sb.erp.dao;
+package com.sb.erp.proj.repository;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.dto.EmpDto;
-import com.sb.erp.dto.ProjectMemberDto;
+import com.sb.erp.emp.dto.EmpDto;
+import com.sb.erp.proj.dto.ProjectMemberDto;
 
 @Mapper
 public interface ProjectMemberMapper {
