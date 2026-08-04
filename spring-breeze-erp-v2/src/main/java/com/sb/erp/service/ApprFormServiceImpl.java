@@ -112,6 +112,11 @@ public class ApprFormServiceImpl implements ApprFormService {
 	public String findByCode(ApprFormDto dto) {
 		return dao.findByCode(dto);
 	}
+	
+	@Override
+	public List<ApprFormDto> selectFormVersions(int forId){
+		return dao.selectFormVersions(forId);
+	}
 
 	///////////////////////// 양식 관련 기능 //////////////////////////////////
 	

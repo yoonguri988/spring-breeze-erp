@@ -73,4 +73,9 @@
 			l.lin_order
 	</select>
 	
+	<!-- 대결시 결재선 갱신 -->
+	<update id="updateLineEmp" parameterType="ApprLineDto">
+		update appr_line set emp_id = #{empId} where lin_id = #{linId}
+	</update>
+	
 </mapper>

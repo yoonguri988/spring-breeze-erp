@@ -27,5 +27,6 @@ public interface ApprFormMapper {
 	public int updateFormNewVersion(ApprFormDto dto);
 	public List<ApprFormDto> selectFormList(ApprFormSearchDto dto);
 	public String findByCode(ApprFormDto dto);
+	public List<ApprFormDto> selectFormVersions(int forId);
 	
 }

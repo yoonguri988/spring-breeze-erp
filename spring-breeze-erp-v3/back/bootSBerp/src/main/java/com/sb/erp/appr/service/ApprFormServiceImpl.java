@@ -1,4 +1,4 @@
-package com.sb.erp.service;
+package com.sb.erp.appr.service;
 
 import java.util.List;
 
@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sb.erp.dao.ApprFormMapper;
-import com.sb.erp.dto.ApprFormDto;
-import com.sb.erp.dto.ApprFormSearchDto;
-import com.sb.erp.dto.CompanySearchDto;
+import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.dto.ApprFormSearchDto;
+import com.sb.erp.appr.repository.ApprFormMapper;
+import com.sb.erp.com.dto.CompanySearchDto;
 
 @Service
 public class ApprFormServiceImpl implements ApprFormService {

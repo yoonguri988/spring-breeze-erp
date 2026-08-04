@@ -1,10 +1,10 @@
-package com.sb.erp.service;
+package com.sb.erp.appr.service;
 
 import java.util.List;
 
-import com.sb.erp.dto.ApprFormDto;
-import com.sb.erp.dto.ApprFormSearchDto;
-import com.sb.erp.dto.CompanySearchDto;
+import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.dto.ApprFormSearchDto;
+import com.sb.erp.com.dto.CompanySearchDto;
 
 public interface ApprFormService { 
 	

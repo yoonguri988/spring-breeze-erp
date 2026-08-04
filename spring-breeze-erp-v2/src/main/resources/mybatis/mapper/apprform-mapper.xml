@@ -22,9 +22,11 @@
 		where
 			for_code = #{forCode}
 			and com_id = #{comId}
+			and is_deleted = 0
 		<if test="forId != null and forId != '' and forId != 0">
 			and for_id != #{forId}
 		</if>
+		and rownum = 1
 	</select>
 	
 	<!-- 양식 생성, 리스트 검색시에 회사 이름 검색 -->
@@ -96,7 +98,7 @@
         #{forContent},
         #{forSchema, jdbcType=VARCHAR},
         #{forStatus},
-        TO_DATE(#{createdAt}, 'YYYY-MM-DD HH24:MI:SS'),
+        sysdate,
         (SELECT NVL(MAX(for_version), 0) + 1 
          FROM appr_form 
          WHERE for_id = #{forId})
@@ -105,8 +107,25 @@
 	
 	<!-- 결재 양식 삭제 -->
 	<update id="deleteForm" parameterType="ApprFormDto">
-		update appr_form set is_deleted = 1 where for_id = #{forId}
+		update appr_form set is_deleted = 1 where for_id = #{forId} and for_version = #{forVersion}
 	</update>
+	
+	<!-- 특정 양식의 전체 버전 이력 조회 -->
+	<select id="selectFormVersions" parameterType="int" resultType="ApprFormDto">
+		select
+			for_id,
+			for_version,
+			for_title,
+			for_status,
+			is_deleted,
+			created_at
+		from
+			appr_form
+		where
+			for_id = #{forId}
+		order by
+			for_version desc
+	</select>
 	
 	<!-- 결재 양식 리스트 / 회사별 출력 -->
 	<select id="selectFormList" parameterType="ApprFormSearchDto" resultType="ApprFormDto">

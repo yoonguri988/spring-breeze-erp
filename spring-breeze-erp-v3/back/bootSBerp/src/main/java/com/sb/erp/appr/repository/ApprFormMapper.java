@@ -1,19 +1,19 @@
-package com.sb.erp.dao;
+package com.sb.erp.appr.repository;
 
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.sb.erp.dto.ApprFormDto;
-import com.sb.erp.dto.ApprFormSearchDto;
-import com.sb.erp.dto.CompanySearchDto;
+import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.dto.ApprFormSearchDto;
+import com.sb.erp.com.dto.CompanySearchDto;
 
 @Mapper
 public interface ApprFormMapper {
 	
 	// 공통 
-	public List<CompanySearchDto> searchCompany(String keyword);
+	public List<CompanySearchDto> searchCompany(String keyword);	
 	public String getCompanyName(int comId);
 	
 	// 페이징 기능

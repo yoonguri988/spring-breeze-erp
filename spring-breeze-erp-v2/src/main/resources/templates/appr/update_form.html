@@ -9,6 +9,18 @@
 <body>
 
 <main layout:fragment="content">
+
+	<!-- 토스트 / 안내 문구 -->
+	<div class="toast-container position-fixed bottom-0 end-0 p-3"
+		 style="z-index: 1080;" id="toastContainer"></div>
+	<div id="flashToastData"
+		 th:if="${toastMsg}"
+		 th:attr="data-type=${toastType} ?: 'info', data-msg=${toastMsg}"
+		 style="display: none;"></div>
+	<script th:src="@{/js/appr-toast.js}"></script>
+	
+	
+
 	<div class="sb-page-head">
 		<div class="sb-page-head__txt">
 			<div class="sb-breadcrumb">
@@ -179,6 +191,7 @@
 	                       </span>
 	                   </div>
 	               </div>
+	               
 	
 	               <div class="sb-card__body bg-light border-top">
 	               	<div class="d-flex gap-2 align-items-start">
@@ -189,9 +202,44 @@
 		                </div>
 		            </div>
 		        </div>
+		        
+                <div class="sb-card mb-4">
+               		<div class="sb-card__head">
+               			<h2>버전 이력</h2>
+               			<p class="mb-0 text-secondary" style="font-size: 12px;">버전별로 개별 삭제할 수 있습니다.</p>
+               		</div>
+               		<div class="sb-card__body sb-card__body--flush">
+               			<div id="versionHistoryList" class="d-flex flex-column">
+               				<div class="text-center text-muted py-3 small">불러오는 중...</div>
+               			</div>
+               		</div>
+               </div>
 		    </div>
 		</div>
 	</form>
+	
+	<!-- 삭제 비밀번호 모달 -->
+	<div class="modal fade" id="deleteModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title"><i class="bi bi-shield-lock"></i> 관리자 확인</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<p class="text-soft mb-3">양식을 삭제하려면 본인 계정의 비밀번호를 입력해주세요.</p>
+					<input type="password" class="form-control" id="deleteInput" placeholder="비밀번호"/>
+					<div id="deleteErr" class="text-danger small mt-2" style="display: none;"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-ghost" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-danger" id="deleteConfirmBtn">
+						<i class="bi bi-trash3"></i> 삭제
+					</button>
+				</div>
+			</div> 
+		</div>
+	</div>
 
 	<!-- jquery 로드 -->
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -427,18 +475,142 @@ let originalCode = "";
 		});
 	});
 	
-	///////////////////// 양식 삭제 재확인 /////////////////////
+	///////////////////// 버전 이력 /////////////////////
+
+	function loadVersionHistory(){
+		const forId = document.getElementsByName("forId")[0].value;
+		const currentVersion = parseInt(document.getElementsByName("forVersion")[0].value);
+		const box = document.getElementById("versionHistoryList");
+		
+		fetch(`/appr/getFormVersions?forId=${encodeURIComponent(forId)}`)
+		.then(res => res.json())
+		.then(data => {
+			box.innerHTML = "";
+			
+			if(!data || data.length === 0){
+				box.innerHTML = `<div class="text-center text-muted py-3 small">이력이 없습니다.</div>`;
+				return;
+			}
+			
+			data.forEach(v => {
+				const isCurrent = v.forVersion === currentVersion;
+				const isDeleted = v.deleted === true || v.deleted === "true";
+				
+				const row = document.createElement("div");
+				row.className = "d-flex justify-content-between align-items-center px-3 py-2 border-bottom";
+				row.innerHTML = `
+					<div>
+						<span class="fw-semibold">v${v.forVersion}</span>
+						${isCurrent ? '<span class="sb-badge sb-badge--blue ms-1" style="font-size:10px;">보는 중</span>' : ''}
+						${isDeleted ? '<span class="sb-badge sb-badge--gray ms-1" style="font-size:10px;">삭제됨</span>' : ''}
+						<div class="text-soft" style="font-size: 11px;">${v.createdAt ?? ''}</div>
+					</div>
+				`;
+				
+				if(!isDeleted){
+					const btn = document.createElement("button");
+					btn.type = "button";
+					btn.className = "btn btn-ghost btn-sm text-danger";
+					btn.innerHTML = '<i class="bi bi-trash3"></i>';
+					btn.addEventListener("click", () => deleteForm(v.forId, v.forVersion));
+					row.appendChild(btn);
+				}
+				
+				box.appendChild(row);
+			});
+		})
+		.catch(err => {
+			box.innerHTML = `<div class="text-center text-danger py-3 small">이력을 불러오지 못했습니다.</div>`;
+		})
+	};
 	
-	function deleteForm(forId,forVersion){
-		if(confirm("양식을 삭제하시겠습니까?")){
-			location.href = "/appr/delete?forId=" + forId + "&forVersion=" + forVersion;						
+	window.addEventListener("load", loadVersionHistory);
+	window.addEventListener("refreshVersionHistory", loadVersionHistory);
+	
+	///////////////////// 버전 이력 /////////////////////
+	
+	
+	///////////////////// 양식 삭제 모달 /////////////////////
+	
+	let deleteTarget = null; // 삭제 대상
+	let deleteModalInstance = null;
+	
+	function deleteForm(forId, forVersion){
+		deleteTarget = {forId, forVersion};
+		
+		document.getElementById("deleteInput").value = "";
+		document.getElementById("deleteErr").style.display = "none";
+		
+		if(!deleteModalInstance){
+			deleteModalInstance = new bootstrap.Modal(document.getElementById("deleteModal"));
 		}
-		else{
-			console.log("취소 확인");
-		}
+		deleteModalInstance.show();
 	}
 	
-	///////////////////// 양식 삭제 재확인 /////////////////////
+	document.getElementById("deleteConfirmBtn").addEventListener("click", function(){
+		if(!deleteTarget) return;
+		
+		const pwInput = document.getElementById("deleteInput");
+		const errBox = document.getElementById("deleteErr");
+		const pw = pwInput.value;
+		
+		if(!pw){
+			errBox.textContent = "비밀번호를 입력해주세요.";
+			errBox.style.display = "block";
+			return;
+		}
+		
+		const btn = this;
+		btn.disabled = true;
+		
+		const params = new URLSearchParams();
+		params.append("forId", deleteTarget.forId);
+		params.append("forVersion", deleteTarget.forVersion);
+		params.append("empPass", pw);
+		
+		const csrfInput = document.querySelector('input[name="_csrf"]');
+		if(csrfInput){
+			params.append(csrfInput.name, csrfInput.value);
+		}
+		
+		fetch("/appr/deleteFormConfirm", {
+			method: "POST",
+			headers: { "Content-Type": "application/x-www-form-urlencoded" },
+			body: params
+		})
+		.then(res => res.json())
+		.then(data => {
+			btn.disabled = false;
+			
+			if(!data.success){
+				errBox.textContent = data.message || "삭제에 실패했습니다.";
+				errBox.style.display = "block";
+				return;
+			}
+			
+			deleteModalInstance.hide();
+			showToast('success', '양식이 삭제되었습니다.');
+			
+			const currentForId = document.getElementsByName("forId")[0].value;
+			const currentVersion = parseInt(document.getElementsByName("forVersion")[0].value);
+			
+			// 지금 편집중인 버전을 삭제 한경우 -> list_form
+			if(deleteTarget.forId == currentForId && deleteTarget.forVersion === currentVersion){
+				location.href = "/appr/list_form";
+			}
+			// 다른 버전 삭제한 경우 -> 버전 이력만 갱신
+			else{
+				window.dispatchEvent(new Event("refreshVersionHistory"));
+			}
+		})
+		.catch(err => {
+			btn.disabled = false;
+			errBox.textContent = "서버 오류가 발생했습니다.";
+			errBox.style.display = "block";
+		})
+	})
+	
+	///////////////////// 양식 삭제 모달 /////////////////////
 	
 	/////////////////////////////// 빈칸 처리 ///////////////////////////////
 	
@@ -590,7 +762,8 @@ let originalCode = "";
 				return;
 			}
 		
-			fetch(`/appr/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}`)
+			const currentForId = document.querySelector('input[name="forId"]').value;
+			fetch(`/appr/checkCode?code=${encodeURIComponent(value)}&comId=${encodeURIComponent(comIdVal)}&forId=${encodeURIComponent(currentForId)}`)
 			.then( response => response.json() )
 			.then( data => {
 				

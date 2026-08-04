@@ -1,15 +1,13 @@
-package com.sb.erp.service;
+package com.sb.erp.appr.service;
 
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.annotations.Param;
-
-import com.sb.erp.dto.ApprDocDto;
-import com.sb.erp.dto.ApprDocInitResponseDto;
-import com.sb.erp.dto.ApprFormDto;
-import com.sb.erp.dto.ApprLineDto;
-import com.sb.erp.dto.DeptDto;
+import com.sb.erp.appr.dto.ApprDocDto;
+import com.sb.erp.appr.dto.ApprDocInitResponseDto;
+import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.dto.ApprLineDto;
+import com.sb.erp.dept.dto.DeptDto;
 
 public interface ApprDocService {
 	
