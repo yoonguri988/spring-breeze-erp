@@ -1,10 +1,10 @@
-package com.sb.erp.service;
+package com.sb.erp.eval.service;
 
 import java.util.List;
 import java.util.Map;
 
-import com.sb.erp.dto.EvalPeriodDto;
-import com.sb.erp.dto.EvalPeriodSearchDto;
+import com.sb.erp.eval.dto.EvalPeriodDto;
+import com.sb.erp.eval.dto.EvalPeriodSearchDto;
 
 public interface EvalPeriodService {
 
@@ -38,7 +38,9 @@ public interface EvalPeriodService {
 	
 	// ─── 하위 데이터 카운트 ──────────────────────────────
 	int countEvalsByPeriodId(int periodId);
-
 	int countReportsByPeriodId(int periodId);
+
+	// 리포트 진행률용: 회차별 평가 대상 사원 수
+	int countDistinctTargetsByPeriodId(int periodId);
 
 }

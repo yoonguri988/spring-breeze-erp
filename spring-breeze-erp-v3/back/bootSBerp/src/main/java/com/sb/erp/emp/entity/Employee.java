@@ -3,95 +3,125 @@ package com.sb.erp.emp.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.sb.erp.com.entity.Company;
-import com.sb.erp.dept.entity.Department;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+
+
+import com.sb.erp.pos.entity.Position;
+import com.sb.erp.dept.entity.Department;
+import com.sb.erp.com.entity.Company;
+
 
 @Entity
-@Table(name = "EMPLOYEE")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "employee")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Employee {
-	@Id
+
+    @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_employee")
     @SequenceGenerator(name = "seq_employee", sequenceName = "SEQ_EMPLOYEE", allocationSize = 1)
-    @Column(name = "EMP_ID", nullable = false)
-    private Long empId;
-	
-	@Column(name = "EMP_NO", nullable = false, length = 20)
+    @Column(name = "emp_id")
+    private Integer empId;
+
+    @Column(name = "emp_no", length = 20, nullable = false)
     private String empNo;
- 
-    @Column(name = "EMP_NAME", nullable = false, length = 50)
-    private String empName;
- 
-    @Column(name = "EMP_PASS", nullable = false, length = 500)
+
+    @Column(name = "emp_pass", length = 200, nullable = false)
     private String empPass;
- 
-    @Column(name = "EMP_EMAIL", nullable = false, length = 100)
+
+    @Column(name = "emp_name", length = 50, nullable = false)
+    private String empName;
+
+    @Column(name = "emp_email", length = 100)
     private String empEmail;
- 
-    @Column(name = "EMP_MOBILE", nullable = false, length = 20)
+
+    @Column(name = "emp_mobile", length = 20)
     private String empMobile;
- 
-    @Column(name = "EMP_STATUS", length = 10)
-    private String empStatus; // 데이터 저장 한긅X -> 영문 지정
- 
-    @Column(name = "HIRE_DATE")
+
+    @Column(name = "emp_status", length = 10, nullable = false)
+    private String empStatus;
+
+    @Column(name = "hire_date")
     private LocalDate hireDate;
- 
-    @Column(name = "CREATED_AT", nullable=false)
+
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
- 
-    @Column(name = "UPDATED_AT", nullable=false)
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
     
-	@PrePersist
-	void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
-	@PreUpdate
-	void onUpdate() {
-		this.updatedAt = LocalDateTime.now();		
-	}
-	
-	// 연관 관계
-	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "COM_ID", nullable = false)
-    private Company company;
-	
+    
+    // ── 연관관계 ──
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DEPT_ID", nullable = false)
+    @JoinColumn(name = "pos_id", nullable = false)
+    private Position position;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dept_id", nullable = false)
     private Department department;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "com_id", nullable = false)
+    private Company company;
+
+    @Builder
+    public Employee(String empNo, String empPass, String empName,
+                    String empEmail, String empMobile, String empStatus,
+                    LocalDate hireDate, Position position,
+                    Department department, Company company) {
+        this.empNo = empNo;
+        this.empPass = empPass;
+        this.empName = empName;
+        this.empEmail = empEmail;
+        this.empMobile = empMobile;
+        this.empStatus = empStatus;
+        this.hireDate = hireDate;
+        this.position = position;
+        this.department = department;
+        this.company = company;
+    }
+
+    
+    // ── 도메인 메서드 ──
+
+    /** 관리자용 사원 정보 수정 (부서, 직급, 상태 포함) */
+    public void updateByAdmin(String empName, String empEmail, String empMobile,
+                              String empStatus, Position position, Department department) {
+        this.empName = empName;
+        this.empEmail = empEmail;
+        this.empMobile = empMobile;
+        this.empStatus = empStatus;
+        this.position = position;
+        this.department = department;
+    }
+
+    /** 일반 사원 본인 정보 수정 (부서/직급/상태 변경 불가) */
+    public void updateBySelf(String empName, String empEmail, String empMobile) {
+        this.empName = empName;
+        this.empEmail = empEmail;
+        this.empMobile = empMobile;
+    }
+
+    /** 비밀번호 변경 (BCrypt 인코딩은 Service에서 처리 후 전달) */
+    public void changePassword(String encodedPassword) {
+        this.empPass = encodedPassword;
+    }
 }
-/*
-EMP_ID     NOT NULL NUMBER(10)    
-EMP_NO     NOT NULL VARCHAR2(20)  
-EMP_NAME   NOT NULL VARCHAR2(50)  
-EMP_PASS   NOT NULL VARCHAR2(500) 
-EMP_EMAIL  NOT NULL VARCHAR2(100) 
-EMP_MOBILE NOT NULL VARCHAR2(20)  
-EMP_STATUS          VARCHAR2(10)  
-HIRE_DATE           DATE          
-CREATED_AT          DATE          
-UPDATED_AT          DATE          
-COM_ID     NOT NULL NUMBER(10)    
-POS_ID     NOT NULL NUMBER(10)    
-DEPT_ID    NOT NULL NUMBER(10)
-*/
