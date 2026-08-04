@@ -4,10 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 
@@ -30,15 +31,14 @@ import com.sb.erp.emp.entity.Employee;
  */
 @Entity
 @Table(name = "performance_evaluation")
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Evaluation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_evaluation")
     @SequenceGenerator(name = "seq_evaluation", sequenceName = "SEQ_EVALUATION", allocationSize = 1)
     @Column(name = "eval_id")
-    private Integer evalId;
+    private Long evalId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "period_id", nullable = false)
@@ -99,47 +99,5 @@ public class Evaluation {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-    }
-
-    @Builder
-    public Evaluation(EvalPeriod evalPeriod, Employee targetEmployee,
-                      Employee evaluator, String evalType,
-                      Integer scorePerformance, Integer scoreExpertise,
-                      Integer scoreTeamwork, Integer scoreAttitude,
-                      Integer scoreGrowth, BigDecimal weightedScore,
-                      String strengthComment, String improvementComment,
-                      String evalStatus) {
-        this.evalPeriod = evalPeriod;
-        this.targetEmployee = targetEmployee;
-        this.evaluator = evaluator;
-        this.evalType = evalType;
-        this.scorePerformance = scorePerformance;
-        this.scoreExpertise = scoreExpertise;
-        this.scoreTeamwork = scoreTeamwork;
-        this.scoreAttitude = scoreAttitude;
-        this.scoreGrowth = scoreGrowth;
-        this.weightedScore = weightedScore;
-        this.strengthComment = strengthComment;
-        this.improvementComment = improvementComment;
-        this.evalStatus = evalStatus;
-    }
-
-    // ── 도메인 메서드 ──
-
-    /** 평가 점수 및 코멘트 수정 (DRAFT 상태에서만 호출 가능 — Service에서 검증) */
-    public void updateScores(Integer scorePerformance, Integer scoreExpertise,
-                             Integer scoreTeamwork, Integer scoreAttitude,
-                             Integer scoreGrowth, BigDecimal weightedScore,
-                             String strengthComment, String improvementComment,
-                             String evalStatus) {
-        this.scorePerformance = scorePerformance;
-        this.scoreExpertise = scoreExpertise;
-        this.scoreTeamwork = scoreTeamwork;
-        this.scoreAttitude = scoreAttitude;
-        this.scoreGrowth = scoreGrowth;
-        this.weightedScore = weightedScore;
-        this.strengthComment = strengthComment;
-        this.improvementComment = improvementComment;
-        this.evalStatus = evalStatus;
     }
 }
