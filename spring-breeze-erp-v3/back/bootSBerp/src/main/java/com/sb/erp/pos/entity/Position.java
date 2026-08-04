@@ -1,6 +1,8 @@
 package com.sb.erp.pos.entity;
 
 import jakarta.persistence.*;
+import com.sb.erp.com.entity.Company;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,15 +39,16 @@ public class Position {
     @Column(name = "pos_order", nullable = false)
     private int posOrder;
 
-    @Column(name = "com_id", nullable = false)
-    private int comId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "com_id", nullable = false)
+    private Company company;
 
     @Builder
-    public Position(String posCode, String posName, int posOrder, int comId) {
+    public Position(String posCode, String posName, int posOrder, Company company) {
         this.posCode = posCode;
         this.posName = posName;
         this.posOrder = posOrder;
-        this.comId = comId;
+        this.company = company;
     }
 
     // ── 도메인 메서드: 수정 가능 필드만 노출 ──
