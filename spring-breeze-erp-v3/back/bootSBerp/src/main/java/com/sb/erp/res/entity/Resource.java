@@ -43,19 +43,19 @@ public class Resource {
 	@JoinColumn(name="COM_ID", nullable = false)
 	private Company company;
 	
-	@Column(name = "RES_CODE", length = 50)
+	@Column(name = "RES_CODE", length = 50, nullable=false)
 	private String resCode;
-	@Column(name = "RES_NAME", length = 100)
+	@Column(name = "RES_NAME", length = 100, nullable=false)
 	private String resName;
-	@Column(name = "RES_TYPE", length = 20)
+	@Column(name = "RES_TYPE", length = 20, nullable=false)
 	private String resType; // VEHICLE, ROOM, EQUIPMENT
-	@Column(name = "QUANTITY")
+	@Column(name = "QUANTITY", nullable=false)
 	private Long quantity;
 	@Column(name = "LOCATION", length = 200)
 	private String location;
-	@Column(name = "CAPACITY", length = 50)
+	@Column(name = "CAPACITY")
 	private Long capacity;
-	@Column(name = "RES_STATUS", length = 20)
+	@Column(name = "RES_STATUS", length = 20, nullable=false)
 	private String resStatus; // MAINTENANCE, AVAILABLE, DISABLED
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -83,7 +83,7 @@ public class Resource {
 	}
 	
 	// 자원
-	@OneToMany(mappedBy ="reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy ="resource", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<Reservation> reservations = new ArrayList<>();
 	
