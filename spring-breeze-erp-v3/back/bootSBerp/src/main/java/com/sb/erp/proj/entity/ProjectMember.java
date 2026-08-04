@@ -26,12 +26,12 @@ import lombok.Setter;
 public class ProjectMember {
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "project_member_seq")
-    @SequenceGenerator(name = "project_member_seq", sequenceName = "PROJECT_MEMBER_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_project_member")
+    @SequenceGenerator(name = "seq_project_member", sequenceName = "SEQ_PROJECT_MEMBER", allocationSize = 1)
 	@Column(name="PM_ID", nullable = false)	
 	private Integer pmId;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="PROJECT_PRO_ID", nullable = false)
 	private Project project;
 	
