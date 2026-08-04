@@ -1,10 +1,10 @@
-package com.sb.erp.dao;
+package com.sb.erp.appr.repository;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.sb.erp.dto.ApprLineDto;
+import com.sb.erp.appr.dto.ApprLineDto;
 
 @Mapper
 public interface ApprLineMapper {

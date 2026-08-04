@@ -1,4 +1,4 @@
-package com.sb.erp.dao;
+package com.sb.erp.appr.repository;
 
 import java.util.List;
 import java.util.Map;
@@ -6,10 +6,10 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.dto.ApprDocDto;
-import com.sb.erp.dto.ApprDocInitResponseDto;
-import com.sb.erp.dto.ApprFormDto;
-import com.sb.erp.dto.ApprLineDto;
+import com.sb.erp.appr.dto.ApprDocDto;
+import com.sb.erp.appr.dto.ApprDocInitResponseDto;
+import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.dto.ApprLineDto;
 
 @Mapper
 public interface ApprDocMapper {

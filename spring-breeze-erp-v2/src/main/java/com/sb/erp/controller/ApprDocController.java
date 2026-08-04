@@ -1,10 +1,12 @@
 package com.sb.erp.controller;
 
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,14 +15,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sb.erp.dto.ApprDocDto;
 import com.sb.erp.dto.ApprDocInitResponseDto;
 import com.sb.erp.dto.ApprFormDto;
 import com.sb.erp.dto.ApprLineDto;
+import com.sb.erp.dto.ApprLineRequestDto;
 import com.sb.erp.dto.DeptDto;
 import com.sb.erp.security.CustomUserDetails;
 import com.sb.erp.service.ApprDocService;
+import com.sb.erp.service.ApprLineRequestService;
 import com.sb.erp.service.DeptService;
 import com.sb.erp.util.PagingUtil;
 
@@ -30,6 +35,7 @@ public class ApprDocController {
 	
 	@Autowired ApprDocService service;
 	@Autowired DeptService deptService;
+	@Autowired ApprLineRequestService lineReqService;
 	
 	
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
@@ -71,7 +77,9 @@ public class ApprDocController {
 	// 문서 작성 처리
 	@PostMapping("/write_doc")
 	public String writeDoc_post(ApprDocDto dto,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			RedirectAttributes rttr,
+			Model model) {
 		
 		dto.setEmpId(userDetails.getUser().getEmpId());
 		dto.setComId(userDetails.getUser().getComId());
@@ -80,8 +88,15 @@ public class ApprDocController {
 		
 		// 위 호출에서 성공시
 		if(result) {
+			rttr.addFlashAttribute("toastType", "success");
+			rttr.addFlashAttribute("toastMsg", "결재 문서가 기안되었습니다.");
 			return "redirect:/appr/list_doc";
 		}
+		
+		ApprDocInitResponseDto reload = service.initResponse(dto);
+		model.addAttribute("dto", reload);
+		model.addAttribute("toastType", "error");
+		model.addAttribute("toastMsg", "결재 문서 기안에 실패했습니다.");
 		return "appr/write_doc";
 	}
 	
@@ -127,6 +142,11 @@ public class ApprDocController {
 			hisDocs = service.selectMyHistoryDocs(dto);
 		}
 		
+		if("request".equals(tab)) {
+			model.addAttribute("pendingRequests", lineReqService.getPendingRequests());
+		}
+		
+		model.addAttribute("pendingCnt", lineReqService.countPending());
 		model.addAttribute("paging", paging);
 		model.addAttribute("docCnts", docCnts);
 		model.addAttribute("myTodoCnt", myTodoCnt);
@@ -171,16 +191,32 @@ public class ApprDocController {
 	// 승인 처리
 	@PostMapping("/detail_doc/app")
 	public String detailDoc_app(@RequestParam("docId") int docId,
-				@AuthenticationPrincipal CustomUserDetails userDetails) {
-		service.processLine(docId, userDetails.getUser().getEmpId(), "APP");
+				@AuthenticationPrincipal CustomUserDetails userDetails,
+				RedirectAttributes rttr) {
+		try {
+			service.processLine(docId, userDetails.getUser().getEmpId(), "APP");
+			rttr.addFlashAttribute("toastType", "success");
+			rttr.addFlashAttribute("toastMsg", "결재를 승인했습니다.");
+		} catch (ConcurrentModificationException e) {
+			rttr.addFlashAttribute("toastType", "error");
+			rttr.addFlashAttribute("toastMsg", e.getMessage());
+		}
 		return "redirect:/appr/detail_doc?docId=" + docId;
 	}
 	
 	// 반려 처리
 	@PostMapping("/detail_doc/rej")
 	public String detailDoc_rej(@RequestParam("docId") int docId,
-				@AuthenticationPrincipal CustomUserDetails userDetails) {
-		service.processLine(docId, userDetails.getUser().getEmpId(), "REJ");
+				@AuthenticationPrincipal CustomUserDetails userDetails,
+				RedirectAttributes rttr) {
+		try {
+			service.processLine(docId, userDetails.getUser().getEmpId(), "REJ");
+			rttr.addFlashAttribute("toastType", "success");
+			rttr.addFlashAttribute("toastMsg", "결재를 반려했습니다.");
+		} catch (ConcurrentModificationException e) {
+			rttr.addFlashAttribute("toastType", "error");
+			rttr.addFlashAttribute("toastMsg", e.getMessage());
+		}
 		return "redirect:/appr/detail_doc?docId=" + docId;
 	}
 	
@@ -213,6 +249,60 @@ public class ApprDocController {
 	@ResponseBody
 	public List<ApprLineDto> getDeptEmps(@RequestParam("deptId") int deptId) {
 		return service.selectDeptEmpsForLines(deptId);
+	}
+	
+	// 결재선 변경 요청 등록
+	@PostMapping("/requsetLineChange")
+	@ResponseBody
+	public Map<String, Object> requestLineChange(
+			@RequestParam("docId") int docId,
+			@RequestParam("linId") int linId,
+			@RequestParam("oriEmpId") int oriEmpId,
+			@RequestParam("reqReason") String reqReason,
+			@AuthenticationPrincipal CustomUserDetails userDetails){
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		ApprLineRequestDto dto = new ApprLineRequestDto();
+		dto.setDocId(docId);
+		dto.setLinId(linId);
+		dto.setOriEmpId(oriEmpId);
+		dto.setReqEmpId(userDetails.getUser().getEmpId());
+		dto.setReqReason(reqReason);
+		
+		lineReqService.requestChange(dto);
+		result.put("succescc", true);
+		return result;
+	}
+	
+	// 관리자 승인
+	@PostMapping("/approveLineChange")
+	@ResponseBody
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT)")
+	public Map<String, Object> approveLineChange(
+			@RequestParam("reqId") int reqId,
+			@RequestParam("newEmpId") int newEmpId,
+			@AuthenticationPrincipal CustomUserDetails userDetails){
+	
+		Map<String, Object> result = new HashMap<>();
+		boolean success = lineReqService.approveRequest(reqId, newEmpId, newEmpId);
+		result.put("success", success);
+		if(!success) result.put("message", "이미 처리되었거나 존재하지 않는 요청입니다.");
+		return result;
+	}
+	
+	// 관리자 반려
+	@PostMapping("/rejectLineChange")
+	@ResponseBody
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+	public Map<String, Object> rejectLineChange(
+			@RequestParam("reqId") int reqId,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
+		
+		Map<String, Object> result = new HashMap<>();
+		boolean success = lineReqService.rejectRequest(reqId, reqId);
+		result.put("success", success);
+		return result;
 	}
 	
 	

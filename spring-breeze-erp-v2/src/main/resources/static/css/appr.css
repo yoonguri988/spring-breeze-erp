@@ -116,6 +116,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 10px;
 	padding: 7px 10px;
 	border-radius: 7px;
 	font-size: 13px;
@@ -144,6 +145,42 @@
 	color: var(--sb-ink-soft);
 	padding: 2px 8px;
 	border-radius: 5px;
+}
+
+.appr-emp-row__avatar {
+	flex: 0 0 auto;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	background: var(--sb-border);
+	color: var(--sb-ink-faint);
+	font-size: 12px;
+	font-weight: 700;
+	display: grid;
+	place-items: center;
+}
+
+.appr-emp-row__info {
+	flex: 1 1 auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.appr-emp.row.disabled .appr-emp-row__avatar {
+	background: var(--sb-accent-soft);
+	color: var(--sb-accent);
+}
+
+.appr-emp-row__check {
+	flex: 0 0 auto;
+	color: var(--sb-accent);
+	font-size: 15px;
+}
+
+.pos-chip--leave {
+	background: var(--sb-amber-soft, #fff3cd);
+	color: var(--sb-amber, #b98900);
 }
 
 /* 결재선 타임라인 */
@@ -300,4 +337,28 @@
 .appr-dyn-input:focus {
 	border-color: var(--sb-accent);
 	box-shadow: 0 0 0 3px var(--sb-accent-soft);
+}
+
+/* ai 양식 생성 효과 */
+.ai-loading-box {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	border: 1px solid #e3ddfb;
+	background: linear-gradient(90deg, #f4f1fe, #eef2ff, #f4f1fe);
+	background-size: 200% 100%;
+	animation: aiShimmer 1.8s ease-in-out infinite;
+}
+
+.ai-loading-text {
+	font-size: 13px;
+	font-weight: 600;
+	color: #6c4fd6;
+}
+
+@keyframes aiShimmer {
+	0% { background-position: 0% 50%; }
+	100% { background-position: 200% 50%; }
 }

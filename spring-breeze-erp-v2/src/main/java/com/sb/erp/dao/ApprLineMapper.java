@@ -12,4 +12,5 @@ public interface ApprLineMapper {
 	public int updateLineStatus(ApprLineDto dto);
 	public ApprLineDto selectLineByOrder(ApprLineDto dto);
 	public List<ApprLineDto> selectLinesByDocId(int docId);
+	public int updateLineEmp(ApprLineDto dto);
 }

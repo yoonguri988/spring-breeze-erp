@@ -10,6 +10,17 @@
 
 <main layout:fragment="content">
 <script th:src="@{/js/appr-schema.js}"></script>
+
+	<!-- 토스트 / 안내 문구 -->
+	<div class="toast-container position-fixed bottom-0 end-0 p-3"
+		 style="z-index: 1080;" id="toastContainer"></div>
+	<div id="flashToastData"
+		 th:if="${toastMsg}"
+		 th:attr="data-type=${toastType} ?: 'info', data-msg=${toastMsg}"
+		 style="display: none;"></div>
+	<script th:src="@{/js/appr-toast.js}"></script>
+	
+	
  <div class="sb-page-head">
  	<div class="sb-page-head__txt">
  		<div class="sb-breadcrumb">
@@ -84,7 +95,7 @@
 						<div class="form-check form-switch mb-0 flex-shrink-0">
 							<input class="form-check-input sb-checkbox" type="checkbox" id="isImportantSwitch"
 								   style="width: 44px; height: 22px; cursor:pointer;"/>
-							<input type="hidden" id="isImportant" name="isImportant" value="0"/>
+							<input type="hidden" id="isImportant" name="important" value="0"/>
 						</div>
 					</div>
 				</div>
@@ -611,15 +622,31 @@
 			
 			filtered.forEach(emp => {
 				const already = slots.some(s => s && s.empId === emp.empId);
+				const onLeave = emp.empStatus === "휴직";
+				const initial = emp.empName ? emp.empName.charAt(0) : "?";
 				const div = document.createElement("div");
 				div.className = "appr-emp-row" + (already ? " disabled" : "");
 				div.innerHTML = `
-					<span>${emp.empName}</span>
-					<span class="pos-chip">${emp.posName}</span>
+					<span class="appr-emp-row__avatar">${initial}</span>
+					<span class="appr-emp-row__info">
+						<span>${emp.empName}</span>
+						<span class="pos-chip">${emp.posName}</span>
+						${onLeave ? '<span class="pos-chip pos-chip--leave">휴직중</span>' : ''}
+					</span>
+					${already ? '<i class="bi bi-check-circle-fill added-check"></i>' : ''}
 				`;
 				// 이미 등록된 상태가 아니면 emp데이터를 다음 슬롯에 추가
 				if(!already){
-					div.addEventListener("click", () => addToNextSlot(emp));
+					div.addEventListener("click", () => {
+						// 휴직중인 사람 선택시 확인
+						if(onLeave){
+							const confirmed = confirm(
+								`${emp.empName}님은 현재 휴직중입니다. \n휴직중인 사원을 결재선에 지정하시겠습니까?`
+							)
+							if(!confirmed) return;
+						}
+						addToNextSlot(emp)
+					});
 				}
 				empBox.appendChild(div);
 			});
@@ -661,9 +688,11 @@
 	    		div.className = "appr-slot" + (slot ? " filled" : "");
 	    		div.innerHTML = slot ?
 	    			`<span class="appr-slot__badge">${order}</span>
-	    			 <span class="appr-slot__body">${slot.empName}
+	    			 <span class="appr-slot__body">
+	    			 	${slot.empName}
 	    			 	<span class="appr-slot__pos">${slot.posName}</span>
-	    			 </span>` :
+	    			 </span>
+	    			 <i class="bi bi-x-lg text-danger"></i>` :
 	    			`<span class="appr-slot__badge">${order}</span>
 	    			 <span class="appr-slot__body appr-slot__empty">${order}차 결재자를 선택해주세요</span>
 	    			`;
