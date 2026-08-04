@@ -2,7 +2,6 @@ package com.sb.erp.com.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,6 +21,7 @@ import com.sb.erp.com.dto.CompanyDto.CompanyResponseDto;
 import com.sb.erp.com.dto.CompanySearchDto;
 import com.sb.erp.com.dto.StatsComDto;
 import com.sb.erp.com.service.CompanyService;
+import com.sb.erp.dept.service.DeptService;
 import com.sb.erp.global.exception.FileUploadException;
 import com.sb.erp.util.dto.FileUploadDto;
 import com.sb.erp.util.dto.FileUploadType;
@@ -46,10 +46,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @CrossOrigin(origins="*")
 public class CompanyController {
-	@Autowired CompanyService service;
+	private final CompanyService service;
 //	private final EmpService empService;
 	//private final PermService permService;
-//	private final DeptService deptService;
+	private final DeptService deptService;
 	
 	// 회사 등록 기능 POST  /api/company
 	@Operation(summary = "회사 등록", description = "새로운 회사를 등록합니다.")
@@ -127,15 +127,15 @@ public class CompanyController {
 	
 	// 회사 상세 조회는 department 도메인 완성 전까지는 /{id} 단건조회와 내용이 완전히 같으므로
 	// 별도 엔드포인트로 분리하지 않는다. (deptStats/deptList가 채워질 때 아래처럼 확장 예정)
-	//
-	// @Operation(summary = "회사 상세 조회", description = "회사 정보 + 부서 통계/조직도를 조회합니다.")
-	// @GetMapping("/{id}/detail")
-	// public ResponseEntity<CompanyDetailResponse> getCompanyDetail(@PathVariable("id") Long id) {
-	// 	CompanyResponseDto company = companyService.getCompany(id);
-	// 	StatsDeptDto deptStats = deptService.selectStats(id);
-	// 	List<DeptDto> deptList = deptService.selectOrgTree(id);
-	// 	return ResponseEntity.ok(new CompanyDetailResponse(company, deptStats, deptList));
-	// }
+	
+//	 @Operation(summary = "회사 상세 조회", description = "회사 정보 + 부서 통계/조직도를 조회합니다.")
+//	 @GetMapping("/{id}/detail")
+//	 public ResponseEntity<CompanyResponseDto> getCompanyDetail(@PathVariable("id") Long id) {
+//	 	CompanyResponseDto company = service.getCompany(id);
+//	 	StatsDeptDto deptStats = deptService.selectStats(id);
+//	 	List<DeptDto> deptList = deptService.selectOrgTree(id);
+//	 	return ResponseEntity.ok(new CompanyDetailResponse(company, deptStats, deptList));
+//	 }
 	
 	// 내 회사 정보 조회 (로그인한 사용자 소속 회사 + 부서 통계/조직도) - 부서 통계/조직도는 추후 추가 예정
 //	@Operation(summary = "내 회사 정보 조회", description = "로그인한 사용자가 소속된 회사 정보를 조회합니다.") // swagger

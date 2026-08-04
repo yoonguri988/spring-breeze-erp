@@ -10,7 +10,7 @@ import com.sb.erp.dept.entity.Department;
 import com.sb.erp.dept.entity.DeptTransferLog;
 import com.sb.erp.emp.entity.Employee;
 import com.sb.erp.notice.entity.Notice;
-import com.sb.erp.perm.entity.Authority;
+import com.sb.erp.auth.entity.Authority;
 import com.sb.erp.pos.entity.Position;
 import com.sb.erp.proj.entity.Project;
 import com.sb.erp.res.entity.Resource;

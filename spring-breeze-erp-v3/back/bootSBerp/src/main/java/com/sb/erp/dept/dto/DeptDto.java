@@ -53,7 +53,7 @@ public class DeptDto {
 		// insert, update, select 결과물
 		public DeptResponseDto(Department department) {
 			this.deptId = department.getDeptId();
-			this.comId = department.getCompany().getId();
+			this.comId = department.getCompany().getComId();
 			this.parentId = department.getParent() != null ? department.getParent().getDeptId() : null;
 			this.empId = department.getEmployee() != null ? department.getEmployee().getEmpId() : null;
 			this.deptName = department.getDeptName();

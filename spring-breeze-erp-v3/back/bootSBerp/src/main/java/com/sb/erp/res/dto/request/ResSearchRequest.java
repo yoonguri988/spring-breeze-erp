@@ -1,15 +1,10 @@
-package com.sb.erp.dto;
+package com.sb.erp.res.dto.request;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString
-public class ResSearchDto {
+@Getter @Setter
+public class ResSearchRequest {
 	private Integer comId;
 	private String keyword;
 	private String resType;
