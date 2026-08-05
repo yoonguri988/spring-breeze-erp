@@ -1,37 +1,51 @@
 package com.sb.erp.appr.dto.response;
 
 import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.entity.ApprForm;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
-@Schema(description = "결재 양식 목록 항목")
 public class ApprFormResponse {
-	
-	private int forId;
-	private int forVersion;
-	private int comId;
+	private Long forId;
+	private Long forVersion;
+	private Long comId;
 	private String comName;
 	private String forCode;
 	private String forTitle;
+	private String forContent;
+	private String forSchema;
 	private Boolean forStatus;
 	private String createdAt;
 	private String updatedAt;
 	
-	public static ApprFormResponse from(ApprFormDto dto) {
-		return ApprFormResponse.builder()
-				.forId(dto.getForId())
-				.forVersion(dto.getForVersion())
-				.comId(dto.getComId())
-				.comName(dto.getComName())
-				.forCode(dto.getForCode())
-				.forTitle(dto.getForTitle())
-				.forStatus(dto.getForStatus())
-				.createdAt(dto.getCreatedAt())
-				.updatedAt(dto.getUpdatedAt())
-				.build();
+	// JPA 경로 - Entity에서 변환
+	public ApprFormResponse(ApprForm form) {
+		this.forId = form.getForId();
+		this.forVersion = form.getForVersion();
+		this.comId = form.getCompany().getId();
+		this.comName = form.getCompany().getComName();
+		this.forCode = form.getForCode();
+		this.forTitle = form.getForTitle();
+		this.forContent = form.getForContent();
+		this.forSchema = form.getForSchema();
+		this.forStatus = form.getForStatus();
+		this.createdAt = form.getCreatedAt() != null ? form.getCreatedAt().toString() : null;
+		this.updatedAt = form.getUpdatedAt() != null ? form.getUpdatedAt().toString() : null;
+	}
+	
+	// MyBatis 경로 - Dto에서 변환
+	public ApprFormResponse(ApprFormDto dto) {
+		this.forId = (long) dto.getForId();
+		this.forVersion = (long) dto.getForVersion();
+		this.comId = (long) dto.getComId();
+		this.comName = dto.getComName();
+		this.forCode = dto.getForCode();
+		this.forTitle = dto.getForTitle();
+		this.forContent = dto.getForContent();
+		this.forSchema = dto.getForSchema();
+		this.forStatus = dto.getForStatus();
+		this.createdAt = dto.getCreatedAt();
+		this.updatedAt = dto.getUpdatedAt();
 	}
 }

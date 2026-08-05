@@ -15,7 +15,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -73,15 +72,10 @@ public class ApprDoc {
 	@Column(name = "doc_revision", nullable = false)
 	private Long docRevision;
 	
-	@Column(name = "created_at", nullable = false, updatable = false)
+	@Column(name = "created_at", nullable = false, insertable = false)
 	private LocalDateTime createdAt;
 	
-	@Column(name = "updated_at", nullable = false, updatable = false)
+	@Column(name = "updated_at", nullable = false, insertable = false)
 	private LocalDateTime updatedAt;
 	
-	@PrePersist
-	public void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
 }
