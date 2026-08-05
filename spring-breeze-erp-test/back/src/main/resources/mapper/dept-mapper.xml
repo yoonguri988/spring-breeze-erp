@@ -5,7 +5,7 @@
 <mapper namespace="com.sb.erp.dept.repository.DeptMapper">
 
 	<!-- 해당 회사가 가지고 있는 부서 갯수 조회 -->
-	<select id="countActiveDepts" resultType="int">
+	<select id="countActiveDepts" resultType="long">
 		select count(*) from
 		department
 		where com_id = #{comId}
@@ -13,7 +13,7 @@
 	</select>
 
 	<!-- 부서 전체 조회 -->
-	<select id="selectAll" resultType="DeptDto" parameterType="int">
+	<select id="selectAll" resultType="DeptResponse" parameterType="long">
 	WITH dept_closure AS (
 	    -- START WITH을 생략하면 조건을 만족하는 모든 행이 각각의 root가 되어
 	    -- "부서별 하위트리(자기자신 포함)" 관계를 한 번의 CONNECT BY로 전개
@@ -58,7 +58,7 @@
 	</select>
 
 	<!-- id 값을 통해 부서 하나 조회 -->
-	<select id="selectOneById" resultType="DeptDto">
+	<select id="selectOneById" resultType="DeptResponse">
 		WITH dept_subtree (dept_id) AS (
 		    SELECT dept_id
 		    FROM department
@@ -94,7 +94,7 @@
 	</select>
 
 	<!-- 부서 순서 정렬 -->
-	<select id="maxSortOrder" resultType="int">
+	<select id="maxSortOrder" resultType="long">
 		select
 		coalesce(max(sort_order), 0)
 		from department
@@ -104,10 +104,13 @@
 	</select>
 
 	<!-- 부서 등록 -->
-	<insert id="insert" parameterType="DeptDto">
-		insert into department (com_id, parent_id, dept_name, dept_code,
+	<insert id="insert" parameterType="DeptRequest">
+		<selectKey keyProperty="deptId" resultType="long" order="BEFORE">
+      	SELECT seq_department.NEXTVAL FROM dual
+    	</selectKey>
+		insert into department (dept_id, com_id, parent_id, dept_name, dept_code,
 		depth, sort_order)
-		values (#{comId},
+		values (#{deptId}, #{comId},
 		<choose>
 			<when test="parentId == null or parentId == 0">NULL</when>
 			<otherwise>#{parentId}</otherwise>
@@ -116,7 +119,7 @@
 	</insert>
 
 	<!-- 하위 부서 존재 확인 -->
-	<select id="countChildren" resultType="int">
+	<select id="countChildren" resultType="long">
 		select count(*) from
 		department
 		where parent_id = #{deptId}
@@ -130,7 +133,7 @@
 	</delete>
 	
 	<!-- 부서 수정 -->
-	<update id="update" parameterType="DeptDto">
+	<update id="update" parameterType="DeptRequest">
 		update department
 		<set>
 			<if test="deptName != null">dept_name = #{deptName},</if>
@@ -146,7 +149,7 @@
 	</update>
 
 	<!-- 하위부서 조회 -->
-	<select id="selectAllChildIds" resultType="DeptDto" parameterType="int">
+	<select id="selectAllChildIds" resultType="DeptResponse" parameterType="long">
 		WITH childTree (dept_id) AS (
 		    SELECT dept_id
 		    FROM department
@@ -162,7 +165,7 @@
 	</select>
 
 	<!-- 부서 통계 데이터 조회 -->
-	<select id="selectStats" resultType="StatsDeptDto">
+	<select id="selectStats" resultType="StatsDeptResponse">
 		SELECT
         (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND DEPT_STATUS != 'DELETED') AS deptTotal,
         (SELECT COUNT(*) FROM department WHERE com_id = #{comId} AND depth = 1 AND DEPT_STATUS != 'DELETED') AS dept1Total,
@@ -171,7 +174,7 @@
         from DUAL
 	</select>
 	
-	<select id="countByDept" parameterType="int">
+	<select id="countByDept" parameterType="long">
 		SELECT COUNT(*) 
 		FROM EMPLOYEE E
 		JOIN DEPARTMENT D
@@ -181,20 +184,20 @@
 	</select>
 	
 	<!-- 부서 임시 삭제 soft delete -->
-	<update id="softDelete" parameterType="int">
+	<update id="softDelete" parameterType="long">
 		UPDATE DEPARTMENT
 		SET DEPT_STATUS = 'PENDING_DELETE'
 		WHERE DEPT_ID = #{deptId}
 	</update>
 	<!-- 이관 이력 화면의 원부서/대상부서 필터 select box용 — 부서 상태 무관 전체 -->
-	<select id="selectAllDeptsByComId" resultType="DeptDto">
+	<select id="selectAllDeptsByComId" resultType="DeptResponse">
 		SELECT *
 		FROM department
 		WHERE com_id = #{comId}
 		ORDER BY dept_name
 	</select>
 	<!-- 부서 코드 중복 체크 -->
-	<select id="selectDeptCode" resultType="DeptDto" parameterType="DeptSearchDto">
+	<select id="selectDeptCode" resultType="DeptResponse" parameterType="DeptSearchRequest">
 		SELECT *
 		FROM DEPARTMENT
 		WHERE COM_ID = #{comId}
