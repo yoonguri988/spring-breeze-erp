@@ -1,12 +1,12 @@
-package com.sb.erp.proj.dto;
+package com.sb.erp.proj.dto.response;
 
 import java.time.LocalDate;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
-public class ProjectAnalysisDto {
-	private Integer proId;
+@Getter
+public class ProjectAnalysisResponse { // 프로젝트 ai 분석용 - 순수 조회 결과
+	private Long proId;
 	private String projectName;
 	
 	//계산용
@@ -22,5 +22,8 @@ public class ProjectAnalysisDto {
 	//계산 결과
 	private Integer progressRate;
 	private long remainDays;
-
+	
+	public void setRemainDays(long remainDays) {
+		this.remainDays = remainDays;
+	}
 }

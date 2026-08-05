@@ -1,15 +1,22 @@
-package com.sb.erp.proj.dto;
+package com.sb.erp.proj.dto.request;
 
 import java.time.LocalDate;
-import java.util.Date;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.Getter;
+import lombok.Setter;
 
-import lombok.Data;
+@Getter @Setter
+public class ProjRequest {
+    private Long comId;
+    private Long empId;
+	private String proStatus;
+	private String proName;
+	private String proDesc;
+	private LocalDate startDate;
+	private LocalDate endDate;
 
-@Data
-public class ProjectDto {
-	private Integer proId;
+}
+/*	private Integer proId;
 	private Integer comId;
 	private Integer empId;
 	private String proStatus;
@@ -28,5 +35,4 @@ public class ProjectDto {
 	private Integer memberCnt; //프로젝트 멤버 인원 db값 존재하지않는 컬럼
 
 	
-	
-}
+	*/
