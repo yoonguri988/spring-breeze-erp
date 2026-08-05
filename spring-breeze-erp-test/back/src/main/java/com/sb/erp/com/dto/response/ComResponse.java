@@ -2,9 +2,13 @@ package com.sb.erp.com.dto.response;
 
 import com.sb.erp.com.entity.Company;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class ComResponse {
 	private long comId;
 	private String industryGrpCode;
