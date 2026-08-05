@@ -26,7 +26,7 @@ public class ProjectMemberController {
 	
 	@GetMapping("/proj_member")
 	public String list(@RequestParam("pro_id") int proId, Model model,Authentication auth) {
-		ProjectDto project = projectService.select(proId);
+		ProjRequest project = projectService.select(proId);
 		SecurityUtil.checkComIdAccess(project.getComId());
 		boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		boolean isCreator = project.getEmpId() == SecurityUtil.getCurrentEmpId();
@@ -39,11 +39,11 @@ public class ProjectMemberController {
 		return "proj/proj_member";} //프로젝트 참여인원 조회
 	
 	  @PostMapping("/proj_member_create") 
-	  public String insert(ProjectMemberDto dto,RedirectAttributes rttr, Authentication auth) { 
+	  public String insert(ProjmRequest dto,RedirectAttributes rttr, Authentication auth) { 
 		    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		    int empId = user.getUser().getEmpId();
 
-			ProjectDto project = projectService.select(dto.getProjectProId());
+			ProjRequest project = projectService.select(dto.getProjectProId());
 			SecurityUtil.checkComIdAccess(project.getComId());
 			
 			boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
@@ -74,7 +74,7 @@ public class ProjectMemberController {
 		
 		   CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		    int empId = user.getUser().getEmpId();
-		ProjectDto project = projectService.select(proId);
+		ProjRequest project = projectService.select(proId);
 		SecurityUtil.checkComIdAccess(project.getComId());
 		boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 		boolean isCreator = project.getEmpId() == empId;
