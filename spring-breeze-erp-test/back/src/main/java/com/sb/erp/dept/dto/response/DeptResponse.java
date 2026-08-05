@@ -5,11 +5,13 @@ import java.util.List;
 
 import com.sb.erp.dept.entity.Department;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class DeptResponse {
 	private long deptId;
 	private long comId;

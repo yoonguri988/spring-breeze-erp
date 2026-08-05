@@ -1,22 +1,18 @@
 package com.sb.erp.dept.dto.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class StatsDeptResponse {
 	private long deptTotal;
 	private long dept0Total;
 	private long dept1Total;
 	private long dept2Total;
 	private long empTotal;
-	
-	public StatsDeptResponse(long deptTotal, long dept0Total, long dept1Total, long dept2Total, long empTotal) {
-		this.deptTotal = deptTotal;
-		this.dept0Total = dept0Total;
-		this.dept1Total = dept1Total;
-		this.dept2Total = dept2Total;
-		this.empTotal = empTotal;
-	}
 }
 
 
