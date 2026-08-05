@@ -1,18 +1,25 @@
-package com.sb.erp.notice.dto; 
+package com.sb.erp.notice.dto.request; 
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /* Notice 게시글을 표현하는 DTO
  * DB 컬럼과 매핑되는 필드 정의
  */
 
-@Data
-public class NoticeDto { //notice
-	private Integer bno;         
+@Getter @Setter
+public class NoticeRequest { //notice
+	private Long empId;
+	private Long comId;
+	private String btitle;
+	private String bcontent;
+	private String bfile;
+	private Long bno;
+}
+
+
+/*
+  	private Integer bno;         
 	private String btitle;    
 	private String bcontent;  
 	private Integer bhit;         
@@ -23,10 +30,7 @@ public class NoticeDto { //notice
 	private Integer comId;
 	private String empName;
 	public boolean isUrgent() {return bcontent!=null && bcontent.contains("긴급");} //외부에서 호출할것이기 때문에 public으로 
-}
 
-
-/*
 DESC sb_erp_db.notice;
 +------------+---------------+------+-----+-------------------+-----------------------------------------------+
 | Field      | Type          | Null | Key | Default           | Extra                                         |

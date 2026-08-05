@@ -32,7 +32,7 @@ public class Notice {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_notice")
     @SequenceGenerator(name = "seq_notice", sequenceName = "SEQ_NOTICE", allocationSize = 1)
 	@Column(name="BNO", nullable = false)
-	private Integer bno; 
+	private Long bno; 
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="COM_ID", nullable = false)

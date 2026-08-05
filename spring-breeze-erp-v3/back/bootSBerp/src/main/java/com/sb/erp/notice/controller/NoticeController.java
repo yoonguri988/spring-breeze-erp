@@ -29,14 +29,14 @@ public class NoticeController {
     
     //공지 목록 조회
     @GetMapping("/list")
-    public String list(NoticeSearchDto search,
+    public String list(NoticeSearchRequest search,
     		Authentication auth, Model model) {
     	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
     	search.setComId(user.getUser().getComId());
     	
     	int currentPage = search.getPstartno(); // 오염되기 전, 진짜 페이지 번호 미리 저장
     	
-    	List<NoticeDto> notices = noticeService.getNoticeListWithUrgent(search); // 긴급5 + 일반목록
+    	List<NoticeRequest> notices = noticeService.getNoticeListWithUrgent(search); // 긴급5 + 일반목록
 
         int totalCnt = noticeService.selectCount(search);              // 전체 건수 (뱃지용)
         long pagingCnt = noticeService.selectCountNoticeList(search);  // 페이징 계산용 (pinnedBnos 반영됨)
@@ -57,7 +57,7 @@ public class NoticeController {
     //공지 등록 처리
     // 첨부파일은 선택사항이므로 required=false (안 붙이면 파일 없는 공지 등록 시 400 에러가 났음)
     @PostMapping("/write")
-    public String insertNotice(NoticeDto dto,
+    public String insertNotice(NoticeRequest dto,
 			@RequestParam(value = "file", required = false) MultipartFile file, HttpSession session, RedirectAttributes rttr) {
     	Integer empId = (Integer) session.getAttribute("empId");
     	Integer comId = (Integer) session.getAttribute("comId");
@@ -78,14 +78,14 @@ public class NoticeController {
     //공지 수정 뷰
     @GetMapping("/edit")
     public String edit(@RequestParam("bno") int bno, Model model) {
-        NoticeDto dto = noticeService.select(bno);
+        NoticeRequest dto = noticeService.select(bno);
         model.addAttribute("dto", dto);
         return "notice/edit"; 
     }
     
     //공지 수정 처리
     @PostMapping("/edit")
-    public String update(NoticeDto dto,
+    public String update(NoticeRequest dto,
 			@RequestParam(value = "file", required = false) MultipartFile file, HttpSession session, RedirectAttributes rttr) {
     	Integer empId = (Integer) session.getAttribute("empId");
     	Integer comId = (Integer) session.getAttribute("comId");
@@ -112,14 +112,14 @@ public class NoticeController {
     @GetMapping("/detail")
     public String select(@RequestParam("bno") int bno, Model model) {
         noticeService.updateHit(bno); // 게시글 상세 진입 시 조회수 1 증가 처리 
-        NoticeDto dto = noticeService.select(bno);
+        NoticeRequest dto = noticeService.select(bno);
         model.addAttribute("notice", dto); // JSP에서 ${notice}로 접근 가능
         return "notice/detail"; // notice/detail.jsp 뷰 반환
     }
 
     // 검색 결과 카운트 (GET 방식) //어디서 쓰이는지 잘 모르겠음
     @GetMapping("/searchCount")
-    public String selectCountNoticeList(NoticeSearchDto search, Model model) {
+    public String selectCountNoticeList(NoticeSearchRequest search, Model model) {
         long searchCount = noticeService.selectCountNoticeList(search);
         model.addAttribute("searchCount", searchCount); // 결과 카운트 정수 바인딩
         return "notice/searchCount"; // 카운트를 노출할 전용 뷰 혹은 페이지 반환
