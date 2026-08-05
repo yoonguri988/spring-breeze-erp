@@ -24,11 +24,11 @@ public interface ApprDocMapper {
 	public Map<String, Object> selectDocCnt(ApprDocDto dto);
 	
 	// 내가 결재 했던 모든 문서
-	public List<Map<String, Object>> selectMyHistoryDocs(ApprDocDto dto);
+	public List<ApprDocDto> selectMyHistoryDocs(ApprDocDto dto);
 	public int selectMyHistoryDocsCnt(ApprDocDto dto);
 	
 	// 내가 결재 해야 할 모든 문서
-	public List<Map<String, Object>> selectMyTodoDocs(ApprDocDto dto);
+	public List<ApprDocDto> selectMyTodoDocs(ApprDocDto dto);
 	public int selectMyTodoDocsCnt(ApprDocDto dto);
 	
 	

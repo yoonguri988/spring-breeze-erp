@@ -28,7 +28,7 @@ public class ApprDocResponse {
 		this.forTitle = doc.getApprForm().getForTitle();
 		this.empId = doc.getEmployee().getEmpId();
 		this.empName = doc.getEmployee().getEmpName();
-		this.comId = doc.getCompany().getId();
+		this.comId = doc.getCompany().getComId();
 		this.docTitle = doc.getDocTitle();
 		this.docContent = doc.getDocContent();
 		this.docStatus = doc.getDocStatus();

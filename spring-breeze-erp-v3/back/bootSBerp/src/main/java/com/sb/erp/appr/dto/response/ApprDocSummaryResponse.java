@@ -1,6 +1,6 @@
 package com.sb.erp.appr.dto.response;
 
-import java.util.Map;
+import com.sb.erp.appr.dto.ApprDocDto;
 
 import lombok.Getter;
 
@@ -15,9 +15,9 @@ public class ApprDocSummaryResponse {
 	private String createdAt;
 	private String updatedAt;
 	
-	public ApprDocSummaryResponse(Map<String, Object> row) {
+	public ApprDocSummaryResponse(ApprDocDto dto) {
 		// Map<String, Object> 에 타입 정보가 하나도 없어서
 		// 뭘 꺼내든 Object로 나와서 직접 타입캐스팅해야 하므로 안전하게 Number로 받아서 .longValue로 통일
-		this.docId = row.get("docId") != null ? ((Number) row.get("docId")).longValue() : null;
+		this.docId = (long) dto.getDocId();
 	}
 }
