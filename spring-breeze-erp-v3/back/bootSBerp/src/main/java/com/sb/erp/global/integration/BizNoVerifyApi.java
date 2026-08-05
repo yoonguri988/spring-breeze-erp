@@ -1,4 +1,4 @@
-package com.sb.erp.api;
+package com.sb.erp.global.integration;
 
 import java.net.URI;
 import java.time.Duration;
@@ -14,7 +14,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.sb.erp.dto.BizNoVerifyDto;
+import com.sb.erp.api.dto.request.BizNoVerifyRequest;
 
 @Service
 public class BizNoVerifyApi {
@@ -42,7 +42,7 @@ public class BizNoVerifyApi {
 	 * 요청 body 예시:
 	 * { "businesses": [ { "b_no": "1234567890", "start_dt": "20240101", "p_nm": "홍길동" } ] }
 	 */
-	public String getResponse(BizNoVerifyDto dto) {
+	public String getResponse(BizNoVerifyRequest dto) {
 		// https 시작하지 않아도 OK /  인코딩문제관련 처리
 		URI uri = UriComponentsBuilder
 				      .fromUriString("https://api.odcloud.kr/api/nts-businessman/v1/validate")

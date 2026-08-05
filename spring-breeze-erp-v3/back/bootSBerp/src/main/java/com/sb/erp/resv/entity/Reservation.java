@@ -28,8 +28,8 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Reservation {
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_department")
-	@SequenceGenerator(name = "seq_department", sequenceName = "SEQ_DEPARTMENT", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_reservation")
+	@SequenceGenerator(name = "seq_reservation", sequenceName = "SEQ_RESERVATION", allocationSize = 1)
 	@Column(name = "REV_ID")
 	private Long revId;
 	
@@ -60,15 +60,15 @@ public class Reservation {
 	@Column(name="END_DT", nullable=false)
 	private LocalDateTime endDt;
 
-	@Column(name="RETURN_DT", nullable=false)
+	@Column(name="RETURN_DT")
 	private LocalDateTime returnDt;
 	
 	// 승인 처리한 직원
 	@ManyToOne
-	@JoinColumn(name = "APPROVED_EMP_ID", nullable=false)
-	private Employee ApprEmployee;
+	@JoinColumn(name = "APPROVED_EMP_ID")
+	private Employee apprEmployee;
 	
-	@Column(name="APPROVED_AT", nullable=false)
+	@Column(name="APPROVED_AT")
 	private LocalDateTime approvedAt;
 	
 	@Column(name = "REJECT_REASON", length = 500)

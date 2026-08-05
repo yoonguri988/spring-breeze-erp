@@ -34,7 +34,7 @@ public class ReservationController {
 
     // 내 예약 목록
     @GetMapping("/my")
-    public String my_list(ResvSearchDto search, Authentication auth, Model model) {
+    public String my_list(ResvSearchRequest search, Authentication auth, Model model) {
     	// 현재 로그인 사용자 정보
     	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
     	search.setComId(user.getUser().getComId());
@@ -144,7 +144,7 @@ public class ReservationController {
     //기간 선택 후 실시간 잔여수량 조회
     @GetMapping("/available")
     @ResponseBody
-    public Map<String, Object> getAvailableQty(ResvSearchDto search, Authentication auth) {
+    public Map<String, Object> getAvailableQty(ResvSearchRequest search, Authentication auth) {
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
         ResDto res = resService.getResourceDetail(search.getResId());
 

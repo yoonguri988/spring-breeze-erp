@@ -14,6 +14,7 @@ import com.sb.erp.com.entity.Company;
 
 @Repository                                             //Entity, PK의 자료형
 public interface CompanyRepository  extends JpaRepository<Company, Long> {
+	// 사업자 번호 중복 확인
 	Optional<Company> findByBizNo(String bizno);
 	
 	// 회사명 자동완성 - keyword, 이름순 상위 5건
@@ -34,10 +35,10 @@ public interface CompanyRepository  extends JpaRepository<Company, Long> {
 			  and (:industryGrpCode is null or c.industryGrpCode = :industryGrpCode)
 			  and (:industryCode is null or c.industryCode = :industryCode)
 			order by c.id desc
-			""",
-			nativeQuery = true)
+			""")
 	Page<Company> search(@Param("keyword") String keyword,
-			@Param("industryGrpCode") String industryGrpCode, @Param("industryCode") String industryCode,
+			@Param("industryGrpCode") String industryGrpCode, 
+			@Param("industryCode") String industryCode,
 			Pageable pageable
 	);	
 }

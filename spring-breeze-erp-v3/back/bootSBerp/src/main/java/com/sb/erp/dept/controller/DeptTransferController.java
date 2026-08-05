@@ -69,7 +69,7 @@ public class DeptTransferController {
     
     /** 이관 최종 실행 (단일 트랜잭션, 실패 시 전체 롤백) */
     @PostMapping("/execute")
-    public String execute(@ModelAttribute DeptTransferExecuteForm form,
+    public String execute(@ModelAttribute DeptTransferExecuteFormRequest form,
                            Authentication authentication,
                            RedirectAttributes redirectAttributes) throws IllegalAccessException {
         // 화면에서 넘어온 comId는 신뢰하지 않고, 인증 정보의 comId로 강제 치환한다
@@ -111,7 +111,7 @@ public class DeptTransferController {
      * @ModelAttribute 로 GET 쿼리스트링(originDeptId, targetDeptId, aiRecommended, dateFrom, dateTo)을 바로 바인딩.
      */
     @GetMapping("/log")
-    public String transferLog(@ModelAttribute DeptTransferLogSearchDto search,
+    public String transferLog(@ModelAttribute DeptTransferLogSearchRequest search,
                                Authentication authentication,
                                Model model) {
         Integer comId = resolveComId(authentication);

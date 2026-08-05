@@ -1,15 +1,13 @@
-package com.sb.erp.dao;
+package com.sb.erp.proj.repository;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.dto.MyWeeklyReportDto;
-import com.sb.erp.dto.ProjectAnalysisDto;
-import com.sb.erp.dto.ProjectDto;
-import com.sb.erp.dto.ProjectSearchDto;
-import com.sb.erp.dto.WeeklyReportDto;
+import com.sb.erp.proj.dto.ProjectAnalysisDto;
+import com.sb.erp.proj.dto.ProjectDto;
+import com.sb.erp.proj.dto.ProjectSearchDto;
+import com.sb.erp.util.dto.move.WeeklyReportDto;
 
 @Mapper
 public interface ProjectMapper {

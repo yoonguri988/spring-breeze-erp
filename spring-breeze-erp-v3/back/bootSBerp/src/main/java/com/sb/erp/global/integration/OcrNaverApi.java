@@ -1,4 +1,4 @@
-package com.sb.erp.api;
+package com.sb.erp.global.integration;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -19,8 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sb.erp.dto.OcrRequestDto;
-import com.sb.erp.dto.OcrResultDto;
+import com.sb.erp.api.dto.request.OcrRequest;
+import com.sb.erp.api.dto.response.OcrResponse;
 
 @Service
 public class OcrNaverApi {
@@ -42,15 +42,15 @@ public class OcrNaverApi {
      * 사업자등록증 이미지를 NCP CLOVA OCR로 전송하고,
      * 화면에서 바로 쓸 수 있도록 파싱된 결과(OcrResultDto)를 반환한다.
      */
-    public OcrResultDto executeOcr(MultipartFile file) throws Exception {
-        OcrRequestDto requestDto = new OcrRequestDto();
+    public OcrResponse executeOcr(MultipartFile file) throws Exception {
+        OcrRequest requestDto = new OcrRequest();
         requestDto.setRequestId(UUID.randomUUID().toString());
         requestDto.setTimestamp(System.currentTimeMillis());
 
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
 
-        OcrRequestDto.ImageDto imageDto = new OcrRequestDto.ImageDto();
+        OcrRequest.ImageDto imageDto = new OcrRequest.ImageDto();
         imageDto.setFormat(extension);
         imageDto.setName("ocr_target");
         requestDto.setImages(Collections.singletonList(imageDto));
@@ -87,7 +87,7 @@ public class OcrNaverApi {
     }
 
     /** NCP 사업자등록증 특화 응답을 OcrResultDto로 매핑 */
-    private OcrResultDto parseBizLicenseResult(String rawJson) throws Exception {
+    private OcrResponse parseBizLicenseResult(String rawJson) throws Exception {
         JsonNode root = objectMapper.readTree(rawJson);
         JsonNode images = root.path("images");
 
@@ -119,7 +119,7 @@ public class OcrNaverApi {
             sb.append(text);
         }
 
-        OcrResultDto dto = new OcrResultDto();
+        OcrResponse dto = new OcrResponse();
         dto.setBizNo(getFieldText(fieldMap, "bizNo"));
         dto.setComName(getFieldText(fieldMap, "comName"));
         dto.setComCeo(getFieldText(fieldMap, "comCeo"));

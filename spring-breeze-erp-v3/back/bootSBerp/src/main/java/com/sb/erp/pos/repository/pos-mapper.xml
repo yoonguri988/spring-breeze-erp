@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sb.erp.dao.PosMapper">
+<mapper namespace="com.sb.erp.pos.repository.PosMapper">
 
 	<!-- 회사별 직급 목록 (기존) -->
 	<select id="selectAll" resultType="PosDto">
@@ -22,6 +22,9 @@
 
 	<!-- 직급 등록 -->
 	<insert id="insert" parameterType="PosDto">
+		<selectKey keyProperty="posId" resultType="int" order="AFTER">
+			select seq_emp_position.currval from dual
+		</selectKey>
 		insert into emp_position (com_id, pos_code, pos_name, pos_order)
 		values (#{comId}, #{posCode}, #{posName}, #{posOrder})
 	</insert>

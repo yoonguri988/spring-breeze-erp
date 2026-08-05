@@ -1,4 +1,4 @@
-package com.sb.erp.controller;
+package com.sb.erp.api.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.sb.erp.api.ApiCoolSms;
-import com.sb.erp.api.BizNoVerifyApi;
-import com.sb.erp.api.OcrNaverApi;
-import com.sb.erp.dto.BizNoVerifyDto;
-import com.sb.erp.dto.OcrResultDto;
+import com.sb.erp.global.integration.ApiCoolSms;
+import com.sb.erp.global.integration.BizNoVerifyApi;
+import com.sb.erp.global.integration.OcrNaverApi;
+import com.sb.erp.api.dto.request.BizNoVerifyRequest;
+import com.sb.erp.api.dto.response.OcrResponse;
 
 import net.nurigo.java_sdk.exceptions.CoolsmsException;
 
@@ -37,7 +37,7 @@ public class ApiUtilController {
      */
 	@PostMapping(value="/bizno/verify" , produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String verify(@RequestBody BizNoVerifyDto bizNoVerify) {
+    public String verify(@RequestBody BizNoVerifyRequest bizNoVerify) {
         return bizNoVerifyApi.getResponse(bizNoVerify);
 	}
 
@@ -50,7 +50,7 @@ public class ApiUtilController {
 
 	    Map<String, Object> resultMap = new HashMap<>();
 	    try {
-	        OcrResultDto parsed = ocrNaverApi.executeOcr(file);
+	        OcrResponse parsed = ocrNaverApi.executeOcr(file);
 	        resultMap.put("status", "success");
 	        resultMap.put("data", parsed); // 화면에서 필드별로 바로 사용
 

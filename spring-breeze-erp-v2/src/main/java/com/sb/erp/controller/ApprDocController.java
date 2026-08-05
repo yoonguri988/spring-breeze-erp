@@ -278,7 +278,7 @@ public class ApprDocController {
 	// 관리자 승인
 	@PostMapping("/approveLineChange")
 	@ResponseBody
-	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT)")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	public Map<String, Object> approveLineChange(
 			@RequestParam("reqId") int reqId,
 			@RequestParam("newEmpId") int newEmpId,

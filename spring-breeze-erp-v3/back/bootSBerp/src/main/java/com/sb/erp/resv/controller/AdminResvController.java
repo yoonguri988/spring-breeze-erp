@@ -32,7 +32,7 @@ public class AdminResvController {
 
 	// 관리자 예약 관리 목록
 	    @GetMapping("/list")
-	    public String list(ResvSearchDto search, 
+	    public String list(ResvSearchRequest search, 
 	    				   Authentication auth, Model model) {
 	    	// 현재 로그인 사용자 정보
 	    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();

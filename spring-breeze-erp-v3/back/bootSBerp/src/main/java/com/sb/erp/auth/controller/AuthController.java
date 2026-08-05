@@ -29,7 +29,7 @@ import jakarta.servlet.http.HttpSession;
 public class AuthController {
 	@Autowired AuthService service;
 	@Autowired EmpService empService;
-	@Autowired CompanyService_v2 comService;
+	@Autowired CompanyService comService;
 	@Autowired PasswordEncoder passEncoder;
 	
 	// 로그인 페이지로 이동
