@@ -6,7 +6,7 @@ import java.util.Map;
 import com.sb.erp.appr.dto.ApprDocDto;
 import com.sb.erp.appr.dto.ApprDocInitResponseDto;
 import com.sb.erp.appr.dto.ApprFormDto;
-import com.sb.erp.appr.dto.ApprLineDto;
+import com.sb.erp.appr.dto.response.ApprLineResponse;
 import com.sb.erp.dept.dto.DeptDto;
 
 public interface ApprDocService {
@@ -24,11 +24,11 @@ public interface ApprDocService {
 	public ApprDocDto selectDocDetail(int docId);
 	
 	// 결재선 관련 파트
-	public List<ApprLineDto> approversByEmpId(ApprDocDto dto);
+	public List<ApprLineResponse> approversByEmpId(ApprDocDto dto);
 	public boolean insertLines(ApprDocDto dto);
-	public List<ApprLineDto> selectLinesByDocId(int docId);
+	public List<ApprLineResponse> selectLinesByDocId(int docId);
 	public void processLine(int docId, int empId, String action);
-	public List<ApprLineDto> selectDeptEmpsForLines(int deptId);
+	public List<ApprLineResponse> selectDeptEmpsForLines(int deptId);
 	public List<DeptDto> cntApprovers(int deptId, int empId);
 	
 	// 페이징

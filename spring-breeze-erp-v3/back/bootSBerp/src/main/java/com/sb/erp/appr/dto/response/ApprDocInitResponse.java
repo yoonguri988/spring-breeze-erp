@@ -7,13 +7,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ApprDocSummaryResponse {
-	private Long docId;
-	private String docTitle;
+public class ApprDocInitResponse {
 	private Long empId;
 	private String empName;
-	private String docStatus;
-	private boolean isImportant;
-	private String createdAt;
-	private String linStatus;
+	private String posName;
+	private int posOrder;
+	private Long comId;
+	private String comName;
+	private Long deptId;
+	private String deptName;
 }

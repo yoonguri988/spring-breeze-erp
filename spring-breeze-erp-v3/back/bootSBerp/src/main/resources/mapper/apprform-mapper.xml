@@ -7,7 +7,7 @@
 	<!-- applicaion.yml mybatis 경로 보고 파라미터타입 경로 수정해야할수도있음 -->
 	
 	<!-- 양식 코드 중복 검사 -->
-	<select id="findByCode" resultType="string" parameterType="ApprFormDto">
+	<select id="findByCode" resultType="string">
 		select
 			for_code
 		from
@@ -21,17 +21,9 @@
 	</select>
 	
 	<!-- 결재 양식 리스트 / 회사별 출력 -->
-	<select id="selectFormList" parameterType="ApprFormSearchDto" resultType="ApprFormDto">
+	<select id="selectFormList" parameterType="ApprFormSearchCondition" resultType="ApprFormResponse">
 		select
-			f.for_id,
-			f.com_id,
-			f.for_code,
-			f.for_title,
-			f.for_content,
-			f.for_status,
-			f.created_at,
-			f.updated_at,
-			f.for_version,
+			f.*,
 			c.com_name as comName
 		from
 			appr_form f
@@ -61,7 +53,7 @@
 	</select>
 	
 	<!-- 결재 양식 리스트 기능 구문 -->
-	<select id="listFormCnt" resultType="int" parameterType="ApprFormSearchDto">
+	<select id="listFormCnt" resultType="int" parameterType="ApprFormSearchCondition">
 		select count(*)
 		from appr_form f
 		<where>

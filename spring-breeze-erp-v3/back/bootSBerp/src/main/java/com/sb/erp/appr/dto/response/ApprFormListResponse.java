@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class ApprFormListResponse {
-	private List<ApprFormResponse> content;;
+	private List<ApprFormResponse> content;
 	private int page;
 	private int pageSize;
 	private int totalCount;

@@ -3,8 +3,12 @@ package com.sb.erp.appr.dto.response;
 import com.sb.erp.appr.entity.ApprDoc;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@NoArgsConstructor
 public class ApprDocResponse {
 	private Long docId;
 	private Long forId;

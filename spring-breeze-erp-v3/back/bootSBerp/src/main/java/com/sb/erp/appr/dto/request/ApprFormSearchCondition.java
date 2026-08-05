@@ -11,4 +11,8 @@ public class ApprFormSearchCondition {
 	private String comName;
 	private Boolean forStatus;
 	private int page = 1;
+	
+	// MyBatis 오프셋 계산용
+	private int pstartno;
+	private int onepagelist = 10;
 }

@@ -6,7 +6,7 @@
 	
 	
 	<!-- 라인 목록 조회 -->
-	<select id="selectLinesByDocId" parameterType="int" resultType="ApprLineDto">
+	<select id="selectLinesByDocId" resultType="ApprLineResponse">
 		select
 			l.lin_id,
 			l.doc_id,

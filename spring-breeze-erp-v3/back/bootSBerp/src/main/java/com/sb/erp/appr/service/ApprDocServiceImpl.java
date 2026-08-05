@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sb.erp.appr.dto.ApprDocDto;
 import com.sb.erp.appr.dto.ApprDocInitResponseDto;
 import com.sb.erp.appr.dto.ApprFormDto;
-import com.sb.erp.appr.dto.ApprLineDto;
+import com.sb.erp.appr.dto.response.ApprLineResponse;
 import com.sb.erp.appr.repository.ApprDocMapper;
 import com.sb.erp.appr.repository.ApprLineMapper;
 import com.sb.erp.dept.dto.DeptDto;
@@ -70,7 +70,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 
 	// 상사들 다 가져오기
 	@Override
-	public List<ApprLineDto> approversByEmpId(ApprDocDto dto) {
+	public List<ApprLineResponse> approversByEmpId(ApprDocDto dto) {
 		return dao.approversByEmpId(dto);
 	}
 
@@ -86,11 +86,11 @@ public class ApprDocServiceImpl implements ApprDocService{
 		int docId = dto.getDocId();
 		
 		// 폼에서 넘어온 결재선 데이터 추출
-		List<ApprLineDto> lineList = dto.getApprLines();
+		List<ApprLineResponse> lineList = dto.getApprLines();
 		
 		// 결재선 순차 적재
 		if(lineList != null && !lineList.isEmpty()) {
-			for(ApprLineDto line : lineList) {
+			for(ApprLineResponse line : lineList) {
 				line.setDocId(docId);
 				lineDao.insertLine(line);
 			}
@@ -118,7 +118,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 
 	// docId로 결재선 가져오기
 	@Override
-	public List<ApprLineDto> selectLinesByDocId(int docId) {
+	public List<ApprLineResponse> selectLinesByDocId(int docId) {
 		return lineDao.selectLinesByDocId(docId);
 	}
 
@@ -141,7 +141,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 		}
 		
 		// 결재선 업데이트
-		ApprLineDto myLine = new ApprLineDto();
+		ApprLineResponse myLine = new ApprLineResponse();
 		myLine.setDocId(docId);
 		myLine.setEmpId(empId);
 		myLine.setLinStatus(action);
@@ -158,16 +158,16 @@ public class ApprDocServiceImpl implements ApprDocService{
 		
 		// 승인했을시 다음 순서 있는지 확인
 		// 전체 결재선 라인 가져옴
-		List<ApprLineDto> lines = lineDao.selectLinesByDocId(docId);
+		List<ApprLineResponse> lines = lineDao.selectLinesByDocId(docId);
 		// 현재 결재한 사용자 정보
-		ApprLineDto current = lines.stream()
+		ApprLineResponse current = lines.stream()
 				// 결재선 데이터의 empId와 로그인한 사용자의 empId가 일치하는 데이터만 남김
 				.filter(l -> l.getEmpId() == empId)
 				// 위에서 남긴 데이터의 첫번째 데이터를 가져옴
 				.findFirst().orElseThrow();
 		
 		// 다음 결재자 정보
-		ApprLineDto next = lines.stream()
+		ApprLineResponse next = lines.stream()
 				// 결재 순서가 내 순서보다 1 더 큰 데이터를 가져옴 
 				.filter(l -> l.getLinOrder() == current.getLinOrder() + 1)
 				// 조건에 맞는 결재자 정보 가져옴 / 없으면 null 담기
@@ -175,7 +175,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 		
 		// 다음순서 있는지 검증
 		if(next != null) { // 있는경우
-			ApprLineDto nextLine = new ApprLineDto();
+			ApprLineResponse nextLine = new ApprLineResponse();
 			nextLine.setDocId(docId);
 			nextLine.setEmpId(next.getEmpId());
 			nextLine.setLinStatus("WAI");
@@ -191,7 +191,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 
 	// 결재선
 	@Override
-	public List<ApprLineDto> selectDeptEmpsForLines(int deptId) {
+	public List<ApprLineResponse> selectDeptEmpsForLines(int deptId) {
 		return dao.selectDeptEmpsForLines(deptId);
 	}
 

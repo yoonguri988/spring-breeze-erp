@@ -1,11 +1,14 @@
 package com.sb.erp.appr.dto.response;
 
-import com.sb.erp.appr.dto.ApprFormDto;
 import com.sb.erp.appr.entity.ApprForm;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@NoArgsConstructor
 public class ApprFormResponse {
 	private Long forId;
 	private Long forVersion;
@@ -23,7 +26,7 @@ public class ApprFormResponse {
 	public ApprFormResponse(ApprForm form) {
 		this.forId = form.getForId();
 		this.forVersion = form.getForVersion();
-		this.comId = form.getCompany().getId();
+		this.comId = form.getCompany().getComId();
 		this.comName = form.getCompany().getComName();
 		this.forCode = form.getForCode();
 		this.forTitle = form.getForTitle();
@@ -32,20 +35,5 @@ public class ApprFormResponse {
 		this.forStatus = form.getForStatus();
 		this.createdAt = form.getCreatedAt() != null ? form.getCreatedAt().toString() : null;
 		this.updatedAt = form.getUpdatedAt() != null ? form.getUpdatedAt().toString() : null;
-	}
-	
-	// MyBatis 경로 - Dto에서 변환
-	public ApprFormResponse(ApprFormDto dto) {
-		this.forId = (long) dto.getForId();
-		this.forVersion = (long) dto.getForVersion();
-		this.comId = (long) dto.getComId();
-		this.comName = dto.getComName();
-		this.forCode = dto.getForCode();
-		this.forTitle = dto.getForTitle();
-		this.forContent = dto.getForContent();
-		this.forSchema = dto.getForSchema();
-		this.forStatus = dto.getForStatus();
-		this.createdAt = dto.getCreatedAt();
-		this.updatedAt = dto.getUpdatedAt();
 	}
 }
