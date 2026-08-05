@@ -44,7 +44,7 @@ public class TaskController {
 		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		int empId = user.getUser().getEmpId();
 
-		ProjectDto project = projectService.select(projectProId);
+		ProjRequest project = projectService.select(projectProId);
 		SecurityUtil.checkComIdAccess(project.getComId());
 		boolean isCreator = project.getEmpId() == empId;
 		boolean isMember = memberservice.select(projectProId).stream()
@@ -61,13 +61,13 @@ public class TaskController {
 	}
 	
 	@PostMapping("/task_create") 
-	public String create(TaskDto dto, RedirectAttributes rttr,Authentication auth) {
+	public String create(TaskRequest dto, RedirectAttributes rttr,Authentication auth) {
 		
 	    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 	    int empId = user.getUser().getEmpId();
 	    int comId = user.getUser().getComId();
 	    
-	    ProjectDto project = projectService.select(dto.getProId());
+	    ProjRequest project = projectService.select(dto.getProId());
 	    SecurityUtil.checkComIdAccess(project.getComId());
 	    boolean isCreator = project.getEmpId() == empId;
 	    boolean isMember = memberservice.select(dto.getProId()).stream()
@@ -79,7 +79,7 @@ public class TaskController {
 	    
 	    dto.setComId(comId);
 	    
-		ProjectMemberDto member = memberservice.selectOne(dto.getPmId());
+		ProjmRequest member = memberservice.selectOne(dto.getPmId());
 		if (member == null) {
 			rttr.addFlashAttribute("result", "유효하지 않은 담당자입니다.");
 			return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();
@@ -100,10 +100,10 @@ public class TaskController {
 	
 	 @GetMapping("/task_detail")
 	 public String view(@RequestParam("task_id") int taskId,Model model, Authentication auth) {
-	 TaskDto dto = service.select(taskId);
+	 TaskRequest dto = service.select(taskId);
 	 
 	  // 회사 소속 검증: ROOT/ADMIN이 아니면 자기 회사 프로젝트의 태스크만 접근 가능
-	  ProjectDto project = projectService.select(dto.getProId());
+	  ProjRequest project = projectService.select(dto.getProId());
 	  SecurityUtil.checkComIdAccess(project.getComId());
 	  
 	  model.addAttribute("dto",dto);
@@ -130,10 +130,10 @@ public class TaskController {
 		 CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		 int empId = user.getUser().getEmpId();
 
-		 TaskDto task = service.select(taskId);
-		 ProjectDto project = projectService.select(task.getProId());
+		 TaskRequest task = service.select(taskId);
+		 ProjRequest project = projectService.select(task.getProId());
 		 SecurityUtil.checkComIdAccess(project.getComId());
-		 ProjectMemberDto assignee = memberservice.selectOne(task.getPmId());
+		 ProjmRequest assignee = memberservice.selectOne(task.getPmId());
 
 		 boolean isCreator = project.getEmpId() == empId;
 		 boolean isAssignee = assignee != null && assignee.getEmpId() == empId;
@@ -150,14 +150,14 @@ public class TaskController {
 		  
 	  
 	  @PostMapping("/task_edit")
-	  public String edit(TaskDto dto,RedirectAttributes rttr, Authentication auth) {
+	  public String edit(TaskRequest dto,RedirectAttributes rttr, Authentication auth) {
 		  CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		  int empId = user.getUser().getEmpId();
 		  //수정 권한 검증: ROOT/ADMIN, 프로젝트 생성자, 담당자 본인만 가능
-		  TaskDto original = service.select(dto.getTaskId());
-		  ProjectDto project = projectService.select(original.getProId());
+		  TaskRequest original = service.select(dto.getTaskId());
+		  ProjRequest project = projectService.select(original.getProId());
 		  SecurityUtil.checkComIdAccess(project.getComId());
-		  ProjectMemberDto assignee = memberservice.selectOne(original.getPmId());
+		  ProjmRequest assignee = memberservice.selectOne(original.getPmId());
 		  
 		  boolean isCreator = project.getEmpId() == empId;
 		  boolean isAssignee = assignee != null && assignee.getEmpId() == empId;
@@ -185,7 +185,7 @@ public class TaskController {
 		  CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		  int empId = user.getUser().getEmpId();
 		  // 삭제 권한 검증: ROOT/ADMIN, 프로젝트 생성자만 가능 (담당자 본인은 제외)
-		  ProjectDto project = projectService.select(proId);
+		  ProjRequest project = projectService.select(proId);
 		  SecurityUtil.checkComIdAccess(project.getComId());
 		  boolean isCreator = project.getEmpId() == empId;
 
@@ -202,7 +202,7 @@ public class TaskController {
 	  
 	  
 	    @GetMapping("/task_list")
-	    public String myList(TaskSearchDto search, Model model,Authentication auth) {
+	    public String myList(TaskSearchRequest search, Model model,Authentication auth) {
 	    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 	    	int empId =user.getUser().getEmpId();
 	    	int comId = user.getUser().getComId();
@@ -213,9 +213,9 @@ public class TaskController {
 	        int totalCnt = service.selectMyTasksCount(search);
 	        PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
 	        search.setPstartno(paging.getPstartno());
-	        List<TaskDto> tasks = service.selectMyTasks(search);
+	        List<TaskRequest> tasks = service.selectMyTasks(search);
 
-	        for (TaskDto task : tasks) {
+	        for (TaskRequest task : tasks) {
 	            boolean delayed =
 	                    !"DONE".equals(task.getTaskStatus())
 	                    && task.getTaskEndDate().isBefore(LocalDate.now());
@@ -233,9 +233,9 @@ public class TaskController {
 		
 		@GetMapping("/gantt")
 		@ResponseBody
-		public List<TaskDto> gantt(@RequestParam("pro_id") int proId, Authentication auth){
+		public List<TaskRequest> gantt(@RequestParam("pro_id") int proId, Authentication auth){
 			
-		    ProjectDto project = projectService.select(proId);
+		    ProjRequest project = projectService.select(proId);
 		    SecurityUtil.checkComIdAccess(project.getComId());
 
 			return dependencyService.selectTaskDependencies(proId);

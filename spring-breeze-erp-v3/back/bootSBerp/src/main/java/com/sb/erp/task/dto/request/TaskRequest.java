@@ -1,12 +1,24 @@
-package com.sb.erp.task.dto;
+package com.sb.erp.task.dto.request;
 
 import java.time.LocalDate;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class TaskDto {
-	private Integer taskId;
+@Getter @Setter
+public class TaskRequest {
+
+	private Long proId;
+	private Long comId;
+	private Long pmId;          // 담당자 (project_member)
+	private Long parentTaskId;  // 선행 태스크 - 없으면 null
+	private String taskName;
+	private String taskDesc;
+	private String taskStatus;
+	private LocalDate taskStartDate;
+	private LocalDate taskEndDate;
+}
+/*	private Integer taskId;
 	private Integer proId;
 	private Integer comId;
 	private String taskName;
@@ -30,6 +42,4 @@ public class TaskDto {
 	private LocalDate endDate;
 	
     // 지연 여부
-    private boolean delayed;
-    
-}
+    private boolean delayed;*/

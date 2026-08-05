@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sb.erp.dao.TaskDependencyMapper">
+<mapper namespace="com.sb.erp.task.repository.TaskDependencyMapper">
 
 <!-- 선행 태스크 지정하여 태스크 생성 (task_id는 trg_task_bi 트리거가 자동 채움) -->
 <!-- parent_task_id->null 값 허용인데 실제 null값 들어오면 오류> 자바-DB 통신 과정버그라고 함> 해결책>jdbcType=INTEGER -->
-<insert id="insertWithParent" parameterType="TaskDto">
+<insert id="insertWithParent" parameterType="TaskRequest">
 	insert into task (pro_id , com_id , task_name , task_desc , task_status , pm_id , 
 	task_start_date , task_end_date , parent_task_id , created_at , updated_at)
 	values(#{proId} , #{comId} , #{taskName} , #{taskDesc} , #{taskStatus} , #{pmId},
@@ -12,7 +12,7 @@
 </insert>
 
 <!-- 태스크 의존성 트리 조회 (선행 -> 후행 순으로 정렬) -->
-<select id="selectTaskDependencies" parameterType="int" resultType="TaskDto">
+<select id="selectTaskDependencies" parameterType="int" resultType="TaskResponse">
 	<![CDATA[
 	with task_hierarchy (
 		task_id, pro_id, pm_id, com_id, task_name, task_desc, task_status,
@@ -38,7 +38,7 @@
 </select>
 
 <!-- 태스크 일정 및 선행 태스크 수정 (updated_at은 trg_task_bu 트리거가 자동 처리) -->
-<update id="updateTaskSchedule" parameterType="TaskDto">
+<update id="updateTaskSchedule" parameterType="TaskRequest">
 	update task set
 	task_name = #{taskName},
 	task_desc = #{taskDesc},
@@ -68,7 +68,7 @@
 </update>
 
 <!-- 후속 작업 조회 -->
-<select id="selectImpactTasks" parameterType="int" resultType="TaskDto">
+<select id="selectImpactTasks" parameterType="int" resultType="TaskResponse">
 <![CDATA[
 SELECT
     task_id,

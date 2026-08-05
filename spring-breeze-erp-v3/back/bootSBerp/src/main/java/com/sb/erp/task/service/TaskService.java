@@ -9,10 +9,10 @@ import com.sb.erp.dto.TaskSearchDto;
 public interface TaskService {
 	
 	//태스크 추가
-	public int insert(TaskDto dto);
+	public int insert(TaskRequest dto);
 	
 	//태스크 참여 명단 조회
-	public List<TaskDto> selectAll(TaskSearchDto search);
+	public List<TaskRequest> selectAll(TaskSearchRequest search);
 	
 	//태스크 개수 카운트
 	public int selectCnt(int proId);
@@ -21,27 +21,27 @@ public interface TaskService {
 	public int delete(int taskId);
 	
 	//태스크 수정
-	public int update(TaskDto dto);
+	public int update(TaskRequest dto);
 	
 	//태스크 상세 조회
-	public TaskDto select(int taskId);
+	public TaskRequest select(int taskId);
 	
 	//태스크 수정뷰
-	public TaskDto taskEditView(int taskId);
+	public TaskRequest taskEditView(int taskId);
 	
 	//태스크 주간 보고서
-	public MyWeeklyReportDto myWeeklyReport(int empId);
+	public MyWeeklyReportResponse myWeeklyReport(int empId);
 	
 	//지연 태스크 목록
 	public List<String>delayedTaskNames(int empId);
 	
 	//pdf보고서 생성
-	public byte[] createMyWeeklyReport(MyWeeklyReportDto dto);
+	public byte[] createMyWeeklyReport(MyWeeklyReportResponse dto);
 	
 	//내 태스크 목록조회
-	public List<TaskDto> selectMyTasks(TaskSearchDto search);
-	public int selectMyTasksCount(TaskSearchDto search);
+	public List<TaskRequest> selectMyTasks(TaskSearchRequest search);
+	public int selectMyTasksCount(TaskSearchRequest search);
 	
 	//태스크 목록
-	public List<TaskDto> selectTaskList(int proId);
+	public List<TaskRequest> selectTaskList(int proId);
 }

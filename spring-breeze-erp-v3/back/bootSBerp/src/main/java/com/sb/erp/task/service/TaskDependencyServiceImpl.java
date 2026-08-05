@@ -21,16 +21,16 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 	@Autowired ProjectMapper projectMapper;
 	
 	//선행 태스크를 지정하여 태스크 생성
-	@Override public int insertWithParent(TaskDto dto) {  
+	@Override public int insertWithParent(TaskRequest dto) {  
 		
 		//프로젝트 done이면 태스크 못넣게
-		ProjectDto project = projectMapper.select(dto.getProId());
+		ProjRequest project = projectMapper.select(dto.getProId());
 		if (project != null && "DONE".equals(project.getProStatus())) {
 			throw new IllegalStateException("완료된 프로젝트에는 태스크를 추가할 수 없습니다.");
 		}
 		if(dto.getParentTaskId()!=null) {
-			List<TaskDto> tasks=dao.selectTaskDependencies(dto.getProId());
-			TaskDto parent = tasks.stream()
+			List<TaskRequest> tasks=dao.selectTaskDependencies(dto.getProId());
+			TaskRequest parent = tasks.stream()
 							.filter(t->t.getTaskId().equals(dto.getParentTaskId()))
 							.findFirst()
 							.orElseThrow(()->new IllegalArgumentException("지정한 선행 태스크가 존재하지 않습니다."));
@@ -43,10 +43,10 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 		}
 	
 	//태스크 의존성 트리 조회
-	@Override public List<TaskDto> selectTaskDependencies(int proId) {  return dao.selectTaskDependencies(proId); }
+	@Override public List<TaskRequest> selectTaskDependencies(int proId) {  return dao.selectTaskDependencies(proId); }
 	
 	//태스크 일정 및 선행 태스크 수정
-	@Override public int updateTaskSchedule(TaskDto dto) {  
+	@Override public int updateTaskSchedule(TaskRequest dto) {  
 		
 		 // 연쇄 일정 계산 중 동시 수정 방지를 위해, 수정 대상 태스크 + 자손만 잠금(FOR UPDATE WAIT 5)
 		 // (프로젝트 전체를 잠그면 관계없는 태스크 수정까지 막혀서 범위를 좁힘 - START WITH ~ CONNECT BY)
@@ -60,7 +60,7 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
          throw new IllegalStateException("다른 사용자가 이 태스크의 일정을 수정 중입니다. 잠시 후 다시 시도해주세요.");
 	    }
 		 //프로젝트 done이면 태스크 못넣게
-		 ProjectDto project = projectMapper.select(dto.getProId());
+		 ProjRequest project = projectMapper.select(dto.getProId());
 		 if (project != null && "DONE".equals(project.getProStatus())) {
 		        throw new IllegalStateException("완료된 프로젝트에는 태스크를 수정할 수 없습니다.");
 		 }
@@ -73,14 +73,14 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 		int result = dao.updateTaskSchedule(dto);
 		
 		//3)전체 태스크 목록 재조회(선행->후행 순 정렬된 상태)
-		List<TaskDto> allTasks = dao.selectTaskDependencies(dto.getProId());
+		List<TaskRequest> allTasks = dao.selectTaskDependencies(dto.getProId());
 		
 		//4)연쇄적으로 밀려야 하는 후속 태스크들만 추려서 리스트에 담기
-		List<TaskDto> targetList = new ArrayList<>();
+		List<TaskRequest> targetList = new ArrayList<>();
 		
-		for(TaskDto task : allTasks) {
+		for(TaskRequest task : allTasks) {
 			if(task.getParentTaskId()==null) {continue;}
-			TaskDto parent = allTasks.stream()
+			TaskRequest parent = allTasks.stream()
 									 .filter(t->t.getTaskId().equals(task.getParentTaskId()))
 									 .findFirst()
 									 .orElse(null);
@@ -102,12 +102,12 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 		return result; }
 
 	//벌크 연쇄 업데이트
-	@Override public void updateBatchTaskSchedule(List<TaskDto> list) { dao.updateBatchTaskSchedule(list); }
+	@Override public void updateBatchTaskSchedule(List<TaskRequest> list) { dao.updateBatchTaskSchedule(list); }
 
 	// DFS 기반 순환 참조 역방향 추적
 	private boolean isCyclic(Integer taskId,Integer parentTaskId,Integer proId) {
 
-		List<TaskDto> list = dao.selectTaskDependencies(proId);
+		List<TaskRequest> list = dao.selectTaskDependencies(proId);
 		Integer pointer = parentTaskId;
 
 		while (pointer != null) {
@@ -118,14 +118,14 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 			pointer = list.stream()
 			        .filter(t -> t.getTaskId().equals(currentFindId))
 			        .findFirst()
-			        .map(TaskDto::getParentTaskId)
+			        .map(TaskRequest::getParentTaskId)
 			        .orElse(null);
 		}
 		return false;
 	}
 	
 	//후속 작업 리스트
-	@Override public List<TaskDto> selectImpactTasks(int taskId) {  return dao.selectImpactTasks(taskId); }
+	@Override public List<TaskRequest> selectImpactTasks(int taskId) {  return dao.selectImpactTasks(taskId); }
 	
 	
 }
