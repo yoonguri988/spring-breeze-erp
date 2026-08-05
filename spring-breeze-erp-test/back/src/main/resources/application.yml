@@ -53,3 +53,8 @@ resource:
 
 #server:
 #  port: 8484s
+
+logging:
+  level:
+    com.sb.erp.com.repository: trace
+    org.mybatis: trace
