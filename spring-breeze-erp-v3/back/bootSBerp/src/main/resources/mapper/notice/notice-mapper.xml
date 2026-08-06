@@ -88,7 +88,7 @@
   </select>
 
 	<!-- 페이징 계산용 카운트(전체 카운트(ex:23)-긴급공지(ex:5) -> 18개면 2페이지로) -->
-	<select id="selectCountNoticeList" resultType="long" parameterType="NoticeSearchRequest">
+	<select id="selectCountNoticeList" resultType="int" parameterType="NoticeSearchRequest">
 	  select count(*)
 	  from notice
 	  where com_id = #{comId}

@@ -1,22 +1,37 @@
-package com.sb.erp.notice.dto.request; 
+package com.sb.erp.notice.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /* Notice 게시글을 표현하는 DTO
  * DB 컬럼과 매핑되는 필드 정의
  */
+@Getter @Setter @NoArgsConstructor
+public class NoticeRequest {
 
-@Getter @Setter
-public class NoticeRequest { //notice
-	private Long empId;
-	private Long comId;
-	private String btitle;
-	private String bcontent;
-	private String bfile;
-	private Long bno;
+    private Long bno; // 수정/삭제 시에만 필요, 등록 시엔 null (auto_increment)
+
+    @NotNull(message = "회사 정보는 필수입니다.")
+    private Long comId;
+
+    @NotNull(message = "사원 정보는 필수입니다.")
+    private Long empId;
+
+    @NotBlank(message = "제목은 필수입니다.")
+    @Size(max = 200, message = "제목은 200자를 초과할 수 없습니다.")
+    private String btitle;
+
+    @NotBlank(message = "내용은 필수입니다.")
+    @Size(max = 1000, message = "내용은 1000자를 초과할 수 없습니다.")
+    private String bcontent;
+
+    @Size(max = 500, message = "첨부파일 경로는 500자를 초과할 수 없습니다.")
+    private String bfile;
 }
-
 
 /*
   	private Integer bno;         

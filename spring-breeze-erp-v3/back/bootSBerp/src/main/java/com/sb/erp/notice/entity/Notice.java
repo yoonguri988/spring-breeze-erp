@@ -55,20 +55,10 @@ public class Notice {
 	@Column(name="BFILE", length=500)
 	private String bfile;    
 	
-	@Column(name="CREATED_AT", nullable = false)
-	private LocalDateTime createdAt; 
-	
-	@Column(name="UPDATED_AT", nullable = false)
-	private LocalDateTime updatedAt; 
+	@Column(name = "CREATED_AT", insertable = false, updatable = false)
+	private LocalDateTime createdAt;
 
-	@PrePersist
-	void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
-	@PreUpdate
-	void onUpdate() {
-		this.updatedAt = LocalDateTime.now();		
-	}
+	@Column(name = "UPDATED_AT", insertable = false, updatable = false)
+	private LocalDateTime updatedAt;
 
 }
