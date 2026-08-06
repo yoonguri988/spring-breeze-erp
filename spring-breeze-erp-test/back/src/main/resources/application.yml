@@ -34,7 +34,7 @@ spring:
 mybatis:
   config-location: classpath:mybatis-config.xml
   mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.sb.erp.**.dto
+  type-aliases-package: com.sb.erp.**.dto,com.sb.erp.**.dto.**
   
 #jwt:
 #  issuer: thejoa703
@@ -59,3 +59,5 @@ logging:
     com.sb.erp.com.repository: trace
     com.sb.erp.dept.repository: trace
     org.mybatis: trace
+
+debug: true
