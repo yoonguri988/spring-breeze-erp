@@ -14,7 +14,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// TODO: @AllArgsConstructor는 기존 코드 깨짐 방지용 임시 조치
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class DeptTransferImpactResponse {
 	private long deptId;
