@@ -17,40 +17,40 @@ public class TaskServiceImpl implements TaskService {
 	@Autowired ReportApi reportApi;
 		
 	//태스크 추가
-	@Override public int insert(TaskDto dto) {  return dao.insert(dto); }
+	@Override public int insert(TaskRequest dto) {  return dao.insert(dto); }
 
 	/*paging*/
-	@Override public List<TaskDto> selectAll(TaskSearchDto search) {  return dao.selectAll(search); }
+	@Override public List<TaskRequest> selectAll(TaskSearchRequest search) {  return dao.selectAll(search); }
 	@Override public int selectCnt(int proId) {  return dao.selectCnt(proId); }
 	
 	//태스크 삭제
 	@Override public int delete(int taskId) {  return dao.delete(taskId); }
 	
 	//태스크 수정
-	@Override public int update(TaskDto dto) {  return dao.update(dto); }
+	@Override public int update(TaskRequest dto) {  return dao.update(dto); }
 	
 	//태스크 상세조회
-	@Override public TaskDto select(int taskId) {  return dao.select(taskId); }
+	@Override public TaskRequest select(int taskId) {  return dao.select(taskId); }
 	
 	//태스크 수정뷰
-	@Override public TaskDto taskEditView(int taskId) { return dao.select(taskId); }
+	@Override public TaskRequest taskEditView(int taskId) { return dao.select(taskId); }
 
 	//태스크 주간 보고서
-	@Override public MyWeeklyReportDto myWeeklyReport(int empId) {  return dao.myWeeklyReport(empId); }
+	@Override public MyWeeklyReportResponse myWeeklyReport(int empId) {  return dao.myWeeklyReport(empId); }
 
 	//지연 태스크 목록
 	@Override public List<String> delayedTaskNames(int empId) {  return dao.delayedTaskNames(empId); }
 	
 	//pdf보고서 생성
-	@Override public byte[] createMyWeeklyReport(MyWeeklyReportDto dto) {
+	@Override public byte[] createMyWeeklyReport(MyWeeklyReportResponse dto) {
 	    return reportApi.createMyWeeklyReport(dto); }
 	
 	//내 태스크 목록조회 paging
-	@Override public List<TaskDto> selectMyTasks(TaskSearchDto search) {  return dao.selectMyTasks(search); }
-	@Override public int selectMyTasksCount(TaskSearchDto search) {  return dao.selectMyTasksCount(search); }
+	@Override public List<TaskRequest> selectMyTasks(TaskSearchRequest search) {  return dao.selectMyTasks(search); }
+	@Override public int selectMyTasksCount(TaskSearchRequest search) {  return dao.selectMyTasksCount(search); }
 
 	//태스크 목록
-	@Override public List<TaskDto> selectTaskList(int proId) {  return dao.selectTaskList(proId); }
+	@Override public List<TaskRequest> selectTaskList(int proId) {  return dao.selectTaskList(proId); }
 
 
 	

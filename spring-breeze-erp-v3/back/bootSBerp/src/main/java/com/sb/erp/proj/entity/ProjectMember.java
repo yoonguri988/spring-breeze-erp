@@ -29,7 +29,7 @@ public class ProjectMember {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_project_member")
     @SequenceGenerator(name = "seq_project_member", sequenceName = "SEQ_PROJECT_MEMBER", allocationSize = 1)
 	@Column(name="PM_ID", nullable = false)	
-	private Integer pmId;
+	private Long pmId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="PROJECT_PRO_ID", nullable = false)

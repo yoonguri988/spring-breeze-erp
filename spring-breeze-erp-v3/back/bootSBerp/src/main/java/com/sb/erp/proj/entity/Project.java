@@ -19,8 +19,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -67,27 +65,20 @@ public class Project {
 	@Column(name="END_DATE", nullable = false)
 	private LocalDate endDate;
 	
-	@Column(name="ACTUAL_START_DATE")
-	private LocalDate actualStartDate; 
+	// 날짜 컬럼들 모두 DB에서 처리 / 순수조회용
 	
-	@Column(name="ACTUAL_END_DATE")
+	@Column(name="ACTUAL_START_DATE", insertable = false, updatable = false)
+	private LocalDate actualStartDate; 
+
+	@Column(name="ACTUAL_END_DATE", insertable = false, updatable = false)
 	private LocalDate actualEndDate; 
 
-	@Column(name="CREATED_AT")
+	@Column(name = "CREATED_AT", insertable = false, updatable = false)
 	private LocalDateTime createdAt;
-	
-	@Column(name="UPDATED_AT")
+
+	@Column(name = "UPDATED_AT", insertable = false, updatable = false)
 	private LocalDateTime updatedAt;
-	
-	@PrePersist
-	void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
-	@PreUpdate
-	void onUpdate() {
-		this.updatedAt = LocalDateTime.now();		
-	}
+
 	
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default

@@ -1,4 +1,4 @@
-package com.sb.erp.api;
+package com.sb.erp.global.integration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sb.erp.dto.MyWeeklyReportDto;
-import com.sb.erp.dto.WeeklyReportDto;
+import com.sb.erp.week.dto.response.MyWeeklyReportResponse;
+import com.sb.erp.week.dto.response.WeeklyReportResponse;
 
 @Service
 public class ReportApi {
@@ -23,7 +23,7 @@ public class ReportApi {
 	   private static final String TEMPLATE_DEVELOPER_DOC_ID = "1YcvPLTg2601gLI-Ri0t3F3eOd34XqY-sQOU78UvDoQM";
 	  // private static final String TARGET_FOLDER_ID ="https://drive.google.com/drive/u/0/folders/1I2BQgF0xYZLmj0TGgadTVjDjGBuueKhA";
 	   //관리자용
-	   public void createReport(WeeklyReportDto dto) {
+	   public void createReport(WeeklyReportResponse dto) {
 		   
 		String accessToken = googleDocsApi.getNewAccessToken().trim();
      
@@ -56,7 +56,7 @@ public class ReportApi {
 
 	   }
 	   // 개발자 개인용 - 즉시 PDF 다운로드, 저장 없음
-	    public byte[] createMyWeeklyReport(MyWeeklyReportDto dto) {
+	    public byte[] createMyWeeklyReport(MyWeeklyReportResponse dto) {
 	        String accessToken = googleDocsApi.getNewAccessToken().trim();
 
 	        ReportSections sections = openAiGpt.myWeeklyReportSections(dto);
