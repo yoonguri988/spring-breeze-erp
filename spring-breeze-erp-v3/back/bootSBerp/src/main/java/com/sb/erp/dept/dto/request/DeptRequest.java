@@ -1,9 +1,12 @@
 package com.sb.erp.dept.dto.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class DeptRequest {
 	private long deptId; // 검색 조건 - 특정 부서 id
 	private long comId; // 소속 회사

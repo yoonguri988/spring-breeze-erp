@@ -1,15 +1,16 @@
 package com.sb.erp.dept.dto.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter
-@Setter
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class DeptTransferLogSearchRequest {
-    private Integer originDeptId; //원부서
-    private Integer targetDeptId; //대상부서
+    private long originDeptId; //원부서
+    private long targetDeptId; //대상부서
     // "Y" | "N" | null(전체)
     private String aiRecommended; // ai 제안여부   
     private String dateFrom;      // 처리시작일자
