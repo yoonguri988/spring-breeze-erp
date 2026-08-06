@@ -14,7 +14,6 @@ import com.sb.erp.auth.entity.Authority;
  * 사원-권한 매핑 Entity (emp_auth 테이블)
  *
  * ── 왜 @ManyToMany가 아니라 별도 Entity인가 ──
- *
  * emp_auth 테이블에 독립 PK(emp_aut_id)가 있고,
  * 향후 부여일시, 부여자 등 추가 컬럼이 생길 수 있음.
  * @ManyToMany는 중간 테이블에 추가 컬럼을 넣을 수 없어서

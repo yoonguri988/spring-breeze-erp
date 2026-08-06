@@ -2,10 +2,10 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sb.erp.dao.EmpMapper">
+<mapper namespace="com.sb.erp.emp.repository.EmpMapper">
 
 	<!-- jsj : 사원 상세 조회 -->
-	<select id="selectByEmpId" resultType="EmpDto">
+	<select id="selectByEmpId" resultType="com.sb.erp.emp.dto.response.EmpResponse">
 		select e.emp_id, e.emp_no, e.emp_name, e.com_id,
 			   e.emp_email, e.emp_mobile, e.emp_status,
 			   e.dept_id, d.dept_name, 
@@ -20,7 +20,7 @@
 	</select>
 	
 	<!-- jsj : 사원 검색 + 페이징 -->
-	<select id="search" parameterType="EmpSearchDto" resultType="EmpDto">
+	<select id="search" parameterType="com.sb.erp.emp.dto.request.EmpSearchRequest" resultType="com.sb.erp.emp.dto.response.EmpResponse">
 		select e.emp_id, e.emp_no, e.emp_name,
 			   d.dept_name, p.pos_name,
 			   e.emp_email, e.emp_mobile, e.emp_status,
@@ -73,7 +73,7 @@
 	</select>
 
 	<!-- jsj : 사원 등록, emp_id는 트리거가 시퀀스로 자동 등록(제외) -->
-	<insert id="insert" parameterType="EmpDto">
+	<insert id="insert" parameterType="com.sb.erp.emp.dto.request.EmpRequest">
 		insert into employee
 		(emp_no, emp_pass, emp_name,
 		dept_id, pos_id, com_id,
@@ -90,7 +90,7 @@
 	</insert>
 
 	<!-- jsj : 사원 정보 수정 -->
-	<update id="update" parameterType="EmpDto">
+	<update id="update" parameterType="com.sb.erp.emp.dto.request.EmpRequest">
 		update employee
 		set emp_name = #{empName},
 			dept_id = #{deptId},
@@ -119,7 +119,7 @@
 	
 	
 	<!-- jsj: 회사 내 권한 + 사원 정보 -->
-	<select id="selectAuthByComId" parameterType="int" resultType="EmpAuthDto">
+	<select id="selectAuthByComId" parameterType="int" resultType="com.sb.erp.perm.dto.response.EmpAuthResponse">
 		select e.emp_id, e.emp_name, e.emp_no, e.com_id,
         	   e.dept_id, d.dept_name
         	   e.pos_id,  p.pos_name
@@ -136,7 +136,7 @@
 	
 	
 	<!-- cyj: 비밀번호 찾기시 해당하는 사원정보가 있는지 확인 -->
-	<select id="selectForVerify" parameterType="EmpDto" resultType="EmpDto">
+	<select id="selectForVerify" parameterType="com.sb.erp.emp.dto.request.EmpRequest" resultType="com.sb.erp.emp.dto.response.EmpResponse">
 		select *
 		from employee
 		where emp_no = #{empNo}
@@ -145,14 +145,14 @@
 	</select>
 	
 	<!-- cyj: 비밀번호 재설정 -->
-	<update id="updatePassByEmpId" parameterType="EmpDto">
+	<update id="updatePassByEmpId" parameterType="com.sb.erp.emp.dto.request.EmpRequest">
 		update employee
 		   set emp_pass = #{empPass}
 		 where emp_id = #{empId} and com_id = #{comId}
 	</update>
 	
 	<!-- cyj: 이메일을 기준으로 사용자 정보 찾기 -->
-	<select id="selectByEmpEmail" parameterType="string" resultType="EmpDto">
+	<select id="selectByEmpEmail" parameterType="string" resultType="com.sb.erp.emp.dto.response.EmpResponse">
 		select e.*, d.dept_name, p.pos_name, c.com_name
 		from employee e
 		join department   d on d.dept_id = e.dept_id
@@ -169,7 +169,7 @@
 	</select>
 	
 	<!-- cyj: 부서 아이디를 기준으로 사원 정보 확인-->
-	<select id="selectByDeptId" resultType="EmpDto">
+	<select id="selectByDeptId" resultType="com.sb.erp.emp.dto.response.EmpResponse">
 		select e.*, p.pos_name
 		from employee e
 		join emp_position p on e.pos_id = p.pos_id
@@ -180,7 +180,7 @@
 	
 	
 	<!-- 비밀번호 분실 - session(empId) 기반, 본인확인 후에만 진입 가능 -->
-	<select id="selectAuthByEmpId" resultType="EmpDto" parameterType="int">
+	<select id="selectAuthByEmpId" resultType="com.sb.erp.emp.dto.response.EmpResponse" parameterType="int">
 		select e.emp_id, e.emp_no, e.emp_name, e.com_id,
 		e.dept_id, d.dept_name, 
 		e.pos_id, p.pos_name, 
@@ -195,7 +195,7 @@
 	</select>
 	
 	<!-- cyj: 비밀번호 분실시 본인 확인 - EMP_ID로만 조회해서 업데이트 -->
-	<update id="updatePassByEmpIdOnly" parameterType="EmpDto">
+	<update id="updatePassByEmpIdOnly" parameterType="com.sb.erp.emp.dto.request.EmpRequest">
 		update employee
 		   set emp_pass = #{empPass}
 		 where emp_id = #{empId}

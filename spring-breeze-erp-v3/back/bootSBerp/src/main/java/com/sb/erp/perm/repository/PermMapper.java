@@ -1,12 +1,12 @@
-package com.sb.erp.dao;
+package com.sb.erp.perm.repository;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.sb.erp.dto.AuthPermDto;
+import com.sb.erp.perm.dto.response.PermResponse;
 
 @Mapper
 public interface PermMapper {
 
-	AuthPermDto selectByEmpId(int empId);
+	PermResponse selectByEmpId(long empId);
 
 }
