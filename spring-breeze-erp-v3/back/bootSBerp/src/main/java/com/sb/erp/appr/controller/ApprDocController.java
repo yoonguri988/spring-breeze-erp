@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sb.erp.appr.dto.ApprDocDto;
 import com.sb.erp.appr.dto.ApprDocInitResponseDto;
 import com.sb.erp.appr.dto.ApprFormDto;
-import com.sb.erp.appr.dto.ApprLineDto;
+import com.sb.erp.appr.dto.response.ApprLineResponse;
 import com.sb.erp.appr.service.ApprDocService;
 import com.sb.erp.dept.dto.DeptDto;
 import com.sb.erp.dept.service.DeptService;
@@ -153,7 +153,7 @@ public class ApprDocController {
 		// docId 사용하여 문서 정보 가져옴
 		ApprDocDto doc = service.selectDocDetail(docId);
 		// 결재선 가져오기
-		List<ApprLineDto> lines = service.selectLinesByDocId(docId);
+		List<ApprLineResponse> lines = service.selectLinesByDocId(docId);
 		
 		// 로그인 한사람 empId 가져와야함
 		int empId = userDetails.getUser().getEmpId();
@@ -190,7 +190,7 @@ public class ApprDocController {
 	
 	@GetMapping("/getApprLines")
 	@ResponseBody
-	public List<ApprLineDto> getApprLines(@RequestParam("isImportant") boolean isImportant,
+	public List<ApprLineResponse> getApprLines(@RequestParam("isImportant") boolean isImportant,
 				@AuthenticationPrincipal CustomUserDetails userDetails)	{
 		ApprDocDto dto = new ApprDocDto();
 		dto.setEmpId(userDetails.getUser().getEmpId());
@@ -211,7 +211,7 @@ public class ApprDocController {
 	// 특정 부서 소속 사원 목록
 	@GetMapping("/getDeptEmps")
 	@ResponseBody
-	public List<ApprLineDto> getDeptEmps(@RequestParam("deptId") int deptId) {
+	public List<ApprLineResponse> getDeptEmps(@RequestParam("deptId") int deptId) {
 		return service.selectDeptEmpsForLines(deptId);
 	}
 	

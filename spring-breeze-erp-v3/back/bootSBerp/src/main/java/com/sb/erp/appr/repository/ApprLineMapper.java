@@ -3,13 +3,12 @@ package com.sb.erp.appr.repository;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.appr.dto.ApprLineDto;
+import com.sb.erp.appr.dto.response.ApprLineResponse;
 
 @Mapper
 public interface ApprLineMapper {
-	public int insertLine(ApprLineDto dto);
-	public int updateLineStatus(ApprLineDto dto);
-	public ApprLineDto selectLineByOrder(ApprLineDto dto);
-	public List<ApprLineDto> selectLinesByDocId(int docId);
+	
+	public List<ApprLineResponse> selectLinesByDocId(@Param("docId") long docId);
 }

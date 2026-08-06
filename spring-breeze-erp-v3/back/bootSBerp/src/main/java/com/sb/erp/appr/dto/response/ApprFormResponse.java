@@ -1,37 +1,39 @@
 package com.sb.erp.appr.dto.response;
 
-import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.entity.ApprForm;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@Builder
-@Schema(description = "결재 양식 목록 항목")
+@Setter
+@NoArgsConstructor
 public class ApprFormResponse {
-	
-	private int forId;
-	private int forVersion;
-	private int comId;
+	private Long forId;
+	private Long forVersion;
+	private Long comId;
 	private String comName;
 	private String forCode;
 	private String forTitle;
+	private String forContent;
+	private String forSchema;
 	private Boolean forStatus;
 	private String createdAt;
 	private String updatedAt;
 	
-	public static ApprFormResponse from(ApprFormDto dto) {
-		return ApprFormResponse.builder()
-				.forId(dto.getForId())
-				.forVersion(dto.getForVersion())
-				.comId(dto.getComId())
-				.comName(dto.getComName())
-				.forCode(dto.getForCode())
-				.forTitle(dto.getForTitle())
-				.forStatus(dto.getForStatus())
-				.createdAt(dto.getCreatedAt())
-				.updatedAt(dto.getUpdatedAt())
-				.build();
+	// JPA 경로 - Entity에서 변환
+	public ApprFormResponse(ApprForm form) {
+		this.forId = form.getForId();
+		this.forVersion = form.getForVersion();
+		this.comId = form.getCompany().getComId();
+		this.comName = form.getCompany().getComName();
+		this.forCode = form.getForCode();
+		this.forTitle = form.getForTitle();
+		this.forContent = form.getForContent();
+		this.forSchema = form.getForSchema();
+		this.forStatus = form.getForStatus();
+		this.createdAt = form.getCreatedAt() != null ? form.getCreatedAt().toString() : null;
+		this.updatedAt = form.getUpdatedAt() != null ? form.getUpdatedAt().toString() : null;
 	}
 }

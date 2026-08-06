@@ -2,10 +2,21 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sb.erp.dao.ApprDocMapper">
+<mapper namespace="com.sb.erp.appr.repository.ApprDocMapper">
+
+	<resultMap id="apprDocSummaryMap" type="ApprDocSummaryResponse">
+		<id property="docId" column="doc_id"/>
+		<result property="empId" column="emp_id"/>
+		<result property="docTitle" column="doc_title"/>
+		<result property="docStatus" column="doc_status"/>
+		<result property="important" column="is_important"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="empName" column="emp_name"/>
+		<result property="linStatus" column="lin_status"/>
+	</resultMap>
 
 	<!-- 결재 문서 작성하려는 사용자의 회사 양식 가져오기 / 활성화된 양식만 -->
-	<select id="findForm" parameterType="ApprDocDto" resultType="ApprFormDto">
+	<select id="findForm" resultType="ApprFormResponse">
 		select * 
 		from 
 			appr_form f
@@ -24,15 +35,9 @@
 					and ff.is_deleted = 0
 			)
 	</select>
-		
-	<!-- 양식 값 가져오기 -->
-	<select id="getForm" parameterType="map" resultType="ApprFormDto">
-		select * from appr_form where for_id = #{forId} and for_version = #{forVersion}
-	</select>
 	
-	
-	<!-- 결재 양식 작성하러 들어갈때 데이터 싹다 끌고와야함ㅇ애ㅔㅂ주ㅠ려ㅠㄴ -->
-	<select id="initResponse" parameterType="ApprDocDto" resultType="ApprDocInitResponseDto" >
+	<!-- 결재 양식 작성하러 들어갈때 사용자 관련 정보 가져오기-->
+	<select id="initResponse" resultType="ApprDocInitResponse" >
 		select
 			e.emp_id,
 			e.emp_name,
@@ -52,47 +57,9 @@
 		
 	</select>
 	
-	<!-- 결재 문서 insert -->
-	<insert id="insertDoc" parameterType="ApprDocDto">
-		<selectKey keyProperty="docId" resultType="int" order="BEFORE">
-			select appr_doc_seq.nextval from dual
-		</selectKey>
-		insert into appr_doc(
-			doc_id,
-			emp_id,
-			for_id,
-			for_version,
-			com_id,
-			doc_title,
-			doc_content,
-			doc_status,
-			is_important)
-		values(
-			#{docId},
-			#{empId},
-			#{forId},
-			#{forVersion},
-			#{comId},
-			#{docTitle},
-			#{docContent},
-			#{docStatus},
-			#{isImportant})
-	</insert>
-	
-	<!-- ApprDocDto 리절트맵 -->
-	<resultMap id="apprDocResultMap" type="ApprDocDto">
-		<id property="docId" column="doc_id"/>
-		<result property="empId" column="emp_id"/>
-		<result property="docTitle" column="doc_title"/>
-		<result property="docStatus" column="doc_status"/>
-		<result property="isImportant" column="is_important"/>
-		<result property="createdAt" column="created_at"/>
-		<result property="empName" column="emp_name"/>
-		<result property="linStatus" column="lin_status"/>
-	</resultMap>
 
 	<!-- 대시보드용 통계 -->
-	<select id="selectDocCnt" parameterType="ApprDocDto" resultType="map">
+	<select id="selectDocCnt" resultType="map">
 		select
 			count(distinct case when d.emp_id = #{empId} or l.emp_id = #{empId} then d.doc_id end) as "TOTALCNT",
 			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'APP' then d.doc_id end) as "APPCNT",
@@ -108,7 +75,7 @@
 	</select>
 	
 	<!-- 모든 문서 조회 -->
-	<select id="selectMyHistoryDocs" parameterType="ApprDocDto" resultMap="apprDocResultMap">
+	<select id="selectMyHistoryDocs" parameterType="ApprDocSearchCondition" resultMap="apprDocSummaryMap">
 		select distinct
 			d.doc_id,
 			d.doc_title,
@@ -133,14 +100,14 @@
 		where
 			(d.emp_id = #{empId}
 			or exists (select 1 from appr_line where doc_id = d.doc_id and emp_id = #{empId}))
-			<if test="searchStatus != null and searchStatus != ''">
-				and d.doc_status = #{searchStatus}
+			<if test="status != null and status != ''">
+				and d.doc_status = #{status}
 			</if>
-			<if test="searchKeyword != null and searchKeyword != ''">
+			<if test="keyword != null and keyword != ''">
 				and (
-					d.doc_id like '%' || #{searchKeyword} || '%'
-					or d.doc_title like '%' || #{searchKeyword} || '%'
-					or (select emp_name from employee where emp_id = d.emp_id) like '%' || #{searchKeyword} || '%'
+					d.doc_id like '%' || #{keyword} || '%'
+					or d.doc_title like '%' || #{keyword} || '%'
+					or (select emp_name from employee where emp_id = d.emp_id) like '%' || #{keyword} || '%'
 				)
 			</if>
 		order by
@@ -149,27 +116,27 @@
 	</select>
 	
 	<!-- 했던 문서 카운트 -->
-	<select id="selectMyHistoryDocsCnt" parameterType="ApprDocDto" resultType="int">
+	<select id="selectMyHistoryDocsCnt" parameterType="ApprDocSearchCondition" resultType="int">
 		select count(distinct d.doc_id)
 		from
 			appr_doc d
 		where
 			(d.emp_id = #{empId}
 			or exists (select 1 from appr_line where doc_id = d.doc_id and emp_id = #{empId}))
-			<if test="searchStatus != null and searchStatus != ''">
-				and d.doc_status = #{searchStatus}
+			<if test="status != null and status != ''">
+				and d.doc_status = #{status}
 			</if>
-			<if test="searchKeyword != null and searchKeyword != ''">
+			<if test="keyword != null and keyword != ''">
 				and (
-					d.doc_id like '%' || #{searchKeyword} || '%'
-					or d.doc_title like '%' || #{searchKeyword} || '%'
-					or (select emp_name from employee where emp_id = d.emp_id) like '%' || #{searchKeyword} || '%'
+					d.doc_id like '%' || #{keyword} || '%'
+					or d.doc_title like '%' || #{keyword} || '%'
+					or (select emp_name from employee where emp_id = d.emp_id) like '%' || #{keyword} || '%'
 				)
 			</if>
 	</select>
 	
 	<!-- 내가 결재해야 할 문서 -->
-	<select id="selectMyTodoDocs" parameterType="ApprDocDto" resultMap="apprDocResultMap">
+	<select id="selectMyTodoDocs" parameterType="ApprDocSearchCondition" resultMap="apprDocSummaryMap">
 		select
 			d.doc_id,
 			d.doc_title,
@@ -186,11 +153,11 @@
 			l.emp_id = #{empId}
 			and l.lin_status = 'WAI'
 			and d.doc_status = 'ING'
-			<if test="searchKeyword != null and searchKeyword != ''">
+			<if test="keyword != null and keyword != ''">
 				and (
-					d.doc_id like '%' || #{searchKeyword} || '%'
-					or d.doc_title like '%' || #{searchKeyword} || '%'
-					or (select emp_name from employee where emp_id = d.emp_id) like '%' || #{searchKeyword} || '%'
+					d.doc_id like '%' || #{keyword} || '%'
+					or d.doc_title like '%' || #{keyword} || '%'
+					or (select emp_name from employee where emp_id = d.emp_id) like '%' || #{keyword} || '%'
 				)
 			</if>
 		order by
@@ -199,7 +166,7 @@
 	</select>
 	
 	<!-- 해야할 문서 카운트 -->
-	<select id="selectMyTodoDocsCnt" parameterType="ApprDocDto" resultType="int">
+	<select id="selectMyTodoDocsCnt" parameterType="ApprDocSearchCondition" resultType="int">
 		select count(*)
 		from
 			appr_doc d
@@ -209,17 +176,17 @@
 			l.emp_id = #{empId}
 			and l.lin_status = 'WAI'
 			and d.doc_status = 'ING'
-			<if test="searchKeyword != null and searchKeyword != ''">
+			<if test="keyword != null and keyword != ''">
 				and (
-					d.doc_id like '%' || #{searchKeyword} || '%'
-					or d.doc_title like '%' || #{searchKeyword} || '%'
-					or (select emp_name from employee where emp_id = d.emp_id) like '%' || #{searchKeyword} || '%'
+					d.doc_id like '%' || #{keyword} || '%'
+					or d.doc_title like '%' || #{keyword} || '%'
+					or (select emp_name from employee where emp_id = d.emp_id) like '%' || #{keyword} || '%'
 				)
 			</if>
 	</select>
 	
 	<!-- 기안자 상사들 목록 조회 -->
-	<select id="approversByEmpId" parameterType="ApprDocDto" resultType="ApprLineDto">
+	<select id="approversByEmpId" resultType="ApprLineResponse">
 		select
 			e.emp_id,
 			e.emp_name,
@@ -235,51 +202,8 @@
 			p.pos_order desc
 	</select>
 	
-	<!-- 최종 결재 승인,반려 등 문서상태 변경 -->
-	<update id="updateDocStatus" parameterType="ApprDocDto">
-		update
-			appr_doc
-		set
-			doc_status = #{docStatus}
-		where
-			doc_id = #{docId}
-	</update>
-	
-	<!-- 문서 상세보기 -->
-	<select id="selectDocDetail" parameterType="int" resultMap="apprDocResultMap">
-		select
-			d.doc_id,
-			d.doc_title,
-			d.doc_content,
-			d.doc_status,
-			d.is_important,
-			d.created_at,
-			d.emp_id,
-			(select emp_name from employee where emp_id = d.emp_id) as emp_name
-		from
-			appr_doc d
-		where
-			doc_id = #{docId}
-	</select>
-	
-	<!-- 낙관적 락 검증용 값 가져오기 -->
-	<select id="getRevision" parameterType="int" resultType="int">
-		select doc_revision from appr_doc where doc_id = #{docId}
-	</select>
-	
-	<!-- 검증용 쿼리문 -->
-	<update id="chkDocRevision" parameterType="ApprDocDto">
-		update
-			appr_doc
-		set
-			doc_revision = doc_revision + 1
-		where
-			doc_id = #{docId}
-			and doc_revision = #{docRevision}
-	</update>
-	
 	<!-- 결재선 지정용 -->
-	<select id="selectDeptEmpsForLines" parameterType="int" resultType="ApprLineDto">
+	<select id="selectDeptEmpsForLines" resultType="ApprLineResponse">
 		select
 			e.emp_id,
 			e.emp_name,
