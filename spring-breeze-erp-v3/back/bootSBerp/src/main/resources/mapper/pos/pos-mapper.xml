@@ -23,7 +23,7 @@
 	<!-- 직급 등록 -->
 	<insert id="insert" parameterType="com.sb.erp.pos.dto.request.PosRequest">
 		<selectKey keyProperty="posId" resultType="long" order="AFTER">
-			select seq_emp_position.currval from dual
+			select SEQ_POSITION.currval from dual
 		</selectKey>
 		insert into emp_position (com_id, pos_code, pos_name, pos_order)
 		values (#{comId}, #{posCode}, #{posName}, #{posOrder})
