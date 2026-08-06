@@ -4,21 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import javax.sql.DataSource;
 
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.com.dto.request.ComRequest;
@@ -28,7 +19,6 @@ import com.sb.erp.com.dto.response.StatsComResponse;
 import com.sb.erp.com.repository.CompanyMapper;
 
 @SpringBootTest
-@MapperScan("com.sb.erp.com.repository")
 @Transactional
 class BackApplicationTests_Company {
 
@@ -187,34 +177,4 @@ class BackApplicationTests_Company {
 		ComResponse response = mapper.selectOneByEmpId(empId);
 		assertThat(response).isNotNull();
 	}
-	
-	//  MyBatis 설정
-	@TestConfiguration
-	static class MyBatisTestConfig {
-
-		@Autowired
-		private DataSource dataSource;
-
-		@Bean
-		public SqlSessionFactory sqlSessionFactory() throws Exception {
-			SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-			factoryBean.setDataSource(dataSource);
-			factoryBean.setMapperLocations(
-				new PathMatchingResourcePatternResolver()
-		           .getResources("classpath:mapper/company-mapper.xml")
-			);
-			//com.sb.erp.com.dto.request, com.sb.erp.com.dto.response
-			factoryBean.setTypeAliasesPackage("com.sb.erp.com.dto");
-			factoryBean.setConfigLocation(
-					new ClassPathResource("mybatis-config.xml")  // ← 이 줄 추가
-			);
-			return factoryBean.getObject();
-		}
-
-		@Bean
-		public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-			return new SqlSessionTemplate(sqlSessionFactory);
-		}
-	}
-
 }
