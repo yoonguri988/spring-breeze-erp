@@ -14,8 +14,8 @@ import com.sb.erp.com.dto.response.StatsComResponse;
 public interface CompanyMapper {
 	public List<ComResponse> selectAll(CompanySearchRequest search);
 
-	public int insert(ComRequest dto)
-	;
+	public int insert(ComRequest dto);
+	
 	public ComResponse selectByBizNo(String bizNo);
 
 	public ComResponse selectOneById(long comId);
