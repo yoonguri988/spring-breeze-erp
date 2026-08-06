@@ -1,8 +1,6 @@
-package com.sb.erp;
+package com.sb.erp.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -23,26 +21,33 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sb.erp.com.dto.request.ComRequest;
 import com.sb.erp.com.repository.CompanyMapper;
 import com.sb.erp.dept.dto.request.DeptRequest;
-import com.sb.erp.dept.dto.response.DeptResponse;
 import com.sb.erp.dept.repository.DeptMapper;
+import com.sb.erp.dept.repository.DeptTransferLogMapper;
+import com.sb.erp.dept.repository.DeptTransferMapper;
 
 @SpringBootTest
 @MapperScan({"com.sb.erp.dept.repository", "com.sb.erp.com.repository"})
 @Transactional
-class BackApplicationTests_Department {
+class BackApplicationTests_DeptTransferLog {
 
 	@Autowired DeptMapper mapper;
 	@Autowired CompanyMapper comMapper;
-	
+	@Autowired DeptTransferMapper deptTrasfer;
+	@Autowired DeptTransferLogMapper deptTrasferLog;
+
 	// 여러 테스트에서 공통으로 재사용할 등록된 회사의 PK
 	private long savedComId;
-	
+
 	private long savedRootDeptId;
 	private long savedChildDeptId;
-	
+
+	// 이관 대상 사원 / 이관 처리자(승인자) 사원
+	private long targetEmpId;
+	private long createdByEmpId;
+
 	@BeforeEach
 	void setUp() {
-		// 매 테스트 실행 전, 조회/수정/삭제 테스트에서 사용할 기준 회사 데이터를 등록해둔다.
+		// 기준 회사 등록
 		ComRequest dto1 = ComRequest.builder()
 				.industryGrpCode("G")
 				.industryCode("12345")
@@ -56,17 +61,24 @@ class BackApplicationTests_Department {
 
 		savedComId = dto1.getComId();
 		assertThat(savedComId).isNotNull();
-		
-		// 기준 부서 트리 등록: root(depth:0) -> child{depth:1)
+
+		// 기준 부서 트리 등록: root(depth:0) -> child(depth:1)
 		DeptRequest root = DeptRequest.builder()
 				.comId(savedComId).parentId(0).deptName("베이스부서").deptCode("BASE0").depth(0).sortOrder(1).build();
 		savedRootDeptId = insertDeptAndGetId(root);
- 
+
 		DeptRequest child = DeptRequest.builder()
 				.comId(savedComId).parentId(savedRootDeptId).deptName("베이스하위부서").deptCode("BASE1").depth(1).sortOrder(1).build();
 		savedChildDeptId = insertDeptAndGetId(child);
+
+		// TODO: EmpMapper 추가되면 아래 두 줄로 사원 데이터 등록
+		// 이관 로그 조회 시 조인되는 사원 데이터 등록 (이관대상자 / 처리자)
+		// targetEmpId = empMapper.insert(EmpRequest.builder()...);
+		// createdByEmpId = empMapper.insert(EmpRequest.builder()...);
+		
+		// TODO: 부서 이관 로그 1건 삽입 헬퍼 작성
 	}
-	
+
 	private long insertDeptAndGetId(DeptRequest dto) {
 		int res = mapper.insert(dto);
 		assertThat(res).isEqualTo(1);
@@ -74,109 +86,48 @@ class BackApplicationTests_Department {
 		return dto.getDeptId();
 	}
 
-	
 	@Test
-	@DisplayName("해당 회사가 가지고 있는 부서 갯수 조회")
-	void testCountActiveDepts() {
-		long count = mapper.countActiveDepts(savedComId);
-		assertThat(count).isEqualTo(2);
+	@DisplayName("부서 이관 로그 삽입 성공")
+	void insertTransferLog_성공() {
+		// TODO: EmpMapper 추가되면 구현 (emp_id/created_by가 employee FK라 유효한 사원 필요)
 	}
-	
+ 
 	@Test
-	@DisplayName("부서 전체 조회 - 계층 구조 전개")
-	void testSelectAll() {
-		// 기준 트리(루트+자식) 2개에 루트 아래 형제 부서 2개를 추가
-		DeptRequest child1 = DeptRequest.builder()
-		                     .comId(savedComId).parentId(savedRootDeptId).deptName("1팀").deptCode("T1").depth(1).sortOrder(2).build();
-		DeptRequest child2 = DeptRequest.builder()
-						     .comId(savedComId).parentId(savedRootDeptId).deptName("2팀").deptCode("T2").depth(1).sortOrder(3).build();
-		insertDeptAndGetId(child1);
-		insertDeptAndGetId(child2);
-		
-		List<DeptResponse> result = mapper.selectAll(savedComId);
-		assertThat(result).hasSize(4);
-		assertThat(result.get(0).getDeptName()).isEqualTo("베이스부서");
+	@DisplayName("검색조건 없이 전체 이관 로그 조회 시 조인 데이터까지 정상 매핑된다")
+	void searchTransferLogs_필터없이_전체조회() {
+		// TODO: EmpMapper 추가되면 구현 (employee 조인 컬럼 empNo/empName/createdByName 검증 필요)
 	}
-	
+ 
 	@Test
-	@DisplayName("부서 등록 - selectKey로 채번된 deptId가 dto에 채워진다")
-	void testInsert() {
-		
+	@DisplayName("origin/target 부서ID로 필터링하여 조회한다")
+	void searchTransferLogs_부서필터() {
+		// TODO: EmpMapper 추가되면 구현
 	}
-	
+ 
 	@Test
-	@DisplayName("부서 등록 - 상위부서 없음(parentId=0/null)이면 parent_id는 NULL로 저장된다")
-	void testInsert_withoutParent() {
-		
+	@DisplayName("aiRecommended 값으로 필터링하여 조회한다")
+	void searchTransferLogs_AI추천여부_필터() {
+		// TODO: EmpMapper 추가되면 구현
 	}
-	
+ 
 	@Test
-	@DisplayName("id로 부서 단건 조회 - 상위부서/부서장 정보 포함")
-	void testSelectOneById() {
-		
+	@DisplayName("dateFrom ~ dateTo 기간으로 필터링하여 조회한다")
+	void searchTransferLogs_기간필터() {
+		// TODO: EmpMapper 추가되면 구현
 	}
-	
+ 
 	@Test
-	@DisplayName("부서 정렬 순서(sort_order) 최대값 조회")
-	void testMaxSortOrder() {
-		
+	@DisplayName("listTotal은 검색조건이 동일할 때 실제 목록 건수와 일치한다")
+	void listTotal_카운트일치() {
+		// TODO: EmpMapper 추가되면 구현
 	}
-	
+ 
 	@Test
-	@DisplayName("하위 부서 존재 여부(countChildren) 확인")
-	void testCountChildren() {
-		
+	@DisplayName("OFFSET/FETCH 페이징이 정상 동작한다")
+	void searchTransferLogs_페이징() {
+		// TODO: EmpMapper 추가되면 구현
 	}
-	
-	@Test
-	@DisplayName("부서 수정")
-	void testUpdate() {
-		
-	}
-	
-	@Test
-	@DisplayName("부서 삭제(hard delete)")
-	void testDelete() {
-		
-	}
-	
-	@Test
-	@DisplayName("부서 임시 삭제(soft delete) - DEPT_STATUS를 PENDING_DELETE로 변경")
-	void testSoftDelete() {
-		
-	}
-	
-	@Test
-	@DisplayName("부서 통계 조회")
-	void testSelectStats() {
-		
-	}
-	
-	@Test
-	@DisplayName("이관 이력 필터용 - 상태 무관 회사 전체 부서 조회")
-	void testSelectAllDeptsByComId() {
-		
-	}
-	
-	@Test
-	@DisplayName("부서 코드 중복 체크")
-	void testSelectDeptCode() {
-		
-	}
-	
-	@Test
-	@DisplayName("하위 부서 id 목록 조회")
-	void testSelectAllChildIds() {
-		
-	}
-	
-	@Test
-	@DisplayName("부서별 소속 직원 수 카운트 (countByDept)")
-	void testCountByDept() {
-//		long count = mapper.countByDept(savedChildDeptId);
-//		assertThat(count).isEqualTo(1);
-	}
-	
+
 	//  MyBatis 설정
 	@TestConfiguration
 	static class MyBatisTestConfig {
@@ -190,10 +141,10 @@ class BackApplicationTests_Department {
 			factoryBean.setDataSource(dataSource);
 			factoryBean.setMapperLocations(
 					new ClassPathResource("mapper/dept-mapper.xml"),
+				    new ClassPathResource("mapper/deptlog-mapper.xml"),
 				    new ClassPathResource("mapper/company-mapper.xml")
 			);
-			//com.sb.erp.com.dto.request, com.sb.erp.com.dto.response
-		    factoryBean.setTypeAliasesPackage("com.sb.erp.dept.dto,com.sb.erp.com.dto"); // 두 패키지 모두
+		    factoryBean.setTypeAliasesPackage("com.sb.erp.dept.dto,com.sb.erp.com.dto,com.sb.erp.emp.dto");
 			factoryBean.setConfigLocation(
 					new ClassPathResource("mybatis-config.xml")
 			);

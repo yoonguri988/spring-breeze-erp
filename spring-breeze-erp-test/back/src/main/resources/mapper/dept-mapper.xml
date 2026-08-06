@@ -134,18 +134,19 @@
 	
 	<!-- 부서 수정 -->
 	<update id="update" parameterType="DeptRequest">
-		update department
-		<set>
-			<if test="deptName != null">dept_name = #{deptName},</if>
-			<if test="deptCode != null">dept_code = #{deptCode},</if>
-			<choose>
-				<when test="parentId == null or parentId == 0">parent_id = NULL,</when>
-				<otherwise>parent_id = #{parentId},</otherwise>
-			</choose>
-			<if test="depth != null">depth = #{depth},</if>
-			<if test="empId != null">emp_Id = #{empId},</if>
-		</set>
-		where dept_id = #{deptId}
+	    update department
+	    SET dept_name = #{deptName},
+	        dept_code = #{deptCode},
+	        parent_id = <choose>
+	                        <when test="parentId == null or parentId == 0">NULL</when>
+	                        <otherwise>#{parentId}</otherwise>
+	                    </choose>,
+	        depth = #{depth},
+	        emp_id = <choose>
+	                     <when test="empId == null or empId == 0">NULL</when>
+	                     <otherwise>#{empId}</otherwise>
+	                 </choose>
+	    where dept_id = #{deptId}
 	</update>
 
 	<!-- 하위부서 조회 -->
@@ -173,7 +174,7 @@
         (SELECT COUNT(*) FROM employee WHERE com_id = #{comId} AND emp_status = '재직') AS empTotal
         from DUAL
 	</select>
-	
+	<!-- 부서별 소속 직원 수 카운트 -->
 	<select id="countByDept" parameterType="long">
 		SELECT COUNT(*) 
 		FROM EMPLOYEE E
@@ -182,7 +183,6 @@
 		WHERE E.DEPT_ID = #{deptId}
 		AND D.DEPT_STATUS != 'DELETED'
 	</select>
-	
 	<!-- 부서 임시 삭제 soft delete -->
 	<update id="softDelete" parameterType="long">
 		UPDATE DEPARTMENT

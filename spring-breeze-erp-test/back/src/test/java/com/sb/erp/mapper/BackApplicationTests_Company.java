@@ -1,4 +1,4 @@
-package com.sb.erp;
+package com.sb.erp.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
