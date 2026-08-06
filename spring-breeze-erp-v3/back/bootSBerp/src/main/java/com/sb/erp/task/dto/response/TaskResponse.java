@@ -3,8 +3,9 @@ package com.sb.erp.task.dto.response;
 import java.time.LocalDate;
 
 import lombok.Getter;
+import lombok.Setter;
 
-@Getter
+@Getter @Setter
 public class TaskResponse {
 	private Long taskId;
 	private Long proId;

@@ -34,6 +34,6 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
 	@Override public ProjmemResponse selectOne(Long pmId) {  return dao.selectOne(pmId); }
 	
 	//사원 이름,번호 조회
-	@Override public List<EmpDto> searchEmpForProject(Long comId, String keyword) { return dao.searchEmpForProject(comId, keyword); }
+	@Override public List<EmpResponse> searchEmpForProject(Long comId, String keyword) { return dao.searchEmpForProject(comId, keyword); }
 
 }

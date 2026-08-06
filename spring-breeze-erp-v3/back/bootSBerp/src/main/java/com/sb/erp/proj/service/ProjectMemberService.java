@@ -26,6 +26,6 @@ public interface ProjectMemberService {
 	public ProjmemResponse selectOne(Long pmId);
 	
 	//사원 이름,번호 조회
-	public List<EmpDto> searchEmpForProject(@Param("comId") Long comId, @Param("keyword") String keyword);
+	public List<EmpResponse> searchEmpForProject(@Param("comId") Long comId, @Param("keyword") String keyword);
 	
 }

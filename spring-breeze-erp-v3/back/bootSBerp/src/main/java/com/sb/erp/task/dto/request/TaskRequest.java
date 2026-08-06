@@ -20,6 +20,8 @@ public class TaskRequest {
 
     @NotNull(message = "담당자는 필수입니다.")
     private Long pmId;
+    
+    private Long taskId;
 
     // 부모 태스크는 선택사항
     private Long parentTaskId;
