@@ -16,7 +16,7 @@ public class ProjectSearchRequest {
 	
 	private boolean searched = false;
 	//일반 사용자용
-	//private Integer comId;
+	private long comId;
 	
 	// 검색 조건이 비어있는지 확인 여부
 	public boolean hasSearchCondition() {

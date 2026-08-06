@@ -9,6 +9,7 @@ import lombok.Setter;
 public class ProjRequest {
     private Long comId;
     private Long empId;
+    private Long proId;
 	private String proStatus;
 	private String proName;
 	private String proDesc;
