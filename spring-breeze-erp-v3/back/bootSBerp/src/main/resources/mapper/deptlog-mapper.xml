@@ -3,7 +3,7 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.dept.repository.DeptTransferLogMapper">
-<insert id="insertTransferLog" parameterType="DeptTransferLogDto">
+<insert id="insertTransferLog" parameterType="DeptTransferLogRequest">
 	INSERT INTO dept_transfer_log
     	(log_id, com_id, origin_dept_id, target_dept_id, emp_id,
 		ai_recommended, ai_reason, handover_snapshot, created_by, created_at)
@@ -11,7 +11,7 @@
     	(seq_dept_transfer_log.NEXTVAL, #{comId}, #{originDeptId}, #{targetDeptId}, #{empId},
         #{aiRecommended}, #{aiReason}, #{handoverSnapshot}, #{createdBy}, SYSDATE)
 </insert>
-<select id="searchTransferLogs" resultType="DeptTransferLogDto">
+<select id="searchTransferLogs" resultType="DeptTransferLogResponse">
 	SELECT
 	    l.log_id, l.com_id,
 	    l.origin_dept_id, od.dept_name AS origin_dept_name,

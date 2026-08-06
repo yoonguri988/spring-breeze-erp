@@ -62,7 +62,7 @@
   where biz_no = #{bizNo}
   </select>
   <!-- 하나만 조회 -->
-  <select id="selectOneById" parameterType="int" resultType="ComResponse">
+  <select id="selectOneById" parameterType="long" resultType="ComResponse">
   select * from company 
   where com_id = #{comId} 
   </select>
@@ -80,7 +80,7 @@
     where com_id = #{comId}
   </update>
   <!-- 회사 삭제 -->
-  <delete id="delete" parameterType="int">
+  <delete id="delete" parameterType="long">
   delete from company
   where com_id = #{comId}
   </delete>
@@ -96,7 +96,7 @@
 	FROM dual
   </select>
   <!-- 회원 id를 통해 내 회사 정보 조회 -->
-  <select id="selectOneByEmpId" resultType="ComResponse" parameterType="int">
+  <select id="selectOneByEmpId" resultType="ComResponse" parameterType="long">
     select c.*
     from company c
     join employee e on e.com_id = c.com_id

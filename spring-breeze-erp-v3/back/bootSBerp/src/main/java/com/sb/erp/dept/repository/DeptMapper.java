@@ -30,7 +30,7 @@ public interface DeptMapper {
 
 	int update(DeptRequest dto);
 
-	List<Long> selectAllChildIds(long deptId);
+	List<DeptResponse> selectAllChildIds(long deptId);
 
 	StatsDeptResponse selectStats(long comId);
 

@@ -4,7 +4,7 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.com.repository.CompanyMapper">
   <!-- 회사 여러개 조회 -->
-  <select id="selectAll" resultType="CompanyDto" parameterType="ComSearchDto">
+  <select id="selectAll" resultType="ComResponse" parameterType="CompanySearchRequest">
 	SELECT c.*,
 	       (SELECT COUNT(e.emp_id) 
 	        FROM employee e 
@@ -24,7 +24,7 @@
   OFFSET #{pstartno} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
   </select>
   <!-- 회사 여러개 조회 -->
-  <select id="listTotal" resultType="int" parameterType="ComSearchDto">
+  <select id="listTotal" resultType="int" parameterType="CompanySearchRequest">
   select count(*) from company 
   <where>
   <!-- 회사명 또는 사업자 번호 검색 -->
@@ -37,7 +37,7 @@
   </if>
   </where>
   </select>
-  <select id="selectSuggest" resultType="CompanyDto" parameterType="string">
+  <select id="selectSuggest" resultType="ComResponse" parameterType="string">
     select com_id, com_name, biz_no
     FROM company
     <where>
@@ -50,21 +50,24 @@
     OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY
   </select>
   <!-- 회사 등록 -->
-  <insert id="insert" parameterType="CompanyDto">
-  insert into company (com_name, industry_code, industry_grp_code, com_ceo, biz_no, com_tel, com_logo)
-  values (#{comName}, #{industryCode}, #{industryGrpCode}, #{comCeo}, #{bizNo}, #{comTel}, #{comLogo, jdbcType=VARCHAR})
+  <insert id="insert" parameterType="ComRequest">
+  	<selectKey keyProperty="comId" resultType="long" order="BEFORE">
+      SELECT seq_company.NEXTVAL FROM dual
+    </selectKey>
+  insert into company (com_id, com_name, industry_code, industry_grp_code, com_ceo, biz_no, com_tel, com_logo)
+  values (#{comId}, #{comName}, #{industryCode}, #{industryGrpCode}, #{comCeo}, #{bizNo}, #{comTel, jdbcType=VARCHAR}, #{comLogo, jdbcType=VARCHAR})
   </insert>
-  <select id="selectByBizNo" parameterType="string" resultType="CompanyDto">
+  <select id="selectByBizNo" parameterType="string" resultType="ComResponse">
   select * from company
   where biz_no = #{bizNo}
   </select>
   <!-- 하나만 조회 -->
-  <select id="selectOneById" parameterType="int" resultType="CompanyDto">
+  <select id="selectOneById" parameterType="long" resultType="ComResponse">
   select * from company 
   where com_id = #{comId} 
   </select>
   <!-- 회사 정보 수정 -->
-  <update id="update" parameterType="CompanyDto">
+  <update id="update" parameterType="ComRequest">
     update company
     <set>
     	<if test="comName != null">com_name = #{comName},</if>
@@ -77,12 +80,12 @@
     where com_id = #{comId}
   </update>
   <!-- 회사 삭제 -->
-  <delete id="delete" parameterType="int">
+  <delete id="delete" parameterType="long">
   delete from company
   where com_id = #{comId}
   </delete>
   <!-- 회사 통계 -->
-  <select id="selectStats" resultType="StatsComDto">
+  <select id="selectStats" resultType="StatsComResponse">
 	SELECT 
 	    (SELECT COUNT(*) FROM company) AS com_total,
 	    (SELECT COUNT(*) FROM employee) AS emp_total,
@@ -93,10 +96,10 @@
 	FROM dual
   </select>
   <!-- 회원 id를 통해 내 회사 정보 조회 -->
-  <select id="selectOneByEmpId" resultType="CompanyDto" parameterType="int">
+  <select id="selectOneByEmpId" resultType="ComResponse" parameterType="long">
     select c.*
     from company c
     join employee e on e.com_id = c.com_id
-    where e.emp_id = #{emdId}
+    where e.emp_id = #{empId}
   </select>
 </mapper>
