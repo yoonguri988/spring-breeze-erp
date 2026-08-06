@@ -2,21 +2,43 @@ package com.sb.erp.task.dto.request;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class TaskRequest {
 
-	private Long proId;
-	private Long comId;
-	private Long pmId;          // 담당자 (project_member)
-	private Long parentTaskId;  // 선행 태스크 - 없으면 null
-	private String taskName;
-	private String taskDesc;
-	private String taskStatus;
-	private LocalDate taskStartDate;
-	private LocalDate taskEndDate;
+    @NotNull(message = "프로젝트는 필수입니다.")
+    private Long proId;
+
+    @NotNull(message = "회사 정보는 필수입니다.")
+    private Long comId;
+
+    @NotNull(message = "담당자는 필수입니다.")
+    private Long pmId;
+
+    // 부모 태스크는 선택사항
+    private Long parentTaskId;
+
+    @NotBlank(message = "태스크명을 입력하세요.")
+    private String taskName;
+
+    @NotBlank(message = "태스크 설명을 입력하세요.")
+    private String taskDesc;
+
+    @NotBlank(message = "상태를 선택하세요.")
+    @Pattern( regexp = "^(TODO|DOING|DONE)$", message = "상태는 TODO, DOING, DONE만 가능합니다." )
+    private String taskStatus;
+
+    @NotNull(message = "시작일을 입력하세요.")
+    private LocalDate taskStartDate;
+
+    @NotNull(message = "종료일을 입력하세요.")
+    private LocalDate taskEndDate;
 }
 /*	private Integer taskId;
 	private Integer proId;

@@ -2,19 +2,38 @@ package com.sb.erp.proj.dto.request;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class ProjRequest {
+	
+    @NotNull(message = "회사 정보는 필수입니다.")
     private Long comId;
+
+    @NotNull(message = "프로젝트 생성자는 필수입니다.")
     private Long empId;
+
     private Long proId;
-	private String proStatus;
-	private String proName;
-	private String proDesc;
-	private LocalDate startDate;
-	private LocalDate endDate;
+
+    @NotBlank(message = "프로젝트 상태는 필수입니다.")
+    @Pattern( regexp = "^(TODO|DOING|DONE)$", message = "상태는 TODO, DOING, DONE만 가능합니다." )
+    private String proStatus;
+
+    @NotBlank(message = "프로젝트명은 필수입니다.")
+    private String proName;
+
+    private String proDesc;
+
+    @NotNull(message = "시작일은 필수입니다.")
+    private LocalDate startDate;
+
+    @NotNull(message = "종료일은 필수입니다.")
+    private LocalDate endDate;
 
 }
 /*	private Integer proId;
