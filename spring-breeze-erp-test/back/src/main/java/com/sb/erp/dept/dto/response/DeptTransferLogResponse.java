@@ -2,11 +2,15 @@ package com.sb.erp.dept.dto.response;
 
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class DeptTransferLogResponse {
 	private long logId;
 	private long comId;

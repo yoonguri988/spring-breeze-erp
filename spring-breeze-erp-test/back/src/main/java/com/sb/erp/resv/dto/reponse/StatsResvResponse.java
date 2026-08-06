@@ -1,19 +1,14 @@
 package com.sb.erp.resv.dto.reponse;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Getter @NoArgsConstructor @AllArgsConstructor @Builder
 public class StatsResvResponse {
-	private int resvTotal;
-	private int waiTotal;
-	private int appTotal;
-	private int rejTotal;
-	
-	public StatsResvResponse(int resvTotal, int waiTotal, int appTotal, int rejTotal) {
-		super();
-		this.resvTotal = resvTotal;
-		this.waiTotal = waiTotal;
-		this.appTotal = appTotal;
-		this.rejTotal = rejTotal;
-	}
+	private long resvTotal;
+	private long waiTotal;
+	private long appTotal;
+	private long rejTotal;
 }
