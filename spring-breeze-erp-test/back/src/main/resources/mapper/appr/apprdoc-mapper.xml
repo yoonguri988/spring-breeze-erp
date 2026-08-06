@@ -57,6 +57,29 @@
 		
 	</select>
 	
+	<!-- 문서 작성 -->
+	<insert id="insertDoc">
+		insert into appr_doc (
+			emp_id,
+			for_id,
+			for_version,
+			com_id,
+			doc_title,
+			doc_content
+		) values (
+			#{empId},
+			#{req.forId},
+			#{req.forVersion},
+			#{comId},
+			#{req.docTitle},
+			#{req.docContent}
+		)
+	</insert>
+	
+	<!-- 시퀀스 값 가져오기 -->
+	<select id="selectCurrentDocSeq" resultType="Long">
+		select appr_doc_seq.currval from dual
+	</select>
 
 	<!-- 대시보드용 통계 -->
 	<select id="selectDocCnt" resultType="map">
@@ -202,7 +225,12 @@
 			p.pos_order desc
 	</select>
 	
-	<!-- 결재선 지정용 -->
+	<!-- 문서 상태 갱신 -->
+	<update id="updateDocStatus">
+		update appr_doc set doc_status = #{docStatus} where doc_id = #{docId}
+	</update>
+	
+	<!-- 결재선 지정 상사 조회 -->
 	<select id="selectDeptEmpsForLines" resultType="ApprLineResponse">
 		select
 			e.emp_id,
@@ -215,6 +243,7 @@
 			emp_position p on e.pos_id = p.pos_id
 		where
 			e.dept_id = #{deptId}
+			and e.emp_status != '퇴직'
 	</select>
 	
 	<!-- 결재선 지정 가능 인원수 / 사용자 본인 빼고, 본인보다 직급 높은사람들 -->
@@ -233,6 +262,27 @@
 				join emp_position pp on ee.pos_id = pp.pos_id
 				where ee.emp_id = #{empId}
 			)
+	</select>
+	
+	<!-- 문서 상세 조회 -->
+	<select id="selectDocDetail" resultType="ApprDocResponse">
+		select
+			d.doc_id,
+			d.doc_title,
+			d.doc_content,
+			d.doc_status,
+			d.is_important,
+			d.created_at,
+			d.emp_id,
+			(select 
+				emp_name
+			 from
+			    employee
+			 where emp_id = d.emp_id) as emp_name
+		from
+			appr_doc d
+		where
+			doc_id = #{docId}
 	</select>
 	
 </mapper>
