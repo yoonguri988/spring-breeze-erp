@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Setter @Getter
 public class EmpAuthRequest {
-	private long empId;
-	private long autId;
+	private Long empId;
+	private Long autId;
 }

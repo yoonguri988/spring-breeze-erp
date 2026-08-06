@@ -7,9 +7,9 @@ import lombok.Setter;
 
 @Setter @Getter
 public class ReportRequest {
-	private long reportId;
-	private long periodId;
-	private long empId;
+	private Long reportId;
+	private Long periodId;
+	private Long empId;
 	private BigDecimal avgPerformance;
 	private BigDecimal avgExpertise;
 	private BigDecimal avgTeamwork;

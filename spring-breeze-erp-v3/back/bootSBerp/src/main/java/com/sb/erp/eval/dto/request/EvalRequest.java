@@ -5,10 +5,10 @@ import lombok.Setter;
 
 @Setter @Getter
 public class EvalRequest {
-	private long evalId;
-	private long periodId;
-	private long targetEmpId;
-	private long evaluatorId;
+	private Long evalId;
+	private Long periodId;
+	private Long targetEmpId;
+	private Long evaluatorId;
 	private String evalType;
 	private Integer scorePerformance;
 	private Integer scoreExpertise;

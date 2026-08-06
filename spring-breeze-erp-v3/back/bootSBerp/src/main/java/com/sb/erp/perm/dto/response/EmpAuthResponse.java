@@ -5,11 +5,11 @@ import lombok.Setter;
 
 @Getter @Setter
 public class EmpAuthResponse {
-	private long empAutId;
-	private long empId;
+	private Long empAutId;
+	private Long empId;
 	private String empName;
 	private String empNo;
-	private long autId;
+	private Long autId;
 	private String autName;
 	private String posName;
 	private String deptName;

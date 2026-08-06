@@ -10,7 +10,7 @@ public class EmpSearchRequest {
 	private String empStatus;
 	private String posCode;
 	private String deptName;
-	private long comId;
+	private Long comId;
 
 	private int onepagelist = 10;
 	private int pstartno = 1;

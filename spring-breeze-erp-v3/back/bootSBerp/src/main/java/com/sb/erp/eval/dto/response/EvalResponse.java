@@ -7,15 +7,15 @@ import lombok.Setter;
 
 @Getter @Setter
 public class EvalResponse {
-	private long evalId;
-	private long periodId;
+	private Long evalId;
+	private Long periodId;
 	private String periodTitle;
-	private long targetEmpId;
+	private Long targetEmpId;
 	private String targetEmpName;
 	private String targetEmpNo;
 	private String targetDeptName;
 	private String targetPosName;
-	private long evaluatorId;
+	private Long evaluatorId;
 	private String evaluatorName;
 	private Integer scorePerformance;
 	private Integer scoreExpertise;

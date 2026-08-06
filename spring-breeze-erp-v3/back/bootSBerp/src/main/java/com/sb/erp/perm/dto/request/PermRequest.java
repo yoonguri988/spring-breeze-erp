@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter @Getter
 public class PermRequest {
-	private long autId;
+	private Long autId;
 	private String autName;
-	private long comId;
+	private Long comId;
 }

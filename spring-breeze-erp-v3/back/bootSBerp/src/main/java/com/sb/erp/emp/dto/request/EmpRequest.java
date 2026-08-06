@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter @Getter
 public class EmpRequest {
-	private long empId;
+	private Long empId;
 	private String empNo;
 	private String empPass;
 	private String empName;
@@ -13,7 +13,7 @@ public class EmpRequest {
 	private String empMobile;
 	private String empStatus;
 	private String hireDate;
-	private long posId;
-	private long deptId;
-	private long comId;
+	private Long posId;
+	private Long deptId;
+	private Long comId;
 }

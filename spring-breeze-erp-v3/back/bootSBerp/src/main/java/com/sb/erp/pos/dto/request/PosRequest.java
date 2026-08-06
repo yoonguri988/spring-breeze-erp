@@ -5,9 +5,9 @@ import lombok.Setter;
 
 @Setter @Getter
 public class PosRequest {
-	private long posId;
+	private Long posId;
 	private String posCode;
 	private String posName;
 	private int posOrder;
-	private long comId;
+	private Long comId;
 }

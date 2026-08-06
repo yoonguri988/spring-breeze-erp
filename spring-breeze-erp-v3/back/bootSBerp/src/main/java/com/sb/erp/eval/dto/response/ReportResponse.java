@@ -7,12 +7,12 @@ import lombok.Setter;
 
 @Getter @Setter
 public class ReportResponse {
-	private long reportId;
-	private long periodId;
+	private Long reportId;
+	private Long periodId;
 	private String periodTitle;
 	private Integer periodYear;
 	private String periodTerm;
-	private long empId;
+	private Long empId;
 	private String empName;
 	private String empNo;
 	private String deptName;

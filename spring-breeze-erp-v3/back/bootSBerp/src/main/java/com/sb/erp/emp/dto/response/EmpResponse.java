@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter @Setter
 public class EmpResponse {
-	private long empId;
+	private Long empId;
 	private String empNo;
 	private String empName;
 	private String empEmail;

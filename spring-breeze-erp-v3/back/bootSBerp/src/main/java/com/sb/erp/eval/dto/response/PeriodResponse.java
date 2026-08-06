@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter @Setter
 public class PeriodResponse {
-	private long periodId;
-	private long comId;
+	private Long periodId;
+	private Long comId;
 	private int evalYear;
 	private String evalTerm;
 	private String title;

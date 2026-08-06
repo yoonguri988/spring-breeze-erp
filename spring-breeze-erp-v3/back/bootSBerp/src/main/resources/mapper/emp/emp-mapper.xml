@@ -84,7 +84,7 @@
 		#{deptId}, #{posId}, #{comId},
 		#{empEmail}, #{empMobile}, #{empStatus},
 		to_date(#{hireDate}, 'YYYY-MM-DD'))
-		<selectKey keyProperty="empId" resultType="int" order="AFTER">
+		<selectKey keyProperty="empId" resultType="long" order="AFTER">
 			select seq_employee.currval from dual
 		</selectKey>
 	</insert>

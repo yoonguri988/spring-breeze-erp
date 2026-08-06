@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter @Setter
 public class PermResponse {
-	private long autId;
+	private Long autId;
 	private String autName;
 	private int autCount;
 }

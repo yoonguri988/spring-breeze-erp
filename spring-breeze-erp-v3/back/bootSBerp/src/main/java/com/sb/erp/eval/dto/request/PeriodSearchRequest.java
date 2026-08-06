@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor
 public class PeriodSearchRequest {
-	private long comId;
+	private Long comId;
 	private Integer evalYear;
 	private String evalTerm;
 	private String periodStatus;
