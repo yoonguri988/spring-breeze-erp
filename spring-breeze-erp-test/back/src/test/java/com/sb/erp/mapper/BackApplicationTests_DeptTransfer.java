@@ -30,7 +30,6 @@ import com.sb.erp.dept.repository.DeptMapper;
 import com.sb.erp.dept.repository.DeptTransferMapper;
 
 @SpringBootTest
-@MapperScan({"com.sb.erp.dept.repository", "com.sb.erp.com.repository"})
 @Transactional
 class BackApplicationTests_DeptTransfer {
 
@@ -215,34 +214,4 @@ class BackApplicationTests_DeptTransfer {
 		assertThat(unmatched).isEmpty();
 	}
 	
-	//  MyBatis 설정
-	@TestConfiguration
-	static class MyBatisTestConfig {
-
-		@Autowired
-		private DataSource dataSource;
-
-		@Bean
-		public SqlSessionFactory sqlSessionFactory() throws Exception {
-			SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-			factoryBean.setDataSource(dataSource);
-			factoryBean.setMapperLocations(
-					new ClassPathResource("mapper/dept-mapper.xml"),
-				    new ClassPathResource("mapper/depttransfer-mapper.xml"),
-				    new ClassPathResource("mapper/company-mapper.xml")
-			);
-			//com.sb.erp.com.dto.request, com.sb.erp.com.dto.response
-		    factoryBean.setTypeAliasesPackage("com.sb.erp.dept.dto,com.sb.erp.com.dto,com.sb.erp.appr.dto,com.sb.erp.emp.dto,com.sb.erp.resv.dto"); // 두 패키지 모두
-			factoryBean.setConfigLocation(
-					new ClassPathResource("mybatis-config.xml")
-			);
-			return factoryBean.getObject();
-		}
-
-		@Bean
-		public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-			return new SqlSessionTemplate(sqlSessionFactory);
-		}
-	}
-
 }

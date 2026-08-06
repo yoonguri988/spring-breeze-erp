@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,12 +16,15 @@ import com.sb.erp.com.dto.request.CompanySearchRequest;
 import com.sb.erp.com.dto.response.ComResponse;
 import com.sb.erp.com.dto.response.StatsComResponse;
 import com.sb.erp.com.repository.CompanyMapper;
+import com.sb.erp.emp.dto.request.EmpRequest;
+import com.sb.erp.emp.repository.EmpMapper;
 
 @SpringBootTest
 @Transactional
 class BackApplicationTests_Company {
 
 	@Autowired CompanyMapper mapper;
+	@Autowired EmpMapper empMapper;
 	
 	// 여러 테스트에서 공통으로 재사용할 등록된 회사의 PK
 	private long savedComId1;
@@ -170,11 +172,28 @@ class BackApplicationTests_Company {
 	@Test
 	@DisplayName("사원 id로 소속 회사 조회")
 	void testSelectOneByEmpId() {
-		// 사전에 employee 테이블에 savedComId 를 가진 사원 데이터가 있어야 정상 통과합니다.
-		// (해당 사원 seed 데이터가 없다면 이 테스트는 별도 준비 데이터에 맞춰 empId 값을 조정하세요.)
-		int empId = 1;
- 
-		ComResponse response = mapper.selectOneByEmpId(empId);
-		assertThat(response).isNotNull();
+	    // savedComId1 소속 사원을 하나 등록
+	    EmpRequest empDto = EmpRequest.builder()
+	            .empNo("EMP-TEST-001")
+	            .empPass("test1234")
+	            .empName("테스트사원")
+	            .deptId(1L)   // TODO: 실제 존재하는 department.dept_id 값으로 교체
+	            .posId(1L)    // TODO: 실제 존재하는 emp_position.pos_id 값으로 교체
+	            .comId(savedComId1)
+	            .empEmail("test-emp-" + System.currentTimeMillis() + "@test.com")
+	            .empMobile("010-0000-0000")
+	            .empStatus("ACTIVE")   // TODO: 실제 코드 값(예: '재직' 등) 확인 필요
+	            .hireDate("2024-01-01")
+	            .build();
+
+	    int res = empMapper.insert(empDto);
+	    assertThat(res).isEqualTo(1);
+	    long empId = empDto.getEmpId();
+
+	    // 방금 등록한 사원의 empId로 소속 회사 조회
+	    ComResponse response = mapper.selectOneByEmpId(empId);
+
+	    assertThat(response).isNotNull();
+	    assertThat(response.getComId()).isEqualTo(savedComId1);
 	}
 }
