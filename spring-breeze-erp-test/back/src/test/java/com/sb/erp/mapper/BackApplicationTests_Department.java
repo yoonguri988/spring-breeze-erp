@@ -298,34 +298,4 @@ class BackApplicationTests_Department {
 				.comId(savedComId).deptCode("NOPE").build();
 		assertThat(mapper.selectDeptCode(notExist)).isNull();
 	}
-	
-	//  MyBatis 설정
-	@TestConfiguration
-	static class MyBatisTestConfig {
-
-		@Autowired
-		private DataSource dataSource;
-
-		@Bean
-		public SqlSessionFactory sqlSessionFactory() throws Exception {
-			SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-			factoryBean.setDataSource(dataSource);
-			factoryBean.setMapperLocations(
-					new ClassPathResource("mapper/dept-mapper.xml"),
-				    new ClassPathResource("mapper/company-mapper.xml")
-			);
-			//com.sb.erp.com.dto.request, com.sb.erp.com.dto.response
-		    factoryBean.setTypeAliasesPackage("com.sb.erp.dept.dto,com.sb.erp.com.dto"); // 두 패키지 모두
-			factoryBean.setConfigLocation(
-					new ClassPathResource("mybatis-config.xml")
-			);
-			return factoryBean.getObject();
-		}
-
-		@Bean
-		public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-			return new SqlSessionTemplate(sqlSessionFactory);
-		}
-	}
-
 }
