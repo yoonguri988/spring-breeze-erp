@@ -20,4 +20,3 @@ public class DeptTransferLogSearchRequest {
     private int pstartno = 1;
     private int onepagelist = 10;
 }
- 
