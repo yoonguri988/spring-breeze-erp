@@ -174,5 +174,19 @@
 	        </if>
 		</where>
 	</select>
+	
+	<!-- 양식 단건 조회 -->
+	<select id="selectFormAll" resultType="ApprFormResponse">
+		select
+			f.*,
+			c.com_name as comName
+		from
+			appr_form f
+		left outer join
+			company c on f.com_id = c.com_id
+		where
+			f.for_id = #{forId}
+			and f.for_version = #{forVersion}
+	</select>
 
 </mapper>

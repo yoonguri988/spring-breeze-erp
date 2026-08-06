@@ -24,14 +24,14 @@ public interface ApprFormMapper {
 							 @Param("forId") Long forId);
 	public ApprFormResponse selectFormAll(@Param("forId") Long forId,
 					 					  @Param("forVersion") Long forVersion);
-	public int insertForm(ApprFormRequest request);
+	public int insertForm(ApprFormRequest req);
 	public int updateForm(@Param("forId") Long forId,
 						  @Param("forVersion") Long forVersion,
-						  @Param("req") ApprFormRequest request);
+						  @Param("req") ApprFormRequest req);
 	public int deleteForm(@Param("forId") Long forId,
 						  @Param("forVersion") Long forVersion);
 	public int updateFormNewVersion(@Param("forId") Long forId,
-								    @Param("req") ApprFormRequest request);
+								    @Param("req") ApprFormRequest req);
 	public List<ApprFormResponse> selectFormList(ApprFormSearchCondition condition);
 	public List<ApprFormResponse> selectFormVersions(@Param("forId") Long forId);
 	

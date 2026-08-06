@@ -69,5 +69,5 @@
 		order by
 			l.lin_order
 	</select>
-
+	
 </mapper>
