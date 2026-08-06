@@ -12,7 +12,7 @@ import lombok.Setter;
 public class ApprFormRequest {
 	
 	@NotNull(message = "회사를 선택해주세요.")
-	private Integer comId;
+	private Long comId;
 	
 	@NotBlank(message = "양식 코드를 입력해주세요.")
 	private String forCode;

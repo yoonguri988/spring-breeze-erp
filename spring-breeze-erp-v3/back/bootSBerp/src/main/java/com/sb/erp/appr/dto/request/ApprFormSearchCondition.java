@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class ApprFormSearchCondition {
 	private String keyword;
-	private Integer comId;
+	private Long comId;
 	private String comName;
 	private Boolean forStatus;
 	private int page = 1;
