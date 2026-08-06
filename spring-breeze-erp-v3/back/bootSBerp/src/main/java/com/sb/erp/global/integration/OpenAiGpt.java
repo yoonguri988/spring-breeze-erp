@@ -1,4 +1,4 @@
-package com.sb.erp.api;
+package com.sb.erp.global.integration;
 
 import java.util.List;
 import java.util.Map;
@@ -10,10 +10,10 @@ import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sb.erp.api.ReportApi.ReportSections;
-import com.sb.erp.dto.MyWeeklyReportDto;
-import com.sb.erp.dto.ProjectAnalysisDto;
-import com.sb.erp.dto.WeeklyReportDto;
+import com.sb.erp.global.integration.ReportApi.ReportSections;
+import com.sb.erp.proj.dto.response.ProjectAnalysisResponse;
+import com.sb.erp.week.dto.response.MyWeeklyReportResponse;
+import com.sb.erp.week.dto.response.WeeklyReportResponse;
 
 @Service
 public class OpenAiGpt {
@@ -53,7 +53,7 @@ public class OpenAiGpt {
 	}
 	
 	//리스크 분석
-	public String analyzeProject(ProjectAnalysisDto dto) {
+	public String analyzeProject(ProjectAnalysisResponse dto) {
 		String prompt=String.format("""
 									당신은 10년 이상의 경력을 가진 IT 프로젝트 관리자(PM)입니다
 									아래 프로젝트 정보를 분석하여 프로젝트의 위험도를 판단해주세요.
@@ -129,7 +129,7 @@ public class OpenAiGpt {
 	}
 	
 	//관리자용 주간보고서
-	public ReportSections weeklyReportSections(WeeklyReportDto dto) {
+	public ReportSections weeklyReportSections(WeeklyReportResponse dto) {
 		String prompt=String.format("""
 									당신은 10년 이상의 경력을 가진 IT 프로젝트 관리자(PM)입니다.
 									전체 일정 리스크와 거시적인 진행 상황 위주로 작성하세요.
@@ -173,7 +173,7 @@ public class OpenAiGpt {
 		    }
 	}
 	// 개발자용 주간보고서
-		public ReportSections myWeeklyReportSections(MyWeeklyReportDto dto) {
+		public ReportSections myWeeklyReportSections(MyWeeklyReportResponse dto) {
 			String delayedListText = dto.getDelayedTaskNames() == null || dto.getDelayedTaskNames().isEmpty()
 					? "없음"
 					: String.join(", ", dto.getDelayedTaskNames());

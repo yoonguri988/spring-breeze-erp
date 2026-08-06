@@ -19,8 +19,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -41,9 +39,9 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_task")
     @SequenceGenerator(name = "seq_task", sequenceName = "SEQ_TASK", allocationSize = 1)
 	@Column(name="TASK_ID", nullable = false)
-	private Integer taskId;
+	private Long taskId;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY) 
 	@JoinColumn(name="PRO_ID", nullable = false)
 	private Project project;
 
@@ -80,26 +78,16 @@ public class Task {
 	@Column(name="TASK_END_DATE", nullable = false)
 	private LocalDate taskEndDate;
 	
-	@Column(name="ACTUAL_START_DATE")
+	@Column(name="ACTUAL_START_DATE", insertable = false, updatable = false)
 	private LocalDate actualStartDate; // 실제 착수일
 	
-	@Column(name="ACTUAL_END_DATE")
+	@Column(name="ACTUAL_END_DATE", insertable = false, updatable = false)
 	private LocalDate actualEndDate; //실제 완요일
 	
-	@Column(name="CREATED_AT", nullable = false)
+	@Column(name="CREATED_AT", insertable = false, updatable = false)
 	private LocalDateTime createdAt;
 	
-	@Column(name="UPDATED_AT", nullable = false)
+	@Column(name="UPDATED_AT", insertable = false, updatable = false)
 	private LocalDateTime updatedAt;
-	
-	@PrePersist
-	void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
-	@PreUpdate
-	void onUpdate() {
-		this.updatedAt = LocalDateTime.now();		
-	}
 
 }

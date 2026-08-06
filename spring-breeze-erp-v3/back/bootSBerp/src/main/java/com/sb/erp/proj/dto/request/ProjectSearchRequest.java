@@ -1,10 +1,11 @@
-package com.sb.erp.proj.dto;
+package com.sb.erp.proj.dto.request;
 
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class ProjectSearchDto {
+@Getter @Setter
+public class ProjectSearchRequest {
 	private String keyword;
 	private String proStatus;
 	private String startDate;
@@ -15,7 +16,7 @@ public class ProjectSearchDto {
 	
 	private boolean searched = false;
 	//일반 사용자용
-	private Integer comId;
+	private long comId;
 	
 	// 검색 조건이 비어있는지 확인 여부
 	public boolean hasSearchCondition() {

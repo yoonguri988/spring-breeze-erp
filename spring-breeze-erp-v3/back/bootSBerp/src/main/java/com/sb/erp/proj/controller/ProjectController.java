@@ -52,7 +52,7 @@ public class ProjectController {
 	
 	// 프로젝트 목록 페이지
 	@GetMapping("/proj_list") // 전체출력시
-	public String listselect(ProjectSearchDto search, Model model ,Authentication auth) {
+	public String listselect(ProjectSearchRequest search, Model model ,Authentication auth) {
 		
 		// 현재 로그인 사용자
 	    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
@@ -73,7 +73,7 @@ public class ProjectController {
 
 	    PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
 	    
-	    List<ProjectDto> list = service.selectAll(search); //목록 조회
+	    List<ProjRequest> list = service.selectAll(search); //목록 조회
 
 		model.addAttribute("paging", paging);
 		model.addAttribute("list", list);
@@ -92,7 +92,7 @@ public class ProjectController {
 	public String insert() {return "proj/proj_create";} //등록
 	
 	@PostMapping("/proj_create")
-	public String insert_post(ProjectDto dto, RedirectAttributes rttr, Authentication auth) { //등록처리
+	public String insert_post(ProjRequest dto, RedirectAttributes rttr, Authentication auth) { //등록처리
 		
 		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		
@@ -109,7 +109,7 @@ public class ProjectController {
 	public String select(@RequestParam("pro_id") int proId,
 	                      @RequestParam(defaultValue = "1") int pstartno,
 	                      Model model, Authentication auth) {
-		ProjectDto dto = service.select(proId);
+		ProjRequest dto = service.select(proId);
 		SecurityUtil.checkComIdAccess(dto.getComId());
 		
 		CustomUserDetails user = (CustomUserDetails)auth.getPrincipal();
@@ -129,7 +129,7 @@ public class ProjectController {
 	    int taskTotalCnt = taskService.selectCnt(proId);
 	    PagingUtil paging = new PagingUtil(taskTotalCnt, pstartno);
 
-	    TaskSearchDto taskSearch = new TaskSearchDto();
+	    TaskSearchRequest taskSearch = new TaskSearchRequest();
 	    taskSearch.setProId(proId);
 	    taskSearch.setPstartno((pstartno - 1) * taskSearch.getOnepagelist());
 	    
@@ -146,7 +146,7 @@ public class ProjectController {
 	@GetMapping("/proj_edit")
 	public String editView(@RequestParam("pro_id") int proId, Model model, Authentication auth) { //수정뷰
 		
-	    ProjectDto dto = service.select(proId);
+	    ProjRequest dto = service.select(proId);
 	    SecurityUtil.checkComIdAccess(dto.getComId());
 	    boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 	    boolean isCreator = dto.getEmpId() == SecurityUtil.getCurrentEmpId();
@@ -159,10 +159,10 @@ public class ProjectController {
 	}
 	
 	@PostMapping("/proj_edit")
-	public String edit_post(ProjectDto dto,RedirectAttributes rttr, Authentication auth) { //수정처리
+	public String edit_post(ProjRequest dto,RedirectAttributes rttr, Authentication auth) { //수정처리
 
 		CustomUserDetails user = (CustomUserDetails)auth.getPrincipal();
-		ProjectDto origin = service.select(dto.getProId());
+		ProjRequest origin = service.select(dto.getProId());
 		SecurityUtil.checkComIdAccess(dto.getComId());
 		 boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 
@@ -180,7 +180,7 @@ public class ProjectController {
 	@GetMapping("/delete") //삭제
 	public String delete(@RequestParam("pro_id") int proId, RedirectAttributes rttr, Authentication auth) {
 		CustomUserDetails user = (CustomUserDetails)auth.getPrincipal();
-		ProjectDto dto = service.select(proId);
+		ProjRequest dto = service.select(proId);
 		SecurityUtil.checkComIdAccess(dto.getComId());
 		int empId = user.getUser().getEmpId();
 		
@@ -202,7 +202,7 @@ public class ProjectController {
 	public ResponseEntity<String> analyzeProject(@RequestParam Integer proId, Authentication auth) {
 		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
 		int empId = user.getUser().getEmpId();
-	    ProjectDto project = service.select(proId);
+	    ProjRequest project = service.select(proId);
 	    SecurityUtil.checkComIdAccess(project.getComId());
 	    boolean isAdmin = SecurityUtil.isAdminOrRoot(auth);
 	    boolean isCreator = project.getEmpId() == empId;

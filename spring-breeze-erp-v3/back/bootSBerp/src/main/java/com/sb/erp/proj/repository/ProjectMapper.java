@@ -4,47 +4,38 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.sb.erp.proj.dto.ProjectAnalysisDto;
-import com.sb.erp.proj.dto.ProjectDto;
-import com.sb.erp.proj.dto.ProjectSearchDto;
-import com.sb.erp.util.dto.move.WeeklyReportDto;
+import com.sb.erp.proj.dto.request.ProjRequest;
+import com.sb.erp.proj.dto.request.ProjectSearchRequest;
+import com.sb.erp.proj.dto.response.ProjResponse;
+import com.sb.erp.proj.dto.response.ProjectAnalysisResponse;
+import com.sb.erp.week.dto.response.WeeklyReportResponse;
 
 @Mapper
 public interface ProjectMapper {
 	// 프로젝트 등록
-	public int insert(ProjectDto dto);
-	
-	/*
-	 * //프로젝트 상태별 리스트 public List<ProjectDto> selectByStatus(String proStatus);
-	 * 
-	 * //기간조회 public List<ProjectDto> selectByPeriod(@Param("startDate") String
-	 * startDate, @Param("endDate") String endDate);
-	 * 
-	 * //프로젝트명 검색 public List<ProjectDto> searchByKeyword(@Param("keyword") String
-	 * keyword);
-	 */
-	
+	public int insert(ProjRequest dto);
+
 	//프로젝트 상세보기
-	public ProjectDto select(int proId);
+	public ProjResponse select(Long proId);
 	
 	//프로젝트 삭제
-	public int deleteTaskByProjectId(int proId);
-	public int deleteMemberByProjectId(int proId);
-	public int deleteProject(int proId);
+	public int deleteTaskByProjectId(Long proId);
+	public int deleteMemberByProjectId(Long proId);
+	public int deleteProject(Long proId);
 	
 	//프로젝트 수정
-	public int update(ProjectDto dto);
+	public int update(ProjRequest dto);
 	
 	/* paging */
-	public List<ProjectDto> selectAll(ProjectSearchDto search);
-	public int selectCnt(ProjectSearchDto search);
+	public List<ProjResponse> selectAll(ProjectSearchRequest search);
+	public int selectCnt(ProjectSearchRequest search);
 
 	
 	//Ai 프로젝트 분석용
-	public ProjectAnalysisDto projectAnalysis(Integer proId);
+	public ProjectAnalysisResponse projectAnalysis(Long proId);
 	
 	//주간 보고서용-팀장용
-	public WeeklyReportDto weeklyReport(Integer proId);
+	public WeeklyReportResponse weeklyReport(Long proId);
 	
 	//주간 보고서용으로 가져올 프로젝트들
 	public List<Integer>selectActiveProjectIds();

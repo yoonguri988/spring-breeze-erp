@@ -1,14 +1,15 @@
-package com.sb.erp.notice.dto; 
+package com.sb.erp.notice.dto.request; 
 
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class NoticeSearchDto {
-	private Integer empId;
-	private Integer comId;
+@Getter @Setter
+public class NoticeSearchRequest {
+	private Long empId;
+	private Long comId;
 	private String keyword;
 	private String sortBy = "new";
 	private List<Integer> pinnedBnos = new ArrayList<>();// 긴급 공지 상단 고정 시 제외할 bno 목록
