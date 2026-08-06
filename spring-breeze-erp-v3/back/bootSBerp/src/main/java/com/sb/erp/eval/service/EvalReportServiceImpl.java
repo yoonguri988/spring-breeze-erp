@@ -1,4 +1,4 @@
-package com.sb.erp.service;
+﻿package com.sb.erp.eval.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -7,15 +7,15 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.sb.erp.api.OpenAiClient;
-import com.sb.erp.dto.openai.ChatMessage;
-import com.sb.erp.dto.openai.ReportContent;
-import com.sb.erp.dao.EvalPeriodMapper;
-import com.sb.erp.dao.EvalReportMapper;
-import com.sb.erp.dto.EvalPeriodDto;
-import com.sb.erp.dto.EvalReportDto;
+import com.sb.erp.global.integration.OpenAiClient;
+import com.sb.erp.global.integration.openAi.ChatMessage;
+import com.sb.erp.global.integration.openAi.ReportContent;
+import com.sb.erp.eval.repository.EvalPeriodMapper;
+import com.sb.erp.eval.repository.EvalReportMapper;
+import com.sb.erp.eval.dto.EvalPeriodDto;
+import com.sb.erp.eval.dto.EvalReportDto;
 import com.sb.erp.dto.EvalReportSearchDto;
-import com.sb.erp.util.SecurityUtil;
+import com.sb.erp.util.dto.SecurityUtil;
 
 import lombok.RequiredArgsConstructor;
 

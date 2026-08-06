@@ -1,7 +1,7 @@
-package com.sb.erp.service;
+﻿package com.sb.erp.emp.service;
 
-import com.sb.erp.dto.EmpDto;
-import com.sb.erp.dto.WelcomeMailTargetDto;
+import com.sb.erp.emp.dto.EmpDto;
+import com.sb.erp.emp.dto.WelcomeMailTargetDto;
 
 /**
  * 온보딩 이메일 발송 서비스.

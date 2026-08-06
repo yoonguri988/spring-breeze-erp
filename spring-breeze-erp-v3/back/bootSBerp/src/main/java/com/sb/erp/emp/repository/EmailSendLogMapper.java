@@ -1,11 +1,11 @@
-package com.sb.erp.dao;
+﻿package com.sb.erp.emp.repository;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.dto.WelcomeMailTargetDto;
+import com.sb.erp.emp.dto.WelcomeMailTargetDto;
 
 @Mapper
 public interface EmailSendLogMapper {

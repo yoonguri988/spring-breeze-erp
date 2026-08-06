@@ -1,16 +1,16 @@
-package com.sb.erp.service;
+﻿package com.sb.erp.emp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sb.erp.api.EmailApi;
-import com.sb.erp.service.MailTemplates;
-import com.sb.erp.dao.EmailSendLogMapper;
-import com.sb.erp.dto.EmailSendLogDto;
-import com.sb.erp.dto.EmpDto;
-import com.sb.erp.dto.WelcomeMailTargetDto;
+import com.sb.erp.global.integration.EmailApi;
+import com.sb.erp.emp.service.MailTemplates;
+import com.sb.erp.emp.repository.EmailSendLogMapper;
+import com.sb.erp.emp.dto.EmailSendLogDto;
+import com.sb.erp.emp.dto.EmpDto;
+import com.sb.erp.emp.dto.WelcomeMailTargetDto;
 
 /**
  * 온보딩 이메일 발송 구현체.

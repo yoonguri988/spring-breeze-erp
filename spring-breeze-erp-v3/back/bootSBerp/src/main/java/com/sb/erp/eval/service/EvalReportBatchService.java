@@ -1,10 +1,10 @@
-package com.sb.erp.service;
+﻿package com.sb.erp.eval.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.sb.erp.dao.EvalPeriodMapper;
+import com.sb.erp.eval.repository.EvalPeriodMapper;
 
 /**
 AI 리포트 배치 오케스트레이터.

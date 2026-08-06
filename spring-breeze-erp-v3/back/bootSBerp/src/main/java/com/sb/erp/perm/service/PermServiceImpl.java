@@ -1,10 +1,10 @@
-package com.sb.erp.service;
+﻿package com.sb.erp.perm.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sb.erp.dao.PermMapper;
-import com.sb.erp.dto.AuthPermDto;
+import com.sb.erp.perm.repository.PermMapper;
+import com.sb.erp.perm.dto.AuthPermDto;
 
 @Service
 public class PermServiceImpl implements PermService {

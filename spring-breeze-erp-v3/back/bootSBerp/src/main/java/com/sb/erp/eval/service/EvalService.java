@@ -1,8 +1,8 @@
-package com.sb.erp.service;
+﻿package com.sb.erp.eval.service;
 
 import java.util.List;
 
-import com.sb.erp.dto.EvalDto;
+import com.sb.erp.eval.dto.EvalDto;
 
 public interface EvalService {
 

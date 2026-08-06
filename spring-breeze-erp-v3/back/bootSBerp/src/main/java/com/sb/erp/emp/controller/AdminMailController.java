@@ -1,4 +1,4 @@
-package com.sb.erp.controller;
+﻿package com.sb.erp.emp.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sb.erp.service.MailSchedulerService;
+import com.sb.erp.emp.service.MailSchedulerService;
 
 /**
  * 관리자 수동 이메일 배치 트리거.
