@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.emp.dto.EmpDto;
+import com.sb.erp.emp.dto.response.EmpResponse;
 import com.sb.erp.proj.dto.request.ProjmemRequest;
 import com.sb.erp.proj.dto.response.ProjmemResponse;
 

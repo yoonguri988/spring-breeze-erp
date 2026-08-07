@@ -1,4 +1,4 @@
-package com.sb.erp.controller;
+package com.sb.erp.notice.controller;
 
 import java.util.List;
 
