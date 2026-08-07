@@ -1,4 +1,4 @@
-package com.sb.erp.pos.entity;
+﻿package com.sb.erp.pos.entity;
 
 import jakarta.persistence.*;
 import com.sb.erp.com.entity.Company;
@@ -16,8 +16,8 @@ import lombok.Setter;
 public class Position {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_emp_position")
-    @SequenceGenerator(name = "seq_emp_position", sequenceName = "SEQ_EMP_POSITION", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_position")
+    @SequenceGenerator(name = "seq_position", sequenceName = "SEQ_POSITION", allocationSize = 1)
     @Column(name = "pos_id")
     private Long posId;
 

@@ -1,4 +1,4 @@
-package com.sb.erp.dto;
+﻿package com.sb.erp.eval.dto;
 
 import java.math.BigDecimal;
 
