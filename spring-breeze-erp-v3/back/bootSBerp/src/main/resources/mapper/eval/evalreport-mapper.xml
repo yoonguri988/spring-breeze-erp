@@ -2,13 +2,13 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sb.erp.dao.EvalReportMapper">
+<mapper namespace="com.sb.erp.eval.repository.EvalReportMapper">
 
 	<!-- 회차별 리포트 목록 (관리자용) 
 	- 회차 소속 회사 격리 위해 evaluation_period 조인 후 com_id 조건. 
 	- 사원 정보(이름/사번/부서/직급)까지 조인해서 카드/리스트 렌더링에 바로 사용.
 	- 종합 점수 내림차순으로 정렬 (성과 상위자 우선 노출). -->
-	<select id="selectByPeriodId" resultType="EvalReportDto">
+	<select id="selectByPeriodId" resultType="com.sb.erp.eval.dto.response.ReportResponse">
 		select
 		r.report_id as
 		reportId,
@@ -69,8 +69,8 @@
 	- deptId, keyword는 선택 필터 
 	- 사원 정보 조인해서 카드 렌더링에 바로 사용 
 	- 정렬은 기존과 동일 (종합 점수 내림차순 → 직급 → 사번) -->
-	<select id="searchByPeriod" parameterType="EvalReportSearchDto"
-		resultType="EvalReportDto">
+	<select id="searchByPeriod" parameterType="com.sb.erp.eval.dto.request.ReportSearchRequest"
+		resultType="com.sb.erp.eval.dto.response.ReportResponse">
 		select
 		r.report_id as reportId,
 		r.period_id as periodId,
@@ -129,7 +129,7 @@
 
 	<!-- 검색 결과 개수 (페이징 계산용) -->
 	<select id="countByPeriodSearch"
-		parameterType="EvalReportSearchDto" resultType="int">
+		parameterType="com.sb.erp.eval.dto.request.ReportSearchRequest" resultType="int">
 		select count(*)
 		from evaluation_ai_report r
 		join evaluation_period p on
@@ -150,7 +150,7 @@
 	</select>
 
 	<!-- 리포트 단건 조회 (comId 격리 포함) -->
-	<select id="selectByReportId" resultType="EvalReportDto">
+	<select id="selectByReportId" resultType="com.sb.erp.eval.dto.response.ReportResponse">
 		select
 		r.report_id as
 		reportId,
@@ -204,7 +204,7 @@
 	</select>
 
 	<!-- 회차 + 사원 조합 단건 (본인 조회, 재생성 시 존재 여부 판단용). -->
-	<select id="selectByPeriodAndEmp" resultType="EvalReportDto">
+	<select id="selectByPeriodAndEmp" resultType="com.sb.erp.eval.dto.response.ReportResponse">
 		select
 		r.report_id
 		as reportId,
@@ -256,7 +256,7 @@
 	</select>
 
 	<!-- 특정 사원의 리포트 이력 (본인 조회용) -->
-	<select id="selectByEmpId" resultType="EvalReportDto">
+	<select id="selectByEmpId" resultType="com.sb.erp.eval.dto.response.ReportResponse">
 		select
 		r.report_id as
 		reportId,
@@ -291,7 +291,7 @@
 	- 회사 격리(comId)를 evaluation_period 조인으로 확보. 
 	- 정렬: 연도 desc → 학기 우선순위(ANNUAL > H2 > H1) desc → generated_at desc. 
 	- Oracle 12c+ FETCH FIRST 1 ROWS ONLY로 Top-N 최적화 유도. -->
-	<select id="selectLatestByEmpId" resultType="EvalReportDto">
+	<select id="selectLatestByEmpId" resultType="com.sb.erp.eval.dto.response.ReportResponse">
 		select
 		r.report_id as reportId,
 		r.period_id as periodId,
@@ -333,7 +333,7 @@
 	</select>
 
 	<!-- 리포트 신규 저장. -->
-	<insert id="insert" parameterType="EvalReportDto">
+	<insert id="insert" parameterType="com.sb.erp.eval.dto.request.ReportRequest">
 		insert into
 		evaluation_ai_report (
 		report_id, period_id, emp_id,
@@ -358,7 +358,7 @@
 	</insert>
 
 	<!-- 리포트 재생성 시 갱신 (같은 period+emp에 대한 upsert의 update 경로). -->
-	<update id="update" parameterType="EvalReportDto">
+	<update id="update" parameterType="com.sb.erp.eval.dto.request.ReportRequest">
 		update evaluation_ai_report
 		set avg_performance = #{avgPerformance},
 		avg_expertise =

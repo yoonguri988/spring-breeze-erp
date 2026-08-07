@@ -1,4 +1,4 @@
-package com.sb.erp.eval.entity;
+﻿package com.sb.erp.eval.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,8 +38,8 @@ import com.sb.erp.com.entity.Company;
 public class EvalPeriod {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_eval_period")
-    @SequenceGenerator(name = "seq_eval_period", sequenceName = "SEQ_EVAL_PERIOD", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_period")
+    @SequenceGenerator(name = "seq_period", sequenceName = "SEQ_PERIOD", allocationSize = 1)
     @Column(name = "period_id")
     private Long periodId;
 

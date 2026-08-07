@@ -1,4 +1,4 @@
-package com.sb.erp.service;
+﻿package com.sb.erp.emp.service;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.sb.erp.dao.EmailSendLogMapper;
-import com.sb.erp.dto.WelcomeMailTargetDto;
+import com.sb.erp.emp.repository.EmailSendLogMapper;
+import com.sb.erp.emp.dto.WelcomeMailTargetDto;
 
 @Service
 public class MailSchedulerService {

@@ -1,4 +1,4 @@
-package com.sb.erp.eval.entity;
+﻿package com.sb.erp.eval.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -35,8 +35,8 @@ import com.sb.erp.emp.entity.Employee;
 public class Evaluation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_evaluation")
-    @SequenceGenerator(name = "seq_evaluation", sequenceName = "SEQ_EVALUATION", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_eval")
+    @SequenceGenerator(name = "seq_eval", sequenceName = "SEQ_EVAL", allocationSize = 1)
     @Column(name = "eval_id")
     private Long evalId;
 

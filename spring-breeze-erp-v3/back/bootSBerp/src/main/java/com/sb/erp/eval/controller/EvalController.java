@@ -1,4 +1,4 @@
-package com.sb.erp.controller;
+﻿package com.sb.erp.eval.controller;
 
 import java.util.List;
 
@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.sb.erp.dto.EvalDto;
-import com.sb.erp.dto.EvalPeriodDto;
-import com.sb.erp.dto.EvalPeriodSearchDto;
-import com.sb.erp.service.EvalPeriodService;
-import com.sb.erp.service.EvalService;
-import com.sb.erp.util.SecurityUtil;
+import com.sb.erp.eval.dto.EvalDto;
+import com.sb.erp.eval.dto.EvalPeriodDto;
+import com.sb.erp.eval.dto.EvalPeriodSearchDto;
+import com.sb.erp.eval.service.EvalPeriodService;
+import com.sb.erp.eval.service.EvalService;
+import com.sb.erp.util.dto.SecurityUtil;
 
 @Controller
 public class EvalController {

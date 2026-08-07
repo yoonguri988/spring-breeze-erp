@@ -54,7 +54,9 @@ dependencies {
     // dotenv
     implementation 'me.paulschwarz:spring-dotenv:3.0.0'    
     
+   // test
    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+   testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:4.0.1'
    //testImplementation 'org.springframework.security:spring-security-test'
    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

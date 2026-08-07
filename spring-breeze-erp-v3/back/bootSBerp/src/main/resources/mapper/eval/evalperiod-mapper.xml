@@ -2,10 +2,10 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sb.erp.dao.EvalPeriodMapper">
+<mapper namespace="com.sb.erp.eval.repository.EvalPeriodMapper">
 
 	<!-- 회차 단건 상세 조회 -->
-	<select id="selectByPeriodId" resultType="EvalPeriodDto">
+	<select id="selectByPeriodId" resultType="com.sb.erp.eval.dto.response.PeriodResponse">
 		select period_id,
 		com_id, eval_year, eval_term, title, period_status,
 		TO_CHAR(start_date, 'YYYY-MM-DD') AS start_date,
@@ -21,7 +21,7 @@
 	</select>
 
 	<!-- 회차 등록 -->
-	<insert id="insert" parameterType="EvalPeriodDto">
+	<insert id="insert" parameterType="com.sb.erp.eval.dto.request.PeriodRequest">
 		insert into
 		evaluation_period(com_id, eval_year, eval_term, title, start_date,
 		end_date)
@@ -31,7 +31,7 @@
 	</insert>
 
 	<!-- 회차 정보 수정 -->
-	<update id="update" parameterType="EvalPeriodDto">
+	<update id="update" parameterType="com.sb.erp.eval.dto.request.PeriodRequest">
 		update evaluation_period
 		set
 		title = #{title},
@@ -56,8 +56,8 @@
 	</update>
 
 	<!-- 목록(조건부) 조회 -->
-	<select id="search" parameterType="EvalPeriodSearchDto"
-		resultType="EvalPeriodDto">
+	<select id="search" parameterType="com.sb.erp.eval.dto.request.PeriodSearchRequest"
+		resultType="com.sb.erp.eval.dto.response.PeriodResponse">
 		select period_id, com_id, eval_year, eval_term, title, period_status,
 		TO_CHAR(start_date, 'YYYY-MM-DD') AS start_date,
 		TO_CHAR(end_date,

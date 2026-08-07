@@ -1,11 +1,11 @@
-package com.sb.erp.dao;
+﻿package com.sb.erp.emp.repository;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.dto.WelcomeMailTargetDto;
+import com.sb.erp.emp.dto.WelcomeMailTargetDto;
 
 @Mapper
 public interface EmailSendLogMapper {
@@ -17,15 +17,15 @@ public interface EmailSendLogMapper {
      * - 최초: INSERT
      * - 재시도(기존 'F' 또는 'P'): UPDATE
      */
-    int upsertProcessing(@Param("empId") int empId,
+    int upsertProcessing(@Param("empId") Long empId,
                          @Param("mailType") String mailType);
 
     /** 발송 성공 시 'S'로 갱신. */
-    int updateSuccess(@Param("empId") int empId,
+    int updateSuccess(@Param("empId") Long empId,
                       @Param("mailType") String mailType);
 
     /** 발송 실패 시 'F' + error_msg 저장. */
-    int updateFail(@Param("empId") int empId,
+    int updateFail(@Param("empId") Long empId,
                    @Param("mailType") String mailType,
                    @Param("errorMsg") String errorMsg);
 

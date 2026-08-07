@@ -1,6 +1,6 @@
-package com.sb.erp.service;
+﻿package com.sb.erp.perm.service;
 
-import com.sb.erp.dto.AuthPermDto;
+import com.sb.erp.perm.dto.AuthPermDto;
 
 public interface PermService {
 
