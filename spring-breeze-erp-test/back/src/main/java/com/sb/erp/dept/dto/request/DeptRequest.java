@@ -20,7 +20,7 @@ public class DeptRequest {
 
 	@NotBlank(message = "부서코드는 필수입니다")
 	private String deptCode;
-
+	
 	private long sortOrder;
 	private long empId;  // 부서장(담당자) - 선택
 	private long depth;

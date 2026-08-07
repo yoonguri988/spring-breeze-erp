@@ -1,17 +1,19 @@
 package com.sb.erp.appr.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter @NoArgsConstructor @AllArgsConstructor @Builder
-public class ApprLineImpactResponse {
-	private Long linId;
+@Getter
+@Setter
+@NoArgsConstructor
+public class ApprDocSummaryResponse {
 	private Long docId;
 	private String docTitle;
 	private Long empId;
 	private String empName;
-	private Integer linOrder;
+	private String docStatus;
+	private boolean isImportant;
+	private String createdAt;
 	private String linStatus;
 }

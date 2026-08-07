@@ -41,6 +41,8 @@ public class ResvResponse {
 	private String empName;
 	private String deptName;
 	private String approvedEmpName;
+	
+	private LocalDateTime noshowAlertAt;
 
 	public ResvResponse(Reservation reservation) {
 		this.revId = reservation.getRevId();
