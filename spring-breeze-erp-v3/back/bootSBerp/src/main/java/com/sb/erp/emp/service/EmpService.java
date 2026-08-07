@@ -11,7 +11,7 @@ public interface EmpService {
 	
 	// ─── 조회 ────────────────────────
 	// 상세 보기
-	EmpDto selectByEmpId(int empId);
+	EmpDto selectByEmpId(long empId);
 	
 	// 이메일을 기준으로 사용자 정보 확인
 	EmpDto selectByEmpEmail(String empEmail);
