@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.resv.repository.ReservationMapper">
 
     <!-- 예약 목록: 회사별 + 상태필터 + 페이징, resource/employee 조인해서 이름까지 표시 -->
-    <select id="selectAll" parameterType="ResvSearchDto" resultType="ResvDto">
+    <select id="selectAll" parameterType="ResvSearchRequest" resultType="ResvResponse">
         SELECT
             rv.*,
             r.res_name, r.res_code, r.res_type, r.location,
@@ -38,7 +40,7 @@
     </select>
 
     <!-- 예약 전체 개수 (페이징 계산용) -->
-    <select id="selectCount" parameterType="ResvSearchDto" resultType="int">
+    <select id="selectCount" parameterType="ResvSearchRequest" resultType="int">
         SELECT COUNT(*)
         FROM reservation rv
         LEFT JOIN COM_RESOURCE R ON R.RES_ID = RV.RES_ID
@@ -65,7 +67,7 @@
     </select>
 
     <!-- 예약 상세 -->
-    <select id="selectOneById" parameterType="int" resultType="ResvDto">
+    <select id="selectById" parameterType="int" resultType="ResvResponse">
         SELECT
             rv.*,
             r.res_name, r.res_code, r.res_type, r.location, 
@@ -79,26 +81,25 @@
     </select>
 
     <!-- 예약 등록: 사용자가 자원을 신청하면 상태는 항상 'WAI'(대기)로 시작 -->
-    <insert id="insert" parameterType="ResvDto">
+    <insert id="insert" parameterType="ResvRequest">
         INSERT INTO reservation (
             rev_id, res_id, com_id, emp_id, quantity, status,
             start_dt, end_dt, remark, created_at, updated_at
         )
         VALUES (
             seq_reservation.NEXTVAL, #{resId}, #{comId}, #{empId}, #{quantity}, 'WAI',
-            TO_TIMESTAMP(#{startDt}, 'YYYY-MM-DD"T"HH24:MI'),
-        	TO_TIMESTAMP(#{endDt}, 'YYYY-MM-DD"T"HH24:MI'),
+            #{startDt}, #{endDt},
 		    #{remark}, SYSDATE, SYSDATE
         )
     </insert>
 
     <!-- 예약 수정: 대기(WAI) 상태에서만 가능, 시간대까지 변경 가능하도록 반영 -->
-    <update id="update" parameterType="ResvDto">
+    <update id="update" parameterType="ResvRequest">
         UPDATE reservation
         <set>
         	<if test="quantity != null">quantity = #{quantity},</if>
-        	<if test="startDt != null">start_dt = TO_TIMESTAMP(#{startDt}, 'YYYY-MM-DD"T"HH24:MI'),</if>
-        	<if test="endDt != null">end_dt = TO_TIMESTAMP(#{endDt}, 'YYYY-MM-DD"T"HH24:MI'),</if>
+        	<if test="startDt != null">start_dt = #{startDt},</if>
+        	<if test="endDt != null">end_dt = #{endDt},</if>
         	<if test="remark != null">remark = #{remark},</if>
         </set>
         WHERE rev_id = #{revId}
@@ -112,7 +113,7 @@
     </delete>
 
     <!-- 예약 승인 -->
-    <update id="updateApprove" parameterType="ResvDto">
+    <update id="updateApprove" parameterType="ResvRequest">
         UPDATE reservation
         SET status          = 'APP',
             approved_emp_id = #{approvedEmpId},
@@ -123,7 +124,7 @@
     </update>
 
     <!-- 예약 반려: 반려 사유는 remark가 아닌 reject_reason에 별도 저장 -->
-    <update id="updateReject" parameterType="ResvDto">
+    <update id="updateReject" parameterType="ResvRequest">
         UPDATE reservation
         SET status          = 'REJ',
             approved_emp_id = #{approvedEmpId},
@@ -135,7 +136,7 @@
     </update>
 
     <!-- 상태별 개수 (관리자 대시보드 통계카드: 전체 / 대기 / 승인 / 반려) -->
-    <select id="countByStats" parameterType="ResvSearchDto" resultType="StatsResvDto">
+    <select id="countByStats" parameterType="ResvSearchRequest" resultType="StatsResvResponse">
         SELECT
             (SELECT COUNT(*) FROM reservation WHERE com_id = #{comId}) AS resvTotal,
             (SELECT COUNT(*) FROM reservation WHERE com_id = #{comId} AND status = 'WAI') AS waiTotal,
@@ -161,12 +162,12 @@
 	      <if test="excludeRevId != null">
 	        AND rev_id != #{excludeRevId}  <!-- 수정(update) 시 자기 자신은 제외 -->
 	      </if>
-	      AND start_dt <![CDATA[<]]> TO_TIMESTAMP(#{endDt}, 'YYYY-MM-DD"T"HH24:MI')
-	      AND end_dt   <![CDATA[>]]> TO_TIMESTAMP(#{startDt}, 'YYYY-MM-DD"T"HH24:MI')
+	      AND start_dt <![CDATA[<]]> #{endDt}
+	      AND end_dt   <![CDATA[>]]> #{startDt}
 	</select>
 	
 	<!-- 알림 발송 대상 조회 -->
-	<select id="selectNoShowTargets" resultType="ResvAlertDto">
+	<select id="selectNoShowTargets" resultType="ResvAlertResponse">
         SELECT
             r.rev_id, 
             res.res_id, res.res_code, res.res_name, res.res_type,
