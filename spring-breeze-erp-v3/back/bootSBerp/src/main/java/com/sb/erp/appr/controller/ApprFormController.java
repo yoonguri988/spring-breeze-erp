@@ -1,228 +1,127 @@
 package com.sb.erp.appr.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.sb.erp.appr.dto.ApprFormDto;
-import com.sb.erp.appr.dto.ApprFormSearchDto;
+import com.sb.erp.appr.dto.request.ApprFormAiSchemaRequest;
+import com.sb.erp.appr.dto.request.ApprFormRequest;
+import com.sb.erp.appr.dto.request.ApprFormSearchCondition;
+import com.sb.erp.appr.dto.response.ApprFormAiSchemaResponse;
+import com.sb.erp.appr.dto.response.ApprFormListResponse;
+import com.sb.erp.appr.dto.response.ApprFormResponse;
+import com.sb.erp.appr.dto.response.CodeCheckResponse;
 import com.sb.erp.appr.service.ApprFormService;
-import com.sb.erp.com.dto.CompanyDto;
-import com.sb.erp.com.service.CompanyService_JPA;
+import com.sb.erp.com.dto.response.ComResponse;
+import com.sb.erp.com.service.CompanyService;
 import com.sb.erp.global.integration.OpenAiGpt;
-import com.sb.erp.util.dto.PagingUtil;
 
-@Controller
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
 @RequestMapping("/appr")
-public class ApprFormController { 
-	@Autowired ApprFormService appr;
-	@Autowired CompanyService com;
-	@Autowired OpenAiGpt gpt;
-	
-	// 회사 검색 기능
-	@GetMapping("/searchCompany")
-	@ResponseBody
-	public List<CompanyDto> searchCompany(@RequestParam("company") String company){
-		//return appr.searchCompany(company);
-		return com.getSuggest(company);
-	}
-	
-	// 양식 코드 중복 검사 기능
-	@GetMapping("/checkCode")
-	@ResponseBody
-	public Map<String,Object> checkCode(@RequestParam("code") String code,
-										@RequestParam("comId") String comId,
-								@RequestParam(value ="forId", required = false) Integer forId) {
-		
-		Map<String,Object> result = new HashMap<>();
-		
-		// null들어오면 뻑나는거 방지
-		if(comId == null || comId.trim().isEmpty()) {
-			result.put("checkCode", false);
-			return result;
-		}
-		
-		ApprFormDto dto = new ApprFormDto();
-		dto.setComId(Integer.parseInt(comId));
-		dto.setForCode(code);
-		
-		if(forId != null) { 
-			dto.setForId(forId);
-		}
-		
-		String find = appr.findByCode(dto);
-		
-		if(find != null) {
-			result.put("checkCode", false);
-		}
-		else {
-			result.put("checkCode", true);
-		}
-		
-		return result;
-	}
-	
-	// 양식 리스트 입력한 값 찾기
-	// required = false : 필수 값이 아니라고 설정
-    // defaultValue = "" : 값이 안 넘어오면 디폴트값 지정
-	@GetMapping("/list_form")
-	public String searchForms(ApprFormSearchDto search, Model model,
-							  @RequestParam( value = "page", defaultValue = "1") int page){
-		
-		int totalCnt = 0;
-	    List<ApprFormDto> list = new ArrayList<>();
-	    PagingUtil paging;
-	    
-	    //2) 검색 조건이 null이 아닐때 실행
-	    if(search.hasSearchCondition() || page > 1) {
-	    	
-	    	// 전체 양식 수
-	    	totalCnt = appr.listFormCnt(search);
-	    	paging = new PagingUtil(totalCnt, page);
-	    	int offset = (page - 1) * paging.getOnepagelist();
-	    	search.setPstartno(offset);
-	    	
-	    	list = appr.selectFormList(search);
-	    } else {
-	    	paging = new PagingUtil(0, page);
-	    }
-		
-		// jsp로 데이터 보내기
-		model.addAttribute("list", list);
-		model.addAttribute("paging", paging);
-		model.addAttribute("search", search);
-		
-		return "appr/list_form";
-	} 
+@RequiredArgsConstructor
+public class ApprFormController {
 
+	private final ApprFormService appr;
+	private final CompanyService com; // 회사 검색
+	private final OpenAiGpt gpt;
 	
-	// 양식 작성 폼
-	@GetMapping("/write_form")
-	public String writeForm() {
-		return "appr/write_form";
+	// 양식 목록 조회 ( 검색 + 페이징 )
+	@GetMapping
+	public ResponseEntity<ApprFormListResponse> listForms(ApprFormSearchCondition condition){
+		return ResponseEntity.ok(appr.listForms(condition));
 	}
 	
-	// 양식 작성 처리
-	@PostMapping("/write_form")
-	public String writeForm_post(ApprFormDto dto, RedirectAttributes rttr, Model model) {
+	// 양식 단건 조회 / 특정 버전
+	@GetMapping("/{forId}/{forVersion}")
+	public ResponseEntity<ApprFormResponse> getForm(
+			@PathVariable Long forId,
+			@PathVariable Long forVersion
+	){
+		return ResponseEntity.ok(appr.getForm(forId, forVersion));
+	}
+	
+	// 특정 양식의 버전 전체 이력 조회
+	@GetMapping("/{forId}/versions")
+	public ResponseEntity<List<ApprFormResponse>> getFormVersions(@PathVariable Long forId){
+		return ResponseEntity.ok(appr.getFormVersions(forId));
+	}
+	
+	// 양식 등록
+	@PostMapping
+	public ResponseEntity<Void> insertForm(@Valid @RequestBody ApprFormRequest req){
+		Long forId = appr.insertForm(req);
+		
+		// 신규 등록 버전은 무조건 1
+		URI location = URI.create("/appr" + forId + "/1");
+		return ResponseEntity.created(location).build();
+	}
+	
+	// 양식 수정
+	// 버전 증가 처리는 서비스 파트에서 처리
+	@PutMapping("/{forId}/{forVersion}")
+	public ResponseEntity<Void> updateForm(
+			@PathVariable Long forId,
+			@PathVariable Long forVersion,
+			@Valid
+			@RequestBody ApprFormRequest req
+	){
+		appr.updateForm(forId, forVersion, req);
+		return ResponseEntity.noContent().build();
+	}
+	
+	// 양식 삭제
+	@DeleteMapping("/{forId}/{forVersion}")
+	public ResponseEntity<Void> deleteForm(
+			@PathVariable Long forId,
+			@PathVariable Long forVersion
+	){
+		appr.deleteForm(forId, forVersion);
+		return ResponseEntity.noContent().build();
+	}
+	
+	// 양식 코드 중복 확인
+	@GetMapping("/check-code")
+	public ResponseEntity<CodeCheckResponse> checkCode(
+			@RequestParam String forCode,
+			@RequestParam Long comId,
+			@RequestParam(required = false) Long forId
+	){
+		return ResponseEntity.ok(appr.checkCode(forCode, comId, forId));
+	}
+	
+	// 회사 검색 ( 확인 필요함 )
+	@GetMapping("/companies")
+	public ResponseEntity<List<ComResponse>> searchCompany(@RequestParam String keyword){
+		return ResponseEntity.ok(com.getSuggest(keyword));
+	}
+	
+	// AI 기반 양식 스키마 생성
+	
+	@PostMapping("/ai-schema")
+	public ResponseEntity<ApprFormAiSchemaResponse> generateSchema(
+			@Valid
+			@RequestBody ApprFormAiSchemaRequest req
+	){
 		try {
-			// 양식 작성 성공
-			if(appr.insertForm(dto) > 0) {
-				return "redirect:/appr/list_form";
-			}
-		} catch (IllegalArgumentException e) {
-			model.addAttribute("errorMsg", e.getMessage());
-			model.addAttribute("dto", dto);
-		}
-		return "appr/write_form";
-	}
-	
-	// 양식 상세보기
-	@GetMapping("/detail_form")
-	public String detail(Model model,
-						 @RequestParam("forId") int forId,
-						 @RequestParam("forVersion") int forVersion) {
-		
-		// 받아온 값 dto 에 저장하여 select문으로 데이터 가져옴
-		ApprFormDto param = new ApprFormDto();
-		param.setForId(forId);
-		param.setForVersion(forVersion);
-		
-		ApprFormDto dto = appr.selectFormAll(param);
-
-		dto.setComName(appr.getCompanyName(dto.getComId()));
-		
-		model.addAttribute("dto", dto);
-		return "appr/detail_form";
-	}
-	
-	// 양식 수정 폼
-	@GetMapping("/update_form")
-	public String update(Model model,
-						 @RequestParam("forId") int forId,
-						 @RequestParam("forVersion") int forVersion) {
-		
-		ApprFormDto param = new ApprFormDto();
-		param.setForId(forId);
-		param.setForVersion(forVersion);
-		
-		// 클릭한 해당 양식의 id값으로 데이터 담아서 jsp value들 채울 용도
-		ApprFormDto dto = appr.selectFormAll(param);
-		dto.setComName(appr.getCompanyName(dto.getComId()));
-				
-		// update_form.jsp 로 데이터 보내기
-		model.addAttribute("dto", dto);
-		return "appr/update_form";
-	}
-	
-	// 양식 수정 처리
-	@PostMapping("/update_form")
-	public String update_post(ApprFormDto dto, Model model) {
-		
-		try {
-			// 양식 수정 성공
-			if(appr.updateForm(dto) > 0) {
-				return "redirect:/appr/list_form";
-			}
-		} catch (IllegalArgumentException e) {
-			model.addAttribute("errorMsg", e.getMessage());
-		}
-		
-		ApprFormDto fail = new ApprFormDto();
-		fail.setForId(dto.getForId());
-		fail.setForVersion(dto.getForVersion());
-		
-		ApprFormDto result = appr.selectFormAll(fail);
-		
-		if(result != null) {
-			result.setComName(appr.getCompanyName(result.getComId()));
-		}
-		
-		model.addAttribute("dto", result);
-		return "appr/update_form";
-	}
-	
-	// 양식 삭제 처리
-	@GetMapping("/delete")
-	public String delete(@RequestParam("forId") int forId,
-						 @RequestParam("forVersion") int forVersion) {
-		
-		ApprFormDto dto = new ApprFormDto();
-		dto.setForId(forId);
-		dto.setForVersion(forVersion);
-		
-		appr.deleteForm(dto);
-		return "redirect:/appr/list_form";
-	}
-	
-	// openAi 호출
-	@PostMapping("/formSchema")
-	@ResponseBody
-	public Map<String, Object> formSchema(@RequestBody Map<String, String> body) {
-		String userPrompt = body.get("prompt");
-		Map<String, Object> result = new HashMap<>();
-		
-		try {
-			String schemaJson = gpt.formSchema(userPrompt);
-			result.put("success", true);
-			result.put("schema", schemaJson);
+			String schemaJson = gpt.formSchema(req.getPrompt());
+			return ResponseEntity.ok(ApprFormAiSchemaResponse.success(schemaJson));
 		} catch (Exception e) {
-			result.put("success", false);
-			result.put("message", "AI 양식 생성에 실패했습니다");
+			// 외부 API 호출 실패는 비즈니스 예외가 아니라 별개취급
+			// -> 여기서만 예외적으로 캐치
+			return ResponseEntity.ok(ApprFormAiSchemaResponse.fail("AI 양식 생성에 실패했습니다"));
 		}
-		return result;
 	}
-	
 }

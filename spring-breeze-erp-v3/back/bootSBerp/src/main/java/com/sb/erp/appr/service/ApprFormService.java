@@ -18,7 +18,7 @@ public interface ApprFormService {
 	public ApprFormResponse getForm(Long forId, Long forVersion);
 	
 	// 특정 양식의 전체 버전 조회 ( 이력 )
-	public List<ApprFormResponse> getFormVersion(Long forId);
+	public List<ApprFormResponse> getFormVersions(Long forId);
 	
 	// 양식 등록 ( 생성된 forId 반환 )
 	public Long insertForm(ApprFormRequest req);
