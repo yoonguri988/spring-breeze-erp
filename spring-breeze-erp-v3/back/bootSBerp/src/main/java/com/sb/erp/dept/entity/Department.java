@@ -63,7 +63,7 @@ public class Department {
 	@Column(name = "DEPT_STATUS", length = 100)
 	private String deptStatus; // ACTIVE, PENDING_DELETE, DELETED
 	
-	@Column(name = "IS_DELETED", nullable = false)
+	@Column(name = "IS_DELETED")
 	private boolean deleted=false;
 	
 	@Column(name="CREATED_AT", nullable=false)

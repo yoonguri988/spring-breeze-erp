@@ -83,16 +83,8 @@ public class Reservation {
 	@Column(name="UPDATED_AT", nullable=false)
 	private LocalDateTime updatedAt;
 	
-	@PrePersist
-	void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
-	
-	@PreUpdate
-	void onUpdate() {
-		this.updatedAt = LocalDateTime.now();		
-	}
+	@Column(name="NOSHOW_ALERT_AT")
+	private LocalDateTime noshowAlertAt;
 }
 /*
 REV_ID          NOT NULL NUMBER        
@@ -110,4 +102,5 @@ REJECT_REASON            VARCHAR2(500)
 REMARK                   VARCHAR2(255) 
 CREATED_AT      NOT NULL DATE          
 UPDATED_AT               DATE   
+noshow_alert_at          DATE
 */

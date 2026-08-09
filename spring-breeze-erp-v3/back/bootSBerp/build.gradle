@@ -26,9 +26,9 @@ dependencies {
    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.0.1'
    
    // 보안 + redis + oauth2.0
-/*   implementation 'org.springframework.boot:spring-boot-starter-security'
+   implementation 'org.springframework.boot:spring-boot-starter-security'
    implementation 'org.springframework.boot:spring-boot-starter-data-redis' 
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'*/
+   implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
    
    // lombok
    compileOnly 'org.projectlombok:lombok'
