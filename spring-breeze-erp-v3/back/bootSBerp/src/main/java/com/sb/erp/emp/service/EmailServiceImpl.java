@@ -1,16 +1,16 @@
-﻿package com.sb.erp.emp.service;
+package com.sb.erp.emp.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sb.erp.global.integration.EmailApi;
-import com.sb.erp.emp.service.MailTemplates;
-import com.sb.erp.emp.repository.EmailSendLogMapper;
 import com.sb.erp.emp.dto.EmailSendLogDto;
-import com.sb.erp.emp.dto.EmpDto;
 import com.sb.erp.emp.dto.WelcomeMailTargetDto;
+import com.sb.erp.emp.dto.request.EmpRequest;
+import com.sb.erp.emp.repository.EmailSendLogMapper;
+import com.sb.erp.global.integration.EmailApi;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 온보딩 이메일 발송 구현체.
@@ -29,29 +29,30 @@ import com.sb.erp.emp.dto.WelcomeMailTargetDto;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired EmailApi emailApi;
-    @Autowired EmailSendLogMapper logMapper;
+    private final EmailApi emailApi;
+    private final EmailSendLogMapper logMapper;
 
-    // 회사명은 employee와 조인 없이는 얻기 어려우므로, insert 시점엔 fallback 사용
+    // 사원 등록 시점엔 회사명 조인 없이 저장하므로 fallback
     private static final String DEFAULT_COM_NAME = "SBerp";
 
 
     // ─── 환영 메일 ─────────────────────────────
     @Override
     @Async("mailExecutor")
-    public void sendWelcomeMailAsync(EmpDto emp) {
-        int    empId    = emp.getEmpId();
+    public void sendWelcomeMailAsync(EmpRequest emp) {
+        long   empId    = emp.getEmpId();
         String empName  = emp.getEmpName();
         String empEmail = emp.getEmpEmail();
-        String comName  = (emp.getComName() != null) ? emp.getComName() : DEFAULT_COM_NAME;
+        String comName  = DEFAULT_COM_NAME;
 
         if (empEmail == null || empEmail.isBlank()) {
             System.err.println("[EmailService] 환영 메일 스킵: empId=" + empId + " 이메일 없음");
             return;
         }
-        
+
         try {
             logMapper.upsertProcessing(empId, EmailSendLogDto.TYPE_WELCOME);
 
@@ -80,7 +81,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async("mailExecutor")
     public void sendFollowup3DayMailAsync(WelcomeMailTargetDto target) {
-        int    empId    = target.getEmpId();
+        long   empId    = target.getEmpId();
         String empName  = target.getEmpName();
         String empEmail = target.getEmpEmail();
         String comName  = (target.getComName() != null) ? target.getComName() : DEFAULT_COM_NAME;
