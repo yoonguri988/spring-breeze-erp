@@ -20,6 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
  
         registry.addResourceHandler(pattern)
                 .addResourceLocations(location);
+	}
                 
     @Override
     public void addCorsMappings(CorsRegistry registry) { 

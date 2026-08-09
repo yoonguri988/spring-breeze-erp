@@ -6,7 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.sb.erp.global.oauth2.CustomOAuth2User;
+import com.sb.erp.global.oauth2.CustomUserPrincipal;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -43,11 +43,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtProvider.parse(token).getBody();  
                 // subject  →  userId( Long ) , role 추출
-                Long userId = Long.parseLong(claims.getSubject());
+                Long empId = Long.parseLong(claims.getSubject());
+                Long comId = claims.get("comId", Long.class);
                 String role = claims.get("role", String.class);
                 
 	             //CustomUserPincipal
-                 CustomOAuth2User userPrincipal = new CustomOAuth2User(userId, role);
+                CustomUserPrincipal userPrincipal = new CustomUserPrincipal(empId, comId, role);
 
                  UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
