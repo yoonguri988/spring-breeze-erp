@@ -80,7 +80,7 @@ public class DeptServiceImpl implements DeptService {
 	    // parent_id가 변경된 경우 (부서 이동)
 	    if (!Objects.equals(cur.getParentId(), dto.getParentId())) {
 	        // 순환참조 방지: 이동 대상이 자신의 하위 부서인지 확인
-	        List<Long> childIds = dao.selectAllChildIds(cur.getDeptId());
+	        List<DeptResponse> childIds = dao.selectAllChildIds(cur.getDeptId());
 	        if (dto.getParentId() != 0L && childIds.contains(dto.getParentId())) {
 	            throw new IllegalArgumentException("하위 부서로 이동할 수 없습니다.");
 	        }
@@ -107,7 +107,7 @@ public class DeptServiceImpl implements DeptService {
 	}
 
 	@Override
-	public StatsDeptResponse selecStats(long comId) {
+	public StatsDeptResponse selectStats(long comId) {
 		return dao.selectStats(comId);
 	}
 

@@ -14,11 +14,11 @@ public interface CompanyService {
 	
 	public ComResponse isDuplicateBizNo(String bizNo);
 	
-	public ComResponse selectOneById(int comId);
+	public ComResponse selectOneById(long comId);
 
 	public int update(ComRequest dto);
 
-	public int delete(int comId);
+	public int delete(long comId);
 
 	public List<ComResponse> getSuggest(String keyword);
 
@@ -26,5 +26,5 @@ public interface CompanyService {
 
 	public StatsComResponse selectStats();
 
-	public ComResponse selectOneByEmpId(int empId);
+	public ComResponse selectOneByEmpId(long empId);
 }

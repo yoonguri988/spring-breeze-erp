@@ -1,10 +1,15 @@
-package com.sb.erp.dto;
+package com.sb.erp.auth.dto.response;
 
-import java.util.List; 
-import lombok.Data;
+import java.util.List;
 
-@Data
-public class AuthUserDto {
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class AuthUserResponse {
 	
 	private String empNo;
 	private String empName;
@@ -12,11 +17,11 @@ public class AuthUserDto {
 	private String empPass;
 	private String posName;
 	private String comName;
-	private List<AuthDto> authList;
+	private List<AuthResponse> authList;
 	
-	private int empId;
-	private int comId;
-	private int deptId;
-	private int posId;
+	private long empId;
+	private long comId;
+	private long deptId;
+	private long posId;
 	
 }
