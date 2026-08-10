@@ -2,8 +2,8 @@ package com.sb.erp.notice.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sb.erp.notice.dto.request.NoticeRequest;
@@ -14,13 +14,18 @@ import com.sb.erp.util.dto.FileUploadDto;
 import com.sb.erp.util.dto.FileUploadType;
 import com.sb.erp.util.dto.FileUploadUtil;
 
+import lombok.RequiredArgsConstructor;
+
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NoticeServiceImpl implements NoticeService{
 	
-	    @Autowired NoticeMapper noticeMapper;
+		private final NoticeMapper noticeMapper;
 
 	    @Override // 공지등록
+	    @Transactional
 	    public int insert(NoticeRequest dto , MultipartFile file) {
 	        if (dto.getBcontent() != null && dto.getBcontent().contains("긴급")) {
 	            int urgentCount = noticeMapper.countUrgentNotices(dto.getComId());
@@ -37,6 +42,7 @@ public class NoticeServiceImpl implements NoticeService{
 	    }
 
 	    @Override // 공지수정
+	    @Transactional
 	    public int update(NoticeRequest dto, MultipartFile file) {
 	    	NoticeResponse origin = noticeMapper.select(dto.getBno());
 	        boolean wasUrgent = origin != null && origin.getBcontent() != null && origin.getBcontent().contains("긴급");
@@ -66,6 +72,7 @@ public class NoticeServiceImpl implements NoticeService{
 	    }
 
 	    @Override // 공지삭제
+	    @Transactional
 	    public int delete(long bno) {
 	    	NoticeResponse origin = noticeMapper.select(bno);
 			if (origin != null && origin.getBfile() != null && !origin.getBfile().isEmpty()) {
@@ -78,6 +85,7 @@ public class NoticeServiceImpl implements NoticeService{
 	    public NoticeResponse select(long bno) { return noticeMapper.select(bno); }
 
 	    @Override // 공지 조회수 증가
+	    @Transactional
 	    public int updateHit(long bno) { return noticeMapper.updateHit(bno); }
 
 	    @Override  // 페이징

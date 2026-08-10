@@ -2,8 +2,8 @@ package com.sb.erp.task.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.global.integration.ReportApi;
 import com.sb.erp.task.dto.request.TaskRequest;
@@ -12,23 +12,33 @@ import com.sb.erp.task.dto.response.TaskResponse;
 import com.sb.erp.task.repository.TaskMapper;
 import com.sb.erp.week.dto.response.MyWeeklyReportResponse;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TaskServiceImpl implements TaskService {
-	@Autowired TaskMapper dao;
-	@Autowired ReportApi reportApi;
+	private final TaskMapper dao;
+	private final ReportApi reportApi;
 		
 	//태스크 추가
-	@Override public int insert(TaskRequest dto) {  return dao.insert(dto); }
+	@Override
+	@Transactional
+	public int insert(TaskRequest dto) {  return dao.insert(dto); }
 
 	/*paging*/
 	@Override public List<TaskResponse> selectAll(TaskSearchRequest search) {  return dao.selectAll(search); }
 	@Override public int selectCnt(Long proId) {  return dao.selectCnt(proId); }
 	
 	//태스크 삭제
-	@Override public int delete(Long taskId) {  return dao.delete(taskId); }
+	@Override 
+	@Transactional
+	public int delete(Long taskId) {  return dao.delete(taskId); }
 	
 	//태스크 수정
-	@Override public int update(TaskRequest dto) {  return dao.update(dto); }
+	@Override 
+	@Transactional
+	public int update(TaskRequest dto) {  return dao.update(dto); }
 	
 	//태스크 상세조회
 	@Override public TaskResponse select(Long taskId) {  return dao.select(taskId); }
