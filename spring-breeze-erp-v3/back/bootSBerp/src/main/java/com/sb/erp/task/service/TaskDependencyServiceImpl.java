@@ -5,25 +5,28 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sb.erp.proj.dto.request.ProjRequest;
 import com.sb.erp.proj.dto.response.ProjResponse;
 import com.sb.erp.proj.repository.ProjectMapper;
 import com.sb.erp.task.dto.request.TaskRequest;
 import com.sb.erp.task.dto.response.TaskResponse;
 import com.sb.erp.task.repository.TaskDependencyMapper;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
-@Transactional
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TaskDependencyServiceImpl implements TaskDependencyService{
-	@Autowired TaskDependencyMapper dao;
-	@Autowired ProjectMapper projectMapper;
+	private final TaskDependencyMapper dao;
+	private final ProjectMapper projectMapper;
 	
 	//선행 태스크를 지정하여 태스크 생성
-	@Override public int insertWithParent(TaskRequest dto) {  
+	@Override 
+	@Transactional
+	public int insertWithParent(TaskRequest dto) {  
 		
 		//프로젝트 done이면 태스크 못넣게
 		ProjResponse project = projectMapper.select(dto.getProId());
@@ -48,7 +51,9 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 	@Override public List<TaskResponse> selectTaskDependencies(Long proId) {  return dao.selectTaskDependencies(proId); }
 	
 	//태스크 일정 및 선행 태스크 수정
-	@Override public int updateTaskSchedule(TaskRequest dto) {  
+	@Override 
+	@Transactional
+	public int updateTaskSchedule(TaskRequest dto) {  
 		
 		 // 연쇄 일정 계산 중 동시 수정 방지를 위해, 수정 대상 태스크 + 자손만 잠금(FOR UPDATE WAIT 5)
 		 // (프로젝트 전체를 잠그면 관계없는 태스크 수정까지 막혀서 범위를 좁힘 - START WITH ~ CONNECT BY)
@@ -104,7 +109,9 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 		return result; }
 
 	//벌크 연쇄 업데이트
-	@Override public void updateBatchTaskSchedule(List<TaskResponse> list) { dao.updateBatchTaskSchedule(list); }
+	@Override 
+	@Transactional
+	public void updateBatchTaskSchedule(List<TaskResponse> list) { dao.updateBatchTaskSchedule(list); }
 
 	// DFS 기반 순환 참조 역방향 추적
 	private boolean isCyclic(Long taskId,Long parentTaskId,Long proId) {
