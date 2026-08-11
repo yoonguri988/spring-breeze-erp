@@ -1,7 +1,7 @@
-﻿package com.sb.erp.emp.service;
+package com.sb.erp.emp.service;
 
-import com.sb.erp.emp.dto.EmpDto;
 import com.sb.erp.emp.dto.WelcomeMailTargetDto;
+import com.sb.erp.emp.dto.request.EmpRequest;
 
 /**
  * 온보딩 이메일 발송 서비스.
@@ -15,9 +15,9 @@ public interface EmailService {
     // @Async: 트랜잭션 커밋 이후 별도 스레드에서 실행
     // 예외 발생 시 로그만 남김 (등록 자체는 영향 없음)
 
-    void sendWelcomeMailAsync(EmpDto emp);
+    void sendWelcomeMailAsync(EmpRequest emp);
 
     // 3일 차 적응 확인 메일.
-     //스케줄러 또는 관리자 수동 트리거에서 호출
+    // 스케줄러 또는 관리자 수동 트리거에서 호출
     void sendFollowup3DayMailAsync(WelcomeMailTargetDto target);
 }

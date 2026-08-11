@@ -1,8 +1,38 @@
-﻿package com.sb.erp.perm.service;
+package com.sb.erp.perm.service;
 
-import com.sb.erp.perm.dto.AuthPermDto;
+import java.util.List;
+
+import com.sb.erp.perm.dto.request.EmpAuthRequest;
+import com.sb.erp.perm.dto.request.PermRequest;
+import com.sb.erp.perm.dto.response.EmpAuthResponse;
+import com.sb.erp.perm.dto.response.PermResponse;
 
 public interface PermService {
 
-	AuthPermDto selectByEmpId(int empId);
+	// ─── 로그인 시 사원 권한 조회 (기존 유지) ───
+	PermResponse selectByEmpId(long empId);
+
+
+	// ─── 권한 관리 ────────────────
+	List<PermResponse> selectAll();
+
+	PermResponse selectOneById(long autId);
+
+	int insert(PermRequest dto);
+
+	int update(PermRequest dto);
+
+	int delete(long autId);
+
+
+	// ─── 사원-권한 매핑 ───────────────
+	List<EmpAuthResponse> selectEmpsByAuthId(long autId);
+
+	List<EmpAuthResponse> selectAuthsByEmpId(long empId);
+
+	// 권한 부여. 반환: 1=성공, 0=권한 회사 소속 아님
+	int grantAuth(EmpAuthRequest dto);
+
+	// 권한 회수. 반환: 1=성공, 0=대상 없음
+	int revokeAuth(EmpAuthRequest dto);
 }
