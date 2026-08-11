@@ -20,6 +20,9 @@ public class JwtProvider {
     private final JwtProperties props; // 토큰 - 출입증
     private final SecretKey key;  //JWT 서명에 사용할 SecretKey
 
+    // 세션을 쓰지 않기 위한 단기 토큰(비밀번호 재설정 등)의 유효시간 - 10분
+    private static final long RESET_TOKEN_EXP_SECONDS = 600;
+    
     // 생성자
     public JwtProvider(JwtProperties props) {
         this.props = props;
@@ -52,6 +55,22 @@ public class JwtProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+    
+    // 비밀번호 재설정(본인확인) 전용 단기 토큰 - HttpSession 대체
+    // purpose=reset 클레임으로 AccessToken/RefreshToken과 용도를 구분
+    public String createResetToken(String subject) {
+        Instant now = Instant.now();
+        Instant exp = now.plusSeconds(RESET_TOKEN_EXP_SECONDS);
+        return Jwts.builder()
+                .setIssuer(props.getIssuer())
+                .setSubject(subject)
+                .claim("purpose", "reset")
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(exp))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+    
     // 토큰 파싱과 검증
     public Jws<Claims> parse(String token) {  // jwt 문자열
         return Jwts.parserBuilder()

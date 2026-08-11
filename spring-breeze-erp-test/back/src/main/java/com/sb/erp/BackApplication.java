@@ -11,3 +11,11 @@ public class BackApplication {
 	}
 
 }
+/*
+ * 	docker exec  -it  my-redis  redis-cli
+	docker exec  -it  my-redis  redis-cli  FLUSHALL
+	
+	keys *
+	
+ * http://localhost:8080/swagger-ui/index.html
+ */
