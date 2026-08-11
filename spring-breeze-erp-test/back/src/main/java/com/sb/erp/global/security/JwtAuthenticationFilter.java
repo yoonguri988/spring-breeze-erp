@@ -1,5 +1,6 @@
 package com.sb.erp.global.security;
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,10 +55,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Long empId = Long.parseLong(claims.getSubject());
                 Long comId = claims.get("comId", Long.class);
                 String empEmail = claims.get("empEmail", String.class);
-                String role = claims.get("role", String.class);
                 
-	             //CustomUserPincipal
-                CustomUserPrincipal userPrincipal = new CustomUserPrincipal(empId, comId, empEmail, role);
+                // 로그인 시 발급한 토큰의 "roles"는 복수(리스트) 클레임 - "role" 단수 아님에 주의
+                @SuppressWarnings("unchecked")
+                List<String> roles = claims.get("roles", List.class);
+                
+	            //CustomUserPincipal
+                CustomUserPrincipal userPrincipal = new CustomUserPrincipal(empId, comId, empEmail, roles);
 
                  UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
