@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,6 +28,7 @@ import com.sb.erp.proj.service.ProjectService;
 import com.sb.erp.task.dto.request.TaskSearchRequest;
 import com.sb.erp.task.service.TaskService;
 import com.sb.erp.util.dto.PagingUtil;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +50,7 @@ public class ProjectController {
 	// ★Authentication 
 	@Operation(summary = "프로젝트 목록 조회",description = "검색 조건에 맞는 프로젝트 목록 조회")
 	@GetMapping
-	public ResponseEntity<Map<String, Object>> getProjects(ProjectSearchRequest search) {
+	public ResponseEntity<Map<String, Object>> getProjects(@ModelAttribute ProjectSearchRequest search) {
 		
 		int totalCnt = service.selectCnt(search);              // 전체 데이터 수
 		PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());

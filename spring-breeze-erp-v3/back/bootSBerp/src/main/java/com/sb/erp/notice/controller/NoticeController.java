@@ -45,7 +45,7 @@ public class NoticeController {
     // ★Authentication
     @Operation(summary = "공지 목록 조회",description = "긴급 공지+검색 조건에 맞는 공지 목록 조회")
     @GetMapping
-    public ResponseEntity<Map<String,Object>>getNotices(NoticeSearchRequest search) {
+    public ResponseEntity<Map<String,Object>>getNotices(@RequestBody NoticeSearchRequest search) {
     	
     	int currentPage = search.getPstartno(); // 오염되기 전, 진짜 페이지 번호 미리 저장
     	List<NoticeResponse> notices = noticeService.getNoticeListWithUrgent(search); // 긴급5 + 일반목록
@@ -67,7 +67,7 @@ public class NoticeController {
     @PostMapping(consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String,Object>> createNotice(
     		@ModelAttribute NoticeRequest dto,
-    		@RequestPart(name="files",required = false )MultipartFile file){
+    		@RequestPart(name="file",required = false )MultipartFile file){
     	Map<String, Object> result = new HashMap<>();
     	
         try {
