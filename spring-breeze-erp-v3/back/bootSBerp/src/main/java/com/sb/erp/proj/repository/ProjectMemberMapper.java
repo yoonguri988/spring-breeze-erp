@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.emp.dto.EmpDto;
+import com.sb.erp.emp.dto.response.EmpResponse;
 import com.sb.erp.proj.dto.request.ProjmemRequest;
 import com.sb.erp.proj.dto.response.ProjmemResponse;
 
@@ -27,7 +27,7 @@ public interface ProjectMemberMapper {
 	public ProjmemResponse selectOne(Long pmId);
 	
 	//사원 이름,번호 조회
-	public List<EmpDto> searchEmpForProject(@Param("comId") Long comId, @Param("keyword") String keyword);
+	public List<EmpResponse> searchEmpForProject(@Param("comId") Long comId, @Param("keyword") String keyword);
 	
 	// 프로젝트에 동일한 사원이 이미 참여 중인지 확인 
 	public int existsMember(ProjmemRequest dto);

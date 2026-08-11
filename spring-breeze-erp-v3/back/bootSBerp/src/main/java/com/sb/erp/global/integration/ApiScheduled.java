@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.sb.erp.proj.service.ProjectService;
+import com.sb.erp.week.dto.response.*;
 import com.sb.erp.api.dto.request.ResvAlertRequest;
-import com.sb.erp.api.dto.response.ResvAlertResponse;
 import com.sb.erp.resv.repository.ReservationMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class ApiScheduled {
 
-	/* ///////CDY///////
+	 /*///////CDY///////
     @Autowired private ProjectService projectService;
     @Autowired private ReportApi reportApi;
 	
@@ -32,7 +33,7 @@ public class ApiScheduled {
         int success = 0, fail = 0;
         for (Integer proId : proIds) {
             try {
-                WeeklyReportDto dto = projectService.weeklyReport(proId);
+                WeeklyReportResponse dto = projectService.weeklyReport(Long.valueOf(proId));
                 reportApi.createReport(dto);
                 success++;
             } catch (Exception e) {
