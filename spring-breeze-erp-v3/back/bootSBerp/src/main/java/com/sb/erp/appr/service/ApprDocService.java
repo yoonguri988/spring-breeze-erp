@@ -10,6 +10,7 @@ import com.sb.erp.appr.dto.response.ApprDocResponse;
 import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
 import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.ApprLineResponse;
+import com.sb.erp.dept.dto.response.DeptResponse;
 
 public interface ApprDocService {
 	
@@ -32,7 +33,7 @@ public interface ApprDocService {
 	public List<ApprLineResponse> selectLinesByDocId(Long docId);
 	public void processLine(Long docId, Long empId, String action);
 	public List<ApprLineResponse> selectDeptEmpsForLines(Long deptId);
-	public int cntApprovers(Long deptId, Long empId);
+	public List<DeptResponse> cntApprovers(Long deptId, Long empId);
 	
 	// ========= 페이징 ============
 	public int selectMyHistoryDocsCnt(ApprDocSearchCondition condition);

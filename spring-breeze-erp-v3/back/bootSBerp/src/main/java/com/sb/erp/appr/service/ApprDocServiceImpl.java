@@ -15,6 +15,8 @@ import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.ApprLineResponse;
 import com.sb.erp.appr.repository.ApprDocMapper;
 import com.sb.erp.appr.repository.ApprLineMapper;
+import com.sb.erp.dept.dto.response.DeptResponse;
+import com.sb.erp.dept.service.DeptService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 
 	private final ApprDocMapper dao;
 	private final ApprLineMapper lineDao;
+	private final DeptService deptService;
 	
 	
 	// 작성하려는 사용자의 회사 양식
@@ -158,10 +161,15 @@ public class ApprDocServiceImpl implements ApprDocService{
 	}
 
 	// 결재선 지정 가능 인원수
-	// !!!!!!! dept 쪽 부서 체인 확인해보고 수정해야함
 	@Override
-	public int cntApprovers(Long deptId, Long empId) {
-		return dao.cntApprovers(deptId, empId);
+	public List<DeptResponse> cntApprovers(Long deptId, Long empId) {
+		List<DeptResponse> chain = deptService.selectAncestorDepts(deptId);
+		
+		for (DeptResponse d : chain) {
+			int cnt = dao.cntApprovers(d.getDeptId(), empId);
+			d.setEmpCount(cnt);
+		}
+		return chain;
 	}
 
 	// 모든 문서 카운트

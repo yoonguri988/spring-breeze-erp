@@ -22,6 +22,7 @@ import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
 import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.ApprLineResponse;
 import com.sb.erp.appr.service.ApprDocService;
+import com.sb.erp.dept.dto.response.DeptResponse;
 import com.sb.erp.util.dto.PagingUtil;
 
 import jakarta.validation.Valid;
@@ -179,12 +180,11 @@ public class ApprDocController {
 
 	// 결재선 지정 가능 인원수 / (service 부터 수정후 이쪽도 수정)
 	@GetMapping("/getDeptTree")
-	public ResponseEntity<Integer> getDeptTree(
+	public ResponseEntity<List<DeptResponse>> getDeptTree(
 			@RequestParam Long deptId,
 			@RequestParam Long empId
 	) {
-		int cnt = service.cntApprovers(deptId, empId);
-		return ResponseEntity.ok(cnt);
+		return ResponseEntity.ok(service.cntApprovers(deptId, empId));
 	}
 
 	// 특정 부서 소속 사원 목록
