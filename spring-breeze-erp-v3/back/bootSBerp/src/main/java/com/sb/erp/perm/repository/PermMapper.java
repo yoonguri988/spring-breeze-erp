@@ -1,5 +1,6 @@
 package com.sb.erp.perm.repository;
 
+
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -47,4 +48,6 @@ public interface PermMapper {
 
 	// 권한 회수
 	int revokeAuth(EmpAuthRequest dto);
+
 }
+

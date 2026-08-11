@@ -67,4 +67,5 @@ public interface EmpService {
 
 	// 비밀번호 분실시 본인 확인 - EMP_ID로만 조회해서 업데이트
 	int updatePassByEmpIdOnly(EmpRequest dto);
+	
 }

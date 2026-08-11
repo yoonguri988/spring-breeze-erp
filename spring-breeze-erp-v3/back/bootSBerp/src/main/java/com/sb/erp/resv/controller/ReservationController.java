@@ -1,4 +1,4 @@
-package com.sb.erp.controller;
+package com.sb.erp.resv.controller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,11 +20,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.sb.erp.dto.ResDto;
 import com.sb.erp.dto.ResSearchDto;
 import com.sb.erp.dto.ResvDto;
-import com.sb.erp.dto.ResvSearchDto;
-import com.sb.erp.security.CustomUserDetails;
-import com.sb.erp.service.ReservationService;
-import com.sb.erp.service.ResourceService;
-import com.sb.erp.util.PagingUtil;
+import com.sb.erp.global.security.CustomUserDetails;
+import com.sb.erp.res.service.ResourceService;
+import com.sb.erp.resv.dto.request.ResvSearchRequest;
+import com.sb.erp.resv.service.ReservationService;
+import com.sb.erp.util.dto.PagingUtil;
 
 @Controller
 @RequestMapping("/resv")

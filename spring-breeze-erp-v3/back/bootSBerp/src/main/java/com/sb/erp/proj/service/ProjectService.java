@@ -13,27 +13,27 @@ public interface ProjectService {
 	public int insert(ProjRequest dto);
 
 	//프로젝트 상세보기
-	public ProjResponse select(int proId);
+	public ProjResponse select(Long proId);
 	
 	//프로젝트 삭제
-	public int delete(int proId);
+	public int delete(Long proId);
 	
 	//프로젝트 수정
 	public int edit(ProjRequest dto);
 	
 	//프로젝트 수정뷰
-	public ProjResponse editView(int proId);
+	public ProjResponse editView(Long proId);
 	
 	/* paging */
 	public List<ProjResponse> selectAll(ProjectSearchRequest search);
 	public int selectCnt(ProjectSearchRequest search);
 
 	//Ai 분석 결과
-	public ProjectAnalysisResponse projectAnalysis(Integer proId);
-	public String analyzeProject(Integer proId);
+	public ProjectAnalysisResponse projectAnalysis(Long proId);
+	public String analyzeProject(Long proId);
 	
 	//주간 보고서용-팀장용
-	public WeeklyReportResponse weeklyReport(Integer proId);
+	public WeeklyReportResponse weeklyReport(Long proId);
 	
 	//주간 보고서용으로 가져올 프로젝트들
 	public List<Integer>selectActiveProjectIds();

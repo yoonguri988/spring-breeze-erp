@@ -36,4 +36,5 @@ public class EmpRequest {
 	private long posId;
 	private long deptId;
 	private long comId;
+
 }

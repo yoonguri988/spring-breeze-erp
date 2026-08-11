@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.sb.erp.proj.service.ProjectService;
+import com.sb.erp.week.dto.response.*;
 import com.sb.erp.api.dto.request.ResvAlertRequest;
-import com.sb.erp.api.dto.response.ResvAlertResponse;
 import com.sb.erp.resv.repository.ReservationMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class ApiScheduled {
 
-	/* ///////CDY///////
+	 /*///////CDY///////
     @Autowired private ProjectService projectService;
     @Autowired private ReportApi reportApi;
 	
@@ -32,7 +33,7 @@ public class ApiScheduled {
         int success = 0, fail = 0;
         for (Integer proId : proIds) {
             try {
-                WeeklyReportDto dto = projectService.weeklyReport(proId);
+                WeeklyReportResponse dto = projectService.weeklyReport(Long.valueOf(proId));
                 reportApi.createReport(dto);
                 success++;
             } catch (Exception e) {
@@ -68,7 +69,7 @@ public class ApiScheduled {
 	// 운영 시 트래픽/AI 호출 비용을 고려해 주기 조정 가능 (여기서는 1분마다)
 //	@Scheduled(cron = "0 */1 * * * *")
 	public void noShowAutoAlert() {
-		List<ResvAlertRequest> targets = resDao.selectNoShowTargets();
+		List<ResvAlertResponse> targets = resDao.selectNoShowTargets();
  
 		if (targets.isEmpty()) {
 			return;
@@ -78,7 +79,7 @@ public class ApiScheduled {
  
 		int success = 0, fail = 0;
  
-		for (ResvAlertRequest dto : targets) {
+		for (ResvAlertResponse dto : targets) {
 			try {
 				String message = buildAlertMessage(dto);
 				apiCoolSms.sendMessage(dto.getEmpMobile(), message);
@@ -100,7 +101,7 @@ public class ApiScheduled {
 	/**
 	 * ChatGPT에게 넘길 프롬프트를 구성하고, 실패 시를 대비한 fallback 문구도 함께 만든다.
 	 */
-	private String buildAlertMessage(ResvAlertRequest dto) {
+	private String buildAlertMessage(ResvAlertResponse dto) {
 		boolean isRoom = "ROOM".equals(dto.getResType());
  
 		String systemPrompt =
@@ -113,7 +114,7 @@ public class ApiScheduled {
 		String fallback;
  
 		if (isRoom) {
-			String startTime = dto.getStartDt().toLocalDateTime().format(TIME_FMT);
+			String startTime = dto.getStartDt().format(TIME_FMT);
 			userPrompt = String.format(
 					"%s 님이 예약한 회의실 '%s'의 예약 시작 시간(%s)이 지났지만 이용 여부가 확인되지 않습니다. "
 					+ "이용하지 않을 경우 다른 사람이 예약할 수 있도록 취소 처리를 요청하는 메시지를 작성해줘.",
@@ -123,7 +124,7 @@ public class ApiScheduled {
 					"%s님, 회의실 '%s' 예약(%s~) 이용 확인이 안 됩니다. 미이용시 취소 부탁드립니다.",
 					dto.getEmpName(), dto.getResName(), startTime);
 		} else {
-			String endTime = dto.getEndDt().toLocalDateTime().format(TIME_FMT);
+			String endTime = dto.getEndDt().format(TIME_FMT);
 			String kindLabel = "EQUIPMENT".equals(dto.getResType()) ? "장비" : "차량";
  
 			userPrompt = String.format(

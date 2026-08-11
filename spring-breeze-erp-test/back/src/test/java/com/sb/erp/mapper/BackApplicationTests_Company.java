@@ -2,6 +2,7 @@ package com.sb.erp.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -182,8 +183,8 @@ class BackApplicationTests_Company {
 	            .comId(savedComId1)
 	            .empEmail("test-emp-" + System.currentTimeMillis() + "@test.com")
 	            .empMobile("010-0000-0000")
-	            .empStatus("ACTIVE")   // TODO: 실제 코드 값(예: '재직' 등) 확인 필요
-	            .hireDate("2024-01-01")
+	            .empStatus("재직")   // TODO: 실제 코드 값(예: '재직' 등) 확인 필요
+	            .hireDate("2026-08-07")
 	            .build();
 
 	    int res = empMapper.insert(empDto);

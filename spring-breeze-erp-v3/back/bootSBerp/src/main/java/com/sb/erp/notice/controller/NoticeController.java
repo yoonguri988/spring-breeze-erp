@@ -1,33 +1,142 @@
-package com.sb.erp.controller;
+package com.sb.erp.notice.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.sb.erp.dto.NoticeDto;
-import com.sb.erp.dto.NoticeSearchDto;
-import com.sb.erp.security.CustomUserDetails;
-import com.sb.erp.service.NoticeService;
-import com.sb.erp.util.PagingUtil;
+import com.sb.erp.notice.dto.request.NoticeRequest;
+import com.sb.erp.notice.dto.request.NoticeSearchRequest;
+import com.sb.erp.notice.dto.response.NoticeResponse;
+import com.sb.erp.notice.service.NoticeService;
+import com.sb.erp.util.dto.PagingUtil;
 
-import jakarta.servlet.http.HttpSession;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
-@Controller
-@RequestMapping("/notice")
+@Tag(name="Notice Api", description = "Notice 관련 Api")
+@RestController
+@RequestMapping("/api/notice")
+@RequiredArgsConstructor
+@CrossOrigin(origins="*")
 public class NoticeController {
     
-    @Autowired NoticeService noticeService;  
+	private final NoticeService noticeService;  
     
-    //공지 목록 조회
+    // 공지 목록 조회
+    // ★Authentication
+    @Operation(summary = "공지 목록 조회",description = "긴급 공지+검색 조건에 맞는 공지 목록 조회")
+    @GetMapping
+    public ResponseEntity<Map<String,Object>>getNotices(NoticeSearchRequest search) {
+    	
+    	int currentPage = search.getPstartno(); // 오염되기 전, 진짜 페이지 번호 미리 저장
+    	List<NoticeResponse> notices = noticeService.getNoticeListWithUrgent(search); // 긴급5 + 일반목록
+        int totalCnt = noticeService.selectCount(search);              // 전체 건수 (뱃지용)
+        long pagingCnt = noticeService.selectCountNoticeList(search);  // 페이징 계산용 (pinnedBnos 반영됨)
+        PagingUtil paging = new PagingUtil((int) pagingCnt, currentPage);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("paging", paging);
+        result.put("notices", notices);
+        result.put("totalCnt", totalCnt);
+        return ResponseEntity.ok(result);
+    }
+    
+
+    // 공지 등록
+    // 첨부파일은 선택사항이므로 required=false (안 붙이면 파일 없는 공지 등록 시 400 에러가 났음)
+    @Operation(summary = "공지 등록",description = "신규 공지 등록")
+    @PostMapping(consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String,Object>> createNotice(
+    		@ModelAttribute NoticeRequest dto,
+    		@RequestPart(name="files",required = false )MultipartFile file){
+    	Map<String, Object> result = new HashMap<>();
+    	
+        try {
+            noticeService.insert(dto, file);
+            result.put("success", true);
+            result.put("message", "공지 등록 성공");
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "공지 등록 실패");
+            return ResponseEntity.badRequest().body(result);
+        }
+
+    }
+    
+    // 공지 수정 
+    @Operation(summary = "공지 수정",description = "공지 수정")
+    @PutMapping(value = "/{bno}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> updateNotice(
+            @ModelAttribute NoticeRequest dto,
+            @PathVariable("bno") Long bno,
+            @RequestPart(name = "file", required = false) MultipartFile file) {
+   
+    	dto.setBno(bno);
+		Map<String, Object> result = new HashMap<>();
+		
+		try {
+			noticeService.update(dto, file);
+			result.put("success", true);
+			result.put("message", "공지 수정 성공");
+			return ResponseEntity.ok(result);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("message", e.getMessage());
+			return ResponseEntity.badRequest().body(result);
+		}
+    }
+
+    //공지 삭제
+    @Operation(summary = "공지 삭제", description = "공지를 삭제합니다.")
+	@DeleteMapping("/{bno}")
+    public ResponseEntity<Map<String, Object>> deleteNotice(@PathVariable("bno") Long bno) {
+		noticeService.delete(bno);
+		Map<String, Object> result = new HashMap<>();
+		result.put("success", true);
+		result.put("message", "공지 삭제 성공");
+		return ResponseEntity.ok(result);
+    }
+
+    //공지 상세 조회
+	@Operation(summary = "공지 상세조회", description = "공지 상세 정보를 조회합니다. (조회수 1 증가)")
+	@GetMapping("/{bno}")
+	public ResponseEntity<NoticeResponse> getNotice(@PathVariable("bno") Long bno) {
+		noticeService.updateHit(bno); // 게시글 상세 진입 시 조회수 1 증가 처리
+		NoticeResponse dto = noticeService.select(bno);
+		if (dto == null) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(dto);
+	}
+
+    // 검색 결과 카운트 (GET 방식) //어디서 쓰이는지 잘 모르겠음
+	@Operation(summary = "공지 검색 결과 카운트", description = "검색 조건에 맞는 공지 건수만 조회합니다.")
+	@GetMapping("/search-count")
+	public ResponseEntity<Long> getSearchCount(NoticeSearchRequest search) {
+		return ResponseEntity.ok(noticeService.selectCountNoticeList(search));
+	}
+}
+/*//공지 목록 조회
     @GetMapping("/list")
     public String list(NoticeSearchRequest search,
     		Authentication auth, Model model) {
@@ -123,5 +232,4 @@ public class NoticeController {
         long searchCount = noticeService.selectCountNoticeList(search);
         model.addAttribute("searchCount", searchCount); // 결과 카운트 정수 바인딩
         return "notice/searchCount"; // 카운트를 노출할 전용 뷰 혹은 페이지 반환
-    }
-}
+    }*/

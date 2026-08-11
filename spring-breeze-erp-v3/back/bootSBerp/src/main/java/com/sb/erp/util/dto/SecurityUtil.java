@@ -3,8 +3,8 @@ package com.sb.erp.util.dto;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import com.sb.erp.security.CustomUserDetails;
+
 
 /**
  * 로그인 사용자 정보 조회 유틸
@@ -20,6 +20,7 @@ public class SecurityUtil {
 
 	// 현재 로그인한 유저의 comId
 	// 비로그인/인증 실패 시 0L → 어떤 회사 데이터에도 매칭되지 않아 안전하게 빈 결과
+<<<<<<< HEAD
 	public static Long getCurrentComId() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth == null || !auth.isAuthenticated())

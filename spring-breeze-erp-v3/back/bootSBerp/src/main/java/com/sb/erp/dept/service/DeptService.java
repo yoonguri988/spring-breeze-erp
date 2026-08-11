@@ -23,7 +23,7 @@ public interface DeptService {
 
 	public DeptResponse selectOneById(long deptId);
 
-	public StatsDeptResponse selecStats(long comId);
+	public StatsDeptResponse selectStats(long comId);
 
 	public Object getAncestorChain(long deptId);
 
