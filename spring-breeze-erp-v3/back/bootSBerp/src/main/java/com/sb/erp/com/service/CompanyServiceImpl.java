@@ -10,11 +10,12 @@ import com.sb.erp.com.dto.request.CompanySearchRequest;
 import com.sb.erp.com.dto.response.ComResponse;
 import com.sb.erp.com.dto.response.StatsComResponse;
 import com.sb.erp.com.repository.CompanyMapper;
+import com.sb.erp.dept.repository.DeptMapper;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {
 	@Autowired CompanyMapper dao;
-//	@Autowired DeptMapper deptDao;
+	@Autowired DeptMapper deptDao;
 
 	@Override
 	public List<ComResponse> list(CompanySearchRequest dto) {
@@ -37,7 +38,7 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public ComResponse selectOneById(int comId) {
+	public ComResponse selectOneById(long comId) {
 		return dao.selectOneById(comId);
 	}
 
@@ -47,10 +48,10 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public int delete(int comId) {
-//		if(deptDao.countActiveDepts(comId) > 0) {
-//			throw new IllegalArgumentException("하위 부서가 존재하는 경우, 회사 삭제 불가능");
-//		}
+	public int delete(long comId) {
+		if(deptDao.countActiveDepts(comId) > 0) {
+			throw new IllegalArgumentException("하위 부서가 존재하는 경우, 회사 삭제 불가능");
+		}
 		return dao.delete(comId);
 	}
 
@@ -71,7 +72,7 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public ComResponse selectOneByEmpId(int empId) {
+	public ComResponse selectOneByEmpId(long empId) {
 		return dao.selectOneByEmpId(empId);
 	}
 

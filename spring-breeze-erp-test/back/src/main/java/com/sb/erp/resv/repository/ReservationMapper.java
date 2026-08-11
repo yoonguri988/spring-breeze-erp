@@ -18,7 +18,7 @@ public interface ReservationMapper {
     
     int selectCount(ResvSearchRequest search);
     
-    ResvResponse selectOneById(int revId);
+    ResvResponse selectById(int revId);
     
     int insert(ResvRequest ResvDto);
 

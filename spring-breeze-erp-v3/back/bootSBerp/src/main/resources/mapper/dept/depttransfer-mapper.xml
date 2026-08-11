@@ -18,7 +18,7 @@
 	AND D.DEPT_STATUS = 'PENDING_DELETE'
 </select>
 <!-- 이관 대상 사원 -->
-<select id="findEmployeesByDept" resultType="ResvImpactResponse" parameterType="int">
+<select id="findEmployeesByDept" resultType="EmpTransferResponse" parameterType="long">
 	SELECT
       e.emp_id, e.emp_no, e.emp_name, e.emp_status,
       p.pos_name, p.pos_order
@@ -28,7 +28,7 @@
     ORDER BY p.pos_order ASC, e.emp_name ASC
 </select>
 <!-- 사원 기준 미처리 예약 -->
-<select id="findPendingResvByDept" resultType="ResvImpactResponse" parameterType="int">
+<select id="findPendingResvByDept" resultType="ResvImpactResponse" parameterType="long">
 	SELECT
       r.rev_id, r.status, r.start_dt, r.end_dt,
       e.emp_id, e.emp_name,
@@ -41,7 +41,7 @@
 	ORDER BY r.start_dt ASC
 </select>
 <!-- 사원 기준 미완료 결재라인 -->
-<select id="findPendingApprLineByDept" resultType="ApprLineImpactResponse" parameterType="int">
+<select id="findPendingApprLineByDept" resultType="ApprLineImpactResponse" parameterType="long">
 	SELECT
       l.lin_id, l.lin_order, l.lin_status,
       ad.doc_id, ad.doc_title,
@@ -54,7 +54,7 @@
     ORDER BY ad.created_at ASC, l.lin_order ASC
 </select>
 <!-- 사원이 기안한 진행중 결재문서 -->
-<select id="findPendingApprDocsByDept" resultType="ApprDocImpactResponse" parameterType="int">
+<select id="findPendingApprDocsByDept" resultType="ApprDocImpactResponse" parameterType="long">
 	SELECT 
 	  d.doc_id, d.doc_title, d.doc_status,
 	  e.emp_id, e.emp_name
@@ -65,7 +65,7 @@
 	ORDER BY d.created_at ASC
 </select>
 <!-- 사원이 기안한 진행중 결재문서 제목 요약 — AI 프롬프트 재료 겸 dept_transfer_log.handover_snapshot 원본 -->
-<select id="findPendingApprDocTitles" parameterType="int" resultType="string">
+<select id="findPendingApprDocTitles" parameterType="long" resultType="string">
 	SELECT LISTAGG(doc_title, ' | ') WITHIN GROUP (ORDER BY doc_title)
     FROM appr_doc
     WHERE doc_status = 'ING'

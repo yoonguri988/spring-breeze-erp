@@ -43,4 +43,7 @@ public class ResvRequest {
 	private String remark;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	
+	// 알림발송관련 컬럼
+	private LocalDateTime noshowAlertAt;
 }
