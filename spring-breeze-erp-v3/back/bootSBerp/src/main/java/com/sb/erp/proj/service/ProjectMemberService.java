@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.emp.dto.EmpDto;
+import com.sb.erp.emp.dto.response.EmpResponse;
 import com.sb.erp.proj.dto.request.ProjmemRequest;
 import com.sb.erp.proj.dto.response.ProjmemResponse;
 
@@ -26,6 +26,6 @@ public interface ProjectMemberService {
 	public ProjmemResponse selectOne(Long pmId);
 	
 	//사원 이름,번호 조회
-	public List<EmpDto> searchEmpForProject(@Param("comId") Long comId, @Param("keyword") String keyword);
+	public List<EmpResponse> searchEmpForProject(@Param("comId") Long comId, @Param("keyword") String keyword);
 	
 }
