@@ -33,6 +33,9 @@ import com.sb.erp.emp.dto.request.EmpRequest;
 import com.sb.erp.emp.service.EmpService;
 import com.sb.erp.global.exception.FileUploadException;
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
+import com.sb.erp.global.security.JwtProperties;
+import com.sb.erp.global.security.JwtProvider;
+import com.sb.erp.global.security.TokenStore;
 import com.sb.erp.util.dto.FileUploadDto;
 import com.sb.erp.util.dto.FileUploadType;
 import com.sb.erp.util.dto.FileUploadUtil;
@@ -54,19 +57,20 @@ import lombok.RequiredArgsConstructor;
 @CrossOrigin(origins = "*")
 public class CompanyController {
 
-	@Autowired
-	CompanyService service;
-	@Autowired
-	EmpService empService;
-	@Autowired
-	DeptService deptService;
+	@Autowired CompanyService service;
+	@Autowired EmpService empService;
+	@Autowired DeptService deptService;
+	
+	private final JwtProperties props;      // JWT 출입증 (설정값)      
+	private final JwtProvider jwtProvider;  // JWT 토근생성/검증 ( access Token / refresh Token )
+	private final TokenStore tokenStore;	// JMT 저장소
 
 	// 회사 등록 기능 POST /api/com
 	@Operation(summary = "회사 등록", description = "새로운 회사를 등록합니다. 사업자등록번호는 중복될 수 없습니다. ADMIN 또는 ROOT 권한이 필요합니다.")
 	@ApiResponses({ @ApiResponse(responseCode = "201", description = "회사 등록 성공"),
 			@ApiResponse(responseCode = "400", description = "유효성 검증 실패(필수값 누락, 사업자번호 형식 오류) 또는 사업자번호 중복"),
 			@ApiResponse(responseCode = "403", description = "권한 없음 (ADMIN/ROOT만 가능)") })
-	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+//	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	@PostMapping
 	public ResponseEntity<?> add(
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "등록할 회사 정보 (사업자번호 형식: 000-00-00000)", required = true) @Valid @RequestBody ComRequest dto) {
