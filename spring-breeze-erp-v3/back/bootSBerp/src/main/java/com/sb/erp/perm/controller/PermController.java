@@ -20,10 +20,6 @@ import com.sb.erp.auth.service.AuthService;
 import com.sb.erp.emp.service.EmpService;
 import com.sb.erp.perm.dto.AuthPermDto;
 import com.sb.erp.emp.dto.EmpAuthDto;
-import com.sb.erp.perm.dto.PermRestDto.PermRequestDto;
-import com.sb.erp.perm.dto.PermRestDto.PermResponseDto;
-import com.sb.erp.perm.dto.PermRestDto.EmpAuthRequestDto;
-import com.sb.erp.perm.dto.PermRestDto.EmpAuthResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

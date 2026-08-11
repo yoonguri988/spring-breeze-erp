@@ -1,31 +1,10 @@
-package com.sb.erp.service;
+package com.sb.erp.auth.service;
 
-import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
-import com.sb.erp.dto.AuthPermDto;
-import com.sb.erp.dto.EmpAuthDto;
+import com.sb.erp.auth.dto.response.AuthUserResponse;
 
 public interface AuthService {
-
-	// ─── 권한 관리 ───────────────
-	List<AuthPermDto> selectAll();
-
-	AuthPermDto selectOneById(int autId);
-
-	int insert(AuthPermDto dto);
-
-	int update(AuthPermDto dto);
-
-	int delete(int autId);
-	
-
-	// ─── 사원-권한 매핑 ────────────
-	List<EmpAuthDto> selectEmpsByAuthId(int autId);
-
-	List<EmpAuthDto> selectAuthsByEmpId(int empId);
-
-	int grantAuth(EmpAuthDto dto);
-
-	int revokeAuth(EmpAuthDto dto);
-
+	//  로그인 시 이메일 기준으로 사원+권한+회사 정보 조회
+	AuthUserResponse readAuth(@Param("username") String username);
 }
