@@ -1,36 +1,41 @@
-package com.sb.erp.service;
+package com.sb.erp.task.service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sb.erp.dao.ProjectMapper;
-import com.sb.erp.dao.TaskDependencyMapper;
-import com.sb.erp.dto.ProjectDto;
-import com.sb.erp.dto.TaskDto;
+import com.sb.erp.proj.dto.response.ProjResponse;
+import com.sb.erp.proj.repository.ProjectMapper;
+import com.sb.erp.task.dto.request.TaskRequest;
+import com.sb.erp.task.dto.response.TaskResponse;
+import com.sb.erp.task.repository.TaskDependencyMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
-@Transactional
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TaskDependencyServiceImpl implements TaskDependencyService{
-	@Autowired TaskDependencyMapper dao;
-	@Autowired ProjectMapper projectMapper;
+	private final TaskDependencyMapper dao;
+	private final ProjectMapper projectMapper;
 	
 	//선행 태스크를 지정하여 태스크 생성
-	@Override public int insertWithParent(TaskRequest dto) {  
+	@Override 
+	@Transactional
+	public int insertWithParent(TaskRequest dto) {  
 		
 		//프로젝트 done이면 태스크 못넣게
-		ProjRequest project = projectMapper.select(dto.getProId());
+		ProjResponse project = projectMapper.select(dto.getProId());
 		if (project != null && "DONE".equals(project.getProStatus())) {
 			throw new IllegalStateException("완료된 프로젝트에는 태스크를 추가할 수 없습니다.");
 		}
 		if(dto.getParentTaskId()!=null) {
-			List<TaskRequest> tasks=dao.selectTaskDependencies(dto.getProId());
-			TaskRequest parent = tasks.stream()
+			List<TaskResponse> tasks=dao.selectTaskDependencies(dto.getProId());
+			TaskResponse parent = tasks.stream()
 							.filter(t->t.getTaskId().equals(dto.getParentTaskId()))
 							.findFirst()
 							.orElseThrow(()->new IllegalArgumentException("지정한 선행 태스크가 존재하지 않습니다."));
@@ -43,10 +48,12 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 		}
 	
 	//태스크 의존성 트리 조회
-	@Override public List<TaskRequest> selectTaskDependencies(int proId) {  return dao.selectTaskDependencies(proId); }
+	@Override public List<TaskResponse> selectTaskDependencies(Long proId) {  return dao.selectTaskDependencies(proId); }
 	
 	//태스크 일정 및 선행 태스크 수정
-	@Override public int updateTaskSchedule(TaskRequest dto) {  
+	@Override 
+	@Transactional
+	public int updateTaskSchedule(TaskRequest dto) {  
 		
 		 // 연쇄 일정 계산 중 동시 수정 방지를 위해, 수정 대상 태스크 + 자손만 잠금(FOR UPDATE WAIT 5)
 		 // (프로젝트 전체를 잠그면 관계없는 태스크 수정까지 막혀서 범위를 좁힘 - START WITH ~ CONNECT BY)
@@ -60,7 +67,7 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
          throw new IllegalStateException("다른 사용자가 이 태스크의 일정을 수정 중입니다. 잠시 후 다시 시도해주세요.");
 	    }
 		 //프로젝트 done이면 태스크 못넣게
-		 ProjRequest project = projectMapper.select(dto.getProId());
+		 ProjResponse project = projectMapper.select(dto.getProId());
 		 if (project != null && "DONE".equals(project.getProStatus())) {
 		        throw new IllegalStateException("완료된 프로젝트에는 태스크를 수정할 수 없습니다.");
 		 }
@@ -73,14 +80,14 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 		int result = dao.updateTaskSchedule(dto);
 		
 		//3)전체 태스크 목록 재조회(선행->후행 순 정렬된 상태)
-		List<TaskRequest> allTasks = dao.selectTaskDependencies(dto.getProId());
+		List<TaskResponse> allTasks = dao.selectTaskDependencies(dto.getProId());
 		
 		//4)연쇄적으로 밀려야 하는 후속 태스크들만 추려서 리스트에 담기
-		List<TaskRequest> targetList = new ArrayList<>();
+		List<TaskResponse> targetList = new ArrayList<>();
 		
-		for(TaskRequest task : allTasks) {
+		for(TaskResponse task : allTasks) {
 			if(task.getParentTaskId()==null) {continue;}
-			TaskRequest parent = allTasks.stream()
+			TaskResponse parent = allTasks.stream()
 									 .filter(t->t.getTaskId().equals(task.getParentTaskId()))
 									 .findFirst()
 									 .orElse(null);
@@ -102,30 +109,32 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 		return result; }
 
 	//벌크 연쇄 업데이트
-	@Override public void updateBatchTaskSchedule(List<TaskRequest> list) { dao.updateBatchTaskSchedule(list); }
+	@Override 
+	@Transactional
+	public void updateBatchTaskSchedule(List<TaskResponse> list) { dao.updateBatchTaskSchedule(list); }
 
 	// DFS 기반 순환 참조 역방향 추적
-	private boolean isCyclic(Integer taskId,Integer parentTaskId,Integer proId) {
+	private boolean isCyclic(Long taskId,Long parentTaskId,Long proId) {
 
-		List<TaskRequest> list = dao.selectTaskDependencies(proId);
-		Integer pointer = parentTaskId;
+		List<TaskResponse> list = dao.selectTaskDependencies(proId);
+		Long pointer = parentTaskId;
 
 		while (pointer != null) {
 			if (pointer.equals(taskId)) {
 				return true;
 			}
-			final Integer currentFindId = pointer;
+			final Long currentFindId = pointer;
 			pointer = list.stream()
 			        .filter(t -> t.getTaskId().equals(currentFindId))
 			        .findFirst()
-			        .map(TaskRequest::getParentTaskId)
+			        .map(TaskResponse::getParentTaskId)
 			        .orElse(null);
 		}
 		return false;
 	}
 	
 	//후속 작업 리스트
-	@Override public List<TaskRequest> selectImpactTasks(int taskId) {  return dao.selectImpactTasks(taskId); }
+	@Override public List<TaskResponse> selectImpactTasks(Long taskId) {  return dao.selectImpactTasks(taskId); }
 	
 	
 }

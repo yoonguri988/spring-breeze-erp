@@ -1,221 +1,197 @@
 package com.sb.erp.appr.controller;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.sb.erp.appr.dto.ApprDocDto;
-import com.sb.erp.appr.dto.ApprDocInitResponseDto;
-import com.sb.erp.appr.dto.ApprFormDto;
+import com.sb.erp.appr.dto.request.ApprDocRequest;
+import com.sb.erp.appr.dto.request.ApprDocSearchCondition;
+import com.sb.erp.appr.dto.response.ApprDocInitResponse;
+import com.sb.erp.appr.dto.response.ApprDocResponse;
+import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
+import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.ApprLineResponse;
 import com.sb.erp.appr.service.ApprDocService;
-import com.sb.erp.dept.dto.DeptDto;
-import com.sb.erp.dept.service.DeptService;
-import com.sb.erp.global.security.CustomUserDetails;
+import com.sb.erp.dept.dto.response.DeptResponse;
 import com.sb.erp.util.dto.PagingUtil;
 
-@Controller
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
 @RequestMapping("/appr")
+@RequiredArgsConstructor
 public class ApprDocController {
+
+	private final ApprDocService service;
 	
-	@Autowired ApprDocService service;
-	@Autowired DeptService deptService;
-	
-	
+	/*
+	 * 보안관련 수업 진행 이후에 수정해야함
+	 */
+
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
-	
+
 	// 해당 회사에 있는 활성화된 양식 가져오기
 	@GetMapping("/getFormList")
-	@ResponseBody
-	public List<ApprFormDto> getFormList(@RequestParam("comId") int comId){
-		ApprDocDto dto = new ApprDocDto();
-		dto.setComId(comId);
-		return service.findForm(dto);
+	public ResponseEntity<List<ApprFormResponse>> getFormList(@RequestParam Long comId) {
+		return ResponseEntity.ok(service.findForm(comId));
 	}
-	
-	// 문서 작성시 
-	@GetMapping("/getFormDetail")
-	@ResponseBody
-	public ApprFormDto getFormDetail(@RequestParam("forId") int forId,
-							   		 @RequestParam("forVersion") int forVersion) {
-		Map<String, Object> params = new HashMap<>();
-		params.put("forId", forId);
-		params.put("forVersion", forVersion);
 
-		return service.getForm(params);
-	}
-	
-	// 문서 작성 폼
+	// 문서 작성 폼 진입시 작성자 인적사항
 	@GetMapping("/write_doc")
-	public String writeDoc(Model model,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
-		// 데이터 넣고 페이지 들어갈때 값 가져와서 삽입
-		ApprDocDto dto = new ApprDocDto();
-		dto.setEmpId(userDetails.getUser().getEmpId());
-		
-		ApprDocInitResponseDto result = service.initResponse(dto);
-		model.addAttribute("dto", result);
-		return "appr/write_doc";
+	public ResponseEntity<ApprDocInitResponse> writeDoc(@RequestParam Long empId) {
+		ApprDocInitResponse result = service.initResponse(empId);
+		return ResponseEntity.ok(result);
 	}
-	
-	// 문서 작성 처리
+
+	// 문서 작성 처리 (문서 + 결재선 동시 등록)
 	@PostMapping("/write_doc")
-	public String writeDoc_post(ApprDocDto dto,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
-		
-		dto.setEmpId(userDetails.getUser().getEmpId());
-		dto.setComId(userDetails.getUser().getComId());
-		
-		boolean result = service.insertLines(dto);
-		
-		// 위 호출에서 성공시
-		if(result) {
-			return "redirect:/appr/list_doc";
-		}
-		return "appr/write_doc";
+	public ResponseEntity<Void> writeDocPost(
+			@Valid
+			@RequestBody ApprDocRequest req,
+			@RequestParam Long empId,
+			@RequestParam Long comId
+    ) {
+		Long docId = service.insertDocAndLine(req, empId, comId);
+
+		URI location = URI.create("/appr" + docId);
+		return ResponseEntity.created(location).build();
 	}
-	
+
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
-	
+
 	//////////////////////////// 문서 조회 처리 파트 /////////////////////////////
-	
+
 	@GetMapping("/list_doc")
-	public String listDoc(Model model,
+	public ResponseEntity<Map<String, Object>> listDoc(
 			@RequestParam(defaultValue = "history") String tab,
 			@RequestParam(required = false) String keyword,
 			@RequestParam(required = false) String status,
 			@RequestParam(defaultValue = "1") int page,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
-		
-		// 로그인 유저 정보 가져오기 (emp_id)
-		ApprDocDto dto = new ApprDocDto(); 
-		dto.setEmpId(userDetails.getUser().getEmpId());
-		dto.setSearchKeyword(keyword);
-		dto.setSearchStatus(status);
-		
-		int myTodoCnt = service.selectMyTodoDocsCnt(dto);
-		
-		// 카운트
-		Map<String, Object> docCnts = service.selectDocCnt(dto);
+			@RequestParam Long empId) {
+
+		ApprDocSearchCondition condition = new ApprDocSearchCondition();
+		condition.setEmpId(empId);
+		condition.setTab(tab);
+		condition.setKeyword(keyword);
+		condition.setStatus(status);
+		condition.setPage(page);
+
+		int myTodoCnt = service.selectMyTodoDocsCnt(condition);
+		Map<String, Object> docCnts = service.selectDocCnt(condition.getEmpId());
 
 		int totalCnt = "todo".equals(tab) ?
 				myTodoCnt :
-				service.selectMyHistoryDocsCnt(dto);
-		
+				service.selectMyHistoryDocsCnt(condition);
 
 		PagingUtil paging = new PagingUtil(totalCnt, page);
-		dto.setPstartno(paging.getPstartno());
-		dto.setOnepagelist(paging.getOnepagelist());
-		
-		List<Map<String, Object>> hisDocs = List.of();
-		List<Map<String, Object>> todoDocs = List.of();
-		
-		if("todo".equals(tab)) {
-			todoDocs = service.selectMyTodoDocs(dto);
+		condition.setPstartno(paging.getPstartno());
+		condition.setOnepagelist(paging.getOnepagelist());
+
+		List<ApprDocSummaryResponse> hisDocs = List.of();
+		List<ApprDocSummaryResponse> todoDocs = List.of();
+
+		if ("todo".equals(tab)) {
+			todoDocs = service.selectMyTodoDocs(condition);
+		} else {
+			hisDocs = service.selectMyHistoryDocs(condition);
 		}
-		else {
-			hisDocs = service.selectMyHistoryDocs(dto);
-		}
-		
-		model.addAttribute("paging", paging);
-		model.addAttribute("docCnts", docCnts);
-		model.addAttribute("myTodoCnt", myTodoCnt);
-		model.addAttribute("hisDocs", hisDocs);
-		model.addAttribute("todoDocs", todoDocs);
-		model.addAttribute("activeTab", tab);
-		model.addAttribute("status", status);
-		model.addAttribute("keyword", keyword);
-		model.addAttribute("page", page);
-		
-		return "appr/list_doc";
+
+		// 예전 model.addAttribute와 동일한 키 이름으로 묶어서 반환
+		Map<String, Object> result = new HashMap<>();
+		result.put("paging", paging);
+		result.put("docCnts", docCnts);
+		result.put("myTodoCnt", myTodoCnt);
+		result.put("hisDocs", hisDocs);
+		result.put("todoDocs", todoDocs);
+		result.put("activeTab", tab);
+		result.put("status", status);
+		result.put("keyword", keyword);
+		result.put("page", page);
+
+		return ResponseEntity.ok(result);
 	}
-	
+
 	//////////////////////////// 문서 조회 처리 파트 /////////////////////////////
 
 	//////////////////////////// 문서 승인,반려 처리 ///////////////////////////////
-	
-	// 상세보기 폼
-	@GetMapping("/detail_doc")
-	public String detailDoc(@AuthenticationPrincipal CustomUserDetails userDetails,
-						    @RequestParam("docId") int docId,
-							Model model) {
-		
-		// docId 사용하여 문서 정보 가져옴
-		ApprDocDto doc = service.selectDocDetail(docId);
-		// 결재선 가져오기
+
+	// 상세보기
+	@GetMapping("/detail_doc/{docId}")
+	public ResponseEntity<Map<String, Object>> detailDoc(
+			@PathVariable Long docId,
+			@RequestParam Long empId
+	) {
+
+		ApprDocResponse doc = service.selectDocDetail(docId);
 		List<ApprLineResponse> lines = service.selectLinesByDocId(docId);
-		
-		// 로그인 한사람 empId 가져와야함
-		int empId = userDetails.getUser().getEmpId();
-		// 전체 결재선 목록에 결재상태가 'WAI' 인 데이터가 있나 검증
+
+		// 전체 결재선 목록에 결재상태가 'WAI'인 데이터가 있나 검증
 		boolean canProcess = lines.stream()
-				.anyMatch(l -> l.getEmpId() == empId && "WAI".equals(l.getLinStatus()));
-		
-		model.addAttribute("doc", doc);
-		model.addAttribute("lines", lines);
-		model.addAttribute("canProcess", canProcess);
-		
-		return "appr/detail_doc";
+				.anyMatch(l -> l.getEmpId().equals(empId) && "WAI".equals(l.getLinStatus()));
+
+		Map<String, Object> result = new HashMap<>();
+		result.put("doc", doc);
+		result.put("lines", lines);
+		result.put("canProcess", canProcess);
+
+		return ResponseEntity.ok(result);
 	}
-	
+
 	// 승인 처리
-	@PostMapping("/detail_doc/app")
-	public String detailDoc_app(@RequestParam("docId") int docId,
-				@AuthenticationPrincipal CustomUserDetails userDetails) {
-		service.processLine(docId, userDetails.getUser().getEmpId(), "APP");
-		return "redirect:/appr/detail_doc?docId=" + docId;
+	@PostMapping("/detail_doc/{docId}/app")
+	public ResponseEntity<Void> detailDocApp(
+			@PathVariable Long docId,
+			@RequestParam Long empId
+	) {
+		service.processLine(docId, empId, "APP");
+		return ResponseEntity.noContent().build();
 	}
-	
+
 	// 반려 처리
-	@PostMapping("/detail_doc/rej")
-	public String detailDoc_rej(@RequestParam("docId") int docId,
-				@AuthenticationPrincipal CustomUserDetails userDetails) {
-		service.processLine(docId, userDetails.getUser().getEmpId(), "REJ");
-		return "redirect:/appr/detail_doc?docId=" + docId;
+	@PostMapping("/detail_doc/{docId}/rej")
+	public ResponseEntity<Void> detailDocRej(
+			@PathVariable Long docId,
+			@RequestParam Long empId
+	) {
+		service.processLine(docId, empId, "REJ");
+		return ResponseEntity.noContent().build();
 	}
-	
+
 	//////////////////////////// 문서 승인,반려 처리 ///////////////////////////////
-	
+
 	//////////////////////////// 결재선 파트 ///////////////////////////////
-	
+
+	// 기안자 상사들 목록
 	@GetMapping("/getApprLines")
-	@ResponseBody
-	public List<ApprLineResponse> getApprLines(@RequestParam("isImportant") boolean isImportant,
-				@AuthenticationPrincipal CustomUserDetails userDetails)	{
-		ApprDocDto dto = new ApprDocDto();
-		dto.setEmpId(userDetails.getUser().getEmpId());
-		
-		return service.approversByEmpId(dto);
+	public ResponseEntity<List<ApprLineResponse>> getApprLines(@RequestParam Long empId) {
+		return ResponseEntity.ok(service.approversByEmpId(empId));
 	}
-	
-	// 결재선 지정용 부서 트리
+
+	// 결재선 지정 가능 인원수 / (service 부터 수정후 이쪽도 수정)
 	@GetMapping("/getDeptTree")
-	@ResponseBody
-	public List<DeptDto> getDeptTree(@AuthenticationPrincipal CustomUserDetails userDetails){
-		return service.cntApprovers(
-				userDetails.getUser().getDeptId(),
-				userDetails.getUser().getEmpId()
-		);
+	public ResponseEntity<List<DeptResponse>> getDeptTree(
+			@RequestParam Long deptId,
+			@RequestParam Long empId
+	) {
+		return ResponseEntity.ok(service.cntApprovers(deptId, empId));
 	}
-	
+
 	// 특정 부서 소속 사원 목록
 	@GetMapping("/getDeptEmps")
-	@ResponseBody
-	public List<ApprLineResponse> getDeptEmps(@RequestParam("deptId") int deptId) {
-		return service.selectDeptEmpsForLines(deptId);
+	public ResponseEntity<List<ApprLineResponse>> getDeptEmps(@RequestParam Long deptId) {
+		return ResponseEntity.ok(service.selectDeptEmpsForLines(deptId));
 	}
-	
-	
+
 	//////////////////////////// 결재선 파트 ///////////////////////////////
-	
 }

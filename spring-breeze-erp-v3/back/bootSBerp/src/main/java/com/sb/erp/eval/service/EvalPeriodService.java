@@ -1,46 +1,41 @@
-﻿package com.sb.erp.eval.service;
+package com.sb.erp.eval.service;
 
 import java.util.List;
 import java.util.Map;
 
-import com.sb.erp.eval.dto.EvalPeriodDto;
-import com.sb.erp.eval.dto.EvalPeriodSearchDto;
+import com.sb.erp.eval.dto.request.PeriodRequest;
+import com.sb.erp.eval.dto.request.PeriodSearchRequest;
+import com.sb.erp.eval.dto.response.PeriodResponse;
 
 public interface EvalPeriodService {
 
 	// ─── 회차 조회 ────────────────────────────────────
-	// 회차 목록 조회
-	List<EvalPeriodDto> search(EvalPeriodSearchDto search);
+	List<PeriodResponse> search(PeriodSearchRequest search);
 
-	// 회차 단건 조회
-	EvalPeriodDto selectByPeriodId(int periodId);
+	PeriodResponse selectByPeriodId(long periodId);
 
-	// 상태별 개수
 	Map<String, Integer> countByStatusAll();
 
-	
-	// ─── 회차 등록/수정 ────────────────────────────────
-	// 회차 등록
-	int insert(EvalPeriodDto dto);
 
-	// 회차 정보 수정
-	int update(EvalPeriodDto dto);
+	// ─── 회차 등록/수정 ────────────────────────────────
+	int insert(PeriodRequest dto);
+
+	int update(PeriodRequest dto);
 
 	// 상태 전환
-	int openPeriod(int periodId);
-    int closePeriod(int periodId);
-    int reportPeriod(int periodId);
+	int openPeriod(long periodId);
+	int closePeriod(long periodId);
+	int reportPeriod(long periodId);
 
-    
+
 	// ─── 중복 확인 ────────────────────────────────────
 	boolean isDuplicate(int evalYear, String evalTerm);
 
-	
+
 	// ─── 하위 데이터 카운트 ──────────────────────────────
-	int countEvalsByPeriodId(int periodId);
-	int countReportsByPeriodId(int periodId);
+	int countEvalsByPeriodId(long periodId);
+	int countReportsByPeriodId(long periodId);
 
 	// 리포트 진행률용: 회차별 평가 대상 사원 수
-	int countDistinctTargetsByPeriodId(int periodId);
-
+	int countDistinctTargetsByPeriodId(long periodId);
 }

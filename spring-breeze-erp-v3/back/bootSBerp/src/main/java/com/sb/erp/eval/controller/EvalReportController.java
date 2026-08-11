@@ -1,23 +1,15 @@
-﻿package com.sb.erp.eval.controller;
+package com.sb.erp.eval.controller;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.sb.erp.eval.dto.EvalPeriodDto;
-import com.sb.erp.eval.dto.EvalReportDto;
-import com.sb.erp.eval.dto.EvalReportSearchDto;
-import com.sb.erp.eval.dto.EvalRestDto.PeriodResponseDto;
-import com.sb.erp.eval.dto.EvalRestDto.ReportResponseDto;
+import com.sb.erp.eval.dto.request.ReportSearchRequest;
+import com.sb.erp.eval.dto.response.PeriodResponse;
+import com.sb.erp.eval.dto.response.ReportResponse;
 import com.sb.erp.eval.service.EvalPeriodService;
 import com.sb.erp.eval.service.EvalReportService;
 import com.sb.erp.util.dto.PagingUtil;
@@ -40,17 +32,15 @@ public class EvalReportController {
 	// ─── 회차별 리포트 목록 (검색 + 페이징) ─────────
 	@Operation(summary = "회차별 리포트 목록", description = "periodId 필수. 검색, 부서필터, 페이징 지원")
 	@GetMapping
-	public ResponseEntity<?> list(EvalReportSearchDto search) {
+	public ResponseEntity<?> list(ReportSearchRequest search) {
 
 		if (search.getPeriodId() == null) {
 			return ResponseEntity.badRequest()
 					.body(Map.of("message", "periodId는 필수입니다."));
 		}
 
-		EvalPeriodDto period = evalPeriodService.selectByPeriodId(search.getPeriodId());
-		if (period == null) {
-			return ResponseEntity.notFound().build();
-		}
+		PeriodResponse period = evalPeriodService.selectByPeriodId(search.getPeriodId());
+		if (period == null) return ResponseEntity.notFound().build();
 
 		String status = period.getPeriodStatus();
 		if (!"CLOSED".equals(status) && !"REPORTED".equals(status)) {
@@ -65,13 +55,10 @@ public class EvalReportController {
 		search.setPstartno(paging.getPstartno());
 		search.setOnepagelist(paging.getOnepagelist());
 
-		List<ReportResponseDto> reports = evalReportService.searchByPeriod(search)
-				.stream()
-				.map(ReportResponseDto::new)
-				.collect(Collectors.toList());
+		List<ReportResponse> reports = evalReportService.searchByPeriod(search);
 
 		return ResponseEntity.ok(Map.of(
-				"period", new PeriodResponseDto(period),
+				"period", period,
 				"reports", reports,
 				"reportCount", total,
 				"paging", paging
@@ -82,39 +69,33 @@ public class EvalReportController {
 	// ─── 리포트 상세 ─────────────────────────────
 	@Operation(summary = "리포트 상세 조회")
 	@GetMapping("/{reportId}")
-	public ResponseEntity<?> detail(@PathVariable int reportId) {
+	public ResponseEntity<?> detail(@PathVariable long reportId) {
 
-		EvalReportDto report = evalReportService.selectByReportId(reportId);
-		if (report == null) {
-			return ResponseEntity.notFound().build();
-		}
+		ReportResponse report = evalReportService.selectByReportId(reportId);
+		if (report == null) return ResponseEntity.notFound().build();
 
-		int loginEmpId = SecurityUtil.getCurrentEmpId();
+		Long loginEmpId = SecurityUtil.getCurrentEmpId();
 		if (report.getEmpId() != loginEmpId && !SecurityUtil.isAdmin()) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "본인 리포트만 조회할 수 있습니다."));
 		}
 
-		return ResponseEntity.ok(new ReportResponseDto(report));
+		return ResponseEntity.ok(report);
 	}
 
 
 	// ─── 본인 리포트 이력 ────────────────────────
 	@Operation(summary = "본인 리포트 이력")
 	@GetMapping("/my")
-	public ResponseEntity<List<ReportResponseDto>> my() {
-		List<ReportResponseDto> reports = evalReportService.selectMyAll()
-				.stream()
-				.map(ReportResponseDto::new)
-				.collect(Collectors.toList());
-		return ResponseEntity.ok(reports);
+	public ResponseEntity<List<ReportResponse>> my() {
+		return ResponseEntity.ok(evalReportService.selectMyAll());
 	}
 
 
 	// ─── 회차 전체 리포트 생성/재생성 ────────────────
 	@Operation(summary = "회차 전체 리포트 생성", description = "AI 배치 생성 시작")
 	@PostMapping("/generate")
-	public ResponseEntity<Map<String, String>> generate(@RequestParam int periodId) {
+	public ResponseEntity<Map<String, String>> generate(@RequestParam long periodId) {
 		int result = evalPeriodService.reportPeriod(periodId);
 		if (result == -1) return ResponseEntity.notFound().build();
 		if (result == -2) return ResponseEntity.badRequest()
@@ -127,8 +108,8 @@ public class EvalReportController {
 	@Operation(summary = "특정 사원 리포트 재생성")
 	@PostMapping("/regenerate")
 	public ResponseEntity<Map<String, String>> regenerate(
-			@RequestParam int periodId,
-			@RequestParam int empId) {
+			@RequestParam long periodId,
+			@RequestParam long empId) {
 
 		int result = evalReportService.regenerateReport(periodId, empId);
 		if (result == 1)  return ResponseEntity.ok(Map.of("message", "리포트를 재생성했습니다."));

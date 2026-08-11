@@ -1,22 +1,25 @@
-﻿package com.sb.erp.eval.service;
+package com.sb.erp.eval.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sb.erp.eval.dto.request.EvalRequest;
+import com.sb.erp.eval.dto.response.EvalResponse;
+import com.sb.erp.eval.dto.response.PeriodResponse;
 import com.sb.erp.eval.repository.EvalMapper;
-import com.sb.erp.eval.dto.EvalDto;
-import com.sb.erp.eval.dto.EvalPeriodDto;
 import com.sb.erp.util.dto.SecurityUtil;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class EvalServiceImpl implements EvalService {
-	
-	@Autowired EvalMapper dao;
-	@Autowired EvalPeriodService evalPeriodService;
+
+	private final EvalMapper evalMapper;
+	private final EvalPeriodService evalPeriodService;
 
 	// 5개 항목 가중치 (성과 40, 전문성 20, 협업 20, 태도 10, 성장 10)
 	private static final BigDecimal W_PERFORMANCE = new BigDecimal("0.40");
@@ -24,49 +27,48 @@ public class EvalServiceImpl implements EvalService {
 	private static final BigDecimal W_TEAMWORK = new BigDecimal("0.20");
 	private static final BigDecimal W_ATTITUDE = new BigDecimal("0.10");
 	private static final BigDecimal W_GROWTH = new BigDecimal("0.10");
-	
-	
+
+
 	// ─── 조회 ────────────────────────────────
 	@Override
-	public List<EvalDto> selectTargetsByCurrentEvaluator(int periodId) {
-		int evaluatorId = SecurityUtil.getCurrentEmpId();
-		return dao.selectTargetsByEvaluator(periodId, evaluatorId);
+	public List<EvalResponse> selectTargetsByCurrentEvaluator(long periodId) {
+		Long evaluatorId = SecurityUtil.getCurrentEmpId();
+		return evalMapper.selectTargetsByEvaluator(periodId, evaluatorId);
 	}
 
 	@Override
-	public EvalDto selectByEvalId(int evalId) {
-		return dao.selectByEvalId(evalId);
+	public EvalResponse selectByEvalId(long evalId) {
+		return evalMapper.selectByEvalId(evalId);
 	}
 
 	@Override
-	public List<EvalDto> selectByPeriodId(int periodId) {
-		return dao.selectByPeriodId(periodId);
+	public List<EvalResponse> selectByPeriodId(long periodId) {
+		return evalMapper.selectByPeriodId(periodId);
 	}
 
 	@Override
-	public List<EvalDto> selectMyEvalHistory() {
-		return dao.selectByTargetEmpId(SecurityUtil.getCurrentEmpId());
+	public List<EvalResponse> selectMyEvalHistory() {
+		return evalMapper.selectByTargetEmpId(SecurityUtil.getCurrentEmpId());
 	}
 
 	@Override
-	public List<EvalDto> selectEvalHistoryByEmpId(int empId) {
-		return dao.selectByTargetEmpId(empId);
+	public List<EvalResponse> selectEvalHistoryByEmpId(long empId) {
+		return evalMapper.selectByTargetEmpId(empId);
 	}
 
 	// ─── 통계 ────────────────────────────────
 
 	@Override
-	public int countMySubmitted(int periodId) {
-		return dao.countSubmittedByEvaluator(periodId, SecurityUtil.getCurrentEmpId());
+	public int countMySubmitted(long periodId) {
+		return evalMapper.countSubmittedByEvaluator(periodId, SecurityUtil.getCurrentEmpId());
 	}
 
 	// ─── 등록 / 수정 ──────────────────────────
 
 	@Override
-	public int saveDraft(EvalDto dto) {
+	public int saveDraft(EvalRequest dto) {
 		int validation = validateBase(dto);
-		if (validation != 1)
-			return validation;
+		if (validation != 1) return validation;
 
 		// 평가자 자동 세팅
 		dto.setEvaluatorId(SecurityUtil.getCurrentEmpId());
@@ -80,14 +82,14 @@ public class EvalServiceImpl implements EvalService {
 	}
 
 	@Override
-	public int submit(EvalDto dto) {
+	public int submit(EvalRequest dto) {
 		int validation = validateBase(dto);
-		if (validation != 1)
-			return validation;
+		if (validation != 1) return validation;
 
 		// 제출 시 모든 점수 + 코멘트 필수
-		if (dto.getScorePerformance() == null || dto.getScoreExpertise() == null || dto.getScoreTeamwork() == null
-				|| dto.getScoreAttitude() == null || dto.getScoreGrowth() == null || isEmpty(dto.getStrengthComment())
+		if (dto.getScorePerformance() == null || dto.getScoreExpertise() == null
+				|| dto.getScoreTeamwork() == null || dto.getScoreAttitude() == null
+				|| dto.getScoreGrowth() == null || isEmpty(dto.getStrengthComment())
 				|| isEmpty(dto.getImprovementComment())) {
 			return -4;
 		}
@@ -102,15 +104,12 @@ public class EvalServiceImpl implements EvalService {
 
 	// ─── 내부 헬퍼 ────────────────────────────
 
-	/* 기본 검증: 회차 존재 + OPEN 상태 + 대상 사원 확인. 
-	 1: 통과 / -1: 회차 없음 / -2: 회차가 OPEN 아님 / -3: 평가 대상 없음 */
-	
-	private int validateBase(EvalDto dto) {
-		EvalPeriodDto period = evalPeriodService.selectByPeriodId(dto.getPeriodId());
-		if (period == null)
-			return -1;
-		if (!"OPEN".equals(period.getPeriodStatus()))
-			return -2;
+	// 기본 검증: 회차 존재 + OPEN 상태.
+	// 1: 통과 / -1: 회차 없음 / -2: 회차가 OPEN 아님
+	private int validateBase(EvalRequest dto) {
+		PeriodResponse period = evalPeriodService.selectByPeriodId(dto.getPeriodId());
+		if (period == null) return -1;
+		if (!"OPEN".equals(period.getPeriodStatus())) return -2;
 		return 1;
 	}
 
@@ -119,21 +118,22 @@ public class EvalServiceImpl implements EvalService {
 	}
 
 	// 기존 평가가 있으면 update, 없으면 insert.
-	private int upsertEval(EvalDto dto) {
-		EvalDto existing = dao.selectByPeriodTargetEvaluator(dto.getPeriodId(), dto.getTargetEmpId(),
-				dto.getEvaluatorId(), dto.getEvalType());
+	private int upsertEval(EvalRequest dto) {
+		EvalResponse existing = evalMapper.selectByPeriodTargetEvaluator(
+				dto.getPeriodId(), dto.getTargetEmpId(), dto.getEvaluatorId(), dto.getEvalType());
 
 		if (existing != null) {
 			dto.setEvalId(existing.getEvalId());
-			return dao.update(dto);
+			return evalMapper.update(dto);
 		}
-		return dao.insert(dto);
+		return evalMapper.insert(dto);
 	}
 
-	// 5개 점수의 가중 평균 계산. 하나라도 null이면 null 반환 (이 경우 계산 안 됨).
-	private BigDecimal calculateWeightedScore(EvalDto dto) {
-		if (dto.getScorePerformance() == null || dto.getScoreExpertise() == null || dto.getScoreTeamwork() == null
-				|| dto.getScoreAttitude() == null || dto.getScoreGrowth() == null) {
+	// 5개 점수의 가중 평균 계산. 하나라도 null이면 null 반환 (임시저장 상태).
+	private BigDecimal calculateWeightedScore(EvalRequest dto) {
+		if (dto.getScorePerformance() == null || dto.getScoreExpertise() == null
+				|| dto.getScoreTeamwork() == null || dto.getScoreAttitude() == null
+				|| dto.getScoreGrowth() == null) {
 			return null;
 		}
 		BigDecimal sum = W_PERFORMANCE.multiply(new BigDecimal(dto.getScorePerformance()))

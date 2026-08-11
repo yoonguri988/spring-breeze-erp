@@ -1,20 +1,23 @@
-﻿package com.sb.erp.emp.service;
+package com.sb.erp.emp.service;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.sb.erp.emp.repository.EmailSendLogMapper;
 import com.sb.erp.emp.dto.WelcomeMailTargetDto;
+import com.sb.erp.emp.dto.request.EmpRequest;
+import com.sb.erp.emp.repository.EmailSendLogMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class MailSchedulerService {
 
-    @Autowired EmailSendLogMapper logMapper;
-    @Autowired EmailService emailService;
+    private final EmailSendLogMapper logMapper;
+    private final EmailService emailService;
 
     private final AtomicBoolean followup3DayRunning = new AtomicBoolean(false);
     private final AtomicBoolean welcomeOrphanRunning = new AtomicBoolean(false);
@@ -72,13 +75,11 @@ public class MailSchedulerService {
 
             System.out.println("[MailScheduler] 환영 메일 누락자 " + orphans.size() + "명");
             for (WelcomeMailTargetDto orphan : orphans) {
-                // EmpDto가 아니라 WelcomeMailTargetDto지만, 필드 구성이 같아 EmailService에서 활용 가능
-                // → 별도 오버로드로 호출 (구현체 참조)
-                com.sb.erp.dto.EmpDto emp = new com.sb.erp.dto.EmpDto();
+                // 안전망 배치: WelcomeMailTargetDto를 EmpRequest로 변환 후 위임
+                EmpRequest emp = new EmpRequest();
                 emp.setEmpId(orphan.getEmpId());
                 emp.setEmpName(orphan.getEmpName());
                 emp.setEmpEmail(orphan.getEmpEmail());
-                emp.setComName(orphan.getComName());
                 emailService.sendWelcomeMailAsync(emp);
             }
 
@@ -96,5 +97,5 @@ public class MailSchedulerService {
 
     /** 관리자 강제 실행: 환영 메일 안전망 배치. */
     public void triggerWelcomeOrphans() { sendWelcomeOrphans(); }
-    
+
 }
