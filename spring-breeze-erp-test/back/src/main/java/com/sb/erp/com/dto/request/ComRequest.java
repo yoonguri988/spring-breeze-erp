@@ -11,8 +11,6 @@ import lombok.Setter;
 
 @Setter @Getter @NoArgsConstructor @AllArgsConstructor @Builder
 public class ComRequest {
-	private long comId;
-
 	@NotBlank(message = "업종 대분류 코드는 필수입니다")
 	private String industryGrpCode;
 

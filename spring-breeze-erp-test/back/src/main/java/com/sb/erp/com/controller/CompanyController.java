@@ -1,0 +1,208 @@
+package com.sb.erp.com.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.sb.erp.auth.service.AuthUserJwtService;
+import com.sb.erp.com.dto.request.ComRequest;
+import com.sb.erp.com.dto.request.CompanySearchRequest;
+import com.sb.erp.com.dto.request.DeleteCompanyRequest;
+import com.sb.erp.com.dto.response.ComDetailResponse;
+import com.sb.erp.com.dto.response.ComResponse;
+import com.sb.erp.com.dto.response.StatsComResponse;
+import com.sb.erp.com.service.CompanyService;
+import com.sb.erp.dept.service.DeptService;
+import com.sb.erp.emp.dto.request.EmpRequest;
+import com.sb.erp.emp.service.EmpService;
+import com.sb.erp.global.exception.FileUploadException;
+import com.sb.erp.global.exception.ResourceNotFoundException;
+import com.sb.erp.global.oauth2.CustomUserPrincipal;
+import com.sb.erp.global.security.JwtProperties;
+import com.sb.erp.global.security.JwtProvider;
+import com.sb.erp.global.security.TokenStore;
+import com.sb.erp.util.dto.FileUploadDto;
+import com.sb.erp.util.dto.FileUploadType;
+import com.sb.erp.util.dto.FileUploadUtil;
+import com.sb.erp.util.dto.ListResponse;
+import com.sb.erp.util.dto.PagingUtil;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@Tag(name = "Company REST API", description = "회사 관리 REST API")
+@RestController
+@RequestMapping("/api/com")
+@RequiredArgsConstructor
+public class CompanyController {
+	private final CompanyService service;
+	private final EmpService empService;
+	private final DeptService deptService;
+	private final AuthUserJwtService authUserJwtService;
+
+	// 회사 등록 기능 POST /api/com
+	@Operation(summary = "회사 등록", description = "새로운 회사를 등록합니다. 사업자등록번호는 중복될 수 없습니다. ADMIN 또는 ROOT 권한이 필요합니다.")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+	@PostMapping(consumes= MediaType.MULTIPART_FORM_DATA_VALUE )
+	public ResponseEntity<?> add(@Valid @ModelAttribute ComRequest dto,
+								 @Parameter(description = "회사 로고 이미지 파일 (선택)") @RequestPart(value = "logoFile", required = false) MultipartFile logoFile) {
+		try {
+			int result = service.add(dto, logoFile);
+			if (result > 0) {
+				return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "회사 등록에 성공하였습니다."));
+			}
+			return ResponseEntity.badRequest().body(Map.of("message", "회사 등록에 실패하였습니다."));
+		} catch (IllegalArgumentException e) {
+			// 사업자등록번호 중복 등 비즈니스 검증 실패
+			return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+		}
+	}
+
+	// 회사 단건 조회 GET /api/com/{comId}
+	@Operation(summary = "회사 상세 조회", description = "회사 ID로 회사 정보 + 부서 통계/조직도를 조회합니다.")
+	@GetMapping("/{comId}")
+	public ResponseEntity<ComDetailResponse> detail(
+			@Parameter(description = "조회할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId) {
+		ComResponse com = service.selectOneById(comId);
+		if (com == null) {
+		     throw new ResourceNotFoundException("존재하지 않는 회사입니다. comId=" + comId);
+		}
+		ComDetailResponse response = ComDetailResponse.builder().com(com).deptStats(deptService.selectStats(comId))
+				.deptList(deptService.selectOrgTree(comId)).build();
+		return ResponseEntity.ok(response);
+	}
+
+	// 회사 목록 조회 GET /api/com
+	@Operation(summary = "회사 목록 조회", description = "검색조건(키워드, 업종 대분류 등)에 맞는 회사 목록을 페이징하여 조회합니다. ADMIN 또는 ROOT 권한이 필요합니다.")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+	@GetMapping
+	public ResponseEntity<ListResponse<ComResponse>> list(
+			@Parameter(description = "검색조건 (keyword, industryGrpCode, pstartno, onepagelist 등)") @ModelAttribute CompanySearchRequest search) {
+ 
+		boolean isEmpty = !search.hasSearchCondition();
+		int listTotal = isEmpty ? 0 : service.listTotal(search);
+ 
+		PagingUtil paging = isEmpty 
+				? new PagingUtil(0, search.getPstartno())
+				: new PagingUtil(listTotal, search.getPstartno(), search.getOnepagelist(), 10);
+ 
+		List<ComResponse> items = isEmpty ? List.of() : service.list(search);
+ 
+		ListResponse<ComResponse> response = ListResponse.<ComResponse>builder().paging(paging).items(items).build();
+		return ResponseEntity.ok(response);
+	}
+
+	// 회사 수정 PUT /api/com/{comId}
+	@Operation(summary = "회사 수정", description = "회사 정보를 수정합니다. 로고 URL을 새로 안 보내면 기존 로고가 유지됩니다. ADMIN 또는 ROOT 권한이 필요합니다.")
+	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+	@PutMapping(value = "/{comId}", consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> update(@Parameter(description = "수정할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId,
+			@Parameter(description = "회사 수정 정보(JSON)", required = true) @Valid @ModelAttribute ComRequest dto,
+			@Parameter(description = "새 로고 이미지 파일 (선택, 안 보내면 기존 로고 유지)") @RequestPart(value = "logoFile", required = false) MultipartFile logoFile
+		) {
+ 
+		try {
+			int result = service.update(comId, dto, logoFile);
+			if (result > 0) {
+				return ResponseEntity.ok(Map.of("message", "회사 정보 수정에 성공하였습니다."));
+			}
+			return ResponseEntity.badRequest().body(Map.of("message", "회사 정보 수정에 실패하였습니다."));
+		} catch (FileUploadException e) {
+			// 로고 업로드 실패 (확장자/용량 등)
+			return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+		}
+	}
+
+	// 회사 삭제 DELETE /api/com/{comId}
+	@Operation(summary = "회사 삭제", description = "회사를 삭제합니다. 요청자 본인의 비밀번호 확인이 필요하며, ROOT 권한만 가능합니다.")
+	@PreAuthorize("hasAuthority('ROOT')")
+	@DeleteMapping("/{comId}")
+	public ResponseEntity<?> delete(
+			@Parameter(description = "삭제할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId,
+			@Valid @RequestBody DeleteCompanyRequest request,
+			@Parameter(hidden = true) Authentication authentication) {
+ 
+		Long empId = authUserJwtService.getCurrentEmpId(authentication);
+		EmpRequest dto = new EmpRequest();
+		dto.setEmpId(empId);
+		dto.setEmpPass(request.getPassword());
+ 
+		boolean matched = empService.matchPassword(dto);
+		if (!matched) {
+			return ResponseEntity.badRequest().body(Map.of("message", "비밀번호가 올바르지 않습니다."));
+		}
+ 
+		try {
+			service.delete(comId);
+			return ResponseEntity.ok(Map.of("message", "회사가 삭제되었습니다."));
+		} catch (IllegalArgumentException e) {
+			// 하위 부서 존재 등 비즈니스 로직 검증 실패
+			return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+		}
+	}
+
+	// 사업자 중복 체크 GET /api/com/check-bizno
+	@Operation(summary = "사업자번호 중복확인", description = "사업자등록번호 중복 여부를 확인합니다.")
+	@GetMapping("/check-bizno")
+	public ResponseEntity<Map<String, Object>> checkBizNo(
+			@Parameter(description = "확인할 사업자등록번호", example = "123-45-67890", required = true) @RequestParam("bizNo") String bizNo) {
+ 
+		boolean duplicate = service.isDuplicateBizNo(bizNo) != null;
+		return ResponseEntity.ok(Map.of("duplicate", duplicate));
+	}
+
+	// 회사명 자동완성 GET /api/com/suggest
+	@Operation(summary = "회사명 자동완성", description = "키워드로 회사명 상위 5건을 조회합니다.")
+	@GetMapping("/suggest")
+	public ResponseEntity<List<ComResponse>> suggest(
+			@Parameter(description = "검색 키워드 (회사명 일부)", example = "위세", required = true) @RequestParam("keyword") String keyword) {
+ 
+		return ResponseEntity.ok(service.getSuggest(keyword));
+	}
+
+	// 회사 통계 조회 GET /api/com/stats
+	@Operation(summary = "회사 통계 조회", description = "전체 회사수/임직원수/업종수 등 통계를 조회합니다.")
+	@GetMapping("/stats")
+	public ResponseEntity<StatsComResponse> stats() {
+		return ResponseEntity.ok(service.selectStats());
+	}
+
+	// 내 회사 정보 조회 GET /api/com/my
+	@Operation(summary = "내 회사 정보 조회", description = "로그인한 사용자가 소속된 회사 정보 + 부서 통계/조직도를 조회합니다.")
+	@GetMapping("/my")
+	public ResponseEntity<ComDetailResponse> my(@Parameter(hidden = true) Authentication authentication) {
+		Long empId = authUserJwtService.getCurrentEmpId(authentication);
+		Long comId = authUserJwtService.getCurrentComId(authentication);
+
+		ComDetailResponse response = ComDetailResponse.builder().com(service.selectOneByEmpId(empId))
+				.deptStats(deptService.selectStats(comId)).deptList(deptService.selectOrgTree(comId)).build();
+
+		return ResponseEntity.ok(response);
+	}
+}
