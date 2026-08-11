@@ -1,6 +1,6 @@
 package com.sb.erp.api.dto.response;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +18,7 @@ public class ResvAlertResponse {
     private String empName;    // 신청자 이름
     private String empMobile;  // 신청자 휴대폰 번호 (CoolSMS 발신 대상)
  
-    private Timestamp startDt;
-    private Timestamp endDt;
-    private Timestamp returnDt;
+    private LocalDateTime startDt;
+    private LocalDateTime endDt;
+    private LocalDateTime returnDt;
 }

@@ -12,7 +12,6 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -62,16 +61,11 @@ public class ApprForm {
 	@Column(name = "is_deleted", nullable = false)
 	private boolean isDeleted;
 	
-	@Column(name = "created_at", nullable = false, updatable = false)
+	@Column(name = "created_at", nullable = false, insertable = false)
 	private LocalDateTime createdAt;
 	
-	@Column(name = "updated_at", nullable = false, updatable = false)
+	@Column(name = "updated_at", nullable = false, insertable = false)
 	private LocalDateTime updatedAt;
 	
-	@PrePersist
-	void onCreated() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
 }
 		  
