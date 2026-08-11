@@ -1,18 +1,19 @@
-package com.sb.erp.perm.entity;
+﻿package com.sb.erp.perm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import com.sb.erp.emp.entity.Employee;
+import com.sb.erp.auth.entity.Authority;
 
 /**
  * 사원-권한 매핑 Entity (emp_auth 테이블)
  *
  * ── 왜 @ManyToMany가 아니라 별도 Entity인가 ──
- *
  * emp_auth 테이블에 독립 PK(emp_aut_id)가 있고,
  * 향후 부여일시, 부여자 등 추가 컬럼이 생길 수 있음.
  * @ManyToMany는 중간 테이블에 추가 컬럼을 넣을 수 없어서
@@ -25,15 +26,14 @@ import com.sb.erp.emp.entity.Employee;
  */
 @Entity
 @Table(name = "emp_auth")
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class EmpAuth {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_emp_auth")
     @SequenceGenerator(name = "seq_emp_auth", sequenceName = "SEQ_EMP_AUTH", allocationSize = 1)
     @Column(name = "emp_aut_id")
-    private Integer empAutId;
+    private Long empAutId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emp_id", nullable = false)
@@ -43,9 +43,4 @@ public class EmpAuth {
     @JoinColumn(name = "aut_id", nullable = false)
     private Authority authority;
 
-    @Builder
-    public EmpAuth(Employee employee, Authority authority) {
-        this.employee = employee;
-        this.authority = authority;
-    }
 }
