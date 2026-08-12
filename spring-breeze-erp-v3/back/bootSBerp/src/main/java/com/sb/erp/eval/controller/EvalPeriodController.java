@@ -42,7 +42,7 @@ public class EvalPeriodController {
 	// ─── 상세 조회 ───────────────────────────────
 	@Operation(summary = "회차 상세 조회")
 	@GetMapping("/{periodId}")
-	public ResponseEntity<?> detail(@PathVariable long periodId) {
+	public ResponseEntity<?> detail(@PathVariable("periodId") long periodId) {
 		PeriodResponse period = evalPeriodService.selectByPeriodId(periodId);
 		if (period == null) return ResponseEntity.notFound().build();
 
@@ -81,7 +81,7 @@ public class EvalPeriodController {
 	@Operation(summary = "회차 수정")
 	@PutMapping("/{periodId}")
 	public ResponseEntity<?> edit(
-			@PathVariable long periodId,
+			@PathVariable("periodId") long periodId,
 			@jakarta.validation.Valid @RequestBody PeriodRequest request) {
 
 		PeriodResponse current = evalPeriodService.selectByPeriodId(periodId);
@@ -105,7 +105,7 @@ public class EvalPeriodController {
 	// ─── 상태 전환 ───────────────────────────────
 	@Operation(summary = "회차 열기 (READY -> OPEN)")
 	@PostMapping("/{periodId}/open")
-	public ResponseEntity<Map<String, String>> open(@PathVariable long periodId) {
+	public ResponseEntity<Map<String, String>> open(@PathVariable("periodId") long periodId) {
 		int result = evalPeriodService.openPeriod(periodId);
 		if (result == -1) return ResponseEntity.notFound().build();
 		if (result == -2) return ResponseEntity.badRequest().body(Map.of("message", "READY 상태의 회차만 열 수 있습니다."));
@@ -114,7 +114,7 @@ public class EvalPeriodController {
 
 	@Operation(summary = "회차 마감 (OPEN -> CLOSED)")
 	@PostMapping("/{periodId}/close")
-	public ResponseEntity<Map<String, String>> close(@PathVariable long periodId) {
+	public ResponseEntity<Map<String, String>> close(@PathVariable("periodId") long periodId) {
 		int result = evalPeriodService.closePeriod(periodId);
 		if (result == -1) return ResponseEntity.notFound().build();
 		if (result == -2) return ResponseEntity.badRequest().body(Map.of("message", "OPEN 상태의 회차만 마감할 수 있습니다."));
@@ -124,7 +124,7 @@ public class EvalPeriodController {
 
 	@Operation(summary = "AI 분석 시작 (CLOSED -> REPORTING)")
 	@PostMapping("/{periodId}/report")
-	public ResponseEntity<Map<String, String>> report(@PathVariable long periodId) {
+	public ResponseEntity<Map<String, String>> report(@PathVariable("periodId") long periodId) {
 		int result = evalPeriodService.reportPeriod(periodId);
 		if (result == -1) return ResponseEntity.notFound().build();
 		if (result == -2) return ResponseEntity.badRequest().body(Map.of("message", "현재 상태에서는 AI 분석을 시작할 수 없습니다."));
@@ -135,7 +135,7 @@ public class EvalPeriodController {
 	// ─── 리포트 진행률 (폴링용) ───────────────────
 	@Operation(summary = "리포트 생성 진행률 조회")
 	@GetMapping("/{periodId}/status")
-	public ResponseEntity<ReportProgressDto> getReportProgress(@PathVariable long periodId) {
+	public ResponseEntity<ReportProgressDto> getReportProgress(@PathVariable("periodId") long periodId) {
 		PeriodResponse period = evalPeriodService.selectByPeriodId(periodId);
 		if (period == null) {
 			return ResponseEntity.ok(new ReportProgressDto("NOT_FOUND", 0, 0));
@@ -152,8 +152,8 @@ public class EvalPeriodController {
 	@Operation(summary = "회차 중복 확인")
 	@GetMapping("/check-duplicate")
 	public ResponseEntity<Map<String, Boolean>> checkDuplicate(
-			@RequestParam int evalYear,
-			@RequestParam String evalTerm) {
+			@RequestParam("evalYear") int evalYear,
+			@RequestParam("evalTerm") String evalTerm) {
 		return ResponseEntity.ok(
 				Map.of("duplicate", evalPeriodService.isDuplicate(evalYear, evalTerm)));
 	}

@@ -14,13 +14,12 @@ import com.sb.erp.eval.dto.response.EvalResponse;
 import com.sb.erp.eval.dto.response.PeriodResponse;
 import com.sb.erp.eval.service.EvalPeriodService;
 import com.sb.erp.eval.service.EvalService;
-import com.sb.erp.util.dto.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "평가 REST API", description = "평가 작성 / 제출 / 조회")
+@Tag(name = "평가 상세", description = "평가 작성 / 제출 / 조회")
 @RestController
 @RequestMapping("/api/eval")
 @RequiredArgsConstructor
@@ -29,14 +28,14 @@ public class EvalController {
 
 	private final EvalService evalService;
 	private final EvalPeriodService evalPeriodService;
-
+	// SecurityUtil → 파일 변경 예정 / 기존 SecurityUtil을 이용한 테스트 진행 O
 
 	// ─── 평가 대시보드 데이터 ─────────────────────────
 	@Operation(summary = "평가 대시보드",
 		description = "periodId 미지정 시 OPEN 회차 목록만 반환. 지정 시 해당 회차의 평가 대상 + 진행률.")
 	@GetMapping("/dashboard")
 	public ResponseEntity<Map<String, Object>> dashboard(
-			@RequestParam(required = false) Long periodId) {
+			@RequestParam(name="periodId", required = false) Long periodId) {
 
 		if (periodId == null) {
 			PeriodSearchRequest search = new PeriodSearchRequest();
@@ -67,7 +66,7 @@ public class EvalController {
 	// ─── 평가 단건 조회 ─────────────────────────────
 	@Operation(summary = "평가 상세 조회", description = "평가자 본인 또는 관리자만 조회 가능")
 	@GetMapping("/{evalId}")
-	public ResponseEntity<?> detail(@PathVariable long evalId) {
+	public ResponseEntity<?> detail(@PathVariable("evalId") long evalId) {
 		EvalResponse eval = evalService.selectByEvalId(evalId);
 		if (eval == null) return ResponseEntity.notFound().build();
 

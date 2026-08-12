@@ -39,7 +39,7 @@ public class PermController {
 
 	@Operation(summary = "권한 상세 조회", description = "권한 정보 + 부여된 사원 목록")
 	@GetMapping("/{autId}")
-	public ResponseEntity<?> detail(@PathVariable long autId) {
+	public ResponseEntity<?> detail(@PathVariable("autId") long autId) {
 		PermResponse role = permService.selectOneById(autId);
 		if (role == null) return ResponseEntity.notFound().build();
 
@@ -69,7 +69,7 @@ public class PermController {
 	@Operation(summary = "권한 수정")
 	@PutMapping("/{autId}")
 	public ResponseEntity<?> edit(
-			@PathVariable long autId,
+			@PathVariable("autId") long autId,
 			@jakarta.validation.Valid @RequestBody PermRequest request) {
 		request.setAutId(autId);
 		int result = permService.update(request);
@@ -83,7 +83,7 @@ public class PermController {
 
 	@Operation(summary = "권한 삭제")
 	@DeleteMapping("/{autId}")
-	public ResponseEntity<Map<String, String>> delete(@PathVariable long autId) {
+	public ResponseEntity<Map<String, String>> delete(@PathVariable("autId") long autId) {
 		int result = permService.delete(autId);
 		if (result > 0) return ResponseEntity.ok(Map.of("message", "삭제되었습니다."));
 		return ResponseEntity.notFound().build();
@@ -96,7 +96,7 @@ public class PermController {
 
 	@Operation(summary = "사원의 권한 목록 조회")
 	@GetMapping("/emp/{empId}")
-	public ResponseEntity<Map<String, Object>> empAuthList(@PathVariable long empId) {
+	public ResponseEntity<Map<String, Object>> empAuthList(@PathVariable("empId") long empId) {
 		List<EmpAuthResponse> authorities = permService.selectAuthsByEmpId(empId);
 
 		return ResponseEntity.ok(Map.of(

@@ -23,7 +23,6 @@ import com.sb.erp.emp.service.EmpService;
 import com.sb.erp.eval.dto.response.ReportResponse;
 import com.sb.erp.eval.service.EvalReportService;
 import com.sb.erp.util.dto.PagingUtil;
-import com.sb.erp.util.dto.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,6 +37,7 @@ public class EmpController {
 
 	private final EmpService empService;
 	private final EvalReportService evalReportService;
+	// SecurityUtil → 수정해야함/ 기존 SecurityUtil을 이용한 Swagger 테스트는 통과
 
 
 	// ─── 목록 조회 (검색 + 페이징) ────────────────────────
@@ -67,7 +67,7 @@ public class EmpController {
 	@Operation(summary = "사원 상세 조회")
 	@GetMapping("/{empId}")
 	public ResponseEntity<Map<String, Object>> detail(
-			@Parameter(description = "사원 ID") @PathVariable long empId) {
+			@Parameter(description = "사원 ID") @PathVariable("empId") long empId) {
 
 		Long loginEmpId = SecurityUtil.getCurrentEmpId();
 		boolean isAdmin = SecurityUtil.isAdmin();
@@ -119,7 +119,7 @@ public class EmpController {
 	@Operation(summary = "사원 정보 수정")
 	@PutMapping("/{empId}")
 	public ResponseEntity<?> edit(
-			@PathVariable long empId,
+			@PathVariable("empId") long empId,
 			@RequestBody EmpRequest request) {
 
 		Long loginEmpId = SecurityUtil.getCurrentEmpId();
@@ -151,7 +151,7 @@ public class EmpController {
 	@Operation(summary = "비밀번호 변경 (본인)")
 	@PutMapping("/{empId}/password")
 	public ResponseEntity<Map<String, String>> editPassword(
-			@PathVariable long empId,
+			@PathVariable("empId") long empId,
 			@RequestBody PasswordChangeRequest request) {
 
 		Long loginEmpId = SecurityUtil.getCurrentEmpId();
@@ -182,7 +182,7 @@ public class EmpController {
 	// ─── 비밀번호 초기화 (관리자) ─────────────────────
 	@Operation(summary = "비밀번호 초기화 (관리자)")
 	@PutMapping("/{empId}/reset-password")
-	public ResponseEntity<Map<String, String>> resetPassword(@PathVariable long empId) {
+	public ResponseEntity<Map<String, String>> resetPassword(@PathVariable("empId") long empId) {
 
 		if (!SecurityUtil.isAdmin()) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -201,7 +201,7 @@ public class EmpController {
 	@Operation(summary = "이메일 중복 검사")
 	@GetMapping("/check-email")
 	public ResponseEntity<Map<String, Boolean>> checkEmail(
-			@RequestParam String empEmail) {
+			@RequestParam("email") String empEmail) {
 		return ResponseEntity.ok(
 				Map.of("duplicate", empService.isEmailDuplicate(empEmail)));
 	}
@@ -209,7 +209,7 @@ public class EmpController {
 	@Operation(summary = "연락처 중복 검사")
 	@GetMapping("/check-mobile")
 	public ResponseEntity<Map<String, Boolean>> checkMobile(
-			@RequestParam String empMobile) {
+			@RequestParam("empMobile") String empMobile) {
 		return ResponseEntity.ok(
 				Map.of("duplicate", empService.isMobileDuplicate(empMobile)));
 	}
@@ -217,7 +217,7 @@ public class EmpController {
 	@Operation(summary = "사번 중복 검사")
 	@GetMapping("/check-empno")
 	public ResponseEntity<Map<String, Boolean>> checkEmpNo(
-			@RequestParam String empNo) {
+			@RequestParam("empNo") String empNo) {
 		return ResponseEntity.ok(
 				Map.of("duplicate", empService.isEmpNoDuplicate(empNo)));
 	}

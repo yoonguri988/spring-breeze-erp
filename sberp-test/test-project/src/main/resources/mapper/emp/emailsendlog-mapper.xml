@@ -49,7 +49,7 @@
 		- created_at이 정확히 '3일 전 하루 구간' 인 사원 
 		- FOLLOWUP_3DAY 
 		발송 이력이 없거나 실패('F')인 경우 포함 - 재직자만 -->
-	<select id="selectFollowup3DayTargets"
+	<!--<select id="selectFollowup3DayTargets"
 		resultType="com.sb.erp.emp.dto.WelcomeMailTargetDto">
 		select
 		e.emp_id as empId,
@@ -71,10 +71,10 @@
 		and
 		l.log_id is null
 		and e.emp_email is not null
-	</select>
+	</select>-->
 
 	<!-- 환영 메일 안전망 (afterCommit 실패 복구). - 최근 7일 이내 등록된 사원 중 성공 로그 없는 사원 / 재직자만 -->
-	<select id="selectWelcomeOrphans"
+	<!--<select id="selectWelcomeOrphans"
 		resultType="com.sb.erp.emp.dto.WelcomeMailTargetDto">
 		select
 		e.emp_id as empId,
@@ -94,6 +94,6 @@
 		e.emp_status = '재직'
 		and l.log_id is null
 		and e.emp_email is not null
-	</select>
+	</select>-->
 
 </mapper>

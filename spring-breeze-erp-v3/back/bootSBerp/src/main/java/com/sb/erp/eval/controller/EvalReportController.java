@@ -13,7 +13,6 @@ import com.sb.erp.eval.dto.response.ReportResponse;
 import com.sb.erp.eval.service.EvalPeriodService;
 import com.sb.erp.eval.service.EvalReportService;
 import com.sb.erp.util.dto.PagingUtil;
-import com.sb.erp.util.dto.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +26,7 @@ public class EvalReportController {
 
 	private final EvalReportService evalReportService;
 	private final EvalPeriodService evalPeriodService;
+	// SecurityUtil → 파일 변경 예정 / 기존 SecurityUtil을 이용한 테스트 진행 O
 
 
 	// ─── 회차별 리포트 목록 (검색 + 페이징) ─────────
@@ -69,7 +69,7 @@ public class EvalReportController {
 	// ─── 리포트 상세 ─────────────────────────────
 	@Operation(summary = "리포트 상세 조회")
 	@GetMapping("/{reportId}")
-	public ResponseEntity<?> detail(@PathVariable long reportId) {
+	public ResponseEntity<?> detail(@PathVariable("reportId") long reportId) {
 
 		ReportResponse report = evalReportService.selectByReportId(reportId);
 		if (report == null) return ResponseEntity.notFound().build();
@@ -95,7 +95,7 @@ public class EvalReportController {
 	// ─── 회차 전체 리포트 생성/재생성 ────────────────
 	@Operation(summary = "회차 전체 리포트 생성", description = "AI 배치 생성 시작")
 	@PostMapping("/generate")
-	public ResponseEntity<Map<String, String>> generate(@RequestParam long periodId) {
+	public ResponseEntity<Map<String, String>> generate(@RequestParam("periodId") long periodId) {
 		int result = evalPeriodService.reportPeriod(periodId);
 		if (result == -1) return ResponseEntity.notFound().build();
 		if (result == -2) return ResponseEntity.badRequest()
@@ -108,8 +108,8 @@ public class EvalReportController {
 	@Operation(summary = "특정 사원 리포트 재생성")
 	@PostMapping("/regenerate")
 	public ResponseEntity<Map<String, String>> regenerate(
-			@RequestParam long periodId,
-			@RequestParam long empId) {
+			@RequestParam("periodId") long periodId,
+			@RequestParam("empId") long empId) {
 
 		int result = evalReportService.regenerateReport(periodId, empId);
 		if (result == 1)  return ResponseEntity.ok(Map.of("message", "리포트를 재생성했습니다."));

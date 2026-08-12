@@ -9,14 +9,12 @@ import com.sb.erp.perm.dto.request.PermRequest;
 import com.sb.erp.perm.dto.response.EmpAuthResponse;
 import com.sb.erp.perm.dto.response.PermResponse;
 import com.sb.erp.perm.repository.PermMapper;
-import com.sb.erp.util.dto.SecurityUtil;
 
 import lombok.RequiredArgsConstructor;
 
 /**
  * 권한 관리 서비스.
- *
- * ⚠️ AuthService에서 분리
+ * ⚠️ AuthService에서 분리!
  *   auth 도메인 = 인증(Authentication) — 로그인, JWT, CustomUserDetails
  *   perm 도메인 = 인가(Authorization) — 권한 CRUD, 사원-권한 매핑
  *
@@ -25,8 +23,7 @@ import lombok.RequiredArgsConstructor;
  *  selectEmpsByAuthId, selectAuthsByEmpId, grantAuth, revokeAuth
  *  
  * 대응 SQL 9개도 auth-mapper.xml → perm-mapper.xml로 분리!!
- * namespace가 달라 당장 충돌은 없으나, DB 스키마 변경 시 두 곳을 고쳐야 하므로
- * auth 도메인 리팩토링 시 원본을 제거할 것.
+ * namespace가 달라 당장 충돌은 없으나 DB 스키마 변경 시 두 곳을 고쳐야 하므로 auth 도메인 리팩토링 시 원본을 제거할 것.
  */
 @Service
 @RequiredArgsConstructor

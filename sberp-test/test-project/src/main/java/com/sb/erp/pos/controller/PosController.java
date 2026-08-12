@@ -15,18 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-/**
- * 직급 관리 REST API.
- *
- * <p>3차 리팩토링 참조 구현 — 다른 도메인 컨트롤러 작성 시 이 구조를 기준으로 삼는다.
- * <ul>
- *   <li>DTO: request/response 이원화. 변환 메서드 없이 MyBatis가 직접 매핑</li>
- *   <li>주입: {@code @RequiredArgsConstructor} + {@code private final} (필드 @Autowired 금지)</li>
- *   <li>comId: 서비스에서 SecurityUtil로 세팅. 컨트롤러/클라이언트가 넘기지 않음</li>
- *   <li>등록/수정 후 재조회: 시퀀스 PK와 조인 컬럼이 채워진 완전한 데이터를 반환하기 위함</li>
- * </ul>
- */
-@Tag(name = "Position REST API", description = "직급 관리 REST API")
+@Tag(name = "직급 관리", description = "직급 CRUD")
 @RestController
 @RequestMapping("/api/pos")
 @RequiredArgsConstructor
@@ -34,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class PosController {
 
 	private final PosService posService;
-
 
 	@Operation(summary = "직급 목록 조회")
 	@GetMapping
@@ -45,7 +33,7 @@ public class PosController {
 
 	@Operation(summary = "직급 상세 조회")
 	@GetMapping("/{posId}")
-	public ResponseEntity<PosResponse> detail(@PathVariable long posId) {
+	public ResponseEntity<PosResponse> detail(@PathVariable("posId") long posId) {
 		PosResponse pos = posService.selectOneById(posId);
 		// 타 회사 직급도 여기서 null → 404. 존재 여부를 노출하지 않는 효과도 있음
 		if (pos == null) return ResponseEntity.notFound().build();
@@ -69,7 +57,7 @@ public class PosController {
 
 	@Operation(summary = "직급 수정")
 	@PutMapping("/{posId}")
-	public ResponseEntity<?> edit(@PathVariable long posId,
+	public ResponseEntity<?> edit(@PathVariable("posId") long posId,
 			@jakarta.validation.Valid @RequestBody PosRequest request) {
 		// PK는 URL을 신뢰. body의 posId는 덮어씀 (경로와 본문 불일치 방지)
 		request.setPosId(posId);
@@ -84,7 +72,7 @@ public class PosController {
 
 	@Operation(summary = "직급 삭제")
 	@DeleteMapping("/{posId}")
-	public ResponseEntity<Map<String, String>> delete(@PathVariable long posId) {
+	public ResponseEntity<Map<String, String>> delete(@PathVariable("posId") long posId) {
 		int result = posService.delete(posId);
 
 		// Service 반환값 → HTTP 상태 매핑
@@ -103,9 +91,9 @@ public class PosController {
 	@Operation(summary = "직급코드 중복 확인")
 	@GetMapping("/check-code")
 	public ResponseEntity<Map<String, Boolean>> checkCode(
-			@RequestParam String posCode,
+			@RequestParam("posCode") String posCode,
 			// 수정 화면에서 자기 자신을 중복 대상에서 빼기 위해 전달 (등록 시 생략)
-			@RequestParam(required = false) Long excludePosId) {
+			@RequestParam(name="excludePosId", required = false) Long excludePosId) {
 		return ResponseEntity.ok(
 				Map.of("duplicate", posService.isPosCodeDuplicate(posCode, excludePosId)));
 	}
