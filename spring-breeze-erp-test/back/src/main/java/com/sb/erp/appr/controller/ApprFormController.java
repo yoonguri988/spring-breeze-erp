@@ -28,6 +28,7 @@ import com.sb.erp.com.service.CompanyService;
 //import com.sb.erp.global.integration.OpenAiGpt;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +69,7 @@ public class ApprFormController {
 	
 	// 양식 등록
 	@Operation(summary = "양식 등록", description = "새 결재 양식을 등록")
+	@ApiResponse(responseCode = "201", description = "생성 성공")
 	@PostMapping
 	public ResponseEntity<Void> insertForm(@Valid @RequestBody ApprFormRequest req){
 		Long forId = appr.insertForm(req);

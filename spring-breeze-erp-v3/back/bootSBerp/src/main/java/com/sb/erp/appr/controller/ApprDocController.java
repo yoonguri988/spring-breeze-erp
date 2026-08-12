@@ -25,9 +25,12 @@ import com.sb.erp.appr.service.ApprDocService;
 import com.sb.erp.dept.dto.response.DeptResponse;
 import com.sb.erp.util.dto.PagingUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "결재 문서", description = "전자 결재 문서 작성/조회/승인 API")
 @RestController
 @RequestMapping("/appr")
 @RequiredArgsConstructor
@@ -42,12 +45,14 @@ public class ApprDocController {
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
 
 	// 해당 회사에 있는 활성화된 양식 가져오기
+	@Operation(summary = "사용 가능한 양식 목록 조회", description = "해당 회사에서 사용 가능한 양식 조회")
 	@GetMapping("/getFormList")
 	public ResponseEntity<List<ApprFormResponse>> getFormList(@RequestParam Long comId) {
 		return ResponseEntity.ok(service.findForm(comId));
 	}
 
 	// 문서 작성 폼 진입시 작성자 인적사항
+	@Operation(summary = "문서 작성 초기 정보 조회", description = "문서 작성 화면 진입시 필요한 작성자 인적사항을 조회")
 	@GetMapping("/write_doc")
 	public ResponseEntity<ApprDocInitResponse> writeDoc(@RequestParam Long empId) {
 		ApprDocInitResponse result = service.initResponse(empId);
@@ -55,6 +60,7 @@ public class ApprDocController {
 	}
 
 	// 문서 작성 처리 (문서 + 결재선 동시 등록)
+	@Operation(summary = "문서/결재선 작성", description = "문서와 결재선을 동시에 작성")
 	@PostMapping("/write_doc")
 	public ResponseEntity<Void> writeDocPost(
 			@Valid
@@ -64,7 +70,7 @@ public class ApprDocController {
     ) {
 		Long docId = service.insertDocAndLine(req, empId, comId);
 
-		URI location = URI.create("/appr" + docId);
+		URI location = URI.create("/appr/" + docId);
 		return ResponseEntity.created(location).build();
 	}
 
@@ -72,6 +78,7 @@ public class ApprDocController {
 
 	//////////////////////////// 문서 조회 처리 파트 /////////////////////////////
 
+	@Operation(summary = "문서 목록 조회", description = "결재 했던 문서, 해야될 문서 탭별로 목록 조회")
 	@GetMapping("/list_doc")
 	public ResponseEntity<Map<String, Object>> listDoc(
 			@RequestParam(defaultValue = "history") String tab,
@@ -127,6 +134,7 @@ public class ApprDocController {
 	//////////////////////////// 문서 승인,반려 처리 ///////////////////////////////
 
 	// 상세보기
+	@Operation(summary = "문서 상세 조회", description = "문서 상세 정보와 결재선, 현재 로그인한 사용자의 결재 가능 여부 반환")
 	@GetMapping("/detail_doc/{docId}")
 	public ResponseEntity<Map<String, Object>> detailDoc(
 			@PathVariable Long docId,
@@ -149,6 +157,7 @@ public class ApprDocController {
 	}
 
 	// 승인 처리
+	@Operation(summary = "문서 승인 처리", description = "해당 결재선의 상태를 승인처리")
 	@PostMapping("/detail_doc/{docId}/app")
 	public ResponseEntity<Void> detailDocApp(
 			@PathVariable Long docId,
@@ -159,6 +168,7 @@ public class ApprDocController {
 	}
 
 	// 반려 처리
+	@Operation(summary = "문서 반려 처리", description = "해당 결재선의 상태를 반려 처리")
 	@PostMapping("/detail_doc/{docId}/rej")
 	public ResponseEntity<Void> detailDocRej(
 			@PathVariable Long docId,
@@ -173,12 +183,14 @@ public class ApprDocController {
 	//////////////////////////// 결재선 파트 ///////////////////////////////
 
 	// 기안자 상사들 목록
+	@Operation(summary = "기안자 상자 목록 조회", description = "기안자의 부서를 기준으로 결재선에 지정 가능한 상사 목록을 조회")
 	@GetMapping("/getApprLines")
 	public ResponseEntity<List<ApprLineResponse>> getApprLines(@RequestParam Long empId) {
 		return ResponseEntity.ok(service.approversByEmpId(empId));
 	}
 
 	// 결재선 지정 가능 인원수 / (service 부터 수정후 이쪽도 수정)
+	@Operation(summary = "결재선 지정용 부서 트리 조회", description = "부서 상위 체계를 따라가며 각 부서별 결재선 지정 가능 인원수를 함께 반환")
 	@GetMapping("/getDeptTree")
 	public ResponseEntity<List<DeptResponse>> getDeptTree(
 			@RequestParam Long deptId,
@@ -188,6 +200,7 @@ public class ApprDocController {
 	}
 
 	// 특정 부서 소속 사원 목록
+	@Operation(summary = "부서 소속 사원 목록 조회", description = "특정 부서에 소속된 사원 목록을 조회합니다.")
 	@GetMapping("/getDeptEmps")
 	public ResponseEntity<List<ApprLineResponse>> getDeptEmps(@RequestParam Long deptId) {
 		return ResponseEntity.ok(service.selectDeptEmpsForLines(deptId));
