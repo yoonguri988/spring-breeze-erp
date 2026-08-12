@@ -1,4 +1,4 @@
-package com.sb.erp.resv.dto.response;
+package com.sb.erp.resv.dto.reponse;
 
 import java.time.LocalDateTime;
 

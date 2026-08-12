@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.sb.erp.task.dto.reponse.TaskResponse;
 import com.sb.erp.task.dto.request.TaskRequest;
-import com.sb.erp.task.dto.response.TaskResponse;
 
 @Mapper
 public interface TaskDependencyMapper {

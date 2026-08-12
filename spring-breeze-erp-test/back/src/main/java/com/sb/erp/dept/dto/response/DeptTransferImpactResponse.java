@@ -6,7 +6,7 @@ import com.sb.erp.api.dto.response.AiRecomResponse;
 import com.sb.erp.appr.dto.response.ApprDocImpactResponse;
 import com.sb.erp.appr.dto.response.ApprLineImpactResponse;
 import com.sb.erp.emp.dto.response.EmpTransferResponse;
-import com.sb.erp.resv.dto.response.ResvImpactResponse;
+import com.sb.erp.resv.dto.reponse.ResvImpactResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
