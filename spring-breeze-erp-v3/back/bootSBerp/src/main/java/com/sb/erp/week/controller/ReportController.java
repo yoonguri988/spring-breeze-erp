@@ -40,7 +40,6 @@ public class ReportController {
         return ResponseEntity.ok("주간보고서 생성 성공");
     }
 
-
     // 개발자 개인용 주간보고서 PDF 생성
     @Operation(
         summary = "개인 주간보고서 PDF 생성",
