@@ -19,7 +19,7 @@ public interface ReservationService {
 
     int update(ResvRequest ResvDto);
 
-    int delete(int revId);
+    int delete(long revId);
 
     // 통계 (전체/승인/대기/반려)
     StatsResvResponse countByStats(ResvSearchRequest search);

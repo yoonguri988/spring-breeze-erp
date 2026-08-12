@@ -42,4 +42,6 @@ public interface DeptMapper {
 
 	DeptResponse selectDeptCode(DeptSearchRequest search);
 
+	// 로그인 사용자(empId) 기준 소속 부서 조회 - "내 부서" 화면용
+	DeptResponse selectByEmpId(long empId);
 }

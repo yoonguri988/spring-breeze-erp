@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import jakarta.annotation.PostConstruct;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -28,7 +29,7 @@ public class OpenAiReturnMsg {
 	
 	private final RestTemplate restTemplate = new RestTemplate();
     private final JsonMapper jsonMapper = new JsonMapper();
-	
+    
 	/**
      * systemPrompt(역할/톤 지시) + userPrompt(실제 상황 데이터)를 넣어 문장을 생성한다.
      * API 호출이 실패하더라도 알림 발송 자체는 끊기면 안 되므로,

@@ -68,7 +68,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public int delete(int revId) {
+    public int delete(long revId) {
     	return dao.delete(revId);
     }
 
