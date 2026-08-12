@@ -23,7 +23,7 @@ import com.sb.erp.emp.dto.response.EmpTransferResponse;
 import com.sb.erp.emp.dto.response.EmployeeTransferItemFormReponse;
 import com.sb.erp.global.exception.DeptTransferException;
 import com.sb.erp.global.integration.OpenAiRecomClient;
-import com.sb.erp.resv.dto.reponse.ResvImpactResponse;
+import com.sb.erp.resv.dto.response.ResvImpactResponse;
 
 @Service
 public class DeptTransferServiceImpl implements DeptTransferService {

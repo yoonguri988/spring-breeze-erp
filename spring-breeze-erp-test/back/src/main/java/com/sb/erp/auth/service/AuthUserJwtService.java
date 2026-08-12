@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
-import com.sb.erp.resv.dto.reponse.ResvResponse;
+import com.sb.erp.resv.dto.response.ResvResponse;
 
 @Component
 public class AuthUserJwtService {

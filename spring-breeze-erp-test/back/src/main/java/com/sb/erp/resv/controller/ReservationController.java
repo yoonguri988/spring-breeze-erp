@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sb.erp.auth.service.AuthUserJwtService;
 import com.sb.erp.res.dto.response.ResResponse;
 import com.sb.erp.res.service.ResourceService;
-import com.sb.erp.resv.dto.reponse.ResvResponse;
 import com.sb.erp.resv.dto.request.ResvRequest;
 import com.sb.erp.resv.dto.request.ResvSearchRequest;
+import com.sb.erp.resv.dto.response.ResvResponse;
 import com.sb.erp.resv.service.ReservationService;
 
 import io.swagger.v3.oas.annotations.Operation;
