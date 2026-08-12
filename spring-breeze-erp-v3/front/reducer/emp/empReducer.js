@@ -1,17 +1,22 @@
 // reducers/empReducer.js
 import { createSlice } from "@reduxjs/toolkit";
 
-//1. 초기화 상태(공용)
+//초기화 상태(공용)
 const initialState={
-    employees: [],
-    currentEmployee: null,
+    //사원 목록
+    empList: [],
+
+    //상세
+    currentEmp: null,
+
+    //공통
     loading: false,
     error: null,
     success: false,
 };
 
 //2. 상태 변화
-const employeeReducer=createSlice({
+const empReducer=createSlice({
     name: "emp",
     initialState,
     reducers: {
@@ -19,20 +24,20 @@ const employeeReducer=createSlice({
         // --- 상태 초기화 ---
         resetEmpState : (state)=>{
             state.loading = false;
-            state.error   = null;
             state.success = false;
+            state.error   = null;
         },
         
-        // --- 게시글 전체 목록 조회 ---
-        fetchPostsRequest: (state)=>{
+        // --- 사원 목록 조회 ---
+        empListRequest: (state)=>{
             state.loading = true;
             state.error = null;
         },
-        fetchPostsSuccess: (state, action)=>{
+        empListSuccess: (state, action)=>{
             state.loading = false;
-            state.posts = action.payload;
+            state.empList = action.payload;
         },
-        fetchPostsFailure: (state, action)=>{
+        empListFailure: (state, action)=>{
             state.loading = false;
             state.error = action.payload;
         },
@@ -42,6 +47,7 @@ const employeeReducer=createSlice({
 //3. action
 export const {
     resetEmpState,
+    empListRequest, empListSuccess, empListFailure,
 } = empReducer.actions;
 
 //4. export

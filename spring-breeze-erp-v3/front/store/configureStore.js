@@ -1,22 +1,24 @@
-// store/__tests__/store.test.js
-import { makeStore } from "../configureStore"; // 스토어 설정 파일 경로에 맞게 수정해주세요
-import { fetchPostsRequest } from "../../reducers/postReducer";
+import { configureStore } from '@reduxjs/toolkit';
+import createSagaMiddleware from 'redux-saga';
+import { createWrapper } from 'next-redux-wrapper';
+import reducer from '../reducer';
+import rootSaga from '../sagas';
 
-describe("Redux Store and Saga Middleware", () => {
-  it("should create store successfully with saga middleware", () => {
-    const store = makeStore();
-
-    // 1. 초기 상태(initialState) 확인
-    const state = store.getState();
-    expect(state).toHaveProperty("auth");
-    expect(state).toHaveProperty("post");
-
-    // 2. 사가 태스크(sagaTask)가 정상적으로 등록되었는지 확인
-    expect(store.sagaTask).toBeDefined();
-
-    // 3. 액션 디스패치 테스트 (리듀서가 정상 동작하는지 확인)
-    store.dispatch(fetchPostsRequest());
-    const updatedState = store.getState();
-    expect(updatedState.post.loading).toBe(true);
+export const makeStore = () => {
+  // saga 미들웨어 생성
+  const sagaMiddleware = createSagaMiddleware();
+  const store = configureStore({
+    reducer,  // reducer
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        thunk: false,   // thunk 미들웨어 사용 x
+        serializableCheck: false,  // 에러방지목적 - 직렬화검사 비활성
+      }).concat(sagaMiddleware), //saga 미들웨어 연결
+    devTools: process.env.NODE_ENV !== 'production',
   });
-});
+  // saga 미들웨어 실행 및 rootSaga연결
+  store.sagaTask = sagaMiddleware.run(rootSaga);
+  return store;
+};
+// next.js 에서 redux를 사용할수 있도록 wrapper 생성
+export const wrapper = createWrapper(makeStore, { debug: process.env.NODE_ENV !== 'production' });
