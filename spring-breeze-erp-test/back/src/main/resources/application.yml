@@ -53,3 +53,26 @@ resource:
 
 #server:
 #  port: 8484s
+
+# Discord Webhook
+webhook:
+  discord:
+    url: ${WEBHOOK_DISCORD_URL}
+
+# Google Docs API
+google:
+  report:
+    client-id: ${GOOGLE_REPORT_CLIENT_ID}
+    client-secret: ${GOOGLE_REPORT_CLIENT_SECRET}
+    refresh-token: ${GOOGLE_REPORT_REFRESH_TOKEN}
+
+# OpenAI API
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+
+# KJY OpenAI API
+kjy:
+  openai:
+    api:
+      key: ${KJY_OPENAI_API_KEY}
