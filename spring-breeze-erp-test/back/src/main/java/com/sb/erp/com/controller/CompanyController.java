@@ -3,15 +3,12 @@ package com.sb.erp.com.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -38,20 +35,11 @@ import com.sb.erp.emp.dto.request.EmpRequest;
 import com.sb.erp.emp.service.EmpService;
 import com.sb.erp.global.exception.FileUploadException;
 import com.sb.erp.global.exception.ResourceNotFoundException;
-import com.sb.erp.global.oauth2.CustomUserPrincipal;
-import com.sb.erp.global.security.JwtProperties;
-import com.sb.erp.global.security.JwtProvider;
-import com.sb.erp.global.security.TokenStore;
-import com.sb.erp.util.dto.FileUploadDto;
-import com.sb.erp.util.dto.FileUploadType;
-import com.sb.erp.util.dto.FileUploadUtil;
 import com.sb.erp.util.dto.ListResponse;
 import com.sb.erp.util.dto.PagingUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -67,19 +55,22 @@ public class CompanyController {
 	private final AuthUserJwtService authUserJwtService;
 
 	// 회사 등록 기능 POST /api/com
-	@Operation(summary = "회사 등록", description = "새로운 회사를 등록합니다. 사업자등록번호는 중복될 수 없습니다. ADMIN 또는 ROOT 권한이 필요합니다.")
+	@Operation(summary = "회사 등록", description = "새로운 회사를 등록합니다. 로고 이미지를 함께 업로드할 수 있습니다. "
+			+ "사업자등록번호는 중복될 수 없습니다. ADMIN 또는 ROOT 권한이 필요합니다.")
 	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
-	@PostMapping(consumes= MediaType.MULTIPART_FORM_DATA_VALUE )
-	public ResponseEntity<?> add(@Valid @ModelAttribute ComRequest dto,
-								 @Parameter(description = "회사 로고 이미지 파일 (선택)") @RequestPart(value = "logoFile", required = false) MultipartFile logoFile) {
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> add(
+			@Parameter(description = "회사 등록 정보") @Valid @ParameterObject @ModelAttribute ComRequest dto,
+			@Parameter(description = "회사 로고 이미지 파일 (선택)") @RequestParam(value = "logoFile", required = false) MultipartFile logoFile) {
 		try {
 			int result = service.add(dto, logoFile);
 			if (result > 0) {
 				return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "회사 등록에 성공하였습니다."));
 			}
 			return ResponseEntity.badRequest().body(Map.of("message", "회사 등록에 실패하였습니다."));
+		} catch (FileUploadException e) {
+			return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
 		} catch (IllegalArgumentException e) {
-			// 사업자등록번호 중복 등 비즈니스 검증 실패
 			return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
 		}
 	}
@@ -121,11 +112,11 @@ public class CompanyController {
 	// 회사 수정 PUT /api/com/{comId}
 	@Operation(summary = "회사 수정", description = "회사 정보를 수정합니다. 로고 URL을 새로 안 보내면 기존 로고가 유지됩니다. ADMIN 또는 ROOT 권한이 필요합니다.")
 	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
-	@PutMapping(value = "/{comId}", consumes= MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<?> update(@Parameter(description = "수정할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId,
-			@Parameter(description = "회사 수정 정보(JSON)", required = true) @Valid @ModelAttribute ComRequest dto,
-			@Parameter(description = "새 로고 이미지 파일 (선택, 안 보내면 기존 로고 유지)") @RequestPart(value = "logoFile", required = false) MultipartFile logoFile
-		) {
+	@PutMapping(value = "/{comId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> update(
+			@Parameter(description = "수정할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId,
+			@Parameter(description = "회사 수정 정보") @Valid @ParameterObject @ModelAttribute ComRequest dto,
+			@Parameter(description = "새 로고 이미지 파일 (선택, 안 보내면 기존 로고 유지)") @RequestParam(value = "logoFile", required = false) MultipartFile logoFile) {
  
 		try {
 			int result = service.update(comId, dto, logoFile);
@@ -134,7 +125,6 @@ public class CompanyController {
 			}
 			return ResponseEntity.badRequest().body(Map.of("message", "회사 정보 수정에 실패하였습니다."));
 		} catch (FileUploadException e) {
-			// 로고 업로드 실패 (확장자/용량 등)
 			return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
 		}
 	}
