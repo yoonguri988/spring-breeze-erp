@@ -31,7 +31,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ResvResponse getResvDetail(int revId) {
+    public ResvResponse getResvDetail(long revId) {
         return dao.selectById(revId);
     }
 
@@ -78,7 +78,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
     
     @Override
-    public int countReservationsByResourceId(int resId) {
+    public int countReservationsByResourceId(long resId) {
         return dao.countReservationsByResourceId(resId);
     }
 
