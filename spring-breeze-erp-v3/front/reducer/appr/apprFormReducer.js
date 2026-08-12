@@ -19,6 +19,7 @@ const initialState = {
     // 버전 이력
     versions: [],
     versionsLoading: false,
+    versionsError: null,
     
     // 등록/수정/삭제
     submitting: false,
@@ -71,8 +72,9 @@ const apprFormReducer = createSlice({
             state.versionsLoading = false;
             state.versions = action.payload;
         },
-        fetchFormVersionsFailure: (state) => {
+        fetchFormVersionsFailure: (state, action) => {
             state.versionsLoading = false;
+            state.versionsError = action.payload;
         },
 
         // 양식 등록
@@ -110,8 +112,15 @@ const apprFormReducer = createSlice({
             state.submitting = true;
             state.submitError = null;
         },
-        deleteFormSuccess: (state, action) => {},
-        deleteFormFailure: (state, action) => {},
+        deleteFormSuccess: (state, action) => {
+            state.submitting = false;
+            // 삭제된 forId를 목록에서 즉시 제거
+            state.list = state.list.filter((f) => f.forId !== action.payload);
+        },
+        deleteFormFailure: (state, action) => {
+            state.submitting = false;
+            state.submitError = action.payload
+        },
         
         // 상태 초기화
         resetFormState: (state) => {
