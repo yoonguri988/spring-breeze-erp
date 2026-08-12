@@ -28,7 +28,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public ResResponse getResourceDetail(int resId) {
+    public ResResponse getResourceDetail(long resId) {
         return dao.selectResourceDetail(resId);
     }
 
@@ -43,7 +43,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public int deleteResource(int resId) {
+    public int deleteResource(long resId) {
     	return dao.deleteResource(resId);
     }
 

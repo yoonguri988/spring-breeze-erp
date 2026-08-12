@@ -19,17 +19,17 @@ public interface ReservationMapper {
     
     int selectCount(ResvSearchRequest search);
     
-    ResvResponse selectById(int revId);
+    ResvResponse selectById(long revId);
     
     int insert(ResvRequest ResvDto);
 
     int update(ResvRequest ResvDto);
 
-    int delete(int revId);
+    int delete(long revId);
     
     StatsResvResponse countByStats(ResvSearchRequest search);
     
-    int countReservationsByResourceId(int resId);
+    int countReservationsByResourceId(long resId);
 
 	int updateApprove(ResvRequest resvDto);
 	int updateReject(ResvRequest ResvDto);
