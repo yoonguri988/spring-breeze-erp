@@ -87,6 +87,7 @@ public class TaskController {
 			if (inserted > 0) {
 				result.put("success", true);
 				result.put("message", "태스크 등록 성공");
+				result.put("task", service.select(dto.getTaskId()));
 				return ResponseEntity.status(HttpStatus.CREATED).body(result);
 			}
 			result.put("success", false);
@@ -181,6 +182,7 @@ public class TaskController {
 			if (updated > 0) {
 				result.put("success", true);
 				result.put("message", "태스크 수정 성공");
+				result.put("task", service.select(taskId));
 				return ResponseEntity.ok(result);
 			}
 			result.put("success", false);

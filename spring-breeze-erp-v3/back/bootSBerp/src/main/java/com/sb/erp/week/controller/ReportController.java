@@ -27,10 +27,8 @@ public class ReportController {
     private final ReportApi reportApi;
 
     // 관리자/팀장용 주간보고서 생성
-    @Operation(
-        summary = "팀장용 주간보고서 생성",
-        description = "프로젝트 주간 데이터를 이용해 AI 주간보고서를 생성하고 Google Docs에 저장"
-    )
+    @Operation(summary = "팀장용 주간보고서 생성",
+    		   description = "프로젝트 주간 데이터를 이용해 AI 주간보고서를 생성하고 Google Docs에 저장")
     @PostMapping("/report")
     public ResponseEntity<String> createReport(
             @RequestBody WeeklyReportResponse dto) {
@@ -42,10 +40,8 @@ public class ReportController {
 
     
     // 개발자 개인용 주간보고서 PDF 생성
-    @Operation(
-        summary = "개인 주간보고서 PDF 생성",
-        description = "개인 주간 데이터를 이용해 AI 주간보고서를 생성하고 PDF로 반환"
-    )
+    @Operation(summary = "개인 주간보고서 PDF 생성",
+               description = "개인 주간 데이터를 이용해 AI 주간보고서를 생성하고 PDF로 반환")
     @PostMapping("/my-report")
     public ResponseEntity<byte[]> createMyWeeklyReport(
             @RequestBody MyWeeklyReportResponse dto) {
