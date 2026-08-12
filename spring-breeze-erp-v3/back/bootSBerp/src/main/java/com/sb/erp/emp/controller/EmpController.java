@@ -1,9 +1,8 @@
-﻿package com.sb.erp.emp.controller;
+package com.sb.erp.emp.controller;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sb.erp.emp.dto.EmpDto;
-import com.sb.erp.emp.dto.EmpRestDto.EmpRequestDto;
-import com.sb.erp.emp.dto.EmpRestDto.EmpResponseDto;
-import com.sb.erp.emp.dto.EmpRestDto.PasswordChangeDto;
-import com.sb.erp.emp.dto.EmpSearchDto;
+import com.sb.erp.emp.dto.request.EmpRequest;
+import com.sb.erp.emp.dto.request.EmpSearchRequest;
+import com.sb.erp.emp.dto.request.PasswordChangeRequest;
+import com.sb.erp.emp.dto.response.EmpResponse;
 import com.sb.erp.emp.service.EmpService;
+import com.sb.erp.eval.dto.response.ReportResponse;
 import com.sb.erp.eval.service.EvalReportService;
-import com.sb.erp.eval.dto.EvalReportDto;
-import com.sb.erp.eval.dto.EvalRestDto.ReportResponseDto;
 import com.sb.erp.util.dto.PagingUtil;
 import com.sb.erp.util.dto.SecurityUtil;
 
@@ -46,7 +43,7 @@ public class EmpController {
 	// ─── 목록 조회 (검색 + 페이징) ────────────────────────
 	@Operation(summary = "사원 목록 조회", description = "검색 조건과 페이징을 적용한 사원 목록")
 	@GetMapping
-	public ResponseEntity<Map<String, Object>> list(EmpSearchDto search) {
+	public ResponseEntity<Map<String, Object>> list(EmpSearchRequest search) {
 
 		int currentPage = (search.getPage() == null || search.getPage() < 1)
 				? 1 : search.getPage();
@@ -57,10 +54,7 @@ public class EmpController {
 		search.setPstartno(paging.getPstartno());
 		search.setOnepagelist(paging.getOnepagelist());
 
-		List<EmpResponseDto> list = empService.search(search)
-				.stream()
-				.map(EmpResponseDto::new)
-				.collect(Collectors.toList());
+		List<EmpResponse> list = empService.search(search);
 
 		return ResponseEntity.ok(Map.of(
 				"list", list,
@@ -73,9 +67,9 @@ public class EmpController {
 	@Operation(summary = "사원 상세 조회")
 	@GetMapping("/{empId}")
 	public ResponseEntity<Map<String, Object>> detail(
-			@Parameter(description = "사원 ID") @PathVariable int empId) {
+			@Parameter(description = "사원 ID") @PathVariable long empId) {
 
-		int loginEmpId = SecurityUtil.getCurrentEmpId();
+		Long loginEmpId = SecurityUtil.getCurrentEmpId();
 		boolean isAdmin = SecurityUtil.isAdmin();
 
 		// 본인 또는 관리자만 조회 가능
@@ -84,21 +78,21 @@ public class EmpController {
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
 
-		EmpDto emp = empService.selectByEmpId(empId);
+		EmpResponse emp = empService.selectByEmpId(empId);
 		if (emp == null) {
 			return ResponseEntity.notFound().build();
 		}
 
-		EvalReportDto latestReport = evalReportService.selectLatestByEmpId(empId);
+		ReportResponse latestReport = evalReportService.selectLatestByEmpId(empId);
 
 		// HashMap 사용: null 허용 + 키 생략 가능
 		// Map.of()는 null 값 → NPE, 빈 문자열 → 프론트에서 타입 혼동
 		Map<String, Object> result = new HashMap<>();
-		result.put("emp", new EmpResponseDto(emp));
+		result.put("emp", emp);
 		result.put("isAdmin", isAdmin);
 		result.put("isSelf", empId == loginEmpId);
 		if (latestReport != null) {
-			result.put("latestReport", new ReportResponseDto(latestReport));
+			result.put("latestReport", latestReport);
 		}
 
 		return ResponseEntity.ok(result);
@@ -108,15 +102,13 @@ public class EmpController {
 	// ─── 사원 등록 ────────────────────────────────────
 	@Operation(summary = "사원 등록")
 	@PostMapping
-	public ResponseEntity<?> add(@RequestBody EmpRequestDto request) {
+	public ResponseEntity<?> add(@jakarta.validation.Valid @RequestBody EmpRequest request) {
 
-		EmpDto dto = request.toEmpDto();
-		int result = empService.insert(dto);
+		int result = empService.insert(request);
 
 		if (result > 0) {
-			EmpDto saved = empService.selectByEmpId(dto.getEmpId());
-			return ResponseEntity.status(HttpStatus.CREATED)
-					.body(new EmpResponseDto(saved));
+			EmpResponse saved = empService.selectByEmpId(request.getEmpId());
+			return ResponseEntity.status(HttpStatus.CREATED).body(saved);
 		}
 		return ResponseEntity.badRequest()
 				.body(Map.of("message", "등록에 실패했습니다."));
@@ -127,10 +119,10 @@ public class EmpController {
 	@Operation(summary = "사원 정보 수정")
 	@PutMapping("/{empId}")
 	public ResponseEntity<?> edit(
-			@PathVariable int empId,
-			@RequestBody EmpRequestDto request) {
+			@PathVariable long empId,
+			@RequestBody EmpRequest request) {
 
-		int loginEmpId = SecurityUtil.getCurrentEmpId();
+		Long loginEmpId = SecurityUtil.getCurrentEmpId();
 		boolean isAdmin = SecurityUtil.isAdmin();
 
 		if (empId != loginEmpId && !isAdmin) {
@@ -138,21 +130,20 @@ public class EmpController {
 					.body(Map.of("message", "수정 권한이 없습니다."));
 		}
 
-		EmpDto dto = request.toEmpDto();
-		dto.setEmpId(empId);
+		request.setEmpId(empId);
 
 		// 일반 사원이 관리자 전용 필드를 변경하지 못하도록 보정
 		if (!isAdmin) {
-			EmpDto current = empService.selectByEmpId(empId);
-			dto.setEmpName(current.getEmpName());
-			dto.setDeptId(current.getDeptId());
-			dto.setPosId(current.getPosId());
-			dto.setEmpStatus(current.getEmpStatus());
+			EmpResponse current = empService.selectByEmpId(empId);
+			request.setEmpName(current.getEmpName());
+			request.setDeptId(current.getDeptId());
+			request.setPosId(current.getPosId());
+			request.setEmpStatus(current.getEmpStatus());
 		}
 
-		empService.update(dto);
-		EmpDto updated = empService.selectByEmpId(empId);
-		return ResponseEntity.ok(new EmpResponseDto(updated));
+		empService.update(request);
+		EmpResponse updated = empService.selectByEmpId(empId);
+		return ResponseEntity.ok(updated);
 	}
 
 
@@ -160,10 +151,10 @@ public class EmpController {
 	@Operation(summary = "비밀번호 변경 (본인)")
 	@PutMapping("/{empId}/password")
 	public ResponseEntity<Map<String, String>> editPassword(
-			@PathVariable int empId,
-			@RequestBody PasswordChangeDto request) {
+			@PathVariable long empId,
+			@RequestBody PasswordChangeRequest request) {
 
-		int loginEmpId = SecurityUtil.getCurrentEmpId();
+		Long loginEmpId = SecurityUtil.getCurrentEmpId();
 		if (empId != loginEmpId) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "본인만 변경할 수 있습니다."));
@@ -191,7 +182,7 @@ public class EmpController {
 	// ─── 비밀번호 초기화 (관리자) ─────────────────────
 	@Operation(summary = "비밀번호 초기화 (관리자)")
 	@PutMapping("/{empId}/reset-password")
-	public ResponseEntity<Map<String, String>> resetPassword(@PathVariable int empId) {
+	public ResponseEntity<Map<String, String>> resetPassword(@PathVariable long empId) {
 
 		if (!SecurityUtil.isAdmin()) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)

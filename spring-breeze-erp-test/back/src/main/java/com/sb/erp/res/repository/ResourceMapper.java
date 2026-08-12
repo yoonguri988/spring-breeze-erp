@@ -15,13 +15,13 @@ public interface ResourceMapper {
 
     int selectResourceCount(ResSearchRequest search);
 
-    ResResponse selectResourceDetail(int resId);
+    ResResponse selectResourceDetail(long resId);
 
     int insertResource(ResRequest resourceDto);
 
     int updateResource(ResRequest resourceDto);
 
-    int deleteResource(int resId);
+    int deleteResource(long resId);
 
     // 자원코드 중복 체크
     ResResponse selectByResCode(ResRequest resDto);

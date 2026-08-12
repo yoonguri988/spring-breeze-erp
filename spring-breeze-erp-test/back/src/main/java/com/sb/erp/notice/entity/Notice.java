@@ -32,7 +32,7 @@ public class Notice {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_notice")
     @SequenceGenerator(name = "seq_notice", sequenceName = "SEQ_NOTICE", allocationSize = 1)
 	@Column(name="BNO", nullable = false)
-	private Integer bno; 
+	private Long bno; 
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="COM_ID", nullable = false)
@@ -55,20 +55,10 @@ public class Notice {
 	@Column(name="BFILE", length=500)
 	private String bfile;    
 	
-	@Column(name="CREATED_AT", nullable = false)
-	private LocalDateTime createdAt; 
-	
-	@Column(name="UPDATED_AT", nullable = false)
-	private LocalDateTime updatedAt; 
+	@Column(name = "CREATED_AT", insertable = false, updatable = false)
+	private LocalDateTime createdAt;
 
-	@PrePersist
-	void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
-	@PreUpdate
-	void onUpdate() {
-		this.updatedAt = LocalDateTime.now();		
-	}
+	@Column(name = "UPDATED_AT", insertable = false, updatable = false)
+	private LocalDateTime updatedAt;
 
 }

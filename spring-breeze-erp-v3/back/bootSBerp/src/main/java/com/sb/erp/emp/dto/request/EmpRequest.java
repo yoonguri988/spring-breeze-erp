@@ -2,10 +2,13 @@ package com.sb.erp.emp.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter @Getter
+@Setter @Getter @NoArgsConstructor @AllArgsConstructor @Builder
 public class EmpRequest {
 	private long empId;
 
@@ -24,6 +27,7 @@ public class EmpRequest {
 	private String empEmail;
 
 	// 선택 입력. 나중에 채워도 됨.
+	@NotBlank(message = "휴대폰번호는 필수입니다.")
 	private String empMobile;
 
 	// 등록 시 서비스에서 "재직" 기본값 세팅
@@ -36,4 +40,5 @@ public class EmpRequest {
 	private long posId;
 	private long deptId;
 	private long comId;
+
 }

@@ -5,25 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sb.erp.emp.service.EmpService;
-import com.sb.erp.global.security.CustomUserDetails;
-import com.sb.erp.proj.dto.request.ProjRequest;
 import com.sb.erp.proj.dto.response.ProjResponse;
 import com.sb.erp.proj.dto.response.ProjmemResponse;
 import com.sb.erp.proj.service.ProjectMemberService;
@@ -34,7 +30,6 @@ import com.sb.erp.task.dto.response.TaskResponse;
 import com.sb.erp.task.service.TaskDependencyService;
 import com.sb.erp.task.service.TaskService;
 import com.sb.erp.util.dto.PagingUtil;
-import com.sb.erp.util.dto.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -234,7 +229,7 @@ public class TaskController {
 	    @Operation(summary = "내 태스크 목록 조회", description = "로그인한 사용자가 담당자로 지정된 태스크 목록을 조회합니다.")
 		@GetMapping("/mine")
 	    
-	    public ResponseEntity<Map<String, Object>> getMyTasks(TaskSearchRequest search){
+	    public ResponseEntity<Map<String, Object>> getMyTasks(@ModelAttribute TaskSearchRequest search){
 	    	int totalCnt = service.selectMyTasksCount(search);
 			PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
 			search.setPstartno(paging.getPstartno());

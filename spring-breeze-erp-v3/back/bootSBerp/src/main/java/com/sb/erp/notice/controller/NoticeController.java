@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -29,7 +28,9 @@ import com.sb.erp.notice.service.NoticeService;
 import com.sb.erp.util.dto.PagingUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name="Notice Api", description = "Notice 관련 Api")
@@ -45,7 +46,7 @@ public class NoticeController {
     // ★Authentication
     @Operation(summary = "공지 목록 조회",description = "긴급 공지+검색 조건에 맞는 공지 목록 조회")
     @GetMapping
-    public ResponseEntity<Map<String,Object>>getNotices(NoticeSearchRequest search) {
+    public ResponseEntity<Map<String,Object>>getNotices(@ModelAttribute NoticeSearchRequest search) {
     	
     	int currentPage = search.getPstartno(); // 오염되기 전, 진짜 페이지 번호 미리 저장
     	List<NoticeResponse> notices = noticeService.getNoticeListWithUrgent(search); // 긴급5 + 일반목록
@@ -66,14 +67,15 @@ public class NoticeController {
     @Operation(summary = "공지 등록",description = "신규 공지 등록")
     @PostMapping(consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String,Object>> createNotice(
-    		@ModelAttribute NoticeRequest dto,
-    		@RequestPart(name="files",required = false )MultipartFile file){
+    		 @Parameter(description = "공지 등록 정보") @Valid @ParameterObject @ModelAttribute NoticeRequest dto,
+    	     @Parameter(description = "첨부파일") @RequestParam(value = "file", required = false) MultipartFile file){
     	Map<String, Object> result = new HashMap<>();
     	
         try {
             noticeService.insert(dto, file);
             result.put("success", true);
             result.put("message", "공지 등록 성공");
+            result.put("bno", dto.getBno());
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } catch (Exception e) {
             result.put("success", false);

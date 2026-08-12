@@ -6,6 +6,9 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.sb.erp.api.dto.request.ResvAlertRequest;
+import com.sb.erp.api.dto.response.ResvAlertResponse;
+import com.sb.erp.resv.dto.reponse.ResvResponse;
+import com.sb.erp.resv.dto.reponse.StatsResvResponse;
 import com.sb.erp.resv.dto.request.ResvRequest;
 import com.sb.erp.resv.dto.request.ResvSearchRequest;
 import com.sb.erp.resv.dto.response.ResvResponse;
@@ -18,17 +21,17 @@ public interface ReservationMapper {
     
     int selectCount(ResvSearchRequest search);
     
-    ResvResponse selectById(int revId);
+    ResvResponse selectById(long revId);
     
     int insert(ResvRequest ResvDto);
 
     int update(ResvRequest ResvDto);
 
-    int delete(int revId);
+    int delete(long revId);
     
     StatsResvResponse countByStats(ResvSearchRequest search);
     
-    int countReservationsByResourceId(int resId);
+    int countReservationsByResourceId(long resId);
 
 	int updateApprove(ResvRequest resvDto);
 	int updateReject(ResvRequest ResvDto);
@@ -42,7 +45,7 @@ public interface ReservationMapper {
      * - ROOM: start_dt는 지났고 end_dt 전인데 return_dt가 NULL인 건 (이용 흔적 없음 = 노쇼 의심)
      * - noshow_alert_at이 NULL인 건만 (이미 알림 보낸 건 재발송하지 않음)
      */
-    List<ResvAlertRequest> selectNoShowTargets();
+    List<ResvAlertResponse> selectNoShowTargets();
  
     /**
      * 알림 발송 완료 처리 (중복 발송 방지 플래그 세팅)

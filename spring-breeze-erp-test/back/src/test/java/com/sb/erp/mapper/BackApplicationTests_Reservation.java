@@ -124,7 +124,7 @@ class BackApplicationTests_Reservation {
 				.comId(comId)
 				.posCode(posCode)
 				.posName("사원")
-				.posOrder(1L)
+				.posOrder(1)
 				.build();
 
 		int inserted = posMapper.insert(dto);
