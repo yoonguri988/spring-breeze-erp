@@ -56,7 +56,7 @@
     </select>
 
     <!-- 자원 상세 -->
-    <select id="selectResourceDetail" parameterType="int" resultType="ResResponse">
+    <select id="selectResourceDetail" parameterType="long" resultType="ResResponse">
         SELECT 
           R.RES_ID, R.COM_ID, R.RES_CODE, R.RES_NAME, R.RES_TYPE, 
 		  R.QUANTITY, R.LOCATION, R.CAPACITY, R.RES_STATUS, 
@@ -108,7 +108,7 @@
     </update>
 
     <!-- 자원 삭제 -->
-    <delete id="deleteResource" parameterType="int">
+    <delete id="deleteResource" parameterType="long">
         DELETE FROM COM_RESOURCE
         WHERE res_id = #{resId}
     </delete>

@@ -14,13 +14,13 @@ public interface ResourceService {
     // 전체 자원 갯수 조회
     int getResourceCount(ResSearchRequest search);
 
-    ResResponse getResourceDetail(int resId);
+    ResResponse getResourceDetail(long resId);
 
     int insertResource(ResRequest resDto);
 
     int updateResource(ResRequest resDto);
 
-    int deleteResource(int resId);
+    int deleteResource(long resId);
 
     // 자원코드 중복 체크
     ResResponse isDuplicateResCode(ResRequest resDto);

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -76,13 +75,20 @@ public class CompanyController {
 	}
 
 	// 회사 단건 조회 GET /api/com/{comId}
-	@Operation(summary = "회사 상세 조회", description = "회사 ID로 회사 정보 + 부서 통계/조직도를 조회합니다.")
+	@Operation(summary = "회사 상세 조회", description = "회사 ID로 회사 정보 + 부서 통계/조직도를 조회합니다. "
+			+ "ROOT는 모든 회사를, 그 외 사용자는 본인 소속 회사만 조회할 수 있습니다.")
 	@GetMapping("/{comId}")
-	public ResponseEntity<ComDetailResponse> detail(
-			@Parameter(description = "조회할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId) {
+	public ResponseEntity<?> detail(
+			@Parameter(description = "조회할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId,
+			@Parameter(hidden = true) Authentication authentication) {
+ 
+		if (authUserJwtService.isForbiddenCompanyAccess(authentication, comId)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "본인 소속 회사만 조회할 수 있습니다."));
+		}
+ 
 		ComResponse com = service.selectOneById(comId);
 		if (com == null) {
-		     throw new ResourceNotFoundException("존재하지 않는 회사입니다. comId=" + comId);
+			throw new ResourceNotFoundException("존재하지 않는 회사입니다. comId=" + comId);
 		}
 		ComDetailResponse response = ComDetailResponse.builder().com(com).deptStats(deptService.selectStats(comId))
 				.deptList(deptService.selectOrgTree(comId)).build();
@@ -110,13 +116,19 @@ public class CompanyController {
 	}
 
 	// 회사 수정 PUT /api/com/{comId}
-	@Operation(summary = "회사 수정", description = "회사 정보를 수정합니다. 로고 URL을 새로 안 보내면 기존 로고가 유지됩니다. ADMIN 또는 ROOT 권한이 필요합니다.")
+	@Operation(summary = "회사 수정", description = "회사 정보를 수정합니다. 로고 URL을 새로 안 보내면 기존 로고가 유지됩니다. "
+			+ "ROOT는 모든 회사를, ADMIN은 본인 소속 회사만 수정할 수 있습니다.")
 	@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 	@PutMapping(value = "/{comId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> update(
 			@Parameter(description = "수정할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId,
 			@Parameter(description = "회사 수정 정보") @Valid @ParameterObject @ModelAttribute ComRequest dto,
-			@Parameter(description = "새 로고 이미지 파일 (선택, 안 보내면 기존 로고 유지)") @RequestParam(value = "logoFile", required = false) MultipartFile logoFile) {
+			@Parameter(description = "새 로고 이미지 파일 (선택, 안 보내면 기존 로고 유지)") @RequestParam(value = "logoFile", required = false) MultipartFile logoFile,
+			@Parameter(hidden = true) Authentication authentication) {
+ 
+		if (authUserJwtService.isForbiddenCompanyAccess(authentication, comId)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "본인 소속 회사만 수정할 수 있습니다."));
+		}
  
 		try {
 			int result = service.update(comId, dto, logoFile);
