@@ -1,13 +1,14 @@
-package com.sb.erp.eval.entity;
+﻿package com.sb.erp.eval.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 
@@ -33,15 +34,14 @@ import com.sb.erp.com.entity.Company;
 
 @Entity
 @Table(name = "evaluation_period")
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class EvalPeriod {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_eval_period")
-    @SequenceGenerator(name = "seq_eval_period", sequenceName = "SEQ_EVAL_PERIOD", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_period")
+    @SequenceGenerator(name = "seq_period", sequenceName = "SEQ_PERIOD", allocationSize = 1)
     @Column(name = "period_id")
-    private Integer periodId;
+    private Long periodId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "com_id", nullable = false)
@@ -82,31 +82,4 @@ public class EvalPeriod {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @Builder
-    public EvalPeriod(Company company, int evalYear, String evalTerm,
-                      String title, LocalDate startDate, LocalDate endDate) {
-        this.company = company;
-        this.evalYear = evalYear;
-        this.evalTerm = evalTerm;
-        this.title = title;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.periodStatus = "READY";  // 초기 상태 고정
-    }
-
-    // ── 도메인 메서드 ──
-
-    public void updateInfo(int evalYear, String evalTerm, String title,
-                           LocalDate startDate, LocalDate endDate) {
-        this.evalYear = evalYear;
-        this.evalTerm = evalTerm;
-        this.title = title;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
-
-    /** 상태 전환 — Service에서 전환 조건 검증 후 호출 */
-    public void changeStatus(String newStatus) {
-        this.periodStatus = newStatus;
-    }
 }

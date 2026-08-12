@@ -1,15 +1,14 @@
-package com.sb.erp.eval.entity;
+﻿package com.sb.erp.eval.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-
+import lombok.Setter;
 
 import com.sb.erp.emp.entity.Employee;
 
@@ -41,15 +40,14 @@ import com.sb.erp.emp.entity.Employee;
            name = "uk_report_period_emp",
            columnNames = {"period_id", "emp_id"}
        ))
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class EvalReport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_report")
     @SequenceGenerator(name = "seq_report", sequenceName = "SEQ_REPORT", allocationSize = 1)
     @Column(name = "report_id")
-    private Integer reportId;
+    private Long reportId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "period_id", nullable = false)
@@ -128,58 +126,5 @@ public class EvalReport {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-    }
-
-    @Builder
-    public EvalReport(EvalPeriod evalPeriod, Employee employee,
-                      BigDecimal avgPerformance, BigDecimal avgExpertise,
-                      BigDecimal avgTeamwork, BigDecimal avgAttitude,
-                      BigDecimal avgGrowth, BigDecimal overallScore,
-                      String grade, String aiSummary,
-                      BigDecimal sentimentPositive, BigDecimal sentimentNeutral,
-                      BigDecimal sentimentNegative, String sentimentLabel,
-                      String modelName) {
-        this.evalPeriod = evalPeriod;
-        this.employee = employee;
-        this.avgPerformance = avgPerformance;
-        this.avgExpertise = avgExpertise;
-        this.avgTeamwork = avgTeamwork;
-        this.avgAttitude = avgAttitude;
-        this.avgGrowth = avgGrowth;
-        this.overallScore = overallScore;
-        this.grade = grade;
-        this.aiSummary = aiSummary;
-        this.sentimentPositive = sentimentPositive;
-        this.sentimentNeutral = sentimentNeutral;
-        this.sentimentNegative = sentimentNegative;
-        this.sentimentLabel = sentimentLabel;
-        this.modelName = modelName;
-        this.generatedAt = LocalDateTime.now();
-    }
-
-    // ── 도메인 메서드 ──
-
-    /** 리포트 재생성 (같은 period+emp 조합의 기존 리포트 갱신) */
-    public void regenerate(BigDecimal avgPerformance, BigDecimal avgExpertise,
-                           BigDecimal avgTeamwork, BigDecimal avgAttitude,
-                           BigDecimal avgGrowth, BigDecimal overallScore,
-                           String grade, String aiSummary,
-                           BigDecimal sentimentPositive, BigDecimal sentimentNeutral,
-                           BigDecimal sentimentNegative, String sentimentLabel,
-                           String modelName) {
-        this.avgPerformance = avgPerformance;
-        this.avgExpertise = avgExpertise;
-        this.avgTeamwork = avgTeamwork;
-        this.avgAttitude = avgAttitude;
-        this.avgGrowth = avgGrowth;
-        this.overallScore = overallScore;
-        this.grade = grade;
-        this.aiSummary = aiSummary;
-        this.sentimentPositive = sentimentPositive;
-        this.sentimentNeutral = sentimentNeutral;
-        this.sentimentNegative = sentimentNegative;
-        this.sentimentLabel = sentimentLabel;
-        this.modelName = modelName;
-        this.generatedAt = LocalDateTime.now();
     }
 }
