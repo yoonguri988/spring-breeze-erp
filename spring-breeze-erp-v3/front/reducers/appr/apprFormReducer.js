@@ -4,9 +4,9 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     // 목록
     list: [],
-    totalCount: 0,
     page: 1,
     pageSize: 10,
+    totalCount: 0,
     totalPages: 0,
     loading: false,
     error: null,
@@ -124,7 +124,9 @@ const apprFormReducer = createSlice({
         
         // 상태 초기화
         resetFormState: (state) => {
-
+            state.submitting = false;
+            state.submitError = null;
+            state.success = false;
         }
     }
 });
@@ -139,4 +141,4 @@ export const {
     resetFormState
 } = apprFormReducer.actions;
 
-export default apprFormReducer.reducers;
+export default apprFormReducer.reducer;

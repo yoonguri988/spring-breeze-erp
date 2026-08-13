@@ -7,6 +7,8 @@ import { all, fork } from "redux-saga/effects";
 
 export default function* rootSaga() {
   yield all([
+    fork(apprFormSaga),
+    fork(apprDocSaga),
     // fork(authSaga),
     // fork(postSaga),
     // fork( commentSaga ) ,

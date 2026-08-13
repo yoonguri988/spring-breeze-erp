@@ -1,5 +1,5 @@
 import { all, call, put, takeLatest } from "redux-saga/effects";
-import api from "../api/axios";
+import api from "../../api/axios";
 import {
     fetchFormListRequest, fetchFormListSuccess, fetchFormListFailure,
     fetchFormDetailRequest, fetchFormDetailSuccess, fetchFormDetailFailure,
@@ -8,18 +8,18 @@ import {
     updateFormRequest, updateFormSuccess, updateFormFailure,
     deleteFormRequest, deleteFormSuccess, deleteFormFailure,
     resetFormState
-} from "../reducer/appr/apprFormReducer";
+} from "../../reducers/appr/apprFormReducer";
 
 const APPR_FORM_API_BASE = "/api/appr/forms";
 
 // 양식 목록 조회
 // GET /api/appr/forms
-export const getFormListApi = (params) => api.get(APPR_FORM_API_BASE, {params});
+export const fetchFormListApi = (params) => api.get(APPR_FORM_API_BASE, {params});
 
 export function* fetchFormList(action) {
     // payload -> {comId, keyword, forStatus, page, onepagelist}
     try {
-        const result = yield call(getFormListApi, action.payload);
+        const result = yield call(fetchFormListApi, action.payload);
         yield put(fetchFormListSuccess(result.data));
     } catch (err) {
         yield put(fetchFormListFailure(err.response?.data?.error || err.message));

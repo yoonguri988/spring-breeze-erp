@@ -12,7 +12,7 @@ import {
     fetchDeptTreeRequest, fetchDeptTreeSuccess, fetchDeptTreeFailure,
     fetchDeptEmpsRequest, fetchDeptEmpsSuccess, fetchDeptEmpsFailure,
     resetProcessState, resetWriteState,
-} from "../../reducer/appr/apprDocReducer";
+} from "../../reducers/appr/apprDocReducer";
 
 const APPR_API_BASE = "/appr";
 
