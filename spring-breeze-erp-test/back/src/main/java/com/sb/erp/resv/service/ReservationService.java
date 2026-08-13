@@ -2,10 +2,10 @@ package com.sb.erp.resv.service;
 
 import java.util.List;
 
-import com.sb.erp.resv.dto.reponse.ResvResponse;
-import com.sb.erp.resv.dto.reponse.StatsResvResponse;
 import com.sb.erp.resv.dto.request.ResvRequest;
 import com.sb.erp.resv.dto.request.ResvSearchRequest;
+import com.sb.erp.resv.dto.response.ResvResponse;
+import com.sb.erp.resv.dto.response.StatsResvResponse;
 
 public interface ReservationService {
 	// 자원 예약 조회
@@ -19,7 +19,7 @@ public interface ReservationService {
 
     int update(ResvRequest ResvDto);
 
-    int delete(int revId);
+    int delete(long revId);
 
     // 통계 (전체/승인/대기/반려)
     StatsResvResponse countByStats(ResvSearchRequest search);

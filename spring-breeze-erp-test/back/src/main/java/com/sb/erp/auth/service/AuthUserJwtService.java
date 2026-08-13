@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
+import com.sb.erp.resv.dto.response.ResvResponse;
 
 @Component
 public class AuthUserJwtService {
@@ -56,5 +57,21 @@ public class AuthUserJwtService {
         }
         Long myComId = getCurrentComId(authentication);
         return myComId == null || !myComId.equals(targetComId);
+    }
+    
+    /**
+     * 로그인 사용자가 이 예약에 접근(조회/수정/취소)할 수 있는지 판단.
+     * - 본인 예약이면 항상 허용
+     * - 본인 예약이 아니면 isForbiddenCompanyAccess 로 관리자/ROOT + 같은 회사 소속 여부 확인
+     *
+     * @return true = 접근 금지, false = 접근 허용
+     */
+    public boolean isForbiddenReservationAccess(Authentication authentication, ResvResponse existing) {
+        Long myEmpId = getCurrentEmpId(authentication);
+        boolean isOwner = existing.getEmpId().equals(myEmpId);
+        if (isOwner) {
+            return false;
+        }
+        return isForbiddenCompanyAccess(authentication, existing.getComId());
     }
 }

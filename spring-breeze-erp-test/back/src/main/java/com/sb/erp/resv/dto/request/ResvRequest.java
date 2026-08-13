@@ -2,6 +2,7 @@ package com.sb.erp.resv.dto.request;
 
 import java.time.LocalDateTime;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -12,15 +13,18 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class ResvRequest {
+	@Schema(hidden = true)
 	private Long revId;
 
 	@NotNull(message = "자원 정보는 필수입니다")
 	private Long resId;
 
-	@NotNull(message = "회사 정보는 필수입니다")
+	@Schema(hidden = true)
+//	@NotNull(message = "회사 정보는 필수입니다")
 	private Long comId;
 
-	@NotNull(message = "사원 정보는 필수입니다")
+	@Schema(hidden = true)
+//	@NotNull(message = "사원 정보는 필수입니다")
 	private Long empId;
 
 	@NotNull(message = "수량은 필수입니다")
@@ -41,9 +45,13 @@ public class ResvRequest {
 	private String rejectReason;
 
 	private String remark;
+	
+	@Schema(hidden = true)
 	private LocalDateTime createdAt;
+	@Schema(hidden = true)
 	private LocalDateTime updatedAt;
 	
 	// 알림발송관련 컬럼
+	@Schema(hidden = true)
 	private LocalDateTime noshowAlertAt;
 }
