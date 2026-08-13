@@ -1,5 +1,5 @@
 // sagas/com/companySaga.js
-import { call, put, takeLatest, debounce } from "redux-saga/effects";
+import { all, call, put, takeLatest, debounce } from "redux-saga/effects";
 import api from "../../api/axios"; // 프로젝트 공통 axios 인스턴스 (JWT 인터셉터 적용) - 경로는 실제 프로젝트에 맞게 수정
 
 import {
