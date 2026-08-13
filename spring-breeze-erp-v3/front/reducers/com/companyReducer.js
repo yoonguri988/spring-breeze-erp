@@ -15,19 +15,19 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   // 목록 조회 (list)
-  list: [],           // ComResponse[]
+  list: [], // ComResponse[]
   listTotal: 0,
-  paging: null,        // PagingUtil
+  paging: null, // PagingUtil
 
   // 상세 조회 (detail / my)
-  detail: null,        // ComDetailResponse { com, deptStats, deptList }
-  myCompany: null,      // ComDetailResponse
+  detail: null, // ComDetailResponse { com, deptStats, deptList }
+  myCompany: null, // ComDetailResponse
 
   // 통계 (stats)
-  stats: null,         // StatsComResponse
+  stats: null, // StatsComResponse
 
   // 자동완성 (suggest)
-  suggestList: [],      // ComResponse[]
+  suggestList: [], // ComResponse[]
 
   // 사업자번호 중복확인 (check-bizno)
   bizNoCheck: {
@@ -79,7 +79,7 @@ const companyReducer = createSlice({
       state.loading = false;
       state.list = action.payload.items ?? [];
       state.paging = action.payload.paging ?? null;
-      state.listTotal = action.payload.paging?.listTotal ?? state.list.length;
+      state.listTotal = action.payload.paging?.listtotal ?? state.list.length;
     },
     fetchCompanyListFailure(state, action) {
       state.loading = false;
@@ -117,7 +117,8 @@ const companyReducer = createSlice({
     updateCompanySuccess(state, action) {
       state.loading = false;
       state.success = true;
-      state.message = action.payload?.message ?? "회사 정보 수정에 성공하였습니다.";
+      state.message =
+        action.payload?.message ?? "회사 정보 수정에 성공하였습니다.";
     },
     updateCompanyFailure(state, action) {
       state.loading = false;
@@ -161,7 +162,10 @@ const companyReducer = createSlice({
     checkBizNoSuccess(state, action) {
       // action.payload: { duplicate: boolean }
       state.loading = false;
-      state.bizNoCheck = { checked: true, duplicate: !!action.payload.duplicate };
+      state.bizNoCheck = {
+        checked: true,
+        duplicate: !!action.payload.duplicate,
+      };
     },
     checkBizNoFailure(state, action) {
       state.loading = false;
