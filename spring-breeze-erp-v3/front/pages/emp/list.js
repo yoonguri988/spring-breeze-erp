@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux"; // 전역상태, 스토�
 import { useRouter } from "next/router"; // 경로 변경
 import { Spin } from "antd";
 
-import { empListRequest } from "../../reducer/emp/empReducer";
+import { listEmpRequest } from "../../reducers/emp/empReducer";
 
 export default function EmpList(){
 
@@ -15,7 +15,7 @@ export default function EmpList(){
     const { empList, loading, success, error } = useSelector((state)=> state.emp);
 
     useEffect(()=>{
-        dispatch(empListRequest());
+        dispatch(listEmpRequest());
     }, [dispatch]);
     
     ////////////////////////////////////////////
@@ -33,8 +33,6 @@ export default function EmpList(){
             {empList.map((emp)=>(
                 <p key={emp.empId}>{emp.empName}</p>
             ))}
-
-            <p>화면 확인용</p>
         </>
     );
 }
