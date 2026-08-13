@@ -5,6 +5,7 @@ import authSaga from "./auth/authSaga";
 import companySaga from "./com/companySaga";
 import deptSaga from "./dept/deptSaga";
 import deptTransferSaga from "./dept/deptTransferSaga";
+import apiUtilSaga from "./api/apiUtilSaga";
 
 export default function* rootSaga() {
   yield all([
@@ -12,5 +13,6 @@ export default function* rootSaga() {
     fork(companySaga),
     fork(deptSaga),
     fork(deptTransferSaga),
+    fork(apiUtilSaga),
   ]);
 }
