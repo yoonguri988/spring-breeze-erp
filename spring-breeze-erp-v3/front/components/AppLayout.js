@@ -1,41 +1,48 @@
-// components/AppLayout.js      # 재사용 가능한 UI 컴포넌트 폴더
-// 1. require
-import { Layout, Menu, Input, Row, Col, Drawer, Button, Grid } from "antd";  
-import { MenuOutlined, SearchOutlined } from "@ant-design/icons";
+// components/AppLayout.js
+import React, { useEffect, useState } from "react";
+import { Layout } from "antd";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+import Footer from "./Footer";
 
-import { useSelector, useDispatch } from 'react-redux'; // 전역상태, 액션
-import { useRouter }                from 'next/router'; // 이동
-import { useEffect, useState }      from 'react';       // 이벤트 변경 감지, 변수
-import Link                         from 'next/link';   // 
+const { Sider, Content } = Layout;
+const LS_LAYOUT_KEY = "sberp.layout"; // "standard" | "rail"
 
-const { Header, Footer, Content } = Layout;
-const { useBreakpoint } = Grid;
+export default function AppLayout({ children }) {
+  const [layoutMode, setLayoutMode] = useState("standard");
 
+  useEffect(() => {
+    const saved = localStorage.getItem(LS_LAYOUT_KEY);
+    if (saved === "rail" || saved === "standard") setLayoutMode(saved);
+  }, []);
 
-// 2. 부품
-function AppLayout( { children, initialUser } ){
+  const toggleLayout = () => {
+    setLayoutMode((cur) => {
+      const next = cur === "rail" ? "standard" : "rail";
+      localStorage.setItem(LS_LAYOUT_KEY, next);
+      return next;
+    });
+  };
 
-    // 변수, 세팅함수
-    const router = useRouter();
-    const dispatch = useDispatch();
+  const isRail = layoutMode === "rail";
 
-    return (
-        <Layout>
-            {/* Header */}
-            <Header>
-                Header
-            </Header>
-    
-            <Layout>
-                <Content> {children} </Content>
-            </Layout>
-
-            <Footer>
-                Footer
-            </Footer>
-        </Layout>
-    );
+  return (
+    <Layout className="sb-app" data-layout={layoutMode}>
+      <Sider
+        className="sb-sidebar"
+        id="sbSidebar"
+        width={248}
+        collapsedWidth={72}
+        collapsed={isRail}
+        trigger={null} // Header의 자체 토글 버튼을 쓰므로 antd 기본 트리거 숨김
+      >
+        <Sidebar />
+      </Sider>
+      <Layout className="sb-main">
+        <Header onToggleSidebar={toggleLayout} />
+        <Content className="sb-content">{children}</Content>
+        <Footer />
+      </Layout>
+    </Layout>
+  );
 }
-
-// 3. export
-export default AppLayout;
