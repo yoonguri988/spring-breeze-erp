@@ -1,32 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Spin, Card, Empty } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { loadUserRequest } from "../reducers/auth/authReducer";
 
 export default function Home() {
   const router = useRouter();
-  const [checked, setChecked] = useState(false);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-    if (!token) {
-      router.replace("/auth/login");
-    } else {
-      setChecked(true); // 인증 확인됨 → 홈 콘텐츠 렌더
-    }
-  }, [router]);
-
-  if (!checked) {
-    return (
-      <div
-        style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}
-      >
-        <Spin size="large" tip="확인 중…" />
-      </div>
-    );
-  }
+  const {user, acccessToken} = useSelector((state)=>state.auth);
 
   // TODO: reducer/saga 연동 후 실제 대시보드 위젯(sb-stat, sb-card 등)으로 교체
   return (
