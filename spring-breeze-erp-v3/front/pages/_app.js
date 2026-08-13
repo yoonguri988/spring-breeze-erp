@@ -13,6 +13,7 @@ import "antd/dist/antd.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/global.css";
 import "../styles/css/auth.css";
+import "../styles/css/company.css";
 
 const NO_LAYOUT_PREFIXES = ["/auth"];
 
