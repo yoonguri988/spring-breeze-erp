@@ -1,4 +1,4 @@
-package com.sb.erp.api;
+package com.sb.erp.global.integration;
 
 import java.util.List;
 
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sb.erp.dto.openai.ChatMessage;
-import com.sb.erp.dto.openai.ChatRequest;
-import com.sb.erp.dto.openai.ChatResponse;
-import com.sb.erp.dto.openai.ReportContent;
+import com.sb.erp.global.integration.openAi.ChatMessage;
+import com.sb.erp.global.integration.openAi.ChatRequest;
+import com.sb.erp.global.integration.openAi.ChatResponse;
+import com.sb.erp.global.integration.openAi.ReportContent;
 
 /* OpenAI Chat Completions API 저수준 호출 어댑터.
 1. 이 클래스가 하는 일:

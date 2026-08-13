@@ -5,8 +5,10 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.sb.erp.auth.service.AuthUserJwtService;
 import com.sb.erp.eval.dto.request.ReportSearchRequest;
 import com.sb.erp.eval.dto.response.PeriodResponse;
 import com.sb.erp.eval.dto.response.ReportResponse;
@@ -26,20 +28,30 @@ public class EvalReportController {
 
 	private final EvalReportService evalReportService;
 	private final EvalPeriodService evalPeriodService;
-	// SecurityUtil → 파일 변경 예정 / 기존 SecurityUtil을 이용한 테스트 진행 O
+	private final AuthUserJwtService authUserJwtService;
+
+	// 관리자 판별: getCurrentRoles()에 ROLE_ADMIN 또는 ROOT가 있는지 확인
+	private boolean isAdmin(Authentication auth) {
+		List<String> roles = authUserJwtService.getCurrentRoles(auth);
+		return roles != null && (roles.contains("ROLE_ADMIN") || roles.contains("ROOT"));
+	}
 
 
 	// ─── 회차별 리포트 목록 (검색 + 페이징) ─────────
 	@Operation(summary = "회차별 리포트 목록", description = "periodId 필수. 검색, 부서필터, 페이징 지원")
 	@GetMapping
-	public ResponseEntity<?> list(ReportSearchRequest search) {
+	public ResponseEntity<?> list(
+			Authentication auth,
+			ReportSearchRequest search) {
+
+		Long comId = authUserJwtService.getCurrentComId(auth);
 
 		if (search.getPeriodId() == null) {
 			return ResponseEntity.badRequest()
 					.body(Map.of("message", "periodId는 필수입니다."));
 		}
 
-		PeriodResponse period = evalPeriodService.selectByPeriodId(search.getPeriodId());
+		PeriodResponse period = evalPeriodService.selectByPeriodId(search.getPeriodId(), comId);
 		if (period == null) return ResponseEntity.notFound().build();
 
 		String status = period.getPeriodStatus();
@@ -49,13 +61,13 @@ public class EvalReportController {
 		}
 
 		int currentPage = (search.getPage() == null || search.getPage() < 1) ? 1 : search.getPage();
-		int total = evalReportService.countByPeriodSearch(search);
+		int total = evalReportService.countByPeriodSearch(search, comId);
 		PagingUtil paging = new PagingUtil(total, currentPage, 12, 10);
 
 		search.setPstartno(paging.getPstartno());
 		search.setOnepagelist(paging.getOnepagelist());
 
-		List<ReportResponse> reports = evalReportService.searchByPeriod(search);
+		List<ReportResponse> reports = evalReportService.searchByPeriod(search, comId);
 
 		return ResponseEntity.ok(Map.of(
 				"period", period,
@@ -69,13 +81,16 @@ public class EvalReportController {
 	// ─── 리포트 상세 ─────────────────────────────
 	@Operation(summary = "리포트 상세 조회")
 	@GetMapping("/{reportId}")
-	public ResponseEntity<?> detail(@PathVariable("reportId") long reportId) {
+	public ResponseEntity<?> detail(
+			Authentication auth,
+			@PathVariable("reportId") long reportId) {
 
-		ReportResponse report = evalReportService.selectByReportId(reportId);
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		ReportResponse report = evalReportService.selectByReportId(reportId, comId);
 		if (report == null) return ResponseEntity.notFound().build();
 
-		Long loginEmpId = SecurityUtil.getCurrentEmpId();
-		if (report.getEmpId() != loginEmpId && !SecurityUtil.isAdmin()) {
+		Long loginEmpId = authUserJwtService.getCurrentEmpId(auth);
+		if (report.getEmpId() != loginEmpId && !isAdmin(auth)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "본인 리포트만 조회할 수 있습니다."));
 		}
@@ -87,16 +102,20 @@ public class EvalReportController {
 	// ─── 본인 리포트 이력 ────────────────────────
 	@Operation(summary = "본인 리포트 이력")
 	@GetMapping("/my")
-	public ResponseEntity<List<ReportResponse>> my() {
-		return ResponseEntity.ok(evalReportService.selectMyAll());
+	public ResponseEntity<List<ReportResponse>> my(Authentication auth) {
+		Long empId = authUserJwtService.getCurrentEmpId(auth);
+		return ResponseEntity.ok(evalReportService.selectMyAll(empId));
 	}
 
 
 	// ─── 회차 전체 리포트 생성/재생성 ────────────────
 	@Operation(summary = "회차 전체 리포트 생성", description = "AI 배치 생성 시작")
 	@PostMapping("/generate")
-	public ResponseEntity<Map<String, String>> generate(@RequestParam("periodId") long periodId) {
-		int result = evalPeriodService.reportPeriod(periodId);
+	public ResponseEntity<Map<String, String>> generate(
+			Authentication auth,
+			@RequestParam("periodId") long periodId) {
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		int result = evalPeriodService.reportPeriod(periodId, comId);
 		if (result == -1) return ResponseEntity.notFound().build();
 		if (result == -2) return ResponseEntity.badRequest()
 				.body(Map.of("message", "현재 상태에서는 리포트를 생성/재생성할 수 없습니다."));
@@ -108,10 +127,12 @@ public class EvalReportController {
 	@Operation(summary = "특정 사원 리포트 재생성")
 	@PostMapping("/regenerate")
 	public ResponseEntity<Map<String, String>> regenerate(
+			Authentication auth,
 			@RequestParam("periodId") long periodId,
 			@RequestParam("empId") long empId) {
 
-		int result = evalReportService.regenerateReport(periodId, empId);
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		int result = evalReportService.regenerateReport(periodId, empId, comId);
 		if (result == 1)  return ResponseEntity.ok(Map.of("message", "리포트를 재생성했습니다."));
 		if (result == -1) return ResponseEntity.notFound().build();
 		if (result == -2) return ResponseEntity.badRequest().body(Map.of("message", "마감 이상 상태에서만 가능합니다."));
