@@ -124,19 +124,19 @@ public class ApprFormController {
 	
 	// AI 기반 양식 스키마 생성
 	
-	@PostMapping("/ai-schema")
-	@Operation(summary = "AI 양식 스키마 생성", description = "프롬프르틀 기반으로 AI호출하여 스키마 생성")
-	public ResponseEntity<ApprFormAiSchemaResponse> generateSchema(
-			@Valid
-			@RequestBody ApprFormAiSchemaRequest req
-	){
-		try {
-			String schemaJson = gpt.formSchema(req.getPrompt());
-			return ResponseEntity.ok(ApprFormAiSchemaResponse.success(schemaJson));
-		} catch (Exception e) {
-			// 외부 API 호출 실패는 비즈니스 예외가 아니라 별개취급
-			// -> 여기서만 예외적으로 캐치
-			return ResponseEntity.ok(ApprFormAiSchemaResponse.fail("AI 양식 생성에 실패했습니다"));
-		}
-	}
+//	@PostMapping("/ai-schema")
+//	@Operation(summary = "AI 양식 스키마 생성", description = "프롬프르틀 기반으로 AI호출하여 스키마 생성")
+//	public ResponseEntity<ApprFormAiSchemaResponse> generateSchema(
+//			@Valid
+//			@RequestBody ApprFormAiSchemaRequest req
+//	){
+//		try {
+//			String schemaJson = gpt.formSchema(req.getPrompt());
+//			return ResponseEntity.ok(ApprFormAiSchemaResponse.success(schemaJson));
+//		} catch (Exception e) {
+//			// 외부 API 호출 실패는 비즈니스 예외가 아니라 별개취급
+//			// -> 여기서만 예외적으로 캐치
+//			return ResponseEntity.ok(ApprFormAiSchemaResponse.fail("AI 양식 생성에 실패했습니다"));
+//		}
+//	}
 }

@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.global.integration.ReportApi;
+import com.sb.erp.task.dto.reponse.TaskResponse;
 import com.sb.erp.task.dto.request.TaskRequest;
 import com.sb.erp.task.dto.request.TaskSearchRequest;
-import com.sb.erp.task.dto.response.TaskResponse;
 import com.sb.erp.task.repository.TaskMapper;
 import com.sb.erp.week.dto.response.MyWeeklyReportResponse;
 

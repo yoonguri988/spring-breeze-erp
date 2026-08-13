@@ -2,9 +2,9 @@ package com.sb.erp.task.service;
 
 import java.util.List;
 
+import com.sb.erp.task.dto.reponse.TaskResponse;
 import com.sb.erp.task.dto.request.TaskRequest;
 import com.sb.erp.task.dto.request.TaskSearchRequest;
-import com.sb.erp.task.dto.response.TaskResponse;
 import com.sb.erp.week.dto.response.MyWeeklyReportResponse;
 
 public interface TaskService {
