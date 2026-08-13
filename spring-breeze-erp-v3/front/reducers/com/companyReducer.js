@@ -2,7 +2,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 // =========================================================
-// CompanyController.java 매핑 기준
 //  - POST   /api/com              : 회사 등록 (add)
 //  - GET    /api/com/{comId}      : 회사 상세 조회 (detail)
 //  - GET    /api/com              : 회사 목록 조회 (list, paging)
