@@ -1,4 +1,4 @@
-package com.sb.erp.task.dto.response;
+package com.sb.erp.task.dto.reponse;
 
 import java.time.LocalDate;
 

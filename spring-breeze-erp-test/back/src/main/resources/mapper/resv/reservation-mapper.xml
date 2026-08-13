@@ -29,11 +29,11 @@
         <if test="status != null and status != ''">
             AND rv.status = #{status}
         </if>
-        <if test="startDt != null and startDt != ''">
+        <if test="startDt != null">
             AND rv.updated_at <![CDATA[>=]]> #{startDt}
         </if>
-        <if test="endDt != null and endDt != ''">
-            AND rv.updated_at <![CDATA[<]]>TO_DATE(#{endDt}, 'YYYY-MM-DD') + 1
+        <if test="endDt != null">
+            AND rv.updated_at <![CDATA[<]]> #{endDt}
         </if>
         ORDER BY rv.rev_id DESC
         OFFSET #{pstartno} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
@@ -58,16 +58,16 @@
         <if test="status != null and status != ''">
             AND rv.status = #{status}
         </if>
-        <if test="startDt != null and startDt != ''">
+        <if test="startDt != null">
             AND rv.updated_at <![CDATA[>=]]> #{startDt}
         </if>
-        <if test="endDt != null and endDt != ''">
-            AND rv.updated_at <![CDATA[<]]>TO_DATE(#{endDt}, 'YYYY-MM-DD') + 1
+        <if test="endDt != null">
+            AND rv.updated_at <![CDATA[<]]> #{endDt}
         </if>
     </select>
 
     <!-- 예약 상세 -->
-    <select id="selectById" parameterType="int" resultType="ResvResponse">
+    <select id="selectById" parameterType="long" resultType="ResvResponse">
         SELECT
             rv.*,
             r.res_name, r.res_code, r.res_type, r.location, 
@@ -106,7 +106,7 @@
           AND status = 'WAI'
     </update>
 
-    <delete id="delete" parameterType="int">
+    <delete id="delete" parameterType="long">
         DELETE FROM reservation
         WHERE rev_id = #{revId}
           AND status = 'WAI'
@@ -146,7 +146,7 @@
     </select>
 
     <!-- 자원 삭제 전에 "진행 중인" 예약(대기/승인)이 있는지 확인. 반려 건은 제외 -->
-    <select id="countReservationsByResourceId" parameterType="int" resultType="int">
+    <select id="countReservationsByResourceId" parameterType="long" resultType="int">
         SELECT COUNT(*)
         FROM reservation
         WHERE res_id = #{resId}

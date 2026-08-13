@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.sb.erp.api.dto.response.ResvAlertResponse;
@@ -65,7 +66,7 @@ public class ApiScheduled {
 	private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
  
 	// 운영 시 트래픽/AI 호출 비용을 고려해 주기 조정 가능 (여기서는 1분마다)
-//	@Scheduled(cron = "0 */1 * * * *")
+	//@Scheduled(cron = "0 */1 * * * *")
 	public void noShowAutoAlert() {
 		List<ResvAlertResponse> targets = resDao.selectNoShowTargets();
  

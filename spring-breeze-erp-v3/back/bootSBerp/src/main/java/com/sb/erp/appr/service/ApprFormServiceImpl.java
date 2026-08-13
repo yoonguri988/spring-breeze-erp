@@ -12,6 +12,7 @@ import com.sb.erp.appr.dto.response.ApprFormListResponse;
 import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.CodeCheckResponse;
 import com.sb.erp.appr.repository.ApprFormMapper;
+import com.sb.erp.global.exception.ResourceNotFoundException;
 import com.sb.erp.util.dto.PagingUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -65,7 +66,7 @@ public class ApprFormServiceImpl implements ApprFormService {
 		
 		// 없는 양식을 조회할때 예외 처리
 		if (form == null) {
-			throw new IllegalArgumentException("존재하지 않는 양식입니다.");
+			throw new ResourceNotFoundException("존재하지 않는 양식입니다.");
 		}
 		return form;
 	}
@@ -103,7 +104,7 @@ public class ApprFormServiceImpl implements ApprFormService {
 		// 원본 데이터 조회 ( 변경 여부 비교 )
 		ApprFormResponse original = formMapper.selectFormAll(forId, forVersion);
 		if(original == null) {
-			throw new IllegalArgumentException("존재하지 않는 양식입니다.");
+			throw new ResourceNotFoundException("존재하지 않는 양식입니다.");
 		}
 		
 		// 공백을 제외한 순수 텍스트 비교
@@ -131,7 +132,7 @@ public class ApprFormServiceImpl implements ApprFormService {
 		
 		// 대상이 없어서 0건 갱신됐다면 예외처리
 		if (result == 0) {
-			throw new IllegalArgumentException("존재하지 않는 양식이거나 이미 삭제되었습니다.");
+			throw new ResourceNotFoundException("존재하지 않는 양식이거나 이미 삭제되었습니다.");
 		}
 		
 	}
