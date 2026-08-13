@@ -23,9 +23,9 @@ import com.sb.erp.proj.dto.response.ProjResponse;
 import com.sb.erp.proj.dto.response.ProjmemResponse;
 import com.sb.erp.proj.service.ProjectMemberService;
 import com.sb.erp.proj.service.ProjectService;
+import com.sb.erp.task.dto.reponse.TaskResponse;
 import com.sb.erp.task.dto.request.TaskRequest;
 import com.sb.erp.task.dto.request.TaskSearchRequest;
-import com.sb.erp.task.dto.response.TaskResponse;
 import com.sb.erp.task.service.TaskDependencyService;
 import com.sb.erp.task.service.TaskService;
 
