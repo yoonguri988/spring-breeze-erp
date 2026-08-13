@@ -2,15 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
-// TODO: reducer/saga 연동 전까지 임시 목데이터. 완성되면 useSelector로 교체.
-const mockAuth = {
-  isAuthenticated: true,
-  isRoot: false,
-  isAdmin: true,
-  empName: "홍길동",
-  posName: "팀장",
-};
+import { useSelector } from "react-redux";
 
 const NAV = [
   {
@@ -181,16 +173,26 @@ const NAV = [
   },
 ];
 
-function canShow(role) {
+// 백엔드 roles는 AuthResponse.autName 목록(예: "ROOT", "ADMIN") 기준.
+// 실제 사용 중인 role 문자열에 맞게 조정하세요.
+function hasRole(user, role) {
+  return Boolean(user?.roles?.includes(role));
+}
+
+function canShow(role, user) {
   if (!role) return true;
-  if (role === "root") return mockAuth.isRoot;
-  if (role === "admin") return mockAuth.isAdmin || mockAuth.isRoot;
+  if (role === "root") return hasRole(user, "ROOT");
+  if (role === "admin") return hasRole(user, "ADMIN") || hasRole(user, "ROOT");
   return true;
 }
 
 export default function Sidebar() {
   const router = useRouter();
+  const { user, accessToken } = useSelector((state) => state.auth);
+  console.log(user)
+
   const currentPath = router.pathname;
+  const isAuthenticated = Boolean(user);
 
   const isActive = (href) => {
     const path = href.split("?")[0];
@@ -213,7 +215,7 @@ export default function Sidebar() {
               <div className="sb-nav__section">{group.section}</div>
             )}
             {group.items
-              .filter((it) => canShow(it.role))
+              .filter((it) => canShow(it.role, user))
               .map((it) => (
                 <Link key={it.page} href={it.href} passHref>
                   <a
@@ -232,13 +234,13 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {mockAuth.isAuthenticated && (
+      {isAuthenticated && (
         <div className="sb-sidebar__foot">
           <div className="sb-userchip">
-            <div className="sb-avatar">{mockAuth.empName?.[0]}</div>
+            <div className="sb-avatar">{user?.empName?.[0]}</div>
             <div className="sb-userchip__meta">
-              <b>{mockAuth.empName}</b>
-              <span>{mockAuth.posName}</span>
+              <b>{user?.empName}</b>
+              <span>{user?.posName}</span>
             </div>
             <i
               className="bi bi-chevron-expand ms-auto sb-nav__label"

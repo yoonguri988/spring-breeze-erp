@@ -113,24 +113,33 @@ a {
   min-height: 100vh;
   display: flex;
   flex-direction: row;
-  /* display: grid;
-  grid-template-columns: var(--sb-sidebar-w) 1fr;
-  grid-template-rows: 100vh;
-  transition: grid-template-columns 0.22s cubic-bezier(0.4, 0, 0.2, 1); */
 }
 
 /* ----- Sidebar ----- */
 .sb-sidebar {
   flex: 0 0 auto;
+  width: var(--sb-sidebar-w);
   height: 100vh;
   overflow: hidden;
-  /* grid-column: 1;
-  background: var(--sb-surface);
+  background: var(--sb-surface) !important;
   border-right: 1px solid var(--sb-border);
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden; */
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* antd Sider가 children을 .ant-layout-sider-children으로 한 번 더 감싸기 때문에
+   실제 flex-column / 배경 적용은 이 래퍼에도 걸어줘야 sb-brand/sb-nav/sb-sidebar__foot에 먹힘 */
+.sb-sidebar.ant-layout-sider-light,
+.sb-sidebar {
+  background: var(--sb-surface) !important;
+}
+.sb-sidebar > .ant-layout-sider-children {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--sb-surface);
 }
 
 .sb-brand {
@@ -167,6 +176,7 @@ a {
 
 .sb-nav {
   flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   padding: 12px 12px 20px;
 }
@@ -264,6 +274,7 @@ a {
   display: grid;
   place-items: center;
   font-size: 13px;
+  line-height: 1; 
 }
 
 /* 대형 아바타 (프로필) */
@@ -295,11 +306,6 @@ a {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  /* grid-column: 2;
-  height: 100vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column; */
 }
 
 /* ----- Header ----- */
@@ -1177,9 +1183,9 @@ a.sb-card {
 /* ==========================================================================
    Layout variants (switched via data-layout on .sb-app)
    ========================================================================== */
-/* .sb-app[data-layout="rail"] {
-  grid-template-columns: var(--sb-sidebar-rail) 1fr;
-} */
+.sb-app[data-layout="rail"] .sb-sidebar {
+  width: var(--sb-sidebar-rail);
+}
 .sb-app[data-layout="rail"] .sb-brand__name,
 .sb-app[data-layout="rail"] .sb-nav__label,
 .sb-app[data-layout="rail"] .sb-nav__badge,
@@ -1285,8 +1291,8 @@ a.sb-card {
 }
 
 @media (max-width: 1100px) {
-  .sb-app:not([data-layout="topnav"]) {
-    grid-template-columns: var(--sb-sidebar-rail) 1fr;
+  .sb-app:not([data-layout="topnav"]) .sb-sidebar {
+    width: var(--sb-sidebar-rail);
   }
 }
 
@@ -1401,4 +1407,58 @@ a.sb-card {
 }
 .sb-nav .sb-nav__submenu .sb-nav__item i {
   font-size: 13px;
+}
+
+/* 2026.08.13 CYJ */
+/* antd Dropdown Menu — SBerp 디자인 토큰 적용 */
+/* antd Dropdown Menu — SBerp 디자인 토큰 적용 */
+.sb-user-menu.ant-dropdown-menu {
+  min-width: 200px;
+  border: 1px solid var(--sb-border);
+  border-radius: 12px;
+  box-shadow: var(--sb-shadow-lg);
+  padding: 6px;
+}
+
+.sb-user-menu .ant-dropdown-menu-item {
+  padding: 8px 12px;
+  border-radius: 7px;
+}
+
+/* 아이콘 + 텍스트 간격을 항목마다 동일하게 고정 */
+.sb-user-menu .sb-dropdown-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font-size: 13.5px;
+  color: inherit;
+}
+.sb-user-menu .sb-dropdown-link .anticon {
+  font-size: 15px;
+  width: 16px;
+  flex: 0 0 auto;
+}
+
+/* 상단 사용자 정보 (클릭/호버 비활성화, 다른 항목과 동일한 padding) */
+.sb-user-menu__info {
+  padding: 8px 12px !important;
+  /* border-bottom: 1px solid var(--sb-border); */
+  margin-bottom: 4px;
+  cursor: default !important;
+  pointer-events: none;
+}
+.sb-user-menu__info b {
+  display: block;
+  line-height: 1.35;
+}
+
+.sb-user-menu .ant-dropdown-menu-item:hover,
+.sb-user-menu .ant-dropdown-menu-item-active {
+  background: var(--sb-accent-soft);
+  color: var(--sb-accent);
+}
+.sb-user-menu .ant-dropdown-menu-item-danger:hover {
+  background: var(--sb-red-soft);
+  color: var(--sb-red);
 }

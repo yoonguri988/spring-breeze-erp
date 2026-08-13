@@ -1,13 +1,13 @@
 // sagas/index.js
 import { all, fork } from "redux-saga/effects";
 
-// import authSaga from "./authSaga";
+import authSaga from "./auth/authSaga";
 // import postSaga from "./postSaga";
 //import  commentSaga  from  './commentSaga';
 
 export default function* rootSaga() {
   yield all([
-    // fork(authSaga),
+    fork(authSaga),
     // fork(postSaga),
     // fork( commentSaga ) ,
   ]);
