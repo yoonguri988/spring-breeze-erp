@@ -5,9 +5,9 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.sb.erp.task.dto.reponse.TaskResponse;
 import com.sb.erp.task.dto.request.TaskRequest;
 import com.sb.erp.task.dto.request.TaskSearchRequest;
-import com.sb.erp.task.dto.response.TaskResponse;
 import com.sb.erp.week.dto.response.MyWeeklyReportResponse;
 
 @Mapper
