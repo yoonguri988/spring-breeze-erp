@@ -45,7 +45,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin("*") // * 하면 안되는 거로 알고 있음 어떻게 수정해야 하는가?
 public class AuthController {
 
 	private final JwtProperties props;      // JWT 출입증 (설정값)      

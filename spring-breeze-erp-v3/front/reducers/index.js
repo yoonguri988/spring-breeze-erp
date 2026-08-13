@@ -1,12 +1,9 @@
 // reducers/index.js
 import { combineReducers } from "@reduxjs/toolkit";
-// import authReducer from './authReducer';
-// import postReducer from './postReducer';
+import authReducer from './auth/authReducer';
 
 const rootReducer = combineReducers({
-  _placeholder: (state = {}, action) => state,
-  // auth: authReducer ,   // state.auth
-  // post: postReducer ,   // state.post
+  auth: authReducer,   // state.auth
 });
 
 export default rootReducer;
