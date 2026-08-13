@@ -29,15 +29,15 @@ const posReducer=createSlice({
         },
 
         // --- 직급 목록 조회 ---
-        posListRequest: (state)=>{
+        listPosRequest: (state)=>{
             state.loading = true;
             state.error = null;
         },
-        posListSuccess: (state, action)=>{
+        listPosSuccess: (state, action)=>{
             state.loading = false;
             state.posList = action.payload;
         },
-        posListFailure: (state, action)=>{
+        listPosFailure: (state, action)=>{
             state.loading = false;
             state.error = action.payload;
         },
@@ -93,6 +93,8 @@ const posReducer=createSlice({
         deletePosSuccess: (state, action)=>{
             state.loading = false;
             state.success = true;
+            // 삭제한 직급 목록에서 제거
+            state.posList  = state.posList.filter(pos => pos.posId !== action.payload)
         },
         deletePosFailure: (state, action)=>{
             state.loading = false;
@@ -102,12 +104,14 @@ const posReducer=createSlice({
 });
 
 // action
-
 export const {
     resetPosState,
-    posListRequest, posListSuccess, posListFailure,
+    listPosRequest, listPosSuccess, listPosFailure,
+    detailPosRequest, detailPosSuccess, detailPosFailure,
+    createPosRequest, createPosSuccess, createPosFailure,
+    updatePosRequest, updatePosSuccess, updatePosFailure,
+    deletePosRequest, deletePosSuccess, deletePosFailure,
 } = posReducer.actions;
 
 // export
-
 export default posReducer.reducer;
