@@ -12,7 +12,7 @@ import   {  fetchTaskDetailRequest,fetchTaskDetailSuccess,fetchTaskDetailFailure
 } from '../../reducers/task/taskReducer';
 import { fetchTaskDetail,createTask,createTaskContext,updateTask
         ,updateTaskContext,deleteTask,fetchMyTasks,fetchGantt
- } from '../task/taskSaga';
+        } from '../task/taskSaga';
 
 jest.mock('../../api/axios');
 describe('task saga',()=>{
@@ -128,4 +128,4 @@ describe('task saga',()=>{
 
 });
 
-// npx jest sagas/__tests__/task.test.js
+// npx jest sagas/__tests__/taskSaga.test.js

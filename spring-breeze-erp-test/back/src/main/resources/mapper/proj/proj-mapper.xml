@@ -4,6 +4,9 @@
 
 	<!-- 프로젝트 생성 -->
 	<insert id="insert" parameterType="ProjRequest">
+    <selectKey keyProperty="proId" resultType="long" order="BEFORE">
+        SELECT SEQ_PROJECT.NEXTVAL FROM DUAL
+    </selectKey>
 	  insert into project(com_id, pro_name, pro_desc, emp_id, pro_status,
                            start_date, end_date, created_at, updated_at )
       values(#{comId}, #{proName}, #{proDesc}, #{empId}, #{proStatus},

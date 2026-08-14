@@ -32,7 +32,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/projectMember")
 @RequiredArgsConstructor
-@CrossOrigin(origins="*")
 public class ProjectMemberController {
 	private final ProjectMemberService service;
 	private final ProjectService projectService;

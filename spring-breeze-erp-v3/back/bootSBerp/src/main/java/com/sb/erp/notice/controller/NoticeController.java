@@ -39,7 +39,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/notice")
 @RequiredArgsConstructor
-@CrossOrigin(origins="*")
 public class NoticeController {
     
 	private final NoticeService noticeService;  
@@ -101,7 +100,7 @@ public class NoticeController {
     @Operation(summary = "공지 수정",description = "공지 수정")
     @PutMapping(value = "/{bno}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> updateNotice(
-            @ModelAttribute NoticeRequest dto,
+    		@Valid @ModelAttribute NoticeRequest dto,
             @PathVariable("bno") Long bno,
             @RequestPart(name = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal CustomUserPrincipal principal) {

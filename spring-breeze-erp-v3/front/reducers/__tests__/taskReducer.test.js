@@ -173,11 +173,18 @@ describe('task',()=>{
         expect(state.loading).toBe(true);
         expect(state.error).toBeNull();
 
-        const payload = {
-            list: [{taskId:1, title:'태스크1'},{taskId:2, title:'태스크2'}],
-            paging: {pstartno:1, totalPage:1},
-            TotalCnt:2
-        };
+        const payload = { 
+        tasks: [
+            {taskId:1, title:'태스크1'},
+            {taskId:2, title:'태스크2'}
+        ], 
+        paging: {
+            pstartno:1,
+            totalPage:1
+            }, 
+        totalCnt:2
+        }; 
+        
         state = taskReducer(initialState,fetchMyTasksSuccess(payload));
         expect(state.loading).toBe(false);
         expect(state.myTaskstasks).toEqual(payload.task);

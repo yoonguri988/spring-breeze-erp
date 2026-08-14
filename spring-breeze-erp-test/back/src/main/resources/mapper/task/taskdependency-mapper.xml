@@ -5,6 +5,9 @@
 <!-- 선행 태스크 지정하여 태스크 생성 (task_id는 trg_task_bi 트리거가 자동 채움) -->
 <!-- parent_task_id->null 값 허용인데 실제 null값 들어오면 오류> 자바-DB 통신 과정버그라고 함> 해결책>jdbcType=INTEGER -->
 <insert id="insertWithParent" parameterType="TaskRequest">
+    <selectKey keyProperty="taskId" resultType="long" order="BEFORE">
+        SELECT SEQ_TASK.NEXTVAL FROM DUAL
+    </selectKey>
 	insert into task (pro_id , com_id , task_name , task_desc , task_status , pm_id , 
 	task_start_date , task_end_date , parent_task_id , created_at , updated_at)
 	values(#{proId} , #{comId} , #{taskName} , #{taskDesc} , #{taskStatus} , #{pmId},
@@ -12,7 +15,7 @@
 </insert>
 
 <!-- 태스크 의존성 트리 조회 (선행 -> 후행 순으로 정렬) -->
-<select id="selectTaskDependencies" parameterType="int" resultType="TaskResponse">
+<select id="selectTaskDependencies" parameterType="long" resultType="TaskResponse">
 	<![CDATA[
 	with task_hierarchy (
 		task_id, pro_id, pm_id, com_id, task_name, task_desc, task_status,
@@ -68,7 +71,7 @@
 </update>
 
 <!-- 후속 작업 조회 -->
-<select id="selectImpactTasks" parameterType="int" resultType="TaskResponse">
+<select id="selectImpactTasks" parameterType="long" resultType="TaskResponse">
 <![CDATA[
 SELECT
     task_id,
@@ -86,7 +89,7 @@ ORDER BY LEVEL
 </select>
 
 <!-- 동일 프로젝트의 태스크를 수정하는 동안 다른 사용자의 동시 수정을 방지하기 위해 행 잠금 획득 -->
-<select id="lockProjectTasks" parameterType="int" resultType="int">
+<select id="lockProjectTasks" parameterType="long" resultType="long">
     SELECT task_id
     FROM task
     START WITH task_id = #{taskId}

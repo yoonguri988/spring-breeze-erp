@@ -1,5 +1,6 @@
 package com.sb.erp.notice.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -13,12 +14,15 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor
 public class NoticeRequest {
 
-    private Long bno; // 수정/삭제 시에만 필요, 등록 시엔 null (auto_increment)
+	@Schema(hidden = true)
+    private Long bno; 
 
-    @NotNull(message = "회사 정보는 필수입니다.")
+    @Schema(hidden = true)
+    //@NotNull(message = "회사 정보는 필수입니다.")
     private Long comId;
 
-    @NotNull(message = "사원 정보는 필수입니다.")
+    @Schema(hidden = true)
+    //@NotNull(message = "사원 정보는 필수입니다.")
     private Long empId;
 
     @NotBlank(message = "제목은 필수입니다.")
