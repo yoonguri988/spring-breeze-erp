@@ -1,4 +1,4 @@
-package com.sb.erp.global.integration.openAi;
+package com.sb.erp.dto.openai;
 
 import java.util.List;
 

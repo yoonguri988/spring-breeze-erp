@@ -1,4 +1,4 @@
-package com.sb.erp.global.integration.openAi;
+package com.sb.erp.dto.openai;
 
 /**
  * OpenAI 응답의 choices 배열 원소.

@@ -10,26 +10,26 @@ import com.sb.erp.eval.dto.response.PeriodResponse;
 public interface EvalPeriodService {
 
 	// ─── 회차 조회 ────────────────────────────────────
-	List<PeriodResponse> search(PeriodSearchRequest search, Long comId);
+	List<PeriodResponse> search(PeriodSearchRequest search);
 
-	PeriodResponse selectByPeriodId(long periodId, Long comId);
+	PeriodResponse selectByPeriodId(long periodId);
 
-	Map<String, Integer> countByStatusAll(Long comId);
+	Map<String, Integer> countByStatusAll();
 
 
 	// ─── 회차 등록/수정 ────────────────────────────────
-	int insert(PeriodRequest dto, Long comId);
+	int insert(PeriodRequest dto);
 
-	int update(PeriodRequest dto, Long comId);
+	int update(PeriodRequest dto);
 
 	// 상태 전환
-	int openPeriod(long periodId, Long comId);
-	int closePeriod(long periodId, Long comId);
-	int reportPeriod(long periodId, Long comId);
+	int openPeriod(long periodId);
+	int closePeriod(long periodId);
+	int reportPeriod(long periodId);
 
 
 	// ─── 중복 확인 ────────────────────────────────────
-	boolean isDuplicate(int evalYear, String evalTerm, Long comId);
+	boolean isDuplicate(int evalYear, String evalTerm);
 
 
 	// ─── 하위 데이터 카운트 ──────────────────────────────
