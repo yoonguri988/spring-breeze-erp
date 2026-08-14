@@ -13,6 +13,7 @@ import projSaga from './proj/projSaga';
 import projMemSaga from'./proj/projMemSaga';
 import taskSaga from './task/taskSaga';
 import noticeSaga from './notice/noticeSaga';
+import weekSaga from './week/weekSaga';
 
 export default function* rootSaga() {
   yield all([
@@ -28,5 +29,6 @@ export default function* rootSaga() {
     fork(projMemSaga),
     fork(taskSaga),
     fork(noticeSaga),
+    fork(weekSaga),
   ]);
 }

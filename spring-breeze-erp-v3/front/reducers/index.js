@@ -12,6 +12,7 @@ import projReducer from './proj/projReducer';
 import projMemReducer from './proj/projMemReducer';
 import taskReducer from './task/taskReducer';
 import noticeReducer from'./notice/noticeReducer';
+import weekReducer from './week/weekReducer';
 
 const rootReducer = combineReducers({
   auth: authReducer,   // state.auth
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
   projMem: projMemReducer, // state.projMem
   task: taskReducer, // state.task
   notice: noticeReducer, // state.notice
+  week: weekReducer,
 });
 
 export default rootReducer;
