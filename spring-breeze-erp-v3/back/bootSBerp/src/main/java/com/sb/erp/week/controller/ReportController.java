@@ -27,7 +27,8 @@ public class ReportController {
 	    private final TaskService taskService;
 
 	    // 개인 주간보고서 생성 가능 여부 확인
-	    @Operation( summary = "개인 주간보고서 생성 가능 여부 확인", description = "로그인한 사원의 지난주 완료 태스크 존재 여부를 확인" )
+	    @Operation( summary = "개인 주간보고서 생성 가능 여부 확인",
+	    			description = "로그인한 사원의 지난주 완료 태스크 존재 여부를 확인" )
 	    @GetMapping("/my-report/check")
 	    public ResponseEntity<Boolean> checkAvailable(
 	    	@AuthenticationPrincipal CustomUserPrincipal principal) {
@@ -39,10 +40,8 @@ public class ReportController {
 
 
 	    // 개인 주간보고서 PDF 생성
-	    @Operation(
-	        summary = "개인 주간보고서 PDF 생성",
-	        description = "로그인한 사원의 지난주 데이터를 이용해 AI 주간보고서를 생성하고 PDF로 반환"
-	    )
+	    @Operation( summary = "개인 주간보고서 PDF 생성", 
+	    			description = "로그인한 사원의 지난주 데이터를 이용해 AI 주간보고서를 생성하고 PDF로 반환" )
 	    @GetMapping("/my-report")
 	    public ResponseEntity<byte[]> createMyWeeklyReport(
 	    	@AuthenticationPrincipal CustomUserPrincipal principal) {
