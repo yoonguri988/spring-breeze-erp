@@ -32,14 +32,14 @@
 </select>
 
 <!-- 태스크 페이징 / 갯수 -->
-<select id="selectCnt" parameterType="int" resultType="int">
+<select id="selectCnt" parameterType="long" resultType="int">
 	select count(*)
 	from task t
 	where t.pro_id = #{proId}
 </select>
 
 <!-- 태스크 상세 목록조회 -->
-<select id="select" parameterType="int" resultType="TaskResponse">
+<select id="select" parameterType="long" resultType="TaskResponse">
 	select t.task_id, t.pro_id, t.pm_id, t.task_name, t.task_desc, t.task_status,
 	em.emp_name as pmName, t.task_start_date, t.task_end_date, t.parent_task_id
 	from task t
@@ -51,7 +51,7 @@
 </select>
 
 <!-- 태스크 삭제 -->
-<delete id="delete" parameterType="int">
+<delete id="delete" parameterType="long">
 	delete from task where task_id =#{taskId}
 </delete>
 
@@ -133,7 +133,7 @@
 </select>
 
 <!-- 한프로젝트의 모든 태스크 -->
-<select id="selectTaskList" resultType="TaskResponse" parameterType="int">
+<select id="selectTaskList" resultType="TaskResponse" parameterType="long">
 select    
 t.task_id, t.task_name, t.task_start_date, t.task_end_date, t.parent_task_id, e.emp_name, p.start_date, p.end_date
 from task t
