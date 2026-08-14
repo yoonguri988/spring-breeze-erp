@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sb.erp.emp.dto.response.EmpResponse;
 import com.sb.erp.emp.service.EmpService;
+import com.sb.erp.global.oauth2.CustomUserPrincipal;
 import com.sb.erp.proj.dto.request.ProjRequest;
 import com.sb.erp.proj.dto.request.ProjectSearchRequest;
 import com.sb.erp.proj.dto.response.ProjResponse;
@@ -50,7 +52,14 @@ public class ProjectController {
 	// ★Authentication 
 	@Operation(summary = "프로젝트 목록 조회",description = "검색 조건에 맞는 프로젝트 목록 조회")
 	@GetMapping
-	public ResponseEntity<Map<String, Object>> getProjects(@ModelAttribute ProjectSearchRequest search) {
+	public ResponseEntity<Map<String, Object>> getProjects(
+			@ModelAttribute ProjectSearchRequest search,
+			@AuthenticationPrincipal CustomUserPrincipal principal) {
+		
+		boolean isRoot = principal.getRoles().contains("ROOT");
+		if (!isRoot) {
+			search.setComId(principal.getComId());
+		}
 		
 		int totalCnt = service.selectCnt(search);              // 전체 데이터 수
 		PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
@@ -66,18 +75,21 @@ public class ProjectController {
 	// ★Authentication
 	@Operation(summary = "사원 검색",description = "프로젝트 멤버 추가용 사원 검색")
 	@GetMapping("/empSearch")//사원 조회
-	public ResponseEntity<List<EmpResponse>> empSearch(@RequestParam("comId") Long comId,
-            @RequestParam("keyword") String keyword){
+	public ResponseEntity<List<EmpResponse>> empSearch(
+            @RequestParam("keyword") String keyword,
+            @AuthenticationPrincipal CustomUserPrincipal principal){
 		 
-		return ResponseEntity.ok(memberService.searchEmpForProject(comId, keyword));
-	}
+		return ResponseEntity.ok(memberService.searchEmpForProject(principal.getComId(), keyword));}
 	
 	// 프로젝트 등록
 	// ★Authentication 
 	@Operation(summary = "프로젝트 등록", description = "신규 프로젝트 등록")
 	@PostMapping
-	public ResponseEntity<Map<String, Object>> createProject(@RequestBody ProjRequest dto) { //등록처리
-
+	public ResponseEntity<Map<String, Object>> createProject(
+			@RequestBody ProjRequest dto,
+			@AuthenticationPrincipal CustomUserPrincipal principal) { //등록처리
+		dto.setComId(principal.getComId());
+		dto.setEmpId(principal.getEmpId());
 		Map<String, Object> result = new HashMap<>();
 		int insert = service.insert(dto);
 		if (insert > 0) {
@@ -98,10 +110,26 @@ public class ProjectController {
 	@GetMapping("/{proId}")
 	public ResponseEntity<Map<String, Object>> getProjectDetail(
 			@PathVariable("proId") Long proId,
-			@RequestParam(defaultValue = "1") int pstartno){
+			@RequestParam(defaultValue = "1") int pstartno,
+			@AuthenticationPrincipal CustomUserPrincipal principal){
 		ProjResponse dto = service.select(proId);
 		if (dto == null) {
 			return ResponseEntity.notFound().build();
+		}
+		boolean isRoot = principal.getRoles().contains("ROOT");
+		if (!isRoot && !dto.getComId().equals(principal.getComId())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "접근 권한이 없습니다."));
+		}
+
+		boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
+		boolean isCreator = dto.getEmpId().equals(principal.getEmpId());
+		boolean isMember = memberService.select(proId).stream()
+				.anyMatch(m -> m.getEmpId().equals(principal.getEmpId()));
+
+		if (!isAdmin && !isCreator && !isMember) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
 
 	    // 태스크 페이징 처리
@@ -127,7 +155,27 @@ public class ProjectController {
 	@PutMapping("/{proId}")
 	public ResponseEntity<Map<String, Object>> updateProject(
 			@PathVariable("proId") Long proId,
-			@RequestBody ProjRequest dto) {
+			@RequestBody ProjRequest dto,
+			@AuthenticationPrincipal CustomUserPrincipal principal) {
+		
+		ProjResponse original = service.select(proId);
+		if (original == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		boolean isRoot = principal.getRoles().contains("ROOT");
+		if (!isRoot && !original.getComId().equals(principal.getComId())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "접근 권한이 없습니다."));
+		}
+
+		boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
+		boolean isCreator = original.getEmpId().equals(principal.getEmpId());
+		if (!isAdmin && !isCreator) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "프로젝트 생성자 또는 관리자만 수정할 수 있습니다."));
+		}
+		
 		dto.setProId(proId);
 		Map<String, Object> result = new HashMap<>();
 
@@ -135,6 +183,7 @@ public class ProjectController {
 		if (updated > 0) {
 			result.put("success", true);
 			result.put("message", "프로젝트 수정 성공");
+			result.put("project", service.select(proId));
 			return ResponseEntity.ok(result);
 		}
 
@@ -147,7 +196,27 @@ public class ProjectController {
 	// ★Authentication
 	@Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제")
 	@DeleteMapping("/{proId}")
-	public ResponseEntity<Map<String, Object>> deleteProject(@PathVariable("proId") Long proId) {
+	public ResponseEntity<Map<String, Object>> deleteProject(
+			@PathVariable("proId") Long proId,
+			@AuthenticationPrincipal CustomUserPrincipal principal) {
+		
+		ProjResponse original = service.select(proId);
+		if (original == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		boolean isRoot = principal.getRoles().contains("ROOT");
+		if (!isRoot && !original.getComId().equals(principal.getComId())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "접근 권한이 없습니다."));
+		}
+
+		boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
+		boolean isCreator = original.getEmpId().equals(principal.getEmpId());
+		if (!isAdmin && !isCreator) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "프로젝트 생성자 또는 관리자만 삭제할 수 있습니다."));
+		}
 		
 		Map<String, Object> result = new HashMap<>();
 		
@@ -169,8 +238,30 @@ public class ProjectController {
 	// ★Authentication
 	@Operation(summary = "AI 프로젝트 분석", description = "프로젝트 리스크 분석 결과를 반환")
 	@GetMapping("/{proId}/analysis")
-	public ResponseEntity<String> analyzeProject(@PathVariable("proId") Long proId) {
+	public ResponseEntity<?> analyzeProject(
+			@PathVariable("proId") Long proId,
+			@AuthenticationPrincipal CustomUserPrincipal principal) {
 		
+		ProjResponse project = service.select(proId);
+		if (project == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		boolean isRoot = principal.getRoles().contains("ROOT");
+		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "접근 권한이 없습니다."));
+		}
+
+		boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
+		boolean isCreator = project.getEmpId().equals(principal.getEmpId());
+		boolean isMember = memberService.select(proId).stream()
+				.anyMatch(m -> m.getEmpId().equals(principal.getEmpId()));
+
+		if (!isAdmin && !isCreator && !isMember) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "접근 권한이 없습니다."));
+		}
 	    return ResponseEntity.ok(service.analyzeProject(proId));
 	}
 
