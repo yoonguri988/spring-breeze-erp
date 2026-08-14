@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
-import org.springframework.boot.http.client.HttpClientSettings;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
@@ -29,7 +29,7 @@ public class BizNoVerifyApi {
 		//    우리 서버 스레드가 응답이 올 때까지 무한정 대기하게 되어
 		//    "너무 오래 걸린다"는 체감이 발생합니다.
 		//    connect 3초 / read 5초로 상한을 두고, 넘으면 예외로 빠르게 실패 처리합니다.
-		HttpClientSettings settings = HttpClientSettings.defaults()
+		ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.defaults()
 				.withConnectTimeout(Duration.ofSeconds(3))
 				.withReadTimeout(Duration.ofSeconds(5));
 		this.restClient = restClientBuilder

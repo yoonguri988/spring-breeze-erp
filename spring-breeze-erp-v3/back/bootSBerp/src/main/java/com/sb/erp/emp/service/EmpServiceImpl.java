@@ -13,7 +13,6 @@ import com.sb.erp.emp.dto.request.EmpSearchRequest;
 import com.sb.erp.emp.dto.response.EmpResponse;
 import com.sb.erp.emp.repository.EmpMapper;
 import com.sb.erp.perm.dto.response.EmpAuthResponse;
-import com.sb.erp.util.dto.SecurityUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,8 +26,8 @@ public class EmpServiceImpl implements EmpService {
 
 	// ─── 조회 ────────────────────────────
 	@Override
-	public EmpResponse selectByEmpId(long empId) {
-		return empMapper.selectByEmpId(empId, SecurityUtil.getCurrentComId());
+	public EmpResponse selectByEmpId(long empId, Long comId) {
+		return empMapper.selectByEmpId(empId, comId);
 	}
 
 	@Override
@@ -37,21 +36,21 @@ public class EmpServiceImpl implements EmpService {
 	}
 
 	@Override
-	public List<EmpResponse> search(EmpSearchRequest dto) {
-		dto.setComId(SecurityUtil.getCurrentComId());
+	public List<EmpResponse> search(EmpSearchRequest dto, Long comId, boolean isAdmin) {
+		dto.setComId(comId);
 
 		List<EmpResponse> list = empMapper.search(dto);
 
 		// 관리자가 아니면 민감 정보 마스킹 (이메일, 연락처, 입사일)
-		if (!SecurityUtil.isAdmin()) {
+		if (!isAdmin) {
 			list.forEach(this::maskSensitiveFields);
 		}
 		return list;
 	}
 
 	@Override
-	public int selectCnt(EmpSearchRequest dto) {
-		dto.setComId(SecurityUtil.getCurrentComId());
+	public int selectCnt(EmpSearchRequest dto, Long comId) {
+		dto.setComId(comId);
 		return empMapper.selectCnt(dto);
 	}
 
@@ -63,9 +62,9 @@ public class EmpServiceImpl implements EmpService {
 	// ─── 등록 / 수정 ─────────────────────
 	@Override
 	@Transactional  // afterCommit 훅 발동을 위해 필수
-	public int insert(EmpRequest dto) {
+	public int insert(EmpRequest dto, Long comId) {
 		int result = -1;
-		dto.setComId(SecurityUtil.getCurrentComId());
+		dto.setComId(comId);
 		dto.setEmpPass(passEncoder.encode(dto.getEmpNo()));
 
 		if (dto.getEmpStatus() == null || dto.getEmpStatus().isEmpty()) {
@@ -96,8 +95,8 @@ public class EmpServiceImpl implements EmpService {
 	}
 
 	@Override
-	public int update(EmpRequest dto) {
-		dto.setComId(SecurityUtil.getCurrentComId());
+	public int update(EmpRequest dto, Long comId) {
+		dto.setComId(comId);
 		return empMapper.update(dto);
 	}
 
@@ -113,27 +112,27 @@ public class EmpServiceImpl implements EmpService {
 	}
 
 	@Override
-	public boolean isEmpNoDuplicate(String empNo) {
-		return empMapper.countByEmpNo(empNo, SecurityUtil.getCurrentComId()) > 0;
+	public boolean isEmpNoDuplicate(String empNo, Long comId) {
+		return empMapper.countByEmpNo(empNo, comId) > 0;
 	}
 
 	// ─── 비밀번호 ────────────────────────
 	@Override
-	public int updatePassByEmpId(EmpRequest dto) {
-		dto.setComId(SecurityUtil.getCurrentComId());
+	public int updatePassByEmpId(EmpRequest dto, Long comId) {
+		dto.setComId(comId);
 		return empMapper.updatePassByEmpId(dto);
 	}
 
 	// 관리자 초기화 - 사번으로 리셋
 	@Override
-	public int resetPassByEmpNo(long empId) {
-		EmpResponse emp = empMapper.selectByEmpId(empId, SecurityUtil.getCurrentComId());
+	public int resetPassByEmpNo(long empId, Long comId) {
+		EmpResponse emp = empMapper.selectByEmpId(empId, comId);
 		if (emp == null)
 			return 0;
 
 		EmpRequest dto = new EmpRequest();
 		dto.setEmpId(empId);
-		dto.setComId(SecurityUtil.getCurrentComId());
+		dto.setComId(comId);
 		dto.setEmpPass(passEncoder.encode(emp.getEmpNo()));
 		return empMapper.updatePassByEmpId(dto);
 	}
@@ -141,7 +140,7 @@ public class EmpServiceImpl implements EmpService {
 	// 본인 비밀번호 변경 - 현재 비번 검증 후 변경
 	// 반환값: -1(사원 없음), 0(불일치), 1(성공)
 	@Override
-	public int changePassword(long empId, String currentPass, String newPass) {
+	public int changePassword(long empId, String currentPass, String newPass, Long comId) {
 		String savedHash = empMapper.selectPassById(empId);
 		if (savedHash == null)
 			return -1;
@@ -150,7 +149,7 @@ public class EmpServiceImpl implements EmpService {
 
 		EmpRequest dto = new EmpRequest();
 		dto.setEmpId(empId);
-		dto.setComId(SecurityUtil.getCurrentComId());
+		dto.setComId(comId);
 		dto.setEmpPass(passEncoder.encode(newPass));
 		return empMapper.updatePassByEmpId(dto);
 	}
@@ -170,8 +169,8 @@ public class EmpServiceImpl implements EmpService {
 
 	// ─── 권한 표시용 ─────────────────────
 	@Override
-	public List<EmpAuthResponse> selectAuthByComId() {
-		return empMapper.selectAuthByComId(SecurityUtil.getCurrentComId());
+	public List<EmpAuthResponse> selectAuthByComId(Long comId) {
+		return empMapper.selectAuthByComId(comId);
 	}
 
 	@Override

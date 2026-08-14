@@ -49,33 +49,21 @@ public class SecurityConfig {
                 "/css/**", "/js/**", "/images/**"
                 ).permitAll()
             	// TODO: 나중에 자기 영역 확인 후 채워 넣어야 함
-                // ─── 정적 리소스 + 인증 관련 ───────────
-//                .requestMatchers("/css/**", "/js/**", "/images/**",
-//                        "/auth/login", "/auth/confirm",
-//                        "/auth/resetPass", "/auth/forgotResetPass", "/auth/updatePass").permitAll()
-                // JWT 발급 전용 로그인(외부/모바일)
-//                .requestMatchers("/api/auth/login").permitAll()
-                // ─── ROOT 전용 ────────────────────────
-//                .requestMatchers("/root/**").hasAuthority("ROOT")
-                // ─── ADMIN 이상 ───────────────────────
-//                .requestMatchers("/admin/**").hasAnyAuthority("ROOT", "ROLE_ADMIN")
-                // ─── 로그인만 하면 접근 가능 ───────────
-//                .requestMatchers("/", "/emp/list", "/emp/detail", "/emp/edit",
-//                        "/emp/editPass", "/com/**", "/dept/**", "/appr/**", "/res/**", "/resv/**",
-//                        "/proj/**", "/notice/**", "/eval/report/detail", "/eval/report/my", "/report/**",
-//                        "/upload/**").authenticated()
-                // ─── 사원/직급/권한/평가 관리 (ADMIN 전용) ────
-//                .requestMatchers("/emp/add", "/emp/resetPass", "/emp/checkEmail", "/emp/checkMobile",
-//                        "/emp/checkEmpNo", "/perm/**", "/pos/**", "/dept/transfer/pending",
-//                        "/dept/transfer/list", "/dept/transfer/log", "/eval/**").hasRole("ADMIN")
-                // ─── 그 외 API: 세션 또는 JWT 둘 중 하나로 인증 ───
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
-            .exceptionHandling(ex -> ex.accessDeniedHandler((request, response, accessDeniedException) -> {
-                request.getSession().setAttribute("accessDeniedMsg", "접근 권한이 없습니다.");
-                response.sendRedirect(request.getContextPath() + "/");
-            }))
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\":\"인증이 필요합니다.\"}");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(403);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\":\"접근 권한이 없습니다.\"}");
+                })
+            )
             // 시큐리티 체인 안에서 동작
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -89,7 +77,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:8080", "http://52.79.175.214"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://52.79.175.214"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

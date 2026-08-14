@@ -9,10 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
-
->>>>>>> origin/main
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sb.erp.api.dto.response.AiRecomResponse;
 import com.sb.erp.dept.dto.response.DeptResponse;
 
@@ -23,9 +21,9 @@ public class OpenAiRecomClient {
 	@Value("${cyj.openai.api.key}") private String apiKey;
 	@Value("${cyj.openai.model}") private String model;
 	 
-	private final JsonMapper jsonMapper = new JsonMapper();
+	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final RestClient restClient;
-	
+	 
 	public OpenAiRecomClient(RestClient.Builder restClientBuilder) {
 		 this.restClient = restClientBuilder.baseUrl(API_URL).build();
 	}
@@ -69,9 +67,9 @@ public class OpenAiRecomClient {
                     .retrieve()
                     .body(String.class);
  
-            JsonNode root = jsonMapper.readTree(responseBody);
+            JsonNode root = objectMapper.readTree(responseBody);
             String content = root.path("choices").get(0).path("message").path("content").asText();
-            JsonNode parsed = jsonMapper.readTree(content);
+            JsonNode parsed = objectMapper.readTree(content);
  
             long targetDeptId = parsed.path("targetDeptId").asLong();
             String reason = parsed.hasNonNull("reason") ? parsed.path("reason").asText() : null;

@@ -49,24 +49,24 @@ public class PermServiceImpl implements PermService {
 	public List<PermResponse> selectAll(Long comId) {
 		// autCount(부여 사원 수)는 emp_auth와 LEFT JOIN 집계로 산출
 		// → 아무에게도 부여되지 않은 권한도 0으로 함께 조회됨
-		return permMapper.selectAll(1L);
+		return permMapper.selectAll(comId);
 	}
 
 	@Override
-	public PermResponse selectOneById(long autId) {
-		return permMapper.selectOneById(autId, 1L);
+	public PermResponse selectOneById(long autId, Long comId) {
+		return permMapper.selectOneById(autId, comId);
 	}
 
 	@Override
 	public int insert(PermRequest dto, Long comId) {
 		// 클라이언트가 보낸 comId는 신뢰하지 않고 세션 값으로 덮어씀
-		dto.setComId(1L);
+		dto.setComId(comId);
 		return permMapper.insert(dto);
 	}
 
 	@Override
-	public int update(PermRequest dto) {
-		dto.setComId(1L);
+	public int update(PermRequest dto, Long comId) {
+		dto.setComId(comId);
 		return permMapper.update(dto);
 	}
 
@@ -75,20 +75,20 @@ public class PermServiceImpl implements PermService {
 		// Mapper의 delete는 PermRequest를 parameterType으로 받으므로 DTO에 담아 전달
 		PermRequest dto = new PermRequest();
 		dto.setAutId(autId);
-		dto.setComId(1L);
+		dto.setComId(comId);
 		return permMapper.delete(dto);
 	}
 
 
 	// ─── 사원-권한 매핑 ───────────────
 	@Override
-	public List<EmpAuthResponse> selectEmpsByAuthId(long autId) {
-		return permMapper.selectEmpsByAuthId(autId, 1L);
+	public List<EmpAuthResponse> selectEmpsByAuthId(long autId, Long comId) {
+		return permMapper.selectEmpsByAuthId(autId, comId);
 	}
 
 	@Override
-	public List<EmpAuthResponse> selectAuthsByEmpId(long empId) {
-		return permMapper.selectAuthsByEmpId(empId, 1L);
+	public List<EmpAuthResponse> selectAuthsByEmpId(long empId, Long comId) {
+		return permMapper.selectAuthsByEmpId(empId, comId);
 	}
 
 	/**
@@ -96,8 +96,8 @@ public class PermServiceImpl implements PermService {
 	 * @return 1=성공, 0=권한이 현재 회사 소속이 아님
 	 */
 	@Override
-	public int grantAuth(EmpAuthRequest dto) {
-		PermResponse auth = permMapper.selectOneById(dto.getAutId(), 1L);
+	public int grantAuth(EmpAuthRequest dto, Long comId) {
+		PermResponse auth = permMapper.selectOneById(dto.getAutId(), comId);
 		if (auth == null) return 0;
 
 		// 대상 사원의 회사 소속 여부는 컨트롤러 진입 시 EmpService 조회로 커버

@@ -26,8 +26,7 @@ public class EmpRequest {
 	@Email(message = "올바른 이메일 형식이 아닙니다.")
 	private String empEmail;
 
-	// 선택 입력. 나중에 채워도 됨.
-	@NotBlank(message = "휴대폰번호는 필수입니다.")
+	@NotBlank(message = "휴대폰 번호는 필수입니다.")
 	private String empMobile;
 
 	// 등록 시 서비스에서 "재직" 기본값 세팅
