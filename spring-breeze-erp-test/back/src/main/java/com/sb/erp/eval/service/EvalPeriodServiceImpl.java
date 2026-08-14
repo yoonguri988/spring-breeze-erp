@@ -57,8 +57,8 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 	// ─── 회차 상태 업데이트 ─────────────────────────────
 
 	@Override
-	public int openPeriod(long periodId) {
-		PeriodResponse period = selectByPeriodId(periodId);
+	public int openPeriod(long periodId, Long comId) {
+		PeriodResponse period = selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalPeriod] 개시 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
@@ -74,8 +74,8 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 	}
 
 	@Override
-	public int closePeriod(long periodId) {
-		PeriodResponse period = selectByPeriodId(periodId);
+	public int closePeriod(long periodId, Long comId) {
+		PeriodResponse period = selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalPeriod] 마감 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
@@ -99,8 +99,8 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 
 	@Override
 	@Transactional
-	public int reportPeriod(long periodId) {
-		PeriodResponse period = selectByPeriodId(periodId);
+	public int reportPeriod(long periodId, Long comId) {
+		PeriodResponse period = selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalPeriod] 리포트 개시 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
@@ -120,6 +120,7 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 			return -2;
 		}
 
+
 		Long comId = 1L;
 
 		// 상태를 즉시 REPORTING으로 전환 (이 트랜잭션이 커밋되면 확정)
@@ -131,7 +132,7 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 		// ⭐ 배치는 트랜잭션 커밋 후 실행되어야 함
 		// - 커밋 전에 배치가 시작되면: 롤백 시 상태 불일치 + 배치가 존재하지 않는 REPORTING 회차 처리
 		// - afterCommit 훅으로 커밋 확정 후에만 배치 개시
-		// - SecurityContext는 async 스레드에서 못 쓰니 comId를 파라미터로 캡처
+		// - Authentication은 async 스레드에서 못 쓰니 comId를 파라미터로 캡처
 		final Long finalComId = comId;
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 			@Override

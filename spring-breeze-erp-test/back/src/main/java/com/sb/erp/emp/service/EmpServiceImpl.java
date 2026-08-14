@@ -44,6 +44,9 @@ public class EmpServiceImpl implements EmpService {
 		List<EmpResponse> list = empMapper.search(dto);
 
 		// 관리자가 아니면 민감 정보 마스킹 (이메일, 연락처, 입사일)
+		if (!isAdmin) {
+			list.forEach(this::maskSensitiveFields);
+		}
 //		if (!SecurityUtil.isAdmin()) {
 //			list.forEach(this::maskSensitiveFields);
 //		}
@@ -51,8 +54,8 @@ public class EmpServiceImpl implements EmpService {
 	}
 
 	@Override
-	public int selectCnt(EmpSearchRequest dto) {
-		dto.setComId(1L);
+	public int selectCnt(EmpSearchRequest dto, Long comId) {
+		dto.setComId(comId);
 		return empMapper.selectCnt(dto);
 	}
 
@@ -64,7 +67,7 @@ public class EmpServiceImpl implements EmpService {
 	// ─── 등록 / 수정 ─────────────────────
 	@Override
 	@Transactional  // afterCommit 훅 발동을 위해 필수
-	public int insert(EmpRequest dto) {
+	public int insert(EmpRequest dto, Long comId) {
 		int result = -1;
 		dto.setComId(1L);
 		dto.setEmpPass(passEncoder.encode(dto.getEmpNo()));
@@ -142,7 +145,7 @@ public class EmpServiceImpl implements EmpService {
 	// 본인 비밀번호 변경 - 현재 비번 검증 후 변경
 	// 반환값: -1(사원 없음), 0(불일치), 1(성공)
 	@Override
-	public int changePassword(long empId, String currentPass, String newPass) {
+	public int changePassword(long empId, String currentPass, String newPass, Long comId) {
 		String savedHash = empMapper.selectPassById(empId);
 		if (savedHash == null)
 			return -1;

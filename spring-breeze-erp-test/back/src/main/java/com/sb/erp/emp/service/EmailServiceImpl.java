@@ -120,4 +120,21 @@ public class EmailServiceImpl implements EmailService {
         if (s == null) return "unknown";
         return s.length() <= max ? s : s.substring(0, max);
     }
+<<<<<<< HEAD
+
+
+	@Override
+	public void sendWelcomeMailAsync(EmpRequest emp) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void sendFollowup3DayMailAsync(WelcomeMailTargetDto target) {
+		// TODO Auto-generated method stub
+		
+	}
+=======
+>>>>>>> origin/main
 }

@@ -11,6 +11,6 @@ public class PermRequest {
 	@NotBlank(message = "권한명은 필수입니다.")
 	private String autName;
 
-	// 컨트롤러/서비스에서 SecurityUtil로 세팅
+	// 컨트롤러가 AuthUserJwtService에서 꺼내 서비스에 파라미터로 전달, 서비스가 여기 세팅
 	private long comId;
 }

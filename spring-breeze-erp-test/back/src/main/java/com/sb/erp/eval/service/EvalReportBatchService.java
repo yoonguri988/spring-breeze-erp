@@ -37,6 +37,7 @@ public class EvalReportBatchService {
 		System.out.println("[ReportBatch] 시작 periodId=" + periodId);
 
 		try {
+
 			int result = evalReportService.generateReports(periodId);
 
 			if (result == 1) {

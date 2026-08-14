@@ -17,9 +17,9 @@ import jakarta.mail.internet.MimeMessage;
 public class EmailApi {
 
 	// 1. 보내는 쪽
-	@Value("${google.host}")      private String host;      // smtp.gmail.com
-	@Value("${google.user}")      private String user;      // mdfy0308@gmail.com
-	@Value("${google.password}")  private String password;  // 구글 앱 비밀번호
+	@Value("${google.email.host}")      private String host;
+	@Value("${google.email.user}")      private String user;
+	@Value("${google.email.password}")  private String password;
 
 	// 2. 이메일 보내기
 	public void sendMail(String subject, String content, String to) {
@@ -47,23 +47,12 @@ public class EmailApi {
 			message.setFrom(new InternetAddress(user)); 
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to)); // 받는 사람
 			message.setSubject(subject); // 제목
-			message.setContent(""
-					+ "<div style='max-width:600px; margin:auto; background-color:#ffffff; border:1px solid #e0e0e0; border-radius:8px; padding:30px; font-family:Segoe UI, sans-serif; color:#333;'>"
-					+ "<h2 style='color:#005bac; border-bottom:1px solid #ddd; padding-bottom:10px;'>정기수신 메일 안내</h2>"
-					+ "<p style='font-size:15px; line-height:1.8; margin-top:20px;'>" 
-					+ content 
-					+ "</p>"
-					+ "<div style='margin-top:30px; text-align:center;'>"
-					+ "<a href='http://localhost:8282/' style='display:inline-block; background-color:#005bac; color:#fff; padding:12px 24px; border-radius:4px; text-decoration:none; font-size:14px;'>홈페이지 바로가기</a>"
-					+ "</div>"
-					+ "<hr style='margin:40px 0; border:none; border-top:1px solid #eee;'>"
-					+ "<p style='font-size:12px; color:#888; text-align:center;'>이 메일은 자동 발송된 안내 메일입니다.<br>문의: <a href='mailto:springbreez@gmail.com' style='color:#005bac; text-decoration:none;'>springbreez@naver.com</a></p>"
-					+ "</div>"
-					, "text/html; charset=UTF-8");
+			message.setContent(content, "text/html; charset=UTF-8");
 			Transport.send(message);
 			System.out.println("....... successfully .......");
 		} catch (Exception e) {
 			e.printStackTrace();
+		    throw new RuntimeException("메일 발송 실패: " + e.getMessage(), e);
 		}
 	}
 }
