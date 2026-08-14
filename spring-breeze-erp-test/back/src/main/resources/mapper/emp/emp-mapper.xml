@@ -162,7 +162,7 @@
 	</select>
 
 	<!-- cyj: 기존 비밀번호와 일치 확인 -->
-	<select id="selectPassById" resultType="string" parameterType="int">
+	<select id="selectPassById" resultType="string" parameterType="long">
 		select e.emp_pass
 		from employee e
 		where e.emp_id = #{empId}
