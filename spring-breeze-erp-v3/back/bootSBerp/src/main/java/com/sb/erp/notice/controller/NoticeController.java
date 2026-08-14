@@ -8,6 +8,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sb.erp.global.oauth2.CustomUserPrincipal;
 import com.sb.erp.notice.dto.request.NoticeRequest;
 import com.sb.erp.notice.dto.request.NoticeSearchRequest;
 import com.sb.erp.notice.dto.response.NoticeResponse;
@@ -46,7 +48,12 @@ public class NoticeController {
     // ★Authentication
     @Operation(summary = "공지 목록 조회",description = "긴급 공지+검색 조건에 맞는 공지 목록 조회")
     @GetMapping
-    public ResponseEntity<Map<String,Object>>getNotices(@ModelAttribute NoticeSearchRequest search) {
+    public ResponseEntity<Map<String,Object>>getNotices(
+    		@ModelAttribute NoticeSearchRequest search,
+    		@AuthenticationPrincipal CustomUserPrincipal principal) {
+    	
+      	boolean isRoot = principal.getRoles().contains("ROOT");
+    	if (!isRoot) { search.setComId(principal.getComId()); }
     	
     	int currentPage = search.getPstartno(); // 오염되기 전, 진짜 페이지 번호 미리 저장
     	List<NoticeResponse> notices = noticeService.getNoticeListWithUrgent(search); // 긴급5 + 일반목록
@@ -68,14 +75,19 @@ public class NoticeController {
     @PostMapping(consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String,Object>> createNotice(
     		 @Parameter(description = "공지 등록 정보") @Valid @ParameterObject @ModelAttribute NoticeRequest dto,
-    	     @Parameter(description = "첨부파일") @RequestParam(value = "file", required = false) MultipartFile file){
+    	     @Parameter(description = "첨부파일") @RequestParam(value = "file", required = false) MultipartFile file,
+    	     @AuthenticationPrincipal CustomUserPrincipal principal){
     	Map<String, Object> result = new HashMap<>();
+    	
+    	dto.setComId(principal.getComId());
+    	dto.setEmpId(principal.getEmpId());
     	
         try {
             noticeService.insert(dto, file);
             result.put("success", true);
             result.put("message", "공지 등록 성공");
             result.put("bno", dto.getBno());
+            result.put("notice", noticeService.select(dto.getBno()));
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } catch (Exception e) {
             result.put("success", false);
@@ -91,7 +103,26 @@ public class NoticeController {
     public ResponseEntity<Map<String, Object>> updateNotice(
             @ModelAttribute NoticeRequest dto,
             @PathVariable("bno") Long bno,
-            @RequestPart(name = "file", required = false) MultipartFile file) {
+            @RequestPart(name = "file", required = false) MultipartFile file,
+            @AuthenticationPrincipal CustomUserPrincipal principal) {
+    	
+    	NoticeResponse original = noticeService.select(bno);
+    	if (original == null) {
+    		return ResponseEntity.notFound().build();
+    	}
+
+    	boolean isRoot = principal.getRoles().contains("ROOT");
+    	if (!isRoot && !original.getComId().equals(principal.getComId())) {
+    		return ResponseEntity.status(HttpStatus.FORBIDDEN)
+    				.body(Map.of("message", "접근 권한이 없습니다."));
+    	}
+
+    	boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
+    	boolean isCreator = original.getEmpId().equals(principal.getEmpId());
+    	if (!isAdmin && !isCreator) {
+    		return ResponseEntity.status(HttpStatus.FORBIDDEN)
+    				.body(Map.of("message", "작성자 또는 관리자만 수정할 수 있습니다."));
+    	}
    
     	dto.setBno(bno);
 		Map<String, Object> result = new HashMap<>();
@@ -100,6 +131,7 @@ public class NoticeController {
 			noticeService.update(dto, file);
 			result.put("success", true);
 			result.put("message", "공지 수정 성공");
+			result.put("notice", noticeService.select(bno));
 			return ResponseEntity.ok(result);
 		} catch (Exception e) {
 			result.put("success", false);
@@ -111,7 +143,29 @@ public class NoticeController {
     //공지 삭제
     @Operation(summary = "공지 삭제", description = "공지를 삭제합니다.")
 	@DeleteMapping("/{bno}")
-    public ResponseEntity<Map<String, Object>> deleteNotice(@PathVariable("bno") Long bno) {
+    public ResponseEntity<Map<String, Object>> deleteNotice(
+    		@PathVariable("bno") Long bno,
+    		@AuthenticationPrincipal CustomUserPrincipal principal) {
+    	NoticeResponse original = noticeService.select(bno);
+    	if (original == null) {
+    		return ResponseEntity.notFound().build();
+    	}
+
+    	boolean isRoot = principal.getRoles().contains("ROOT");
+    	if (!isRoot && !original.getComId().equals(principal.getComId())) {
+    		return ResponseEntity.status(HttpStatus.FORBIDDEN)
+    				.body(Map.of("message", "접근 권한이 없습니다."));
+    	}
+
+    	boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
+    	boolean isCreator = original.getEmpId().equals(principal.getEmpId());
+    	if (!isAdmin && !isCreator) {
+    		Map<String, Object> result = new HashMap<>();
+    		result.put("success", false);
+    		result.put("message", "작성자 또는 관리자만 삭제할 수 있습니다.");
+    		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+    	}
+
 		noticeService.delete(bno);
 		Map<String, Object> result = new HashMap<>();
 		result.put("success", true);
@@ -122,11 +176,17 @@ public class NoticeController {
     //공지 상세 조회
 	@Operation(summary = "공지 상세조회", description = "공지 상세 정보를 조회합니다. (조회수 1 증가)")
 	@GetMapping("/{bno}")
-	public ResponseEntity<NoticeResponse> getNotice(@PathVariable("bno") Long bno) {
+	public ResponseEntity<NoticeResponse> getNotice(
+			@PathVariable("bno") Long bno,
+			@AuthenticationPrincipal CustomUserPrincipal principal) {
 		noticeService.updateHit(bno); // 게시글 상세 진입 시 조회수 1 증가 처리
 		NoticeResponse dto = noticeService.select(bno);
 		if (dto == null) {
 			return ResponseEntity.notFound().build();
+		}
+		boolean isRoot = principal.getRoles().contains("ROOT");
+		if (!isRoot && !dto.getComId().equals(principal.getComId())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 		return ResponseEntity.ok(dto);
 	}
