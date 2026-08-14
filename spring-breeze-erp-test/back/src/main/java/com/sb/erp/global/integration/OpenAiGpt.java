@@ -20,8 +20,6 @@ import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class OpenAiGpt {
-
-    private final OAuth2SuccessHandler OAuth2SuccessHandler;
 	
 	@Value("${openai.api.key}")private String apikey;
 	
