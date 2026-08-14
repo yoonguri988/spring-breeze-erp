@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sb.erp.pos.dto.request.PosRequest;
 import com.sb.erp.pos.dto.response.PosResponse;
 import com.sb.erp.pos.repository.PosMapper;
+import com.sb.erp.util.dto.SecurityUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,33 +19,35 @@ public class PosServiceImpl implements PosService {
 
 	// ─── 조회 ────────────────────────
 	@Override
-	public List<PosResponse> selectAll(Long comId) {
-		return posMapper.selectAll(comId);
+	public List<PosResponse> selectAll() {
+		return posMapper.selectAll(SecurityUtil.getCurrentComId());
 	}
 
 	@Override
-	public PosResponse selectOneById(long posId, Long comId) {
+	public PosResponse selectOneById(long posId) {
 		// comId를 함께 넘겨 타 회사 직급 조회를 차단
-		return posMapper.selectOneById(posId, comId);
+		return posMapper.selectOneById(posId, SecurityUtil.getCurrentComId());
 	}
 
 	// ─── 등록 / 수정 ──────────────────
 	@Override
-	public int insert(PosRequest dto, Long comId) {
+	public int insert(PosRequest dto) {
 		// 클라이언트가 보낸 comId는 신뢰하지 않고 세션 값으로 덮어씀
-		dto.setComId(comId);
+		dto.setComId(SecurityUtil.getCurrentComId());
 		return posMapper.insert(dto);
 	}
 
 	@Override
-	public int update(PosRequest dto, Long comId) {
-		dto.setComId(comId);
+	public int update(PosRequest dto) {
+		dto.setComId(SecurityUtil.getCurrentComId());
 		return posMapper.update(dto);
 	}
 
 	// ─── 삭제 ────────────────────────
 	@Override
-	public int delete(long posId, Long comId) {
+	public int delete(long posId) {
+		Long comId = SecurityUtil.getCurrentComId();
+
 		// ⭐ 선검사 방식:
 		// 그냥 delete하면 employee.pos_id FK 제약에 걸려 DataIntegrityViolationException 발생.
 		// 예외로 처리하면 원인을 사용자에게 설명하기 어려우므로,
@@ -61,8 +64,8 @@ public class PosServiceImpl implements PosService {
 
 	// ─── 중복 검사 ────────────────────
 	@Override
-	public boolean isPosCodeDuplicate(String posCode, Long excludePosId, Long comId) {
+	public boolean isPosCodeDuplicate(String posCode, Long excludePosId) {
 		// excludePosId가 null이면 등록, 값이 있으면 수정(자기 자신 제외)
-		return posMapper.countByPosCode(posCode, comId, excludePosId) > 0;
+		return posMapper.countByPosCode(posCode, SecurityUtil.getCurrentComId(), excludePosId) > 0;
 	}
 }

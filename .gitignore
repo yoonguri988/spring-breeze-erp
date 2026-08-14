@@ -69,11 +69,11 @@ logs/
 # ============================
 # DB / 환경설정 (보안)
 # ============================
-src/main/resources/application.properties
-src/main/resources/application.yml
-src/main/resources/db.properties
-src/main/resources/*-secret*
-src/main/resources/*-local*
+# src/main/resources/application.properties
+# src/main/resources/application.yml
+# src/main/resources/db.properties
+# src/main/resources/*-secret*
+# src/main/resources/*-local*
 
 #
 /Servers/
@@ -102,9 +102,3 @@ Thumbs.db
 *.log
 logs/
 
-
-
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar

@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,6 +32,7 @@ import com.sb.erp.util.dto.PagingUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
@@ -40,7 +40,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
-@CrossOrigin(origins="*")
 public class ProjectController {
 	private final ProjectService service;
 	private final TaskService taskService;
@@ -86,7 +85,7 @@ public class ProjectController {
 	@Operation(summary = "프로젝트 등록", description = "신규 프로젝트 등록")
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createProject(
-			@RequestBody ProjRequest dto,
+			@Valid @RequestBody ProjRequest dto,
 			@AuthenticationPrincipal CustomUserPrincipal principal) { //등록처리
 		dto.setComId(principal.getComId());
 		dto.setEmpId(principal.getEmpId());
@@ -114,7 +113,8 @@ public class ProjectController {
 			@AuthenticationPrincipal CustomUserPrincipal principal){
 		ProjResponse dto = service.select(proId);
 		if (dto == null) {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+		            .body(Map.of("message", "해당 프로젝트를 찾을 수 없습니다."));
 		}
 		boolean isRoot = principal.getRoles().contains("ROOT");
 		if (!isRoot && !dto.getComId().equals(principal.getComId())) {
@@ -155,12 +155,13 @@ public class ProjectController {
 	@PutMapping("/{proId}")
 	public ResponseEntity<Map<String, Object>> updateProject(
 			@PathVariable("proId") Long proId,
-			@RequestBody ProjRequest dto,
+			@Valid @RequestBody ProjRequest dto,
 			@AuthenticationPrincipal CustomUserPrincipal principal) {
 		
 		ProjResponse original = service.select(proId);
 		if (original == null) {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+		            .body(Map.of("message", "해당 프로젝트를 찾을 수 없습니다."));
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
@@ -189,7 +190,7 @@ public class ProjectController {
 
 		result.put("success", false);
 		result.put("message", "해당 프로젝트를 찾을 수 없습니다.");
-		return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
 	}
 
 	// 프로젝트 삭제
@@ -202,7 +203,8 @@ public class ProjectController {
 		
 		ProjResponse original = service.select(proId);
 		if (original == null) {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+		            .body(Map.of("message", "해당 프로젝트를 찾을 수 없습니다."));
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
@@ -230,8 +232,7 @@ public class ProjectController {
 
 		    result.put("success", false);
 		    result.put("message", "프로젝트 삭제 실패");
-
-		    return ResponseEntity.notFound().build();
+		    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
 	}
 	
 	// Ai 프로젝트 분석 결과

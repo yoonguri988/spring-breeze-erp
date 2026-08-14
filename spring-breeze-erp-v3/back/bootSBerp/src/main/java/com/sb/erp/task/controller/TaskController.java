@@ -8,7 +8,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,13 +34,13 @@ import com.sb.erp.util.dto.PagingUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Task Api", description = "Task 관련 Api")
 @RestController
 @RequestMapping("/api/tasks")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class TaskController {
 	private final TaskService service;
 	private final ProjectMemberService memberservice;
@@ -76,9 +75,11 @@ public class TaskController {
 	@Operation(summary = "태스크 등록", description = "신규 태스크를 등록합니다.")
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createTask(
-			@RequestBody TaskRequest dto,
+			@Valid @RequestBody TaskRequest dto,
 			@AuthenticationPrincipal CustomUserPrincipal principal) {
 
+		dto.setComId(principal.getComId());
+		
 		Map<String, Object> result = new HashMap<>();
 
 		ProjResponse project = projectService.select(dto.getProId());
@@ -229,10 +230,11 @@ public class TaskController {
 	@PutMapping("/{taskId}")
 	public ResponseEntity<Map<String, Object>> updateTask(
 			@PathVariable("taskId") Long taskId,
-			@RequestBody TaskRequest dto,
+			@Valid @RequestBody TaskRequest dto,
 			@AuthenticationPrincipal CustomUserPrincipal principal) {
 
 		dto.setTaskId(taskId);
+		dto.setComId(principal.getComId());
 		Map<String, Object> result = new HashMap<>();
 
 		TaskResponse original = service.select(taskId);

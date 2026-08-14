@@ -29,6 +29,6 @@ public interface TaskDependencyMapper {
    public List<TaskResponse> findCriticalPath(Long proId);
    
    //동일 프로젝트의 태스크를 수정하는 동안 다른 사용자의 동시 수정을 방지하기 위해 행 잠금 획득
-   public List<Integer> lockProjectTasks(Long taskId);
+   public List<Long> lockProjectTasks(Long taskId);
 	
 }

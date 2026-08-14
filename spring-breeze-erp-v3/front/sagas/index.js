@@ -1,5 +1,6 @@
 // sagas/index.js
-import { all, fork } from 'redux-saga/effects';
+import { all, fork } from "redux-saga/effects";
+
 import authSaga from "./auth/authSaga";
 import companySaga from "./com/companySaga";
 import deptSaga from "./dept/deptSaga";
@@ -16,9 +17,13 @@ import evalSaga from './eval/evalSaga';
 import evalPeriodSaga from './eval/evalPeriodSaga';
 import evalReportSaga from './eval/evalReportSaga';
 import permSaga from './perm/permSaga';
+import projSaga from './proj/projSaga';
+import projMemSaga from'./proj/projMemSaga';
+import taskSaga from './task/taskSaga';
+import noticeSaga from './notice/noticeSaga';
+import weekSaga from './week/weekSaga';
 
-
-export default function *rootSaga(){
+export default function* rootSaga() {
   yield all([
     fork(authSaga),
     fork(companySaga),
@@ -36,5 +41,10 @@ export default function *rootSaga(){
     fork(evalSaga),
     fork(evalPeriodSaga),
     fork(evalReportSaga),
+    fork(projSaga),
+    fork(projMemSaga),
+    fork(taskSaga),
+    fork(noticeSaga),
+    fork(weekSaga),
   ]);
 }

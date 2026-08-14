@@ -12,7 +12,6 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 import com.sb.erp.global.integration.ReportApi.ReportSections;
-import com.sb.erp.global.oauth2.OAuth2SuccessHandler;
 import com.sb.erp.proj.dto.response.ProjectAnalysisResponse;
 import com.sb.erp.week.dto.response.MyWeeklyReportResponse;
 import com.sb.erp.week.dto.response.WeeklyReportResponse;
@@ -30,9 +29,8 @@ public class OpenAiGpt {
 	private final JsonMapper jsonMapper = new JsonMapper();
 	private final RestClient restClient;
 	 
-	public OpenAiGpt(RestClient.Builder restClientBuilder, OAuth2SuccessHandler OAuth2SuccessHandler) {
+	public OpenAiGpt(RestClient.Builder restClientBuilder) {
 		this.restClient = restClientBuilder.baseUrl(API_URL).build();
-		this.OAuth2SuccessHandler = OAuth2SuccessHandler;
 	}
 	
 	private String callOpenAi(String prompt) {
@@ -85,7 +83,6 @@ public class OpenAiGpt {
 		return callOpenAi(prompt);
 	
 	}
-
 	//관리자용 주간보고서
 	public ReportSections weeklyReportSections(WeeklyReportResponse dto) {
 		String prompt=String.format("""

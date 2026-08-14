@@ -16,11 +16,14 @@ import permReducer from './perm/permReducer';
 import evalReducer from './eval/evalReducer';
 import evalPeriodReducer from './eval/evalPeriodReducer';
 import evalReportReducer from './eval/evalReportReducer';
+import projReducer from './proj/projReducer';
+import projMemReducer from './proj/projMemReducer';
+import taskReducer from './task/taskReducer';
+import noticeReducer from'./notice/noticeReducer';
+import weekReducer from './week/weekReducer';
 
 
 const rootReducer = combineReducers({
-  _placeholder: (state = {}, action) => state,
-  
   auth: authReducer,   // state.auth
   company: companyReducer,   // state.company
   dept: deptReducer,   // state.dept
@@ -39,6 +42,11 @@ const rootReducer = combineReducers({
   period: evalPeriodReducer, // state.period
   report: evalReportReducer, // state.report
 
+  proj: projReducer, // state.proj
+  projMem: projMemReducer, // state.projMem
+  task: taskReducer, // state.task
+  notice: noticeReducer, // state.notice
+  week: weekReducer,
 });
 
 export default rootReducer;
