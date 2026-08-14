@@ -9,6 +9,10 @@ import apiUtilSaga from "./api/apiUtilSaga";
 import resourceSaga from "./res/resourceSaga";
 import resvSaga from './resv/resvSaga';
 import adminResvSaga from './resv/adminResvSaga';
+import projSaga from './proj/projSaga';
+import projMemSaga from'./proj/projMemSaga';
+import taskSaga from './task/taskSaga';
+import noticeSaga from './notice/noticeSaga';
 
 export default function* rootSaga() {
   yield all([
@@ -20,5 +24,9 @@ export default function* rootSaga() {
     fork(resourceSaga),
     fork(resvSaga),
     fork(adminResvSaga),
+    fork(projSaga),
+    fork(projMemSaga),
+    fork(taskSaga),
+    fork(noticeSaga),
   ]);
 }

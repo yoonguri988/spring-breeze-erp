@@ -8,6 +8,10 @@ import apiUtilReducer from './api/apiUtilReducer';
 import resourceReducer from './res/resourceReducer';
 import resvReducer from './resv/resvReducer';
 import adminResvReducer from './resv/adminResvReducer';
+import projReducer from './proj/projReducer';
+import projMemReducer from './proj/projMemReducer';
+import taskReducer from './task/taskReducer';
+import noticeReducer from'./notice/noticeReducer';
 
 const rootReducer = combineReducers({
   auth: authReducer,   // state.auth
@@ -18,6 +22,10 @@ const rootReducer = combineReducers({
   res: resourceReducer,   // state.res
   resv: resvReducer,   // state.resv
   adminResv: adminResvReducer,   // state.adminResv
+  proj: projReducer, // state.proj
+  projMem: projMemReducer, // state.projMem
+  task: taskReducer, // state.task
+  notice: noticeReducer, // state.notice
 });
 
 export default rootReducer;
