@@ -10,6 +10,7 @@ import com.sb.erp.eval.dto.request.EvalRequest;
 import com.sb.erp.eval.dto.response.EvalResponse;
 import com.sb.erp.eval.dto.response.PeriodResponse;
 import com.sb.erp.eval.repository.EvalMapper;
+import com.sb.erp.util.dto.SecurityUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +31,8 @@ public class EvalServiceImpl implements EvalService {
 
 	// ─── 조회 ────────────────────────────────
 	@Override
-	public List<EvalResponse> selectTargetsByEvaluator(long periodId, Long evaluatorId) {
+	public List<EvalResponse> selectTargetsByCurrentEvaluator(long periodId) {
+		Long evaluatorId = SecurityUtil.getCurrentEmpId();
 		return evalMapper.selectTargetsByEvaluator(periodId, evaluatorId);
 	}
 
@@ -45,6 +47,11 @@ public class EvalServiceImpl implements EvalService {
 	}
 
 	@Override
+	public List<EvalResponse> selectMyEvalHistory() {
+		return evalMapper.selectByTargetEmpId(SecurityUtil.getCurrentEmpId());
+	}
+
+	@Override
 	public List<EvalResponse> selectEvalHistoryByEmpId(long empId) {
 		return evalMapper.selectByTargetEmpId(empId);
 	}
@@ -52,19 +59,19 @@ public class EvalServiceImpl implements EvalService {
 	// ─── 통계 ────────────────────────────────
 
 	@Override
-	public int countSubmittedByEvaluator(long periodId, Long evaluatorId) {
-		return evalMapper.countSubmittedByEvaluator(periodId, evaluatorId);
+	public int countMySubmitted(long periodId) {
+		return evalMapper.countSubmittedByEvaluator(periodId, SecurityUtil.getCurrentEmpId());
 	}
 
 	// ─── 등록 / 수정 ──────────────────────────
 
 	@Override
-	public int saveDraft(EvalRequest dto, Long evaluatorId, Long comId) {
-		int validation = validateBase(dto, comId);
+	public int saveDraft(EvalRequest dto) {
+		int validation = validateBase(dto);
 		if (validation != 1) return validation;
 
 		// 평가자 자동 세팅
-		dto.setEvaluatorId(evaluatorId);
+		dto.setEvaluatorId(SecurityUtil.getCurrentEmpId());
 		dto.setEvalType("LEADER");
 		dto.setEvalStatus("DRAFT");
 
@@ -75,8 +82,8 @@ public class EvalServiceImpl implements EvalService {
 	}
 
 	@Override
-	public int submit(EvalRequest dto, Long evaluatorId, Long comId) {
-		int validation = validateBase(dto, comId);
+	public int submit(EvalRequest dto) {
+		int validation = validateBase(dto);
 		if (validation != 1) return validation;
 
 		// 제출 시 모든 점수 + 코멘트 필수
@@ -87,7 +94,7 @@ public class EvalServiceImpl implements EvalService {
 			return -4;
 		}
 
-		dto.setEvaluatorId(evaluatorId);
+		dto.setEvaluatorId(SecurityUtil.getCurrentEmpId());
 		dto.setEvalType("LEADER");
 		dto.setEvalStatus("SUBMITTED");
 		dto.setWeightedScore(calculateWeightedScore(dto));
@@ -99,8 +106,8 @@ public class EvalServiceImpl implements EvalService {
 
 	// 기본 검증: 회차 존재 + OPEN 상태.
 	// 1: 통과 / -1: 회차 없음 / -2: 회차가 OPEN 아님
-	private int validateBase(EvalRequest dto, Long comId) {
-		PeriodResponse period = evalPeriodService.selectByPeriodId(dto.getPeriodId(), comId);
+	private int validateBase(EvalRequest dto) {
+		PeriodResponse period = evalPeriodService.selectByPeriodId(dto.getPeriodId());
 		if (period == null) return -1;
 		if (!"OPEN".equals(period.getPeriodStatus())) return -2;
 		return 1;
