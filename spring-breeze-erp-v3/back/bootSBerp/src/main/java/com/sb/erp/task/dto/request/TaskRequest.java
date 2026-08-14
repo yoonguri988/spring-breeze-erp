@@ -2,6 +2,7 @@ package com.sb.erp.task.dto.request;
 
 import java.time.LocalDate;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -15,12 +16,14 @@ public class TaskRequest {
     @NotNull(message = "프로젝트는 필수입니다.")
     private Long proId;
 
-    @NotNull(message = "회사 정보는 필수입니다.")
+	@Schema(hidden = true)
+    //@NotNull(message = "회사 정보는 필수입니다.")
     private Long comId;
 
     @NotNull(message = "담당자는 필수입니다.")
     private Long pmId;
     
+    @Schema(hidden = true)
     private Long taskId;
 
     // 부모 태스크는 선택사항

@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,6 +32,7 @@ import com.sb.erp.util.dto.PagingUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
@@ -40,7 +40,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
-@CrossOrigin(origins="*")
 public class ProjectController {
 	private final ProjectService service;
 	private final TaskService taskService;
@@ -86,7 +85,7 @@ public class ProjectController {
 	@Operation(summary = "프로젝트 등록", description = "신규 프로젝트 등록")
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createProject(
-			@RequestBody ProjRequest dto,
+			@Valid @RequestBody ProjRequest dto,
 			@AuthenticationPrincipal CustomUserPrincipal principal) { //등록처리
 		dto.setComId(principal.getComId());
 		dto.setEmpId(principal.getEmpId());
@@ -155,7 +154,7 @@ public class ProjectController {
 	@PutMapping("/{proId}")
 	public ResponseEntity<Map<String, Object>> updateProject(
 			@PathVariable("proId") Long proId,
-			@RequestBody ProjRequest dto,
+			@Valid @RequestBody ProjRequest dto,
 			@AuthenticationPrincipal CustomUserPrincipal principal) {
 		
 		ProjResponse original = service.select(proId);
