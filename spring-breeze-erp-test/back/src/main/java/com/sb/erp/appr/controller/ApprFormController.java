@@ -25,7 +25,7 @@ import com.sb.erp.appr.dto.response.CodeCheckResponse;
 import com.sb.erp.appr.service.ApprFormService;
 import com.sb.erp.com.dto.response.ComResponse;
 import com.sb.erp.com.service.CompanyService;
-//import com.sb.erp.global.integration.OpenAiGpt;
+import com.sb.erp.global.integration.ApprFormAiService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -41,7 +41,7 @@ public class ApprFormController {
 
 	private final ApprFormService appr;
 	private final CompanyService com; // 회사 검색
-	//private final OpenAiGpt gpt;
+	private final ApprFormAiService gpt;
 	
 	// 양식 목록 조회 ( 검색 + 페이징 )
 	@Operation(summary = "양식 목록 조회", description = "검색 조건과 페이징으로 결재양식을 조회, 최신버전만 노출")
@@ -124,19 +124,19 @@ public class ApprFormController {
 	
 	// AI 기반 양식 스키마 생성
 	
-//	@PostMapping("/ai-schema")
-//	@Operation(summary = "AI 양식 스키마 생성", description = "프롬프르틀 기반으로 AI호출하여 스키마 생성")
-//	public ResponseEntity<ApprFormAiSchemaResponse> generateSchema(
-//			@Valid
-//			@RequestBody ApprFormAiSchemaRequest req
-//	){
-//		try {
-//			String schemaJson = gpt.formSchema(req.getPrompt());
-//			return ResponseEntity.ok(ApprFormAiSchemaResponse.success(schemaJson));
-//		} catch (Exception e) {
-//			// 외부 API 호출 실패는 비즈니스 예외가 아니라 별개취급
-//			// -> 여기서만 예외적으로 캐치
-//			return ResponseEntity.ok(ApprFormAiSchemaResponse.fail("AI 양식 생성에 실패했습니다"));
-//		}
-//	}
+	@PostMapping("/ai-schema")
+	@Operation(summary = "AI 양식 스키마 생성", description = "프롬프르틀 기반으로 AI호출하여 스키마 생성")
+	public ResponseEntity<ApprFormAiSchemaResponse> generateSchema(
+			@Valid
+			@RequestBody ApprFormAiSchemaRequest req
+	){
+		try {
+			String schemaJson = gpt.formSchema(req.getPrompt());
+			return ResponseEntity.ok(ApprFormAiSchemaResponse.success(schemaJson));
+		} catch (Exception e) {
+			// 외부 API 호출 실패는 비즈니스 예외가 아니라 별개취급
+			// -> 여기서만 예외적으로 캐치
+			return ResponseEntity.ok(ApprFormAiSchemaResponse.fail("AI 양식 생성에 실패했습니다"));
+		}
+	}
 }

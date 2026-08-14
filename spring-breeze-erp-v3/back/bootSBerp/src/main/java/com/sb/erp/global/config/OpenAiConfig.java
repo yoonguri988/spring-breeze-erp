@@ -10,8 +10,8 @@ import org.springframework.web.client.RestClient;
 public class OpenAiConfig {
 	
 	// application.properties의 값을 읽어 필드에 넣기
-	@Value("${jsj.openai.api.baseurl}") private String baseUrl;
-	@Value("${jsj.openai.api.key}")     private String apiKey;
+    @Value("${openai.api.baseurl}") private String baseUrl;
+    @Value("${jsj.openai.api.key}")     private String apiKey;
     
     /* OpenAI 통신 전용 RestClient.
      Bean 이름을 "openAiRestClient"로 명시:

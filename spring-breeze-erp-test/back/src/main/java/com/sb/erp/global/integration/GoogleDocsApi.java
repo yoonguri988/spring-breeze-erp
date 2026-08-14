@@ -13,14 +13,14 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Component
 public class GoogleDocsApi {
 	
 	private final RestClient restClient;
-	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final JsonMapper jsonMapper  = new JsonMapper();
 	
 	@Value("${google.report.client-id}")private String clientId;
 	@Value("${google.report.client-secret}")private String clientSecret;
@@ -46,7 +46,7 @@ public class GoogleDocsApi {
                     .retrieve()
                     .body(String.class);
 
-            JsonNode root = objectMapper.readTree(response);
+            JsonNode root = jsonMapper.readTree(response);
             return root.path("access_token").asText();
         } catch (Exception e) {
             throw new RuntimeException("Google Access Token 갱신 실패: " + e.getMessage(), e);
@@ -64,7 +64,7 @@ public class GoogleDocsApi {
                     .retrieve()
                     .body(String.class);
             try {
-            	return objectMapper.readTree(response).path("id").asText();
+            	return jsonMapper.readTree(response).path("id").asText();
             }catch(Exception e) {throw new RuntimeException("템플릿 복사 실패:"+e.getMessage(),e);}
     }
     // 사본 문서 안의 {{...}} placeholder들을 실제 값으로 치환

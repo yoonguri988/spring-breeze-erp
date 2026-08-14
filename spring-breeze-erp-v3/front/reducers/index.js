@@ -8,16 +8,22 @@ import apiUtilReducer from './api/apiUtilReducer';
 import resourceReducer from './res/resourceReducer';
 import resvReducer from './resv/resvReducer';
 import adminResvReducer from './resv/adminResvReducer';
+import apprFormReducer from "./appr/apprFormReducer";
+import apprDocReducer from "./appr/apprDocReducer";
 import empReducer from './emp/empReducer';
 import posReducer from './pos/posReducer';
 import permReducer from './perm/permReducer';
 import evalReducer from './eval/evalReducer';
 import evalPeriodReducer from './eval/evalPeriodReducer';
 import evalReportReducer from './eval/evalReportReducer';
+import projReducer from './proj/projReducer';
+import projMemReducer from './proj/projMemReducer';
+import taskReducer from './task/taskReducer';
+import noticeReducer from'./notice/noticeReducer';
+import weekReducer from './week/weekReducer';
+
 
 const rootReducer = combineReducers({
-  _placeholder: (state = {}, action) => state,
-  
   auth: authReducer,   // state.auth
   company: companyReducer,   // state.company
   dept: deptReducer,   // state.dept
@@ -26,6 +32,9 @@ const rootReducer = combineReducers({
   res: resourceReducer,   // state.res
   resv: resvReducer,   // state.resv
   adminResv: adminResvReducer,   // state.adminResv
+  apprForm: apprFormReducer, // state.apprForm
+  apprDoc: apprDocReducer,  // state.apprDoc
+
   emp: empReducer,  // state.emp
   pos: posReducer,  // state.pos
   perm: permReducer,  // state.perm
@@ -33,6 +42,11 @@ const rootReducer = combineReducers({
   period: evalPeriodReducer, // state.period
   report: evalReportReducer, // state.report
 
+  proj: projReducer, // state.proj
+  projMem: projMemReducer, // state.projMem
+  task: taskReducer, // state.task
+  notice: noticeReducer, // state.notice
+  week: weekReducer,
 });
 
 export default rootReducer;

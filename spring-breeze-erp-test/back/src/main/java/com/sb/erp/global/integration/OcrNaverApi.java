@@ -17,8 +17,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
 import com.sb.erp.api.dto.request.OcrRequest;
 import com.sb.erp.api.dto.response.OcrResponse;
 
@@ -32,7 +33,7 @@ public class OcrNaverApi {
     private String apiUrl;
 
     private final RestClient restClient;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = new JsonMapper();
 
     public OcrNaverApi(RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder.build();
@@ -63,7 +64,7 @@ public class OcrNaverApi {
 
         HttpHeaders messagePartHeaders = new HttpHeaders();
         messagePartHeaders.setContentType(MediaType.APPLICATION_JSON);
-        String messageJson = objectMapper.writeValueAsString(requestDto);
+        String messageJson = jsonMapper.writeValueAsString(requestDto);
         body.add("message", new HttpEntity<>(messageJson, messagePartHeaders));
 
         // 2. file 파트
@@ -88,7 +89,7 @@ public class OcrNaverApi {
 
     /** NCP 사업자등록증 특화 응답을 OcrResultDto로 매핑 */
     private OcrResponse parseBizLicenseResult(String rawJson) throws Exception {
-        JsonNode root = objectMapper.readTree(rawJson);
+        JsonNode root = jsonMapper.readTree(rawJson);
         JsonNode images = root.path("images");
 
         if (!images.isArray() || images.isEmpty()) {

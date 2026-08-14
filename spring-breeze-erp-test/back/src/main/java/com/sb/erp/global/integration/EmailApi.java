@@ -2,7 +2,6 @@ package com.sb.erp.global.integration;
 
 import java.util.Properties;
 
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

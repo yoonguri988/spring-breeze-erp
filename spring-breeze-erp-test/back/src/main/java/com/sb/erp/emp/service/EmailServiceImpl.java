@@ -4,8 +4,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sb.erp.emp.dto.EmailSendLogDto;
 import com.sb.erp.emp.dto.WelcomeMailTargetDto;
 import com.sb.erp.emp.dto.request.EmpRequest;
+import com.sb.erp.emp.repository.EmailSendLogMapper;
 import com.sb.erp.global.integration.EmailApi;
 
 import lombok.RequiredArgsConstructor;
@@ -118,6 +120,7 @@ public class EmailServiceImpl implements EmailService {
         if (s == null) return "unknown";
         return s.length() <= max ? s : s.substring(0, max);
     }
+<<<<<<< HEAD
 
 
 	@Override
@@ -132,4 +135,6 @@ public class EmailServiceImpl implements EmailService {
 		// TODO Auto-generated method stub
 		
 	}
+=======
+>>>>>>> origin/main
 }

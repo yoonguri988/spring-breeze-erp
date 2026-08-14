@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
 import com.sb.erp.global.integration.openAi.ChatMessage;
 import com.sb.erp.global.integration.openAi.ChatRequest;
 import com.sb.erp.global.integration.openAi.ChatResponse;
@@ -30,11 +32,11 @@ import com.sb.erp.global.integration.openAi.ReportContent;
 @Component // Spring이 관리하는 일반 Bean
 public class OpenAiClient {
 
-    @Value("${jsj.openai.api.model}") private String model;
+    @Value("${openai.api.model}") private String model;
     // @Autowired로 필드 주입하는 대신 생성자 주입하기
     // 필드에 final을 붙일 수 있음 → 실수로 변경하지 않게
     private final RestClient openAiRestClient;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     
     
     @Autowired
@@ -42,9 +44,9 @@ public class OpenAiClient {
             @Qualifier("openAiRestClient") RestClient openAiRestClient,
           //RestClient는 OpenAiConfig가 만들어놓은 "openAiRestClient" Bean을 지정해 받음
           //ObjectMapper는 Spring Boot가 기본으로 제공하는 걸 자동 주입
-            ObjectMapper objectMapper) {
+            JsonMapper jsonMapper) {
         this.openAiRestClient = openAiRestClient;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     //GPT에게 메시지 리스트를 보내고 리포트 콘텐츠를 받아온다.
@@ -76,7 +78,7 @@ public class OpenAiClient {
             }
 
             // 4. content 안의 JSON을 ReportContent record로 파싱 (2번 파싱)
-            return objectMapper.readValue(contentJson, ReportContent.class);
+            return jsonMapper.readValue(contentJson, ReportContent.class);
             // readValue(문자열, 타입) — Jackson의 파싱 메서드. 문자열을 지정한 타입 record로 변환.
 
         } catch (Exception e) {
