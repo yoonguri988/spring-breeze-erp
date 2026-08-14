@@ -14,6 +14,18 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/global.css";
 import "../styles/css/auth.css";
 import "../styles/css/company.css";
+import "../styles/css/appr.css";
+import "../styles/css/dashboard.css";
+import "../styles/css/dashboard-admin.css";
+import "../styles/css/dashboard-exec.css";
+import "../styles/css/dashboard-sysadmin.css";
+import "../styles/css/dept.css";
+import "../styles/css/emp.css";
+import "../styles/css/my.css";
+import "../styles/css/notice.css";
+import "../styles/css/perm.css";
+import "../styles/css/project.css";
+import "../styles/css/resv.css";
 
 const NO_LAYOUT_PREFIXES = ["/auth"];
 

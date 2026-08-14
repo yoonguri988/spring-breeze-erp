@@ -22,5 +22,6 @@ export const makeStore = () => {
 };
 // next.js 에서 redux를 사용할수 있도록 wrapper 생성
 export const wrapper = createWrapper(makeStore, {
-  debug: process.env.NODE_ENV !== "production",
+  debug: false, 
+  //debug: process.env.NODE_ENV !== "production",
 });

@@ -57,22 +57,23 @@ export function* login(action) {
 // --- 사용자 정보 로드 (새로고침 시 세션 복원용) ---
 export function* loadUser() {
     try {
-        const accessToken = typeof window !== "undefined" ? Cookies.get("accessToken") : null;
+        let accessToken = typeof window !== "undefined" ? Cookies.get("accessToken") : null;
 
-        if (!accessToken) {
-            yield put(loadUserFailure("저장된 토큰이 없습니다."));
-            return;
+        // accessToken 쿠키가 없거나 만료됐으면, HttpOnly refreshToken으로 재발급 시도
+        if (!accessToken || user_expired(accessToken)) {
+            try {
+                const res = yield call(refreshTokenApi); // POST /auth/refresh (withCredentials)
+                accessToken = res.data?.accessToken;
+                if (!accessToken) throw new Error("no accessToken");
+                if (typeof window !== "undefined") Cookies.set("accessToken", accessToken);
+            } catch (e) {
+                if (typeof window !== "undefined") Cookies.remove("accessToken");
+                yield put(loadUserFailure("세션이 만료되었습니다."));
+                return;
+            }
         }
 
         const user = decodeUser(accessToken);
-
-        // 만료 체크 (exp는 초 단위)
-        if (user_expired(accessToken)) {
-            Cookies.remove("accessToken");
-            yield put(loadUserFailure("세션이 만료되었습니다."));
-            return;
-        }
-
         yield put(loadUserSuccess({user, accessToken }));
     } catch (err) {
         if (typeof window !== "undefined") Cookies.remove("accessToken");
