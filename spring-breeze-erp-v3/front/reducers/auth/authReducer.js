@@ -3,11 +3,15 @@ import { createSlice } from "@reduxjs/toolkit";
 
 // 초기화
 const initialState = {
-    user:null, 
-    accessToken:null, 
+    user:null,
+    accessToken:null,
     loading:false,
-    error: null,  
+    error: null,
     success:false,
+    // 새로고침 직후 loadUserRequest(쿠키 → accessToken 복원)가 끝났는지 여부.
+    // false인 동안은 "아직 로그인 여부를 확인 중"인 상태이며, 이때 accessToken===null이라고
+    // 곧바로 비로그인으로 단정하면 안 된다. (AppLayout의 리다이렉트 가드에서 사용)
+    initialized:false,
 };
 
 // 상태변화
@@ -80,12 +84,14 @@ const authReducer=createSlice({
             state.loading = false;
             state.user = action.payload.user || null;
             state.accessToken = action.payload.accessToken || null;
+            state.initialized = true;
         },
         loadUserFailure:(state,action)=>{
             state.loading = false;
             state.error = action.payload;
             state.user = null;
             state.accessToken = null;
+            state.initialized = true;
         },
 
         // --- 비밀번호 재설정 - 본인확인 (/auth/confirm)---
