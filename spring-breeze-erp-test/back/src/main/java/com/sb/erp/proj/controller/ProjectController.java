@@ -87,6 +87,7 @@ public class ProjectController {
 		if (insert > 0) {
 			result.put("success", true);
 			result.put("message", "프로젝트 등록 성공");
+			result.put("proId", dto.getProId());
 			result.put("project", service.select(dto.getProId()));
 			return ResponseEntity.status(HttpStatus.CREATED).body(result);
 		}

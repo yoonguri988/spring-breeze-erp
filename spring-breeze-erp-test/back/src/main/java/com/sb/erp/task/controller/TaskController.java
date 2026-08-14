@@ -114,6 +114,7 @@ public class TaskController {
 			if (inserted > 0) {
 				result.put("success", true);
 				result.put("message", "태스크 등록 성공");
+				result.put("taskId", dto.getTaskId());
 				result.put("task", service.select(dto.getTaskId()));
 				return ResponseEntity.status(HttpStatus.CREATED).body(result);
 			}
