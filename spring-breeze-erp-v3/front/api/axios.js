@@ -1,6 +1,6 @@
 // api/axios.js
-
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const api = axios.create({
   // 기본 api 서버 주소, 환경변수 없으면 로컬 서버 사용
@@ -16,11 +16,16 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      // CSR 환경에서만 localStorage 접근
-      const accessToken = localStorage.getItem("accessToken"); // 저장된 Access Token 가져오기
+      const accessToken = Cookies.get("accessToken"); // localStorage → Cookies로 변경
       if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`; //Authorization 헤더에 추가
+        config.headers.Authorization = `Bearer ${accessToken}`;
       }
+
+      // CSR 환경에서만 localStorage 접근
+      // const accessToken = localStorage.getItem("accessToken"); // 저장된 Access Token 가져오기
+      // if (accessToken) {
+      //   config.headers.Authorization = `Bearer ${accessToken}`; //Authorization 헤더에 추가
+      // }
     }
     return config;
   },
@@ -39,14 +44,16 @@ api.interceptors.response.use(
         const newAccessToken = data?.accessToken;
 
         if (typeof window !== "undefined" && newAccessToken) {
-          localStorage.setItem("accessToken", newAccessToken); // local 저장
+          // localStorage.setItem("accessToken", newAccessToken); // local 저장
+          Cookies.set("accessToken", newAccessToken);
         }
 
         original.headers.Authorization = `Bearer ${newAccessToken}`; // 원 요청 헤어 갱신
         return api(original);
       } catch (refreshErr) {
         if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken"); // Access Token 제거
+          // localStorage.removeItem("accessToken"); // Access Token 제거
+          Cookies.remove("accessToken"); // Access Token 제거
           window.location.href = "/login"; // 로그인 페이지로 이동
         }
         return Promise.reject(refreshErr);
