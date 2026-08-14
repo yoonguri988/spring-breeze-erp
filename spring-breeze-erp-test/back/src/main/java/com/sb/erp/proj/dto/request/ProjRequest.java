@@ -2,6 +2,7 @@ package com.sb.erp.proj.dto.request;
 
 import java.time.LocalDate;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -12,12 +13,15 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor
 public class ProjRequest {
 	
-    @NotNull(message = "회사 정보는 필수입니다.")
+	@Schema(hidden = true)
+    //@NotNull(message = "회사 정보는 필수입니다.")
     private Long comId;
 
-    @NotNull(message = "프로젝트 생성자는 필수입니다.")
+	@Schema(hidden = true)
+    //@NotNull(message = "프로젝트 생성자는 필수입니다.")
     private Long empId;
 
+    @Schema(hidden = true)
     private Long proId;
 
     @NotBlank(message = "프로젝트 상태는 필수입니다.")
