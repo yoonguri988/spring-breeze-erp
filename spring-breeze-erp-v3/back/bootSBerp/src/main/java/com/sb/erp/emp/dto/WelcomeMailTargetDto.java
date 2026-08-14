@@ -11,7 +11,7 @@ import lombok.Data;
 
 @Data
 public class WelcomeMailTargetDto {
-    private int    empId;
+    private long   empId;
     private String empName;
     private String empEmail;
     private String comName;
