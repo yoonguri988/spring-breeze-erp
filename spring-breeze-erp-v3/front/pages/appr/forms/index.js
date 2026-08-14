@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector} from "react-redux";
 import { useRouter } from "next/router";
 import { Table, Input, Select, Button, Space, Tag, message } from "antd";
-import { fetchFormListRequest, deleteFormRequest } from "../../reducers/appr/apprFormReducer";
+import { fetchFormListRequest, deleteFormRequest } from "../../../reducers/appr/apprFormReducer";
 
 const { Option } = Select;
 
