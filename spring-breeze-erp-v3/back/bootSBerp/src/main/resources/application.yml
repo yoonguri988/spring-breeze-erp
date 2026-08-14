@@ -58,12 +58,24 @@ webhook:
   discord:
     url: ${WEBHOOK_DISCORD_URL}
 
-# Google Docs API
+# Google (Email + Docs API)
 google:
+  email:
+    host: ${GOOGLE_EMAIL_HOST}
+    user: ${GOOGLE_EMAIL_USER}
+    password: ${GOOGLE_EMAIL_PASSWORD}
   report:
     client-id: ${GOOGLE_REPORT_CLIENT_ID}
     client-secret: ${GOOGLE_REPORT_CLIENT_SECRET}
     refresh-token: ${GOOGLE_REPORT_REFRESH_TOKEN}
+
+# JSJ OpenAI API
+jsj:
+  openai:
+    api:
+      key: ${JSJ_OPENAI_API_KEY}
+      baseurl: ${JSJ_OPENAI_API_BASEURL}
+      model: ${JSJ_OPENAI_API_MODEL}
 
 # OpenAI API
 openai:
