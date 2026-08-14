@@ -1,4 +1,3 @@
-// pages/index.js
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Spin, Card, Empty } from "antd";

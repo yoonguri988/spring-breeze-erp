@@ -30,14 +30,14 @@ public class EvalReportBatchService {
 	 * - 호출자는 트랜잭션 커밋 후 이 메서드를 호출해야 함 (REPORTING 상태가 확정된 후)
 	 * - 이 메서드는 즉시 반환하고 별도 스레드에서 실행됨.
 	 * @param periodId 대상 회차
-	 * @param comId    회사 ID (SecurityUtil을 async 스레드에서 못 쓰니 파라미터로 전달)
+	 * @param comId    회사 ID (Authentication은 @Async 스레드에서 못 쓰므로 파라미터로 전달)
 	 */
 	@Async("reportExecutor")
 	public void runInBackground(long periodId, long comId) {
 		System.out.println("[ReportBatch] 시작 periodId=" + periodId);
 
 		try {
-			int result = evalReportService.generateReports(periodId);
+			int result = evalReportService.generateReports(periodId, comId);
 
 			if (result == 1) {
 				evalPeriodMapper.updateStatus(periodId, "REPORTED", comId);

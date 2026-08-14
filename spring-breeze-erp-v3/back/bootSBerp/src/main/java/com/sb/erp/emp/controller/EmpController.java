@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sb.erp.auth.service.AuthUserJwtService;
 import com.sb.erp.emp.dto.request.EmpRequest;
 import com.sb.erp.emp.dto.request.EmpSearchRequest;
 import com.sb.erp.emp.dto.request.PasswordChangeRequest;
@@ -23,7 +25,6 @@ import com.sb.erp.emp.service.EmpService;
 import com.sb.erp.eval.dto.response.ReportResponse;
 import com.sb.erp.eval.service.EvalReportService;
 import com.sb.erp.util.dto.PagingUtil;
-import com.sb.erp.util.dto.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,23 +39,35 @@ public class EmpController {
 
 	private final EmpService empService;
 	private final EvalReportService evalReportService;
+	private final AuthUserJwtService authUserJwtService;
+
+	// 관리자 판별: getCurrentRoles()에 ROLE_ADMIN 또는 ROOT가 있는지 확인
+	private boolean isAdmin(Authentication auth) {
+		List<String> roles = authUserJwtService.getCurrentRoles(auth);
+		return roles != null && (roles.contains("ROLE_ADMIN") || roles.contains("ROOT"));
+	}
 
 
 	// ─── 목록 조회 (검색 + 페이징) ────────────────────────
-	@Operation(summary = "사원 목록 조회", description = "검색 조건과 페이징을 적용한 사원 목록")
+	@Operation(summary = "사원 목록 조회", description = "사원 목록")
 	@GetMapping
-	public ResponseEntity<Map<String, Object>> list(EmpSearchRequest search) {
+	public ResponseEntity<Map<String, Object>> list(
+			Authentication auth,
+			EmpSearchRequest search) {
+
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		boolean isAdmin = isAdmin(auth);
 
 		int currentPage = (search.getPage() == null || search.getPage() < 1)
 				? 1 : search.getPage();
 
-		int total = empService.selectCnt(search);
+		int total = empService.selectCnt(search, comId);
 		PagingUtil paging = new PagingUtil(total, currentPage);
 
 		search.setPstartno(paging.getPstartno());
 		search.setOnepagelist(paging.getOnepagelist());
 
-		List<EmpResponse> list = empService.search(search);
+		List<EmpResponse> list = empService.search(search, comId, isAdmin);
 
 		return ResponseEntity.ok(Map.of(
 				"list", list,
@@ -67,10 +80,12 @@ public class EmpController {
 	@Operation(summary = "사원 상세 조회")
 	@GetMapping("/{empId}")
 	public ResponseEntity<Map<String, Object>> detail(
-			@Parameter(description = "사원 ID") @PathVariable long empId) {
+			Authentication auth,
+			@Parameter(description = "사원 ID") @PathVariable("empId") long empId) {
 
-		Long loginEmpId = SecurityUtil.getCurrentEmpId();
-		boolean isAdmin = SecurityUtil.isAdmin();
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		Long loginEmpId = authUserJwtService.getCurrentEmpId(auth);
+		boolean isAdmin = isAdmin(auth);
 
 		// 본인 또는 관리자만 조회 가능
 		if (empId != loginEmpId && !isAdmin) {
@@ -78,12 +93,12 @@ public class EmpController {
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
 
-		EmpResponse emp = empService.selectByEmpId(empId);
+		EmpResponse emp = empService.selectByEmpId(empId, comId);
 		if (emp == null) {
 			return ResponseEntity.notFound().build();
 		}
 
-		ReportResponse latestReport = evalReportService.selectLatestByEmpId(empId);
+		ReportResponse latestReport = evalReportService.selectLatestByEmpId(empId, comId);
 
 		// HashMap 사용: null 허용 + 키 생략 가능
 		// Map.of()는 null 값 → NPE, 빈 문자열 → 프론트에서 타입 혼동
@@ -102,12 +117,15 @@ public class EmpController {
 	// ─── 사원 등록 ────────────────────────────────────
 	@Operation(summary = "사원 등록")
 	@PostMapping
-	public ResponseEntity<?> add(@jakarta.validation.Valid @RequestBody EmpRequest request) {
+	public ResponseEntity<?> add(
+			Authentication auth,
+			@jakarta.validation.Valid @RequestBody EmpRequest request) {
 
-		int result = empService.insert(request);
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		int result = empService.insert(request, comId);
 
 		if (result > 0) {
-			EmpResponse saved = empService.selectByEmpId(request.getEmpId());
+			EmpResponse saved = empService.selectByEmpId(request.getEmpId(), comId);
 			return ResponseEntity.status(HttpStatus.CREATED).body(saved);
 		}
 		return ResponseEntity.badRequest()
@@ -119,11 +137,13 @@ public class EmpController {
 	@Operation(summary = "사원 정보 수정")
 	@PutMapping("/{empId}")
 	public ResponseEntity<?> edit(
-			@PathVariable long empId,
+			Authentication auth,
+			@PathVariable("empId") long empId,
 			@RequestBody EmpRequest request) {
 
-		Long loginEmpId = SecurityUtil.getCurrentEmpId();
-		boolean isAdmin = SecurityUtil.isAdmin();
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		Long loginEmpId = authUserJwtService.getCurrentEmpId(auth);
+		boolean isAdmin = isAdmin(auth);
 
 		if (empId != loginEmpId && !isAdmin) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -134,15 +154,15 @@ public class EmpController {
 
 		// 일반 사원이 관리자 전용 필드를 변경하지 못하도록 보정
 		if (!isAdmin) {
-			EmpResponse current = empService.selectByEmpId(empId);
+			EmpResponse current = empService.selectByEmpId(empId, comId);
 			request.setEmpName(current.getEmpName());
 			request.setDeptId(current.getDeptId());
 			request.setPosId(current.getPosId());
 			request.setEmpStatus(current.getEmpStatus());
 		}
 
-		empService.update(request);
-		EmpResponse updated = empService.selectByEmpId(empId);
+		empService.update(request, comId);
+		EmpResponse updated = empService.selectByEmpId(empId, comId);
 		return ResponseEntity.ok(updated);
 	}
 
@@ -151,10 +171,13 @@ public class EmpController {
 	@Operation(summary = "비밀번호 변경 (본인)")
 	@PutMapping("/{empId}/password")
 	public ResponseEntity<Map<String, String>> editPassword(
-			@PathVariable long empId,
+			Authentication auth,
+			@PathVariable("empId") long empId,
 			@RequestBody PasswordChangeRequest request) {
 
-		Long loginEmpId = SecurityUtil.getCurrentEmpId();
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		Long loginEmpId = authUserJwtService.getCurrentEmpId(auth);
+
 		if (empId != loginEmpId) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "본인만 변경할 수 있습니다."));
@@ -166,7 +189,7 @@ public class EmpController {
 					.body(Map.of("message", "새 비밀번호가 일치하지 않습니다."));
 		}
 
-		int result = empService.changePassword(empId, request.getCurrentPass(), request.getNewPass());
+		int result = empService.changePassword(empId, request.getCurrentPass(), request.getNewPass(), comId);
 
 		if (result == -1) {
 			return ResponseEntity.notFound().build();
@@ -182,14 +205,17 @@ public class EmpController {
 	// ─── 비밀번호 초기화 (관리자) ─────────────────────
 	@Operation(summary = "비밀번호 초기화 (관리자)")
 	@PutMapping("/{empId}/reset-password")
-	public ResponseEntity<Map<String, String>> resetPassword(@PathVariable long empId) {
+	public ResponseEntity<Map<String, String>> resetPassword(
+			Authentication auth,
+			@PathVariable("empId") long empId) {
 
-		if (!SecurityUtil.isAdmin()) {
+		if (!isAdmin(auth)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "관리자만 초기화할 수 있습니다."));
 		}
 
-		int result = empService.resetPassByEmpNo(empId);
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		int result = empService.resetPassByEmpNo(empId, comId);
 		if (result > 0) {
 			return ResponseEntity.ok(Map.of("message", "비밀번호가 사번으로 초기화되었습니다."));
 		}
@@ -198,10 +224,12 @@ public class EmpController {
 
 
 	// ─── 중복 검사 ────────────────────────────────────
+	// 이메일/연락처: 전역 유니크 → comId 불필요
+	// 사번: 회사 내에서만 유니크 → comId 필요
 	@Operation(summary = "이메일 중복 검사")
 	@GetMapping("/check-email")
 	public ResponseEntity<Map<String, Boolean>> checkEmail(
-			@RequestParam String empEmail) {
+			@RequestParam("email") String empEmail) {
 		return ResponseEntity.ok(
 				Map.of("duplicate", empService.isEmailDuplicate(empEmail)));
 	}
@@ -209,7 +237,7 @@ public class EmpController {
 	@Operation(summary = "연락처 중복 검사")
 	@GetMapping("/check-mobile")
 	public ResponseEntity<Map<String, Boolean>> checkMobile(
-			@RequestParam String empMobile) {
+			@RequestParam("empMobile") String empMobile) {
 		return ResponseEntity.ok(
 				Map.of("duplicate", empService.isMobileDuplicate(empMobile)));
 	}
@@ -217,8 +245,10 @@ public class EmpController {
 	@Operation(summary = "사번 중복 검사")
 	@GetMapping("/check-empno")
 	public ResponseEntity<Map<String, Boolean>> checkEmpNo(
-			@RequestParam String empNo) {
+			Authentication auth,
+			@RequestParam("empNo") String empNo) {
+		Long comId = authUserJwtService.getCurrentComId(auth);
 		return ResponseEntity.ok(
-				Map.of("duplicate", empService.isEmpNoDuplicate(empNo)));
+				Map.of("duplicate", empService.isEmpNoDuplicate(empNo, comId)));
 	}
 }

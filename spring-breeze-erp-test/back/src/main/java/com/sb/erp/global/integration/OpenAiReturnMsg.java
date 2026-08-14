@@ -13,9 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.annotation.PostConstruct;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,8 +27,8 @@ public class OpenAiReturnMsg {
 	private static final String CHAT_URL = "https://api.openai.com/v1/chat/completions";
 	
 	private final RestTemplate restTemplate = new RestTemplate();
-    private final JsonMapper jsonMapper = new JsonMapper();
-    
+    private final ObjectMapper objectMapper = new ObjectMapper();
+	
 	/**
      * systemPrompt(역할/톤 지시) + userPrompt(실제 상황 데이터)를 넣어 문장을 생성한다.
      * API 호출이 실패하더라도 알림 발송 자체는 끊기면 안 되므로,
@@ -62,7 +61,7 @@ public class OpenAiReturnMsg {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(CHAT_URL, request, String.class);
  
-            JsonNode root = jsonMapper.readTree(response.getBody());
+            JsonNode root = objectMapper.readTree(response.getBody());
             String content = root.path("choices").get(0).path("message").path("content").asText();
  
             if (content == null || content.isBlank()) {

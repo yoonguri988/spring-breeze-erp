@@ -1,0 +1,32 @@
+upload:
+  path: /your/upload/directory
+
+resource:
+  path: /your/resource/directory
+
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521/XEPDB1
+    username: sberp
+    password: sberp1234
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+  main:
+    allow-bean-definition-overriding: true
+
+mybatis:
+  config-location: classpath:mybatis-config.xml
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.sb.erp.**.dto,com.sb.erp.**.dto.**
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha

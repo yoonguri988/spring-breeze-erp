@@ -1,4 +1,4 @@
-﻿package com.sb.erp.pos.dto;
+package com.sb.erp.pos.dto;
 
 import lombok.Data;
 
