@@ -113,7 +113,8 @@ public class ProjectController {
 			@AuthenticationPrincipal CustomUserPrincipal principal){
 		ProjResponse dto = service.select(proId);
 		if (dto == null) {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+		            .body(Map.of("message", "해당 프로젝트를 찾을 수 없습니다."));
 		}
 		boolean isRoot = principal.getRoles().contains("ROOT");
 		if (!isRoot && !dto.getComId().equals(principal.getComId())) {
@@ -159,7 +160,8 @@ public class ProjectController {
 		
 		ProjResponse original = service.select(proId);
 		if (original == null) {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+		            .body(Map.of("message", "해당 프로젝트를 찾을 수 없습니다."));
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
@@ -188,7 +190,7 @@ public class ProjectController {
 
 		result.put("success", false);
 		result.put("message", "해당 프로젝트를 찾을 수 없습니다.");
-		return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
 	}
 
 	// 프로젝트 삭제
@@ -201,7 +203,8 @@ public class ProjectController {
 		
 		ProjResponse original = service.select(proId);
 		if (original == null) {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+		            .body(Map.of("message", "해당 프로젝트를 찾을 수 없습니다."));
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
@@ -229,8 +232,7 @@ public class ProjectController {
 
 		    result.put("success", false);
 		    result.put("message", "프로젝트 삭제 실패");
-
-		    return ResponseEntity.notFound().build();
+		    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
 	}
 	
 	// Ai 프로젝트 분석 결과
