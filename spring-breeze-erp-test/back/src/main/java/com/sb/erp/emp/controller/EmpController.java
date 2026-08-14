@@ -42,6 +42,7 @@ public class EmpController {
 	private final AuthUserJwtService authUserJwtService;
 
 	// 관리자 판별: getCurrentRoles()에 ROLE_ADMIN 또는 ROOT가 있는지 확인
+	// (추후 팀과 조율하여 AuthUserJwtService에 isAdmin(auth) 메서드 추가 검토 예정)
 	private boolean isAdmin(Authentication auth) {
 		List<String> roles = authUserJwtService.getCurrentRoles(auth);
 		return roles != null && (roles.contains("ROLE_ADMIN") || roles.contains("ROOT"));
@@ -49,7 +50,7 @@ public class EmpController {
 
 
 	// ─── 목록 조회 (검색 + 페이징) ────────────────────────
-	@Operation(summary = "사원 목록 조회", description = "사원 목록")
+	@Operation(summary = "사원 목록 조회", description = "검색 조건과 페이징을 적용한 사원 목록")
 	@GetMapping
 	public ResponseEntity<Map<String, Object>> list(
 			Authentication auth,

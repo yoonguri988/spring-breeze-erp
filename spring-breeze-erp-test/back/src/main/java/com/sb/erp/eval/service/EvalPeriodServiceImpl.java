@@ -26,31 +26,31 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 
 	// ─── 회차 조회 ────────────────────────────────────
 	@Override
-	public List<PeriodResponse> search(PeriodSearchRequest search) {
-		search.setComId(1L);
+	public List<PeriodResponse> search(PeriodSearchRequest search, Long comId) {
+		search.setComId(comId);
 		return evalPeriodMapper.search(search);
 	}
 
 	@Override
-	public PeriodResponse selectByPeriodId(long periodId) {
-		return evalPeriodMapper.selectByPeriodId(periodId, 1);
+	public PeriodResponse selectByPeriodId(long periodId, Long comId) {
+		return evalPeriodMapper.selectByPeriodId(periodId, comId);
 	}
 
 	@Override
-	public Map<String, Integer> countByStatusAll() {
-		return evalPeriodMapper.countByStatusAll(1);
+	public Map<String, Integer> countByStatusAll(Long comId) {
+		return evalPeriodMapper.countByStatusAll(comId);
 	}
 
 	// ─── 회차 등록/수정 ────────────────────────────────
 	@Override
-	public int insert(PeriodRequest dto) {
-		dto.setComId(1);
+	public int insert(PeriodRequest dto, Long comId) {
+		dto.setComId(comId);
 		return evalPeriodMapper.insert(dto);
 	}
 
 	@Override
-	public int update(PeriodRequest dto) {
-		dto.setComId(1);
+	public int update(PeriodRequest dto, Long comId) {
+		dto.setComId(comId);
 		return evalPeriodMapper.update(dto);
 	}
 
@@ -70,7 +70,7 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 			return -2;
 		}
 
-		return evalPeriodMapper.updateStatus(periodId, "OPEN", 1);
+		return evalPeriodMapper.updateStatus(periodId, "OPEN", comId);
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 			return -3;
 		}
 
-		return evalPeriodMapper.updateStatus(periodId, "CLOSED", 1);
+		return evalPeriodMapper.updateStatus(periodId, "CLOSED", comId);
 	}
 
 	@Override
@@ -120,9 +120,6 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 			return -2;
 		}
 
-
-		Long comId = 1L;
-
 		// 상태를 즉시 REPORTING으로 전환 (이 트랜잭션이 커밋되면 확정)
 		int result = evalPeriodMapper.updateStatus(periodId, "REPORTING", comId);
 		if (result != 1) {
@@ -146,8 +143,8 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 
 	// ─── 중복 확인 ────────────────────────────────────
 	@Override
-	public boolean isDuplicate(int evalYear, String evalTerm) {
-		return evalPeriodMapper.isDuplicate(evalYear, evalTerm, 1);
+	public boolean isDuplicate(int evalYear, String evalTerm, Long comId) {
+		return evalPeriodMapper.isDuplicate(evalYear, evalTerm, comId);
 	}
 
 	// ─── 하위 데이터 카운트 ──────────────────────────────
