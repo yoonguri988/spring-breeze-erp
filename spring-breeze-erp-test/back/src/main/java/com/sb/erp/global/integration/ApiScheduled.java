@@ -1,5 +1,6 @@
 package com.sb.erp.global.integration;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sb.erp.proj.service.ProjectService;
 import com.sb.erp.week.dto.response.*;
 import com.sb.erp.api.dto.request.ResvAlertRequest;
+import com.sb.erp.api.dto.response.ResvAlertResponse;
 import com.sb.erp.resv.repository.ReservationMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +69,7 @@ public class ApiScheduled {
 	private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
  
 	// 운영 시 트래픽/AI 호출 비용을 고려해 주기 조정 가능 (여기서는 1분마다)
-//	@Scheduled(cron = "0 */1 * * * *")
+	//@Scheduled(cron = "0 */1 * * * *")
 	public void noShowAutoAlert() {
 		List<ResvAlertResponse> targets = resDao.selectNoShowTargets();
  
@@ -114,7 +116,8 @@ public class ApiScheduled {
 		String fallback;
  
 		if (isRoom) {
-			String startTime = dto.getStartDt().format(TIME_FMT);
+			LocalDateTime startDt = dto.getStartDt();
+			String startTime = startDt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 			userPrompt = String.format(
 					"%s 님이 예약한 회의실 '%s'의 예약 시작 시간(%s)이 지났지만 이용 여부가 확인되지 않습니다. "
 					+ "이용하지 않을 경우 다른 사람이 예약할 수 있도록 취소 처리를 요청하는 메시지를 작성해줘.",
@@ -124,7 +127,8 @@ public class ApiScheduled {
 					"%s님, 회의실 '%s' 예약(%s~) 이용 확인이 안 됩니다. 미이용시 취소 부탁드립니다.",
 					dto.getEmpName(), dto.getResName(), startTime);
 		} else {
-			String endTime = dto.getEndDt().format(TIME_FMT);
+			LocalDateTime endDt = dto.getEndDt();
+			String endTime = endDt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 			String kindLabel = "EQUIPMENT".equals(dto.getResType()) ? "장비" : "차량";
  
 			userPrompt = String.format(

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,6 +46,11 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
+	@Value("${app.cookie.secure:false}")
+	private boolean cookieSecure;
+
+	@Value("${app.cookie.same-site:Lax}")
+	private String cookieSameSite;
 
 	private final JwtProperties props;      // JWT 출입증 (설정값)      
 	private final JwtProvider jwtProvider;  // JWT 토근생성/검증 ( access Token / refresh Token )
@@ -121,8 +126,21 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid refresh token"));
         }
 
-        List<String> roles = service.findAuthByUserId(Long.valueOf(empId));
-        String newAccessToken = jwtProvider.createAccessToken(empId, Map.of("roles", roles));
+        // roles만 넣으면 재발급된 accessToken에서 comId/empName/comName/empEmail 등이
+        // 빠져버려 프론트(decodeUser)가 로그인 직후와 다른(껍데기) user 객체를 만들게 된다.
+        // login()과 동일한 클레임 구성을 쓰도록 이메일/사번 등 전체 정보를 다시 조회한다.
+        AuthUserResponse user = service.readAuthByEmpId(Long.parseLong(empId));
+
+        String newAccessToken = jwtProvider.createAccessToken(
+                empId,
+                Map.of("comId", user.getComId(),
+                        "empNo", user.getEmpNo(),
+                        "empName", user.getEmpName(),
+                        "posName", user.getPosName(),
+                        "comName", user.getComName(),
+                        "empEmail", user.getEmpEmail(),
+                        "roles", user.getAuthList().stream().map(AuthResponse::getAutName).toList())
+        );
 
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
@@ -194,8 +212,8 @@ public class AuthController {
     private ResponseCookie buildRefreshCookie(String value, int maxAgeSeconds) {
         return ResponseCookie.from("refreshToken", value)
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite)
                 .path("/")
                 .maxAge(maxAgeSeconds)
                 .build();
