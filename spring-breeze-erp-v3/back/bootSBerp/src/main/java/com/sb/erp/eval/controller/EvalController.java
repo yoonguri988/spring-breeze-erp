@@ -6,21 +6,22 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.sb.erp.auth.service.AuthUserJwtService;
 import com.sb.erp.eval.dto.request.EvalRequest;
 import com.sb.erp.eval.dto.request.PeriodSearchRequest;
 import com.sb.erp.eval.dto.response.EvalResponse;
 import com.sb.erp.eval.dto.response.PeriodResponse;
 import com.sb.erp.eval.service.EvalPeriodService;
 import com.sb.erp.eval.service.EvalService;
-import com.sb.erp.util.dto.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "평가 REST API", description = "평가 작성 / 제출 / 조회")
+@Tag(name = "평가 상세", description = "평가 작성 / 제출 / 조회")
 @RestController
 @RequestMapping("/api/eval")
 @RequiredArgsConstructor
@@ -29,6 +30,13 @@ public class EvalController {
 
 	private final EvalService evalService;
 	private final EvalPeriodService evalPeriodService;
+	private final AuthUserJwtService authUserJwtService;
+
+	// 관리자 판별: getCurrentRoles()에 ROLE_ADMIN 또는 ROOT가 있는지 확인
+	private boolean isAdmin(Authentication auth) {
+		List<String> roles = authUserJwtService.getCurrentRoles(auth);
+		return roles != null && (roles.contains("ROLE_ADMIN") || roles.contains("ROOT"));
+	}
 
 
 	// ─── 평가 대시보드 데이터 ─────────────────────────
@@ -36,24 +44,28 @@ public class EvalController {
 		description = "periodId 미지정 시 OPEN 회차 목록만 반환. 지정 시 해당 회차의 평가 대상 + 진행률.")
 	@GetMapping("/dashboard")
 	public ResponseEntity<Map<String, Object>> dashboard(
-			@RequestParam(required = false) Long periodId) {
+			Authentication auth,
+			@RequestParam(name="periodId", required = false) Long periodId) {
+
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		Long empId = authUserJwtService.getCurrentEmpId(auth);
 
 		if (periodId == null) {
 			PeriodSearchRequest search = new PeriodSearchRequest();
 			search.setPeriodStatus("OPEN");
-			List<PeriodResponse> openPeriods = evalPeriodService.search(search);
+			List<PeriodResponse> openPeriods = evalPeriodService.search(search, comId);
 
 			return ResponseEntity.ok(Map.of("openPeriods", openPeriods));
 		}
 
-		PeriodResponse period = evalPeriodService.selectByPeriodId(periodId);
+		PeriodResponse period = evalPeriodService.selectByPeriodId(periodId, comId);
 		if (period == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.body(Map.of("message", "존재하지 않는 회차입니다."));
 		}
 
-		List<EvalResponse> targets = evalService.selectTargetsByCurrentEvaluator(periodId);
-		int submittedCount = evalService.countMySubmitted(periodId);
+		List<EvalResponse> targets = evalService.selectTargetsByEvaluator(periodId, empId);
+		int submittedCount = evalService.countSubmittedByEvaluator(periodId, empId);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("period", period);
@@ -67,12 +79,14 @@ public class EvalController {
 	// ─── 평가 단건 조회 ─────────────────────────────
 	@Operation(summary = "평가 상세 조회", description = "평가자 본인 또는 관리자만 조회 가능")
 	@GetMapping("/{evalId}")
-	public ResponseEntity<?> detail(@PathVariable long evalId) {
+	public ResponseEntity<?> detail(
+			Authentication auth,
+			@PathVariable("evalId") long evalId) {
 		EvalResponse eval = evalService.selectByEvalId(evalId);
 		if (eval == null) return ResponseEntity.notFound().build();
 
-		Long loginEmpId = SecurityUtil.getCurrentEmpId();
-		if (eval.getEvaluatorId() != loginEmpId && !SecurityUtil.isAdmin()) {
+		Long loginEmpId = authUserJwtService.getCurrentEmpId(auth);
+		if (eval.getEvaluatorId() != loginEmpId && !isAdmin(auth)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "본인이 작성한 평가만 조회할 수 있습니다."));
 		}
@@ -84,8 +98,12 @@ public class EvalController {
 	// ─── 임시 저장 ────────────────────────────────
 	@Operation(summary = "평가 임시 저장", description = "일부 점수만 채워도 저장 가능")
 	@PostMapping("/draft")
-	public ResponseEntity<Map<String, String>> saveDraft(@RequestBody EvalRequest request) {
-		int result = evalService.saveDraft(request);
+	public ResponseEntity<Map<String, String>> saveDraft(
+			Authentication auth,
+			@RequestBody EvalRequest request) {
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		Long empId = authUserJwtService.getCurrentEmpId(auth);
+		int result = evalService.saveDraft(request, empId, comId);
 		return buildResultResponse(result, "임시 저장했습니다.");
 	}
 
@@ -94,8 +112,11 @@ public class EvalController {
 	@Operation(summary = "평가 최종 제출", description = "모든 점수 + 코멘트 필수")
 	@PostMapping("/submit")
 	public ResponseEntity<Map<String, String>> submit(
+			Authentication auth,
 			@jakarta.validation.Valid @RequestBody EvalRequest request) {
-		int result = evalService.submit(request);
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		Long empId = authUserJwtService.getCurrentEmpId(auth);
+		int result = evalService.submit(request, empId, comId);
 		return buildResultResponse(result, "평가를 제출했습니다.");
 	}
 
