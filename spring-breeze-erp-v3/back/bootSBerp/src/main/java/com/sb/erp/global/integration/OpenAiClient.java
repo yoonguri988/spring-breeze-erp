@@ -30,7 +30,7 @@ import com.sb.erp.global.integration.openAi.ReportContent;
 @Component // Spring이 관리하는 일반 Bean
 public class OpenAiClient {
 
-    @Value("${openai.api.model}") private String model;
+    @Value("${jsj.openai.api.model}") private String model;
     // @Autowired로 필드 주입하는 대신 생성자 주입하기
     // 필드에 final을 붙일 수 있음 → 실수로 변경하지 않게
     private final RestClient openAiRestClient;
