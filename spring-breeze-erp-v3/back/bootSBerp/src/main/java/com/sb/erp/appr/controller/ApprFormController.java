@@ -25,7 +25,7 @@ import com.sb.erp.appr.dto.response.CodeCheckResponse;
 import com.sb.erp.appr.service.ApprFormService;
 import com.sb.erp.com.dto.response.ComResponse;
 import com.sb.erp.com.service.CompanyService;
-//import com.sb.erp.global.integration.OpenAiGpt;
+import com.sb.erp.global.integration.ApprFormAiService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -41,7 +41,7 @@ public class ApprFormController {
 
 	private final ApprFormService appr;
 	private final CompanyService com; // 회사 검색
-	//private final OpenAiGpt gpt;
+	private final ApprFormAiService gpt;
 	
 	// 양식 목록 조회 ( 검색 + 페이징 )
 	@Operation(summary = "양식 목록 조회", description = "검색 조건과 페이징으로 결재양식을 조회, 최신버전만 노출")

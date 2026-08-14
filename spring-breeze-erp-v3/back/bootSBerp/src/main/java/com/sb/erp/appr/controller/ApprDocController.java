@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.ApprLineResponse;
 import com.sb.erp.appr.service.ApprDocService;
 import com.sb.erp.dept.dto.response.DeptResponse;
+import com.sb.erp.global.oauth2.CustomUserPrincipal;
 import com.sb.erp.util.dto.PagingUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,25 +39,25 @@ import lombok.RequiredArgsConstructor;
 public class ApprDocController {
 
 	private final ApprDocService service;
-	
-	/*
-	 * 보안관련 수업 진행 이후에 수정해야함
-	 */
 
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
 
 	// 해당 회사에 있는 활성화된 양식 가져오기
 	@Operation(summary = "사용 가능한 양식 목록 조회", description = "해당 회사에서 사용 가능한 양식 조회")
 	@GetMapping("/getFormList")
-	public ResponseEntity<List<ApprFormResponse>> getFormList(@RequestParam Long comId) {
-		return ResponseEntity.ok(service.findForm(comId));
+	public ResponseEntity<List<ApprFormResponse>> getFormList(
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	) {
+		return ResponseEntity.ok(service.findForm(principal.getComId()));
 	}
 
 	// 문서 작성 폼 진입시 작성자 인적사항
 	@Operation(summary = "문서 작성 초기 정보 조회", description = "문서 작성 화면 진입시 필요한 작성자 인적사항을 조회")
 	@GetMapping("/write_doc")
-	public ResponseEntity<ApprDocInitResponse> writeDoc(@RequestParam Long empId) {
-		ApprDocInitResponse result = service.initResponse(empId);
+	public ResponseEntity<ApprDocInitResponse> writeDoc(
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	) {
+		ApprDocInitResponse result = service.initResponse(principal.getEmpId());
 		return ResponseEntity.ok(result);
 	}
 
@@ -65,10 +67,9 @@ public class ApprDocController {
 	public ResponseEntity<Void> writeDocPost(
 			@Valid
 			@RequestBody ApprDocRequest req,
-			@RequestParam Long empId,
-			@RequestParam Long comId
+			@AuthenticationPrincipal CustomUserPrincipal principal
     ) {
-		Long docId = service.insertDocAndLine(req, empId, comId);
+		Long docId = service.insertDocAndLine(req, principal.getEmpId(), principal.getComId());
 
 		URI location = URI.create("/appr/" + docId);
 		return ResponseEntity.created(location).build();
@@ -85,8 +86,10 @@ public class ApprDocController {
 			@RequestParam(required = false) String keyword,
 			@RequestParam(required = false) String status,
 			@RequestParam(defaultValue = "1") int page,
-			@RequestParam Long empId) {
+			@AuthenticationPrincipal CustomUserPrincipal principal) {
 
+		Long empId = principal.getEmpId();
+		
 		ApprDocSearchCondition condition = new ApprDocSearchCondition();
 		condition.setEmpId(empId);
 		condition.setTab(tab);
@@ -95,7 +98,7 @@ public class ApprDocController {
 		condition.setPage(page);
 
 		int myTodoCnt = service.selectMyTodoDocsCnt(condition);
-		Map<String, Object> docCnts = service.selectDocCnt(condition.getEmpId());
+		Map<String, Object> docCnts = service.selectDocCnt(empId);
 
 		int totalCnt = "todo".equals(tab) ?
 				myTodoCnt :
@@ -106,7 +109,7 @@ public class ApprDocController {
 		condition.setOnepagelist(paging.getOnepagelist());
 
 		List<ApprDocSummaryResponse> hisDocs = List.of();
-		List<ApprDocSummaryResponse> todoDocs = List.of();
+		List<ApprDocSummaryResponse> todoDocs = List.of();	
 
 		if ("todo".equals(tab)) {
 			todoDocs = service.selectMyTodoDocs(condition);
@@ -138,7 +141,7 @@ public class ApprDocController {
 	@GetMapping("/detail_doc/{docId}")
 	public ResponseEntity<Map<String, Object>> detailDoc(
 			@PathVariable Long docId,
-			@RequestParam Long empId
+			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 
 		ApprDocResponse doc = service.selectDocDetail(docId);
@@ -146,7 +149,7 @@ public class ApprDocController {
 
 		// 전체 결재선 목록에 결재상태가 'WAI'인 데이터가 있나 검증
 		boolean canProcess = lines.stream()
-				.anyMatch(l -> l.getEmpId().equals(empId) && "WAI".equals(l.getLinStatus()));
+				.anyMatch(l -> l.getEmpId().equals(principal.getEmpId()) && "WAI".equals(l.getLinStatus()));
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("doc", doc);
@@ -161,9 +164,9 @@ public class ApprDocController {
 	@PostMapping("/detail_doc/{docId}/app")
 	public ResponseEntity<Void> detailDocApp(
 			@PathVariable Long docId,
-			@RequestParam Long empId
+			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
-		service.processLine(docId, empId, "APP");
+		service.processLine(docId, principal.getEmpId(), "APP");
 		return ResponseEntity.noContent().build();
 	}
 
@@ -172,9 +175,9 @@ public class ApprDocController {
 	@PostMapping("/detail_doc/{docId}/rej")
 	public ResponseEntity<Void> detailDocRej(
 			@PathVariable Long docId,
-			@RequestParam Long empId
+			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
-		service.processLine(docId, empId, "REJ");
+		service.processLine(docId, principal.getEmpId(), "REJ");
 		return ResponseEntity.noContent().build();
 	}
 
@@ -185,8 +188,10 @@ public class ApprDocController {
 	// 기안자 상사들 목록
 	@Operation(summary = "기안자 상자 목록 조회", description = "기안자의 부서를 기준으로 결재선에 지정 가능한 상사 목록을 조회")
 	@GetMapping("/getApprLines")
-	public ResponseEntity<List<ApprLineResponse>> getApprLines(@RequestParam Long empId) {
-		return ResponseEntity.ok(service.approversByEmpId(empId));
+	public ResponseEntity<List<ApprLineResponse>> getApprLines(
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	) {
+		return ResponseEntity.ok(service.approversByEmpId(principal.getEmpId()));
 	}
 
 	// 결재선 지정 가능 인원수 / (service 부터 수정후 이쪽도 수정)
@@ -194,9 +199,9 @@ public class ApprDocController {
 	@GetMapping("/getDeptTree")
 	public ResponseEntity<List<DeptResponse>> getDeptTree(
 			@RequestParam Long deptId,
-			@RequestParam Long empId
+			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
-		return ResponseEntity.ok(service.cntApprovers(deptId, empId));
+		return ResponseEntity.ok(service.cntApprovers(deptId, principal.getEmpId()));
 	}
 
 	// 특정 부서 소속 사원 목록
