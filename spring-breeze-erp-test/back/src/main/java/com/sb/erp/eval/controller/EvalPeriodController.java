@@ -178,7 +178,7 @@ public class EvalPeriodController {
 
 	// ─── 중복 확인 ───────────────────────────────
 	@Operation(summary = "회차 중복 확인")
-	@GetMapping("/check-period")
+	@GetMapping("/check-duplicate")
 	public ResponseEntity<Map<String, Boolean>> checkDuplicate(
 			Authentication auth,
 			@RequestParam("evalYear") int evalYear,

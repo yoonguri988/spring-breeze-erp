@@ -44,7 +44,10 @@ public class AsyncConfig {
 
     /**
 	AI 리포트 배치 실행 전용 스레드 풀
-	래퍼가 작업 제출 시점의 SecurityContext를 async 스레드에 전파
+	DelegatingSecurityContextAsyncTaskExecutor로 감싸는 이유:
+	배치 안에서 호출되는 EvalReportService의 여러 DAO가 SecurityUtil을 사용
+	async 스레드에는 원래 SecurityContext가 없어서 comId=0 반환
+	이 래퍼가 작업 제출 시점의 SecurityContext를 async 스레드에 전파
 	*/
     @Bean(name = "reportExecutor")
     public Executor reportExecutor() {
