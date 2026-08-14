@@ -16,15 +16,15 @@ import {
 
 const APPR_API_BASE = "/appr";
 
-// 작성 가능한 양식 목록
-// GET /appr/getFormList?comId=
-export const fetchWritableFormsApi = (comId) =>
-    api.get(`${APPR_API_BASE}/getFormList`, {params: {comId}});
+// 작성 가능한 양식 목록 (토큰 comId)
+// GET /appr/getFormList
+export const fetchWritableFormsApi = () =>
+    api.get(`${APPR_API_BASE}/getFormList`);
 
-export function* fetchWritableForms(action) {
-    // payload -> comId
+export function* fetchWritableForms() {
+    // payload -> X
     try {
-        const result = yield call(fetchWritableFormsApi, action.payload);
+        const result = yield call(fetchWritableFormsApi);
         yield put(fetchWritableFormsSuccess(result.data));
     } catch (err) {
         yield put(fetchWritableFormsFailure(err.response?.data?.error || err.message));
@@ -35,15 +35,15 @@ function* watchFetchWritableForms() {
     yield takeLatest(fetchWritableFormsRequest.type, fetchWritableForms);
 }
 
-// 작성자 인적사항 조회
-// GET /appr/write_doc?empId=
-export const fetchWriterInfoApi = (empId) => 
-    api.get(`${APPR_API_BASE}/write_doc`,{params: {empId}});
+// 작성자 인적사항 조회 (토큰 empId)
+// GET /appr/write_doc
+export const fetchWriterInfoApi = () => 
+    api.get(`${APPR_API_BASE}/write_doc`);
 
-export function* fetchWriterInfo(action) {
-    // payload -> empId
+export function* fetchWriterInfo() {
+    // payload -> x
     try {
-        const result = yield call(fetchWriterInfoApi, action.payload);
+        const result = yield call(fetchWriterInfoApi);
         yield put(fetchWriterInfoSuccess(result.data));
     } catch (err) {
         yield put(fetchWriterInfoFailure(err.response?.data?.error || err.message));
@@ -54,13 +54,13 @@ function* watchFetchWriterInfo() {
     yield takeLatest(fetchWriterInfoRequest.type, fetchWriterInfo);
 }
 
-// 문서 작성
+// 문서 작성 (토큰에서 emp,com id값)
 // POST /appr/write_doc?empId= &comId=
-export const writeDocApi = ({empId, comId, data}) =>
-    api.post(`${APPR_API_BASE}/write_doc`, data, {params:{empId, comId}});
+export const writeDocApi = ({data}) =>
+    api.post(`${APPR_API_BASE}/write_doc`, data);
 
 export function* writeDoc(action) {
-    // payload -> {empId, comId, data}
+    // payload -> {data}
     try {
         yield call(writeDocApi, action.payload);
         yield put(writeDocSuccess());
@@ -73,13 +73,13 @@ function* watchWriteDoc() {
     yield takeLatest(writeDocRequest.type, writeDoc);
 }
 
-// 문서 목록 조회
-// GET /appr/list_doc?tab= &keyword= &status= &page= &empId=
+// 문서 목록 조회 (토큰 empid값)
+// GET /appr/list_doc?tab= &keyword= &status= &page= (&empId=)
 export const fetchDocListApi = (params) =>
     api.get(`${APPR_API_BASE}/list_doc`, {params});
 
 export function* fetchDocList(action) {
-    // payload ->{tab, keyword, status, page, empId}
+    // payload ->{tab, keyword, status, page}
     try {
         const result = yield call(fetchDocListApi, action.payload);
         yield put(fetchDocListSuccess(result.data));
@@ -92,13 +92,13 @@ function* watchFetchDocList() {
     yield takeLatest(fetchDocListRequest.type, fetchDocList);
 }
 
-// 문서 상세 조회
-// GET /appr/detail_doc/{docId}?empId=
-export const fetchDocDetailApi = ({docId, empId}) =>
-    api.get(`${APPR_API_BASE}/detail_doc/${docId}`, {params: {empId}});
+// 문서 상세 조회 (토큰 empId)
+// GET /appr/detail_doc/{docId}
+export const fetchDocDetailApi = ({docId}) =>
+    api.get(`${APPR_API_BASE}/detail_doc/${docId}`);
 
 export function* fetchDocDetail(action) {
-    // payload -> {docId, empId}
+    // payload -> {docId}
     try {
         const result = yield call(fetchDocDetailApi, action.payload);
         yield put(fetchDocDetailSuccess(result.data));
@@ -111,13 +111,13 @@ function* watchFetchDocDetail() {
     yield takeLatest(fetchDocDetailRequest.type, fetchDocDetail);
 }
 
-// 결재 승인
-// POST /appr/detail_doc/{docId}/app?empId=
-export const approveDocApi = ({docId, empId}) => 
-    api.post(`${APPR_API_BASE}/detail_doc/${docId}/app`,null, {params: {empId}});
+// 결재 승인 (토큰 empId)
+// POST /appr/detail_doc/{docId}/app
+export const approveDocApi = ({docId}) => 
+    api.post(`${APPR_API_BASE}/detail_doc/${docId}/app`, null);
 
 export function* approveDoc(action) {
-    // payload -> {docId, empId}
+    // payload -> {docId}
     try {
         yield call(approveDocApi, action.payload);
         yield put(approveDocSuccess());
@@ -130,13 +130,13 @@ function* watchApproveDoc() {
     yield takeLatest(approveDocRequest.type, approveDoc);
 }
 
-// 결재 반려
+// 결재 반려 (토큰 empId)
 // POST /appr/detail_doc/{docId}/rej?empid=
-export const rejectDocApi = ({docId, empId}) =>
-    api.post(`${APPR_API_BASE}/detail_doc/${docId}/rej`, null, {params: {empId}});
+export const rejectDocApi = ({docId}) =>
+    api.post(`${APPR_API_BASE}/detail_doc/${docId}/rej`, null);
 
 export function* rejectDoc(action) {
-    // payload -> {docId, empId}
+    // payload -> {docId}
     try {
         yield call(rejectDocApi, action.payload);
         yield put(rejectDocSuccess());
@@ -149,15 +149,15 @@ function* watchRejectDoc() {
     yield takeLatest(rejectDocRequest.type, rejectDoc);
 }
 
-// 기안자 상사 목록 조회
-// GET /appr/getApprLines?empId=
-export const fetchApprLinesApi = (empId) =>
-    api.get(`${APPR_API_BASE}/getApprLines`, {params: {empId}});
+// 기안자 상사 목록 조회 (토큰 empId)
+// GET /appr/getApprLines
+export const fetchApprLinesApi = () =>
+    api.get(`${APPR_API_BASE}/getApprLines`);
 
-export function* fetchApprLines(action) {
-    // payload -> empId
+export function* fetchApprLines() {
+    // payload -> x
     try {
-        const result = yield call(fetchApprLinesApi, action.payload);
+        const result = yield call(fetchApprLinesApi);
         yield put(fetchApprLinesSuccess(result.data));
     } catch (err) {
         yield put(fetchApprLinesFailure(err.response?.data?.error || err.message));
@@ -168,13 +168,13 @@ function* watchFetchApprLines() {
     yield takeLatest(fetchApprLinesRequest.type, fetchApprLines);
 }
 
-// 부서 체인 + 지정 가능 인원수 조회
-// GET /appr/getDeptTree?deptId= &empId=
-export const fetchDeptTreeApi = ({deptId, empId}) =>
-    api.get(`${APPR_API_BASE}/getDeptTree`, {params: {deptId, empId}});
+// 부서 체인 + 지정 가능 인원수 조회 (토큰 empId)
+// GET /appr/getDeptTree?deptId=
+export const fetchDeptTreeApi = ({deptId}) =>
+    api.get(`${APPR_API_BASE}/getDeptTree`, {params: {deptId}});
 
 export function* fetchDeptTree(action) {
-    // payload -> {deptId, empId}
+    // payload -> {deptId}
     try {
         const result = yield call(fetchDeptTreeApi, action.payload);
         yield put(fetchDeptTreeSuccess(result.data));
