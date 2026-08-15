@@ -1,4 +1,24 @@
 @charset "UTF-8";
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family:
+    "Pretendard Variable",
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.login-page {
+  display: flex;
+  background: #fff;
+}
 .aw {
   display: flex;
   width: 100%;
@@ -94,8 +114,7 @@
   border-radius: 10px;
   padding: 11px 16px;
 }
-.ab-feat i,
-.ab-feat span.anticon {
+.ab-feat i {
   font-size: 17px;
   flex: 0 0 auto;
   opacity: 0.9;
@@ -295,7 +314,8 @@ body.reset-page {
   background: var(--sb-green-soft);
   color: var(--sb-green);
 }
-.pw-req i {
+.pw-req i,
+.pw-req .anticon {
   font-size: 11px;
 }
 
@@ -390,6 +410,88 @@ body.reset-page {
   border-color: var(--sb-red) !important;
   box-shadow: 0 0 0 3px var(--sb-red-soft) !important;
 }
+
+/* antd Input에 prefix/suffix(아이콘)를 넣으면 우리가 준 className="fi"는
+   실제 <input>이 아니라 그걸 감싸는 span.ant-input-affix-wrapper 쪽에
+   붙는다 (안쪽 input은 계속 ant-input 클래스만 가짐). 위 .fi 규칙은
+   raw <input class="fi"> 전용이라 그 경우엔 적용되지 않으므로,
+   wrapper/내부 input 각각에 맞춰 같은 모양을 재정의한다. */
+.ant-input-affix-wrapper.fi {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 50px;
+  border: 1.5px solid var(--sb-border);
+  border-radius: var(--sb-radius);
+  padding: 0 15px;
+  background: #fff;
+  box-shadow: none;
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s;
+}
+.ant-input-affix-wrapper.fi:hover {
+  border-color: var(--sb-border-strong);
+}
+.ant-input-affix-wrapper.fi.ant-input-affix-wrapper-focused,
+.ant-input-affix-wrapper.fi:focus-within {
+  border-color: var(--sb-accent);
+  box-shadow: 0 0 0 3px var(--sb-accent-soft);
+}
+.ant-input-affix-wrapper.fi.ant-input-affix-wrapper-status-error {
+  border-color: var(--sb-red) !important;
+  box-shadow: 0 0 0 3px var(--sb-red-soft) !important;
+}
+.ant-input-affix-wrapper.fi .ant-input {
+  height: auto;
+  border: none;
+  padding: 0;
+  margin: 0 0 0 10px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--sb-ink);
+  background: transparent;
+  box-shadow: none;
+}
+.ant-input-affix-wrapper.fi .ant-input::placeholder {
+  color: var(--sb-ink-faint);
+  font-size: 14px;
+}
+.ant-input-affix-wrapper.fi .ant-input-prefix {
+  margin-right: 0;
+  color: var(--sb-ink-faint);
+  font-size: 16px;
+}
+.ant-input-affix-wrapper.fi .ant-input-suffix {
+  margin-left: 8px;
+  color: var(--sb-ink-faint);
+  font-size: 16px;
+}
+.ant-input-affix-wrapper.fi .ant-input-suffix .anticon:hover {
+  color: var(--sb-ink-soft);
+}
+/* prefix 없이 순수 antd Input(.fi)로 쓰는 경우 대비 */
+input.ant-input.fi {
+  display: block;
+  width: 100%;
+  height: 50px;
+  border: 1.5px solid var(--sb-border);
+  border-radius: var(--sb-radius);
+  padding: 0 15px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--sb-ink);
+  background: #fff;
+  box-shadow: none;
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s;
+}
+input.ant-input.fi:focus {
+  border-color: var(--sb-accent);
+  box-shadow: 0 0 0 3px var(--sb-accent-soft);
+}
+
 .f-icon {
   position: absolute;
   right: 14px;
@@ -465,6 +567,12 @@ body.reset-page {
   box-shadow: none;
   cursor: not-allowed;
 }
+/* antd Button은 icon 뒤 텍스트 span에 기본 margin-left:8px 를 자동으로
+   붙이는데, 위에서 이미 gap:8px 를 쓰고 있어 합치면 16px 로 벌어진다.
+   중복분 제거. */
+.a-btn.ant-btn > .anticon + span {
+  margin-left: 0;
+}
 
 .a-link {
   background: none;
@@ -517,6 +625,26 @@ body.reset-page {
   font-size: 15px;
   flex: 0 0 auto;
   margin-top: 1px;
+}
+/* antd Alert(className="a-alert on")는 루트가 div 하나뿐이라 wrapper
+   문제는 없지만, antd 기본 스킨(패딩/배경/보더)이 덧씌워지므로 내부
+   구조(ant-alert-icon / ant-alert-content / ant-alert-message)에 맞춰
+   위 .a-alert 디자인을 그대로 재현한다. */
+.ant-alert.a-alert .ant-alert-icon {
+  position: static;
+  margin-right: 0;
+  margin-top: 1px;
+  font-size: 15px;
+  color: #b91c1c;
+}
+.ant-alert.a-alert .ant-alert-content {
+  padding: 0;
+}
+.ant-alert.a-alert .ant-alert-message {
+  font-size: 13.5px;
+  color: #b91c1c;
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 .a-success {
@@ -573,67 +701,4 @@ body.reset-page {
     border-radius: var(--sb-radius-lg);
     box-shadow: var(--sb-shadow-lg);
   }
-}
-
-/* ==========================================================================
-   antd Form/Input/Button 오버라이드 (login.js 등 .asec 내부에서만 적용)
-   antd는 prefix/suffix가 있으면 <input>이 아니라 .ant-input-affix-wrapper를
-   렌더링하므로, 원래 .fi에 주던 스타일을 이 클래스에 직접 얹습니다.
-   ========================================================================== */
-.asec .ant-form-item-label > label {
-  font-size: 12.5px;
-  font-weight: 650;
-  color: var(--sb-ink-soft);
-  letter-spacing: 0.02em;
-}
-.asec .ant-input-affix-wrapper,
-.asec .ant-input:not(.ant-input-affix-wrapper .ant-input) {
-  height: 50px;
-  border: 1.5px solid var(--sb-border);
-  border-radius: var(--sb-radius);
-  font-size: 15px;
-  padding: 0 15px;
-}
-.asec .ant-input-affix-wrapper .ant-input {
-  font-size: 15px;
-}
-.asec .ant-input-affix-wrapper:hover,
-.asec .ant-input:hover {
-  border-color: var(--sb-accent);
-}
-.asec .ant-input-affix-wrapper-focused,
-.asec .ant-input-affix-wrapper:focus-within,
-.asec .ant-input:focus {
-  border-color: var(--sb-accent) !important;
-  box-shadow: 0 0 0 3px var(--sb-accent-soft) !important;
-}
-.asec .ant-input-prefix {
-  color: var(--sb-ink-faint);
-  margin-right: 10px;
-}
-.asec .ant-form-item-has-error .ant-input-affix-wrapper,
-.asec .ant-form-item-has-error .ant-input {
-  border-color: var(--sb-red) !important;
-}
-
-.asec .ant-btn.ant-btn-primary {
-  height: 52px;
-  border-radius: var(--sb-radius);
-  background: var(--sb-accent);
-  border-color: var(--sb-accent);
-  font-size: 15.5px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.28);
-}
-.asec .ant-btn.ant-btn-primary:hover,
-.asec .ant-btn.ant-btn-primary:focus {
-  background: var(--sb-accent-hover);
-  border-color: var(--sb-accent-hover);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.36);
-}
-.asec .ant-btn.ant-btn-primary[disabled] {
-  background: #9db5e8;
-  border-color: #9db5e8;
-  box-shadow: none;
 }
