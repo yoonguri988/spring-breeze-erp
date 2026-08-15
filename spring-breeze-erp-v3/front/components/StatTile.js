@@ -1,16 +1,13 @@
-import { Card } from "antd";
-
+// components/StatTile.js
 function StatTile({ icon, tone, label, value }) {
   return (
-    <Card bordered className={`sb-stat tone-${tone}`} bodyStyle={{ padding: 16 }}>
-      <div className="sb-stat__top" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div className="sb-stat__ico">{icon}</div>
+    <div className="sb-stat">
+      <div className="sb-stat__top">
+        <div className={`sb-stat__ico tone-${tone}`}>{icon}</div>
         <div className="sb-stat__label">{label}</div>
       </div>
-      <div className="sb-stat__val" style={{ fontSize: 22, fontWeight: 700 }}>
-        {value ?? "-"}
-      </div>
-    </Card>
+      <div className="sb-stat__val">{value ?? "-"}</div>
+    </div>
   );
 }
 

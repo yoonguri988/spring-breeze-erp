@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sb.erp.auth.service.AuthUserJwtService;
 import com.sb.erp.emp.dto.request.EmpRequest;
 import com.sb.erp.emp.service.EmpService;
+import com.sb.erp.res.dto.request.DeleteResRequest;
 import com.sb.erp.res.dto.request.ResRequest;
 import com.sb.erp.res.dto.request.ResSearchRequest;
 import com.sb.erp.res.dto.response.ResResponse;
@@ -153,7 +154,7 @@ public class ResourceController {
     public ResponseEntity<Map<String, Object>> deleteResource(
             @Parameter(description = "삭제할 자원 ID", example = "1", required = true)
             @PathVariable("resId") long resId,
-            @RequestBody EmpRequest empDto,
+            @Valid @RequestBody DeleteResRequest request,
             @Parameter(hidden = true) Authentication authentication) {
         Map<String, Object> result = new HashMap<>();
  
@@ -166,14 +167,15 @@ public class ResourceController {
         }
  
         // 비밀번호는 로그인 본인 것으로만 검증
-        empDto.setEmpId(authUserJwtService.getCurrentEmpId(authentication));
-        boolean matched = empService.matchPassword(empDto);
-        if (!matched) {
-            result.put("success", false);
-            result.put("reason", "passwordMismatch");
-            result.put("message", "비밀번호가 올바르지 않습니다.");
-            return ResponseEntity.badRequest().body(result);
-        }
+		Long empId = authUserJwtService.getCurrentEmpId(authentication);
+		EmpRequest dto = new EmpRequest();
+		dto.setEmpId(empId);
+		dto.setEmpPass(request.getPassword());
+ 
+		boolean matched = empService.matchPassword(dto);
+		if (!matched) {
+			return ResponseEntity.badRequest().body(Map.of("message", "비밀번호가 올바르지 않습니다."));
+		}
  
         // 예약 처리 중인 자원의 경우 삭제 불가
         int resvCount = resvService.countReservationsByResourceId(resId);

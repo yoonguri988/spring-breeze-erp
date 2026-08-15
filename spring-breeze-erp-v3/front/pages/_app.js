@@ -37,10 +37,10 @@ function MyApp({ Component, pageProps }) {
     router.pathname.startsWith(p),
   );
 
-  // 새로고침/재방문 시 쿠키의 accessToken을 디코딩해서 로그인 상태 복원
   useEffect(() => {
+    if (isBareLayout) return;
     dispatch(loadUserRequest());
-  }, [dispatch]);
+  }, [dispatch, isBareLayout]);
 
   if (isBareLayout) {
     // 로그인 / 비밀번호 재설정 등 → AppLayout(사이드바/헤더/푸터) 미적용
