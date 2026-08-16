@@ -5,7 +5,7 @@ import {
     Table, Input, Select, Button, Space, Tag,
     Tabs, Row, Col, Statistic, Card
 } from "antd";
-import { fetchFormDetailRequest } from "../../../reducers/appr/apprFormReducer";
+import { fetchDocListRequest } from "../../../reducers/appr/apprDocReducer";
 
 const { Option } = Select;
 
@@ -65,8 +65,8 @@ export default function DocListPage() {
             title: "관리",
             key: "action",
             width: 100,
-            render: (_, recode) => (
-                <Button size="small" onClick={() => router.push(`/appr/docs/${record.docId}`)}>
+            render: (_, record) => (
+                <Button size="small" onClick={() => router.push(`/appr/docs/detail?docId=${record.docId}`)}>
                     상세
                 </Button>
             ),
@@ -109,7 +109,7 @@ export default function DocListPage() {
                     <Card>
                         <Statistic
                             title="진행중"
-                            value={}
+                            value={docCnts?.INGCNT ?? 0}
                         />
                     </Card>
                 </Col>
@@ -117,7 +117,8 @@ export default function DocListPage() {
                     <Card>
                         <Statistic
                             title="내 할일"
-                            value={}
+                            value={myTodoCnt ?? 0}
+                            valueStyle={{color: "#1677ff"}}
                         />
                     </Card>
                 </Col>
@@ -125,20 +126,56 @@ export default function DocListPage() {
 
             <Space>
                 <Input.Search
+                    onSearch={(value) => {
+                        setKeyword(value);
+                        setCurrentPage(1);
+                    }}
+                    style={{width: 240}}
+                    allowClear
                 />
                 {/* status 필터는 history 탭에서만 todo는 항상 ING+WAI */}
-                {tab === "history" ** (
-                    <Select>
-                        <Option></Option>
-                        <Option></Option>
-                        <Option></Option>
+                {tab === "history" && (
+                    <Select
+                        placeholder="상태"
+                        allowClear
+                        style={{width: 120}}
+                        onChange={(value) => {
+                            setStatus(value);
+                            setCurrentPage(1);
+                        }}
+                    >
+                        <Option value="ING">진행중</Option>
+                        <Option value="APP">승인</Option>
+                        <Option value="REJ">반려</Option>
                     </Select>
                 )}
-                <Button></Button>
+                <Button type="primary" onClick={() => router.push("/appr/docs/write")}>
+                    문서 작성
+                </Button>
             </Space>
 
-            <Tabs/>
-            <Table/>
+            <Tabs
+                activeKey={tab}
+                onChange={handleTabChange}
+                items={[
+                    {key: "history", label: "결재 이력"},
+                    {key: "todo", label: `내 할일${myTodoCnt ? `(${myTodoCnt})` : ""}`},
+                ]}
+            />
+            <Table
+                rowKey="docId"
+                columns={columns}
+                dataSource={dataSource}
+                loading={listLoading}
+                pagination={{
+                    current: paging?.current || currentPage,
+                    pageSize: paging?.onepagelist || 10,
+                    total: paging?.listtotal || 0,
+                    onChange: (p) => setCurrentPage(p),
+                }}
+            />
+
+            {listError && <div style={{color: "red", marginTop: 8}}>{listError}</div>}
         </div>
     </>);
 }
