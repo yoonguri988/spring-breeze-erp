@@ -10,6 +10,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +23,10 @@ import jakarta.servlet.http.HttpServletResponse;
  * - Authorization 헤더에서 Bearer 토큰추출
  * - JwtProvider로 Claims파싱
  * - CustomUserPincipal 기반   Pincipal 생성후 SecurityContext에 저장
+ * - 토큰이 없거나 만료/무효해도 여기서 응답을 끝내지 않는다.
+ *   (그냥 인증 안 된 상태로 다음 필터로 넘기고, 최종적으로 401/403 여부는
+ *    SecurityConfig의 authenticationEntryPoint/accessDeniedHandler가 결정한다.
+ *    /auth/** 같은 permitAll 경로는 이렇게 해야 막히지 않는다.)
  * */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -49,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             try {
-            	logger.debug("====== [Filter] 추출된 토큰: " + token);
                 Claims claims = jwtProvider.parse(token).getBody();  
                 // subject  →  empId, comId, empEmail, role
                 Long empId = Long.parseLong(claims.getSubject());
@@ -70,16 +75,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                  SecurityContextHolder.getContext().setAuthentication(auth);
  
-                 logger.debug("====== [Filter] SecurityContext에 인증 정보 저장 완료! ======");
-            } catch (Exception e) {
-            	//토큰파싱, 검증시 에러나는지 확인
-            	System.out.println("에러 원인: " + e.getMessage());
-                e.printStackTrace(); 
-                
+                 logger.debug("[Filter] SecurityContext에 인증 정보 저장 완료 (empId=" + empId + ")");
+            } catch (ExpiredJwtException e) {
+            	// 정상적으로 발생할 수 있는 상황(accessToken 만료) → 스택트레이스 없이 debug 로그만
+            	logger.debug("[Filter] accessToken 만료: " + e.getMessage());
+                SecurityContextHolder.clearContext();
+            } catch (JwtException | IllegalArgumentException e) {
+            	// 서명 위조, 형식 오류 등 실제 이상 케이스만 warn 로 남긴다
+            	logger.warn("[Filter] 유효하지 않은 토큰: " + e.getMessage());
                 SecurityContextHolder.clearContext();
             }
         } else { 
-        	logger.debug("  [Filter] Authorization 헤더가 누락되었거나 Bearer 형식이 아닙니다.");
+        	logger.debug("[Filter] Authorization 헤더가 누락되었거나 Bearer 형식이 아닙니다.");
         }
 
         chain.doFilter(request, response);
