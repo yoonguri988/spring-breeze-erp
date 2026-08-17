@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -28,6 +27,7 @@ import com.sb.erp.proj.service.ProjectMemberService;
 import com.sb.erp.proj.service.ProjectService;
 import com.sb.erp.task.dto.request.TaskSearchRequest;
 import com.sb.erp.task.service.TaskService;
+import com.sb.erp.util.dto.PagingUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,11 +55,14 @@ public class ProjectController {
 		if (!isRoot) {
 			search.setComId(principal.getComId());
 		}
-
-		List<ProjResponse> list = service.selectAll(search);
+		
+		int totalCnt = service.selectCnt(search);              // 전체 데이터 수
+		PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
+		List<ProjResponse> list = service.selectAll(search);    // 목록 조회
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("list", list);
+		result.put("paging", paging);
 		return ResponseEntity.ok(result);
 	}	
 	
@@ -102,6 +105,7 @@ public class ProjectController {
 	@GetMapping("/{proId}")
 	public ResponseEntity<Map<String, Object>> getProjectDetail(
 			@PathVariable("proId") Long proId,
+			@RequestParam(defaultValue = "1") int pstartno,
 			@AuthenticationPrincipal CustomUserPrincipal principal){
 
 		ProjResponse dto = service.select(proId);
@@ -125,14 +129,19 @@ public class ProjectController {
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
 
+		 // 태스크 페이징 처리
+	    int taskTotalCnt = taskService.selectCnt(proId);
+	    PagingUtil paging = new PagingUtil(taskTotalCnt, pstartno);
+
 	    TaskSearchRequest taskSearch = new TaskSearchRequest();
 	    taskSearch.setProId(proId);
+	    taskSearch.setPstartno((pstartno - 1) * taskSearch.getOnepagelist());
 	    
 	    Map<String, Object> result = new HashMap<>();
-	    result.put("dto", dto);
+	    result.put("dto",dto);
 	    result.put("list", taskService.selectAll(taskSearch));
+	    result.put("paging", paging);
 	    result.put("memberList", memberService.select(proId));
-
 	    return ResponseEntity.ok(result);
 	}
 	
