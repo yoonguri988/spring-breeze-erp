@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Input, Button, Alert } from "antd";
+import { Form, Input, Button, Alert, message } from "antd";
 import {
   MailOutlined,
   LockOutlined,
@@ -31,6 +31,21 @@ export default function LoginPage() {
   const [forgotForm] = Form.useForm();
 
   const prevLoading = useRef(false);
+
+  // accessToken, refreshToken 이 모두 만료된 상태에서 api 호출 시
+  // api/axios.js 인터셉터가 "/auth/login?reason=session_expired" 로 강제 이동시킨 경우 안내
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (router.query.reason === "session_expired") {
+      message.warning("로그인 정보가 없습니다. 다시 로그인해 주세요.");
+      // 새로고침 시 메시지가 다시 뜨지 않도록 쿼리스트링 정리
+      const { reason, ...rest } = router.query;
+      router.replace({ pathname: "/auth/login", query: rest }, undefined, {
+        shallow: true,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, router.query.reason]);
 
   // 로그인 성공(accessToken 발급) → 메인으로 이동
   // 본인 확인 성공(success) → 비밀번호 재설정 페이지로 이동

@@ -31,14 +31,49 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error), // 요청에러처리
 );
+
+// 동시 요청용 refreshToken 상태 관리
+let isRefreshing = false;
+let refreshQueue = [];
+
+const processQueue = (error, token = null) => {
+  refreshQueue.forEach((p) => {
+    if (error) p.reject(error);
+    else p.resolve(token);
+  });
+  refreshQueue = [];
+};
+
 api.interceptors.response.use(
   (res) => res, // 정상 응답 그대로 반환
   async (error) => {
     const original = error.config; // 원래 요청 정보
     const status = error.response?.status; // 응답 상태 코드
+
+    // refresh 요청 자체가 실패한 경우 → 재귀 방지, 즉시 로그아웃 처리
+    if (original?.url?.includes("/auth/refresh")) {
+      if (typeof window !== "undefined") {
+        Cookies.remove("accessToken");
+        window.location.href = "/auth/login";
+      }
+      return Promise.reject(error);
+    }
+
     // 401 발생 Refresh Token 재발급
     if (status === 401 && !original._retry) {
+      // 이미 refresh 진행 중이면 큐에 대기했다가 새 토큰으로 재시도
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          refreshQueue.push({ resolve, reject });
+        }).then((newToken) => {
+          original.headers.Authorization = `Bearer ${newToken}`;
+          return api(original);
+        });
+      }
+
       original._retry = true; //무한 루프 방지 플래그
+      isRefreshing = true;
+
       try {
         const { data } = await api.post("/auth/refresh");
         const newAccessToken = data?.accessToken;
@@ -48,15 +83,19 @@ api.interceptors.response.use(
           Cookies.set("accessToken", newAccessToken);
         }
 
+        processQueue(null, newAccessToken); // 대기 중인 요청 재시도
         original.headers.Authorization = `Bearer ${newAccessToken}`; // 원 요청 헤어 갱신
         return api(original);
       } catch (refreshErr) {
+        processQueue(refreshErr, null);
         if (typeof window !== "undefined") {
           // localStorage.removeItem("accessToken"); // Access Token 제거
           Cookies.remove("accessToken"); // Access Token 제거
           window.location.href = "/auth/login"; // 로그인 페이지로 이동 (실제 로그인 라우트는 /login이 아니라 /auth/login)
         }
         return Promise.reject(refreshErr);
+      } finally {
+        isRefreshing = false;
       }
     }
 

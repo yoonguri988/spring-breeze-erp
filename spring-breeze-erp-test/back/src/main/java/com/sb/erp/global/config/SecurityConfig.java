@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.sb.erp.global.security.JwtAuthenticationFilter;
 import com.sb.erp.global.security.JwtProvider;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -40,6 +42,14 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // 세션 설정
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // JWT 전용 stateless API이므로 anonymous 인증을 비활성화한다.
+            // (비활성화하지 않으면 Spring Security가 인증 안 된 요청에도 항상 익명
+            //  Authentication을 채워 넣어서, /api/** 의 .authenticated() 실패가
+            //  전부 AccessDeniedException(→ accessDeniedHandler, 403)으로만 처리되고
+            //  authenticationEntryPoint(401)가 절대 호출되지 않는다.
+            //  프론트 axios 인터셉터는 401을 봐야 refreshToken 재발급을 시도하므로
+            //  "토큰 없음/만료/무효"는 반드시 401로 떨어져야 한다.)
+            .anonymous(AbstractHttpConfigurer::disable)
             // 권한 설정
             .authorizeHttpRequests(auth -> auth
             	//Swagger 인증관련경로 권한 설정
@@ -74,10 +84,22 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
-            .exceptionHandling(ex -> ex.accessDeniedHandler((request, response, accessDeniedException) -> {
-                request.getSession().setAttribute("accessDeniedMsg", "접근 권한이 없습니다.");
-                response.sendRedirect(request.getContextPath() + "/");
-            }))
+            .exceptionHandling(ex -> ex
+                // 인증 자체가 안 된 경우(토큰 없음/만료/무효) → 401 JSON
+                // 프론트 axios 인터셉터가 이 401을 보고 refreshToken으로 accessToken 재발급을 시도한다.
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\":\"UNAUTHORIZED\"}");
+                })
+                // 인증은 됐지만 권한이 부족한 경우 → 403 JSON
+                // (기존의 세션 attribute + sendRedirect는 stateless JSON API에 맞지 않아 제거)
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\":\"FORBIDDEN\"}");
+                })
+            )
             // 시큐리티 체인 안에서 동작
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();

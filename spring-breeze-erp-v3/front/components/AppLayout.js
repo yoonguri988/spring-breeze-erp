@@ -50,7 +50,7 @@ function AppLayout({ children }) {
       <Sider
         className="sb-sidebar"
         id="sbSidebar"
-        theme="light" 
+        theme="light"
         width={248}
         collapsedWidth={72}
         collapsed={isRail}
@@ -60,7 +60,12 @@ function AppLayout({ children }) {
       </Sider>
       <Layout className="sb-main">
         <Header onToggleSidebar={toggleLayout} />
-        <Content className="sb-content">{children}</Content>
+        <Content
+          className="sb-content"
+          style={{ display: "flex", flexDirection: "column", flex: "1 0 auto" }}
+        >
+          {children}
+        </Content>
         <Footer />
       </Layout>
     </Layout>
