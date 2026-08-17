@@ -11,7 +11,7 @@ import resvSaga from "./resv/resvSaga";
 import adminResvSaga from "./resv/adminResvSaga";
 import apprFormSaga from "./appr/apprFormSaga";
 import apprDocSaga from "./appr/apprDocSaga";
-// import empSaga from './emp/empSaga';
+import empSaga from "./emp/empSaga";
 // import posSaga from './pos/posSaga';
 // import evalSaga from './eval/evalSaga';
 // import evalPeriodSaga from './eval/evalPeriodSaga';
@@ -35,7 +35,7 @@ export default function* rootSaga() {
     fork(adminResvSaga),
     fork(apprFormSaga),
     fork(apprDocSaga),
-    // fork(empSaga),
+    fork(empSaga),
     // fork(posSaga),
     // fork(permSaga),
     // fork(evalSaga),

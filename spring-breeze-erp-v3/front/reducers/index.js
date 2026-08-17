@@ -10,7 +10,7 @@ import resvReducer from "./resv/resvReducer";
 import adminResvReducer from "./resv/adminResvReducer";
 import apprFormReducer from "./appr/apprFormReducer";
 import apprDocReducer from "./appr/apprDocReducer";
-// import empReducer from './emp/empReducer';
+import empReducer from "./emp/empReducer";
 // import posReducer from './pos/posReducer';
 // import permReducer from './perm/permReducer';
 // import evalReducer from './eval/evalReducer';
@@ -28,13 +28,13 @@ const rootReducer = combineReducers({
   dept: deptReducer, // state.dept
   deptTransfer: deptTransferReducer, // state.deptTransfer
   apiUtil: apiUtilReducer, // state.apiUtil
-  res: resourceReducer, // state.res
+  resource: resourceReducer, // state.resource
   resv: resvReducer, // state.resv
   adminResv: adminResvReducer, // state.adminResv
   apprForm: apprFormReducer, // state.apprForm
   apprDoc: apprDocReducer, // state.apprDoc
 
-  // emp: empReducer,  // state.emp
+  emp: empReducer, // state.emp
   // pos: posReducer,  // state.pos
   // perm: permReducer,  // state.perm
   // eval: evalReducer,  // state.eval
