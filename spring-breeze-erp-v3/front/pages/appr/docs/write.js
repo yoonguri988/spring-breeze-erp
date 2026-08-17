@@ -42,7 +42,7 @@ export default function DocWritePage() {
     const [docContent, setDocContent] = useState("");
     // empId, empName, posName 순서대로
     const [approvers, setApprovers] = useState([]);
-    const [selectDeptId, setSelectDeptId] = useState(null);
+    const [selectedDeptId, setSelectedDeptId] = useState(null);
 
     // 초기진입시 작성자 정보 + 사용 가능항 양식 목록 조회
     useEffect(() => {
@@ -134,11 +134,11 @@ export default function DocWritePage() {
     }, [apprLines]);
 
     const handleDeptSelect = (deptId) => {
-        setSelectDeptId(deptId);
+        setSelectedDeptId(deptId);
         dispatch(fetchDeptEmpsRequest(deptId));
     };
 
-    const handleSubmit = (value) => {
+    const handleSubmit = (values) => {
         if (!docContent.trim()) {
             message.error("문서 내용을 입력해주세요.");
             return;
@@ -180,7 +180,7 @@ export default function DocWritePage() {
                                 key={`${f.forId}-${f.forVersion}`}
                                 value={`${f.forId}-${f.forVersion}`}
                             >
-                                {f.forTitle} (v{forVersion})
+                                {f.forTitle} (v{f.forVersion})
                             </Option>
                         })}
                     </Select>
@@ -233,9 +233,87 @@ export default function DocWritePage() {
                         />
                     </div>
                     {/* 선택한 부서의 사원 목록 */}
-
+                    <div style={{flex: 1, border: "1px solid #f0f0f0", padding: 12, borderRadius: 6}}>
+                        <div style={{ fontWeight: 600, marginBottom: 8}}>사원 선택</div>
+                        <List
+                            size="small"
+                            loading={deptEmpsLoading}
+                            dataSource={deptEmps}
+                            locale={{emptyText: "왼쪽에서 부서를 먼저 선택하세요."}}
+                            renderItem={(e) => (
+                                <List.Item
+                                    actions={[
+                                        <a key="add" onClick={() => addApprover({
+                                            empId: e.empId,
+                                            empName: e.empName,
+                                            posName: e.posName
+                                        })}>추가</a>
+                                    ]}
+                                >
+                                    {e.empName} <Tag style={{marginLeft: 8}}>{e.posName}</Tag>
+                                </List.Item>
+                            )}
+                        />
+                    </div>
                     {/* 선택된 결재선 */}
+                    <div style={{flex: 1, border: "1px solid #f0f0f0", padding: 12, borderRadius: 6}}>
+                        <div style={{fontWeight: 600, marginBottom: 8}}>결재선 순서</div>
+                        {approvers.length === 0 ? (
+                            <Empty
+                                description="결재자를 추가해주세요"
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            />
+                        ) : (
+                            <List
+                                size="small"
+                                dataSource={approvers}
+                                renderItem={(a, index) => (
+                                    <List.Item
+                                        actions={[
+                                            <Button
+                                                key="up"
+                                                type="text"
+                                                size="small"
+                                                icon={<ArrowUpOutlined/>}
+                                                disabled={index === 0}
+                                                onClick={() => moveApprover(index, -1)}
+                                            />,
+                                            <Button
+                                                key="down"
+                                                type="text"
+                                                size="small"
+                                                icon={<ArrowDownOutlined/>}
+                                                disabled={index === approvers.length - 1}
+                                                onClick={() => moveApprover(index, 1)}
+                                            />,
+                                            <Button
+                                                key="remove"
+                                                type="text"
+                                                danger
+                                                size="small"
+                                                icon={<DeleteOutlined/>}
+                                                onClick={() => removeApprover(a.empId)}
+                                            />
+                                        ]}
+                                    >
+                                        <span>
+                                            {index + 1}. {a.empName} {a.posName && <Tag>{a.posName}</Tag>}
+                                        </span>
+                                    </List.Item>
+                                )}
+                            />
+                        )}
+                    </div>
                 </div>
+
+                <Form.Item>
+                    <Space>
+                        <Button type="primary" htmlType="submit" loading={writeSubmitting}>
+                            제출
+                        </Button>
+                        <Button onClick={() => router.push("/appr/docs")}>취소</Button>
+                    </Space>
+                </Form.Item>
             </Form>
         </div>
     );
