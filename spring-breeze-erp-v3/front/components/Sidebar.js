@@ -167,7 +167,7 @@ const NAV = [
         label: "자원 예약 요청 관리",
         href: "/admin/resv/list?status=WAI",
         icon: "bi-calendar2-event",
-        role: "admin",
+        role: "ROLE_ADMIN",
       },
     ],
   },
@@ -181,15 +181,15 @@ function hasRole(user, role) {
 
 function canShow(role, user) {
   if (!role) return true;
-  if (role === "root") return hasRole(user, "ROOT");
-  if (role === "admin") return hasRole(user, "ADMIN") || hasRole(user, "ROOT");
+  if (role === "ROOT") return hasRole(user, "ROOT");
+  if (role === "ROLE_ADMIN")
+    return hasRole(user, "ROLE_ADMIN") || hasRole(user, "ROOT");
   return true;
 }
 
 export default function Sidebar() {
   const router = useRouter();
   const { user, accessToken } = useSelector((state) => state.auth);
-  console.log(user)
 
   const currentPath = router.pathname;
   const isAuthenticated = Boolean(user);
