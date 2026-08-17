@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import {
@@ -82,6 +82,29 @@ export default function DocDetailPage() {
         {title: "결재일시", dataIndex: "linApproved", key: "linApproved"},
     ];
 
+    // 스키마 방식 양식인지?
+    const isSchemaDoc = !!detailDoc?.forSchema;
+
+    // 스키마 필드 정의 파싱
+    const schemaFieldDefs = useMemo(() => {
+        if (!isSchemaDoc) return [];
+        try {
+            return JSON.parse(detailDoc.forSchema).fields || [];
+        } catch (e) {
+            return [];
+        }
+    }, [isSchemaDoc, detailDoc]);
+
+    // 스키마는 JSON 형태로 저장 K:V
+    const schemaValues = useMemo(() => {
+        if (!isSchemaDoc || !detailDoc?.docContent) return {};
+        try {
+            return JSON.parse(detailDoc.docContent);
+        } catch (e) {
+            return {};
+        }
+    }, [isSchemaDoc, detailDoc]);
+
     if (detailLoading || !detailDoc) {
         return <div style={{padding: 24}}>불러오는 중..</div>
     }
@@ -110,8 +133,30 @@ export default function DocDetailPage() {
 
             <div style={{marginTop: 16}}>
                 <h4>내용</h4>
-                {/*2차때 예상 질문에 나왔던 문제인데 에디터에 악의적으로 코드를 작성할경우 대처해야함 나중에 구상*/}
-                <div dangerouslySetInnerHTML={{__html: detailDoc.docContent}}/>
+                {isSchemaDoc ? (
+                    // 스키마 방식
+                    schemaFieldDefs.length > 0 ? (
+                        <Descriptions bordered column={1} size="small">
+                            {schemaFieldDefs.map((field) => (
+                                <Descriptions.Item key={field.key} label={field.label}>
+                                    {schemaValues[field.key] ?? "-"}
+                                </Descriptions.Item>
+                            ))}
+                        </Descriptions>
+                    ) : (
+                        // 파싱 실패시 raw key만 나열
+                        <Descriptions bordered column={1} size="small">
+                            {Object.entries(schemaValues).map(([key, value]) => (
+                                <Descriptions.Item key={key} label={key}>
+                                    {value ?? "-"}
+                                </Descriptions.Item>
+                            ))}
+                        </Descriptions>
+                    )
+                ) : (
+                    // 2차때 예상질문중 에디터에 악의적으로 html코드를 작성하는거 예방하는거 고려해봐야함
+                    <div dangerouslySetInnerHTML={{__html: detailDoc.docContent}}/>
+                )}
             </div>
 
             <Divider>결재선</Divider>

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import {
     message, Form, Input, Select, Button, Space, List,
-    Tag, Divider, Empty
+    Tag, Divider, Empty, DatePicker, InputNumber
 } from "antd";
 import { ArrowUpOutlined, ArrowDownOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
@@ -24,6 +24,7 @@ const ReactQuill = dynamic( () => import("react-quill"), {ssr: false});
 import "react-quill/dist/quill.snow.css";
 
 const { Option } = Select;
+const { TextArea } = Input;
 
 export default function DocWritePage() {
     const router = useRouter();
@@ -40,9 +41,74 @@ export default function DocWritePage() {
     } = useSelector((state) => state.apprDoc);
 
     const [docContent, setDocContent] = useState("");
+    // { [field.key] : value }
+    const [schemaValues, setSchemaValues] = useState({});
     // empId, empName, posName 순서대로
     const [approvers, setApprovers] = useState([]);
     const [selectedDeptId, setSelectedDeptId] = useState(null);
+
+    // 폼에서 선택한 양식 감시
+    const formKey = Form.useWatch("formKey", form);
+
+    // 선택된 양식의 원본 데이터 찾기
+    const selectedForm = useMemo(
+        () => writableForms.find((f) => `${f.forId}-${f.forVersion}` === formKey),
+        [writableForms, formKey]
+    );
+
+    const isSchemaForm = !!selectedForm?.forSchema;
+
+    // 스키마 방식 필드 파싱
+    const schemaFieldDefs = useMemo(() => {
+        if (!isSchemaForm) return [];
+        try {
+            return JSON.parse(selectedForm.forSchema).fields || [];
+        } catch (e) {
+            return [];
+        }
+    }, [isSchemaForm, selectedForm]);
+
+    // 양식이 바뀌면 이전값 초기화
+    useEffect(() => {
+        setSchemaValues({});
+        setDocContent("");
+    }, [formKey]);
+
+    const updateSchemaValue = (key, value) => {
+        setSchemaValues((prev) => ({...prev, [key]: value}));
+    };
+
+    const renderSchemaField = (field) => {
+        const value = schemaValues[field.key];
+        const onChange = (v) => updateSchemaValue(field.key, v);
+
+        switch (field.type) {
+            case "textarea":
+                return <TextArea rows={4} value={value} onChange={(e) => onChange(e.target.value)}/>;
+            case "date":
+                return (
+                    <DatePicker
+                        style={{width: "100%"}}
+                        value={value}
+                        onChange={(date, dateString) => onChange(dateString)}
+                    />
+                );
+            case "number":
+                return <InputNumber style={{width: "100%"}} value={value} onChange={onChange}/>;
+            case "select":
+                return (
+                    <Select value={value} onChange={onChange}>
+                        {(field.options || []).map((opt) => (
+                            <Option key={opt} value={opt}>{opt}</Option>
+                        ))}
+                    </Select>
+                );
+            default:
+                return <Input value={value} onChange={(e) => onChange(e.target.value)}/>;
+        }
+    }
+
+    
 
     // 초기진입시 작성자 정보 + 사용 가능항 양식 목록 조회
     useEffect(() => {
@@ -139,13 +205,30 @@ export default function DocWritePage() {
     };
 
     const handleSubmit = (values) => {
-        if (!docContent.trim()) {
-            message.error("문서 내용을 입력해주세요.");
-            return;
-        }
         if (approvers.length === 0) {
             message.error("결재선을 1명 이상 지정해주세요.");
             return;
+        }
+
+        let content;
+
+        if (isSchemaForm) {
+            // 필수 필드 검증
+            const missing = schemaFieldDefs.filter(
+                (f) => f.required && (schemaValues[f.key] === undefined || schemaValues[f.key] === "")
+            );
+            if (missing.length > 0) {
+                message.error(`필수 항목을 입력해주세요 : ${missing.map((f) => f.label).join(", ")}`);
+                return;
+            }
+            content = JSON.stringify(schemaValues);
+        }
+        else {
+            if (!docContent.trim()) {
+                message.error("문서 내용을 입력해주세요.");
+                return;
+            }
+            content = docContent;
         }
 
         const [forId, forVersion] = values.formKey.split("-");
@@ -154,7 +237,7 @@ export default function DocWritePage() {
             forId: Number(forId),
             forVersion: Number(forVersion),
             docTitle: values.docTitle,
-            docContent,
+            docContent: content,
             approverEmpIds: approvers.map((a) => a.empId),
         };
 
@@ -175,14 +258,14 @@ export default function DocWritePage() {
                         placeholder="작성할 양식을 선택하세요"
                         loading={writableFormsLoading}
                     >
-                        {writableForms.map((f) => {
+                        {writableForms.map((f) => (
                             <Option
                                 key={`${f.forId}-${f.forVersion}`}
                                 value={`${f.forId}-${f.forVersion}`}
                             >
                                 {f.forTitle} (v{f.forVersion})
                             </Option>
-                        })}
+                        ))}
                     </Select>
                 </Form.Item>
 
@@ -193,14 +276,32 @@ export default function DocWritePage() {
                 >
                     <Input/>
                 </Form.Item>
-                {/* 일단 에디터 방식만 구현 schema 컬럼으로 들어오는거 JSON 파싱하는거 구현해야함 */}
-                <Form.Item label="문서 내용">
-                    <ReactQuill
-                        theme="snow"
-                        value={docContent}
-                        onChange={setDocContent}
-                    />
-                </Form.Item>
+                {/* 선택한 양식에 따라 동적으로 분기 */}
+                {formKey && (
+                    isSchemaForm ? (
+                        <Form.Item label="문서 내용">
+                            <Space direction="vertical" style={{width: "100%"}} size={12}>
+                                {schemaFieldDefs.map((field) => (
+                                    <div key={field.key}>
+                                        <div style={{marginBottom: 4}}>
+                                            {field.label}
+                                            {field.required && <span style={{color: "red"}}> *</span>}
+                                        </div>
+                                        {renderSchemaField(field)}
+                                    </div>
+                                ))}
+                            </Space>
+                        </Form.Item>
+                    ) : (
+                        <Form.Item label="문서 내용">
+                            <ReactQuill
+                                theme="snow"
+                                value={docContent}
+                                onChange={setDocContent}
+                            />
+                        </Form.Item>
+                    )
+                )}
 
                 <Divider>결재선 지정</Divider>
 
