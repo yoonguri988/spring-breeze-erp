@@ -24,7 +24,7 @@ const NAV = [
         tip: "회사 • 부서 관리",
         href: "/com/list",
         icon: "bi-building-fill-gear",
-        role: "root",
+        role: "ROOT",
       },
       {
         page: "commypage",
@@ -41,7 +41,7 @@ const NAV = [
       {
         page: "deptmy",
         tip: "내 부서 정보",
-        href: "/dept/detail",
+        href: "/dept/my",
         icon: "bi-tag",
       },
       {
@@ -49,14 +49,14 @@ const NAV = [
         tip: "부서 이관 대상 관리",
         href: "/dept/transfer/pending",
         icon: "bi-signpost-split",
-        role: "admin",
+        role: "ROLE_ADMIN",
       },
       {
         page: "depttranslog",
         tip: "부서 이력 관리",
         href: "/dept/transfer/log",
         icon: "bi-clock-history",
-        role: "admin",
+        role: "ROLE_ADMIN",
       },
     ],
   },
@@ -75,28 +75,28 @@ const NAV = [
         tip: "직급 관리",
         href: "/pos/list",
         icon: "bi-briefcase",
-        role: "admin",
+        role: "ROLE_ADMIN",
       },
       {
         page: "permissions",
         tip: "권한 관리",
         href: "/perm/list",
         icon: "bi-shield-lock",
-        role: "admin",
+        role: "ROLE_ADMIN",
       },
       {
         page: "evalperiodlist",
         tip: "인사 평가",
         href: "/eval/period/list",
         icon: "bi-calendar-event",
-        role: "admin",
+        role: "ROLE_ADMIN",
       },
       {
         page: "evallist",
         tip: "평가 작성",
         href: "/eval/list",
         icon: "bi-star",
-        role: "admin",
+        role: "ROLE_ADMIN",
       },
       {
         page: "evalreport",
@@ -115,7 +115,7 @@ const NAV = [
         label: "결재 양식 관리",
         href: "/appr/list_form",
         icon: "bi-sliders",
-        role: "root",
+        role: "ROOT",
       },
       {
         page: "apprlistdoc",
@@ -173,7 +173,7 @@ const NAV = [
   },
 ];
 
-// 백엔드 roles는 AuthResponse.autName 목록(예: "ROOT", "ADMIN") 기준.
+// 백엔드 roles는 AuthResponse.autName 목록(예: "ROOT", "ROLE_ADMIN") 기준.
 // 실제 사용 중인 role 문자열에 맞게 조정하세요.
 function hasRole(user, role) {
   return Boolean(user?.roles?.includes(role));
@@ -182,8 +182,7 @@ function hasRole(user, role) {
 function canShow(role, user) {
   if (!role) return true;
   if (role === "ROOT") return hasRole(user, "ROOT");
-  if (role === "ROLE_ADMIN")
-    return hasRole(user, "ROLE_ADMIN") || hasRole(user, "ROOT");
+  if (role === "ROLE_ADMIN") return hasRole(user, "ROLE_ADMIN");
   return true;
 }
 
