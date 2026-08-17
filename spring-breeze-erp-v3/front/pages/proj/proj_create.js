@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Button, Input, Select, DatePicker } from "antd";
 import { createProjRequest } from "../../reducers/proj/projReducer";
 
-import dayjs from "dayjs";
+import moment from "moment";
 
 const { TextArea } = Input;
 
@@ -82,7 +82,7 @@ export default function ProjCreatePage() {
     if (
       form.startDate &&
       form.endDate &&
-      dayjs(form.startDate).isAfter(dayjs(form.endDate))
+      moment(form.startDate).isAfter(moment(form.endDate))
     ) {
       newErrors.endDate = "종료일은 시작일 이후로 선택하세요.";
     }
@@ -231,7 +231,7 @@ export default function ProjCreatePage() {
                   id="start_date"
                   value={
                     form.startDate
-                      ? dayjs(form.startDate)
+                      ? moment(form.startDate, "YYYY-MM-DD")
                       : null
                   }
                   onChange={(date) =>
@@ -266,7 +266,7 @@ export default function ProjCreatePage() {
                   id="end_date"
                   value={
                     form.endDate
-                      ? dayjs(form.endDate)
+                      ? moment(form.endDate, "YYYY-MM-DD")
                       : null
                   }
                   onChange={(date) =>
@@ -300,7 +300,7 @@ export default function ProjCreatePage() {
 
               <Input
                 id="reg_date"
-                value={dayjs().format("YYYY-MM-DD")}
+                value={moment().format("YYYY-MM-DD")}
                 readOnly
                 style={{
                   maxWidth: 200,
