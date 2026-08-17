@@ -1,100 +1,116 @@
-// reducers/evalReducer.js
+// reducers/eval/evalReducer.js
 import { createSlice } from "@reduxjs/toolkit";
 
-//초기화 상태(공용)
-const initialState={
-    //평가 목록
-    evalList: [],
+const initialState = {
+    // 대시보드 — periodId 없이 호출 시
+    openPeriods: [],
 
-    //평가 상세
+    // 대시보드 — periodId 지정 시
+    currentPeriod: null,
+    targets: [],           // 평가 대상 목록
+    submittedCount: 0,
+    totalCount: 0,
+
+    // 평가 상세
     currentEval: null,
 
-    //공통
+    // 공통
     loading: false,
     error: null,
     success: false,
 };
 
-//2. 상태 변화
-const evalReducer=createSlice({
+const evalReducer = createSlice({
     name: "eval",
     initialState,
     reducers: {
 
         // --- 상태 초기화 ---
-        resetEvalState : (state)=>{
+        resetEvalState: (state) => {
             state.loading = false;
             state.success = false;
-            state.error   = null;
+            state.error = null;
         },
-        
-        // --- 평가 목록 조회 ---
-        listEvalRequest: (state)=>{
+        clearEvalDetail: (state) => {
+            state.currentEval = null;
+        },
+
+        // --- 대시보드 조회 ---
+        dashboardEvalRequest: (state) => {
             state.loading = true;
             state.error = null;
         },
-        listEvalSuccess: (state, action)=>{
+        dashboardEvalSuccess: (state, action) => {
             state.loading = false;
-            state.evalList = action.payload;
+            // periodId 없이 호출 → openPeriods만 내려옴
+            if (action.payload.openPeriods) {
+                state.openPeriods = action.payload.openPeriods;
+            }
+            // periodId 지정 → period + targets + 진행률
+            if (action.payload.period) {
+                state.currentPeriod = action.payload.period;
+                state.targets = action.payload.targets;
+                state.submittedCount = action.payload.submittedCount;
+                state.totalCount = action.payload.totalCount;
+            }
         },
-        listEvalFailure: (state, action)=>{
+        dashboardEvalFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
 
         // --- 평가 상세 조회 ---
-        detailEvalRequest: (state)=>{
+        detailEvalRequest: (state) => {
             state.loading = true;
             state.error = null;
         },
-        detailEvalSuccess: (state, action)=>{
+        detailEvalSuccess: (state, action) => {
             state.loading = false;
             state.currentEval = action.payload;
         },
-        detailEvalFailure: (state, action)=>{
+        detailEvalFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
 
         // --- 평가 임시저장 ---
-        draftEvalRequest: (state)=>{
+        draftEvalRequest: (state) => {
             state.loading = true;
             state.error = null;
+            state.success = false;
         },
-        draftEvalSuccess: (state, action)=>{
+        draftEvalSuccess: (state) => {
             state.loading = false;
-            state.currentEval = action.payload;
+            state.success = true;
         },
-        draftEvalFailure: (state, action)=>{
+        draftEvalFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
 
         // --- 평가 제출 ---
-        submitEvalRequest: (state)=>{
+        submitEvalRequest: (state) => {
             state.loading = true;
             state.error = null;
+            state.success = false;
         },
-       submitEvalSuccess: (state, action)=>{
+        submitEvalSuccess: (state) => {
             state.loading = false;
-            state.currentEval = action.payload;
             state.success = true;
         },
-        submitEvalFailure: (state, action)=>{
+        submitEvalFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
     }
 });
 
-//3. action
 export const {
-    resetEvalState,
-    listEvalRequest, listEvalSuccess, listEvalFailure,
+    resetEvalState, clearEvalDetail,
+    dashboardEvalRequest, dashboardEvalSuccess, dashboardEvalFailure,
     detailEvalRequest, detailEvalSuccess, detailEvalFailure,
     draftEvalRequest, draftEvalSuccess, draftEvalFailure,
     submitEvalRequest, submitEvalSuccess, submitEvalFailure,
 } = evalReducer.actions;
 
-//4. export
 export default evalReducer.reducer;

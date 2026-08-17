@@ -1,108 +1,119 @@
-// reducers/evalReportReducer.js
+// reducers/eval/evalReportReducer.js
 import { createSlice } from "@reduxjs/toolkit";
 
-//초기화 상태(공용)
-const initialState={
-    //리포트 목록
+const initialState = {
+    // 리포트 목록 (회차별)
     reportList: [],
+    reportPeriod: null,    // 리포트 목록 조회 시 함께 내려오는 회차 정보
+    reportCount: 0,
+    paging: null,
 
-    //리포트 상세
+    // 리포트 상세
     currentReport: null,
 
-    //공통
+    // 내 리포트 이력
+    myReports: [],
+
+    // 공통
     loading: false,
     error: null,
     success: false,
 };
 
-//2. 상태 변화
-const evalReportReducer=createSlice({
+const evalReportReducer = createSlice({
     name: "report",
     initialState,
     reducers: {
 
         // --- 상태 초기화 ---
-        resetReportState : (state)=>{
+        resetReportState: (state) => {
             state.loading = false;
             state.success = false;
-            state.error   = null;
+            state.error = null;
         },
-        
-        // --- 리포트 목록 조회 ---
-        listReportRequest: (state)=>{
+        clearReportDetail: (state) => {
+            state.currentReport = null;
+        },
+
+        // --- 회차별 리포트 목록 조회 ---
+        listReportRequest: (state) => {
             state.loading = true;
             state.error = null;
         },
-        listReportSuccess: (state, action)=>{
+        listReportSuccess: (state, action) => {
             state.loading = false;
-            state.reportList = action.payload;
+            state.reportList = action.payload.reports;
+            state.reportPeriod = action.payload.period;
+            state.reportCount = action.payload.reportCount;
+            state.paging = action.payload.paging;
         },
-        listReportFailure: (state, action)=>{
+        listReportFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
 
         // --- 리포트 상세 조회 ---
-        detailReportRequest: (state)=>{
+        detailReportRequest: (state) => {
             state.loading = true;
             state.error = null;
         },
-        detailReportSuccess: (state, action)=>{
+        detailReportSuccess: (state, action) => {
             state.loading = false;
             state.currentReport = action.payload;
         },
-        detailReportFailure: (state, action)=>{
+        detailReportFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
 
-        // --- 내 리포트 조회 ---
-        myReportRequest: (state)=>{
+        // --- 내 리포트 이력 ---
+        myReportRequest: (state) => {
             state.loading = true;
             state.error = null;
         },
-        myReportSuccess: (state, action)=>{
+        myReportSuccess: (state, action) => {
             state.loading = false;
-            state.currentReport = action.payload;
+            state.myReports = action.payload;
         },
-        myReportFailure: (state, action)=>{
+        myReportFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
 
-        // --- 리포트 전체 생성/재생성 ---
-        generateReportRequest: (state)=>{
+        // --- 회차 전체 리포트 생성 ---
+        generateReportRequest: (state) => {
             state.loading = true;
             state.error = null;
+            state.success = false;
         },
-        generateReportSuccess: (state, action)=>{
+        generateReportSuccess: (state) => {
             state.loading = false;
-            state.reportList = action.payload;
+            state.success = true;
         },
-        generateReportFailure: (state, action)=>{
+        generateReportFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
 
-        // --- 리포트 개별 재생성 ---
-        regenerateReportRequest: (state)=>{
+        // --- 특정 사원 리포트 재생성 ---
+        regenerateReportRequest: (state) => {
             state.loading = true;
             state.error = null;
+            state.success = false;
         },
-        regenerateReportSuccess: (state, action)=>{
+        regenerateReportSuccess: (state) => {
             state.loading = false;
-            state.currentReport = action.payload;
+            state.success = true;
         },
-        regenerateReportFailure: (state, action)=>{
+        regenerateReportFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
     }
 });
 
-//3. action
 export const {
-    resetReportState,
+    resetReportState, clearReportDetail,
     listReportRequest, listReportSuccess, listReportFailure,
     detailReportRequest, detailReportSuccess, detailReportFailure,
     myReportRequest, myReportSuccess, myReportFailure,
@@ -110,5 +121,4 @@ export const {
     regenerateReportRequest, regenerateReportSuccess, regenerateReportFailure,
 } = evalReportReducer.actions;
 
-//4. export
 export default evalReportReducer.reducer;
