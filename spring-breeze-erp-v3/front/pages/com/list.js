@@ -42,6 +42,7 @@ import {
 } from "../../reducers/com/companyReducer";
 
 import StatTile from "../../components/StatTile";
+import resolveFileUrl from "../../constants/resolveFileUrl";
 // 업종 대분류 코드 <-> 라벨 (com-list 화면 전용, 원본 list.html 기준)
 const INDUSTRY_GRP_OPTIONS = [
   { value: "", label: "전체 업종" },
@@ -120,7 +121,7 @@ export default function ComListPage() {
     if (!deleting || loading) return;
 
     if (success) {
-      antdMessage.success(companyMessage || "회사가 삭제되었습니다.");
+      message.success(companyMessage || "회사가 삭제되었습니다.");
       setDeleteTarget(null);
       setDeleting(false);
       setDeleteError("");
@@ -215,7 +216,7 @@ export default function ComListPage() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Avatar
             shape="square"
-            src={record.comLogo || undefined}
+            src={resolveFileUrl(record.comLogo) || undefined}
             icon={!record.comLogo && <BankOutlined />}
           />
           <span style={{ fontWeight: 600 }}>{name}</span>
