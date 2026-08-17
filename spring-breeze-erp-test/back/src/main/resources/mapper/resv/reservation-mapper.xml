@@ -89,7 +89,7 @@
         VALUES (
             seq_reservation.NEXTVAL, #{resId}, #{comId}, #{empId}, #{quantity}, 'WAI',
             #{startDt}, #{endDt},
-		    #{remark}, SYSDATE, SYSDATE
+		    #{remark, jdbcType=VARCHAR}, SYSDATE, SYSDATE
         )
     </insert>
 
