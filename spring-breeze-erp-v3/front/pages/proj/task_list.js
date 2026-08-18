@@ -150,7 +150,7 @@ export default function TaskListPage() {
       dataIndex: "taskName",
       key: "taskName",
       render: (name, record) => (
-        <Link href={{ pathname: "/proj/task_detail", query: { task_id: record.taskId } }}>
+        <Link href={{ pathname: "/proj/task_detail", query: { taskId: record.taskId } }}>
           <span className="sb-table__name" style={{ cursor: "pointer" }}>
             {name}
           </span>

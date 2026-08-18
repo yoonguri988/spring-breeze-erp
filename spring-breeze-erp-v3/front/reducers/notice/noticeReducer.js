@@ -7,7 +7,8 @@ const initialState = {
     currentNotice: null,
     loading: false,
     error: null,
-    success: false
+    success: false,
+    deleteSuccess: false
 }
 const noticeReducer = createSlice({
     name: "notice",
@@ -38,7 +39,7 @@ const noticeReducer = createSlice({
         fetchNoticeDetailSuccess: (state, action) => {
             state.loading = false;
             state.currentNotice = action.payload; 
-            state.success = true;
+            //state.success = true;
         },
         fetchNoticeDetailFailure: (state, action) => {
             state.loading = false;
@@ -88,17 +89,17 @@ const noticeReducer = createSlice({
         deleteNoticeRequest: (state) => {
             state.loading = true;
             state.error = null;
-            state.success = false;
+            state.deleteSuccess = false;
         },
         deleteNoticeSuccess: (state, action) => {
             state.loading = false;
             state.notices = state.notices.filter(n => n.bno !== action.payload);
-            state.success = true;
+            state.deleteSuccess = true;
         },
         deleteNoticeFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
-            state.success = false;
+            state.deleteSuccess = false;
         },
 
         // 공지 초기화
@@ -106,6 +107,7 @@ const noticeReducer = createSlice({
             state.loading = false;
             state.error = null;
             state.success = false;
+            state.deleteSuccess = false;
         },
     }
 });

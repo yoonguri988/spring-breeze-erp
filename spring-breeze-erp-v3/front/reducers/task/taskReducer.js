@@ -33,7 +33,7 @@ const taskReducer = createSlice({
                 impactTasks: action.payload.impactTasks,
                 isDelayed: action.payload.isDelayed
             };
-            state.success=true;
+           // state.success=true;
         },
         fetchTaskDetailFailure:(state,action)=>{
             state.loading=false;
