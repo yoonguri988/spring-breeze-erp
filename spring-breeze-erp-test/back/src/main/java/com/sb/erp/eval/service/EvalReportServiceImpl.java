@@ -59,13 +59,13 @@ public class EvalReportServiceImpl implements EvalReportService {
 
 	// ─── 조회 ─────────────────────────────────────
 	@Override
-	public List<ReportResponse> selectByPeriodId(long periodId) {
-		return evalReportMapper.selectByPeriodId(periodId, 1);
+	public List<ReportResponse> selectByPeriodId(long periodId, Long comId) {
+		return evalReportMapper.selectByPeriodId(periodId, comId);
 	}
 
 	@Override
-	public ReportResponse selectByReportId(long reportId) {
-		return evalReportMapper.selectByReportId(reportId, 1);
+	public ReportResponse selectByReportId(long reportId, Long comId) {
+		return evalReportMapper.selectByReportId(reportId, comId);
 	}
 
 	@Override
@@ -74,29 +74,29 @@ public class EvalReportServiceImpl implements EvalReportService {
 	}
 
 	@Override
-	public ReportResponse selectMyByPeriod(long periodId) {
-		return evalReportMapper.selectByPeriodAndEmp(periodId, 1L);
+	public ReportResponse selectMyByPeriod(long periodId, Long empId) {
+		return evalReportMapper.selectByPeriodAndEmp(periodId, empId);
 	}
 
 	@Override
-	public List<ReportResponse> selectMyAll() {
-		return evalReportMapper.selectByEmpId(1L);
+	public List<ReportResponse> selectMyAll(Long empId) {
+		return evalReportMapper.selectByEmpId(empId);
 	}
 
 	@Override
-	public ReportResponse selectLatestByEmpId(long empId) {
-		return evalReportMapper.selectLatestByEmpId(empId, 1);
+	public ReportResponse selectLatestByEmpId(long empId, Long comId) {
+		return evalReportMapper.selectLatestByEmpId(empId, comId);
 	}
 
 	@Override
-	public List<ReportResponse> searchByPeriod(ReportSearchRequest search) {
-		search.setComId(1L);
+	public List<ReportResponse> searchByPeriod(ReportSearchRequest search, Long comId) {
+		search.setComId(comId);
 		return evalReportMapper.searchByPeriod(search);
 	}
 
 	@Override
-	public int countByPeriodSearch(ReportSearchRequest search) {
-		search.setComId(1L);
+	public int countByPeriodSearch(ReportSearchRequest search, Long comId) {
+		search.setComId(comId);
 		return evalReportMapper.countByPeriodSearch(search);
 	}
 
@@ -104,8 +104,8 @@ public class EvalReportServiceImpl implements EvalReportService {
 	// ─── 생성/재생성 ───────────────────────────────
 
 	@Override
-	public int generateReports(long periodId) {
-		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, 1);
+	public int generateReports(long periodId, Long comId) {
+		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalReport] 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
@@ -139,8 +139,8 @@ public class EvalReportServiceImpl implements EvalReportService {
 	}
 
 	@Override
-	public int regenerateReport(long periodId, long empId) {
-		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, 1);
+	public int regenerateReport(long periodId, long empId, Long comId) {
+		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalReport] 재생성 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;

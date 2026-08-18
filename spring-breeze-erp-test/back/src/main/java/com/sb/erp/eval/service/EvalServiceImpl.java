@@ -30,8 +30,7 @@ public class EvalServiceImpl implements EvalService {
 
 	// ─── 조회 ────────────────────────────────
 	@Override
-	public List<EvalResponse> selectTargetsByCurrentEvaluator(long periodId) {
-		Long evaluatorId = 1L;
+	public List<EvalResponse> selectTargetsByEvaluator(long periodId, Long evaluatorId) {
 		return evalMapper.selectTargetsByEvaluator(periodId, evaluatorId);
 	}
 
@@ -46,11 +45,6 @@ public class EvalServiceImpl implements EvalService {
 	}
 
 	@Override
-	public List<EvalResponse> selectMyEvalHistory() {
-		return evalMapper.selectByTargetEmpId(1);
-	}
-
-	@Override
 	public List<EvalResponse> selectEvalHistoryByEmpId(long empId) {
 		return evalMapper.selectByTargetEmpId(empId);
 	}
@@ -58,19 +52,19 @@ public class EvalServiceImpl implements EvalService {
 	// ─── 통계 ────────────────────────────────
 
 	@Override
-	public int countMySubmitted(long periodId) {
-		return evalMapper.countSubmittedByEvaluator(periodId, 1);
+	public int countSubmittedByEvaluator(long periodId, Long evaluatorId) {
+		return evalMapper.countSubmittedByEvaluator(periodId, evaluatorId);
 	}
 
 	// ─── 등록 / 수정 ──────────────────────────
 
 	@Override
-	public int saveDraft(EvalRequest dto) {
-		int validation = validateBase(dto);
+	public int saveDraft(EvalRequest dto, Long evaluatorId, Long comId) {
+		int validation = validateBase(dto, comId);
 		if (validation != 1) return validation;
 
 		// 평가자 자동 세팅
-		dto.setEvaluatorId(1);
+		dto.setEvaluatorId(evaluatorId);
 		dto.setEvalType("LEADER");
 		dto.setEvalStatus("DRAFT");
 
@@ -81,8 +75,8 @@ public class EvalServiceImpl implements EvalService {
 	}
 
 	@Override
-	public int submit(EvalRequest dto) {
-		int validation = validateBase(dto);
+	public int submit(EvalRequest dto, Long evaluatorId, Long comId) {
+		int validation = validateBase(dto, comId);
 		if (validation != 1) return validation;
 
 		// 제출 시 모든 점수 + 코멘트 필수
@@ -93,7 +87,7 @@ public class EvalServiceImpl implements EvalService {
 			return -4;
 		}
 
-		dto.setEvaluatorId(1);
+		dto.setEvaluatorId(evaluatorId);
 		dto.setEvalType("LEADER");
 		dto.setEvalStatus("SUBMITTED");
 		dto.setWeightedScore(calculateWeightedScore(dto));
@@ -105,8 +99,8 @@ public class EvalServiceImpl implements EvalService {
 
 	// 기본 검증: 회차 존재 + OPEN 상태.
 	// 1: 통과 / -1: 회차 없음 / -2: 회차가 OPEN 아님
-	private int validateBase(EvalRequest dto) {
-		PeriodResponse period = evalPeriodService.selectByPeriodId(dto.getPeriodId());
+	private int validateBase(EvalRequest dto, Long comId) {
+		PeriodResponse period = evalPeriodService.selectByPeriodId(dto.getPeriodId(), comId);
 		if (period == null) return -1;
 		if (!"OPEN".equals(period.getPeriodStatus())) return -2;
 		return 1;

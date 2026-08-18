@@ -1,4 +1,4 @@
-package com.sb.erp.dto.openai;
+package com.sb.erp.global.integration.openAi;
 
 import java.math.BigDecimal;
 

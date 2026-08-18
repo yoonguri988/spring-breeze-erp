@@ -274,7 +274,7 @@ a {
   display: grid;
   place-items: center;
   font-size: 13px;
-  line-height: 1; 
+  line-height: 1;
 }
 
 /* 대형 아바타 (프로필) */
@@ -740,6 +740,26 @@ a.sb-card {
 .btn-sm {
   padding: 5px 11px;
   font-size: 12.5px;
+}
+
+/* antd Button (전역) — 아이콘 + 텍스트 정렬
+   ----------------------------------------------------------------------
+   antd v4 Button 기본은 아이콘(span.anticon)과 텍스트(span)를 각각
+   inline 요소로 두고 vertical-align으로만 정렬한다. Bootstrap reboot 등
+   전역 CSS와 맞물리면 베이스라인이 미세하게 어긋나 아이콘이 텍스트보다
+   위/아래로 들뜨는 문제가 생긴다. .btn-sb/.btn-ghost 등 커스텀 버튼은
+   이미 자체적으로 flex 정렬을 쓰고 있어 문제 없지만, 프로젝트 전역에서
+   쓰는 순수 <Button icon={...}>는 이 규칙이 없으면 그대로 영향을 받으므로
+   antd Button 전체에 flex 정렬을 강제한다. */
+.ant-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.ant-btn > .anticon + span,
+.ant-btn > span + .anticon {
+  margin-left: 0; /* 위 gap이 이미 간격을 주므로 antd 기본 마진과 중복되지 않게 제거 */
 }
 
 /* ==========================================================================

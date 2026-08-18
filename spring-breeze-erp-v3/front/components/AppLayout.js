@@ -15,20 +15,19 @@ function AppLayout({ children }) {
   const [layoutMode, setLayoutMode] = useState("standard");
 
   // 실제 로그인 상태 (mock 제거)
-  const { user, accessToken } = useSelector((state) => state.auth);
+  const { user, accessToken, initialized } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const saved = localStorage.getItem(LS_LAYOUT_KEY);
     if (saved === "rail" || saved === "standard") setLayoutMode(saved);
   }, []);
 
-  // AppLayout은 /auth/* 를 제외한 "로그인이 필요한" 페이지에만 씌워지므로
-  // accessToken이 없으면 로그인 페이지로 돌려보낸다.
   useEffect(() => {
+    if (!initialized) return;
     if (!accessToken) {
       router.replace("/auth/login");
     }
-  }, [accessToken, router]);
+  }, [initialized, accessToken, router]);
 
   const toggleLayout = () => {
     setLayoutMode((cur) => {
@@ -40,8 +39,9 @@ function AppLayout({ children }) {
 
   const isRail = layoutMode === "rail";
 
-  // 리다이렉트되기 전까지 레이아웃이 잠깐 보이는 걸 막기 위한 가드
-  if (!accessToken) {
+  // 아직 loadUser(쿠키 → accessToken 복원)가 끝나지 않았거나(initialized===false),
+  // 끝났는데도 accessToken이 없는 경우(리다이렉트 대상) 모두 레이아웃을 그리지 않는다.
+  if (!initialized || !accessToken) {
     return null;
   }
 
@@ -50,7 +50,7 @@ function AppLayout({ children }) {
       <Sider
         className="sb-sidebar"
         id="sbSidebar"
-        theme="light" 
+        theme="light"
         width={248}
         collapsedWidth={72}
         collapsed={isRail}
@@ -60,7 +60,12 @@ function AppLayout({ children }) {
       </Sider>
       <Layout className="sb-main">
         <Header onToggleSidebar={toggleLayout} />
-        <Content className="sb-content">{children}</Content>
+        <Content
+          className="sb-content"
+          style={{ display: "flex", flexDirection: "column", flex: "1 0 auto" }}
+        >
+          {children}
+        </Content>
         <Footer />
       </Layout>
     </Layout>

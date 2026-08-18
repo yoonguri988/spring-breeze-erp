@@ -26,39 +26,39 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 
 	// ─── 회차 조회 ────────────────────────────────────
 	@Override
-	public List<PeriodResponse> search(PeriodSearchRequest search) {
-		search.setComId(1L);
+	public List<PeriodResponse> search(PeriodSearchRequest search, Long comId) {
+		search.setComId(comId);
 		return evalPeriodMapper.search(search);
 	}
 
 	@Override
-	public PeriodResponse selectByPeriodId(long periodId) {
-		return evalPeriodMapper.selectByPeriodId(periodId, 1);
+	public PeriodResponse selectByPeriodId(long periodId, Long comId) {
+		return evalPeriodMapper.selectByPeriodId(periodId, comId);
 	}
 
 	@Override
-	public Map<String, Integer> countByStatusAll() {
-		return evalPeriodMapper.countByStatusAll(1);
+	public Map<String, Integer> countByStatusAll(Long comId) {
+		return evalPeriodMapper.countByStatusAll(comId);
 	}
 
 	// ─── 회차 등록/수정 ────────────────────────────────
 	@Override
-	public int insert(PeriodRequest dto) {
-		dto.setComId(1);
+	public int insert(PeriodRequest dto, Long comId) {
+		dto.setComId(comId);
 		return evalPeriodMapper.insert(dto);
 	}
 
 	@Override
-	public int update(PeriodRequest dto) {
-		dto.setComId(1);
+	public int update(PeriodRequest dto, Long comId) {
+		dto.setComId(comId);
 		return evalPeriodMapper.update(dto);
 	}
 
 	// ─── 회차 상태 업데이트 ─────────────────────────────
 
 	@Override
-	public int openPeriod(long periodId) {
-		PeriodResponse period = selectByPeriodId(periodId);
+	public int openPeriod(long periodId, Long comId) {
+		PeriodResponse period = selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalPeriod] 개시 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
@@ -70,12 +70,12 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 			return -2;
 		}
 
-		return evalPeriodMapper.updateStatus(periodId, "OPEN", 1);
+		return evalPeriodMapper.updateStatus(periodId, "OPEN", comId);
 	}
 
 	@Override
-	public int closePeriod(long periodId) {
-		PeriodResponse period = selectByPeriodId(periodId);
+	public int closePeriod(long periodId, Long comId) {
+		PeriodResponse period = selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalPeriod] 마감 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
@@ -94,13 +94,13 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 			return -3;
 		}
 
-		return evalPeriodMapper.updateStatus(periodId, "CLOSED", 1);
+		return evalPeriodMapper.updateStatus(periodId, "CLOSED", comId);
 	}
 
 	@Override
 	@Transactional
-	public int reportPeriod(long periodId) {
-		PeriodResponse period = selectByPeriodId(periodId);
+	public int reportPeriod(long periodId, Long comId) {
+		PeriodResponse period = selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalPeriod] 리포트 개시 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
@@ -120,8 +120,6 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 			return -2;
 		}
 
-		Long comId = 1L;
-
 		// 상태를 즉시 REPORTING으로 전환 (이 트랜잭션이 커밋되면 확정)
 		int result = evalPeriodMapper.updateStatus(periodId, "REPORTING", comId);
 		if (result != 1) {
@@ -131,7 +129,7 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 		// ⭐ 배치는 트랜잭션 커밋 후 실행되어야 함
 		// - 커밋 전에 배치가 시작되면: 롤백 시 상태 불일치 + 배치가 존재하지 않는 REPORTING 회차 처리
 		// - afterCommit 훅으로 커밋 확정 후에만 배치 개시
-		// - SecurityContext는 async 스레드에서 못 쓰니 comId를 파라미터로 캡처
+		// - Authentication은 async 스레드에서 못 쓰니 comId를 파라미터로 캡처
 		final Long finalComId = comId;
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 			@Override
@@ -145,8 +143,8 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 
 	// ─── 중복 확인 ────────────────────────────────────
 	@Override
-	public boolean isDuplicate(int evalYear, String evalTerm) {
-		return evalPeriodMapper.isDuplicate(evalYear, evalTerm, 1);
+	public boolean isDuplicate(int evalYear, String evalTerm, Long comId) {
+		return evalPeriodMapper.isDuplicate(evalYear, evalTerm, comId);
 	}
 
 	// ─── 하위 데이터 카운트 ──────────────────────────────

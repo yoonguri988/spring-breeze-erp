@@ -1,181 +1,203 @@
 // auth/authSaga.js
-import { all, call, put, take, takeLatest } from 'redux-saga/effects';
+import { all, call, put, take, takeLatest } from "redux-saga/effects";
 import api from "../../api/axios";
-import { jwtDecode } from "jwt-decode";
 import {
-    loginRequest, loginSuccess, loginFailure,
-    refreshTokenRequest, refreshTokenSuccess, refreshTokenFailure,
-    logoutRequest, logoutSuccess, logoutFailure,
-    loadUserRequest, loadUserSuccess, loadUserFailure,
-    confirmRequest, confirmSuccess, confirmFailure,
-    updatePassRequest, updatePassSuccess, updatePassFailure,
-    changePasswordRequest, changePasswordSuccess, changePasswordFailure,
+  loginRequest,
+  loginSuccess,
+  loginFailure,
+  refreshTokenRequest,
+  refreshTokenSuccess,
+  refreshTokenFailure,
+  logoutRequest,
+  logoutSuccess,
+  logoutFailure,
+  loadUserRequest,
+  loadUserSuccess,
+  loadUserFailure,
+  confirmRequest,
+  confirmSuccess,
+  confirmFailure,
+  updatePassRequest,
+  updatePassSuccess,
+  updatePassFailure,
+  changePasswordRequest,
+  changePasswordSuccess,
+  changePasswordFailure,
 } from "../../reducers/auth/authReducer";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
+import { decodeUser, isTokenExpired } from "../../utils/jwt";
 
-const AUTH_API_BASE = '/auth';
-
-// 토큰 payload → user 객체로 변환하는 공통 헬퍼
-function decodeUser(accessToken) {
-    const claims = jwtDecode(accessToken); // { sub, comId, empNo, empName, posName, comName, empEmail, roles, exp, iat ... }
-    return {
-        empId: claims.sub,
-        comId: claims.comId,
-        empNo: claims.empNo,
-        empName: claims.empName,
-        posName: claims.posName,
-        comName: claims.comName,
-        empEmail: claims.empEmail,
-        roles: claims.roles || [],
-    };
-}
+const AUTH_API_BASE = "/auth";
 
 // --- 로그인 ---
-export const loginApi = (payload) => api.post(`${AUTH_API_BASE}/login`, payload, { withCredentials: true });
+export const loginApi = (payload) =>
+  api.post(`${AUTH_API_BASE}/login`, payload, { withCredentials: true });
 export function* login(action) {
-    try {
-        const res = yield call(loginApi, action.payload);
-        const { accessToken } = res.data;
+  try {
+    const res = yield call(loginApi, action.payload);
+    const { accessToken } = res.data;
 
-        if (!accessToken) {
-            yield put(loginFailure("로그인 응답이 올바르지 않습니다."));
-            return;
-        }
-
-        if (typeof window !== "undefined") {
-            Cookies.set("accessToken", accessToken);
-        }
-
-        const user = decodeUser(accessToken); // ★ 토큰에서 empName/empEmail/roles까지 추출
-
-        yield put(loginSuccess({ user, accessToken }));
-    } catch (err) {
-        yield put(loginFailure(err.response?.data?.error || "로그인 실패"));
+    if (!accessToken) {
+      yield put(loginFailure("로그인 응답이 올바르지 않습니다."));
+      return;
     }
+
+    if (typeof window !== "undefined") {
+      Cookies.set("accessToken", accessToken);
+    }
+
+    const user = decodeUser(accessToken); // ★ 토큰에서 empName/empEmail/roles까지 추출
+
+    yield put(loginSuccess({ user, accessToken }));
+  } catch (err) {
+    yield put(loginFailure(err.response?.data?.error || "로그인 실패"));
+  }
 }
 
 // --- 사용자 정보 로드 (새로고침 시 세션 복원용) ---
 export function* loadUser() {
-    try {
-        const accessToken = typeof window !== "undefined" ? Cookies.get("accessToken") : null;
+  try {
+    let accessToken =
+      typeof window !== "undefined" ? Cookies.get("accessToken") : null;
 
-        if (!accessToken) {
-            yield put(loadUserFailure("저장된 토큰이 없습니다."));
-            return;
-        }
-
-        const user = decodeUser(accessToken);
-
-        // 만료 체크 (exp는 초 단위)
-        if (user_expired(accessToken)) {
-            Cookies.remove("accessToken");
-            yield put(loadUserFailure("세션이 만료되었습니다."));
-            return;
-        }
-
-        yield put(loadUserSuccess({user, accessToken }));
-    } catch (err) {
+    // accessToken 쿠키가 없거나 만료됐으면, HttpOnly refreshToken으로 재발급 시도
+    if (!accessToken || isTokenExpired(accessToken)) {
+      try {
+        const res = yield call(refreshTokenApi); // POST /auth/refresh (withCredentials)
+        accessToken = res.data?.accessToken;
+        if (!accessToken) throw new Error("no accessToken");
+        if (typeof window !== "undefined")
+          Cookies.set("accessToken", accessToken);
+      } catch (e) {
         if (typeof window !== "undefined") Cookies.remove("accessToken");
-        yield put(loadUserFailure("세션 정보를 불러오지 못했습니다."));
+        yield put(loadUserFailure("세션이 만료되었습니다."));
+        return;
+      }
     }
-}
 
-function user_expired(accessToken) {
-    const { exp } = jwtDecode(accessToken);
-    return !exp || Date.now() >= exp * 1000;
+    const user = decodeUser(accessToken);
+    yield put(loadUserSuccess({ user, accessToken }));
+  } catch (err) {
+    if (typeof window !== "undefined") Cookies.remove("accessToken");
+    yield put(loadUserFailure("세션 정보를 불러오지 못했습니다."));
+  }
 }
 
 // --- 토큰 재발급 ---
-export const refreshTokenApi = () => api.post(`${AUTH_API_BASE}/refresh`, {}, { withCredentials: true });
+export const refreshTokenApi = () =>
+  api.post(`${AUTH_API_BASE}/refresh`, {}, { withCredentials: true });
 export function* refreshToken() {
-    try {
-        const res = yield call(refreshTokenApi);
-        const { accessToken } = res.data;
+  try {
+    const res = yield call(refreshTokenApi);
+    const { accessToken } = res.data;
 
-        if (typeof window !== "undefined") {
-            Cookies.set("accessToken", accessToken);
-        }
-
-        yield put(refreshTokenSuccess({ accessToken }));
-    } catch (err) {
-        yield put(refreshTokenFailure(err.response?.data?.error || "재발급 실패"));
+    if (typeof window !== "undefined") {
+      Cookies.set("accessToken", accessToken);
     }
+
+    yield put(refreshTokenSuccess({ accessToken }));
+  } catch (err) {
+    yield put(refreshTokenFailure(err.response?.data?.error || "재발급 실패"));
+  }
 }
 
 // --- 로그아웃 ---
-export const logoutApi = () => api.post(`${AUTH_API_BASE}/logout`, {}, { withCredentials: true });
+export const logoutApi = () =>
+  api.post(`${AUTH_API_BASE}/logout`, {}, { withCredentials: true });
 export function* logout() {
-    try {
-        yield call(logoutApi);
-        if (typeof window !== "undefined") {
-            Cookies.remove("accessToken");
-        }
-        yield put(logoutSuccess());
-    } catch (err) {
-        yield put(logoutFailure(err.response?.data?.error || "로그아웃 실패"));
+  try {
+    yield call(logoutApi);
+    if (typeof window !== "undefined") {
+      Cookies.remove("accessToken");
     }
+    yield put(logoutSuccess());
+  } catch (err) {
+    yield put(logoutFailure(err.response?.data?.error || "로그아웃 실패"));
+  }
 }
 
 // --- 비밀번호 재설정 - 본인확인 ---
-export const confirmApi = (payload) => api.post(`${AUTH_API_BASE}/confirm`, payload);
+export const confirmApi = (payload) =>
+  api.post(`${AUTH_API_BASE}/confirm`, payload);
 export function* confirm(action) {
-    try {
-        const res = yield call(confirmApi, action.payload);
-        if (res.data.state === "OK" && typeof window !== "undefined") {
-            sessionStorage.setItem("resetToken", res.data.resetToken);
-        }
-        yield put(confirmSuccess(res.data));
-    } catch (err) {
-        yield put(confirmFailure(err.response?.data?.error || "본인확인 실패"));
+  try {
+    const res = yield call(confirmApi, action.payload);
+    if (res.data.state === "OK" && typeof window !== "undefined") {
+      sessionStorage.setItem("resetToken", res.data.resetToken);
     }
+    yield put(confirmSuccess(res.data));
+  } catch (err) {
+    yield put(confirmFailure(err.response?.data?.error || "본인확인 실패"));
+  }
 }
 
 // --- 비밀번호 재설정 (비로그인, resetToken 기반) ---
-export const updatePassApi = (payload) => api.post(`${AUTH_API_BASE}/updatePass`, payload);
+export const updatePassApi = (payload) =>
+  api.post(`${AUTH_API_BASE}/updatePass`, payload);
 export function* updatePass(action) {
-    try {
-        const resetToken = typeof window !== "undefined"
-            ? sessionStorage.getItem("resetToken")
-            : null;
+  try {
+    const resetToken =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("resetToken")
+        : null;
 
-        yield call(updatePassApi, { ...action.payload, resetToken });
+    yield call(updatePassApi, { ...action.payload, resetToken });
 
-        if (typeof window !== "undefined") {
-            sessionStorage.removeItem("resetToken");
-        }
-        yield put(updatePassSuccess());
-    } catch (err) {
-        yield put(updatePassFailure(err.response?.data?.error || "비밀번호 재설정 실패"));
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("resetToken");
     }
+    yield put(updatePassSuccess());
+  } catch (err) {
+    yield put(
+      updatePassFailure(err.response?.data?.error || "비밀번호 재설정 실패"),
+    );
+  }
 }
 
 // --- 비밀번호 변경 (로그인 상태) ---
-export const changePasswordApi = (payload) => api.put(`${AUTH_API_BASE}/password`, payload);
+export const changePasswordApi = (payload) =>
+  api.put(`${AUTH_API_BASE}/password`, payload);
 export function* changePassword(action) {
-    try {
-        yield call(changePasswordApi, action.payload);
-        yield put(changePasswordSuccess());
-    } catch (err) {
-        yield put(changePasswordFailure(err.response?.data?.error || "비밀번호 변경 실패"));
-    }
+  try {
+    yield call(changePasswordApi, action.payload);
+    yield put(changePasswordSuccess());
+  } catch (err) {
+    yield put(
+      changePasswordFailure(err.response?.data?.error || "비밀번호 변경 실패"),
+    );
+  }
 }
 
-function* watchLogin() { yield takeLatest(loginRequest.type, login); }
-function* watchLoadUser() { yield takeLatest(loadUserRequest.type, loadUser); }
-function* watchRefreshToken() { yield takeLatest(refreshTokenRequest.type, refreshToken); }
-function* watchLogout() { yield takeLatest(logoutRequest.type, logout); }
-function* watchConfirm() { yield takeLatest(confirmRequest.type, confirm); }
-function* watchUpdatePass() { yield takeLatest(updatePassRequest.type, updatePass); }
-function* watchChangePassword() { yield takeLatest(changePasswordRequest.type, changePassword); }
+function* watchLogin() {
+  yield takeLatest(loginRequest.type, login);
+}
+function* watchLoadUser() {
+  yield takeLatest(loadUserRequest.type, loadUser);
+}
+function* watchRefreshToken() {
+  yield takeLatest(refreshTokenRequest.type, refreshToken);
+}
+function* watchLogout() {
+  yield takeLatest(logoutRequest.type, logout);
+}
+function* watchConfirm() {
+  yield takeLatest(confirmRequest.type, confirm);
+}
+function* watchUpdatePass() {
+  yield takeLatest(updatePassRequest.type, updatePass);
+}
+function* watchChangePassword() {
+  yield takeLatest(changePasswordRequest.type, changePassword);
+}
 
 export default function* authSaga() {
-    yield all([
-        call(watchLogin),
-        call(watchLoadUser),
-        call(watchRefreshToken),
-        call(watchLogout),
-        call(watchConfirm),
-        call(watchUpdatePass),
-        call(watchChangePassword),
-    ]);
+  yield all([
+    call(watchLogin),
+    call(watchLoadUser),
+    call(watchRefreshToken),
+    call(watchLogout),
+    call(watchConfirm),
+    call(watchUpdatePass),
+    call(watchChangePassword),
+  ]);
 }
