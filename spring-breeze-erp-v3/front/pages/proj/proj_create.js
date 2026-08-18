@@ -22,9 +22,7 @@ export default function ProjCreatePage() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { loading, error, success } = useSelector(
-    (state) => state.proj
-  );
+  const { loading, error, success } = useSelector((state) => state.proj);
 
   const [form, setForm] = useState({
     proName: "",
@@ -36,12 +34,14 @@ export default function ProjCreatePage() {
 
   const [errors, setErrors] = useState({});
 
+  // 생성 성공하면 목록 페이지로 이동
   useEffect(() => {
     if (success) {
       router.push("/proj/proj_list");
     }
   }, [success, router]);
 
+  // 입력값 하나 바꿀 때 실행 (폼 값 갱신 + 해당 항목 에러 지우기)
   const handleChange = (name, value) => {
     setForm((prev) => ({
       ...prev,
@@ -54,6 +54,7 @@ export default function ProjCreatePage() {
     }));
   };
 
+  // 등록 버튼(폼 제출) 클릭 시 실행
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -103,6 +104,7 @@ export default function ProjCreatePage() {
     );
   };
 
+  // 취소 버튼: 입력값 전체 초기화
   const handleReset = () => {
     setForm({
       proName: "",
@@ -131,9 +133,7 @@ export default function ProjCreatePage() {
 
           <h1>프로젝트 생성</h1>
 
-          <p>
-            새로운 프로젝트의 기본 정보를 입력하세요.
-          </p>
+          <p>새로운 프로젝트의 기본 정보를 입력하세요.</p>
         </div>
       </div>
 
@@ -141,71 +141,52 @@ export default function ProjCreatePage() {
         <div className="sb-card__body">
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label
-                htmlFor="pro_name"
-                className="sb-form-label"
-              >
+              <label htmlFor="pro_name" className="sb-form-label">
                 프로젝트명
               </label>
 
               <Input
                 id="pro_name"
                 value={form.proName}
-                onChange={(e) =>
-                  handleChange("proName", e.target.value)
-                }
+                onChange={(e) => handleChange("proName", e.target.value)}
                 placeholder="프로젝트명을 입력하세요"
                 status={errors.proName ? "error" : ""}
               />
 
               {errors.proName && (
-                <div className="text-danger mt-1">
-                  {errors.proName}
-                </div>
+                <div className="text-danger mt-1">{errors.proName}</div>
               )}
             </div>
 
             <div className="mb-3">
-              <label
-                htmlFor="pro_desc"
-                className="sb-form-label"
-              >
+              <label htmlFor="pro_desc" className="sb-form-label">
                 프로젝트 설명
               </label>
 
               <TextArea
                 id="pro_desc"
                 value={form.proDesc}
-                onChange={(e) =>
-                  handleChange("proDesc", e.target.value)
-                }
+                onChange={(e) => handleChange("proDesc", e.target.value)}
                 placeholder="프로젝트에 대한 설명을 입력하세요"
                 rows={4}
                 status={errors.proDesc ? "error" : ""}
               />
 
               {errors.proDesc && (
-                <div className="text-danger mt-1">
-                  {errors.proDesc}
-                </div>
+                <div className="text-danger mt-1">{errors.proDesc}</div>
               )}
             </div>
 
             <div className="row g-3 mb-3">
               <div className="col-md-4">
-                <label
-                  htmlFor="pro_status"
-                  className="sb-form-label"
-                >
+                <label htmlFor="pro_status" className="sb-form-label">
                   상태
                 </label>
 
                 <Select
                   id="pro_status"
                   value={form.proStatus || undefined}
-                  onChange={(value) =>
-                    handleChange("proStatus", value)
-                  }
+                  onChange={(value) => handleChange("proStatus", value)}
                   options={STATUS_OPTIONS}
                   placeholder="상태를 선택하세요"
                   style={{ width: "100%" }}
@@ -213,34 +194,20 @@ export default function ProjCreatePage() {
                 />
 
                 {errors.proStatus && (
-                  <div className="text-danger mt-1">
-                    {errors.proStatus}
-                  </div>
+                  <div className="text-danger mt-1">{errors.proStatus}</div>
                 )}
               </div>
 
               <div className="col-md-4">
-                <label
-                  htmlFor="start_date"
-                  className="sb-form-label"
-                >
+                <label htmlFor="start_date" className="sb-form-label">
                   시작일
                 </label>
 
                 <DatePicker
                   id="start_date"
-                  value={
-                    form.startDate
-                      ? moment(form.startDate, "YYYY-MM-DD")
-                      : null
-                  }
+                  value={form.startDate ? moment(form.startDate, "YYYY-MM-DD") : null}
                   onChange={(date) =>
-                    handleChange(
-                      "startDate",
-                      date
-                        ? date.format("YYYY-MM-DD")
-                        : ""
-                    )
+                    handleChange("startDate", date ? date.format("YYYY-MM-DD") : "")
                   }
                   format="YYYY-MM-DD"
                   style={{ width: "100%" }}
@@ -248,34 +215,20 @@ export default function ProjCreatePage() {
                 />
 
                 {errors.startDate && (
-                  <div className="text-danger mt-1">
-                    {errors.startDate}
-                  </div>
+                  <div className="text-danger mt-1">{errors.startDate}</div>
                 )}
               </div>
 
               <div className="col-md-4">
-                <label
-                  htmlFor="end_date"
-                  className="sb-form-label"
-                >
+                <label htmlFor="end_date" className="sb-form-label">
                   종료일
                 </label>
 
                 <DatePicker
                   id="end_date"
-                  value={
-                    form.endDate
-                      ? moment(form.endDate, "YYYY-MM-DD")
-                      : null
-                  }
+                  value={form.endDate ? moment(form.endDate, "YYYY-MM-DD") : null}
                   onChange={(date) =>
-                    handleChange(
-                      "endDate",
-                      date
-                        ? date.format("YYYY-MM-DD")
-                        : ""
-                    )
+                    handleChange("endDate", date ? date.format("YYYY-MM-DD") : "")
                   }
                   format="YYYY-MM-DD"
                   style={{ width: "100%" }}
@@ -283,18 +236,13 @@ export default function ProjCreatePage() {
                 />
 
                 {errors.endDate && (
-                  <div className="text-danger mt-1">
-                    {errors.endDate}
-                  </div>
+                  <div className="text-danger mt-1">{errors.endDate}</div>
                 )}
               </div>
             </div>
 
             <div className="mb-4">
-              <label
-                htmlFor="reg_date"
-                className="sb-form-label"
-              >
+              <label htmlFor="reg_date" className="sb-form-label">
                 등록일
               </label>
 
@@ -302,41 +250,24 @@ export default function ProjCreatePage() {
                 id="reg_date"
                 value={moment().format("YYYY-MM-DD")}
                 readOnly
-                style={{
-                  maxWidth: 200,
-                  background: "#fafbfc",
-                }}
+                style={{ maxWidth: 200, background: "#fafbfc" }}
               />
             </div>
 
-            {error && (
-              <div className="text-danger mb-3">
-                {error}
-              </div>
-            )}
+            {error && <div className="text-danger mb-3">{error}</div>}
 
             <div className="sb-divider"></div>
 
             <div className="d-flex justify-content-end gap-2">
-              <Button
-                type="default"
-                htmlType="button"
-                onClick={handleReset}
-              >
+              <Button type="default" htmlType="button" onClick={handleReset}>
                 취소
               </Button>
 
               <Link href="/proj/proj_list">
-                <Button>
-                  목록
-                </Button>
+                <Button>목록</Button>
               </Link>
 
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-              >
+              <Button type="primary" htmlType="submit" loading={loading}>
                 등록
               </Button>
             </div>
