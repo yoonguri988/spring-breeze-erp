@@ -18,7 +18,7 @@ const WEEK_API_BASE="/api/week";
         }
     }
     // 개인 주간보고서 PDF 생성
-    export const createMyReportAPI=()=>api.get(`${WEEK_API_BASE}/my-report`);
+    export const createMyReportAPI=()=>api.get(`${WEEK_API_BASE}/my-report`, { responseType: "blob" });
     export function* createMyReport(action){
         try{
             const result = yield call(createMyReportAPI,action.payload)

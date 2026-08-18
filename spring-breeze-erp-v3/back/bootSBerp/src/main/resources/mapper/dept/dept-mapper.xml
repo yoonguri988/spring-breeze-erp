@@ -203,4 +203,23 @@
 		WHERE COM_ID = #{comId}
 		  AND DEPT_CODE = #{deptCode}
 	</select>
+	<!-- 로그인 사원(empId) 기준 소속 부서 조회 - "내 부서" 화면용 -->
+	<select id="selectByEmpId" resultType="DeptResponse" parameterType="long">
+		SELECT
+		    d.dept_id, d.dept_name, d.dept_code,
+		    d.depth, d.sort_order, d.com_id, d.dept_status,
+		    d.parent_id,
+		    dp_parent.dept_name  AS parent_name,
+		    d.emp_id             AS leader_id,
+		    leader.emp_name      AS leader_name,
+		    leader.emp_no        AS leader_emp_no,
+		    leader_p.pos_name    AS leader_pos_name
+		FROM employee me
+		JOIN department d              ON d.dept_id = me.dept_id
+		LEFT JOIN department dp_parent ON dp_parent.dept_id = d.parent_id
+		LEFT JOIN employee leader      ON leader.emp_id = d.emp_id
+		LEFT JOIN emp_position leader_p ON leader_p.pos_id = leader.pos_id
+		WHERE me.emp_id = #{empId}
+		  AND d.dept_status != 'DELETED'
+	</select>
 </mapper>

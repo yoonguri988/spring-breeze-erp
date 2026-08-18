@@ -27,10 +27,10 @@ import com.sb.erp.pos.repository.PosMapper;
 import com.sb.erp.res.dto.request.ResRequest;
 import com.sb.erp.res.dto.response.ResResponse;
 import com.sb.erp.res.repository.ResourceMapper;
-import com.sb.erp.resv.dto.reponse.ResvResponse;
-import com.sb.erp.resv.dto.reponse.StatsResvResponse;
 import com.sb.erp.resv.dto.request.ResvRequest;
 import com.sb.erp.resv.dto.request.ResvSearchRequest;
+import com.sb.erp.resv.dto.response.ResvResponse;
+import com.sb.erp.resv.dto.response.StatsResvResponse;
 import com.sb.erp.resv.repository.ReservationMapper;
 
 @SpringBootTest

@@ -54,10 +54,14 @@ public class NoticeController {
       	boolean isRoot = principal.getRoles().contains("ROOT");
     	if (!isRoot) { search.setComId(principal.getComId()); }
     	
+    	int currentPage = search.getPstartno(); // 오염되기 전, 진짜 페이지 번호 미리 저장
     	List<NoticeResponse> notices = noticeService.getNoticeListWithUrgent(search); // 긴급5 + 일반목록
         int totalCnt = noticeService.selectCount(search);              // 전체 건수 (뱃지용)
+        long pagingCnt = noticeService.selectCountNoticeList(search);  // 페이징 계산용 (pinnedBnos 반영됨)
+        PagingUtil paging = new PagingUtil((int) pagingCnt, currentPage);
 
         Map<String, Object> result = new HashMap<>();
+        result.put("paging", paging);
         result.put("notices", notices);
         result.put("totalCnt", totalCnt);
         return ResponseEntity.ok(result);
@@ -188,7 +192,7 @@ public class NoticeController {
     // 검색 결과 카운트 (GET 방식) //어디서 쓰이는지 잘 모르겠음
 	@Operation(summary = "공지 검색 결과 카운트", description = "검색 조건에 맞는 공지 건수만 조회합니다.")
 	@GetMapping("/search-count")
-	public ResponseEntity<Long> getSearchCount(NoticeSearchRequest search) {
+	public ResponseEntity<Integer> getSearchCount(NoticeSearchRequest search) {
 		return ResponseEntity.ok(noticeService.selectCountNoticeList(search));
 	}
 }

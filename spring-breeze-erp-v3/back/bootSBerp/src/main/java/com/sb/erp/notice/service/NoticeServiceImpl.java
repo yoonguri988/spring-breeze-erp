@@ -103,7 +103,7 @@ public class NoticeServiceImpl implements NoticeService{
 		 */
 
 	    @Override // 검색 결과 카운트
-	    public long selectCountNoticeList(NoticeSearchRequest search) { return noticeMapper.selectCountNoticeList(search); }
+	    public Integer selectCountNoticeList(NoticeSearchRequest search) { return noticeMapper.selectCountNoticeList(search); }
 
 		@Override // 긴급 공지 리스트
 		public List<NoticeResponse> selectUrgentNotices(NoticeSearchRequest search) {  return noticeMapper.selectUrgentNotices(search); }
