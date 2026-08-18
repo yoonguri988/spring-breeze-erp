@@ -1,6 +1,6 @@
 // sagas/emp/empSaga.js
 import { all, call, put, takeLatest } from 'redux-saga/effects';
-import axios from 'axios';
+import api from '../../api/axios';
 import { 
     resetEmpState,
     listEmpRequest, listEmpSuccess, listEmpFailure,
@@ -20,7 +20,7 @@ const EMP_API_BASE = '/api/emp';
 // listEmp  - GET /api/emp 사원 목록 조회 ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const listEmpApi = ()=> axios.get(EMP_API_BASE);
+export const listEmpApi = ()=> api.get(EMP_API_BASE);
 
 export function* listEmp(){
     try{
@@ -35,7 +35,7 @@ export function* listEmp(){
 // detailEmp - GET /api/emp 사원 상세 조회 ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const detailEmpApi = (empId)=> axios.get(`${EMP_API_BASE}/${empId}`);
+export const detailEmpApi = (empId)=> api.get(`${EMP_API_BASE}/${empId}`);
 
 export function* detailEmp(action){
     try{
@@ -50,7 +50,7 @@ export function* detailEmp(action){
 // createEmp  - POST /api/emp 사원 등록 ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const createEmpApi = (data)=> axios.post(EMP_API_BASE, data);
+export const createEmpApi = (data)=> api.post(EMP_API_BASE, data);
 
 export function* createEmp(action){
     try{
@@ -65,7 +65,7 @@ export function* createEmp(action){
 // updateEmp  - PUT /api/emp/{empId} 사원 정보 수정 ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const updateEmpApi = ({empId, ...data})=> axios.put(`${EMP_API_BASE}/${empId}`, data);
+export const updateEmpApi = ({empId, ...data})=> api.put(`${EMP_API_BASE}/${empId}`, data);
 
 export function* updateEmp(action){
     try{
@@ -80,7 +80,7 @@ export function* updateEmp(action){
 // updatePassword  - PUT /api/emp/{empId}/password 비밀번호 변경(본인) ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const updatePasswordApi = ({empId, ...data})=> axios.put(`${EMP_API_BASE}/${empId}/password`, data);
+export const updatePasswordApi = ({empId, ...data})=> api.put(`${EMP_API_BASE}/${empId}/password`, data);
 
 export function* updatePassword(action){
     try{
@@ -95,7 +95,7 @@ export function* updatePassword(action){
 // resetPassword  - PUT /api/emp/{empId}/reset-password 비밀번호 초기화(관리자) ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const resetPasswordApi = (empId)=> axios.put(`${EMP_API_BASE}/${empId}/reset-password`);
+export const resetPasswordApi = (empId)=> api.put(`${EMP_API_BASE}/${empId}/reset-password`);
 
 export function* resetPassword(action){
     try{
@@ -110,7 +110,7 @@ export function* resetPassword(action){
 // checkEmail  - GET /api/emp/check-email 	이메일 중복검사 ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const checkEmailApi = (email)=> axios.get(`${EMP_API_BASE}/check-email`, { params: {email} });
+export const checkEmailApi = (email)=> api.get(`${EMP_API_BASE}/check-email`, { params: {email} });
 
 export function* checkEmail(action){
     try{
@@ -125,7 +125,7 @@ export function* checkEmail(action){
 // checkMobile  - GET /api/emp/check-mobile 	모바일 중복검사 ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const checkMobileApi = (mobile)=> axios.get(`${EMP_API_BASE}/check-mobile`, { params: {mobile} });
+export const checkMobileApi = (mobile)=> api.get(`${EMP_API_BASE}/check-mobile`, { params: {mobile} });
 
 export function* checkMobile(action){
     try{
@@ -140,7 +140,7 @@ export function* checkMobile(action){
 // checkEmpNo  - GET /api/emp/check-empno 	사번 중복검사 ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const checkEmpNoApi = (empNo)=> axios.get(`${EMP_API_BASE}/check-empno`, { params: {empNo} });
+export const checkEmpNoApi = (empNo)=> api.get(`${EMP_API_BASE}/check-empno`, { params: {empNo} });
 
 export function* checkEmpNo(action){
     try{
