@@ -105,13 +105,12 @@ export default function ResvDetailPage() {
                     query: { revId: resv.revId },
                   }}
                 >
-                  <Button icon={<EditOutlined />} size="small">
+                  <Button icon={<EditOutlined />}>
                     수정
                   </Button>
                 </Link>
                 <Button
                   danger
-                  size="small"
                   icon={<CloseCircleOutlined />}
                   onClick={() =>
                     setCancelTarget({
@@ -125,7 +124,7 @@ export default function ResvDetailPage() {
               </>
             )}
             <Link href="/resv/my">
-              <Button icon={<ArrowLeftOutlined />} size="small">
+              <Button icon={<ArrowLeftOutlined />}>
                 목록으로
               </Button>
             </Link>

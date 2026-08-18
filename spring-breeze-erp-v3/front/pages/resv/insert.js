@@ -175,7 +175,7 @@ export default function ResvInsertPage() {
         </div>
         <div className="sb-page-head__actions">
           <Link href="/resv/my">
-            <Button icon={<ArrowLeftOutlined />} size="small">
+            <Button icon={<ArrowLeftOutlined />}>
               목록으로
             </Button>
           </Link>
