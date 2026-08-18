@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,15 +15,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.sb.erp.appr.dto.request.ApprDocRequest;
 import com.sb.erp.appr.dto.request.ApprDocSearchCondition;
 import com.sb.erp.appr.dto.response.ApprDocInitResponse;
 import com.sb.erp.appr.dto.response.ApprDocResponse;
 import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
+import com.sb.erp.appr.dto.response.ApprFileResponse;
 import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.ApprLineResponse;
 import com.sb.erp.appr.service.ApprDocService;
+import com.sb.erp.appr.service.ApprFileService;
 import com.sb.erp.dept.dto.response.DeptResponse;
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
 import com.sb.erp.util.dto.PagingUtil;
@@ -39,6 +43,7 @@ import lombok.RequiredArgsConstructor;
 public class ApprDocController {
 
 	private final ApprDocService service;
+	private final ApprFileService fileService;
 
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
 
@@ -212,4 +217,37 @@ public class ApprDocController {
 	}
 
 	//////////////////////////// 결재선 파트 ///////////////////////////////
+	
+	//////////////////////////// 파일 첨부 ///////////////////////////////
+	
+	@Operation(summary = "첨부파일 업로드", description = "문서에 첨부파일 등록 (최대 5개)")
+	@PostMapping("/{docId}/files")
+	public ResponseEntity<List<ApprFileResponse>> uploadFiles(
+			@PathVariable Long docId,
+			@RequestParam("files") List<MultipartFile> files
+	) {
+		return ResponseEntity.ok(fileService.uploadFiles(docId, files));
+	}
+	
+	@Operation(summary = "첨부파일 목록 조회", description = "문서에 등록된 첨부파일 목록 조회")
+	@GetMapping("/{docId}/files")
+	public ResponseEntity<List<ApprFileResponse>> getFiles(
+			@PathVariable Long docId
+	) {
+		return ResponseEntity.ok(fileService.selectFilesByDocId(docId));
+	}
+	
+	@Operation(summary = "첨부파일 삭제", description = "본인이 등록한 문서의 첨부파일을 삭제")
+	@DeleteMapping("/{docId}/files/{fileId}")
+	public ResponseEntity<Void> deleteFile(
+			@PathVariable Long docId,
+			@PathVariable Long fileId,
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	) {
+		fileService.deleteFile(docId, fileId, principal.getEmpId());
+		return ResponseEntity.noContent().build();
+	}
+	
+	//////////////////////////// 파일 첨부 ///////////////////////////////
 }
+

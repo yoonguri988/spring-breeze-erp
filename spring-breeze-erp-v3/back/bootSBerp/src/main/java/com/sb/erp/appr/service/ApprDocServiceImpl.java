@@ -30,7 +30,6 @@ public class ApprDocServiceImpl implements ApprDocService{
 	private final ApprLineMapper lineDao;
 	private final DeptService deptService;
 	
-	
 	// 작성하려는 사용자의 회사 양식
 	@Override
 	public List<ApprFormResponse> findForm(Long comId) {
@@ -184,7 +183,5 @@ public class ApprDocServiceImpl implements ApprDocService{
 	public int selectMyTodoDocsCnt(ApprDocSearchCondition condition) {
 		return dao.selectMyTodoDocsCnt(condition);
 	}
-
-	
 	
 }
