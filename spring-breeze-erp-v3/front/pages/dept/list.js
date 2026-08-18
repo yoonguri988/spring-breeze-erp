@@ -256,7 +256,7 @@ export default function DeptListPage() {
           </span>
 
           <Link href={{ pathname: "/dept/add", query: comId ? { comId } : {} }}>
-            <Button type="primary" size="small" icon={<PlusOutlined />}>
+            <Button type="primary" icon={<PlusOutlined />}>
               부서 등록
             </Button>
           </Link>

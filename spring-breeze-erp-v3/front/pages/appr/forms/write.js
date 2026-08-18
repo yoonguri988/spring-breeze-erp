@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { message, Radio, Form, Input, Select, Switch, Button } from "antd";
 import { insertFormRequest, resetFormState } from "../../../reducers/appr/apprFormReducer";
 import { checkCode, searchCompany, generateAiSchema } from "../../../api/appr/apprFormApi";
+import SchemaFieldEditor, {validateSchemaFields} from "../../../components/appr/SchemaFieldEditor";
 
 // react-quill은 SSR이 불가하므로 CSR로 로드
 // () => import("react-quill") -> 처음에 로드 하지않고 필요할때 로드
@@ -24,7 +25,7 @@ export default function FormWritePage() {
     const [contentMode, setContentMode] = useState("editor")
     const [content, setContent] = useState("");
     const [aiPrompt, setAiPrompt] = useState("");
-    const [aiSchema, setAiSchema] = useState("");
+    const [schemaFields, setSchemaFields] = useState([]);
     const [aiLoading, setAiLoading] = useState(false);
     const [companyOptions, setCompanyOptions] = useState([]);
 
@@ -70,8 +71,16 @@ export default function FormWritePage() {
         try {
             const res = await generateAiSchema(aiPrompt);
             if (res.success) {
-                setAiSchema(res.schema);
-                message.success("AI 스키마가 생성되었습니다.");
+                // 서버가 준 스키마 JSON 파싱해서 편집 가능하게 세팅
+                const parsed = JSON.parse(res.schema);
+                setSchemaFields(parsed.fields || []);
+
+                // 제목을 안적었을때만 채우기
+                if (parsed.title && !form.getFieldValue("forTitle")){
+                    form.setFieldsValue({forTitle: parsed.title});
+                }
+
+                message.success("AI 스키마가 생성되었습니다. \n필드를 확인/수정한 뒤 등록해주세요.")
             }
             else {
                 message.error(res.message || "AI 양식 생성에 실패했습니다.")
@@ -105,19 +114,31 @@ export default function FormWritePage() {
     };
 
     const handleSubmit = (values) => {
-        // XOR 검증 -> 백엔드와 동일하게 체크 UX용, 최종 검증은 서버에서
-        const hasContent = contentMode === "editor" && content.trim();
-        const hasSchema = contentMode === "ai" && aiSchema.trim();
-        if (!hasContent && !hasSchema) {
-            message.error("에디터 작성 또는 AI 생성 중 하나는 완료해야합니다.");
-            return;
-        }
+        let payload;
 
-        const payload = {
-            ...values,
-            forContent: contentMode === "editor" ? content : null,
-            forSchema: contentMode === "ai" ? aiSchema : null,
-        };
+        if (contentMode === "ai") {
+            const errorMsg = validateSchemaFields(schemaFields);
+            if (errorMsg) {
+                message.error(errorMsg);
+                return;
+            }
+            payload = {
+                ...values,
+                forContent: null,
+                forSchema: JSON.stringify({fields: schemaFields}),
+            };
+        }
+        else {
+            if (!content.trim()) {
+                message.error("양식 내용을 입력해주세요.");
+                return;
+            }
+            payload = {
+                ...values,
+                forContent: content,
+                forSchema: null,
+            }
+        }
 
         dispatch(insertFormRequest(payload));
     }
@@ -199,15 +220,16 @@ export default function FormWritePage() {
                             </Button>
                         </Input.Group>
                     </Form.Item>
-                    {aiSchema && (
-                        <Form.Item label="생성된 스키마 (미리보기)">
-                            <Input.TextArea
-                                value={aiSchema}
-                                readOnly
-                                rows={8}
+                    
+                    {schemaFields.length > 0 && (
+                        <Form.Item label="생성된 필드 구성 (수정 가능)">
+                            <SchemaFieldEditor
+                                fields={schemaFields}
+                                onChange={setSchemaFields}
                             />
                         </Form.Item>
                     )}
+
                 </>)}
 
                 <Form.Item

@@ -1,6 +1,7 @@
 package com.sb.erp.resv.controller;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,8 @@ public class ReservationController {
         }
         if (search.getEndDt() == null) {
             search.setEndDt(LocalDateTime.now());
+        } else {
+            search.setEndDt(search.getEndDt().toLocalDate().atTime(LocalTime.MAX)); // 23:59:59.999999999
         }
 
         return ResponseEntity.ok(service.getResvList(search));
@@ -78,6 +81,8 @@ public class ReservationController {
         }
         if (search.getEndDt() == null) {
             search.setEndDt(LocalDateTime.now());
+        } else {
+            search.setEndDt(search.getEndDt().toLocalDate().atTime(LocalTime.MAX)); // 23:59:59.999999999
         }
 
         return ResponseEntity.ok(service.getResvCount(search));

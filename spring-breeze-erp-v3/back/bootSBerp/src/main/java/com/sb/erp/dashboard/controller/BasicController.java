@@ -1,4 +1,4 @@
-package com.sb.erp.controller;
+package com.sb.erp.dashboard.controller;
 
 import java.time.LocalDate;
 
