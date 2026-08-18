@@ -3,27 +3,16 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import {
-  Card,
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  Button,
-  message,
-} from "antd";
+import { Card, Form, Input, Select, DatePicker, Button, message, } from "antd";
 import { ArrowLeftOutlined, CheckOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
 import {
-  detailEmpRequest,
-  updateEmpRequest,
-  checkEmailRequest,
-  checkMobileRequest,
-  checkEmpNoRequest,
-  resetEmpState,
+  detailEmpRequest, updateEmpRequest, checkEmailRequest,
+  checkMobileRequest, checkEmpNoRequest, resetEmpState,
 } from "../../reducers/emp/empReducer";
 import { listPosRequest } from "../../reducers/pos/posReducer";
+import { fetchDeptFlatRequest } from "../../reducers/dept/deptReducer";
 
 const STATUS_OPTIONS = [
   { value: "재직", label: "재직" },
@@ -37,16 +26,18 @@ export default function EmpEditPage() {
   const { empId } = router.query;
   const [form] = Form.useForm();
 
-  const { currentEmp, checkResult, loading, success, error } = useSelector(
-    (state) => state.emp
-  );
+  const { currentEmp, checkResult, loading, success, error } = useSelector((state) => state.emp);
+  const { user } = useSelector((state) => state.auth);
   const { posList } = useSelector((state) => state.pos);
+  const { flatList } = useSelector((state) => state.dept);
 
   // 데이터 로드
   useEffect(() => {
     if (!empId) return;
     dispatch(detailEmpRequest(Number(empId)));
     dispatch(listPosRequest());
+    dispatch(fetchDeptFlatRequest(user?.comId));
+    return () => { dispatch(resetEmpState()); };
   }, [dispatch, empId]);
 
   // 폼에 기존 값 세팅
@@ -57,6 +48,7 @@ export default function EmpEditPage() {
       empName: currentEmp.empName,
       empEmail: currentEmp.empEmail,
       empMobile: currentEmp.empMobile,
+      deptId: currentEmp.deptId,
       posId: currentEmp.posId,
       empStatus: currentEmp.empStatus,
       hireDate: currentEmp.hireDate ? dayjs(currentEmp.hireDate) : null,
@@ -170,7 +162,7 @@ export default function EmpEditPage() {
           <Form.Item
             name="empEmail"
             label="이메일"
-            rules={[{ required: true }, { type: "email" }]}
+            rules={[{ required: true, message: "이메일을 입력하세요" }, { type: "email", message: "올바른 이메일 형식이 아닙니다" }]}
             {...checkHelp("email")}
           >
             <Input
@@ -200,6 +192,20 @@ export default function EmpEditPage() {
                   checkMobileRequest
                 )
               }
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="deptId"
+            label="부서"
+            rules={[{ required: true, message: "부서를 선택하세요." }]}
+          >
+            <Select
+              placeholder="부서 선택"
+              options={flatList.map((d) => ({
+                  value: d.deptId,
+                  label: d.deptName,
+                }))}
             />
           </Form.Item>
 

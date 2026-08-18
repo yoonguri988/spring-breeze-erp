@@ -9,6 +9,12 @@ const initialState={
     //상세
     currentEmp: null,
 
+    //페이징
+    paging: null,
+
+    //리포트 결과
+    latestReport: null,
+
     //중복 검사 결과
     checkResult: {
         email: null,        // true=사용가능, false=중복, null=미검사
@@ -43,7 +49,8 @@ const empReducer=createSlice({
         },
         listEmpSuccess: (state, action)=>{
             state.loading = false;
-            state.empList = action.payload;
+            state.empList = action.payload.list;
+            state.paging = action.payload.paging;
         },
         listEmpFailure: (state, action)=>{
             state.loading = false;
@@ -57,7 +64,8 @@ const empReducer=createSlice({
         },
         detailEmpSuccess: (state, action)=>{
             state.loading = false;
-            state.currentEmp = action.payload;
+            state.currentEmp = action.payload.emp;
+            state.latestReport = action.payload.latestReport || null;
         },
         detailEmpFailure: (state, action)=>{
             state.loading = false;

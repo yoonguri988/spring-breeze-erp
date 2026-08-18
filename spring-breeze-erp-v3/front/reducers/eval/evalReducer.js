@@ -33,6 +33,10 @@ const evalReducer = createSlice({
         },
         clearEvalDetail: (state) => {
             state.currentEval = null;
+            state.currentPeriod = null;
+            state.targets = [];
+            state.submittedCount = 0;
+            state.totalCount = 0;
         },
 
         // --- 대시보드 조회 ---

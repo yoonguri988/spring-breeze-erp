@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { Row, Col, Card, Button, Tag, Avatar, message } from "antd";
-import { PlusOutlined, CloseOutlined, ArrowLeftOutlined, ShieldOutlined, } from "@ant-design/icons";
+import { PlusOutlined, CloseOutlined, ArrowLeftOutlined, SafetyCertificateOutlined, } from "@ant-design/icons";
 
 import {
   listPermRequest, empAuthListRequest, grantPermRequest,
@@ -37,6 +37,7 @@ export default function EmpAuthPage() {
 
     return () => {
       dispatch(clearEmpAuth());
+      dispatch(resetPermState());
     };
   }, [dispatch, empId]);
 
@@ -61,8 +62,8 @@ export default function EmpAuthPage() {
     dispatch(grantPermRequest({ empId: Number(empId), autId }));
   };
 
-  const handleRevoke = (empAutId) => {
-    dispatch(revokePermRequest({ empId: Number(empId), empAutId }));
+  const handleRevoke = (autId) => {
+    dispatch(revokePermRequest({ empId: Number(empId), autId }));
   };
 
   // 이미 부여된 권한 ID 목록 (부여 가능 목록에서 제외용)
@@ -179,7 +180,7 @@ export default function EmpAuthPage() {
                   color: "#999",
                 }}
               >
-                <ShieldOutlined style={{ fontSize: 24, marginBottom: 8 }} />
+                <SafetyCertificateOutlined style={{ fontSize: 24, marginBottom: 8 }} />
                 <p>부여된 권한이 없습니다.</p>
               </div>
             ) : (
@@ -200,7 +201,7 @@ export default function EmpAuthPage() {
                     <Button
                       size="small"
                       icon={<CloseOutlined />}
-                      onClick={() => handleRevoke(auth.empAutId)}
+                      onClick={() => handleRevoke(auth.autId)}
                       loading={loading}
                     >
                       회수
@@ -228,7 +229,7 @@ export default function EmpAuthPage() {
                   color: "#999",
                 }}
               >
-                <ShieldOutlined style={{ fontSize: 24, marginBottom: 8 }} />
+                <SafetyCertificateOutlined style={{ fontSize: 24, marginBottom: 8 }} />
                 <p>
                   {permList.length === 0
                     ? "등록된 권한이 없습니다."

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import { Row, Col, Card, Table, Button, Modal, Form, Input, Badge, Avatar, message, } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, ShieldOutlined, } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined, SafetyCertificateOutlined, } from "@ant-design/icons";
 
 import {
   listPermRequest, detailPermRequest, createPermRequest,
@@ -17,12 +17,8 @@ export default function PermListPage() {
   const [form] = Form.useForm();
 
   const {
-    permList,
-    currentPerm,
-    permEmployees,
-    loading,
-    success,
-    error,
+    permList, currentPerm, permEmployees,
+    loading, success, error,
   } = useSelector((state) => state.perm);
 
   // 선택된 권한 ID
@@ -45,6 +41,11 @@ export default function PermListPage() {
       setSelectedId(id);
       dispatch(detailPermRequest(id));
     }
+    // 페이지 떠날 때 상태 초기화
+    return () => {
+      dispatch(clearPermDetail());
+      dispatch(resetPermState());
+    };
   }, [dispatch, router.query.autId]);
 
   // ─── 등록/수정/삭제 결과 처리 ───
@@ -187,7 +188,7 @@ export default function PermListPage() {
           >
             {permList.length === 0 ? (
               <div style={{ textAlign: "center", padding: "40px 0", color: "#999" }}>
-                <ShieldOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+                <SafetyCertificateOutlined style={{ fontSize: 32, marginBottom: 8 }} />
                 <p>등록된 권한이 없습니다.</p>
               </div>
             ) : (
@@ -228,7 +229,7 @@ export default function PermListPage() {
           <Card>
             {!currentPerm ? (
               <div style={{ textAlign: "center", padding: "60px 0", color: "#999" }}>
-                <ShieldOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+                <SafetyCertificateOutlined style={{ fontSize: 32, marginBottom: 8 }} />
                 <p>왼쪽에서 권한을 선택하세요.</p>
                 <p>또는 '권한 등록'으로 새 권한을 만드세요.</p>
               </div>
@@ -277,7 +278,11 @@ export default function PermListPage() {
                   columns={empColumns}
                   dataSource={permEmployees}
                   loading={loading}
-                  pagination={false}
+                  pagination={{
+                    pageSize: 10,
+                    showTotal: (total) => `총 ${total}명`,
+                    showSizeChanger: false,
+                  }}
                   size="small"
                   locale={{ emptyText: "이 권한이 부여된 사원이 없습니다." }}
                 />

@@ -32,6 +32,11 @@ export default function PosListPage() {
   // ─── 페이지 진입 시 목록 조회 ───
   useEffect(() => {
     dispatch(listPosRequest());
+    
+    return () => {
+      dispatch(resetPosState());
+      dispatch(clearCodeCheck());
+    };
   }, [dispatch]);
 
   // ─── 등록/수정/삭제 결과 처리 ───

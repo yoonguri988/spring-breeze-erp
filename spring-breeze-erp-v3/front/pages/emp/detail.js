@@ -3,11 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Row, Col, Card, Button, Tag, Avatar, Descriptions,
-  Modal, Form, Input, message, } from "antd";
-import {
-  ArrowLeftOutlined, EditOutlined, KeyOutlined, ShieldOutlined,
-} from "@ant-design/icons";
+import { Row, Col, Card, Button, Tag, Avatar, Descriptions, Modal, Form, Input, message, } from "antd";
+import { ArrowLeftOutlined, EditOutlined, KeyOutlined, SafetyCertificateOutlined, } from "@ant-design/icons";
 
 import {
   detailEmpRequest, updatePasswordRequest, resetPasswordRequest,
@@ -41,6 +38,7 @@ export default function EmpDetailPage() {
   useEffect(() => {
     if (!empId) return;
     dispatch(detailEmpRequest(Number(empId)));
+    return () => { dispatch(resetEmpState()); };
   }, [dispatch, empId]);
 
   // ─── 비밀번호 결과 처리 ───
@@ -297,7 +295,7 @@ export default function EmpDetailPage() {
                 query: { empId },
               }}
             >
-              <Button icon={<ShieldOutlined />}>권한 관리</Button>
+              <Button icon={<SafetyCertificateOutlined />}>권한 관리</Button>
             </Link>
             <Button
               icon={<KeyOutlined />}

@@ -11,20 +11,23 @@ import {
   checkEmpNoRequest, resetEmpState,
 } from "../../reducers/emp/empReducer";
 import { listPosRequest } from "../../reducers/pos/posReducer";
+import { fetchDeptFlatRequest } from "../../reducers/dept/deptReducer";
 
 export default function EmpAddPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
 
-  const { checkResult, loading, success, error } = useSelector(
-    (state) => state.emp
-  );
+  const { checkResult, loading, success, error } = useSelector((state) => state.emp);
+  const { user } = useSelector((state) => state.auth);
   const { posList } = useSelector((state) => state.pos);
+  const { flatList } = useSelector((state) => state.dept);
 
-  // 직급 목록 로드
+  // 직급, 부서 목록 로드
   useEffect(() => {
     dispatch(listPosRequest());
+    dispatch(fetchDeptFlatRequest(user?.comId));
+    return () => { dispatch(resetEmpState()); };
   }, [dispatch]);
 
   // 등록 성공 시 목록으로 이동
@@ -149,6 +152,20 @@ export default function EmpAddPage() {
                 const v = e.target.value.trim();
                 if (v) dispatch(checkMobileRequest(v));
               }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="deptId"
+            label="부서"
+            rules={[{ required: true, message: "부서를 선택하세요." }]}
+          >
+            <Select
+                placeholder="부서 선택"
+                options={flatList.map((d) => ({
+                  value: d.deptId,
+                  label: d.deptName,
+                }))}
             />
           </Form.Item>
 
