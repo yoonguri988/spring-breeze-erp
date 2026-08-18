@@ -6,31 +6,24 @@ import {
   fetchResourceListRequest,
   fetchResourceListSuccess,
   fetchResourceListFailure,
-
   fetchResourceCountRequest,
   fetchResourceCountSuccess,
   fetchResourceCountFailure,
-
   fetchResourceDetailRequest,
   fetchResourceDetailSuccess,
   fetchResourceDetailFailure,
-
   addResourceRequest,
   addResourceSuccess,
   addResourceFailure,
-
   updateResourceRequest,
   updateResourceSuccess,
   updateResourceFailure,
-
   deleteResourceRequest,
   deleteResourceSuccess,
   deleteResourceFailure,
-
   checkResCodeRequest,
   checkResCodeSuccess,
   checkResCodeFailure,
-
   fetchReservableResourcesRequest,
   fetchReservableResourcesSuccess,
   fetchReservableResourcesFailure,
@@ -41,7 +34,8 @@ const RES_API_BASE = "/api/res";
 // =========================================================
 // 1) 자원 목록 조회 GET /api/res
 // =========================================================
-export const fetchResourceListApi = (search) => api.get(RES_API_BASE, { params: search });
+export const fetchResourceListApi = (search) =>
+  api.get(RES_API_BASE, { params: search });
 
 export function* fetchResourceList(action) {
   try {
@@ -49,7 +43,11 @@ export function* fetchResourceList(action) {
 
     yield put(fetchResourceListSuccess(res.data));
   } catch (err) {
-    yield put(fetchResourceListFailure(err.response?.data?.message || "자원 목록 조회에 실패하였습니다."));
+    yield put(
+      fetchResourceListFailure(
+        err.response?.data?.message || "자원 목록 조회에 실패하였습니다.",
+      ),
+    );
   }
 }
 
@@ -65,14 +63,19 @@ export function* fetchResourceCount(action) {
 
     yield put(fetchResourceCountSuccess(res.data));
   } catch (err) {
-    yield put(fetchResourceCountFailure(err.response?.data?.message || "자원 개수 조회에 실패하였습니다."));
+    yield put(
+      fetchResourceCountFailure(
+        err.response?.data?.message || "자원 개수 조회에 실패하였습니다.",
+      ),
+    );
   }
 }
 
 // =========================================================
 // 3) 자원 단건 조회 GET /api/res/{resId}
 // =========================================================
-export const fetchResourceDetailApi = (resId) => api.get(`${RES_API_BASE}/${resId}`);
+export const fetchResourceDetailApi = (resId) =>
+  api.get(`${RES_API_BASE}/${resId}`);
 
 export function* fetchResourceDetail(action) {
   try {
@@ -81,7 +84,11 @@ export function* fetchResourceDetail(action) {
 
     yield put(fetchResourceDetailSuccess(res.data));
   } catch (err) {
-    yield put(fetchResourceDetailFailure(err.response?.data?.message || "자원 상세 조회에 실패하였습니다."));
+    yield put(
+      fetchResourceDetailFailure(
+        err.response?.data?.message || "자원 상세 조회에 실패하였습니다.",
+      ),
+    );
   }
 }
 
@@ -102,7 +109,7 @@ export function* addResource(action) {
       addResourceFailure({
         message: err.response?.data?.message || "자원 등록에 실패하였습니다.",
         reason: err.response?.data?.reason ?? null,
-      })
+      }),
     );
   }
 }
@@ -111,7 +118,8 @@ export function* addResource(action) {
 // 5) 자원 수정 PUT /api/res/{resId}
 // action.payload: { resId, dto: ResRequest }
 // =========================================================
-export const updateResourceApi = (resId, dto) => api.put(`${RES_API_BASE}/${resId}`, dto);
+export const updateResourceApi = (resId, dto) =>
+  api.put(`${RES_API_BASE}/${resId}`, dto);
 
 export function* updateResource(action) {
   try {
@@ -120,7 +128,11 @@ export function* updateResource(action) {
 
     yield put(updateResourceSuccess(res.data));
   } catch (err) {
-    yield put(updateResourceFailure(err.response?.data?.message || "자원 수정에 실패하였습니다."));
+    yield put(
+      updateResourceFailure(
+        err.response?.data?.message || "자원 수정에 실패하였습니다.",
+      ),
+    );
   }
 }
 
@@ -130,7 +142,7 @@ export function* updateResource(action) {
 // =========================================================
 export const deleteResourceApi = (resId, password) =>
   api.delete(`${RES_API_BASE}/${resId}`, {
-    data: { empPass: password }, // EmpRequest
+    data: { password }, // EmpRequest
   });
 
 export function* deleteResource(action) {
@@ -145,7 +157,7 @@ export function* deleteResource(action) {
       deleteResourceFailure({
         message: err.response?.data?.message || "자원 삭제에 실패하였습니다.",
         reason: err.response?.data?.reason ?? null,
-      })
+      }),
     );
   }
 }
@@ -163,7 +175,11 @@ export function* checkResCode(action) {
 
     yield put(checkResCodeSuccess(res.data));
   } catch (err) {
-    yield put(checkResCodeFailure(err.response?.data?.message || "자원코드 중복확인에 실패하였습니다."));
+    yield put(
+      checkResCodeFailure(
+        err.response?.data?.message || "자원코드 중복확인에 실패하였습니다.",
+      ),
+    );
   }
 }
 
@@ -180,7 +196,9 @@ export function* fetchReservableResources(action) {
     yield put(fetchReservableResourcesSuccess(res.data));
   } catch (err) {
     yield put(
-      fetchReservableResourcesFailure(err.response?.data?.message || "예약 가능 자원 조회에 실패하였습니다.")
+      fetchReservableResourcesFailure(
+        err.response?.data?.message || "예약 가능 자원 조회에 실패하였습니다.",
+      ),
     );
   }
 }
@@ -188,15 +206,32 @@ export function* fetchReservableResources(action) {
 // =========================================================
 // Watcher
 // =========================================================
-function* watchFetchResourceList() { yield takeLatest(fetchResourceListRequest.type, fetchResourceList); }
-function* watchFetchResourceCount() { yield takeLatest(fetchResourceCountRequest.type, fetchResourceCount); }
-function* watchFetchResourceDetail() { yield takeLatest(fetchResourceDetailRequest.type, fetchResourceDetail); }
-function* watchAddResource() { yield takeLatest(addResourceRequest.type, addResource); }
-function* watchUpdateResource() { yield takeLatest(updateResourceRequest.type, updateResource); }
-function* watchDeleteResource() { yield takeLatest(deleteResourceRequest.type, deleteResource); }
-function* watchCheckResCode() { yield takeLatest(checkResCodeRequest.type, checkResCode); }
+function* watchFetchResourceList() {
+  yield takeLatest(fetchResourceListRequest.type, fetchResourceList);
+}
+function* watchFetchResourceCount() {
+  yield takeLatest(fetchResourceCountRequest.type, fetchResourceCount);
+}
+function* watchFetchResourceDetail() {
+  yield takeLatest(fetchResourceDetailRequest.type, fetchResourceDetail);
+}
+function* watchAddResource() {
+  yield takeLatest(addResourceRequest.type, addResource);
+}
+function* watchUpdateResource() {
+  yield takeLatest(updateResourceRequest.type, updateResource);
+}
+function* watchDeleteResource() {
+  yield takeLatest(deleteResourceRequest.type, deleteResource);
+}
+function* watchCheckResCode() {
+  yield takeLatest(checkResCodeRequest.type, checkResCode);
+}
 function* watchFetchReservableResources() {
-  yield takeLatest(fetchReservableResourcesRequest.type, fetchReservableResources);
+  yield takeLatest(
+    fetchReservableResourcesRequest.type,
+    fetchReservableResources,
+  );
 }
 
 export default function* resourceSaga() {

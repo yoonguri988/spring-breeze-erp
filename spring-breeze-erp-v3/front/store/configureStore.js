@@ -3,6 +3,7 @@ import createSagaMiddleware from "redux-saga";
 import { createWrapper } from "next-redux-wrapper";
 import reducer from "../reducers";
 import rootSaga from "../sagas";
+import { setStore } from "./storeRegistry";
 
 export const makeStore = () => {
   // saga 미들웨어 생성
@@ -18,9 +19,17 @@ export const makeStore = () => {
   });
   // saga 미들웨어 실행 및 rootSaga연결
   store.sagaTask = sagaMiddleware.run(rootSaga);
+
+  // 브라우저에서 생성된 store 인스턴스만 레지스트리에 등록
+  // (axios 인터셉터 등 React 트리 밖 코드에서 dispatch 하기 위함)
+  if (typeof window !== "undefined") {
+    setStore(store);
+  }
+
   return store;
 };
 // next.js 에서 redux를 사용할수 있도록 wrapper 생성
 export const wrapper = createWrapper(makeStore, {
-  debug: process.env.NODE_ENV !== "production",
+  debug: false,
+  //debug: process.env.NODE_ENV !== "production",
 });

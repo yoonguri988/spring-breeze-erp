@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update  # test 환경 create-drop 매번 초기화 / update 부분 수정  
+      ddl-auto: update # test 환경 create-drop 매번 초기화 / update 부분 수정
     properties:
       hibernate:
         format_sql: true
@@ -17,7 +17,7 @@ spring:
     multipart:
       enabled: true
       max-file-size: 10MB
-      max-request-size: 20MB      
+      max-request-size: 20MB
 
   data:
     redis:
@@ -26,7 +26,7 @@ spring:
       timeout: 2000
 
   config:
-    import: 
+    import:
       - optional:application-oauth.yml
       - optional:file:.env[.properties]
 
@@ -38,18 +38,17 @@ mybatis:
 jwt:
   issuer: spring-breeze
   secret: ${JWT_SECRET}
-  access-token-exp-seconds: 900       
-  refresh-token-exp-seconds: 1209600   
+  access-token-exp-seconds: 900
+  refresh-token-exp-seconds: 1209600
   header: Authorization
   prefix: Bearer
 
 #file:
 #  upload-dir: uploads
 upload:
-  path: /upload         # 웹에서 접근할 URL prefix (fileUrl = /upload/**/**/파일명)
+  path: /upload # 웹에서 접근할 URL prefix (fileUrl = /upload/**/**/파일명)
 resource:
-  path: C:/upload       # 실제 디스크 저장 경로 (운영 서버에서는 리눅스 절대경로로 교체)
-
+  path: C:/upload # 실제 디스크 저장 경로 (운영 서버에서는 리눅스 절대경로로 교체)
 
 #server:
 #  port: 8484s
@@ -59,12 +58,24 @@ webhook:
   discord:
     url: ${WEBHOOK_DISCORD_URL}
 
-# Google Docs API
+# Google (Email + Docs API)
 google:
+  email:
+    host: ${GOOGLE_EMAIL_HOST}
+    user: ${GOOGLE_EMAIL_USER}
+    password: ${GOOGLE_EMAIL_PASSWORD}
   report:
     client-id: ${GOOGLE_REPORT_CLIENT_ID}
     client-secret: ${GOOGLE_REPORT_CLIENT_SECRET}
     refresh-token: ${GOOGLE_REPORT_REFRESH_TOKEN}
+
+# JSJ OpenAI API
+jsj:
+  openai:
+    api:
+      key: ${JSJ_OPENAI_API_KEY}
+      baseurl: ${JSJ_OPENAI_API_BASEURL}
+      model: ${JSJ_OPENAI_API_MODEL}
 
 # OpenAI API
 openai:
@@ -76,27 +87,26 @@ kjy:
   openai:
     api:
       key: ${KJY_OPENAI_API_KEY}
-    
 
 # CYJ
 # 국세청 사업자등록정보 진위확인 API
 nts:
   bizno:
     api: ${NTS_BIZNO_API_KEY}
- 
+
 # 네이버 클로바 OCR API
 naver:
   ocr:
     secret: ${NAVER_OCR_SECRET}
     apiUrl: ${NAVER_OCR_API_URL}
- 
+
 # CoolSMS (문자 발송)
 coolsms:
   apikey: ${COOLSMS_API_KEY}
   apisecret: ${COOLSMS_API_SECRET}
   # 사전 등록된 발신번호. 미설정 시 기존 동작(수신번호를 발신번호로도 사용)으로 폴백.
   sender: ${COOLSMS_SENDER}
- 
+
 # OpenAI API
 cyj:
   openai:

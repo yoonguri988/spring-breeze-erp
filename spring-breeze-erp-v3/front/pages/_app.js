@@ -14,6 +14,18 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/global.css";
 import "../styles/css/auth.css";
 import "../styles/css/company.css";
+import "../styles/css/appr.css";
+import "../styles/css/dashboard.css";
+import "../styles/css/dashboard-admin.css";
+import "../styles/css/dashboard-exec.css";
+import "../styles/css/dashboard-sysadmin.css";
+import "../styles/css/dept.css";
+import "../styles/css/emp.css";
+import "../styles/css/my.css";
+import "../styles/css/notice.css";
+import "../styles/css/perm.css";
+import "../styles/css/project.css";
+import "../styles/css/resv.css";
 
 const NO_LAYOUT_PREFIXES = ["/auth"];
 
@@ -25,10 +37,10 @@ function MyApp({ Component, pageProps }) {
     router.pathname.startsWith(p),
   );
 
-  // 새로고침/재방문 시 쿠키의 accessToken을 디코딩해서 로그인 상태 복원
   useEffect(() => {
+    if (isBareLayout) return;
     dispatch(loadUserRequest());
-  }, [dispatch]);
+  }, [dispatch, isBareLayout]);
 
   if (isBareLayout) {
     // 로그인 / 비밀번호 재설정 등 → AppLayout(사이드바/헤더/푸터) 미적용

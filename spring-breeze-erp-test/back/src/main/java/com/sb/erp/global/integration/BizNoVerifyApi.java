@@ -7,15 +7,19 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
-import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.http.client.HttpClientSettings;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.sb.erp.api.dto.request.BizNoVerifyRequest;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class BizNoVerifyApi {
 	@Value("${nts.bizno.api}") private String apiKey;
@@ -24,12 +28,12 @@ public class BizNoVerifyApi {
 
 	public BizNoVerifyApi(RestClient.Builder restClientBuilder) {
 		super();
-		// [신규] connect/read 타임아웃 설정
+		// connect/read 타임아웃 설정
 		// -> 설정이 없으면 국세청(api.odcloud.kr)이 응답을 지연시킬 때
 		//    우리 서버 스레드가 응답이 올 때까지 무한정 대기하게 되어
 		//    "너무 오래 걸린다"는 체감이 발생합니다.
 		//    connect 3초 / read 5초로 상한을 두고, 넘으면 예외로 빠르게 실패 처리합니다.
-		ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.defaults()
+		HttpClientSettings settings = HttpClientSettings.defaults()
 				.withConnectTimeout(Duration.ofSeconds(3))
 				.withReadTimeout(Duration.ofSeconds(5));
 		this.restClient = restClientBuilder
@@ -66,11 +70,14 @@ public class BizNoVerifyApi {
 			         .retrieve()
 			         .body(String.class);
 		} catch (ResourceAccessException e) {
-			// [신규] connect/read timeout 은 대부분 이 예외로 올라옵니다.
-			// 500 에러를 그대로 던지면 프런트 fetch(res.json())가 깨지므로,
-			// 프런트가 기대하는 형식(status_code)에 맞춰 폴백 JSON을 내려줍니다.
+			log.warn("NTS 진위확인 타임아웃/연결실패", e);
 			return "{\"status_code\":\"TIMEOUT\",\"message\":\"국세청 서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.\"}";
+		} catch (RestClientResponseException e) {
+			// odcloud가 4xx/5xx로 응답한 경우 -> 응답 바디에 실제 에러 코드/메시지가 들어있음
+			log.error("NTS 진위확인 실패 status={} body={}", e.getStatusCode().value(), e.getResponseBodyAsString());
+			throw new RuntimeException("사업자번호 진위확인 API 호출중 오류 발생: " + e.getResponseBodyAsString(), e);
 		} catch (Exception e) {
+			log.error("사업자번호 진위확인 API 호출중 알 수 없는 오류", e);
 			throw new RuntimeException("사업자번호 진위확인 API 호출중 오류 발생", e);
 		}
 	}
