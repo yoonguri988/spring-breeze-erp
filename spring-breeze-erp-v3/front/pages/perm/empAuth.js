@@ -37,6 +37,7 @@ export default function EmpAuthPage() {
 
     return () => {
       dispatch(clearEmpAuth());
+      dispatch(resetPermState());
     };
   }, [dispatch, empId]);
 

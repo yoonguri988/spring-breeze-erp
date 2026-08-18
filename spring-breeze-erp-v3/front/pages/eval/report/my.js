@@ -20,6 +20,8 @@ export default function MyReportPage() {
 
   useEffect(() => {
     dispatch(myReportRequest());
+    
+    return () => { dispatch(resetReportState()); };
   }, [dispatch]);
 
   const columns = [

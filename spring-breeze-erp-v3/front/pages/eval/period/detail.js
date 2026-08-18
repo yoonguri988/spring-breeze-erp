@@ -35,9 +35,13 @@ export default function EvalPeriodDetailPage() {
   useEffect(() => {
     if (!periodId) return;
     dispatch(detailPeriodRequest(Number(periodId)));
+    
     return () => {
+      dispatch(clearPeriodDetail());
+      dispatch(resetPeriodState());
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
+    
   }, [dispatch, periodId]);
 
   // REPORTING 상태이면 폴링 시작

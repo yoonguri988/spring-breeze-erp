@@ -37,6 +37,7 @@ export default function EmpEditPage() {
     dispatch(detailEmpRequest(Number(empId)));
     dispatch(listPosRequest());
     dispatch(fetchDeptFlatRequest(user?.comId));
+    return () => { dispatch(resetEmpState()); };
   }, [dispatch, empId]);
 
   // 폼에 기존 값 세팅

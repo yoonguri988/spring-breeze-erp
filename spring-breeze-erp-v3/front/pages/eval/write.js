@@ -18,11 +18,8 @@ import {
   SendOutlined,
 } from "@ant-design/icons";
 
-import {
-  detailEvalRequest,
-  draftEvalRequest,
-  submitEvalRequest,
-  resetEvalState,
+import { 
+  detailEvalRequest, draftEvalRequest, submitEvalRequest, resetEvalState,
 } from "../../reducers/eval/evalReducer";
 
 const SCORE_ITEMS = [
@@ -48,6 +45,7 @@ export default function EvalWritePage() {
   useEffect(() => {
     if (!evalId) return;
     dispatch(detailEvalRequest(Number(evalId)));
+    return () => { dispatch(resetEvalState()); };
   }, [dispatch, evalId]);
 
   // 기존 데이터 폼에 세팅

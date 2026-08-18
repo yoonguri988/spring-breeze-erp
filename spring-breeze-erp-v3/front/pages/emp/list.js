@@ -44,6 +44,7 @@ export default function EmpListPage() {
   // 직급 목록 로드 (필터 select용)
   useEffect(() => {
     dispatch(listPosRequest());
+    return () => { dispatch(resetEmpState()); };
   }, [dispatch]);
 
   // URL 쿼리 → 필터 동기화 → 목록 조회

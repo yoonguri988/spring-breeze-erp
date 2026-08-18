@@ -17,12 +17,8 @@ export default function PermListPage() {
   const [form] = Form.useForm();
 
   const {
-    permList,
-    currentPerm,
-    permEmployees,
-    loading,
-    success,
-    error,
+    permList, currentPerm, permEmployees,
+    loading, success, error,
   } = useSelector((state) => state.perm);
 
   // 선택된 권한 ID
@@ -45,6 +41,11 @@ export default function PermListPage() {
       setSelectedId(id);
       dispatch(detailPermRequest(id));
     }
+    // 페이지 떠날 때 상태 초기화
+    return () => {
+      dispatch(clearPermDetail());
+      dispatch(resetPermState());
+    };
   }, [dispatch, router.query.autId]);
 
   // ─── 등록/수정/삭제 결과 처리 ───

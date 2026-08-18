@@ -25,6 +25,8 @@ export default function EvalReportDetailPage() {
   useEffect(() => {
     if (!reportId) return;
     dispatch(detailReportRequest(Number(reportId)));
+    
+    return () => { dispatch(clearReportDetail()); };
   }, [dispatch, reportId]);
 
   const r = currentReport;

@@ -27,6 +27,7 @@ export default function EmpAddPage() {
   useEffect(() => {
     dispatch(listPosRequest());
     dispatch(fetchDeptFlatRequest(user?.comId));
+    return () => { dispatch(resetEmpState()); };
   }, [dispatch]);
 
   // 등록 성공 시 목록으로 이동

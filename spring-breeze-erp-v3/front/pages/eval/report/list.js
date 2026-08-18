@@ -31,6 +31,8 @@ export default function EvalReportListPage() {
   useEffect(() => {
     if (!periodId) return;
     dispatch(listReportRequest({ periodId, keyword, page }));
+    
+    return () => { dispatch(resetReportState()); };
   }, [dispatch, periodId, keyword, page]);
 
   useEffect(() => {

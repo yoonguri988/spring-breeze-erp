@@ -30,6 +30,8 @@ export default function EvalPeriodListPage() {
 
   useEffect(() => {
     dispatch(listPeriodRequest());
+
+    return () => { dispatch(resetPeriodState()); };
   }, [dispatch]);
 
   useEffect(() => {

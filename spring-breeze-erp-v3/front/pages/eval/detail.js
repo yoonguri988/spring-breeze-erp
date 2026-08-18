@@ -30,6 +30,8 @@ export default function EvalDetailPage() {
   useEffect(() => {
     if (!evalId) return;
     dispatch(detailEvalRequest(Number(evalId)));
+
+    return () => { dispatch(clearEvalDetail()); };
   }, [dispatch, evalId]);
 
   const e = currentEval;

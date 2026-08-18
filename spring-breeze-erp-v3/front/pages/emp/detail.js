@@ -38,6 +38,7 @@ export default function EmpDetailPage() {
   useEffect(() => {
     if (!empId) return;
     dispatch(detailEmpRequest(Number(empId)));
+    return () => { dispatch(resetEmpState()); };
   }, [dispatch, empId]);
 
   // ─── 비밀번호 결과 처리 ───
