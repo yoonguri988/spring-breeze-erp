@@ -64,8 +64,8 @@ export default function DocDetailPage() {
     };
 
     const lineStatusTag = (status) => {
-        const colorMap = {WAI: "gold", APP: "green", REJ: "red", PEND: "default"};
-        const labelMap = {WAI: "결재대기", APP: "승인", REJ: "반려", PEND: "대기"};
+        const colorMap = {WAI: "gold", APP: "green", REJ: "red", NOT: "default"};
+        const labelMap = {WAI: "결재대기", APP: "승인", REJ: "반려", NOT: "대기"};
         return <Tag color={colorMap[status] || "default"}>{labelMap[status] || status}</Tag>;
     };
 

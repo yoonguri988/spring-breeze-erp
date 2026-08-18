@@ -31,7 +31,7 @@ public class ApprDocResponse {
 		this.forId = doc.getApprForm().getForId();
 		this.forVersion = doc.getApprForm().getForVersion();
 		this.forTitle = doc.getApprForm().getForTitle();
-		this.forSchema = doc.getApprForm(). getforSchema();
+		this.forSchema = doc.getApprForm(). getForSchema();
 		this.empId = doc.getEmployee().getEmpId();
 		this.empName = doc.getEmployee().getEmpName();
 		this.comId = doc.getCompany().getComId();
