@@ -3,22 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import {
-  Card,
-  Table,
-  Select,
-  Input,
-  Button,
-  Tag,
-  Avatar,
-  Pagination,
-} from "antd";
-import {
-  PlusOutlined,
-  SearchOutlined,
-  EyeOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import { Card, Table, Select, Input, Button, Tag, Avatar, Pagination, } from "antd";
+import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, } from "@ant-design/icons";
 
 import { listEmpRequest } from "../../reducers/emp/empReducer";
 import { listPosRequest } from "../../reducers/pos/posReducer";
@@ -70,6 +56,7 @@ export default function EmpListPage() {
       keyword = "",
       page = "1",
     } = router.query;
+    
     const next = {
       deptId,
       posId,

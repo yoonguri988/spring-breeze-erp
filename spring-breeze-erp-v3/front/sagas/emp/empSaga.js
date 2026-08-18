@@ -20,11 +20,17 @@ const EMP_API_BASE = '/api/emp';
 // listEmp  - GET /api/emp 사원 목록 조회 ---
 //////////////////////////////////////////////////////////////////////////////
 
-export const listEmpApi = ()=> api.get(EMP_API_BASE);
+export const listEmpApi = (params) => {
+    const clean = {};
+    Object.entries(params).forEach(([k, v]) => {
+        if (v !== '' && v !== null && v !== undefined) clean[k] = v;
+    });
+    return api.get(EMP_API_BASE, { params: clean });
+};
 
-export function* listEmp(){
+export function* listEmp(action){
     try{
-        const result = yield call(listEmpApi);
+        const result = yield call(listEmpApi, action.payload);
         yield put(listEmpSuccess(result.data));
     }catch(err){
         yield put(listEmpFailure(err.response?.data?.message || err.message));
@@ -115,7 +121,7 @@ export const checkEmailApi = (email)=> api.get(`${EMP_API_BASE}/check-email`, { 
 export function* checkEmail(action){
     try{
         const result = yield call(checkEmailApi, action.payload);
-        yield put(checkEmailSuccess(result.data));
+        yield put(checkEmailSuccess(!result.data.duplicate));
     }catch(err){
         console.error('이메일 중복검사 실패: ', err);
     }
@@ -130,7 +136,7 @@ export const checkMobileApi = (mobile)=> api.get(`${EMP_API_BASE}/check-mobile`,
 export function* checkMobile(action){
     try{
         const result = yield call(checkMobileApi, action.payload);
-        yield put(checkMobileSuccess(result.data));
+        yield put(checkMobileSuccess(!result.data.duplicate));
     }catch(err){
         console.error('모바일 중복검사 실패: ', err);
     }
@@ -145,7 +151,7 @@ export const checkEmpNoApi = (empNo)=> api.get(`${EMP_API_BASE}/check-empno`, { 
 export function* checkEmpNo(action){
     try{
         const result = yield call(checkEmpNoApi, action.payload);
-        yield put(checkEmpNoSuccess(result.data));
+        yield put(checkEmpNoSuccess(!result.data.duplicate));
     }catch(err){
         console.error('사번 중복검사 실패: ', err);
     }
