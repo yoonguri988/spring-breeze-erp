@@ -25,7 +25,7 @@ function AppLayout({ children }) {
   useEffect(() => {
     if (!initialized) return;
     if (!accessToken) {
-      router.replace("/auth/login");
+      //router.replace("/auth/login");
     }
   }, [initialized, accessToken, router]);
 
@@ -41,7 +41,11 @@ function AppLayout({ children }) {
 
   // 아직 loadUser(쿠키 → accessToken 복원)가 끝나지 않았거나(initialized===false),
   // 끝났는데도 accessToken이 없는 경우(리다이렉트 대상) 모두 레이아웃을 그리지 않는다.
-  if (!initialized || !accessToken) {
+  // if (!initialized || !accessToken) {
+  //   return null;
+  // }
+
+  if (!initialized) {
     return null;
   }
 
