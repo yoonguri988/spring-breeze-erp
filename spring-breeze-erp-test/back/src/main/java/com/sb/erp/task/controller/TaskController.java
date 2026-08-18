@@ -336,9 +336,11 @@ public class TaskController {
 	public ResponseEntity<Map<String, Object>> getMyTasks(
 			@ModelAttribute TaskSearchRequest search,
 			@AuthenticationPrincipal CustomUserPrincipal principal){
-		int totalCnt = service.selectMyTasksCount(search);
+		
 		search.setEmpId(principal.getEmpId());
 		search.setComId(principal.getComId());
+		
+		int totalCnt = service.selectMyTasksCount(search);
 		
 		PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
 		search.setPstartno(paging.getPstartno());
