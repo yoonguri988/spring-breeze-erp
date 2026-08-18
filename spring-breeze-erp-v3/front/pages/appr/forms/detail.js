@@ -269,7 +269,7 @@ export default function FormDetailPage() {
                         <Form.Item
                             name="forTitle"
                             label="양식 제목"
-                            rules={[{required: true, message="양식 제목을 입력해주세요."}]}
+                            rules={[{required: true, message: "양식 제목을 입력해주세요."}]}
                         >
                             <Input />
                         </Form.Item>
@@ -343,7 +343,7 @@ export default function FormDetailPage() {
                             renderItem={(v) => (
                                 <List.Item
                                     actions={[
-                                        <a key="view" onClick={() => router.push(`/appr/forms/${v.forId}/${v.forVersion}`)}>
+                                        <a key="view" onClick={() => router.push(`/appr/forms/detail?forId=${v.forId}&forVersion=${v.forVersion}`)}>
                                             보기
                                         </a>,
                                     ]}

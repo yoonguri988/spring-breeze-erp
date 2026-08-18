@@ -146,7 +146,7 @@ export default function FormListPage() {
                 <Space>
                     <Button
                         size="small"
-                        onClick={() => router.push(`/appr/forms/${record.forId}/${record.forVersion}`)}
+                        onClick={() => router.push(`/appr/forms/detail?forId=${record.forId}&forVersion=${record.forVersion}`)}
                     >
                         상세
                     </Button>

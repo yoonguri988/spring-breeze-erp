@@ -145,7 +145,7 @@ public class ApprDocController {
 	@Operation(summary = "문서 상세 조회", description = "문서 상세 정보와 결재선, 현재 로그인한 사용자의 결재 가능 여부 반환")
 	@GetMapping("/detail_doc/{docId}")
 	public ResponseEntity<Map<String, Object>> detailDoc(
-			@PathVariable Long docId,
+			@PathVariable("docId") Long docId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 
@@ -168,7 +168,7 @@ public class ApprDocController {
 	@Operation(summary = "문서 승인 처리", description = "해당 결재선의 상태를 승인처리")
 	@PostMapping("/detail_doc/{docId}/app")
 	public ResponseEntity<Void> detailDocApp(
-			@PathVariable Long docId,
+			@PathVariable("docId") Long docId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 		service.processLine(docId, principal.getEmpId(), "APP");
@@ -179,7 +179,7 @@ public class ApprDocController {
 	@Operation(summary = "문서 반려 처리", description = "해당 결재선의 상태를 반려 처리")
 	@PostMapping("/detail_doc/{docId}/rej")
 	public ResponseEntity<Void> detailDocRej(
-			@PathVariable Long docId,
+			@PathVariable("docId") Long docId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 		service.processLine(docId, principal.getEmpId(), "REJ");
@@ -203,7 +203,7 @@ public class ApprDocController {
 	@Operation(summary = "결재선 지정용 부서 트리 조회", description = "부서 상위 체계를 따라가며 각 부서별 결재선 지정 가능 인원수를 함께 반환")
 	@GetMapping("/getDeptTree")
 	public ResponseEntity<List<DeptResponse>> getDeptTree(
-			@RequestParam Long deptId,
+			@RequestParam("deptId") Long deptId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 		return ResponseEntity.ok(service.cntApprovers(deptId, principal.getEmpId()));
@@ -212,7 +212,7 @@ public class ApprDocController {
 	// 특정 부서 소속 사원 목록
 	@Operation(summary = "부서 소속 사원 목록 조회", description = "특정 부서에 소속된 사원 목록을 조회합니다.")
 	@GetMapping("/getDeptEmps")
-	public ResponseEntity<List<ApprLineResponse>> getDeptEmps(@RequestParam Long deptId) {
+	public ResponseEntity<List<ApprLineResponse>> getDeptEmps(@RequestParam("deptId") Long deptId) {
 		return ResponseEntity.ok(service.selectDeptEmpsForLines(deptId));
 	}
 
