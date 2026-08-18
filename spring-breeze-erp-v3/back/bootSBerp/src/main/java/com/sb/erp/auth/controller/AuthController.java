@@ -25,13 +25,16 @@ import com.sb.erp.auth.dto.request.UpdatePassRequest;
 import com.sb.erp.auth.dto.response.AuthResponse;
 import com.sb.erp.auth.dto.response.AuthUserResponse;
 import com.sb.erp.auth.service.AuthService;
+import com.sb.erp.auth.service.LoginHistoryService;
 import com.sb.erp.com.service.CompanyService;
 import com.sb.erp.emp.dto.request.EmpRequest;
 import com.sb.erp.emp.dto.response.EmpResponse;
+import com.sb.erp.emp.service.EmailService;
 import com.sb.erp.emp.service.EmpService;
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
 import com.sb.erp.global.security.JwtProperties;
 import com.sb.erp.global.security.JwtProvider;
+import com.sb.erp.global.security.PasswordPolicy;
 import com.sb.erp.global.security.TokenStore;
 
 import io.jsonwebtoken.Claims;
@@ -52,29 +55,50 @@ public class AuthController {
 	@Value("${app.cookie.same-site:Lax}")
 	private String cookieSameSite;
 
-	private final JwtProperties props;      // JWT 출입증 (설정값)      
+	// 비밀번호 재설정 메일 링크 생성에 사용되는 프론트엔드 기본 URL
+	@Value("${app.front.url:http://localhost:3000}")
+	private String frontUrl;
+
+	private final JwtProperties props;      // JWT 출입증 (설정값)
 	private final JwtProvider jwtProvider;  // JWT 토근생성/검증 ( access Token / refresh Token )
 	private final TokenStore tokenStore;	// JMT 저장소
 	private final PasswordEncoder passEncoder;
+	private final LoginHistoryService loginHistoryService; // 로그인 성공/실패 이력 기록
 	
 	@Autowired AuthService service;
 	@Autowired EmpService empService;
 	@Autowired CompanyService comService;
+	@Autowired EmailService emailService;
 
 	@Operation(summary = "로그인", description = "Access Token 발급 + Refresh Token은 HttpOnly 쿠키로 저장")
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest dto,
 	            HttpServletRequest request,
 	            HttpServletResponse response) {
-	AuthUserResponse user = service.readAuth(dto.getEmpEmail());
-	
-	// emp_pass는 readAuth 쿼리에 emp_pass 컬럼 추가 후에만 채워짐 (auth-mapper.xml 참고)
-	if (user == null || user.getEmpPass() == null
-	|| !passEncoder.matches(dto.getEmpPass(), user.getEmpPass())) {
+
+	String clientIp = extractClientIp(request);
+	String userAgent = request.getHeader("User-Agent");
+
+	// readAuth는 사원이 없으면 예외를 던진다(IllegalArgumentException).
+	// 로그인 이력을 성공/실패 구분 없이 항상 남기고, 존재 여부와 무관하게 동일한
+	// 401 메시지를 응답해 계정 존재 여부가 노출(사용자 열거 공격)되지 않도록 한다.
+	AuthUserResponse user;
+	try {
+		user = service.readAuth(dto.getEmpEmail());
+	} catch (Exception e) {
+		loginHistoryService.recordFailure(dto.getEmpEmail(), "존재하지 않는 계정", clientIp, userAgent);
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 		.body(Map.of("error", "이메일 또는 비밀번호가 올바르지 않습니다."));
 	}
-	
+
+	// emp_pass는 readAuth 쿼리에 emp_pass 컬럼 추가 후에만 채워짐 (auth-mapper.xml 참고)
+	if (user == null || user.getEmpPass() == null
+	|| !passEncoder.matches(dto.getEmpPass(), user.getEmpPass())) {
+		loginHistoryService.recordFailure(dto.getEmpEmail(), "비밀번호 불일치", clientIp, userAgent);
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+		.body(Map.of("error", "이메일 또는 비밀번호가 올바르지 않습니다."));
+	}
+
 	String access = jwtProvider.createAccessToken(
 	String.valueOf(user.getEmpId()),
 	Map.of("comId", user.getComId(),
@@ -94,7 +118,9 @@ public class AuthController {
 	
 	 response.addHeader(HttpHeaders.SET_COOKIE,
              buildRefreshCookie(refresh, props.getRefreshTokenExpSeconds()).toString());
-	 
+
+	 loginHistoryService.recordSuccess(user.getEmpId(), user.getEmpEmail(), user.getEmpName(), clientIp, userAgent);
+
 	return ResponseEntity.ok(Map.of(
 			"accessToken", access,
 			"empId", user.getEmpId(),
@@ -147,22 +173,28 @@ public class AuthController {
 	
 	
     // 비밀번호를 변경하려는 사용자가 실제로 존재하는지 확인
-    // 세션 대신 짧은 유효기간의 resetToken(JWT)을 발급해서 클라이언트가 들고 있게 함
-    @Operation(summary = "비밀번호 재설정 - 본인확인", description = "본인 확인 성공 시 10분짜리 resetToken 발급")
+    // 세션 대신 짧은 유효기간의 resetToken(JWT)을 발급하되, 더 이상 클라이언트에 직접 내려주지
+    // 않고 본인이 등록한 이메일로 재설정 링크를 발송한다(요구사항 3. Gmail SMTP 기반 발송).
+    @Operation(summary = "비밀번호 재설정 - 본인확인", description = "본인 확인 성공 시 등록된 이메일로 10분짜리 재설정 링크 발송")
     @PostMapping("/confirm")
     public ResponseEntity<Map<String, Object>> confirm(@RequestBody ConfirmRequest request) {
-    	
+
     	EmpRequest dto = new EmpRequest();
     	dto.setEmpNo(request.getEmpNo());
     	dto.setEmpEmail(request.getEmpEmail());
     	dto.setEmpMobile(request.getEmpMobile());
-    	
+
         EmpResponse emp = empService.selectForVerify(dto);
         if (emp == null) {
             return ResponseEntity.ok(Map.of("state", "FAIL"));
         }
+
         String resetToken = jwtProvider.createResetToken(String.valueOf(emp.getEmpId()));
-        return ResponseEntity.ok(Map.of("state", "OK", "resetToken", resetToken));
+        String resetLink = frontUrl + "/auth/forgotResetPass?token=" + resetToken;
+        emailService.sendPasswordResetMailAsync(emp, resetLink);
+
+        // resetToken은 더 이상 응답 바디로 노출하지 않는다 - 이메일을 받은 사람만 재설정 가능
+        return ResponseEntity.ok(Map.of("state", "OK"));
     }
     
     // 비밀번호 재설정 (비로그인, resetToken 기반)
@@ -183,31 +215,46 @@ public class AuthController {
         }
  
         Long empId = Long.valueOf(claims.getSubject());
- 
+
+        // 비밀번호 정책 검증 (8자 이상 + 영문/숫자/특수문자 조합) - 위반 시 IllegalArgumentException → 400
+        PasswordPolicy.validate(dto.getNewPass());
+
         EmpRequest patch = new EmpRequest();
         patch.setEmpId(empId);
         patch.setEmpPass(passEncoder.encode(dto.getNewPass()));
         empService.updatePassByEmpIdOnly(patch);
- 
+
         return ResponseEntity.ok(Map.of("state", "OK"));
     }
-    
+
     // 비밀번호 변경 (로그인 상태, JWT 인증 사용자 본인)
     @Operation(summary = "비밀번호 변경(로그인 상태)")
     @PutMapping("/password")
     public ResponseEntity<Map<String, String>> changePassword(Authentication authentication,
                                                                 @RequestBody UpdatePassRequest dto) {
         CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
- 
+
+        // 비밀번호 정책 검증 (8자 이상 + 영문/숫자/특수문자 조합)
+        PasswordPolicy.validate(dto.getNewPass());
+
         EmpRequest patch = new EmpRequest();
         patch.setEmpId(principal.getEmpId());
         patch.setEmpPass(passEncoder.encode(dto.getNewPass()));
         empService.updatePassByEmpIdOnly(patch);
- 
+
         return ResponseEntity.ok(Map.of("state", "OK"));
     }
 	
-    // 공통 
+    // 공통
+    // 리버스 프록시(Nginx 등) 뒤에 있는 경우 X-Forwarded-For의 첫 번째 IP가 실제 클라이언트 IP
+    private String extractClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
+
     // secure(true) + sameSite("Strict") -> https:// 로 접속해야 브라우저가 쿠키 저장
     private ResponseCookie buildRefreshCookie(String value, int maxAgeSeconds) {
         return ResponseCookie.from("refreshToken", value)

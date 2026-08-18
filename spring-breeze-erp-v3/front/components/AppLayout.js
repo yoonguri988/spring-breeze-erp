@@ -6,6 +6,7 @@ import { Layout } from "antd";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Footer from "./Footer";
+import useIdleLogout from "../utils/useIdleLogout";
 
 const { Sider, Content } = Layout;
 const LS_LAYOUT_KEY = "sberp.layout"; // "standard" | "rail"
@@ -14,8 +15,10 @@ function AppLayout({ children }) {
   const router = useRouter();
   const [layoutMode, setLayoutMode] = useState("standard");
 
-  // 실제 로그인 상태 (mock 제거)
   const { user, accessToken, initialized } = useSelector((state) => state.auth);
+
+  // 로그인 유지 시간 제한: 30분 미사용 시 자동 로그아웃 (절대 1시간 만료는 백엔드 refreshToken TTL로 처리)
+  useIdleLogout(Boolean(accessToken));
 
   useEffect(() => {
     const saved = localStorage.getItem(LS_LAYOUT_KEY);

@@ -2,6 +2,7 @@ package com.sb.erp.config;
 
 import javax.sql.DataSource;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -12,7 +13,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
-@MapperScan(basePackages = "com.sb.erp.**.repository", sqlSessionFactoryRef = "sqlSessionFactory")
+@MapperScan(basePackages = "com.sb.erp.**.repository", annotationClass = Mapper.class, sqlSessionFactoryRef = "sqlSessionFactory")
 public class MyBatisConfig {
 
     @Bean

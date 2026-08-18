@@ -12,6 +12,7 @@ import {
   PhoneOutlined,
   SafetyCertificateOutlined,
   InfoCircleOutlined,
+  CheckCircleFilled,
 } from "@ant-design/icons";
 import AuthLayout from "../../components/AuthLayout";
 import {
@@ -29,6 +30,8 @@ export default function LoginPage() {
 
   const [section, setSection] = useState("login"); // 'login' | 'forgot'
   const [forgotForm] = Form.useForm();
+  // 본인확인 성공 시 즉시 재설정 페이지로 이동하지 않고, 이메일 발송 완료 안내로 전환
+  const [emailSent, setEmailSent] = useState(false);
 
   const prevLoading = useRef(false);
 
@@ -43,22 +46,24 @@ export default function LoginPage() {
       router.replace({ pathname: "/auth/login", query: rest }, undefined, {
         shallow: true,
       });
+    } else if (router.query.reason === "idle_timeout") {
+      message.warning("30분간 활동이 없어 자동으로 로그아웃되었습니다.");
+      const { reason, ...rest } = router.query;
+      router.replace({ pathname: "/auth/login", query: rest }, undefined, {
+        shallow: true,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, router.query.reason]);
 
   // 로그인 성공(accessToken 발급) → 메인으로 이동
-  // 본인 확인 성공(success) → 비밀번호 재설정 페이지로 이동
+  // 본인 확인 성공(success) → 등록된 이메일로 재설정 링크 발송, 화면엔 안내만 표시
   useEffect(() => {
     if (prevLoading.current && !loading && !error) {
       if (section === "login" && accessToken) {
         router.replace("/");
       } else if (section === "forgot" && success) {
-        const { empNo, empEmail } = forgotForm.getFieldsValue();
-        router.push({
-          pathname: "/auth/forgotResetPass",
-          query: { empNo, empEmail },
-        });
+        setEmailSent(true);
       }
     }
     prevLoading.current = loading;
@@ -67,6 +72,7 @@ export default function LoginPage() {
 
   const switchSection = (next) => {
     dispatch(resetUserState());
+    setEmailSent(false);
     setSection(next);
   };
 
@@ -194,7 +200,36 @@ export default function LoginPage() {
         </div>
       )}
 
-      {section === "forgot" && (
+      {section === "forgot" && emailSent && (
+        <div
+          className="asec on"
+          id="secForgotSent"
+          style={{ textAlign: "center" }}
+        >
+          <div className="rp-check-ring">
+            <CheckCircleFilled />
+          </div>
+          <h1 className="a-h">메일함을 확인해주세요</h1>
+          <p className="a-sub">
+            입력하신 정보가 확인되어 등록된 이메일 주소로
+            <br />
+            비밀번호 재설정 링크를 발송했습니다.
+            <br />
+            메일의 링크는 <b>10분간</b> 유효합니다.
+          </p>
+          <Button
+            className="a-btn"
+            type="primary"
+            icon={<ArrowLeftOutlined />}
+            block
+            onClick={() => switchSection("login")}
+          >
+            로그인으로 돌아가기
+          </Button>
+        </div>
+      )}
+
+      {section === "forgot" && !emailSent && (
         <div className="asec on" id="secForgot">
           <button
             type="button"
@@ -207,7 +242,7 @@ export default function LoginPage() {
           <p className="a-sub">
             사원번호 · 이메일 · 휴대폰 번호가
             <br />
-            등록된 정보와 일치하면 재설정 페이지로 이동합니다.
+            등록된 정보와 일치하면 등록된 이메일로 재설정 링크를 보내드립니다.
           </p>
 
           <Form
