@@ -26,7 +26,7 @@ import {
   resetDeptState,
 } from "../../reducers/dept/deptReducer";
 import { listEmpRequest, resetEmpState } from "../../reducers/emp/empReducer";
-import { fetchCompanyListRequest } from "../../reducers/com/companyReducer";
+import { fetchCompanyDetailRequest, resetCompanyState } from "../../reducers/com/companyReducer";
 import DeptDeleteModal from "../../components/DeptDeleteModal";
 
 const DEPTH_LABELS = ["", "본부", "팀", "셀", "파트"];
@@ -36,7 +36,7 @@ export default function DeptEditPage() {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
 
-  const { list: companies } = useSelector((state) => state.company);
+  const { detail: companyDetail } = useSelector((state) => state.company);
   const {
     flatList: depts,
     detail,
@@ -58,15 +58,16 @@ export default function DeptEditPage() {
   const backUrl =
     returnUrl || (comId ? `/dept/list?comId=${comId}` : "/dept/list");
 
-  const com = useMemo(
-    () => (companies || []).find((c) => String(c.comId) === comId),
-    [companies, comId],
-  );
+  // 화면에 소속 회사명만 보여주면 되므로, 회사 전체 목록을 가져올 필요 없이
+  // comId 단건 상세(GET /api/com/{comId})만 조회한다.
+  const com = companyDetail?.com;
 
   const dept = detail?.dept || null;
+
+  console.log(empList)
   const deptEmpList = useMemo(
     () =>
-      (empList || []).filter(
+      (empList?.list || []).filter(
         (e) => dept && String(e.deptId) === String(dept.deptId),
       ),
     [empList, dept],
@@ -83,7 +84,6 @@ export default function DeptEditPage() {
   const prevLoading = useRef(false);
 
   useEffect(() => {
-    dispatch(fetchCompanyListRequest({ onepagelist: 100 }));
     dispatch(listEmpRequest());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
@@ -95,7 +95,9 @@ export default function DeptEditPage() {
   }, [dispatch, router.isReady, deptId]);
 
   useEffect(() => {
-    if (comId) dispatch(fetchDeptFlatRequest(comId));
+    if (!comId) return;
+    dispatch(fetchCompanyDetailRequest(comId));
+    dispatch(fetchDeptFlatRequest(comId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, comId]);
 
@@ -128,48 +130,40 @@ export default function DeptEditPage() {
   }, [dept, deptEmpList]);
 
   useEffect(() => {
-    prevLoading.current = loading;
-  }, [loading]);
-
-  useEffect(() => {
     if (!submitting) return;
-    if (prevLoading.current && !loading) {
-      if (success) {
-        message.success("변경사항이 저장되었습니다.");
-        setSubmitting(false);
-        dispatch(resetDeptState());
-        router.push(backUrl);
-      } else if (error) {
-        message.error(error);
-        setSubmitting(false);
-        dispatch(resetDeptState());
-      }
+    if (success) {
+      message.success("변경사항이 저장되었습니다.");
+      setSubmitting(false);
+      dispatch(resetDeptState());
+      router.push(backUrl);
+    } else if (error) {
+      message.error(error);
+      setSubmitting(false);
+      dispatch(resetDeptState());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, success, error, submitting]);
 
   useEffect(() => {
     if (!deleting) return;
-    if (prevLoading.current && !loading) {
-      if (success) {
-        if (pendingTransfer) {
-          message.info("소속 사원 이관이 필요합니다.");
-          setConfirmOpen(false);
-          setDeleting(false);
-          dispatch(resetDeptState());
-          router.push({ pathname: "/dept/transfer/list", query: { deptId } });
-          return;
-        }
-        message.success("삭제 처리되었습니다.");
+    if (success) {
+      if (pendingTransfer) {
+        message.info("소속 사원 이관이 필요합니다.");
         setConfirmOpen(false);
         setDeleting(false);
         dispatch(resetDeptState());
-        router.push(backUrl);
-      } else if (error) {
-        message.error(error);
-        setDeleting(false);
-        dispatch(resetDeptState());
+        router.push({ pathname: "/dept/transfer/list", query: { deptId } });
+        return;
       }
+      message.success("삭제 처리되었습니다.");
+      setConfirmOpen(false);
+      setDeleting(false);
+      dispatch(resetDeptState());
+      router.push(backUrl);
+    } else if (error) {
+      message.error(error);
+      setDeleting(false);
+      dispatch(resetDeptState());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, success, error, deleting]);
@@ -178,6 +172,7 @@ export default function DeptEditPage() {
     return () => {
       dispatch(resetDeptState());
       dispatch(resetEmpState());
+      dispatch(resetCompanyState());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -291,7 +286,7 @@ export default function DeptEditPage() {
             <ExclamationCircleOutlined style={{ fontSize: 34, opacity: 0.5 }} />
             <p>해당 부서를 찾을 수 없습니다.</p>
             <Link href="/dept/list">
-              <Button size="small" className="mt-2">
+              <Button className="mt-2">
                 목록으로 돌아가기
               </Button>
             </Link>
@@ -319,7 +314,7 @@ export default function DeptEditPage() {
         </div>
         <div className="sb-page-head__actions">
           <Link href={backUrl}>
-            <Button icon={<ArrowLeftOutlined />} size="small">
+            <Button icon={<ArrowLeftOutlined />}>
               목록으로
             </Button>
           </Link>
