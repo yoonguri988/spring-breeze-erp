@@ -1,168 +1,227 @@
 package com.sb.erp.resv.controller;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.sb.erp.dto.ResDto;
-import com.sb.erp.dto.ResSearchDto;
-import com.sb.erp.dto.ResvDto;
-import com.sb.erp.global.security.CustomUserDetails;
+import com.sb.erp.auth.service.AuthUserJwtService;
+import com.sb.erp.res.dto.response.ResResponse;
 import com.sb.erp.res.service.ResourceService;
+import com.sb.erp.resv.dto.request.ResvRequest;
 import com.sb.erp.resv.dto.request.ResvSearchRequest;
+import com.sb.erp.resv.dto.response.ResvResponse;
 import com.sb.erp.resv.service.ReservationService;
-import com.sb.erp.util.dto.PagingUtil;
 
-@Controller
-@RequestMapping("/resv")
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@Tag(name = "Reservation REST API", description = "자원 예약 관리 REST API")
+@RestController
+@RequestMapping("/api/resv")
+@RequiredArgsConstructor
 public class ReservationController {
-    @Autowired private ReservationService service;
-    @Autowired private ResourceService resService;
 
-    // 내 예약 목록
+    private static final String STATUS_WAIT = "WAI";
+
+    private final ReservationService service;
+    private final ResourceService resService;
+    private final AuthUserJwtService authUserJwtService;
+
+    // 내 예약 목록 조회 GET /api/resv/my
+    @Operation(summary = "내 예약 목록 조회", description = "로그인한 사용자 본인의 예약 목록을 조회합니다.")
     @GetMapping("/my")
-    public String my_list(ResvSearchRequest search, Authentication auth, Model model) {
-    	// 현재 로그인 사용자 정보
-    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-    	search.setComId(user.getUser().getComId());
-    	search.setEmpId(user.getUser().getEmpId());
-    	
-    	if (search.getStartDt() == null || search.getStartDt().isBlank()) {
-    		search.setStartDt(java.time.LocalDate.now().minusDays(30).toString());
-    	}
-    	if (search.getEndDt() == null || search.getEndDt().isBlank()) {
-    		search.setEndDt(java.time.LocalDate.now().toString());
-    	}
-    	
-    	int listtotal = service.getResvCount(search);
-    	PagingUtil paging = new PagingUtil(listtotal, search.getPstartno());
-    	List<ResvDto> list = service.getResvList(search);
-    	
-    	model.addAttribute("list", list);
-    	model.addAttribute("paging", paging);
-    	model.addAttribute("search", search);
-    	
-    	return "resv/my";
-    }
+    public ResponseEntity<List<ResvResponse>> getMyResvList(
+            @ParameterObject @ModelAttribute ResvSearchRequest search,
+            @Parameter(hidden = true) Authentication authentication) {
+        search.setComId(authUserJwtService.getCurrentComId(authentication));
+        search.setEmpId(authUserJwtService.getCurrentEmpId(authentication));
 
-    @GetMapping("/insert")
-    public String insertForm(Authentication auth, Model model) {
-    	// 현재 로그인 사용자 정보
-    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-    	
-    	ResSearchDto search = new ResSearchDto();
-    	search.setComId(user.getUser().getComId());
-    	
-    	// 예약 할 수 있는 회사의 자원 정보
-    	// TODO: 자원 정보에 대해 더 디테일하게 갯수 체크 해야될 것 같음
-        List<ResDto> resList = resService.getResListForResv(search);
-        model.addAttribute("resList", resList);
-
-        return "resv/insert";
-    }
-
-    @PostMapping("/insert")
-    public String insert(Authentication auth, ResvDto resvDto, RedirectAttributes rttr) {
-    	// 현재 로그인 사용자 정보
-    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-    	resvDto.setEmpId(user.getUser().getEmpId());
-    	resvDto.setComId(user.getUser().getComId());
-    	
-    	try {
-            service.insert(resvDto);
-        } catch (IllegalStateException e) {
-            // 예: "해당 기간에 예약 가능한 수량이 부족합니다. (남은 수량: 2개)"
-        	rttr.addFlashAttribute("toastMsg", e.getMessage());
-        	rttr.addFlashAttribute("toastKind", "warn");
-        	rttr.addFlashAttribute("toastField", "quantity"); // 문제 필드 지목 (선택사항)
-            return "redirect:/resv/insert";
-        } catch (IllegalArgumentException e) {
-        	rttr.addFlashAttribute("toastMsg", e.getMessage());
-        	rttr.addFlashAttribute("toastKind", "warn");
-            return "redirect:/resv/insert";
+        if (search.getStartDt() == null) {
+            search.setStartDt(LocalDateTime.now().minusDays(30));
+        }
+        if (search.getEndDt() == null) {
+            search.setEndDt(LocalDateTime.now());
+        } else {
+            search.setEndDt(search.getEndDt().toLocalDate().atTime(LocalTime.MAX)); // 23:59:59.999999999
         }
 
-    	rttr.addFlashAttribute("toastMsg", "예약이 신청되었습니다.");
-    	rttr.addFlashAttribute("toastKind", "ok");
-        return "redirect:/resv/my";
+        return ResponseEntity.ok(service.getResvList(search));
     }
-    
-    @GetMapping("/edit")
-    public String edit_get(Authentication auth, Integer revId, Model model) {
-        ResvDto resv = service.getResvDetail(revId);
-        ResDto dto = resService.getResourceDetail(resv.getResId());
-        model.addAttribute("resource", dto);
-        model.addAttribute("resv", resv);
-    	return "resv/edit";
-    }
-    
-    @PostMapping("/edit")
-    public String edit_post(ResvDto dto) {
-    	int result = service.update(dto);
-    	return "redirect:/resv/my";
-    }
-    
-    @GetMapping("/detail")
-    public String detail_get(Authentication auth, Integer revId, Model model) {
-    	// 현재 로그인 사용자 정보
-    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-	    Set<String> authNames = user.getAuthorities().stream()
-	            .map(GrantedAuthority::getAuthority)
-	            .collect(Collectors.toSet());
 
-	    boolean isAdmin = authNames.contains("ROLE_ADMIN");
-    	
-        ResvDto resv = service.getResvDetail(revId);
-        ResDto dto = resService.getResourceDetail(resv.getResId());
-        model.addAttribute("resource", dto);
-        model.addAttribute("resv", resv);
-        
-        model.addAttribute("isAdmin", isAdmin);
-        model.addAttribute("empId", user.getUser().getEmpId());
-    	return "resv/detail";
+    // 내 예약 개수 조회 GET /api/resv/my/count
+    @Operation(summary = "내 예약 개수 조회", description = "로그인한 사용자 본인의 예약 전체 개수를 조회합니다.")
+    @GetMapping("/my/count")
+    public ResponseEntity<Integer> getMyResvCount(
+            @ParameterObject @ModelAttribute ResvSearchRequest search,
+            @Parameter(hidden = true) Authentication authentication) {
+        search.setComId(authUserJwtService.getCurrentComId(authentication));
+        search.setEmpId(authUserJwtService.getCurrentEmpId(authentication));
+
+        if (search.getStartDt() == null) {
+            search.setStartDt(LocalDateTime.now().minusDays(30));
+        }
+        if (search.getEndDt() == null) {
+            search.setEndDt(LocalDateTime.now());
+        } else {
+            search.setEndDt(search.getEndDt().toLocalDate().atTime(LocalTime.MAX)); // 23:59:59.999999999
+        }
+
+        return ResponseEntity.ok(service.getResvCount(search));
     }
-    
-    @PostMapping("/cancel")
-    public String cancel_post(Integer revId) {
-    	int result = service.delete(revId);
-    	return "redirect:/resv/my";
+
+    // 예약 단건 조회 GET /api/resv/{revId}
+    // 본인 예약이거나, 관리자/ROOT로서 같은 회사 소속일 때만 조회 가능
+    @Operation(summary = "예약 단건 조회", description = "예약 ID로 상세 정보를 조회합니다. (자원 정보 포함)")
+    @GetMapping("/{revId}")
+    public ResponseEntity<ResvResponse> getResv(
+            @Parameter(description = "조회할 예약 ID", example = "1", required = true) @PathVariable("revId") long revId,
+            @Parameter(hidden = true) Authentication authentication) {
+        ResvResponse resv = service.getResvDetail(revId);
+        if (resv == null || authUserJwtService.isForbiddenReservationAccess(authentication, resv)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(resv);
     }
-    
-    //기간 선택 후 실시간 잔여수량 조회
+
+    // 자원 예약 등록 POST /api/resv
+    // 예약 가능 수량/자원 상태 검증은 ReservationServiceImpl.insert()에서 처리 (IllegalArgumentException/IllegalStateException)
+    @Operation(summary = "자원 예약 등록", description = "신규 예약을 신청합니다. 자원 상태와 기간별 예약 가능 수량을 검증합니다.")
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> insert(
+            @Parameter(hidden = true) Authentication authentication,
+            @Valid @RequestBody ResvRequest resvDto) {
+        Map<String, Object> result = new HashMap<>();
+
+        resvDto.setEmpId(authUserJwtService.getCurrentEmpId(authentication));
+        resvDto.setComId(authUserJwtService.getCurrentComId(authentication));
+        resvDto.setStatus(STATUS_WAIT);
+
+        try {
+            int inserted = service.insert(resvDto);
+            if (inserted > 0) {
+                result.put("success", true);
+                result.put("message", "예약이 신청되었습니다.");
+                return ResponseEntity.status(HttpStatus.CREATED).body(result);
+            }
+            result.put("success", false);
+            result.put("message", "예약 신청 실패");
+            return ResponseEntity.internalServerError().body(result);
+        } catch (IllegalStateException e) {
+            // 예: "해당 기간에 예약 가능한 수량이 부족합니다. (남은 수량: 2개)"
+            result.put("success", false);
+            result.put("reason", "notEnoughQuantity");
+            result.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(result);
+        } catch (IllegalArgumentException e) {
+            result.put("success", false);
+            result.put("reason", "invalidResource");
+            result.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(result);
+        }
+    }
+
+    // 자원 예약 수정 PUT /api/resv/{revId}
+    // 본인 예약만 수정 가능 (관리자라도 타인 예약 내용을 대신 수정하지 않음)
+    @Operation(summary = "자원 예약 수정", description = "본인 예약의 수량/기간 등을 수정합니다.")
+    @PutMapping("/{revId}")
+    public ResponseEntity<Map<String, Object>> update(
+            @Parameter(description = "수정할 예약 ID", example = "1", required = true) @PathVariable("revId") long revId,
+            @Valid @RequestBody ResvRequest resvDto,
+            @Parameter(hidden = true) Authentication authentication) {
+        Map<String, Object> result = new HashMap<>();
+
+        ResvResponse existing = service.getResvDetail(revId);
+        Long myEmpId = authUserJwtService.getCurrentEmpId(authentication);
+        if (existing == null || !existing.getEmpId().equals(myEmpId)) {
+            result.put("success", false);
+            result.put("message", "본인 예약만 수정할 수 있습니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+        }
+
+        resvDto.setRevId(revId);
+        resvDto.setEmpId(myEmpId);
+        resvDto.setComId(existing.getComId());
+
+        int updated = service.update(resvDto);
+        if (updated > 0) {
+            result.put("success", true);
+            result.put("message", "예약 수정 성공");
+            return ResponseEntity.ok(result);
+        }
+
+        result.put("success", false);
+        result.put("message", "예약 수정 실패");
+        return ResponseEntity.internalServerError().body(result);
+    }
+
+    // 자원 예약 취소 DELETE /api/resv/{revId}
+    @Operation(summary = "자원 예약 취소", description = "예약을 취소합니다. 본인 예약이거나 관리자 권한이 필요합니다.")
+    @DeleteMapping("/{revId}")
+    public ResponseEntity<Map<String, Object>> cancel(
+            @Parameter(description = "취소할 예약 ID", example = "1", required = true) @PathVariable("revId") long revId,
+            @Parameter(hidden = true) Authentication authentication) {
+        Map<String, Object> result = new HashMap<>();
+
+        ResvResponse existing = service.getResvDetail(revId);
+        if (existing == null) {
+            result.put("success", false);
+            result.put("message", "해당 예약을 찾을 수 없습니다.");
+            return ResponseEntity.notFound().build();
+        }
+        if (authUserJwtService.isForbiddenReservationAccess(authentication, existing)) {
+            result.put("success", false);
+            result.put("message", "본인 예약이거나 관리자만 취소할 수 있습니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+        }
+
+        service.delete(revId);
+        result.put("success", true);
+        result.put("message", "예약이 취소되었습니다.");
+        return ResponseEntity.ok(result);
+    }
+
+    // 기간 선택 후 실시간 잔여수량 조회 GET /api/resv/available
+    @Operation(summary = "실시간 잔여수량 조회", description = "선택한 자원의 특정 기간 내 예약 가능 잔여 수량을 조회합니다.")
     @GetMapping("/available")
-    @ResponseBody
-    public Map<String, Object> getAvailableQty(ResvSearchRequest search, Authentication auth) {
-        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-        ResDto res = resService.getResourceDetail(search.getResId());
+    public ResponseEntity<Map<String, Object>> getAvailableQty(
+            @ParameterObject @ModelAttribute ResvSearchRequest search,
+            @Parameter(hidden = true) Authentication authentication) {
+        ResResponse res = resService.getResourceDetail(search.getResId());
+        Long comId = authUserJwtService.getCurrentComId(authentication);
 
-        // 소속 회사 재검증 (여기서도 반드시)
-        if (res == null || !res.getComId().equals(user.getUser().getComId())) {
+        // 소속 회사 재검증 (다른 회사 자원의 잔여수량을 조회하지 못하도록)
+        if (res == null || authUserJwtService.isForbiddenCompanyAccess(authentication, res.getComId())) {
             throw new IllegalArgumentException("잘못된 자원 요청입니다.");
         }
 
         // 특정 자원의 특정 기간에 이미 예약(대기+승인)된 수량 합계
         int reservedQty = service.getReservedQuantity(search);
-        int availableQty = res.getQuantity() - reservedQty;
+        long availableQty = res.getQuantity() - reservedQty;
 
         Map<String, Object> result = new HashMap<>();
         result.put("totalQuantity", res.getQuantity());
         result.put("reservedQty", reservedQty);
         result.put("availableQty", Math.max(availableQty, 0));
         result.put("resStatus", res.getResStatus());
-        return result;
+        return ResponseEntity.ok(result);
     }
-    
 }

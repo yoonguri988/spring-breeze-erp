@@ -23,14 +23,14 @@ import com.sb.erp.emp.dto.response.EmpTransferResponse;
 import com.sb.erp.emp.dto.response.EmployeeTransferItemFormReponse;
 import com.sb.erp.global.exception.DeptTransferException;
 import com.sb.erp.global.integration.OpenAiRecomClient;
-import com.sb.erp.resv.dto.reponse.ResvImpactResponse;
+import com.sb.erp.resv.dto.response.ResvImpactResponse;
 
 @Service
 public class DeptTransferServiceImpl implements DeptTransferService {
+	
 	@Autowired DeptTransferMapper dao;
 	@Autowired DeptTransferLogMapper logDao;
 	@Autowired OpenAiRecomClient aiClient;
-	
 	
 	/** 멀티테넌시 격리 가드 — deptId가 실제로 comId 소속이 아니면 즉시 차단
 	 * @throws AccessDeniedException */
@@ -108,6 +108,13 @@ public class DeptTransferServiceImpl implements DeptTransferService {
             if (item.getEmpId() == null || item.getNewDeptId() == null) {
                 throw new DeptTransferException(
                         "INVALID_TRANSFER_ITEM", "사원 또는 이관할 부서 정보가 누락되었습니다.");
+            }
+            // 이관 대상 부서가 실제로 같은 회사 소속인지 검증 (다른 회사 부서로의 이관 차단)
+            if (dao.countDeptInCompany(item.getNewDeptId(), form.getComId()) == 0) {
+                throw new DeptTransferException(
+                        "INVALID_TARGET_DEPT",
+                        "사원(emp_id: " + item.getEmpId() + ")의 이관 대상 부서(dept_id: " + item.getNewDeptId()
+                                + ")가 본인 회사 소속이 아닙니다. 전체 이관이 취소되었습니다.");
             }
             try {
                 int updated = dao.updateEmployeeDept(item.getEmpId(), item.getNewDeptId());

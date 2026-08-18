@@ -38,4 +38,6 @@ public interface DeptService {
 	// KJY 조직도 범위 제한
 	public List<DeptResponse> selectAncestorDepts(long deptId);
 
+	// 로그인 사원(empId) 기준 소속 부서 조회 - "내 부서" 화면용
+	public DeptResponse selectByEmpId(long empId);
 }

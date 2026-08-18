@@ -114,6 +114,7 @@ public class TaskController {
 			if (inserted > 0) {
 				result.put("success", true);
 				result.put("message", "태스크 등록 성공");
+				result.put("taskId", dto.getTaskId());
 				result.put("task", service.select(dto.getTaskId()));
 				return ResponseEntity.status(HttpStatus.CREATED).body(result);
 			}
@@ -328,34 +329,35 @@ public class TaskController {
 		return ResponseEntity.notFound().build();
 	  }
 	    	
-	    // 내 태스크 목록
-	    // ★Authentication
-	    @Operation(summary = "내 태스크 목록 조회", description = "로그인한 사용자가 담당자로 지정된 태스크 목록을 조회합니다.")
-		@GetMapping("/mine")
-	    public ResponseEntity<Map<String, Object>> getMyTasks(
-	    		@ModelAttribute TaskSearchRequest search,
-	    		@AuthenticationPrincipal CustomUserPrincipal principal){
-	    	int totalCnt = service.selectMyTasksCount(search);
-	    	
-			search.setEmpId(principal.getEmpId());
-			search.setComId(principal.getComId());
-			
-			PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
-			search.setPstartno(paging.getPstartno());
-			List<TaskResponse> tasks = service.selectMyTasks(search);
+	// 내 태스크 목록
+	// ★Authentication
+	@Operation(summary = "내 태스크 목록 조회", description = "로그인한 사용자가 담당자로 지정된 태스크 목록을 조회합니다.")
+	@GetMapping("/mine")
+	public ResponseEntity<Map<String, Object>> getMyTasks(
+			@ModelAttribute TaskSearchRequest search,
+			@AuthenticationPrincipal CustomUserPrincipal principal){
+		
+		search.setEmpId(principal.getEmpId());
+		search.setComId(principal.getComId());
+		
+		int totalCnt = service.selectMyTasksCount(search);
+		
+		PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
+		search.setPstartno(paging.getPstartno());
+		List<TaskResponse> tasks = service.selectMyTasks(search);
 
-			for (TaskResponse task : tasks) {
-				boolean delayed = !"DONE".equals(task.getTaskStatus())
-						&& task.getTaskEndDate().isBefore(LocalDate.now());
-				task.setDelayed(delayed);
-			}
-
-			Map<String, Object> result = new HashMap<>();
-			result.put("tasks", tasks);
-			result.put("paging", paging);
-			result.put("totalCnt", totalCnt);
-			return ResponseEntity.ok(result);
+		for (TaskResponse task : tasks) {
+			boolean delayed = !"DONE".equals(task.getTaskStatus())
+					&& task.getTaskEndDate().isBefore(LocalDate.now());
+			task.setDelayed(delayed);
 		}
+
+		Map<String, Object> result = new HashMap<>();
+		result.put("tasks", tasks);
+		result.put("paging", paging);
+		result.put("totalCnt", totalCnt);
+		return ResponseEntity.ok(result);
+	}
 		
 	    //간트 차트
 		@Operation(summary = "간트차트 조회", description = "프로젝트의 태스크 의존관계를 간트차트용으로 조회합니다.")
@@ -386,205 +388,3 @@ public class TaskController {
 		}//간트차트
 }
 
-/*@GetMapping("/task_create")
-	public String createFrom(@RequestParam("project_pro_id") int projectProId, Model model,Authentication auth) {
-		
-		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-		int empId = user.getUser().getEmpId();
-
-		ProjRequest project = projectService.select(projectProId);
-		SecurityUtil.checkComIdAccess(project.getComId());
-		boolean isCreator = project.getEmpId() == empId;
-		boolean isMember = memberservice.select(projectProId).stream()
-		        .anyMatch(m -> m.getEmpId() == empId);
-
-		if (!isCreator && !isMember) {
-		    throw new AccessDeniedException("접근 권한이 없습니다.");
-		}
-		
-		model.addAttribute("memberlist",memberservice.selectByproject(projectProId));
-		model.addAttribute("taskList", dependencyService.selectTaskDependencies(projectProId));
-		model.addAttribute("pro_id",projectProId);
-		return "proj/task_create"; // 프로젝트 멤버 이름 출력
-	}
-	
-	@PostMapping("/task_create") 
-	public String create(TaskRequest dto, RedirectAttributes rttr,Authentication auth) {
-		
-	    CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-	    int empId = user.getUser().getEmpId();
-	    int comId = user.getUser().getComId();
-	    
-	    ProjRequest project = projectService.select(dto.getProId());
-	    SecurityUtil.checkComIdAccess(project.getComId());
-	    boolean isCreator = project.getEmpId() == empId;
-	    boolean isMember = memberservice.select(dto.getProId()).stream()
-	            .anyMatch(m -> m.getEmpId() == empId);
-	    
-	    if (!isCreator && !isMember) {
-	        throw new AccessDeniedException("접근 권한이 없습니다.");
-	    }
-	    
-	    dto.setComId(comId);
-	    
-		ProjmRequest member = memberservice.selectOne(dto.getPmId());
-		if (member == null) {
-			rttr.addFlashAttribute("result", "유효하지 않은 담당자입니다.");
-			return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();
-		}
-
-		String result = "태스크 등록 실패";
-		try {
-			if (dependencyService.insertWithParent(dto) > 0) {
-				result = "태스크 등록 성공";
-			}
-		} catch (IllegalArgumentException | IllegalStateException e) { 
-			result = e.getMessage();
-		}
-
-		rttr.addFlashAttribute("result", result);
-		return "redirect:/proj/proj_detail?pro_id=" + dto.getProId();
-	}
-	
-	 @GetMapping("/task_detail")
-	 public String view(@RequestParam("task_id") int taskId,Model model, Authentication auth) {
-	 TaskRequest dto = service.select(taskId);
-	 
-	  // 회사 소속 검증: ROOT/ADMIN이 아니면 자기 회사 프로젝트의 태스크만 접근 가능
-	  ProjRequest project = projectService.select(dto.getProId());
-	  SecurityUtil.checkComIdAccess(project.getComId());
-	  
-	  model.addAttribute("dto",dto);
-	  model.addAttribute("pro_id", dto.getProId());
-	  
-	  	// 선행 작업이 있으면 그 태스크 정보도 조회
-		if (dto.getParentTaskId() != null) {
-			model.addAttribute("parentDto", service.select(dto.getParentTaskId())); }
-		
-		// 이 태스크를 수정하면 영향을 받는 후속 작업들
-		model.addAttribute("impactTasks", dependencyService.selectImpactTasks(taskId));
-	
-		// 지연 여부 판단 (완료 안 됐는데 마감일이 지남)
-		boolean isDelayed = !"DONE".equals(dto.getTaskStatus())
-				&& dto.getTaskEndDate().isBefore(LocalDate.now());
-		model.addAttribute("isDelayed", isDelayed);
-		
-	  return "proj/task_detail";
-	  } //해당 태스크 상세
-	 	  
-	 @GetMapping("/task_edit")
-	 public String taskEditView(@RequestParam("task_id") int taskId,@RequestParam("project_pro_id") int projectProId, Model model, Authentication auth) {
-		 
-		 CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-		 int empId = user.getUser().getEmpId();
-
-		 TaskRequest task = service.select(taskId);
-		 ProjRequest project = projectService.select(task.getProId());
-		 SecurityUtil.checkComIdAccess(project.getComId());
-		 ProjmRequest assignee = memberservice.selectOne(task.getPmId());
-
-		 boolean isCreator = project.getEmpId() == empId;
-		 boolean isAssignee = assignee != null && assignee.getEmpId() == empId;
-
-		 if (!isCreator && !isAssignee) {
-		     throw new AccessDeniedException("접근 권한이 없습니다.");
-		 }
-		 
-		  model.addAttribute("dto",service.taskEditView(taskId));
-		  model.addAttribute("taskList", dependencyService.selectTaskDependencies(projectProId));
-		  model.addAttribute("memberlist",memberservice.selectByproject(projectProId));
-		  model.addAttribute("pro_id",projectProId);
-		  return "proj/task_edit";  }//태스크 수정뷰
-		  
-	  
-	  @PostMapping("/task_edit")
-	  public String edit(TaskRequest dto,RedirectAttributes rttr, Authentication auth) {
-		  CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-		  int empId = user.getUser().getEmpId();
-		  //수정 권한 검증: ROOT/ADMIN, 프로젝트 생성자, 담당자 본인만 가능
-		  TaskRequest original = service.select(dto.getTaskId());
-		  ProjRequest project = projectService.select(original.getProId());
-		  SecurityUtil.checkComIdAccess(project.getComId());
-		  ProjmRequest assignee = memberservice.selectOne(original.getPmId());
-		  
-		  boolean isCreator = project.getEmpId() == empId;
-		  boolean isAssignee = assignee != null && assignee.getEmpId() == empId;
-		  
-		  if (!isCreator && !isAssignee) {
-			  rttr.addFlashAttribute("result", "담당자, 프로젝트 생성자만 수정할 수 있습니다.");
-			  return "redirect:/proj/task_detail?task_id="+dto.getTaskId();
-		  }
-		  
-		  String result= "태스크 수정 실패";
-		    try {
-		        if(dependencyService.updateTaskSchedule(dto) > 0) { result = "태스크 수정 성공"; }
-		    } catch(IllegalArgumentException | IllegalStateException e) 
-		    // 멀티캐치: 순환참조(IllegalArgumentException), 완료된 프로젝트/동시수정 락 타임아웃(IllegalStateException)
-		    // 예상된 예외만 여기서 잡아서 사용자에게 메시지로 안내.
-		    // Exception으로 넓게 잡지 않는 이유: 의도치 않은 버그(NPE 등)까지 숨겨버리면 디버깅이 어려워지기 때문
-		    { result = e.getMessage(); }
-			rttr.addFlashAttribute("result",result);
-			return "redirect:/proj/task_detail?task_id="+dto.getTaskId();
-	  } //태스크 수정폼
-	  
-	  @GetMapping("/task_delete")
-	  public String delete(@RequestParam("task_id") int taskId, @RequestParam("pro_id") int proId,RedirectAttributes rttr
-			  , Authentication auth) {
-		  CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-		  int empId = user.getUser().getEmpId();
-		  // 삭제 권한 검증: ROOT/ADMIN, 프로젝트 생성자만 가능 (담당자 본인은 제외)
-		  ProjRequest project = projectService.select(proId);
-		  SecurityUtil.checkComIdAccess(project.getComId());
-		  boolean isCreator = project.getEmpId() == empId;
-
-		  if (!isCreator) {
-			  rttr.addFlashAttribute("result", "프로젝트 생성자만 삭제할 수 있습니다.");
-			  return "redirect:/proj/proj_detail?pro_id="+proId;
-		  }
-		  
-		  String result="태스크 삭제 실패";
-		  if(service.delete(taskId)>0) {result="태스크 삭제 성공";}
-		  rttr.addFlashAttribute("result",result);
-		  return "redirect:/proj/proj_detail?pro_id="+proId;
-	  }// 태스크 삭제
-	  
-	  
-	    @GetMapping("/task_list")
-	    public String myList(TaskSearchRequest search, Model model,Authentication auth) {
-	    	CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-	    	int empId =user.getUser().getEmpId();
-	    	int comId = user.getUser().getComId();
-	    	
-	    	   search.setEmpId(empId);
-	    	   search.setComId(comId);
-
-	        int totalCnt = service.selectMyTasksCount(search);
-	        PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
-	        search.setPstartno(paging.getPstartno());
-	        List<TaskRequest> tasks = service.selectMyTasks(search);
-
-	        for (TaskRequest task : tasks) {
-	            boolean delayed =
-	                    !"DONE".equals(task.getTaskStatus())
-	                    && task.getTaskEndDate().isBefore(LocalDate.now());
-
-	            task.setDelayed(delayed);}
-
-	        model.addAttribute("search", search);
-	        model.addAttribute("tasks", tasks);
-	        model.addAttribute("paging", paging);
-	        model.addAttribute("totalCnt", totalCnt);
-	        
-	        
-	        return "proj/task_list";
-	    }// 내 태스크 목록 조회
-		
-		@GetMapping("/gantt")
-		@ResponseBody
-		public List<TaskRequest> gantt(@RequestParam("pro_id") int proId, Authentication auth){
-			
-		    ProjRequest project = projectService.select(proId);
-		    SecurityUtil.checkComIdAccess(project.getComId());
-
-			return dependencyService.selectTaskDependencies(proId);
-		}//간트차트*/

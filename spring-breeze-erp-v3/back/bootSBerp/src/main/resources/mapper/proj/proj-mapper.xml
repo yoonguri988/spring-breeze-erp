@@ -4,16 +4,15 @@
 
 	<!-- 프로젝트 생성 -->
 	<insert id="insert" parameterType="ProjRequest">
-    <selectKey keyProperty="proId" resultType="long" order="BEFORE">
-        SELECT SEQ_PROJECT.NEXTVAL FROM DUAL
-    </selectKey>
-	  insert into project(com_id, pro_name, pro_desc, emp_id, pro_status,
-                           start_date, end_date, created_at, updated_at )
-      values(#{comId}, #{proName}, #{proDesc}, #{empId}, #{proStatus},
-               #{startDate}, #{endDate}, SYSDATE, SYSDATE)
-	</insert> 
+	    <selectKey keyProperty="proId" resultType="long" order="AFTER">
+	        SELECT seq_project.CURRVAL FROM DUAL
+	    </selectKey>
+	    insert into project(com_id, pro_name, pro_desc, emp_id, pro_status,
+	                         start_date, end_date, created_at, updated_at )
+	    values(#{comId}, #{proName}, #{proDesc}, #{empId}, #{proStatus},
+	             #{startDate}, #{endDate}, SYSDATE, SYSDATE)
+	</insert>
 	
-
     <!-- 프로젝트 상세페이지 (참여인원 포함) -->
     <select id="select" resultType="ProjResponse" parameterType="long">
         select p.*, e.emp_name,

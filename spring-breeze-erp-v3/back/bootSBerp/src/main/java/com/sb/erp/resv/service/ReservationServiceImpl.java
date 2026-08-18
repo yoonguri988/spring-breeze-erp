@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.sb.erp.res.dto.response.ResResponse;
 import com.sb.erp.res.repository.ResourceMapper;
-import com.sb.erp.resv.dto.reponse.ResvResponse;
-import com.sb.erp.resv.dto.reponse.StatsResvResponse;
 import com.sb.erp.resv.dto.request.ResvRequest;
 import com.sb.erp.resv.dto.request.ResvSearchRequest;
+import com.sb.erp.resv.dto.response.ResvResponse;
+import com.sb.erp.resv.dto.response.StatsResvResponse;
 import com.sb.erp.resv.repository.ReservationMapper;
 
 @Service
@@ -31,8 +31,8 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ResvResponse getResvDetail(int revId) {
-        return dao.selectOneById(revId);
+    public ResvResponse getResvDetail(long revId) {
+        return dao.selectById(revId);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public int delete(int revId) {
+    public int delete(long revId) {
     	return dao.delete(revId);
     }
 
@@ -78,7 +78,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
     
     @Override
-    public int countReservationsByResourceId(int resId) {
+    public int countReservationsByResourceId(long resId) {
         return dao.countReservationsByResourceId(resId);
     }
 
