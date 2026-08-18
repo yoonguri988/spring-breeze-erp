@@ -6,6 +6,10 @@ import { wrapper } from "../store/configureStore";
 import AppLayout from "../components/AppLayout";
 import { loadUserRequest } from "../reducers/auth/authReducer";
 
+import { I18nextProvider } from "react-i18next";
+import i18n from "../i18n";
+import { getStoredLanguage } from "../i18n/languageStorage";
+
 // 스타일 (순서 중요: antd → bootstrap(CSS만, 유틸리티 클래스용) → 프로젝트 커스텀 CSS)
 // 드롭다운/모달 등 JS로 동작하는 컴포넌트는 전부 antd를 쓰므로
 // bootstrap.bundle.min.js(JS)는 로드하지 않습니다.
@@ -42,15 +46,34 @@ function MyApp({ Component, pageProps }) {
     dispatch(loadUserRequest());
   }, [dispatch, isBareLayout]);
 
+  // 최초 하이드레이션은 항상 기본 언어(ko)로 서버와 일치시킨 뒤,
+  // 마운트 이후에 쿠키에 저장된 사용자의 언어 설정을 반영합니다.
+  // (i18n/index.js 상단 설명 참고 — 하이드레이션 불일치 방지 목적)
+  useEffect(() => {
+    const stored = getStoredLanguage();
+    if (stored !== i18n.language) {
+      i18n.changeLanguage(stored);
+    }
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = stored;
+    }
+  }, []);
+
   if (isBareLayout) {
     // 로그인 / 비밀번호 재설정 등 → AppLayout(사이드바/헤더/푸터) 미적용
-    return <Component {...pageProps} />;
+    return (
+      <I18nextProvider i18n={i18n}>
+        <Component {...pageProps} />
+      </I18nextProvider>
+    );
   }
 
   return (
-    <AppLayout>
-      <Component {...pageProps} />
-    </AppLayout>
+    <I18nextProvider i18n={i18n}>
+      <AppLayout>
+        <Component {...pageProps} />
+      </AppLayout>
+    </I18nextProvider>
   );
 }
 
