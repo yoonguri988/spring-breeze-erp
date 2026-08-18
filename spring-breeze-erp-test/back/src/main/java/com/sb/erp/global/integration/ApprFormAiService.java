@@ -74,12 +74,9 @@ public class ApprFormAiService {
 					.body(body)
 					.retrieve()
 					.body(String.class);
-			System.out.print("=======================================");
-			System.out.print(responseBody);
 			JsonNode root = jsonMapper.readTree(responseBody);
 			return root.path("choices").get(0).path("message").path("content").asText();
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException("openAi 양식 생성 실패", e);
 		}
 		
