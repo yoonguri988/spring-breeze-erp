@@ -67,7 +67,6 @@ public class NoticeController {
         return ResponseEntity.ok(result);
     }
     
-
     // 공지 등록
     // 첨부파일은 선택사항이므로 required=false (안 붙이면 파일 없는 공지 등록 시 400 에러가 났음)
     @Operation(summary = "공지 등록",description = "신규 공지 등록")
@@ -100,7 +99,7 @@ public class NoticeController {
     @Operation(summary = "공지 수정",description = "공지 수정")
     @PutMapping(value = "/{bno}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> updateNotice(
-    		@Valid @ModelAttribute NoticeRequest dto,
+            @ModelAttribute NoticeRequest dto,
             @PathVariable("bno") Long bno,
             @RequestPart(name = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal CustomUserPrincipal principal) {
@@ -193,7 +192,7 @@ public class NoticeController {
     // 검색 결과 카운트 (GET 방식) //어디서 쓰이는지 잘 모르겠음
 	@Operation(summary = "공지 검색 결과 카운트", description = "검색 조건에 맞는 공지 건수만 조회합니다.")
 	@GetMapping("/search-count")
-	public ResponseEntity<Long> getSearchCount(NoticeSearchRequest search) {
+	public ResponseEntity<Integer> getSearchCount(NoticeSearchRequest search) {
 		return ResponseEntity.ok(noticeService.selectCountNoticeList(search));
 	}
 }

@@ -32,4 +32,13 @@ public class AuthServiceImpl implements AuthService {
 				.map(AuthResponse::getAutName)
 				.toList();
 	}
+
+	@Override
+	public AuthUserResponse readAuthByEmpId(long empId) {
+		AuthUserResponse user = dao.readAuthByEmpId(empId);
+		if (user == null) {
+			throw new IllegalArgumentException("사용자를 찾을 수 없습니다: empId=" + empId);
+		}
+		return user;
+	}
 }

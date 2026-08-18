@@ -1,5 +1,6 @@
 package com.sb.erp.dept.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class DeptRequest {
+	@Schema(hidden = true)
 	private long deptId;   // 검색 조건 - 특정 부서 id
 	private long comId;    // 소속 회사
 

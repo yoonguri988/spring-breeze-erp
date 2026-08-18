@@ -1,8 +1,12 @@
 package com.sb.erp.global.config;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.FormatterRegistry;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -21,6 +25,21 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler(pattern)
                 .addResourceLocations(location);
 	}
+	
+	@Override
+	public void addFormatters(FormatterRegistry registry) {
+	    registry.addConverter(new Converter<String, LocalDateTime>() {
+	        @Override
+	        public LocalDateTime convert(String source) {
+	            if (source == null || source.isBlank()) return null;
+	            // "yyyy-MM-dd" 만 오면 그날 00:00:00 으로, 이미 시간 포함이면 그대로 파싱
+	            return source.length() == 10
+	                    ? LocalDate.parse(source).atStartOfDay()
+	                    : LocalDateTime.parse(source);
+	        }
+	    });
+	}
+	
 	// Cor - 외부에서 접근 가능하게 설정      
 //    @Override
 //    public void addCorsMappings(CorsRegistry registry) { 

@@ -2,6 +2,7 @@ package com.sb.erp.resv.dto.request;
 
 import java.time.LocalDateTime;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,20 +11,29 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class ResvSearchRequest {
+	@Schema(hidden = true)
 	private Long comId;
+	@Schema(hidden = true)
 	private Long empId;
+	
 	private Long resId;
 	private Long excludeRevId;
 
+	private String keyword;
 	private String status;
+	@Schema(description = "자원 유형", example = "VEHICLE",
+			allowableValues = {"VEHICLE", "ROOM", "EQUIPMENT"})
 	private String resType;
+	
 	private LocalDateTime startDt;
 	private LocalDateTime endDt;
-	private String keyword;
 
 	// 페이징
+	@Schema(example = "1", defaultValue = "1")
 	@Builder.Default
 	private int pstartno = 1;
+	
+	@Schema(example = "10", defaultValue = "10")
 	@Builder.Default
 	private int onepagelist = 10;
 

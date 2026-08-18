@@ -17,7 +17,6 @@ import com.sb.erp.appr.repository.ApprDocMapper;
 import com.sb.erp.appr.repository.ApprLineMapper;
 import com.sb.erp.dept.dto.response.DeptResponse;
 import com.sb.erp.dept.service.DeptService;
-import com.sb.erp.global.exception.ResourceNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -90,7 +89,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 	public ApprDocResponse selectDocDetail(Long docId) {
 		ApprDocResponse detail = dao.selectDocDetail(docId);
 		if (detail == null) {
-			throw new ResourceNotFoundException("존재하지 않는 문서입니다");
+			throw new IllegalArgumentException("존재하지 않는 문서입니다");
 		}
 		return detail;
 	}

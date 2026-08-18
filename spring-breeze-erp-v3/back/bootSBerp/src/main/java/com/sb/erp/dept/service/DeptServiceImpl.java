@@ -52,6 +52,12 @@ public class DeptServiceImpl implements DeptService {
 	public int insert(DeptRequest dto) {
 		if(dto.getParentId() != 0) {
 			DeptResponse parent = dao.selectOneById(dto.getParentId());
+			if (parent == null) {
+				throw new IllegalArgumentException("상위 부서가 존재하지 않습니다.");
+			}
+			if (parent.getComId() != dto.getComId()) {
+				throw new IllegalArgumentException("다른 회사의 부서를 상위 부서로 지정할 수 없습니다.");
+			}
 			dto.setDepth(parent.getDepth()+1L);
 		} else {
 			dto.setDepth(0L);
@@ -89,6 +95,9 @@ public class DeptServiceImpl implements DeptService {
 	        	DeptResponse newParent = dao.selectOneById(dto.getParentId());
 	        	if (newParent == null) {
 	        	    throw new IllegalArgumentException("이동할 상위 부서가 존재하지 않습니다.");
+	        	}
+	        	if (newParent.getComId() != cur.getComId()) {
+	        	    throw new IllegalArgumentException("다른 회사의 부서로 이동할 수 없습니다.");
 	        	}
 	        	dto.setDepth(newParent.getDepth() + 1);
 	        } else {
@@ -157,6 +166,12 @@ public class DeptServiceImpl implements DeptService {
 			chain.add(0, dept);
 		}
 		return chain;
+	}
+
+	// 로그인 사원(empId) 기준 소속 부서 조회 - "내 부서" 화면용
+	@Override
+	public DeptResponse selectByEmpId(long empId) {
+		return dao.selectByEmpId(empId);
 	}
 
 }
