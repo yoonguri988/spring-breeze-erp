@@ -4,7 +4,8 @@ const initialState ={
     projectMems:[],
     loading:false,
     error:null,
-    success:false
+    createSuccess: false,   // 등록 성공 여부
+    deleteSuccess: false,   // 삭제 성공 여부
 }
 
 const projMemReducer= createSlice({
@@ -29,41 +30,42 @@ const projMemReducer= createSlice({
         createProjMemRequest:(state)=>{
             state.loading=true;
             state.error=null;
-            state.success=false;
+            state.createSuccess=false;
         },
         createProjMemSuccess:(state,action)=>{
             state.loading=false;
             state.projectMems.unshift(action.payload.ProjectMember);
-            state.success=true;
+            state.createSuccess=true;
         },
         createProjMemFailure:(state,action)=>{
             state.loading=false;
             state.error=action.payload;
-            state.success=false;
+            state.createSuccess=false;
         },
 
         // 멤버 삭제
         deleteProjMemRequest:(state)=>{
             state.loading=true;
             state.error=null;
-            state.success=false;
+            state.deleteSuccess=false;
         },
         deleteProjMemSuccess:(state,action)=>{
             state.loading=false;
             state.projectMems=state.projectMems.filter(project_member=>project_member.pmId!==action.payload);
-            state.success=true;
+            state.deleteSuccess=true;
         },
         deleteProjMemFailure:(state,action)=>{
             state.loading=false;
             state.error=action.payload;
-            state.success=false;
+            state.deleteSuccess=false;
         },
 
         // 초기화
         resetProjMemState:(state)=>{
             state.loading=false;
             state.error=null;
-            state.success=false;
+            state.createSuccess=false;
+            state.deleteSuccess=false;
         },
     }
 });

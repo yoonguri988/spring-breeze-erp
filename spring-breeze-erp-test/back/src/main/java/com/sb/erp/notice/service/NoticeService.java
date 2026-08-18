@@ -27,7 +27,7 @@ public interface NoticeService {
 	// 페이징 계산용 카운트    
 	//public List<NoticeDto> selectNoticeList(NoticeSearchDto search);
 	// 검색 결과 카운트
-	public long selectCountNoticeList(NoticeSearchRequest search);
+	public Integer selectCountNoticeList(NoticeSearchRequest search);
     // 긴급 공지 리스트
     public List<NoticeResponse> selectUrgentNotices(NoticeSearchRequest search);
     // 긴급 공지 갯수 체크용

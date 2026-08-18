@@ -8,7 +8,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -31,6 +30,7 @@ import com.sb.erp.task.dto.request.TaskRequest;
 import com.sb.erp.task.dto.request.TaskSearchRequest;
 import com.sb.erp.task.service.TaskDependencyService;
 import com.sb.erp.task.service.TaskService;
+import com.sb.erp.util.dto.PagingUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -114,6 +114,7 @@ public class TaskController {
 			if (inserted > 0) {
 				result.put("success", true);
 				result.put("message", "태스크 등록 성공");
+				result.put("taskId", dto.getTaskId());
 				result.put("task", service.select(dto.getTaskId()));
 				return ResponseEntity.status(HttpStatus.CREATED).body(result);
 			}
@@ -335,10 +336,14 @@ public class TaskController {
 	public ResponseEntity<Map<String, Object>> getMyTasks(
 			@ModelAttribute TaskSearchRequest search,
 			@AuthenticationPrincipal CustomUserPrincipal principal){
-
+		
 		search.setEmpId(principal.getEmpId());
 		search.setComId(principal.getComId());
-
+		
+		int totalCnt = service.selectMyTasksCount(search);
+		
+		PagingUtil paging = new PagingUtil(totalCnt, search.getPstartno());
+		search.setPstartno(paging.getPstartno());
 		List<TaskResponse> tasks = service.selectMyTasks(search);
 
 		for (TaskResponse task : tasks) {
@@ -349,6 +354,8 @@ public class TaskController {
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("tasks", tasks);
+		result.put("paging", paging);
+		result.put("totalCnt", totalCnt);
 		return ResponseEntity.ok(result);
 	}
 		

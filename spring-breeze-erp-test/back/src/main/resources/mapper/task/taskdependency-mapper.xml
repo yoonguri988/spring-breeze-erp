@@ -5,8 +5,8 @@
 <!-- 선행 태스크 지정하여 태스크 생성 (task_id는 trg_task_bi 트리거가 자동 채움) -->
 <!-- parent_task_id->null 값 허용인데 실제 null값 들어오면 오류> 자바-DB 통신 과정버그라고 함> 해결책>jdbcType=INTEGER -->
 <insert id="insertWithParent" parameterType="TaskRequest">
-    <selectKey keyProperty="taskId" resultType="long" order="BEFORE">
-        SELECT SEQ_TASK.NEXTVAL FROM DUAL
+    <selectKey keyProperty="taskId" resultType="long" order="AFTER">
+        SELECT SEQ_TASK.CURRVAL FROM DUAL
     </selectKey>
 	insert into task (pro_id , com_id , task_name , task_desc , task_status , pm_id , 
 	task_start_date , task_end_date , parent_task_id , created_at , updated_at)
