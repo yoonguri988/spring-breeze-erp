@@ -7,7 +7,7 @@ import lombok.Setter;
 public class EmpResponse {
 
 	// ─── 사원 기본 정보 ───
-	private long empId;
+	private Long empId;
 	private String empNo;
 	private String empName;
 	private String empEmail;
@@ -17,9 +17,9 @@ public class EmpResponse {
 	private String createdAt;
 
 	// ─── FK (수정 시 원본값 유지용) ───
-	private long deptId;
-	private long posId;
-	private long comId;
+	private Long deptId;
+	private Long posId;
+	private Long comId;
 
 	// ─── 조인 조회용 표시 필드 ───
 	private String posName;
