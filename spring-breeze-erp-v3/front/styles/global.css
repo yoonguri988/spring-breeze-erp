@@ -1431,30 +1431,42 @@ a.sb-card {
 
 /* 2026.08.13 CYJ */
 /* antd Dropdown Menu — SBerp 디자인 토큰 적용 */
-/* antd Dropdown Menu — SBerp 디자인 토큰 적용 */
-.sb-user-menu.ant-dropdown-menu {
-  min-width: 200px;
+/* .sb-user-menu: 헤더 계정 드롭다운(내 프로필/권한 설정/로그아웃 등 긴 라벨) 전용, min-width 고정.
+   .sb-lang-menu: 언어 전환 드롭다운(한국어/English) 전용, 텍스트 길이에 맞춰 min-width 없이 좁게. */
+.sb-user-menu.ant-dropdown-menu,
+.sb-lang-menu.ant-dropdown-menu {
   border: 1px solid var(--sb-border);
   border-radius: 12px;
   box-shadow: var(--sb-shadow-lg);
   padding: 6px;
 }
+.sb-user-menu.ant-dropdown-menu {
+  min-width: 200px;
+}
+.sb-lang-menu.ant-dropdown-menu {
+  min-width: 0;
+  width: max-content;
+}
 
-.sb-user-menu .ant-dropdown-menu-item {
+.sb-user-menu .ant-dropdown-menu-item,
+.sb-lang-menu .ant-dropdown-menu-item {
   padding: 8px 12px;
   border-radius: 7px;
 }
 
 /* 아이콘 + 텍스트 간격을 항목마다 동일하게 고정 */
-.sb-user-menu .sb-dropdown-link {
+.sb-user-menu .sb-dropdown-link,
+.sb-lang-menu .sb-dropdown-link {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
   font-size: 13.5px;
   color: inherit;
+  white-space: nowrap;
 }
-.sb-user-menu .sb-dropdown-link .anticon {
+.sb-user-menu .sb-dropdown-link .anticon,
+.sb-lang-menu .sb-dropdown-link .anticon {
   font-size: 15px;
   width: 16px;
   flex: 0 0 auto;
@@ -1474,7 +1486,9 @@ a.sb-card {
 }
 
 .sb-user-menu .ant-dropdown-menu-item:hover,
-.sb-user-menu .ant-dropdown-menu-item-active {
+.sb-user-menu .ant-dropdown-menu-item-active,
+.sb-lang-menu .ant-dropdown-menu-item:hover,
+.sb-lang-menu .ant-dropdown-menu-item-active {
   background: var(--sb-accent-soft);
   color: var(--sb-accent);
 }

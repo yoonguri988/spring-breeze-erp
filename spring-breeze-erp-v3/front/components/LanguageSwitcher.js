@@ -26,7 +26,7 @@ export default function LanguageSwitcher() {
 
   const menu = (
     <Menu
-      className="sb-user-menu"
+      className="sb-lang-menu"
       selectedKeys={[current]}
       onClick={({ key }) => handleSelect(key)}
     >
@@ -49,16 +49,13 @@ export default function LanguageSwitcher() {
     <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
       <button
         className="sb-iconbtn"
-        style={{
-          width: "auto",
-          padding: "0 10px",
-          fontSize: 12,
-          fontWeight: 700,
-        }}
+        style={{ width: "auto", padding: "0 10px", fontSize: 12, fontWeight: 700 }}
         title="Language / 언어"
       >
-        <GlobalOutlined />
-        <span>{LANG_SHORT[current]}</span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+          <GlobalOutlined />
+          <span style={{lineHeight: "normal"}}>{LANG_SHORT[current]}</span>
+        </span>
       </button>
     </Dropdown>
   );

@@ -1,23 +1,26 @@
 // components/Footer.js
 import React from "react";
 import { Layout } from "antd";
+import { useTranslation } from "react-i18next";
 
 const { Footer: AntFooter } = Layout;
 
 export default function Footer() {
+  const { t } = useTranslation("footer");
+  
   return (
     <AntFooter className="sb-footer" id="sbFooter">
-      <span>© 2026 SBerp 통합 ERP 시스템</span>
-      <span className="d-none d-md-inline">v3.0.0</span>
+      <span>{t("copyright")}</span>
+      <span className="d-none d-md-inline">{t("version")}</span>
       <a href="#" className="d-none d-md-inline">
-        이용약관
+        {t("terms")}
       </a>
       <a href="#" className="d-none d-md-inline">
-        개인정보처리방침
+        {t("privacy")}
       </a>
       <span className="ms-auto d-inline-flex align-items-center gap-2">
         <span className="sb-dot" style={{ background: "var(--sb-green)" }} />
-        모든 시스템 정상
+        {t("systemNormal")}
       </span>
     </AntFooter>
   );
