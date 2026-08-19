@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Card, Table, Tag, Button, Avatar, Input, message, } from "antd";
 import { EyeOutlined, ReloadOutlined, CalendarOutlined, } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   listReportRequest, generateReportRequest, regenerateReportRequest,
@@ -12,16 +13,18 @@ import {
 } from "../../../reducers/eval/evalReportReducer";
 
 const GRADE_COLOR = { S: "#eb2f96", A: "#52c41a", B: "#1890ff", C: "#fa8c16", D: "#ff4d4f" };
-const SENTIMENT = {
-  POSITIVE: { color: "green", label: "긍정적" },
-  NEUTRAL: { color: "default", label: "중립적" },
-  NEGATIVE: { color: "red", label: "부정적" },
-};
 
 export default function EvalReportListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["eval", "common"]);
   const { periodId, keyword, page } = router.query;
+
+  const SENTIMENT = {
+    POSITIVE: { color: "green", label: t("common.sentiment.positive") },
+    NEUTRAL: { color: "default", label: t("common.sentiment.neutral") },
+    NEGATIVE: { color: "red", label: t("common.sentiment.negative") },
+  };
 
   const { reportList, reportPeriod, reportCount, paging, loading, success, error } =
     useSelector((state) => state.report);
@@ -31,13 +34,13 @@ export default function EvalReportListPage() {
   useEffect(() => {
     if (!periodId) return;
     dispatch(listReportRequest({ periodId, keyword, page }));
-    
+
     return () => { dispatch(resetReportState()); };
   }, [dispatch, periodId, keyword, page]);
 
   useEffect(() => {
     if (success) {
-      message.success("처리되었습니다.");
+      message.success(t("report.list.processedMsg"));
       dispatch(resetReportState());
       dispatch(listReportRequest({ periodId }));
     }
@@ -46,7 +49,7 @@ export default function EvalReportListPage() {
 
   const columns = [
     {
-      title: "사원",
+      title: t("report.list.table.emp"),
       key: "emp",
       render: (_, r) => (
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -59,7 +62,7 @@ export default function EvalReportListPage() {
       ),
     },
     {
-      title: "등급",
+      title: t("report.list.table.grade"),
       dataIndex: "grade",
       key: "grade",
       width: 70,
@@ -69,7 +72,7 @@ export default function EvalReportListPage() {
       ),
     },
     {
-      title: "종합 점수",
+      title: t("report.list.table.score"),
       dataIndex: "overallScore",
       key: "score",
       width: 100,
@@ -77,17 +80,17 @@ export default function EvalReportListPage() {
       render: (s) => s?.toFixed(2),
     },
     {
-      title: "감성",
+      title: t("report.list.table.sentiment"),
       dataIndex: "sentimentLabel",
       key: "sentiment",
       width: 80,
       render: (s) => {
-        const t = SENTIMENT[s];
-        return t ? <Tag color={t.color}>{t.label}</Tag> : "—";
+        const st = SENTIMENT[s];
+        return st ? <Tag color={st.color}>{st.label}</Tag> : "—";
       },
     },
     {
-      title: "생성일",
+      title: t("report.list.table.date"),
       dataIndex: "generatedAt",
       key: "date",
       width: 160,
@@ -106,7 +109,7 @@ export default function EvalReportListPage() {
               type="text"
               size="small"
               icon={<ReloadOutlined />}
-              title="재생성"
+              title={t("report.list.regenerateTooltip")}
               onClick={() =>
                 dispatch(regenerateReportRequest({ periodId: Number(periodId), empId: r.empId }))
               }
@@ -122,17 +125,17 @@ export default function EvalReportListPage() {
     <div className="sb-page">
       <div className="sb-page-head" style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">인사평가 &gt; AI 리포트</div>
-          <h1>AI 리포트</h1>
-          <p>회차별 사원 성과 요약 리포트를 확인합니다.</p>
+          <div className="sb-breadcrumb">{t("common.breadcrumbRoot")} &gt; {t("report.list.breadcrumbCurrent")}</div>
+          <h1>{t("report.list.title")}</h1>
+          <p>{t("report.list.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions" style={{ display: "flex", gap: 8 }}>
           {periodId && (
-            <Link href="/eval/report/list"><Button>회차 변경</Button></Link>
+            <Link href="/eval/report/list"><Button>{t("report.list.periodChangeBtn")}</Button></Link>
           )}
           {isAdmin && (
             <Link href="/eval/period/list">
-              <Button icon={<CalendarOutlined />}>회차 관리</Button>
+              <Button icon={<CalendarOutlined />}>{t("report.list.periodManageBtn")}</Button>
             </Link>
           )}
         </div>
@@ -142,9 +145,9 @@ export default function EvalReportListPage() {
       {!periodId && (
         <Card>
           <div style={{ textAlign: "center", padding: "60px 0", color: "#999" }}>
-            <p>리포트를 확인할 회차를 선택하세요.</p>
+            <p>{t("report.list.selectPeriodMsg")}</p>
             <Link href="/eval/period/list">
-              <Button type="primary">회차 목록 보기</Button>
+              <Button type="primary">{t("report.list.periodListBtn")}</Button>
             </Link>
           </div>
         </Card>
@@ -161,7 +164,7 @@ export default function EvalReportListPage() {
                     {reportPeriod.periodStatus}
                   </Tag>
                   <span style={{ fontWeight: 650, marginLeft: 8 }}>{reportPeriod.title}</span>
-                  <span style={{ color: "#999", marginLeft: 8 }}>{reportCount}건</span>
+                  <span style={{ color: "#999", marginLeft: 8 }}>{t("report.list.countSuffix", { count: reportCount })}</span>
                 </div>
                 {isAdmin && (
                   <Button
@@ -169,7 +172,7 @@ export default function EvalReportListPage() {
                     onClick={() => dispatch(generateReportRequest(Number(periodId)))}
                     loading={loading}
                   >
-                    전체 재생성
+                    {t("report.list.regenerateAllBtn")}
                   </Button>
                 )}
               </div>
@@ -191,7 +194,7 @@ export default function EvalReportListPage() {
                   query: { ...router.query, page: p },
                 }),
               } : false}
-              locale={{ emptyText: "리포트가 없습니다." }}
+              locale={{ emptyText: t("report.list.emptyMsg") }}
             />
           </Card>
         </>

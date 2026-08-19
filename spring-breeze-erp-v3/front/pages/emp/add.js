@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Card, Form, Input, Select, DatePicker, Button, message, } from "antd";
 import { ArrowLeftOutlined, CheckOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   createEmpRequest, checkEmailRequest, checkMobileRequest,
@@ -16,6 +17,7 @@ import { fetchDeptFlatRequest } from "../../reducers/dept/deptReducer";
 export default function EmpAddPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["emp", "common"]);
   const [form] = Form.useForm();
 
   const { checkResult, loading, success, error } = useSelector((state) => state.emp);
@@ -33,7 +35,7 @@ export default function EmpAddPage() {
   // 등록 성공 시 목록으로 이동
   useEffect(() => {
     if (success) {
-      message.success("사원이 등록되었습니다.");
+      message.success(t("add.successMsg"));
       dispatch(resetEmpState());
       router.push("/emp/list");
     } else if (error) {
@@ -45,8 +47,8 @@ export default function EmpAddPage() {
   // 중복검사 도움말 생성
   const checkHelp = (field) => {
     const val = checkResult[field];
-    if (val === true) return { validateStatus: "success", help: "사용 가능합니다." };
-    if (val === false) return { validateStatus: "error", help: "이미 사용 중입니다." };
+    if (val === true) return { validateStatus: "success", help: t("common.checkAvailable") };
+    if (val === false) return { validateStatus: "error", help: t("common.checkUnavailable") };
     return {};
   };
 
@@ -55,7 +57,7 @@ export default function EmpAddPage() {
       const values = await form.validateFields();
       // 중복 차단
       if (checkResult.email === false || checkResult.mobile === false || checkResult.empNo === false) {
-        message.warning("중복된 항목이 있습니다. 확인 후 다시 시도하세요.");
+        message.warning(t("add.duplicateWarning"));
         return;
       }
       // 날짜 변환
@@ -80,19 +82,19 @@ export default function EmpAddPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            조직 관리 &gt; 사원관리 &gt; 사원 등록
+            {t("common.breadcrumbOrg")} &gt; {t("common.breadcrumbList")} &gt; {t("add.breadcrumbCurrent")}
           </div>
-          <h1>사원 등록</h1>
-          <p>새로운 사원을 등록합니다.</p>
+          <h1>{t("add.title")}</h1>
+          <p>{t("add.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/emp/list">
-            <Button icon={<ArrowLeftOutlined />}>목록으로</Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("common.backToListBtn")}</Button>
           </Link>
         </div>
       </div>
 
-      <Card title="사원 정보">
+      <Card title={t("common.infoCardTitle")}>
         <Form
           form={form}
           layout="vertical"
@@ -101,12 +103,12 @@ export default function EmpAddPage() {
         >
           <Form.Item
             name="empNo"
-            label="사번"
-            rules={[{ required: true, message: "사번을 입력하세요." }]}
+            label={t("common.fieldLabel.empNo")}
+            rules={[{ required: true, message: t("add.empNoRequired") }]}
             {...checkHelp("empNo")}
           >
             <Input
-              placeholder="예: EMP-001"
+              placeholder={t("add.empNoPlaceholder")}
               onBlur={(e) => {
                 const v = e.target.value.trim();
                 if (v) dispatch(checkEmpNoRequest(v));
@@ -116,23 +118,23 @@ export default function EmpAddPage() {
 
           <Form.Item
             name="empName"
-            label="이름"
-            rules={[{ required: true, message: "이름을 입력하세요." }]}
+            label={t("common.fieldLabel.empName")}
+            rules={[{ required: true, message: t("add.empNameRequired") }]}
           >
-            <Input placeholder="이름" />
+            <Input placeholder={t("add.empNamePlaceholder")} />
           </Form.Item>
 
           <Form.Item
             name="empEmail"
-            label="이메일"
+            label={t("common.fieldLabel.empEmail")}
             rules={[
-              { required: true, message: "이메일을 입력하세요." },
-              { type: "email", message: "올바른 이메일 형식이 아닙니다." },
+              { required: true, message: t("add.emailRequired") },
+              { type: "email", message: t("add.emailInvalid") },
             ]}
             {...checkHelp("email")}
           >
             <Input
-              placeholder="email@sberp.com"
+              placeholder={t("add.empEmailPlaceholder")}
               onBlur={(e) => {
                 const v = e.target.value.trim();
                 if (v) dispatch(checkEmailRequest(v));
@@ -142,12 +144,12 @@ export default function EmpAddPage() {
 
           <Form.Item
             name="empMobile"
-            label="연락처"
-            rules={[{ required: true, message: "연락처를 입력하세요." }]}
+            label={t("common.fieldLabel.empMobile")}
+            rules={[{ required: true, message: t("common.mobileRequired") }]}
             {...checkHelp("mobile")}
           >
             <Input
-              placeholder="010-0000-0000"
+              placeholder={t("add.empMobilePlaceholder")}
               onBlur={(e) => {
                 const v = e.target.value.trim();
                 if (v) dispatch(checkMobileRequest(v));
@@ -157,11 +159,11 @@ export default function EmpAddPage() {
 
           <Form.Item
             name="deptId"
-            label="부서"
-            rules={[{ required: true, message: "부서를 선택하세요." }]}
+            label={t("common.fieldLabel.dept")}
+            rules={[{ required: true, message: t("common.deptRequired") }]}
           >
             <Select
-                placeholder="부서 선택"
+                placeholder={t("common.deptPlaceholder")}
                 options={flatList.map((d) => ({
                   value: d.deptId,
                   label: d.deptName,
@@ -171,11 +173,11 @@ export default function EmpAddPage() {
 
           <Form.Item
             name="posId"
-            label="직급"
-            rules={[{ required: true, message: "직급을 선택하세요." }]}
+            label={t("common.fieldLabel.pos")}
+            rules={[{ required: true, message: t("common.posRequired") }]}
           >
             <Select
-              placeholder="직급 선택"
+              placeholder={t("common.posPlaceholder")}
               options={posList.map((p) => ({
                 value: p.posId,
                 label: p.posName,
@@ -185,15 +187,15 @@ export default function EmpAddPage() {
 
           <Form.Item
             name="hireDate"
-            label="입사일"
-            rules={[{ required: true, message: "입사일을 선택하세요." }]}
+            label={t("common.fieldLabel.hireDate")}
+            rules={[{ required: true, message: t("add.hireDateRequired") }]}
           >
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
 
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
             <Link href="/emp/list">
-              <Button>취소</Button>
+              <Button>{t("common:button.cancel")}</Button>
             </Link>
             <Button
               type="primary"
@@ -201,7 +203,7 @@ export default function EmpAddPage() {
               icon={<CheckOutlined />}
               loading={loading}
             >
-              등록
+              {t("common:button.add")}
             </Button>
           </div>
         </Form>

@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import { Row, Col, Card, Table, Button, Modal, Form, Input, Badge, Avatar, message, } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, SafetyCertificateOutlined, } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   listPermRequest, detailPermRequest, createPermRequest,
@@ -14,6 +15,7 @@ import {
 export default function PermListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["perm", "common"]);
   const [form] = Form.useForm();
 
   const {
@@ -55,7 +57,7 @@ export default function PermListPage() {
     if (success) {
       if (saving) {
         message.success(
-          formTarget === "add" ? "권한이 등록되었습니다." : "권한이 수정되었습니다."
+          formTarget === "add" ? t("list.addSuccessMsg") : t("list.editSuccessMsg")
         );
         closeFormModal();
         dispatch(listPermRequest());
@@ -65,7 +67,7 @@ export default function PermListPage() {
         }
       }
       if (deleting) {
-        message.success("권한이 삭제되었습니다.");
+        message.success(t("list.deleteSuccessMsg"));
         setDeleteTarget(null);
         setDeleting(false);
         setSelectedId(null);
@@ -132,7 +134,7 @@ export default function PermListPage() {
   // ─── 부여된 사원 테이블 컬럼 ───
   const empColumns = [
     {
-      title: "사원",
+      title: t("list.empTable.emp"),
       key: "emp",
       render: (_, record) => (
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -146,8 +148,8 @@ export default function PermListPage() {
         </div>
       ),
     },
-    { title: "부서", dataIndex: "deptName", key: "deptName" },
-    { title: "직급", dataIndex: "posName", key: "posName" },
+    { title: t("list.empTable.dept"), dataIndex: "deptName", key: "deptName" },
+    { title: t("list.empTable.pos"), dataIndex: "posName", key: "posName" },
   ];
 
   //////
@@ -164,17 +166,16 @@ export default function PermListPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            조직 관리 &gt; 권한 관리
+            {t("common.breadcrumbOrg")} &gt; {t("list.breadcrumbCurrent")}
           </div>
-          <h1>권한 관리</h1>
+          <h1>{t("list.title")}</h1>
           <p>
-            회사별 권한(authority)을 등록·수정·삭제합니다. 권한에 따른 접근
-            제어는 애플리케이션 서버에서 적용됩니다.
+            {t("list.subtitle")}
           </p>
         </div>
         <div className="sb-page-head__actions">
           <Button type="primary" icon={<PlusOutlined />} onClick={openAddModal}>
-            권한 등록
+            {t("list.addBtn")}
           </Button>
         </div>
       </div>
@@ -183,13 +184,13 @@ export default function PermListPage() {
         {/* ── 좌측: 권한 목록 ── */}
         <Col xs={24} lg={8}>
           <Card
-            title="권한 목록"
-            extra={<span style={{ color: "#999" }}>{permList.length}개 권한</span>}
+            title={t("list.listCardTitle")}
+            extra={<span style={{ color: "#999" }}>{t("list.countSuffix", { count: permList.length })}</span>}
           >
             {permList.length === 0 ? (
               <div style={{ textAlign: "center", padding: "40px 0", color: "#999" }}>
                 <SafetyCertificateOutlined style={{ fontSize: 32, marginBottom: 8 }} />
-                <p>등록된 권한이 없습니다.</p>
+                <p>{t("list.emptyMsg")}</p>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -214,7 +215,7 @@ export default function PermListPage() {
                   >
                     <span style={{ fontWeight: 600 }}>{item.autName}</span>
                     <Badge
-                      count={`${item.autCount || 0}명`}
+                      count={t("list.empCountSuffix", { count: item.autCount || 0 })}
                       style={{ backgroundColor: "#f0f0f0", color: "#666" }}
                     />
                   </div>
@@ -230,8 +231,8 @@ export default function PermListPage() {
             {!currentPerm ? (
               <div style={{ textAlign: "center", padding: "60px 0", color: "#999" }}>
                 <SafetyCertificateOutlined style={{ fontSize: 32, marginBottom: 8 }} />
-                <p>왼쪽에서 권한을 선택하세요.</p>
-                <p>또는 '권한 등록'으로 새 권한을 만드세요.</p>
+                <p>{t("list.selectHint")}</p>
+                <p>{t("list.selectHint2")}</p>
               </div>
             ) : (
               <>
@@ -253,7 +254,7 @@ export default function PermListPage() {
                       icon={<EditOutlined />}
                       onClick={openEditModal}
                     >
-                      수정
+                      {t("common:button.edit")}
                     </Button>
                     <Button
                       size="small"
@@ -261,16 +262,16 @@ export default function PermListPage() {
                       icon={<DeleteOutlined />}
                       onClick={() => setDeleteTarget(currentPerm)}
                     >
-                      삭제
+                      {t("common:button.delete")}
                     </Button>
                   </div>
                 </div>
 
                 {/* 부여된 사원 목록 */}
                 <div style={{ marginBottom: 8 }}>
-                  <span style={{ fontWeight: 600 }}>이 권한이 부여된 사원</span>
+                  <span style={{ fontWeight: 600 }}>{t("list.assignedEmpLabel")}</span>
                   <span style={{ color: "#999", marginLeft: 8 }}>
-                    {permEmployees.length}명
+                    {t("list.empCountSuffix", { count: permEmployees.length })}
                   </span>
                 </div>
                 <Table
@@ -280,11 +281,11 @@ export default function PermListPage() {
                   loading={loading}
                   pagination={{
                     pageSize: 10,
-                    showTotal: (total) => `총 ${total}명`,
+                    showTotal: (total) => t("list.paginationTotal", { total }),
                     showSizeChanger: false,
                   }}
                   size="small"
-                  locale={{ emptyText: "이 권한이 부여된 사원이 없습니다." }}
+                  locale={{ emptyText: t("list.empEmptyMsg") }}
                 />
               </>
             )}
@@ -294,43 +295,43 @@ export default function PermListPage() {
 
       {/* ── 등록/수정 모달 ── */}
       <Modal
-        title={isEditMode ? "권한 수정" : "권한 등록"}
+        title={isEditMode ? t("list.editModalTitle") : t("list.addModalTitle")}
         open={formTarget !== null}
         onCancel={closeFormModal}
         onOk={handleSubmit}
-        okText={isEditMode ? "수정" : "등록"}
+        okText={isEditMode ? t("common:button.edit") : t("common:button.add")}
         okButtonProps={{ loading: saving }}
-        cancelText="취소"
+        cancelText={t("common:button.cancel")}
         destroyOnClose
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="autName"
-            label="권한명"
-            rules={[{ required: true, message: "권한명을 입력하세요." }]}
-            extra="Spring Security 관례에 따라 ROLE_ 접두사로 시작하는 것을 권장합니다."
+            label={t("list.nameLabel")}
+            rules={[{ required: true, message: t("list.nameRequired") }]}
+            extra={t("list.nameExtra")}
           >
-            <Input placeholder="예: ROLE_MEMBER" />
+            <Input placeholder={t("list.namePlaceholder")} />
           </Form.Item>
         </Form>
       </Modal>
 
       {/* ── 삭제 확인 모달 ── */}
       <Modal
-        title="권한 삭제"
+        title={t("list.deleteModalTitle")}
         open={!!deleteTarget}
         onCancel={() => setDeleteTarget(null)}
         onOk={confirmDelete}
-        okText="삭제"
+        okText={t("common:button.delete")}
         okButtonProps={{ danger: true, loading: deleting }}
-        cancelText="취소"
+        cancelText={t("common:button.cancel")}
         destroyOnClose
       >
         <p>
-          정말로 <b>{deleteTarget?.autName}</b> 권한을 삭제하시겠습니까?
+          {t("list.deleteConfirmMsg", { autName: deleteTarget?.autName })}
         </p>
         <p style={{ color: "#999", fontSize: 13 }}>
-          이 권한이 부여된 사원이 있으면 삭제할 수 없습니다.
+          {t("list.deleteHint")}
         </p>
       </Modal>
     </div>

@@ -4,34 +4,37 @@ import { useSelector, useDispatch } from "react-redux";
 import Link from "next/link";
 import { Card, Table, Tag, Button } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import { myReportRequest, resetReportState, } from "../../../reducers/eval/evalReportReducer";
 
 const GRADE_COLOR = { S: "#eb2f96", A: "#52c41a", B: "#1890ff", C: "#fa8c16", D: "#ff4d4f" };
-const SENTIMENT = {
-  POSITIVE: { color: "green", label: "긍정적" },
-  NEUTRAL: { color: "default", label: "중립적" },
-  NEGATIVE: { color: "red", label: "부정적" },
-};
 
 export default function MyReportPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation(["eval", "common"]);
   const { myReports, loading } = useSelector((state) => state.report);
+
+  const SENTIMENT = {
+    POSITIVE: { color: "green", label: t("common.sentiment.positive") },
+    NEUTRAL: { color: "default", label: t("common.sentiment.neutral") },
+    NEGATIVE: { color: "red", label: t("common.sentiment.negative") },
+  };
 
   useEffect(() => {
     dispatch(myReportRequest());
-    
+
     return () => { dispatch(resetReportState()); }
   }, [dispatch]);
 
   const columns = [
     {
-      title: "평가 회차",
+      title: t("report.my.table.period"),
       dataIndex: "periodTitle",
       key: "period",
     },
     {
-      title: "등급",
+      title: t("report.my.table.grade"),
       dataIndex: "grade",
       key: "grade",
       width: 70,
@@ -41,7 +44,7 @@ export default function MyReportPage() {
       ),
     },
     {
-      title: "종합 점수",
+      title: t("report.my.table.score"),
       dataIndex: "overallScore",
       key: "score",
       width: 100,
@@ -49,17 +52,17 @@ export default function MyReportPage() {
       render: (s) => s?.toFixed(2),
     },
     {
-      title: "감성",
+      title: t("report.my.table.sentiment"),
       dataIndex: "sentimentLabel",
       key: "sentiment",
       width: 80,
       render: (s) => {
-        const t = SENTIMENT[s];
-        return t ? <Tag color={t.color}>{t.label}</Tag> : "—";
+        const st = SENTIMENT[s];
+        return st ? <Tag color={st.color}>{st.label}</Tag> : "—";
       },
     },
     {
-      title: "생성일",
+      title: t("report.my.table.date"),
       dataIndex: "generatedAt",
       key: "date",
       width: 160,
@@ -81,9 +84,9 @@ export default function MyReportPage() {
     <div className="sb-page">
       <div className="sb-page-head" style={{ marginBottom: 16 }}>
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">인사평가 &gt; 내 리포트</div>
-          <h1>내 AI 리포트</h1>
-          <p>회차별 내 성과 분석 리포트를 확인합니다.</p>
+          <div className="sb-breadcrumb">{t("common.breadcrumbRoot")} &gt; {t("report.my.breadcrumbCurrent")}</div>
+          <h1>{t("report.my.title")}</h1>
+          <p>{t("report.my.subtitle")}</p>
         </div>
       </div>
 
@@ -94,7 +97,7 @@ export default function MyReportPage() {
           dataSource={myReports}
           loading={loading}
           pagination={false}
-          locale={{ emptyText: "생성된 리포트가 없습니다." }}
+          locale={{ emptyText: t("report.my.emptyMsg") }}
         />
       </Card>
     </div>

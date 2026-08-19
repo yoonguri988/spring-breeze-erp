@@ -3,6 +3,7 @@ import moment from "moment";
 import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 import {
     message, Form, Input, Select, Button, Space, List,
     Tag, Divider, Empty, DatePicker, InputNumber,
@@ -33,6 +34,7 @@ export default function DocWritePage() {
     const router = useRouter();
     const dispatch = useDispatch();
     const [form] = Form.useForm();
+    const { t } = useTranslation(["appr", "common"]);
 
     const {
         writerInfo, writerInfoLoading,
@@ -145,7 +147,7 @@ export default function DocWritePage() {
     // 등록 성공하면 목록으로 이동
     useEffect(() => {
         if (writeSuccess) {
-            message.success("문서가 등록되었습니다.");
+            message.success(t("docs.write.successMsg"));
             router.push("/appr/docs");
         }
     }, [writeSuccess]);
@@ -173,7 +175,7 @@ export default function DocWritePage() {
     const addApprover = (person) => {
         // 추가할 대상 (person.empId)이 approverIdSet에 이미 존재하면 메세지띄우고 함수 종료
         if (approverIdSet.has(person.empId)) {
-            message.warning("이미 추가된 결재자입니다.");
+            message.warning(t("docs.write.duplicateApproverWarning"));
             return;
         }
         setApprovers((prev) => [...prev, person]);
@@ -189,10 +191,10 @@ export default function DocWritePage() {
 
         if (emp.empStatus === "휴직") {
             Modal.confirm({
-                title: "휴직자 추가 확인",
-                content: `${emp.empName}님은 현재 휴직 상태입니다. 그래도 결재선에 추가하시겠습니까?`,
-                okText: "추가",
-                cancelText: "취소",
+                title: t("docs.write.leaveConfirmTitle"),
+                content: t("docs.write.leaveConfirmContent", { empName: emp.empName }),
+                okText: t("docs.write.leaveConfirmOk"),
+                cancelText: t("docs.write.leaveConfirmCancel"),
                 onOk: () => addApprover(person),
             });
             return;
@@ -225,7 +227,7 @@ export default function DocWritePage() {
         const newRequired = checked ? 3 : 1;
         setApprovers((prev) => {
             if (prev.length <= newRequired) return prev;
-            message.info(`결재선이 ${newRequired}명으로 조정되었습니다. 초과된 결재자는 제외됩니다.`);
+            message.info(t("docs.write.approverAdjustedMsg", { count: newRequired }));
             return prev.slice(0, newRequired);
         })
     }
@@ -262,7 +264,7 @@ export default function DocWritePage() {
 
     const handleSubmit = (values) => {
         if (approvers.length !== requiredApproverCount) {
-            message.error(`결재선을 ${requiredApproverCount}명 지정해주세요.`);
+            message.error(t("docs.write.approverCountRequired", { count: requiredApproverCount }));
             return;
         }
 
@@ -274,14 +276,14 @@ export default function DocWritePage() {
                 (f) => f.required && (schemaValues[f.key] === undefined || schemaValues[f.key] === "")
             );
             if (missing.length > 0) {
-                message.error(`필수 항목을 입력해주세요 : ${missing.map((f) => f.label).join(", ")}`);
+                message.error(t("docs.write.requiredFieldsMissing", { fields: missing.map((f) => f.label).join(", ") }));
                 return;
             }
             content = JSON.stringify(schemaValues);
         }
         else {
             if (!docContent.trim()) {
-                message.error("문서 내용을 입력해주세요.");
+                message.error(t("docs.write.contentRequired"));
                 return;
             }
             content = docContent;
@@ -305,28 +307,28 @@ export default function DocWritePage() {
             <div className="sb-page-head">
                 <div className="sb-page-head__txt">
                     <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>전자결재</a>
+                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
                         <i className="bi bi-chevron-right"/>
-                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>결재 문서함</a>
+                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>{t("docs.list.breadcrumbCurrent")}</a>
                         <i className="bi bi-chevron-right"/>
-                        <span>문서 작성</span>
+                        <span>{t("docs.write.breadcrumbCurrent")}</span>
                     </div>
-                    <h1>결재 문서 작성</h1>
-                    <p>선택한 양식으로 새로운 결재 문서를 기안합니다.</p>
+                    <h1>{t("docs.write.title")}</h1>
+                    <p>{t("docs.write.subtitle")}</p>
                 </div>
                 <div className="sb-page-head__actions">
-                    <Button onClick={() => router.push("/appr/docs")}>목록으로</Button>
+                    <Button onClick={() => router.push("/appr/docs")}>{t("common.backToListBtn")}</Button>
                 </div>
             </div>
 
             <Form form={form} layout="vertical" onFinish={handleSubmit}>
                 <Form.Item
                     name="formKey"
-                    label="양식 선택"   
-                    rules={[{required: true, message: "양식을 선택해주세요."}]}
+                    label={t("docs.write.formSelectLabel")}
+                    rules={[{required: true, message: t("docs.write.formSelectRequired")}]}
                 >
                     <Select
-                        placeholder="작성할 양식을 선택하세요"
+                        placeholder={t("docs.write.formSelectPlaceholder")}
                         loading={writableFormsLoading}
                     >
                         {writableForms.map((f) => (
@@ -343,8 +345,8 @@ export default function DocWritePage() {
 
                 <Form.Item
                     name="docTitle"
-                    label="문서 제목"
-                    rules={[{required: true, message: "문서 제목을 입력해주세요."}]}
+                    label={t("docs.write.docTitleLabel")}
+                    rules={[{required: true, message: t("docs.write.docTitleRequired")}]}
                 >
                     <Input/>
                 </Form.Item>
@@ -361,9 +363,9 @@ export default function DocWritePage() {
                     }}
                 >
                     <div>
-                        <div style={{fontWeight: 600}}>중요 문서 여부</div>
+                        <div style={{fontWeight: 600}}>{t("docs.write.importantTitle")}</div>
                         <div style={{fontSize: 13, color: "rgba(0,0,0,0.45)"}}>
-                            중요문서로 지정하면 결재선을 3명 지정해야 합니다.
+                            {t("docs.write.importantDesc")}
                         </div>
                     </div>
                     <Switch checked={isImportant} onChange={handleImportantChange}/>
@@ -372,7 +374,7 @@ export default function DocWritePage() {
                 {/* 선택한 양식에 따라 동적으로 분기 */}
                 {formKey && (
                     isSchemaForm ? (
-                        <Form.Item label="문서 내용">
+                        <Form.Item label={t("docs.write.contentLabel")}>
                             <Space direction="vertical" style={{width: "100%"}} size={12}>
                                 {schemaFieldDefs.map((field) => (
                                     <div key={field.key}>
@@ -386,7 +388,7 @@ export default function DocWritePage() {
                             </Space>
                         </Form.Item>
                     ) : (
-                        <Form.Item label="문서 내용">
+                        <Form.Item label={t("docs.write.contentLabel")}>
                             <ReactQuill
                                 theme="snow"
                                 value={docContent}
@@ -396,7 +398,7 @@ export default function DocWritePage() {
                     )
                 )}
 
-                <Divider>결재선 지정</Divider>
+                <Divider>{t("docs.write.lineDivider")}</Divider>
 
                 {noApproversAvailable ? (
                     <div
@@ -410,13 +412,13 @@ export default function DocWritePage() {
                         }}
                     >
                         <i className="bi bi-info-circle" style={{fontSize: 20, display: "block", marginBottom: 8}}/>
-                        최고 직급자는 결재선 지정 없이 문서를 기안할 수 없습니다.<br/>
-                        관리자에게 문의해주세요.
+                        {t("docs.write.noApproversLine1")}<br/>
+                        {t("docs.write.noApproversLine2")}
                     </div>
                 ) : (<>
 
                 <Text type="secondary" style={{display: "block", marginBottom: 12}}>
-                    {isImportant ? "중요 문서는 결재선을 3명 순서대로 지정해야 합니다." : "일반 문서는 결재선을 1명 지정합니다."}
+                    {isImportant ? t("docs.write.importantHint") : t("docs.write.normalHint")}
                 </Text>
 
                 {/*
@@ -430,13 +432,13 @@ export default function DocWritePage() {
                 <Row gutter={16} style={{marginBottom: 16}}>
                     {/* 부서 트리 */}
                     <Col xs={24} md={6}>
-                        <Card size="small" title="부서 선택" bodyStyle={{padding: 8}}>
+                        <Card size="small" title={t("docs.write.deptCardTitle")} bodyStyle={{padding: 8}}>
                             <div style={{maxHeight: 320, overflowY: "auto"}}>
                                 <List
                                     size="small"
                                     loading={deptTreeLoading}
                                     dataSource={deptTree}
-                                    locale={{ emptyText: "부서 정보를 불러오는 중입니다."}}
+                                    locale={{ emptyText: t("docs.write.deptLoadingMsg")}}
                                     renderItem={(d) => (
                                         <List.Item
                                             style={{
@@ -445,7 +447,7 @@ export default function DocWritePage() {
                                             }}
                                             onClick={() => handleDeptSelect(d.deptId)}
                                         >
-                                            {d.deptName} <Tag style={{marginLeft: 8}}>{d.empCount}명</Tag>
+                                            {d.deptName} <Tag style={{marginLeft: 8}}>{t("docs.write.empCountSuffix", { count: d.empCount })}</Tag>
                                         </List.Item>
                                     )}
                                 />
@@ -454,17 +456,17 @@ export default function DocWritePage() {
                     </Col>
                     {/* 선택한 부서의 사원 목록 */}
                     <Col xs={24} md={9}>
-                        <Card size="small" title="사원 선택" bodyStyle={{padding: 8}}>
+                        <Card size="small" title={t("docs.write.empCardTitle")} bodyStyle={{padding: 8}}>
                             {deptEmpsLoading ? (
                                 <div style={{textAlign: "center", padding: "20px 0"}}>
                                     <Spin size="small"/>
                                 </div>
-                            ) : ( 
+                            ) : (
                                 <div className="appr-emp-box">
                                     {deptEmps.length === 0 ? (
                                         <div className="text-muted text-center py-4 small">
-                                            왼쪽에서 부서를 먼저 선택하세요.
-                                        </div>    
+                                            {t("docs.write.selectDeptFirstMsg")}
+                                        </div>
                                     ) : (
                                         deptEmps.map((e) => {
                                             const already = approverIdSet.has(e.empId);
@@ -477,7 +479,7 @@ export default function DocWritePage() {
                                                     <span>
                                                         {e.empName}
                                                         {e.empStatus === "휴직" && (
-                                                            <Tag color="orange" style={{marginLeft: 6}}>휴직중</Tag>
+                                                            <Tag color="orange" style={{marginLeft: 6}}>{t("docs.write.onLeaveTag")}</Tag>
                                                         )}
                                                     </span>
                                                     <span className="pos-chip">{e.posName}</span>
@@ -491,7 +493,7 @@ export default function DocWritePage() {
                     </Col>
                     {/* 선택된 결재선 */}
                     <Col xs={24} md={9}>
-                        <Card size="small" title="결재선 순서" bodyStyle={{padding: 8}}>
+                        <Card size="small" title={t("docs.write.lineOrderCardTitle")} bodyStyle={{padding: 8}}>
                             <div className="appr-slots">
                                {approverSlots.map((slot) => {
                                     const { slotIndex: index, approver: a} = slot;
@@ -529,7 +531,7 @@ export default function DocWritePage() {
                                                 </Space>
                                             </>) : (
                                                 <span className="appr-slot__body appr-slot__empty">
-                                                    {order}차 결재자를 선택해주세요
+                                                    {t("docs.write.emptySlotPlaceholder", { order })}
                                                 </span>
                                             )}
                                         </div>
@@ -544,14 +546,14 @@ export default function DocWritePage() {
 
                 <Form.Item>
                     <div style={{display: "flex", justifyContent: "flex-end", gap: 8}}>
-                        <Button onClick={() => router.push("/appr/docs")}>취소</Button>
-                        <Button 
+                        <Button onClick={() => router.push("/appr/docs")}>{t("docs.write.cancelBtn")}</Button>
+                        <Button
                             type="primary"
                             htmlType="submit"
                             loading={writeSubmitting}
                             disabled={writeSubmitting || noApproversAvailable}
                         >
-                            제출
+                            {t("docs.write.submitBtn")}
                         </Button>
                     </div>
                 </Form.Item>

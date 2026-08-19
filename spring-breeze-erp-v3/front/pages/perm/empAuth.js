@@ -5,11 +5,13 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Row, Col, Card, Button, Tag, Avatar, message } from "antd";
 import { PlusOutlined, CloseOutlined, ArrowLeftOutlined, SafetyCertificateOutlined, } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   listPermRequest, empAuthListRequest, grantPermRequest,
   revokePermRequest, clearEmpAuth, resetPermState,
 } from "../../reducers/perm/permReducer";
+import { empStatusLabel } from "../../utils/empStatus";
 
 // 재직 상태별 Tag 색상
 const STATUS_COLOR = {
@@ -21,6 +23,7 @@ const STATUS_COLOR = {
 export default function EmpAuthPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["perm", "common"]);
   const { empId } = router.query;
 
   const { permList, empAuthList, empAuthTargetId, loading, success, error } =
@@ -45,7 +48,7 @@ export default function EmpAuthPage() {
   useEffect(() => {
     if (!success) return;
 
-    message.success("권한이 변경되었습니다.");
+    message.success(t("empAuth.successMsg"));
     dispatch(resetPermState());
     dispatch(empAuthListRequest(Number(empId))); // 권한 목록 새로고침
     dispatch(listPermRequest()); // 전체 목록도 갱신 (카운트 반영)
@@ -88,10 +91,10 @@ export default function EmpAuthPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            조직 관리 &gt; 권한 관리 &gt; 사원 권한 부여
+            {t("common.breadcrumbOrg")} &gt; {t("list.breadcrumbCurrent")} &gt; {t("empAuth.breadcrumbCurrent")}
           </div>
-          <h1>사원 권한 관리</h1>
-          <p>선택한 사원에게 권한을 부여하거나 회수합니다.</p>
+          <h1>{t("empAuth.title")}</h1>
+          <p>{t("empAuth.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link
@@ -100,7 +103,7 @@ export default function EmpAuthPage() {
               query: { empId },
             }}
           >
-            <Button icon={<ArrowLeftOutlined />}>사원 상세로</Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("empAuth.backToEmpDetailBtn")}</Button>
           </Link>
         </div>
       </div>
@@ -108,7 +111,7 @@ export default function EmpAuthPage() {
       <Row gutter={16}>
         {/* ── 좌측: 사원 정보 ── */}
         <Col xs={24} lg={8}>
-          <Card title="사원 정보">
+          <Card title={t("empAuth.empInfoCardTitle")}>
             {currentEmp ? (
               <>
                 <div
@@ -134,17 +137,17 @@ export default function EmpAuthPage() {
                   </div>
                 </div>
                 <div style={{ marginBottom: 8 }}>
-                  <div style={{ color: "#999", fontSize: 12 }}>사번</div>
+                  <div style={{ color: "#999", fontSize: 12 }}>{t("empAuth.empNoLabel")}</div>
                   <div>{currentEmp.empNo}</div>
                 </div>
                 <div style={{ marginBottom: 8 }}>
-                  <div style={{ color: "#999", fontSize: 12 }}>이메일</div>
+                  <div style={{ color: "#999", fontSize: 12 }}>{t("empAuth.emailLabel")}</div>
                   <div>{currentEmp.empEmail}</div>
                 </div>
                 <div>
-                  <div style={{ color: "#999", fontSize: 12 }}>재직 상태</div>
+                  <div style={{ color: "#999", fontSize: 12 }}>{t("empAuth.statusLabel")}</div>
                   <Tag color={STATUS_COLOR[currentEmp.empStatus] || "default"}>
-                    {currentEmp.empStatus}
+                    {empStatusLabel(t, currentEmp.empStatus)}
                   </Tag>
                 </div>
               </>
@@ -156,7 +159,7 @@ export default function EmpAuthPage() {
                   color: "#999",
                 }}
               >
-                사원 정보를 불러오는 중...
+                {t("empAuth.loadingMsg")}
               </div>
             )}
           </Card>
@@ -166,9 +169,9 @@ export default function EmpAuthPage() {
         <Col xs={24} lg={16}>
           {/* 현재 부여된 권한 */}
           <Card
-            title="현재 부여된 권한"
+            title={t("empAuth.grantedCardTitle")}
             extra={
-              <span style={{ color: "#999" }}>{empAuthList.length}개</span>
+              <span style={{ color: "#999" }}>{t("empAuth.countSuffix", { count: empAuthList.length })}</span>
             }
             style={{ marginBottom: 16 }}
           >
@@ -181,7 +184,7 @@ export default function EmpAuthPage() {
                 }}
               >
                 <SafetyCertificateOutlined style={{ fontSize: 24, marginBottom: 8 }} />
-                <p>부여된 권한이 없습니다.</p>
+                <p>{t("empAuth.grantedEmptyMsg")}</p>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -204,7 +207,7 @@ export default function EmpAuthPage() {
                       onClick={() => handleRevoke(auth.autId)}
                       loading={loading}
                     >
-                      회수
+                      {t("empAuth.revokeBtn")}
                     </Button>
                   </div>
                 ))}
@@ -214,10 +217,10 @@ export default function EmpAuthPage() {
 
           {/* 부여 가능한 권한 */}
           <Card
-            title="부여 가능한 권한"
+            title={t("empAuth.availableCardTitle")}
             extra={
               <span style={{ color: "#999" }}>
-                회사 전체 권한 중 아직 부여되지 않은 권한
+                {t("empAuth.availableCardExtra")}
               </span>
             }
           >
@@ -232,8 +235,8 @@ export default function EmpAuthPage() {
                 <SafetyCertificateOutlined style={{ fontSize: 24, marginBottom: 8 }} />
                 <p>
                   {permList.length === 0
-                    ? "등록된 권한이 없습니다."
-                    : "모든 권한이 이미 부여되었습니다."}
+                    ? t("empAuth.noPermMsg")
+                    : t("empAuth.allGrantedMsg")}
                 </p>
               </div>
             ) : (
@@ -256,7 +259,7 @@ export default function EmpAuthPage() {
                         style={{ marginLeft: 8 }}
                         color="default"
                       >
-                        {auth.autCount || 0}명 부여
+                        {t("empAuth.grantedCountSuffix", { count: auth.autCount || 0 })}
                       </Tag>
                     </div>
                     <Button
@@ -266,7 +269,7 @@ export default function EmpAuthPage() {
                       onClick={() => handleGrant(auth.autId)}
                       loading={loading}
                     >
-                      부여
+                      {t("empAuth.grantBtn")}
                     </Button>
                   </div>
                 ))}

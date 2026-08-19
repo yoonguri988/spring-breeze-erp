@@ -2,7 +2,8 @@ import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import { 
+import { useTranslation } from "react-i18next";
+import {
     message, Form, Input, Select, Switch,
     Button, Descriptions, Tag, Space,
     Popconfirm, Row, Col, Breadcrumb,
@@ -33,6 +34,7 @@ export default function FormDetailPage() {
     const { forId, forVersion } = router.query;
     const dispatch = useDispatch();
     const [form] = Form.useForm();
+    const { t } = useTranslation(["appr", "common"]);
 
     const {
         detail, detailLoading, detailError,
@@ -81,7 +83,7 @@ export default function FormDetailPage() {
     // 수정 성공하면 수정모드 종료하고 최신 데이터 재조회
     useEffect( () => {
         if (success) {
-            message.success("수정되었습니다.");
+            message.success(t("forms.detail.updatedMsg"));
             setEditMode(false);
             dispatch(fetchFormDetailRequest({ forId, forVersion}));
             dispatch(fetchFormVersionsRequest(forId));
@@ -107,7 +109,7 @@ export default function FormDetailPage() {
             const companies = await searchCompany(keyword);
             setCompanyOptions(companies.map( (c) => ({label: c.comName, value: c.comId})));
         } catch (err) {
-            message.error("회사 검색에 실패했습니다.");
+            message.error(t("forms.detail.companySearchFailedMsg"));
         }
     };
 
@@ -116,7 +118,7 @@ export default function FormDetailPage() {
         const forCode = form.getFieldValue("forCode");
         const comId = form.getFieldValue("comId");
         if (!forCode || !comId) {
-            message.warning("회사와 양식 코드를 먼저 입력해주세요.");
+            message.warning(t("forms.detail.codeCheckRequiredMsg"));
             return;
         }
 
@@ -124,13 +126,13 @@ export default function FormDetailPage() {
         try {
             const res = await checkCode(forCode, comId, forId);
             if (res.available) {
-                message.success("사용 가능한 코드입니다.");
+                message.success(t("forms.detail.codeAvailableMsg"));
             }
             else {
-                message.error("이미 사용 중인 코드입니다.")
+                message.error(t("forms.detail.codeUnavailableMsg"))
             }
         } catch (err) {
-            message.error("코드 확인 중 오류가 발생했습니다.");
+            message.error(t("forms.detail.codeCheckErrorMsg"));
         }
     };
 
@@ -142,7 +144,7 @@ export default function FormDetailPage() {
         let payload;
         
         if (isSchemaMode) {
-            const errorMsg = validateSchemaFields(schemaFields);
+            const errorMsg = validateSchemaFields(schemaFields, t);
             if (errorMsg) {
                 message.error(errorMsg);
                 return;
@@ -156,7 +158,7 @@ export default function FormDetailPage() {
 
         else {
             if (!content.trim()) {
-                message.error("양식 내용을 입력해주세요.");
+                message.error(t("forms.detail.contentRequired"));
                 return;
             }
             payload = {
@@ -189,13 +191,13 @@ export default function FormDetailPage() {
     // 양식 삭제
     const handleDelete = () => {
         dispatch(deleteFormRequest({forId, forVersion}));
-        message.success("삭제되었습니다.")
+        message.success(t("forms.detail.deletedMsg"))
         router.push("/appr/forms");
     };
 
     // 로딩중 안내
     if (detailLoading || !detail) {
-        return <div style={{padding: 24}}>불러오는 중..</div>;
+        return <div style={{padding: 24}}>{t("common.loadingMsg")}</div>;
     }
 
     // 오류 안내
@@ -209,17 +211,17 @@ export default function FormDetailPage() {
                 <Breadcrumb.Item
                     onClick={() => router.push("/appr/forms")}
                     style={{cursor: "pointer"}}
-                >전자 결재</Breadcrumb.Item>
+                >{t("common.breadcrumbRoot")}</Breadcrumb.Item>
                 <Breadcrumb.Item
                     onClick={() => router.push("/appr/forms")}
                     style={{cursor: "pointer"}}
-                >양식 관리</Breadcrumb.Item>
-                <Breadcrumb.Item>양식 상세</Breadcrumb.Item>
+                >{t("forms.detail.breadcrumbForms")}</Breadcrumb.Item>
+                <Breadcrumb.Item>{t("forms.detail.breadcrumbCurrent")}</Breadcrumb.Item>
             </Breadcrumb>
 
             <div style={{marginBottom: 20}}>
-                <Title level={3} style={{marginBottom: 4}}>결재 양식 상세조회</Title>
-                <Text type="secondary">결재 양식의 상세 정보를 확인합니다.</Text>
+                <Title level={3} style={{marginBottom: 4}}>{t("forms.detail.title")}</Title>
+                <Text type="secondary">{t("forms.detail.subtitle")}</Text>
             </div>
             
             <Row gutter={[24, 16]}>
@@ -238,12 +240,12 @@ export default function FormDetailPage() {
                     >
                         <Form.Item
                             name="comId"
-                            label="회사"
-                            rules={[{required: true, message: "회사를 선택해주세요."}]}
+                            label={t("forms.detail.companyLabel")}
+                            rules={[{required: true, message: t("forms.detail.companyRequired")}]}
                         >
                             <Select
                                 showSearch
-                                placeholder="회사명 또는 사업자번호 검색"
+                                placeholder={t("forms.detail.companySearchPlaceholder")}
                                 filterOption={false}
                                 suffixIcon={<BankOutlined/>}
                                 onSearch={handleCompanySearch}
@@ -252,12 +254,12 @@ export default function FormDetailPage() {
                             />
                         </Form.Item>
 
-                        <Form.Item label="양식 코드" required>
+                        <Form.Item label={t("forms.detail.codeLabel")} required>
                             <Input.Group compact>
                                 <Form.Item
                                     name="forCode"
                                     noStyle
-                                    rules={[{required: true, message: "양식 코드를 입력해주세요."}]}
+                                    rules={[{required: true, message: t("forms.detail.codeRequired")}]}
                                 >
                                     <Input
                                         style={{width: "calc(100% - 100px)"}}
@@ -269,15 +271,15 @@ export default function FormDetailPage() {
                                     onClick={handleCodeCheck}
                                     disabled={!editMode}
                                 >
-                                    중복 확인
+                                    {t("forms.detail.codeCheckBtn")}
                                 </Button>
                             </Input.Group>
                         </Form.Item>
 
                         <Form.Item
                             name="forTitle"
-                            label="양식 제목"
-                            rules={[{required: true, message: "양식 제목을 입력해주세요."}]}
+                            label={t("forms.detail.titleLabel")}
+                            rules={[{required: true, message: t("forms.detail.titleRequired")}]}
                         >
                             <Input
                                 disabled={!editMode}
@@ -286,7 +288,7 @@ export default function FormDetailPage() {
 
                         <Form.Item
                             name="forStatus"
-                            label="활성화 여부"
+                            label={t("forms.detail.activeLabel")}
                             valuePropName="checked"
                         >
                             <Switch
@@ -294,7 +296,7 @@ export default function FormDetailPage() {
                             />
                         </Form.Item>
                         {isSchemaMode ? (
-                            <Form.Item label="양식 필드 구성">
+                            <Form.Item label={t("forms.detail.schemaFieldsLabel")}>
                                 <SchemaFieldEditor
                                     fields={schemaFields}
                                     onChange={setSchemaFields}
@@ -302,7 +304,7 @@ export default function FormDetailPage() {
                                 />
                             </Form.Item>
                         ) : (
-                            <Form.Item label="양식 내용">
+                            <Form.Item label={t("forms.detail.contentLabel")}>
                                 <ReactQuill
                                     theme="snow"
                                     value={content}
@@ -323,19 +325,19 @@ export default function FormDetailPage() {
                         >
                         {editMode ? (
                             <Space wrap>
-                                <Button onClick={handleCancelEdit}>취소</Button>
+                                <Button onClick={handleCancelEdit}>{t("forms.detail.cancelBtn")}</Button>
                                 <Button type="primary" htmlType="submit" loading={submitting}>
-                                    저장
+                                    {t("forms.detail.saveBtn")}
                                 </Button>
                             </Space>
                         ) : (
                             <Space wrap>
-                                <Button onClick={() => router.push("/appr/forms")}>목록으로</Button>
-                                <Popconfirm title="삭제하시겠습니까?" onConfirm={handleDelete}>
-                                    <Button danger>삭제</Button>
+                                <Button onClick={() => router.push("/appr/forms")}>{t("common.backToListBtn")}</Button>
+                                <Popconfirm title={t("forms.detail.deleteConfirmTitle")} onConfirm={handleDelete}>
+                                    <Button danger>{t("forms.detail.deleteBtn")}</Button>
                                 </Popconfirm>
                                 <Button type="primary" onClick={() => setEditMode(true)}>
-                                    수정
+                                    {t("forms.detail.editBtn")}
                                 </Button>
                             </Space>
                         )}
@@ -345,28 +347,28 @@ export default function FormDetailPage() {
 
                 <Col xs={24} md={8}>
                     <div style={{background: "#fafafa", borderRadius: 8, padding: 16, marginBottom: 16}}>
-                        <div style={{fontWeight: 600, marginBottom: 12}}>양식 상세 정보</div>
-                        <Descriptions4Line label="양식 ID" value={detail.forId}/>
-                        <Descriptions4Line label="버전" value={detail.forVersion}/>
-                        <Descriptions4Line label="생성일" value={detail.createdAt}/>
-                        <Descriptions4Line label="수정일" value={detail.updatedAt}/>
+                        <div style={{fontWeight: 600, marginBottom: 12}}>{t("forms.detail.sideInfoTitle")}</div>
+                        <Descriptions4Line label={t("forms.detail.sideInfo.forId")} value={detail.forId}/>
+                        <Descriptions4Line label={t("forms.detail.sideInfo.forVersion")} value={detail.forVersion}/>
+                        <Descriptions4Line label={t("forms.detail.sideInfo.createdAt")} value={detail.createdAt}/>
+                        <Descriptions4Line label={t("forms.detail.sideInfo.updatedAt")} value={detail.updatedAt}/>
                         <div style={{display: "flex", justifyContent: "space-between", padding: "6px 0"}}>
-                            <span style={{color: "#888", fontSize: 13}}>사용 여부</span>
+                            <span style={{color: "#888", fontSize: 13}}>{t("forms.detail.sideInfo.usageLabel")}</span>
                             <Tag color={detail.forStatus ? "green" : "default"}>
-                                {detail.forStatus ? "활성화" : "비활성화"}
+                                {detail.forStatus ? t("common.statusActive") : t("common.statusInactive")}
                             </Tag>
                         </div>
                     </div>
 
                     <div style={{background: "#fafafa", borderRadius: 8, padding: 16}}>
-                        <div style={{fontWeight: 600, marginBottom: 12}}>버전 이력</div>
+                        <div style={{fontWeight: 600, marginBottom: 12}}>{t("forms.detail.versionHistoryTitle")}</div>
                         {versionsLoading ? (
                             <div style={{textAlign: "center", padding: "20px 0", color: "#999", fontSize: 13}}>
-                                불러오는 중...
+                                {t("common.loadingMsg")}
                             </div>
                         ) : versions.length === 0 ? (
                             <div style={{textAlign: "center", padding: "20px 0", color: "#999", fontSize: 13}}>
-                                버전 이력이 없습니다.
+                                {t("forms.detail.versionHistoryEmpty")}
                             </div>
                         ) : (
                             versions.map((v) => {
@@ -399,7 +401,7 @@ export default function FormDetailPage() {
                                                 v{v.forVersion}
                                                 {isCurrent && !isDeleted && (
                                                     <Tag color="blue" style={{marginLeft: 6}}>
-                                                        현재 보는 중
+                                                        {t("forms.detail.currentVersionTag")}
                                                     </Tag>
                                                 )}
                                             </div>
@@ -408,10 +410,10 @@ export default function FormDetailPage() {
                                             </div>
                                         </div>
                                         {isDeleted ? (
-                                            <Tag color="red" style={{margin: 0}}>삭제됨</Tag>
+                                            <Tag color="red" style={{margin: 0}}>{t("forms.detail.deletedTag")}</Tag>
                                         ) : (
                                             <Tag color={v.forStatus ? "green" : "default"} style={{margin: 0}}>
-                                                {v.forStatus ? "활성화" : "비활성화"}
+                                                {v.forStatus ? t("common.statusActive") : t("common.statusInactive")}
                                             </Tag>
                                         )}
                                     </div>
