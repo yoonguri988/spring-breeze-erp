@@ -219,4 +219,10 @@
            AND return_dt IS NULL
            AND end_dt <![CDATA[<]]> SYSTIMESTAMP
     </update>
+    <!-- 반려(REJ) 예약 이력 정리 -->
+    <delete id="deleteRejectedByResourceId" parameterType="long">
+        DELETE FROM reservation
+        WHERE res_id = #{resId}
+          AND status = 'REJ'
+    </delete>
 </mapper>
