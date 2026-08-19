@@ -43,7 +43,6 @@ export default function TaskDetailPage() {
     dispatch(fetchTaskDetailRequest(taskId));
   }, [router.isReady, taskId, dispatch]);
 
-  // 에러
   useEffect(() => {
     if (error) {
       message.error(error);
@@ -86,8 +85,6 @@ export default function TaskDetailPage() {
     );
     setDeleteModalOpen(false);
   };
-
-  // 로딩
   if (loading && !task) {
     return (
       <main className="sb-content">
@@ -99,8 +96,6 @@ export default function TaskDetailPage() {
       </main>
     );
   }
-
-  // 조회 실패 / 데이터 없음
   if (!loading && !task) {
     return (
       <main className="sb-content">

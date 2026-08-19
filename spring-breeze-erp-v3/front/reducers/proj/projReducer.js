@@ -49,7 +49,7 @@ const projReducer = createSlice({
                 taskPaging: action.payload.paging,
                 memberList: action.payload.memberList
             };
-            state.success=true;
+           // state.success=true;
         },
         fetchProjDetailFailure:(state,action)=>{
             state.loading=false;
