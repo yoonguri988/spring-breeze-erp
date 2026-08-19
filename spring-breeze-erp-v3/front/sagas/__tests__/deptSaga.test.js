@@ -11,6 +11,7 @@ import {
   deleteDept,
   checkDeptCode,
   fetchAncestorDepts,
+  fetchDeptEmpList,
 } from "../dept/deptSaga";
 
 import {
@@ -49,6 +50,10 @@ import {
   fetchAncestorDeptsRequest,
   fetchAncestorDeptsSuccess,
   fetchAncestorDeptsFailure,
+
+  fetchDeptEmpListRequest,
+  fetchDeptEmpListSuccess,
+  fetchDeptEmpListFailure,
 } from "../../reducers/dept/deptReducer";
 
 describe("dept saga", () => {
@@ -309,6 +314,50 @@ describe("dept saga", () => {
     const putStep = generator.throw(mockError).value;
 
     expect(putStep).toEqual(put(fetchAncestorDeptsFailure("본인 소속 회사의 부서만 조회할 수 있습니다.")));
+    expect(generator.next().done).toBe(true);
+  });
+
+  // --- 부서(+하위부서) 소속 사원 목록 ---
+  it("fetch dept emp list success", () => {
+    const generator = fetchDeptEmpList(fetchDeptEmpListRequest(2));
+
+    const callStep = generator.next().value;
+    expect(callStep.type).toBe("CALL");
+
+    const mockResponse = {
+      data: {
+        list: [
+          { empId: 10, empName: "홍길동", deptId: 2 },
+          { empId: 11, empName: "김철수", deptId: 2 },
+        ],
+      },
+    };
+    const putStep = generator.next(mockResponse).value;
+
+    // saga 는 응답의 list 만 뽑아서 성공 액션에 담아야 한다
+    expect(putStep).toEqual(put(fetchDeptEmpListSuccess(mockResponse.data.list)));
+    expect(generator.next().done).toBe(true);
+  });
+
+  it("fetch dept emp list success: list 없으면 빈 배열로 처리한다", () => {
+    const generator = fetchDeptEmpList(fetchDeptEmpListRequest(2));
+    generator.next();
+
+    const mockResponse = { data: {} };
+    const putStep = generator.next(mockResponse).value;
+
+    expect(putStep).toEqual(put(fetchDeptEmpListSuccess([])));
+    expect(generator.next().done).toBe(true);
+  });
+
+  it("fetch dept emp list fail", () => {
+    const generator = fetchDeptEmpList(fetchDeptEmpListRequest(2));
+    generator.next();
+
+    const mockError = { response: { data: { message: "본인 소속 회사의 부서만 조회할 수 있습니다." } } };
+    const putStep = generator.throw(mockError).value;
+
+    expect(putStep).toEqual(put(fetchDeptEmpListFailure("본인 소속 회사의 부서만 조회할 수 있습니다.")));
     expect(generator.next().done).toBe(true);
   });
 });

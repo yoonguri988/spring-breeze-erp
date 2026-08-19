@@ -11,10 +11,15 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { logoutRequest } from "../reducers/auth/authReducer";
 
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
+
 const { Header: AntHeader } = Layout;
 
 export default function Header({ onToggleSidebar }) {
   const dispatch = useDispatch();
+  // 언어변경설정
+  const { t } = useTranslation("header");
   const { user } = useSelector((state) => state.auth);
   const isAuthenticated = Boolean(user);
   const isAdmin =
@@ -40,7 +45,7 @@ const userMenu = (
         <Link href={`/emp/detail?empId=${user?.empId}`} passHref>
           <a className="sb-dropdown-link">
             <UserOutlined />
-            내 프로필
+            {t("profile")}
           </a>
         </Link>
       </Menu.Item>
@@ -50,7 +55,7 @@ const userMenu = (
           <Link href="/perm/list" passHref>
             <a className="sb-dropdown-link">
               <SafetyCertificateOutlined />
-              권한 설정
+              {t("permSettings")}
             </a>
           </Link>
         </Menu.Item>
@@ -61,7 +66,7 @@ const userMenu = (
       <Menu.Item key="logout" danger onClick={handleLogout}>
         <span className="sb-dropdown-link">
           <LogoutOutlined />
-          로그아웃
+          {t("logout")}
         </span>
       </Menu.Item>
     </Menu>
@@ -72,7 +77,7 @@ const userMenu = (
       <button
         className="sb-iconbtn"
         id="sbToggleSidebar"
-        title="사이드바 접기/펼치기"
+        title={t("toggleSidebar")}
         onClick={onToggleSidebar}
       >
         <MenuOutlined />
@@ -93,6 +98,8 @@ const userMenu = (
       <div className="sb-header__spacer" />
 
       <div className="sb-header__right">
+        <LanguageSwitcher />
+
         {isAuthenticated && (
           <Dropdown overlay={userMenu} trigger={["click"]} placement="bottomRight">
             <button

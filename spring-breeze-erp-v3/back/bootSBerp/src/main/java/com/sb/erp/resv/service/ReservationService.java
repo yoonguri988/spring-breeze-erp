@@ -1,5 +1,6 @@
 package com.sb.erp.resv.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.sb.erp.resv.dto.request.ResvRequest;
@@ -32,4 +33,7 @@ public interface ReservationService {
     
     //
 	int getReservedQuantity(ResvSearchRequest search);
+	
+	int returnReservation(long revId, Long empId, LocalDateTime returnDt);
+
 }

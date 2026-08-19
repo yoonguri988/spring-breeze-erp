@@ -8,6 +8,7 @@ import {
   addResv,
   updateResv,
   cancelResv,
+  returnResv,
   fetchAvailableQty,
 } from "../resv/resvSaga";
 
@@ -35,6 +36,10 @@ import {
   cancelResvRequest,
   cancelResvSuccess,
   cancelResvFailure,
+
+  returnResvRequest,
+  returnResvSuccess,
+  returnResvFailure,
 
   fetchAvailableQtyRequest,
   fetchAvailableQtySuccess,
@@ -219,6 +224,43 @@ describe("reservation saga", () => {
     const putStep = generator.throw(mockError).value;
 
     expect(putStep).toEqual(put(cancelResvFailure("본인 예약이거나 관리자만 취소할 수 있습니다.")));
+    expect(generator.next().done).toBe(true);
+  });
+
+  // --- 자원 반납 처리 ---
+  it("return resv success", () => {
+    const generator = returnResv(returnResvRequest(1));
+
+    const callStep = generator.next().value;
+    expect(callStep.type).toBe("CALL");
+
+    const mockResponse = {
+      data: { success: true, message: "반납 처리되었습니다.", returnDt: "2026-08-19T10:00:00" },
+    };
+    const putStep = generator.next(mockResponse).value;
+
+    // 응답에 revId 가 없더라도 saga 가 항상 revId 를 합쳐서 dispatch 하는지 확인
+    expect(putStep).toEqual(
+      put(
+        returnResvSuccess({
+          success: true,
+          message: "반납 처리되었습니다.",
+          returnDt: "2026-08-19T10:00:00",
+          revId: 1,
+        })
+      )
+    );
+    expect(generator.next().done).toBe(true);
+  });
+
+  it("return resv fail", () => {
+    const generator = returnResv(returnResvRequest(1));
+    generator.next();
+
+    const mockError = { response: { data: { message: "본인이 예약한 자원만 반납할 수 있습니다." } } };
+    const putStep = generator.throw(mockError).value;
+
+    expect(putStep).toEqual(put(returnResvFailure("본인이 예약한 자원만 반납할 수 있습니다.")));
     expect(generator.next().done).toBe(true);
   });
 

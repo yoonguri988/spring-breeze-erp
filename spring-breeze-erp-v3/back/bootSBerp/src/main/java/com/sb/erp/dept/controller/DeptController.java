@@ -42,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 public class DeptController {
 
 	private final DeptService service;
+	private final EmpService empService;
 	private final AuthUserJwtService authUserJwtService;
 	
 	@SuppressWarnings("unchecked")
@@ -257,5 +258,20 @@ public class DeptController {
 		}
  
 		return ResponseEntity.ok(service.selectAncestorDepts(deptId));
+	}
+	
+	@Operation(summary = "부서 소속 사원 목록 조회", description = "해당 부서 및 하위 부서 소속 사원 목록을 조회합니다.")
+	@GetMapping("/{deptId}/emp")
+	public ResponseEntity<?> deptEmpList(
+	        @PathVariable("deptId") long deptId,
+	        @Parameter(hidden = true) Authentication authentication) {
+
+	    DeptResponse dept = service.selectOneById(deptId);
+	    if (dept == null) return ResponseEntity.notFound().build();
+	    if (authUserJwtService.isForbiddenCompanyAccess(authentication, dept.getComId())) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "본인 소속 회사의 부서만 조회할 수 있습니다."));
+	    }
+
+	    return ResponseEntity.ok(Map.of("list", empService.selectByDeptId(deptId)));
 	}
 }

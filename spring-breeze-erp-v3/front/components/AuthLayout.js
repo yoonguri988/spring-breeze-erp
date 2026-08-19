@@ -6,10 +6,17 @@ import {
   ProjectOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function AuthLayout({ children }) {
+  const { t } = useTranslation("auth");
+
   return (
-    <div className="aw" style={{ background: "#fff" }}>
+    <div className="aw" style={{ background: "#fff", position: "relative" }}>
+      <div style={{ position: "absolute", top: 16, right: 20, zIndex: 10 }}>
+        <LanguageSwitcher />
+      </div>
       <aside className="ab">
         <div className="ab-logo">
           <div className="ab-mark">S</div>
@@ -17,35 +24,35 @@ export default function AuthLayout({ children }) {
         </div>
         <div className="ab-mid">
           <div className="ab-tagline">
-            전사 통합 ERP,
+            {t("authLayout.tagline1")}
             <br />
-            하나의 플랫폼으로
+            {t("authLayout.tagline1Sub")}
           </div>
           <div className="ab-tagline-sub">
-            인사·조직 관리부터 전자문서 결재,
+            {t("authLayout.taglineSub1")}
             <br />
-            프로젝트·자원예약까지 모두 한 곳에서
+            {t("authLayout.taglineSub2")}
           </div>
           <div className="ab-feats">
             <div className="ab-feat">
               <CheckSquareFilled />
-              <span>전자문서 · 결재 관리</span>
+              <span>{t("authLayout.feat1")}</span>
             </div>
             <div className="ab-feat">
               <TeamOutlined />
-              <span>인사 · 조직 · 권한 관리</span>
+              <span>{t("authLayout.feat2")}</span>
             </div>
             <div className="ab-feat">
               <ProjectOutlined />
-              <span>프로젝트 · 태스크 관리</span>
+              <span>{t("authLayout.feat3")}</span>
             </div>
             <div className="ab-feat">
               <CalendarOutlined />
-              <span>자원 · 공간 예약관리</span>
+              <span>{t("authLayout.feat4")}</span>
             </div>
           </div>
         </div>
-        <div className="ab-foot">© 2026 SBerp · All rights reserved.</div>
+        <div className="ab-foot">{t("authLayout.footer")}</div>
       </aside>
       <main className="ap">
         <div className="ap-wrap">{children}</div>

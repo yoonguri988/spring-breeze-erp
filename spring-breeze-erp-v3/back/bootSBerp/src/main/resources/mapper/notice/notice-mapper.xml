@@ -52,7 +52,8 @@
 	       e.emp_name as empName
 	    from notice n
 	    join employee e on n.emp_id = e.emp_id
-	   where n.com_id = #{comId}
+	   where 1=1
+	    <if test="comId != null">and n.com_id = #{comId, jdbcType=BIGINT}</if>
 	     and n.bcontent like '%긴급%'
 	   order by n.created_at desc
 	   FETCH FIRST 5 ROWS ONLY
@@ -65,7 +66,8 @@
 	       e.emp_name as empName
 	    from notice n
 	    join employee e on n.emp_id = e.emp_id
-	   where n.com_id = #{comId}
+	   where 1=1
+	    <if test="comId != null">and n.com_id = #{comId, jdbcType=BIGINT}</if>
 	    <if test="pinnedBnos != null and !pinnedBnos.isEmpty()">
 	      and n.bno not in
 	      <foreach collection="pinnedBnos" item="bno" open="(" separator="," close=")">
@@ -84,17 +86,19 @@
 	  OFFSET #{pstartno} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
 	</select>
 
-  <!-- 전체 카운트 -->
-  <select id="selectCount" resultType="int" parameterType="NoticeSearchRequest">
-    select count(*) from notice
-    where com_id = #{comId}
-  </select>
+ 	<!-- 전체 카운트 -->
+	<select id="selectCount" resultType="int" parameterType="NoticeSearchRequest">
+	    select count(*) from notice
+	   where 1=1
+	    <if test="comId != null">and com_id = #{comId, jdbcType=BIGINT}</if>
+	</select>
 
 	<!-- 페이징 계산용 카운트(전체 카운트(ex:23)-긴급공지(ex:5) -> 18개면 2페이지로) -->
 	<select id="selectCountNoticeList" resultType="int" parameterType="NoticeSearchRequest">
 	  select count(*)
 	  from notice
-	  where com_id = #{comId}
+	 where 1=1
+	    <if test="comId != null">and com_id = #{comId, jdbcType=BIGINT}</if>
 	    <if test="pinnedBnos != null and !pinnedBnos.isEmpty()">
 	      and bno not in
 	      <foreach collection="pinnedBnos" item="bno" open="(" separator="," close=")">
@@ -105,6 +109,6 @@
 	      and (lower(btitle) like lower('%' || #{keyword} || '%')
 	           or lower(bcontent) like lower('%' || #{keyword} || '%'))
 	    </if>
-</select>
+	</select>
 
 </mapper>

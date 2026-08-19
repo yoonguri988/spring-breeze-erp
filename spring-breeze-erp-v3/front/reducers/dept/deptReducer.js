@@ -11,6 +11,7 @@ import { createSlice } from "@reduxjs/toolkit";
 //  - DELETE /api/dept/{deptId}            : 부서 삭제 (완전삭제 또는 이관대기 전환)
 //  - GET    /api/dept/check-deptcode      : 부서코드 중복확인
 //  - GET    /api/dept/{deptId}/ancestors  : 상위 계층 부서 목록
+//  - GET    /api/dept/{deptId}/emp        : 부서(+하위부서) 소속 사원 목록
 // =========================================================
 
 const initialState = {
@@ -25,6 +26,9 @@ const initialState = {
   // 상세 조회 (detail / my)
   detail: null,       // DeptDetailResponse { dept, ancestorChain }
   myDept: null,        // DeptDetailResponse
+
+  // 부서(+하위부서) 소속 사원 목록 (detail / my 화면 공용)
+  deptEmpList: [],     // EmpResponse[]
 
   // 부서코드 중복확인 (check-deptcode)
   deptCodeCheck: {
@@ -231,6 +235,27 @@ const deptReducer = createSlice({
     },
 
     // ---------------------------------------------------
+    // 10) 부서(+하위부서) 소속 사원 목록 GET /api/dept/{deptId}/emp
+    // payload: deptId
+    // - detail.js / my.js 공용: 부서가 확정된 이후에만 호출해야 함
+    // - 요청 시작 시 이전 부서의 목록이 잠깐 보이지 않도록 즉시 비운다
+    // ---------------------------------------------------
+    fetchDeptEmpListRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.deptEmpList = [];
+    },
+    fetchDeptEmpListSuccess(state, action) {
+      // action.payload: EmpResponse[]
+      state.loading = false;
+      state.deptEmpList = action.payload ?? [];
+    },
+    fetchDeptEmpListFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // ---------------------------------------------------
     // 공통: 상태 초기화 (모달 닫기, 폼 리셋 등에 사용)
     // ---------------------------------------------------
     resetDeptState(state) {
@@ -280,6 +305,10 @@ export const {
   fetchAncestorDeptsSuccess,
   fetchAncestorDeptsFailure,
   clearAncestorDepts,
+
+  fetchDeptEmpListRequest,
+  fetchDeptEmpListSuccess,
+  fetchDeptEmpListFailure,
 
   resetDeptState,
 } = deptReducer.actions;

@@ -124,17 +124,6 @@ export default function ProjListPage() {
   // 기간(날짜 범위) 변경
   const handleDateChange = (dates) => {
     setDateRange(dates);
-
-    if (!dates || dates.length !== 2) {
-      updateQuery({ startDate: "", endDate: "", pstartno: 1 });
-      return;
-    }
-
-    updateQuery({
-      startDate: dates[0].format("YYYY-MM-DD"),
-      endDate: dates[1].format("YYYY-MM-DD"),
-      pstartno: 1,
-    });
   };
 
   // 페이지 번호 변경
@@ -295,8 +284,19 @@ export default function ProjListPage() {
               format="YYYY-MM-DD"
             />
 
-            <Button icon={<SearchOutlined />} onClick={() => handleSearch(keyword)}>
-              조회
+            <Button
+              icon={<SearchOutlined />}
+              onClick={() => {
+              updateQuery({
+              keyword,
+              proStatus,
+              startDate: dateRange?.[0] ? dateRange[0].format("YYYY-MM-DD") : "",
+              endDate: dateRange?.[1] ? dateRange[1].format("YYYY-MM-DD") : "",
+              pstartno: 1,
+              });
+              }}
+              >
+            조회
             </Button>
           </div>
         </div>
@@ -323,24 +323,30 @@ export default function ProjListPage() {
             }}
           />
         </div>
-
         {/* 페이지네이션 */}
-        {totalCnt > 0 && (
-          <div
-            className="d-flex justify-content-center py-3"
-            style={{ borderTop: "1px solid var(--sb-border)" }}
+        <div
+          style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "14px 16px",
+          borderTop: "1px solid var(--sb-border)",
+          }}
           >
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={totalCnt}
-              showSizeChanger
-              pageSizeOptions={["10", "20", "30", "50"]}
-              onChange={handlePageChange}
-              onShowSizeChange={handlePageSizeChange}
-            />
+          <span style={{ color: "#999", fontSize: 12.5 }}>
+          총 <b>{totalCnt}</b>개 프로젝트
+          </span>
+          {totalCnt > pageSize && (
+          <Pagination
+          size="small"
+          current={currentPage}
+          total={totalCnt}
+          pageSize={pageSize}
+          showSizeChanger={false}
+          onChange={handlePageChange}
+          />
+          )}
           </div>
-        )}
       </div>
     </main>
   );
