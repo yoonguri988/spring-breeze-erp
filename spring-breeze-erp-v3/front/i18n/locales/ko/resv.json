@@ -2,7 +2,8 @@
   "status": {
     "waiting": "대기",
     "approved": "승인",
-    "rejected": "반려"
+    "rejected": "반려",
+    "notReturned": "미반납"
   },
   "resType": {
     "room": "회의실",
@@ -24,7 +25,8 @@
     "breadcrumbCurrent": "예약 상세",
     "heading": "예약 ID {{revId}}",
     "backToList": "목록으로",
-    "cancelSuccess": "예약이 취소되었습니다."
+    "cancelSuccess": "예약이 취소되었습니다.",
+    "returnSuccess": "반납 처리되었습니다."
   },
   "edit": {
     "breadcrumbList": "예약 내역",
@@ -123,7 +125,8 @@
     "detailButtonTitle": "상세보기",
     "totalCountPrefix": "총",
     "totalCountSuffix": "건",
-    "cancelSuccess": "예약이 취소되었습니다."
+    "cancelSuccess": "예약이 취소되었습니다.",
+    "returnSuccess": "반납 처리되었습니다."
   },
   "adminDetail": {
     "breadcrumbHome": "홈",
@@ -214,5 +217,12 @@
     "rejectorLabel": "반려자",
     "rejectedAtLabel": "반려일시",
     "rejectReasonLabel": "반려사유"
+  },
+  "returnModal": {
+    "title": "자원 반납",
+    "confirmButton": "반납 처리",
+    "confirmTitle": "이 자원을 반납 처리하시겠습니까?",
+    "confirmDesc": "반납 처리 후에는 예약 상태가 완료로 변경되며, 되돌릴 수 없습니다.",
+    "targetResource": "대상 자원:"
   }
 }

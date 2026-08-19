@@ -17,7 +17,7 @@
     "position": { "tip": "Position Management" },
     "permissions": { "tip": "Permission Management" },
     "evalperiodlist": { "tip": "Performance Evaluation" },
-    "evallist": { "tip": "Write Evaluation" },
+    "evaldashboard": { "tip": "Write Evaluation" },
     "evalreport": { "tip": "My Evaluation Report" },
     "apprlistform": { "tip": "e-Approval", "label": "Approval Form Management" },
     "apprlistdoc": { "tip": "e-Approval", "label": "Draft Approval Document" },

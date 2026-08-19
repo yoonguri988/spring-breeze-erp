@@ -2,7 +2,8 @@
   "status": {
     "waiting": "Pending",
     "approved": "Approved",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "notReturned": "Not Returned"
   },
   "resType": {
     "room": "Meeting Room",
@@ -24,7 +25,8 @@
     "breadcrumbCurrent": "Reservation Details",
     "heading": "Reservation ID {{revId}}",
     "backToList": "Back to List",
-    "cancelSuccess": "The reservation has been cancelled."
+    "cancelSuccess": "The reservation has been cancelled.",
+    "returnSuccess": "The item has been returned."
   },
   "edit": {
     "breadcrumbList": "Reservation History",
@@ -123,7 +125,8 @@
     "detailButtonTitle": "View Details",
     "totalCountPrefix": "Total",
     "totalCountSuffix": "item(s)",
-    "cancelSuccess": "The reservation has been cancelled."
+    "cancelSuccess": "The reservation has been cancelled.",
+    "returnSuccess": "The item has been returned."
   },
   "adminDetail": {
     "breadcrumbHome": "Home",
@@ -214,5 +217,12 @@
     "rejectorLabel": "Rejected By",
     "rejectedAtLabel": "Rejected On",
     "rejectReasonLabel": "Rejection Reason"
+  },
+  "returnModal": {
+    "title": "Return Resource",
+    "confirmButton": "Confirm Return",
+    "confirmTitle": "Are you sure you want to mark this resource as returned?",
+    "confirmDesc": "Once returned, the reservation status cannot be reverted.",
+    "targetResource": "Target Resource:"
   }
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Input, InputNumber, Select, message } from "antd";
 import { ArrowLeftOutlined, CheckOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchResourceDetailRequest,
@@ -13,18 +14,19 @@ import {
 } from "../../reducers/res/resourceReducer";
 import { listEmpRequest, resetEmpState } from "../../reducers/emp/empReducer";
 
-const RES_STATUS_OPTIONS = [
-  { value: "AVAILABLE", label: "사용가능" },
-  { value: "MAINTENANCE", label: "점검중" },
-  { value: "DISABLED", label: "사용중지" },
-];
-
-const RES_TYPE_LABEL = { ROOM: "회의실", EQUIPMENT: "장비", VEHICLE: "차량" };
+// label 은 i18n/locales/{ko,en}/res.json 의 enum.resStatus 키와 매핑됩니다.
+const RES_STATUS_VALUES = ["AVAILABLE", "MAINTENANCE", "DISABLED"];
 
 export default function ResourceUpdatePage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["res", "common"]);
   const [form] = Form.useForm();
+
+  const resStatusOptions = RES_STATUS_VALUES.map((v) => ({
+    value: v,
+    label: t(`enum.resStatus.${v}`),
+  }));
 
   const {
     detail: resource,
@@ -67,7 +69,7 @@ export default function ResourceUpdatePage() {
   useEffect(() => {
     if (!submitting) return;
     if (success) {
-      message.success("자원 정보가 수정되었습니다.");
+      message.success(t("update.successMessage"));
       setSubmitting(false);
       dispatch(resetResourceState());
       router.push("/res/list");
@@ -89,7 +91,7 @@ export default function ResourceUpdatePage() {
 
   const onFinish = (values) => {
     if (resource?.resType === "ROOM" && !values.capacity) {
-      message.error("회의실은 수용인원을 입력해야 합니다.");
+      message.error(t("shared.roomCapacityRequired"));
       return;
     }
     setSubmitting(true);
@@ -118,15 +120,16 @@ export default function ResourceUpdatePage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/res/list">자원 관리</Link> · 자원 수정
+            <Link href="/res/list">{t("shared.title")}</Link> ·{" "}
+            {t("update.breadcrumbCurrent")}
           </div>
-          <h1>자원 수정</h1>
-          <p>등록된 자원 정보를 수정합니다.</p>
+          <h1>{t("update.title")}</h1>
+          <p>{t("update.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/res/list">
             <Button icon={<ArrowLeftOutlined />} size="small">
-              목록으로
+              {t("shared.backToList")}
             </Button>
           </Link>
         </div>
@@ -135,13 +138,13 @@ export default function ResourceUpdatePage() {
       <Form form={form} layout="vertical" onFinish={onFinish}>
         <div className="sb-card mb-3">
           <div className="sb-card__head">
-            <h2>기본 정보</h2>
+            <h2>{t("shared.basicInfoTitle")}</h2>
             <span className="sub">{resource.resCode}</span>
           </div>
           <div className="sb-card__body">
             <div className="row g-3">
               <div className="col-md-3">
-                <label className="sb-form-label">자원코드</label>
+                <label className="sb-form-label">{t("field.resCode")}</label>
                 <Input
                   value={resource.resCode}
                   readOnly
@@ -149,7 +152,7 @@ export default function ResourceUpdatePage() {
                 />
               </div>
               <div className="col-md-6">
-                <label className="sb-form-label">자원명</label>
+                <label className="sb-form-label">{t("field.resName")}</label>
                 <Input
                   value={resource.resName}
                   readOnly
@@ -157,38 +160,45 @@ export default function ResourceUpdatePage() {
                 />
               </div>
               <div className="col-md-3">
-                <label className="sb-form-label">자원 유형</label>
+                <label className="sb-form-label">{t("field.resType")}</label>
                 <Input
-                  value={RES_TYPE_LABEL[resource.resType] || resource.resType}
+                  value={t(`enum.resType.${resource.resType}`, {
+                    defaultValue: resource.resType,
+                  })}
                   readOnly
                   style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }}
                 />
               </div>
 
               <div className="col-md-4">
-                <Form.Item label="위치" name="location">
+                <Form.Item label={t("field.location")} name="location">
                   <Input maxLength={200} />
                 </Form.Item>
               </div>
               <div className="col-md-2">
                 <Form.Item
-                  label="수량"
+                  label={t("field.quantity")}
                   name="quantity"
-                  rules={[{ required: true, message: "수량을 입력하세요." }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("shared.quantityRequired"),
+                    },
+                  ]}
                 >
                   <InputNumber min={0} style={{ width: "100%" }} />
                 </Form.Item>
               </div>
               <div className="col-md-3">
                 <Form.Item
-                  label="수용인원"
+                  label={t("field.capacity")}
                   name="capacity"
                   rules={[
                     {
                       validator: (_, value) => {
                         if (resource.resType === "ROOM" && !value) {
                           return Promise.reject(
-                            new Error("회의실은 수용인원을 입력해야 합니다."),
+                            new Error(t("shared.roomCapacityRequired")),
                           );
                         }
                         return Promise.resolve();
@@ -198,31 +208,31 @@ export default function ResourceUpdatePage() {
                 >
                   <InputNumber
                     min={1}
-                    placeholder="회의실인 경우 입력"
+                    placeholder={t("shared.capacityPlaceholder")}
                     style={{ width: "100%" }}
                   />
                 </Form.Item>
                 <div className="text-faint mt-1" style={{ fontSize: 12 }}>
-                  장비·차량은 비워두셔도 됩니다.
+                  {t("shared.capacityHint")}
                 </div>
               </div>
               <div className="col-md-3">
-                <Form.Item label="상태" name="resStatus">
-                  <Select options={RES_STATUS_OPTIONS} />
+                <Form.Item label={t("field.resStatus")} name="resStatus">
+                  <Select options={resStatusOptions} />
                 </Form.Item>
               </div>
 
               <div className="col-12">
-                <Form.Item label="비고" name="remark">
+                <Form.Item label={t("field.remark")} name="remark">
                   <Input />
                 </Form.Item>
               </div>
 
               <div className="col-12">
-                <Form.Item label="담당자" name="managerEmpId">
+                <Form.Item label={t("field.manager")} name="managerEmpId">
                   <Select
                     allowClear
-                    placeholder="지정 안 함"
+                    placeholder={t("shared.managerPlaceholder")}
                     options={(empList?.list || []).map((e) => ({
                       value: String(e.empId),
                       label: `${e.empName} (${e.posName})`,
@@ -236,7 +246,7 @@ export default function ResourceUpdatePage() {
 
         <div className="d-flex gap-2 justify-content-end">
           <Link href="/res/list">
-            <Button>취소</Button>
+            <Button>{t("common:button.cancel")}</Button>
           </Link>
           <Button
             type="primary"
@@ -244,7 +254,7 @@ export default function ResourceUpdatePage() {
             icon={<CheckOutlined />}
             loading={submitting && loading}
           >
-            수정 완료
+            {t("update.submitButton")}
           </Button>
         </div>
       </Form>

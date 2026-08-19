@@ -9,6 +9,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import { fetchResvDetailRequest } from "../../../reducers/resv/resvReducer";
 import {
@@ -25,6 +26,7 @@ import RejectResvModal from "../../../components/RejectResvModal";
 export default function AdminResvDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["resv", "common"]);
 
   const { detail: resv } = useSelector((state) => state.resv);
   const { loading, error, success } = useSelector((state) => state.adminResv);
@@ -47,7 +49,7 @@ export default function AdminResvDetailPage() {
     if (!approving) return;
     if (prevLoading.current && !loading) {
       if (success) {
-        message.success("예약이 승인되었습니다.");
+        message.success(t("adminDetail.approveSuccess"));
         setApproveTarget(null);
         setApproving(false);
         dispatch(resetAdminResvState());
@@ -65,7 +67,7 @@ export default function AdminResvDetailPage() {
     if (!rejecting) return;
     if (prevLoading.current && !loading) {
       if (success) {
-        message.success("예약이 반려되었습니다.");
+        message.success(t("adminDetail.rejectSuccess"));
         setRejectTarget(null);
         setRejecting(false);
         dispatch(resetAdminResvState());
@@ -104,17 +106,17 @@ export default function AdminResvDetailPage() {
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
             <div className="sb-breadcrumb">
-              <Link href="/">홈</Link> <span>&gt;</span>
+              <Link href="/">{t("adminDetail.breadcrumbHome")}</Link> <span>&gt;</span>
               <Link href="/admin/resv/list?status=WAI">
-                자원 예약 요청 관리
+                {t("adminDetail.breadcrumbList")}
               </Link>{" "}
               <span>&gt;</span>
-              예약 상세
+              {t("adminDetail.breadcrumbCurrent")}
             </div>
           </div>
           <h1>
-            예약 ID {resv.revId}{" "}
-            <span className="ms-2">{statusBadge(resv.status)}</span>
+            {t("adminDetail.heading", { revId: resv.revId })}{" "}
+            <span className="ms-2">{statusBadge(resv.status, t)}</span>
           </h1>
           <p>{resv.resName}</p>
         </div>
@@ -132,7 +134,7 @@ export default function AdminResvDetailPage() {
                     })
                   }
                 >
-                  승인
+                  {t("common:button.approve")}
                 </Button>
                 <Button
                   danger
@@ -144,12 +146,12 @@ export default function AdminResvDetailPage() {
                     })
                   }
                 >
-                  반려
+                  {t("common:button.reject")}
                 </Button>
               </>
             )}
             <Link href="/admin/resv/list?status=WAI">
-              <Button icon={<ArrowLeftOutlined />}>목록으로</Button>
+              <Button icon={<ArrowLeftOutlined />}>{t("adminDetail.backToList")}</Button>
             </Link>
           </div>
         </div>

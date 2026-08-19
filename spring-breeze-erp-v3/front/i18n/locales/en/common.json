@@ -24,7 +24,8 @@
     "apply": "Apply",
     "select": "Select",
     "view": "View",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "return": "Return"
   },
   "label": {
     "all": "All",

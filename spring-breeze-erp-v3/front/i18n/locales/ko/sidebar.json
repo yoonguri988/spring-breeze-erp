@@ -17,7 +17,7 @@
     "position": { "tip": "직급 관리" },
     "permissions": { "tip": "권한 관리" },
     "evalperiodlist": { "tip": "인사 평가" },
-    "evallist": { "tip": "평가 작성" },
+    "evaldashboard": { "tip": "평가 작성" },
     "evalreport": { "tip": "내 평가 리포트" },
     "apprlistform": { "tip": "전자결재", "label": "결재 양식 관리" },
     "apprlistdoc": { "tip": "전자결재", "label": "전자결재 기안" },

@@ -21,13 +21,15 @@ import footerKo from "./locales/ko/footer.json";
 import authKo from "./locales/ko/auth.json";
 import comKo from "./locales/ko/com.json";
 // import dashboardKo from "./locales/ko/dashboard.json";
-// import deptKo from "./locales/ko/dept.json";
+import deptKo from "./locales/ko/dept.json";
 // import empKo from "./locales/ko/emp.json";
 // import apprKo from "./locales/ko/appr.json";
-// import resvKo from "./locales/ko/resv.json";
-// import resKo from "./locales/ko/res.json";
+import resvKo from "./locales/ko/resv.json";
+import resKo from "./locales/ko/res.json";
 // import permKo from "./locales/ko/perm.json";
 // import posKo from "./locales/ko/pos.json";
+import loginHistoryKo from "./locales/ko/loginHistory.json";
+
 
 import commonEn from "./locales/en/common.json";
 import headerEn from "./locales/en/header.json";
@@ -36,13 +38,15 @@ import footerEn from "./locales/en/footer.json";
 import authEn from "./locales/en/auth.json";
 import comEn from "./locales/en/com.json";
 // import dashboardEn from "./locales/en/dashboard.json";
-// import deptEn from "./locales/en/dept.json";
+import deptEn from "./locales/en/dept.json";
 // import empEn from "./locales/en/emp.json";
 // import apprEn from "./locales/en/appr.json";
-// import resvEn from "./locales/en/resv.json";
-// import resEn from "./locales/en/res.json";
+import resvEn from "./locales/en/resv.json";
+import resEn from "./locales/en/res.json";
 // import permEn from "./locales/en/perm.json";
 // import posEn from "./locales/en/pos.json";
+import loginHistoryEn from "./locales/en/loginHistory.json";
+
 
 export const SUPPORTED_LANGUAGES = ["ko", "en"];
 export const DEFAULT_LANGUAGE = "ko";
@@ -58,13 +62,14 @@ const resources = {
     auth: authKo,
     com: comKo,
     // dashboard: dashboardKo,
-    // dept: deptKo,
+    dept: deptKo,
     // emp: empKo,
     // appr: apprKo,
-    // resv: resvKo,
-    // res: resKo,
+    resv: resvKo,
+    res: resKo,
     // perm: permKo,
     // pos: posKo,
+    loginHistory: loginHistoryKo,
   },
   en: {
     common: commonEn,
@@ -74,13 +79,14 @@ const resources = {
     auth: authEn,
     com: comEn,
     // dashboard: dashboardEn,
-    // dept: deptEn,
+    dept: deptEn,
     // emp: empEn,
     // appr: apprEn,
-    // resv: resvEn,
-    // res: resEn,
+    resv: resvEn,
+    res: resEn,
     // perm: permEn,
     // pos: posEn,
+    loginHistory: loginHistoryEn,
   },
 };
 

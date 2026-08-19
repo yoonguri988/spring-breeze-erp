@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Input, InputNumber, Select, message } from "antd";
 import { ApartmentOutlined, ArrowLeftOutlined, BlockOutlined, CheckOutlined, RightOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   addDeptRequest,
@@ -14,12 +15,13 @@ import {
 } from "../../reducers/dept/deptReducer";
 import { fetchCompanyDetailRequest, resetCompanyState } from "../../reducers/com/companyReducer";
 
-const DEPTH_LABELS = ["", "본부", "팀", "셀", "파트"];
-
 export default function DeptAddPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const { t } = useTranslation(["dept", "common"]);
+
+  const DEPTH_LABEL_KEYS = ["", "hq", "team", "cell", "part"];
 
   const { detail: companyDetail } = useSelector((state) => state.company);
   const {
@@ -66,7 +68,7 @@ export default function DeptAddPage() {
     if (!submitting) return;
     if (prevLoading.current && !loading) {
       if (success) {
-        message.success("부서가 등록되었습니다.");
+        message.success(t("add.successMsg"));
         setSubmitting(false);
         dispatch(resetDeptState());
         router.push(backUrl);
@@ -93,14 +95,15 @@ export default function DeptAddPage() {
 
   const parentOptions = useMemo(
     () => [
-      { value: "0", label: "없음 (최상위 본부)", depth: 0 },
+      { value: "0", label: t("add.hierarchy.parentNoneOption"), depth: 0 },
       ...(depts || []).map((d) => ({
         value: String(d.deptId),
         label: `${"　".repeat(d.depth || 0)}${d.depth > 0 ? "└ " : ""}${d.deptName} (${d.deptCode})`,
         depth: d.depth,
       })),
     ],
-    [depts],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [depts, t],
   );
 
   const handleParentChange = (value) => {
@@ -119,21 +122,26 @@ export default function DeptAddPage() {
 
   // 계층 미리보기 노드 목록: [회사명, (상위부서명), (입력중인 부서명)]
   const hierNodes = useMemo(() => {
-    const nodes = [com?.comName || "회사"];
+    const nodes = [com?.comName || t("add.hierarchy.defaultComName")];
     if (parentId && parentId !== "0") {
       const opt = parentOptions.find((o) => o.value === parentId);
       if (opt) nodes.push(opt.label.replace(/^[\s└]+/, "").trim());
     }
     return nodes;
-  }, [com, parentId, parentOptions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [com, parentId, parentOptions, t]);
+
+  const depthLabel = DEPTH_LABEL_KEYS[depth]
+    ? t(`depthLabels.${DEPTH_LABEL_KEYS[depth]}`)
+    : t("depthLabels.fallback");
 
   const onFinish = (values) => {
     if (!comId) {
-      message.error("소속 회사 정보가 없습니다. 목록 화면에서 다시 진입해주세요.");
+      message.error(t("add.noComError"));
       return;
     }
     if (deptCodeCheck?.checked && deptCodeCheck?.duplicate) {
-      message.error("이미 사용 중인 부서코드입니다.");
+      message.error(t("add.basicInfo.deptCodeDuplicate"));
       return;
     }
     setSubmitting(true);
@@ -156,16 +164,17 @@ export default function DeptAddPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <RightOutlined /> <Link href={backUrl}>부서 관리</Link>{" "}
-            <RightOutlined /> 등록
+            <Link href="/">{t("add.breadcrumbHome")}</Link> <RightOutlined />{" "}
+            <Link href={backUrl}>{t("add.breadcrumbList")}</Link>{" "}
+            <RightOutlined /> {t("add.breadcrumbAdd")}
           </div>
-          <h1>부서 등록</h1>
-          <p>새로운 부서를 시스템에 등록합니다.</p>
+          <h1>{t("add.title")}</h1>
+          <p>{t("add.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href={backUrl}>
             <Button icon={<ArrowLeftOutlined />}>
-              목록으로
+              {t("add.backBtn")}
             </Button>
           </Link>
         </div>
@@ -185,34 +194,34 @@ export default function DeptAddPage() {
           <div className="sb-card__head">
             <h2>
               <ApartmentOutlined className="me-2 text-soft" />
-              기본 정보
+              {t("add.basicInfo.title")}
             </h2>
           </div>
           <div className="sb-card__body">
             <div className="row g-3">
               <div className="col-md-8">
                 <Form.Item
-                  label="부서명"
+                  label={t("add.basicInfo.deptNameLabel")}
                   name="deptName"
-                  rules={[{ required: true, message: "부서명을 입력하세요." }]}
+                  rules={[{ required: true, message: t("add.basicInfo.deptNameRequired") }]}
                 >
-                  <Input placeholder="예: 플랫폼개발팀" maxLength={100} />
+                  <Input placeholder={t("add.basicInfo.deptNamePlaceholder")} maxLength={100} />
                 </Form.Item>
               </div>
               <div className="col-md-4">
                 <Form.Item
-                  label="부서코드"
+                  label={t("add.basicInfo.deptCodeLabel")}
                   name="deptCode"
-                  rules={[{ required: true, message: "부서코드를 입력하세요." }]}
+                  rules={[{ required: true, message: t("add.basicInfo.deptCodeRequired") }]}
                   validateStatus={deptCodeCheck?.checked && deptCodeCheck?.duplicate ? "error" : undefined}
                   help={
                     deptCodeCheck?.checked && deptCodeCheck?.duplicate
-                      ? "이미 사용 중인 부서코드입니다."
-                      : "영문 대문자 · 숫자 권장"
+                      ? t("add.basicInfo.deptCodeDuplicate")
+                      : t("add.basicInfo.deptCodeHint")
                   }
                 >
                   <Input
-                    placeholder="예: PLT"
+                    placeholder={t("add.basicInfo.deptCodePlaceholder")}
                     maxLength={45}
                     style={{ textTransform: "uppercase" }}
                     onChange={(e) => {
@@ -232,38 +241,38 @@ export default function DeptAddPage() {
           <div className="sb-card__head">
             <h2>
               <ApartmentOutlined className="me-2 text-soft" />
-              소속 및 계층
+              {t("add.hierarchy.title")}
             </h2>
           </div>
           <div className="sb-card__body">
             <div className="row g-3">
               <div className="col-md-6">
-                <label className="sb-form-label">소속 회사</label>
+                <label className="sb-form-label">{t("add.hierarchy.comLabel")}</label>
                 <Input value={com?.comName || ""} readOnly style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }} />
               </div>
 
               <div className="col-md-6">
-                <Form.Item label="상위 부서" name="parentId">
+                <Form.Item label={t("add.hierarchy.parentLabel")} name="parentId">
                   <Select options={parentOptions} onChange={handleParentChange} />
                 </Form.Item>
                 <div className="text-faint mt-1" style={{ fontSize: 12 }}>
-                  비워두면 최상위 본부(depth 1)로 등록됩니다.
+                  {t("add.hierarchy.parentHint")}
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="row g-3">
                   <div className="col-6">
-                    <label className="sb-form-label">계층 깊이</label>
+                    <label className="sb-form-label">{t("add.hierarchy.depthLabel")}</label>
                     <div className="depth-info-box">
                       <BlockOutlined className="text-faint" />
                       <span>depth</span>
                       <span className="depth-val">{depth}</span>
-                      <span className="text-faint">· {DEPTH_LABELS[depth] || "하위"}</span>
+                      <span className="text-faint">· {depthLabel}</span>
                     </div>
                   </div>
                   <div className="col-6">
-                    <Form.Item label="정렬 순서" name="sortOrder">
+                    <Form.Item label={t("add.hierarchy.sortOrderLabel")} name="sortOrder">
                       <InputNumber min={1} max={999} style={{ width: "100%" }} />
                     </Form.Item>
                   </div>
@@ -271,7 +280,7 @@ export default function DeptAddPage() {
               </div>
 
               <div className="col-md-6">
-                <label className="sb-form-label">계층 미리보기</label>
+                <label className="sb-form-label">{t("add.hierarchy.previewLabel")}</label>
                 <div className="hier-preview">
                   {hierNodes.map((n, i) => (
                     <React.Fragment key={i}>
@@ -283,7 +292,7 @@ export default function DeptAddPage() {
                     <span className="hier-node hier-node--new">{deptName}</span>
                   ) : (
                     <span className="text-faint" style={{ fontSize: 12.5 }}>
-                      부서명 입력 중…
+                      {t("add.hierarchy.previewTyping")}
                     </span>
                   )}
                 </div>
@@ -293,15 +302,15 @@ export default function DeptAddPage() {
         </div>
 
         <div className="text-faint mb-3" style={{ fontSize: 12.5 }}>
-          부서장은 부서 등록 후 부서 수정 화면에서 지정할 수 있습니다.
+          {t("add.leaderHint")}
         </div>
 
         <div className="d-flex gap-2 justify-content-end">
           <Link href={backUrl}>
-            <Button>취소</Button>
+            <Button>{t("common:button.cancel")}</Button>
           </Link>
           <Button type="primary" htmlType="submit" icon={<CheckOutlined />} loading={submitting && loading}>
-            등록하기
+            {t("add.submitBtn")}
           </Button>
         </div>
       </Form>

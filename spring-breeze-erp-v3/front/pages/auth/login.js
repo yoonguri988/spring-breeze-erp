@@ -14,6 +14,7 @@ import {
   InfoCircleOutlined,
   CheckCircleFilled,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 import AuthLayout from "../../components/AuthLayout";
 import {
   loginRequest,
@@ -24,6 +25,7 @@ import {
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("auth");
   const { loading, error, success, accessToken } = useSelector(
     (state) => state.auth,
   );
@@ -40,14 +42,14 @@ export default function LoginPage() {
   useEffect(() => {
     if (!router.isReady) return;
     if (router.query.reason === "session_expired") {
-      message.warning("로그인 정보가 없습니다. 다시 로그인해 주세요.");
+      message.warning(t("login.sessionExpired"));
       // 새로고침 시 메시지가 다시 뜨지 않도록 쿼리스트링 정리
       const { reason, ...rest } = router.query;
       router.replace({ pathname: "/auth/login", query: rest }, undefined, {
         shallow: true,
       });
     } else if (router.query.reason === "idle_timeout") {
-      message.warning("30분간 활동이 없어 자동으로 로그아웃되었습니다.");
+      message.warning(t("login.idleTimeout"));
       const { reason, ...rest } = router.query;
       router.replace({ pathname: "/auth/login", query: rest }, undefined, {
         shallow: true,
@@ -106,29 +108,29 @@ export default function LoginPage() {
     <AuthLayout>
       {section === "login" && (
         <div className="asec on" id="secLogin">
-          <h1 className="a-h">안녕하세요 👋</h1>
+          <h1 className="a-h">{t("login.greeting")}</h1>
           <p className="a-sub">
-            이메일과 비밀번호를 입력하여
+            {t("login.subtitle1")}
             <br />
-            SBerp에 로그인하세요.
+            {t("login.subtitle2")}
           </p>
 
           <Form layout="vertical" onFinish={onFinishLogin} requiredMark={false}>
             <Form.Item
-              label={<span className="fl">이메일 주소</span>}
+              label={<span className="fl">{t("login.emailLabel")}</span>}
               name="empEmail"
               rules={[
-                { required: true, message: "이메일을 입력하세요." },
+                { required: true, message: t("login.emailRequired") },
                 {
                   pattern: /^[^\s@]+@[^\s@]+$/,
-                  message: "올바른 이메일 형식이 아닙니다.",
+                  message: t("login.emailInvalid"),
                 },
               ]}
             >
               <Input
                 className="fi"
                 size="large"
-                placeholder="name@smartbuilder.com"
+                placeholder={t("login.emailPlaceholder")}
                 prefix={
                   <MailOutlined style={{ color: "var(--sb-ink-faint)" }} />
                 }
@@ -137,14 +139,14 @@ export default function LoginPage() {
             </Form.Item>
 
             <Form.Item
-              label={<span className="fl">비밀번호</span>}
+              label={<span className="fl">{t("login.passwordLabel")}</span>}
               name="empPass"
-              rules={[{ required: true, message: "비밀번호를 입력하세요." }]}
+              rules={[{ required: true, message: t("login.passwordRequired") }]}
             >
               <Input.Password
                 className="fi"
                 size="large"
-                placeholder="비밀번호 입력"
+                placeholder={t("login.passwordPlaceholder")}
                 prefix={
                   <LockOutlined style={{ color: "var(--sb-ink-faint)" }} />
                 }
@@ -158,9 +160,7 @@ export default function LoginPage() {
                 type="error"
                 showIcon
                 message={
-                  typeof error === "string"
-                    ? error
-                    : "이메일 또는 비밀번호가 올바르지 않습니다."
+                  typeof error === "string" ? error : t("login.loginError")
                 }
               />
             )}
@@ -171,7 +171,7 @@ export default function LoginPage() {
               style={{ display: "block", marginBottom: 14 }}
               onClick={() => switchSection("forgot")}
             >
-              비밀번호를 잊으셨나요?
+              {t("login.forgotPassword")}
             </button>
 
             <Button
@@ -182,19 +182,19 @@ export default function LoginPage() {
               icon={<LoginOutlined />}
               block
             >
-              로그인
+              {t("login.submit")}
             </Button>
           </Form>
 
           <div className="a-demo">
             <p>
-              <InfoCircleOutlined /> 데모 계정
+              <InfoCircleOutlined /> {t("login.demo.title")}
               <br />
-              시스템 관리자 이메일 <code>a@a</code> / 비밀번호 <code>1</code>
+              {t("login.demo.sysadmin")} <code>a@a</code> / {t("login.demo.password")} <code>1</code>
               <br />
-              관리자 이메일 <code>b@b</code> / 비밀번호 <code>1</code>
+              {t("login.demo.admin")} <code>b@b</code> / {t("login.demo.password")} <code>1</code>
               <br />
-              사용자 이메일 <code>c@c</code> / 비밀번호 <code>1</code>
+              {t("login.demo.user")} <code>c@c</code> / {t("login.demo.password")} <code>1</code>
             </p>
           </div>
         </div>
@@ -209,13 +209,15 @@ export default function LoginPage() {
           <div className="rp-check-ring">
             <CheckCircleFilled />
           </div>
-          <h1 className="a-h">메일함을 확인해주세요</h1>
+          <h1 className="a-h">{t("forgot.emailSent.title")}</h1>
           <p className="a-sub">
-            입력하신 정보가 확인되어 등록된 이메일 주소로
+            {t("forgot.emailSent.body1")}
             <br />
-            비밀번호 재설정 링크를 발송했습니다.
+            {t("forgot.emailSent.body2")}
             <br />
-            메일의 링크는 <b>10분간</b> 유효합니다.
+            {t("forgot.emailSent.validityPrefix")}
+            <b>{t("forgot.emailSent.validityEmphasis")}</b>
+            {t("forgot.emailSent.validitySuffix")}
           </p>
           <Button
             className="a-btn"
@@ -224,7 +226,7 @@ export default function LoginPage() {
             block
             onClick={() => switchSection("login")}
           >
-            로그인으로 돌아가기
+            {t("forgot.backToLogin")}
           </Button>
         </div>
       )}
@@ -236,13 +238,13 @@ export default function LoginPage() {
             className="a-back"
             onClick={() => switchSection("login")}
           >
-            <ArrowLeftOutlined /> 로그인으로 돌아가기
+            <ArrowLeftOutlined /> {t("forgot.backToLogin")}
           </button>
-          <h1 className="a-h">비밀번호 찾기</h1>
+          <h1 className="a-h">{t("forgot.title")}</h1>
           <p className="a-sub">
-            사원번호 · 이메일 · 휴대폰 번호가
+            {t("forgot.subtitle1")}
             <br />
-            등록된 정보와 일치하면 등록된 이메일로 재설정 링크를 보내드립니다.
+            {t("forgot.subtitle2")}
           </p>
 
           <Form
@@ -252,14 +254,14 @@ export default function LoginPage() {
             requiredMark={false}
           >
             <Form.Item
-              label={<span className="fl">사원번호</span>}
+              label={<span className="fl">{t("forgot.empNoLabel")}</span>}
               name="empNo"
-              rules={[{ required: true, message: "사원번호를 입력하세요." }]}
+              rules={[{ required: true, message: t("forgot.empNoRequired") }]}
             >
               <Input
                 className="fi"
                 size="large"
-                placeholder="E1001"
+                placeholder={t("forgot.empNoPlaceholder")}
                 prefix={
                   <UserOutlined style={{ color: "var(--sb-ink-faint)" }} />
                 }
@@ -268,20 +270,20 @@ export default function LoginPage() {
             </Form.Item>
 
             <Form.Item
-              label={<span className="fl">이메일 주소</span>}
+              label={<span className="fl">{t("forgot.emailLabel")}</span>}
               name="empEmail"
               rules={[
-                { required: true, message: "이메일을 입력하세요." },
+                { required: true, message: t("forgot.emailRequired") },
                 {
                   pattern: /^[^\s@]+@[^\s@]+$/,
-                  message: "올바른 이메일 형식이 아닙니다.",
+                  message: t("forgot.emailInvalid"),
                 },
               ]}
             >
               <Input
                 className="fi"
                 size="large"
-                placeholder="name@sberp.co.kr"
+                placeholder={t("forgot.emailPlaceholder")}
                 prefix={
                   <MailOutlined style={{ color: "var(--sb-ink-faint)" }} />
                 }
@@ -289,14 +291,14 @@ export default function LoginPage() {
             </Form.Item>
 
             <Form.Item
-              label={<span className="fl">휴대폰 번호</span>}
+              label={<span className="fl">{t("forgot.mobileLabel")}</span>}
               name="empMobile"
-              rules={[{ required: true, message: "휴대폰 번호를 입력하세요." }]}
+              rules={[{ required: true, message: t("forgot.mobileRequired") }]}
             >
               <Input
                 className="fi"
                 size="large"
-                placeholder="010-0000-0000"
+                placeholder={t("forgot.mobilePlaceholder")}
                 prefix={
                   <PhoneOutlined style={{ color: "var(--sb-ink-faint)" }} />
                 }
@@ -311,9 +313,7 @@ export default function LoginPage() {
                 type="error"
                 showIcon
                 message={
-                  typeof error === "string"
-                    ? error
-                    : "입력하신 정보와 일치하는 계정을 찾을 수 없습니다. 다시 확인해 주세요."
+                  typeof error === "string" ? error : t("forgot.notFoundError")
                 }
               />
             )}
@@ -326,7 +326,7 @@ export default function LoginPage() {
               icon={<SafetyCertificateOutlined />}
               block
             >
-              본인 확인
+              {t("forgot.submit")}
             </Button>
           </Form>
         </div>

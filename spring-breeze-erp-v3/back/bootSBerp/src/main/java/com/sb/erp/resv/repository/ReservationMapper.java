@@ -58,4 +58,10 @@ public interface ReservationMapper {
 
     // 장비(EQUIPMENT) 자동 미반납 처리 - 종료일시가 지났는데 반납되지 않은 승인건을 NORET으로 전환
     int updateEquipmentNoReturn();
+    
+	/**
+     * 반려(REJ) 예약 이력 정리 - 자원을 실제로 삭제하기 직전에 호출해서 FK 제약조건 위반(ORA-02292)을 막는다.
+     * WAI/APP/NORET 건은 countReservationsByResourceId 에서 이미 걸러지므로 이 메서드가 지우는 대상이 아니다.
+     */
+    int deleteRejectedByResourceId(long resId);
 }

@@ -2,6 +2,7 @@
 import React from "react";
 import { Modal, Button } from "antd";
 import { CheckCircleFilled } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 export default function ApproveResvModal({
   target,
@@ -10,6 +11,8 @@ export default function ApproveResvModal({
   onClose,
   onConfirm,
 }) {
+  const { t } = useTranslation(["resv", "common"]);
+
   if (!target) return null;
 
   return (
@@ -23,7 +26,7 @@ export default function ApproveResvModal({
             gap: 6,
           }}
         >
-          <CheckCircleFilled /> 예약 승인
+          <CheckCircleFilled /> {t("approveModal.title")}
         </span>
       }
       open={open}
@@ -31,7 +34,7 @@ export default function ApproveResvModal({
       width={380}
       footer={[
         <Button key="cancel" onClick={onClose} disabled={loading}>
-          닫기
+          {t("common:button.close")}
         </Button>,
         <Button
           key="confirm"
@@ -39,7 +42,7 @@ export default function ApproveResvModal({
           loading={loading}
           onClick={onConfirm}
         >
-          <CheckCircleFilled /> 승인 처리
+          <CheckCircleFilled /> {t("approveModal.confirmButton")}
         </Button>,
       ]}
     >
@@ -52,15 +55,14 @@ export default function ApproveResvModal({
         </div>
         <div className="sb-confirm-box__text">
           <p className="sb-confirm-box__title">
-            이 예약 요청을 승인하시겠습니까?
+            {t("approveModal.confirmTitle")}
           </p>
           <p className="sb-confirm-box__desc">
-            승인 후에는 신청자에게 자원 사용이 확정되며, 상태를 다시 대기로
-            되돌릴 수 없습니다.
+            {t("approveModal.confirmDesc")}
           </p>
           {target.resName && (
             <p className="sb-confirm-box__desc" style={{ marginTop: 4 }}>
-              대상 자원: <b>{target.resName}</b>
+              {t("approveModal.targetResource")} <b>{target.resName}</b>
             </p>
           )}
         </div>

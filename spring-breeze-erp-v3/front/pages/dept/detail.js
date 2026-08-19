@@ -5,13 +5,18 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "antd";
 import { ArrowLeftOutlined, RightOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
-import { fetchDeptDetailRequest, fetchDeptEmpListRequest } from "../../reducers/dept/deptReducer";
+import {
+  fetchDeptDetailRequest,
+  fetchDeptEmpListRequest,
+} from "../../reducers/dept/deptReducer";
 import DeptDetailView from "../../components/DeptDetailView";
 
 export default function DeptDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["dept", "common"]);
 
   const { detail, deptEmpList } = useSelector((state) => state.dept);
   const { user } = useSelector((state) => state.auth);
@@ -48,14 +53,14 @@ export default function DeptDetailPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <RightOutlined />{" "}
+            <Link href="/">{t("detail.breadcrumbHome")}</Link> <RightOutlined />{" "}
             <Link
               href={{
                 pathname: "/dept/detail",
                 query: { deptId: dept.deptId },
               }}
             >
-              부서 상세 현황
+              {t("detail.breadcrumbTitle")}
             </Link>{" "}
             <RightOutlined /> {dept.deptName}
           </div>
@@ -69,8 +74,8 @@ export default function DeptDetailPage() {
               query: dept.comId ? { comId: dept.comId } : {},
             }}
           >
-            <Button icon={<ArrowLeftOutlined />} size="small">
-              목록으로
+            <Button icon={<ArrowLeftOutlined />}>
+              {t("detail.backBtn")}
             </Button>
           </Link>
         </div>
