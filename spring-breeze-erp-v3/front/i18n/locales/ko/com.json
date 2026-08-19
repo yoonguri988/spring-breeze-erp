@@ -151,7 +151,7 @@
     "deptLeaderLabel": "{{name}} 부서장"
   },
   "list": {
-    "breadcrumb": "조직 관리 &gt; 회사 관리 &gt; 목록",
+    "breadcrumb": "조직 관리 > 회사 관리 > 목록",
     "title": "회사 관리",
     "subtitle": "등록된 회사를 조회하고 관리합니다.",
     "addButton": "회사 등록",

@@ -151,7 +151,7 @@
     "deptLeaderLabel": "{{name}} (Head)"
   },
   "list": {
-    "breadcrumb": "Organization Management &gt; Company Management &gt; List",
+    "breadcrumb": "Organization Management > Company Management > List",
     "title": "Company Management",
     "subtitle": "View and manage registered companies.",
     "addButton": "Add Company",
