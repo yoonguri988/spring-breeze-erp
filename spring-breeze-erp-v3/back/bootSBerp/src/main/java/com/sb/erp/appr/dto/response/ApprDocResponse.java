@@ -14,6 +14,8 @@ public class ApprDocResponse {
 	private Long forId;
 	private Long forVersion;
 	private String forTitle;
+	private String forSchema;
+	private String forContent;
 	private Long empId;
 	private String empName;
 	private Long comId;
@@ -30,6 +32,8 @@ public class ApprDocResponse {
 		this.forId = doc.getApprForm().getForId();
 		this.forVersion = doc.getApprForm().getForVersion();
 		this.forTitle = doc.getApprForm().getForTitle();
+		this.forSchema = doc.getApprForm().getForSchema();
+		this.forContent = doc.getApprForm().getForContent();
 		this.empId = doc.getEmployee().getEmpId();
 		this.empName = doc.getEmployee().getEmpName();
 		this.comId = doc.getCompany().getComId();

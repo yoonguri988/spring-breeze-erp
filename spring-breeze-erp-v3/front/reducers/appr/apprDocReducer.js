@@ -99,6 +99,9 @@ const apprDocReducer = createSlice({
             state.writeSubmitting = false;
             state.writeError = null;
             state.writeSuccess = false;
+            state.apprLines = [];
+            state.deptTree = [];
+            state.deptEmps = [];
         },
 
         // 문서 목록 조회

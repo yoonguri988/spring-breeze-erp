@@ -10,7 +10,7 @@ import {
     resetFormState
 } from "../../reducers/appr/apprFormReducer";
 
-const APPR_FORM_API_BASE = "/api/appr/forms";
+const APPR_FORM_API_BASE = "/appr";
 
 // 양식 목록 조회
 // GET /api/appr/forms

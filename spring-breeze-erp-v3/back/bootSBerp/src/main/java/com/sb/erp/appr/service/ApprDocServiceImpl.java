@@ -29,7 +29,6 @@ public class ApprDocServiceImpl implements ApprDocService{
 	private final ApprLineMapper lineDao;
 	private final DeptService deptService;
 	
-	
 	// 작성하려는 사용자의 회사 양식
 	@Override
 	public List<ApprFormResponse> findForm(Long comId) {
@@ -156,8 +155,8 @@ public class ApprDocServiceImpl implements ApprDocService{
 
 	// 결재선 지정용 - 부서 내 직원 목록
 	@Override
-	public List<ApprLineResponse> selectDeptEmpsForLines(Long deptId) {
-		return dao.selectDeptEmpsForLines(deptId);
+	public List<ApprLineResponse> selectDeptEmpsForLines(Long deptId, Long empId) {
+		return dao.selectDeptEmpsForLines(deptId, empId);
 	}
 
 	// 결재선 지정 가능 인원수
@@ -183,7 +182,5 @@ public class ApprDocServiceImpl implements ApprDocService{
 	public int selectMyTodoDocsCnt(ApprDocSearchCondition condition) {
 		return dao.selectMyTodoDocsCnt(condition);
 	}
-
-	
 	
 }
