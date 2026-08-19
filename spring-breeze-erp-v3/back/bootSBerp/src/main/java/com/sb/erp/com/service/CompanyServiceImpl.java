@@ -72,7 +72,7 @@ public class CompanyServiceImpl implements CompanyService {
  
 		// 로고가 실제로 교체된 경우에만 기존 파일 정리
 		if (result > 0 && before.getComLogo() != null && !before.getComLogo().equals(dto.getComLogo())) {
-			FileUploadUtil.delete(before.getComLogo());
+			FileUploadUtil.delete(FileUploadUtil.resolveDiskPath(before.getComLogo()));
 		}
  
 		return result;

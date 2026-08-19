@@ -9,6 +9,7 @@ import { createSlice } from "@reduxjs/toolkit";
 //  - PUT    /{revId}     : 자원 예약 수정 (update)
 //  - DELETE /{revId}     : 자원 예약 취소 (cancel)
 //  - GET    /available   : 실시간 잔여수량 조회 (getAvailableQty)
+//  - PUT    /{revId}/return : 자원 반납 처리 (return) - 본인 예약만 가능
 // =========================================================
 
 const initialState = {
@@ -161,7 +162,43 @@ const resvReducer = createSlice({
     },
 
     // ---------------------------------------------------
-    // 7) 실시간 잔여수량 조회 GET /api/resv/available
+    // 7) 자원 반납 처리 PUT /api/resv/{revId}/return
+    // payload: revId
+    // ---------------------------------------------------
+    returnResvRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.success = false;
+    },
+    returnResvSuccess(state, action) {
+      // action.payload: { success, message, revId, returnDt }
+      state.loading = false;
+      state.success = true;
+      state.message = action.payload?.message ?? "반납 처리되었습니다.";
+
+      const revId = action.payload?.revId;
+      const returnDt = action.payload?.returnDt;
+      if (revId != null && returnDt) {
+        // 반납 처리되면 상태(NORET 포함)와 무관하게 승인(APP)으로 정리한다.
+        const target = state.myList.find((r) => r.revId === revId);
+        if (target) {
+          target.returnDt = returnDt;
+          target.status = "APP";
+        }
+        if (state.detail && state.detail.revId === revId) {
+          state.detail.returnDt = returnDt;
+          state.detail.status = "APP";
+        }
+      }
+    },
+    returnResvFailure(state, action) {
+      state.loading = false;
+      state.success = false;
+      state.error = action.payload;
+    },
+
+    // ---------------------------------------------------
+    // 8) 실시간 잔여수량 조회 GET /api/resv/available
     // payload: ResvSearchRequest (resId, startDt, endDt 등)
     // ---------------------------------------------------
     fetchAvailableQtyRequest(state) {
@@ -216,6 +253,10 @@ export const {
   cancelResvRequest,
   cancelResvSuccess,
   cancelResvFailure,
+
+  returnResvRequest,
+  returnResvSuccess,
+  returnResvFailure,
 
   fetchAvailableQtyRequest,
   fetchAvailableQtySuccess,

@@ -1,5 +1,4 @@
 // pages/com/detail.js
-// 원본: pages/com/detail.html
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -16,9 +15,10 @@ import {
   ApartmentOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import { fetchCompanyDetailRequest } from "../../reducers/com/companyReducer";
-import { GRP_LABEL_MAP, CODE_LABEL_MAP } from "../../constants/industryCode";
+import { getGrpLabel, getCodeLabel } from "../../constants/industryCode";
 import resolveFileUrl from "../../constants/resolveFileUrl";
 
 const TONE_BY_DEPTH = { 0: "blue", 1: "green", 2: "amber" };
@@ -26,6 +26,7 @@ const TONE_BY_DEPTH = { 0: "blue", 1: "green", 2: "amber" };
 export default function ComDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t, i18n } = useTranslation(["com", "common"]);
   const { detail, loading } = useSelector((state) => state.company);
 
   const comId = router.query.comId;
@@ -52,21 +53,22 @@ export default function ComDetailPage() {
       <div className="sb-page-head" style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <span>&gt;</span>{" "}
-            <Link href="/com/my">회사 정보</Link> <span>&gt;</span> {com.comName}
+            <Link href="/">{t("breadcrumb.home")}</Link> <span>&gt;</span>{" "}
+            <Link href="/com/my">{t("breadcrumb.comInfo")}</Link> <span>&gt;</span>{" "}
+            {com.comName}
           </div>
-          <h1>{com.comName} 회사 정보</h1>
-          <p>{com.comName} 회사의 기본 정보와 조직도를 확인합니다.</p>
+          <h1>{t("detail.title", { name: com.comName })}</h1>
+          <p>{t("detail.subtitle", { name: com.comName })}</p>
         </div>
         <div className="sb-page-head__actions" style={{ display: "flex", gap: 8 }}>
           <Link href={{ pathname: "/com/edit", query: { comId: com.comId } }}>
             <button type="button" className="btn btn-sb btn-sm">
-              <EditOutlined /> 수정하기
+              <EditOutlined /> {t("detail.editButton")}
             </button>
           </Link>
           <Link href="/com/list">
             <button type="button" className="btn btn-ghost btn-sm">
-              <ArrowLeftOutlined /> 목록으로
+              <ArrowLeftOutlined /> {t("detail.listButton")}
             </button>
           </Link>
         </div>
@@ -91,24 +93,27 @@ export default function ComDetailPage() {
             {com.comName}
           </div>
           <div className="mc-summary__sub" style={{ color: "#888" }}>
-            대표 {com.comCeo}
+            {t("detail.ceoPrefix")} {com.comCeo}
           </div>
         </div>
         <div className="mc-stat-divider" />
         <div className="mc-stat-col">
-          <div className="mc-stat-col__label">총 임직원</div>
-          <div className="mc-stat-col__val">{stats.empTotal ?? "-"}명</div>
+          <div className="mc-stat-col__label">{t("detail.totalEmp")}</div>
+          <div className="mc-stat-col__val">
+            {stats.empTotal ?? "-"}
+            {t("detail.personSuffix")}
+          </div>
         </div>
         <div className="mc-stat-col">
-          <div className="mc-stat-col__label">부서</div>
+          <div className="mc-stat-col__label">{t("detail.dept")}</div>
           <div className="mc-stat-col__val">{stats.deptTotal ?? "-"}</div>
         </div>
         <div className="mc-stat-col">
-          <div className="mc-stat-col__label">본사</div>
+          <div className="mc-stat-col__label">{t("detail.headOffice")}</div>
           <div className="mc-stat-col__val">{stats.dept1Total ?? "-"}</div>
         </div>
         <div className="mc-stat-col">
-          <div className="mc-stat-col__label">부서/팀</div>
+          <div className="mc-stat-col__label">{t("detail.deptTeam")}</div>
           <div className="mc-stat-col__val">{stats.dept2Total ?? "-"}</div>
         </div>
       </div>
@@ -117,21 +122,23 @@ export default function ComDetailPage() {
       <div className="row g-3">
         {/* 좌측: 회사 기본 정보 */}
         <div className="col-lg-5">
-          <Card className="sb-card h-100" title="회사 기본 정보">
-            <InfoRow icon={<BankOutlined />} label="회사명" value={com.comName} />
-            <InfoRow icon={<IdcardOutlined />} label="대표자" value={com.comCeo} />
-            <InfoRow icon={<FileTextOutlined />} label="사업자등록번호" value={com.bizNo} />
-            <InfoRow icon={<PhoneOutlined />} label="대표 전화" value={com.comTel} />
+          <Card className="sb-card h-100" title={t("detail.basicInfoCard")}>
+            <InfoRow icon={<BankOutlined />} label={t("detail.comNameLabel")} value={com.comName} />
+            <InfoRow icon={<IdcardOutlined />} label={t("detail.ceoLabel")} value={com.comCeo} />
+            <InfoRow icon={<FileTextOutlined />} label={t("detail.bizNoLabel")} value={com.bizNo} />
+            <InfoRow icon={<PhoneOutlined />} label={t("detail.telLabel")} value={com.comTel} />
             <InfoRow
               icon={<TagOutlined />}
-              label="업종"
+              label={t("detail.industryLabel")}
               value={
                 <>
-                  <span>{GRP_LABEL_MAP[com.industryGrpCode] || "미분류"}</span>
+                  <span>
+                    {getGrpLabel(com.industryGrpCode, i18n.language) || t("detail.uncategorized")}
+                  </span>
                   {com.industryCode && (
                     <span className="text-faint" style={{ fontWeight: 500 }}>
                       {" "}
-                      · {CODE_LABEL_MAP[com.industryCode] || ""} ({com.industryCode})
+                      · {getCodeLabel(com.industryCode, i18n.language) || ""} ({com.industryCode})
                     </span>
                   )}
                 </>
@@ -142,7 +149,7 @@ export default function ComDetailPage() {
 
         {/* 우측: 조직도 (읽기전용) */}
         <div className="col-lg-7">
-          <Card className="sb-card h-100" title="조직도" bodyStyle={{ padding: 0 }}>
+          <Card className="sb-card h-100" title={t("detail.orgCard")} bodyStyle={{ padding: 0 }}>
             <div className="mc-org">
               {deptList.map((dept, idx) => {
                 const tone = TONE_BY_DEPTH[dept.depth] ?? "cyan";
@@ -159,11 +166,14 @@ export default function ComDetailPage() {
                       <span>{dept.deptName}</span>
                       {dept.leaderName && (
                         <span className="mc-org-lead" style={{ marginLeft: 8, color: "#999" }}>
-                          {dept.leaderName} 부서장
+                          {t("detail.deptLeaderLabel", { name: dept.leaderName })}
                         </span>
                       )}
                     </div>
-                    <Tag>{dept.empCount}명</Tag>
+                    <Tag>
+                      {dept.empCount}
+                      {t("detail.personSuffix")}
+                    </Tag>
                   </div>
                 );
               })}

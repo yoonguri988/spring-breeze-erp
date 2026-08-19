@@ -11,6 +11,7 @@ import {
   EditOutlined,
   InfoCircleOutlined,
   PlusOutlined,
+  RollbackOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
@@ -19,9 +20,11 @@ import {
   fetchMyResvListRequest,
   fetchMyResvCountRequest,
   cancelResvRequest,
+  returnResvRequest,
   resetResvState,
 } from "../../reducers/resv/resvReducer";
 import CancelResvModal from "../../components/CancelResvModal";
+import ReturnResvModal from "../../components/ReturnResvModal";
 
 const ONE_PAGE_LIST = 10;
 
@@ -30,6 +33,7 @@ const STATUS_TABS = [
   { value: "WAI", label: "대기" },
   { value: "APP", label: "승인" },
   { value: "REJ", label: "반려" },
+  { value: "NORET", label: "미반납" },
 ];
 
 function typeBadge(type) {
@@ -49,6 +53,8 @@ function statusBadge(status) {
     return <span className="sb-badge sb-badge--green">승인</span>;
   if (status === "REJ")
     return <span className="sb-badge sb-badge--red">반려</span>;
+  if (status === "NORET")
+    return <span className="sb-badge sb-badge--red">미반납</span>;
   return <span className="sb-badge sb-badge--gray">{status}</span>;
 }
 
@@ -59,7 +65,7 @@ function returnCell(r) {
         {moment(r.returnDt).format("YYYY-MM-DD HH:mm:ss")}
       </span>
     );
-  if (r.status === "APP" && !r.returnDt)
+  if ((r.status === "APP" || r.status === "NORET") && !r.returnDt)
     return <span className="sb-badge sb-badge--amber">미반납</span>;
   return <span className="view-val-empty">해당 없음</span>;
 }
@@ -78,6 +84,8 @@ export default function ResvMyPage() {
   const [keyword, setKeyword] = useState("");
   const [target, setTarget] = useState(null); // { revId, resName }
   const [canceling, setCanceling] = useState(false);
+  const [returnTarget, setReturnTarget] = useState(null); // { revId, resName }
+  const [returning, setReturning] = useState(false);
   const prevLoading = useRef(false);
 
   const status = router.query.status || "";
@@ -129,6 +137,23 @@ export default function ResvMyPage() {
   }, [loading, success, error, canceling]);
 
   useEffect(() => {
+    if (!returning) return;
+    if (prevLoading.current && !loading) {
+      if (success) {
+        message.success("반납 처리되었습니다.");
+        setReturnTarget(null);
+        setReturning(false);
+        dispatch(resetResvState());
+      } else if (error) {
+        message.error(error);
+        setReturning(false);
+        dispatch(resetResvState());
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, success, error, returning]);
+
+  useEffect(() => {
     prevLoading.current = loading;
   }, [loading]);
 
@@ -162,6 +187,17 @@ export default function ResvMyPage() {
     if (!target) return;
     setCanceling(true);
     dispatch(cancelResvRequest(target.revId));
+  };
+
+  const openReturn = (r) => {
+    setReturnTarget({ revId: r.revId, resName: r.resName });
+    dispatch(resetResvState());
+  };
+
+  const confirmReturn = () => {
+    if (!returnTarget) return;
+    setReturning(true);
+    dispatch(returnResvRequest(returnTarget.revId));
   };
 
   const startOffset = (currentPage - 1) * ONE_PAGE_LIST;
@@ -378,6 +414,18 @@ export default function ResvMyPage() {
                             </button>
                           </>
                         )}
+                        {(r.status === "APP" || r.status === "NORET") &&
+                          !r.returnDt && (
+                            <button
+                              type="button"
+                              className="sb-iconbtn"
+                              style={{ color: "var(--sb-green, #389e0d)" }}
+                              title="반납"
+                              onClick={() => openReturn(r)}
+                            >
+                              <RollbackOutlined />
+                            </button>
+                          )}
                       </div>
                     </td>
                   </tr>
@@ -413,6 +461,13 @@ export default function ResvMyPage() {
         loading={canceling && loading}
         onClose={() => setTarget(null)}
         onConfirm={confirmCancel}
+      />
+      <ReturnResvModal
+        target={returnTarget}
+        open={!!returnTarget}
+        loading={returning && loading}
+        onClose={() => setReturnTarget(null)}
+        onConfirm={confirmReturn}
       />
     </div>
   );

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card, Descriptions, Tag, Button } from "antd";
 import { ArrowLeftOutlined, EditOutlined } from "@ant-design/icons";
 
-import { detailEvalRequest } from "../../reducers/eval/evalReducer";
+import { detailEvalRequest, clearEvalDetail, } from "../../reducers/eval/evalReducer";
 
 const STATUS_TAG = {
   DRAFT: { color: "default", label: "임시저장" },
@@ -31,7 +31,7 @@ export default function EvalDetailPage() {
     if (!evalId) return;
     dispatch(detailEvalRequest(Number(evalId)));
 
-    return () => { dispatch(clearEvalDetail()); };
+    return () => { dispatch(clearEvalDetail()); }
   }, [dispatch, evalId]);
 
   const e = currentEval;

@@ -8,15 +8,18 @@ import {
   ArrowLeftOutlined,
   CloseCircleOutlined,
   EditOutlined,
+  RollbackOutlined,
 } from "@ant-design/icons";
 
 import {
   fetchResvDetailRequest,
   cancelResvRequest,
+  returnResvRequest,
   resetResvState,
 } from "../../reducers/resv/resvReducer";
 import ResvDetailView, { statusBadge } from "../../components/ResvDetailView";
 import CancelResvModal from "../../components/CancelResvModal";
+import ReturnResvModal from "../../components/ReturnResvModal";
 
 export default function ResvDetailPage() {
   const router = useRouter();
@@ -39,6 +42,8 @@ export default function ResvDetailPage() {
 
   const [cancelTarget, setCancelTarget] = useState(null);
   const [canceling, setCanceling] = useState(false);
+  const [returnTarget, setReturnTarget] = useState(null);
+  const [returning, setReturning] = useState(false);
   const prevLoading = useRef(false);
 
   useEffect(() => {
@@ -66,17 +71,45 @@ export default function ResvDetailPage() {
   }, [loading, success, error, canceling]);
 
   useEffect(() => {
+    if (!returning) return;
+    if (prevLoading.current && !loading) {
+      if (success) {
+        message.success("반납 처리되었습니다.");
+        setReturnTarget(null);
+        setReturning(false);
+        dispatch(resetResvState());
+        dispatch(fetchResvDetailRequest(revId));
+      } else if (error) {
+        message.error(error);
+        setReturning(false);
+        dispatch(resetResvState());
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, success, error, returning]);
+
+  useEffect(() => {
     prevLoading.current = loading;
   }, [loading]);
 
   if (!resv) return null;
 
   const showActions = resv.status === "WAI" && isSelf;
+  const canReturn =
+    isSelf &&
+    (resv.status === "APP" || resv.status === "NORET") &&
+    !resv.returnDt;
 
   const confirmCancel = () => {
     if (!cancelTarget) return;
     setCanceling(true);
     dispatch(cancelResvRequest(cancelTarget.revId));
+  };
+
+  const confirmReturn = () => {
+    if (!returnTarget) return;
+    setReturning(true);
+    dispatch(returnResvRequest(returnTarget.revId));
   };
 
   return (
@@ -123,6 +156,20 @@ export default function ResvDetailPage() {
                 </Button>
               </>
             )}
+            {canReturn && (
+              <Button
+                type="primary"
+                icon={<RollbackOutlined />}
+                onClick={() =>
+                  setReturnTarget({
+                    revId: resv.revId,
+                    resName: resv.resName,
+                  })
+                }
+              >
+                반납
+              </Button>
+            )}
             <Link href="/resv/my">
               <Button icon={<ArrowLeftOutlined />}>
                 목록으로
@@ -140,6 +187,13 @@ export default function ResvDetailPage() {
         loading={canceling && loading}
         onClose={() => setCancelTarget(null)}
         onConfirm={confirmCancel}
+      />
+      <ReturnResvModal
+        target={returnTarget}
+        open={!!returnTarget}
+        loading={returning && loading}
+        onClose={() => setReturnTarget(null)}
+        onConfirm={confirmReturn}
       />
     </div>
   );

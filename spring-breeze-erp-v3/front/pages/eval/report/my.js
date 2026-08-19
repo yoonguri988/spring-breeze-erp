@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card, Table, Tag, Button } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 
-import { myReportRequest } from "../../../reducers/eval/evalReportReducer";
+import { myReportRequest, resetReportState, } from "../../../reducers/eval/evalReportReducer";
 
 const GRADE_COLOR = { S: "#eb2f96", A: "#52c41a", B: "#1890ff", C: "#fa8c16", D: "#ff4d4f" };
 const SENTIMENT = {
@@ -21,7 +21,7 @@ export default function MyReportPage() {
   useEffect(() => {
     dispatch(myReportRequest());
     
-    return () => { dispatch(resetReportState()); };
+    return () => { dispatch(resetReportState()); }
   }, [dispatch]);
 
   const columns = [

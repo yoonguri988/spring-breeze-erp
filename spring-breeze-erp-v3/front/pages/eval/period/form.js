@@ -7,13 +7,9 @@ import { Card, Form, Input, InputNumber, Select, DatePicker, Button, message } f
 import { ArrowLeftOutlined, CheckOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
-import {
-  detailPeriodRequest,
-  createPeriodRequest,
-  updatePeriodRequest,
-  checkDuplicateRequest,
-  clearCheckDuplicate,
-  resetPeriodState,
+import { 
+  detailPeriodRequest, createPeriodRequest, updatePeriodRequest,
+  checkDuplicateRequest, clearCheckDuplicate, resetPeriodState,
 } from "../../../reducers/eval/evalPeriodReducer";
 
 const TERM_OPTIONS = [

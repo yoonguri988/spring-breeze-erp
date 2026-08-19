@@ -224,4 +224,46 @@ public class ReservationController {
         result.put("resStatus", res.getResStatus());
         return ResponseEntity.ok(result);
     }
+    
+    // 자원 반납 처리 PUT /api/resv/{revId}/return
+    // 자원을 예약해서 빌린 본인(신청자 본인)만 반납 처리할 수 있다. (관리자도 대신 반납 처리하지 않음)
+    @Operation(summary = "자원 반납 처리", description = "본인이 예약한 자원을 반납 처리합니다. 승인(APP) 또는 미반납(NORET) 상태에서만 가능합니다.")
+    @PutMapping("/{revId}/return")
+    public ResponseEntity<Map<String, Object>> returnResv(
+            @Parameter(description = "반납 처리할 예약 ID", example = "1", required = true) @PathVariable("revId") long revId,
+            @Parameter(hidden = true) Authentication authentication) {
+        Map<String, Object> result = new HashMap<>();
+
+        ResvResponse existing = service.getResvDetail(revId);
+        Long myEmpId = authUserJwtService.getCurrentEmpId(authentication);
+
+        if (existing == null || !existing.getEmpId().equals(myEmpId)) {
+            result.put("success", false);
+            result.put("message", "본인이 예약한 자원만 반납할 수 있습니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+        }
+        if (existing.getReturnDt() != null) {
+            result.put("success", false);
+            result.put("message", "이미 반납 처리된 예약입니다.");
+            return ResponseEntity.badRequest().body(result);
+        }
+        if (!"APP".equals(existing.getStatus()) && !"NORET".equals(existing.getStatus())) {
+            result.put("success", false);
+            result.put("message", "승인된 예약만 반납할 수 있습니다.");
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        LocalDateTime returnDt = LocalDateTime.now();
+        int updated = service.returnReservation(revId, myEmpId, returnDt);
+        if (updated > 0) {
+            result.put("success", true);
+            result.put("message", "반납 처리되었습니다.");
+            result.put("returnDt", returnDt);
+            return ResponseEntity.ok(result);
+        }
+
+        result.put("success", false);
+        result.put("message", "반납 처리에 실패했습니다.");
+        return ResponseEntity.internalServerError().body(result);
+    }
 }

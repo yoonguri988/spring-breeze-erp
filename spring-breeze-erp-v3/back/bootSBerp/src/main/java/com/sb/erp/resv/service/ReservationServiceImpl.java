@@ -1,5 +1,6 @@
 package com.sb.erp.resv.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,5 +96,10 @@ public class ReservationServiceImpl implements ReservationService {
 	@Override
 	public int getReservedQuantity(ResvSearchRequest search) {
 		return dao.selectReservedQuantity(search);
+	}
+	
+	@Override
+	public int returnReservation(long revId, Long empId, LocalDateTime returnDt) {
+	    return dao.updateReturn(revId, empId, returnDt);
 	}
 }

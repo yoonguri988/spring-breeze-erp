@@ -11,4 +11,5 @@ public class StatsResvResponse {
 	private long waiTotal;
 	private long appTotal;
 	private long rejTotal;
+	private long noRetTotal;
 }

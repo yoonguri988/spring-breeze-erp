@@ -1,5 +1,4 @@
 // pages/com/add.js
-// 원본: pages/com/form.html + pages/com/util/ocrModal.html
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -33,6 +32,7 @@ import {
   SafetyCertificateOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 import {
   addCompanyRequest,
@@ -57,6 +57,7 @@ export default function ComAddPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const { t, i18n } = useTranslation(["com", "common"]);
 
   const { loading, error, success, bizNoCheck } = useSelector(
     (state) => state.company,
@@ -82,17 +83,28 @@ export default function ComAddPage() {
   const [ocrLoadingLocal, setOcrLoadingLocal] = useState(false);
   const [ocrForm, setOcrForm] = useState(null); // { bizNo, comName, comCeo, startDt, industryGrpCode, industryCode, grpRaw, codeRaw }
 
-  const codeOptions = useMemo(() => getCodeOptions(industryGrpCode), [industryGrpCode]);
+  const codeOptions = useMemo(
+    () => getCodeOptions(industryGrpCode, i18n.language),
+    [industryGrpCode, i18n.language],
+  );
   const ocrCodeOptions = useMemo(
-    () => getCodeOptions(ocrForm?.industryGrpCode),
-    [ocrForm?.industryGrpCode],
+    () => getCodeOptions(ocrForm?.industryGrpCode, i18n.language),
+    [ocrForm?.industryGrpCode, i18n.language],
+  );
+  const grpOptions = useMemo(
+    () =>
+      GRP_OPTIONS.map((o) => ({
+        value: o.value,
+        label: i18n.language === "en" ? o.labelEn : o.label,
+      })),
+    [i18n.language],
   );
 
   // 등록 성공/실패 처리
   useEffect(() => {
     if (!submitting || loading) return;
     if (success) {
-      message.success("회사 등록에 성공하였습니다.");
+      message.success(t("add.messages.success"));
       dispatch(resetCompanyState());
       setSubmitting(false);
       router.push("/com/list");
@@ -109,7 +121,7 @@ export default function ComAddPage() {
     if (!bizNoCheck.checked) return;
     if (bizNoCheck.duplicate) {
       form.setFields([
-        { name: "bizNo", errors: ["이미 사용 중인 사업자번호입니다."] },
+        { name: "bizNo", errors: [t("add.messages.bizNoDuplicate")] },
       ]);
     } else {
       form.setFields([{ name: "bizNo", errors: [] }]);
@@ -129,10 +141,10 @@ export default function ComAddPage() {
         startDt: fields.startDt ? fields.startDt.format("YYYY-MM-DD") : "",
         ceoName: fields.comCeo,
       });
-      message.success("국세청에 등록된 사업자 정보와 일치합니다.");
+      message.success(t("add.verify.success"));
     } else {
       setVerifiedSnapshot(null);
-      message.error(item?.valid_msg || "입력하신 정보와 일치하는 사업자를 찾을 수 없습니다.");
+      message.error(item?.valid_msg || t("add.verify.failDefault"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [utilLoading, verifying, bizNoVerifyResult]);
@@ -144,7 +156,7 @@ export default function ComAddPage() {
     if (!ocrLoadingLocal || utilLoading) return;
     setOcrLoadingLocal(false);
     if (!ocrResult) {
-      message.warning("OCR 인식에 실패했습니다.");
+      message.warning(t("add.ocr.fail"));
       return;
     }
     const grpCode = matchGrpFromText(ocrResult.industryGrpText);
@@ -159,7 +171,7 @@ export default function ComAddPage() {
       grpRaw: ocrResult.industryGrpText || "",
       codeRaw: ocrResult.industryCodeText || "",
     });
-    message.success("사업자등록증 인식이 완료되었습니다. 내용을 확인해주세요.");
+    message.success(t("add.ocr.success"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ocrLoadingLocal, utilLoading, ocrResult]);
 
@@ -187,15 +199,15 @@ export default function ComAddPage() {
   const handleVerifyBizNo = () => {
     const fields = form.getFieldsValue();
     if (!BIZNO_PATTERN.test(fields.bizNo || "")) {
-      message.error("사업자등록번호 형식을 먼저 확인해주세요. (예: 123-45-67890)");
+      message.error(t("add.verify.bizNoFormatRequired"));
       return;
     }
     if (!fields.startDt) {
-      message.error("개업일자를 입력해주세요.");
+      message.error(t("add.verify.startDtRequired"));
       return;
     }
     if (!fields.comCeo) {
-      message.error("대표자명을 먼저 입력해주세요.");
+      message.error(t("add.verify.ceoRequired"));
       return;
     }
     setVerifying(true);
@@ -212,7 +224,7 @@ export default function ComAddPage() {
     const file = info.file?.originFileObj || info.file;
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      message.error("파일 크기는 2MB 이하여야 합니다.");
+      message.error(t("form.logoSizeError"));
       return;
     }
     setLogoFile(file);
@@ -264,7 +276,7 @@ export default function ComAddPage() {
 
   const onFinish = (values) => {
     if (!isVerified(values)) {
-      message.error("사업자등록번호 진위확인을 먼저 완료해주세요.");
+      message.error(t("add.verify.requiredBeforeSubmit"));
       return;
     }
     const dto = {
@@ -288,18 +300,19 @@ export default function ComAddPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <span>&gt;</span>{" "}
-            <Link href="/com/list">회사 관리</Link> <span>&gt;</span> 등록
+            <Link href="/">{t("breadcrumb.home")}</Link> <span>&gt;</span>{" "}
+            <Link href="/com/list">{t("breadcrumb.comManagement")}</Link>{" "}
+            <span>&gt;</span> {t("breadcrumb.add")}
           </div>
-          <h1>회사 등록</h1>
-          <p>새로운 회사를 시스템에 등록합니다.</p>
+          <h1>{t("add.title")}</h1>
+          <p>{t("add.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions" style={{ display: "flex", gap: 8 }}>
           <Button icon={<CameraOutlined />} onClick={() => setOcrOpen(true)}>
-            사업자등록증으로 자동입력
+            {t("add.ocrButton")}
           </Button>
           <Link href="/com/list">
-            <Button icon={<ArrowLeftOutlined />}>목록으로</Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("form.backToListButton")}</Button>
           </Link>
         </div>
       </div>
@@ -316,20 +329,20 @@ export default function ComAddPage() {
           className="sb-card mb-3"
           title={
             <span>
-              <TagOutlined className="me-2 text-soft" /> 업종 분류
+              <TagOutlined className="me-2 text-soft" /> {t("form.industryCard")}
             </span>
           }
         >
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
-                label="업종"
+                label={t("form.industryLabel")}
                 name="industryGrpCode"
-                rules={[{ required: true, message: "업종을 선택하세요." }]}
+                rules={[{ required: true, message: t("form.industryRequired") }]}
               >
                 <Select
-                  placeholder="-- 업종 선택 --"
-                  options={GRP_OPTIONS}
+                  placeholder={t("form.industryPlaceholder")}
+                  options={grpOptions}
                   onChange={(v) => {
                     setIndustryGrpCode(v);
                     form.setFieldsValue({ industryCode: undefined });
@@ -339,13 +352,15 @@ export default function ComAddPage() {
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="세부 업종"
+                label={t("form.detailIndustryLabel")}
                 name="industryCode"
-                rules={[{ required: true, message: "세부 업종을 선택하세요." }]}
+                rules={[{ required: true, message: t("form.detailIndustryRequired") }]}
               >
                 <Select
                   placeholder={
-                    industryGrpCode ? "-- 세부업종 선택 --" : "-- 업종을 먼저 선택하세요 --"
+                    industryGrpCode
+                      ? t("form.detailIndustryPlaceholder")
+                      : t("form.detailIndustryPlaceholderDisabled")
                   }
                   disabled={!industryGrpCode}
                   options={codeOptions}
@@ -360,57 +375,57 @@ export default function ComAddPage() {
           className="sb-card mb-3"
           title={
             <span>
-              <BankOutlined className="me-2 text-soft" /> 기본 정보
+              <BankOutlined className="me-2 text-soft" /> {t("form.basicInfoCard")}
             </span>
           }
         >
           <Row gutter={16}>
             <Col xs={24} md={16}>
               <Form.Item
-                label="회사명"
+                label={t("form.comNameLabel")}
                 name="comName"
-                rules={[{ required: true, message: "회사명은 필수입니다. (최대 100자)" }]}
+                rules={[{ required: true, message: t("form.comNameRequired") }]}
               >
-                <Input placeholder="예: (주)선빈테크놀로지" maxLength={100} />
+                <Input placeholder={t("form.comNamePlaceholder")} maxLength={100} />
               </Form.Item>
             </Col>
             <Col xs={24} md={8}>
               <Form.Item
-                label="대표자"
+                label={t("form.ceoLabel")}
                 name="comCeo"
-                rules={[{ required: true, message: "대표자명은 필수입니다." }]}
+                rules={[{ required: true, message: t("form.ceoRequired") }]}
               >
-                <Input placeholder="대표자명" maxLength={100} />
+                <Input placeholder={t("form.ceoPlaceholder")} maxLength={100} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="사업자등록번호"
+                label={t("form.bizNoLabel")}
                 name="bizNo"
                 validateTrigger="onBlur"
                 rules={[
                   {
                     pattern: BIZNO_PATTERN,
-                    message: "사업자번호 형식이 올바르지 않습니다. (예: 123-45-67890)",
+                    message: t("form.bizNoFormatError"),
                   },
-                  { required: true, message: "사업자등록번호는 필수입니다." },
+                  { required: true, message: t("form.bizNoRequired") },
                 ]}
-                extra="형식: 123-45-67890"
+                extra={t("form.bizNoExtra")}
               >
-                <Input placeholder="000-00-00000" maxLength={45} onBlur={handleBizNoBlur} />
+                <Input placeholder={t("form.bizNoPlaceholder")} maxLength={45} onBlur={handleBizNoBlur} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="대표 전화" name="comTel" extra="선택 입력">
-                <Input placeholder="02-0000-0000" maxLength={100} />
+              <Form.Item label={t("form.telLabel")} name="comTel" extra={t("form.telExtra")}>
+                <Input placeholder={t("form.telPlaceholder")} maxLength={100} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="개업일자"
+                label={t("add.startDtLabel")}
                 name="startDt"
-                rules={[{ required: true, message: "개업일자는 필수입니다." }]}
-                extra="진위확인 시에만 사용되며 DB에는 저장되지 않습니다."
+                rules={[{ required: true, message: t("add.startDtRequired") }]}
+                extra={t("add.startDtExtra")}
               >
                 <DatePicker style={{ width: "100%" }} />
               </Form.Item>
@@ -424,16 +439,16 @@ export default function ComAddPage() {
                   loading={verifying && utilLoading}
                   danger={verifiedSnapshot === null && verifying === false && bizNoVerifyResult != null}
                 >
-                  국세청 진위확인
+                  {t("add.verifyButton")}
                 </Button>
                 <div style={{ marginTop: 6, fontSize: 13 }}>
                   {verifiedSnapshot ? (
                     <span style={{ color: "#389e0d" }}>
-                      <CheckCircleFilled /> 국세청에 등록된 사업자 정보와 일치합니다.
+                      <CheckCircleFilled /> {t("add.verifiedText")}
                     </span>
                   ) : (
                     <span className="text-faint">
-                      <InfoCircleOutlined /> 등록하려면 진위확인이 필요합니다.
+                      <InfoCircleOutlined /> {t("add.unverifiedText")}
                     </span>
                   )}
                 </div>
@@ -447,10 +462,10 @@ export default function ComAddPage() {
           className="sb-card mb-3"
           title={
             <span>
-              <PictureOutlined className="me-2 text-soft" /> 회사 로고
+              <PictureOutlined className="me-2 text-soft" /> {t("form.logoCard")}
             </span>
           }
-          extra={<span className="sub">PNG · JPG · SVG · WEBP, 최대 2MB</span>}
+          extra={<span className="sub">{t("form.logoExtra")}</span>}
         >
           <div className="logo-zone" style={{ display: "flex", gap: 16, alignItems: "center" }}>
             <div
@@ -470,7 +485,7 @@ export default function ComAddPage() {
               {logoPreview ? (
                 <img
                   src={logoPreview}
-                  alt="로고 미리보기"
+                  alt={t("form.logoPreviewAlt")}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               ) : (
@@ -484,10 +499,10 @@ export default function ComAddPage() {
                 beforeUpload={() => false}
                 onChange={handleLogoChange}
               >
-                <Button icon={<UploadOutlined />}>로고 파일 선택</Button>
+                <Button icon={<UploadOutlined />}>{t("form.logoSelectButton")}</Button>
               </Upload>
               <div className="text-faint mt-1" style={{ fontSize: 12 }}>
-                정사각형 이미지 권장 · 미입력 시 기본 이미지 사용
+                {t("add.logoHint")}
               </div>
             </div>
           </div>
@@ -495,12 +510,12 @@ export default function ComAddPage() {
 
         {/* 폼 버튼 */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <Button onClick={handleReset}>초기화</Button>
+          <Button onClick={handleReset}>{t("form.resetButton")}</Button>
           <Link href="/com/list">
-            <Button>목록</Button>
+            <Button>{t("form.listButton")}</Button>
           </Link>
           <Button type="primary" htmlType="submit" icon={<CheckOutlined />} loading={submitting && loading}>
-            등록하기
+            {t("add.submitButton")}
           </Button>
         </div>
       </Form>
@@ -509,7 +524,7 @@ export default function ComAddPage() {
       <Modal
         title={
           <span>
-            <CameraOutlined /> 사업자등록증 자동입력
+            <CameraOutlined /> {t("add.ocr.modalTitle")}
           </span>
         }
         open={ocrOpen}
@@ -517,7 +532,7 @@ export default function ComAddPage() {
         width={720}
         footer={[
           <Button key="cancel" onClick={closeOcrModal}>
-            취소
+            {t("add.ocr.cancelButton")}
           </Button>,
           <Button
             key="apply"
@@ -526,13 +541,13 @@ export default function ComAddPage() {
             disabled={!ocrForm}
             onClick={applyOcrToForm}
           >
-            폼에 적용
+            {t("add.ocr.applyButton")}
           </Button>,
         ]}
         destroyOnClose
       >
         <div style={{ marginBottom: 16 }}>
-          <div style={{ marginBottom: 8 }}>이미지 업로드 (JPG · PNG · PDF)</div>
+          <div style={{ marginBottom: 8 }}>{t("add.ocr.uploadLabel")}</div>
           <Upload
             accept="image/*,.pdf"
             showUploadList={ocrFile ? [{ uid: "-1", name: ocrFile.name, status: "done" }] : false}
@@ -541,20 +556,20 @@ export default function ComAddPage() {
             onChange={handleOcrFileChange}
             maxCount={1}
           >
-            <Button icon={<UploadOutlined />}>파일 선택</Button>
+            <Button icon={<UploadOutlined />}>{t("add.ocr.selectFileButton")}</Button>
           </Upload>
         </div>
 
         {ocrLoadingLocal && (
           <div style={{ marginBottom: 16 }}>
-            <Spin size="small" /> 인식 중입니다...
+            <Spin size="small" /> {t("add.ocr.recognizing")}
           </div>
         )}
 
         {ocrForm && (
           <Row gutter={16}>
             <Col span={12}>
-              <div className="sb-form-label">사업자등록번호</div>
+              <div className="sb-form-label">{t("add.ocr.bizNoLabel")}</div>
               <Input
                 value={ocrForm.bizNo}
                 onChange={(e) => setOcrForm({ ...ocrForm, bizNo: e.target.value })}
@@ -562,21 +577,21 @@ export default function ComAddPage() {
               />
             </Col>
             <Col span={12}>
-              <div className="sb-form-label">회사명</div>
+              <div className="sb-form-label">{t("add.ocr.comNameLabel")}</div>
               <Input
                 value={ocrForm.comName}
                 onChange={(e) => setOcrForm({ ...ocrForm, comName: e.target.value })}
               />
             </Col>
             <Col span={12} style={{ marginTop: 12 }}>
-              <div className="sb-form-label">대표자</div>
+              <div className="sb-form-label">{t("add.ocr.ceoLabel")}</div>
               <Input
                 value={ocrForm.comCeo}
                 onChange={(e) => setOcrForm({ ...ocrForm, comCeo: e.target.value })}
               />
             </Col>
             <Col span={12} style={{ marginTop: 12 }}>
-              <div className="sb-form-label">개업일자</div>
+              <div className="sb-form-label">{t("add.ocr.startDtLabel")}</div>
               <DatePicker
                 style={{ width: "100%" }}
                 value={ocrForm.startDt ? moment(ocrForm.startDt, "YYYY-MM-DD") : null}
@@ -587,12 +602,13 @@ export default function ComAddPage() {
             </Col>
             <Col span={24} style={{ marginTop: 12 }}>
               <div className="sb-form-label">
-                업종 <span className="field-hint">(OCR 인식 텍스트로 자동 매칭 · 틀리면 직접 선택)</span>
+                {t("add.ocr.industryLabel")}{" "}
+                <span className="field-hint">{t("add.ocr.industryHint")}</span>
               </div>
               <Select
                 style={{ width: "100%" }}
-                placeholder="-- 업종 선택 --"
-                options={GRP_OPTIONS}
+                placeholder={t("form.industryPlaceholder")}
+                options={grpOptions}
                 value={ocrForm.industryGrpCode || undefined}
                 onChange={(v) => setOcrForm({ ...ocrForm, industryGrpCode: v, industryCode: "" })}
               />
@@ -600,24 +616,24 @@ export default function ComAddPage() {
                 <div className="field-hint mt-1" style={{ fontSize: 12, color: "#999" }}>
                   {ocrForm.grpRaw && (
                     <div>
-                      업종 인식 원문: "{ocrForm.grpRaw}"
-                      {!ocrForm.industryGrpCode && " (자동 매칭 실패 - 직접 선택해주세요)"}
+                      {t("add.ocr.grpRawText", { text: ocrForm.grpRaw })}
+                      {!ocrForm.industryGrpCode && t("add.ocr.matchFail")}
                     </div>
                   )}
                   {ocrForm.codeRaw && (
                     <div>
-                      세부업종 인식 원문: "{ocrForm.codeRaw}"
-                      {!ocrForm.industryCode && " (자동 매칭 실패 - 직접 선택해주세요)"}
+                      {t("add.ocr.codeRawText", { text: ocrForm.codeRaw })}
+                      {!ocrForm.industryCode && t("add.ocr.matchFail")}
                     </div>
                   )}
                 </div>
               )}
             </Col>
             <Col span={24} style={{ marginTop: 12 }}>
-              <div className="sb-form-label">세부 업종</div>
+              <div className="sb-form-label">{t("add.ocr.detailIndustryLabel")}</div>
               <Select
                 style={{ width: "100%" }}
-                placeholder="-- 업종을 먼저 선택하세요 --"
+                placeholder={t("form.detailIndustryPlaceholderDisabled")}
                 disabled={!ocrForm.industryGrpCode}
                 options={ocrCodeOptions}
                 value={ocrForm.industryCode || undefined}

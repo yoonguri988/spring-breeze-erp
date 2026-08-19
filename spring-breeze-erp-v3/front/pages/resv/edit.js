@@ -30,6 +30,7 @@ function statusBadge(status) {
   if (status === "WAI") return <span className="sb-badge sb-badge--amber">대기</span>;
   if (status === "APP") return <span className="sb-badge sb-badge--green">승인</span>;
   if (status === "REJ") return <span className="sb-badge sb-badge--red">반려</span>;
+  if (status === "NORET") return <span className="sb-badge sb-badge--red">미반납</span>;
   return <span className="sb-badge sb-badge--gray">{status}</span>;
 }
 

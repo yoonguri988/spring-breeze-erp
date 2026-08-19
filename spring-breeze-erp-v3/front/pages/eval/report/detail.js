@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card, Descriptions, Tag, Button, Row, Col } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 
-import { detailReportRequest } from "../../../reducers/eval/evalReportReducer";
+import { detailReportRequest, clearReportDetail, } from "../../../reducers/eval/evalReportReducer";
 
 const GRADE_COLOR = { S: "#eb2f96", A: "#52c41a", B: "#1890ff", C: "#fa8c16", D: "#ff4d4f" };
 const SENTIMENT = {

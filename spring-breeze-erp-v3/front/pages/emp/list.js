@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card, Table, Select, Input, Button, Tag, Avatar, Pagination, } from "antd";
 import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, } from "@ant-design/icons";
 
-import { listEmpRequest } from "../../reducers/emp/empReducer";
+import { listEmpRequest, resetEmpState, } from "../../reducers/emp/empReducer";
 import { listPosRequest } from "../../reducers/pos/posReducer";
 
 // 재직 상태 옵션
@@ -44,7 +44,7 @@ export default function EmpListPage() {
   // 직급 목록 로드 (필터 select용)
   useEffect(() => {
     dispatch(listPosRequest());
-    return () => { dispatch(resetEmpState()); };
+    return () => { dispatch(resetEmpState()); }
   }, [dispatch]);
 
   // URL 쿼리 → 필터 동기화 → 목록 조회
