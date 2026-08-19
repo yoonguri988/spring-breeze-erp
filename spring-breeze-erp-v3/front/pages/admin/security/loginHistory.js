@@ -14,6 +14,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchLoginHistoryListRequest,
@@ -23,23 +24,17 @@ import StatTile from "../../../components/StatTile";
 
 const ONE_PAGE_LIST = 10;
 
-const STATUS_TABS = [
-  { value: "", label: "전체" },
-  { value: "S", label: "성공" },
-  { value: "F", label: "실패" },
-];
-
-function statusBadge(status) {
+function statusBadge(status, t) {
   if (status === "S")
     return (
       <span className="sb-badge sb-badge--green">
-        <CheckCircleOutlined /> 성공
+        <CheckCircleOutlined /> {t("status.success")}
       </span>
     );
   if (status === "F")
     return (
       <span className="sb-badge sb-badge--red">
-        <CloseCircleOutlined /> 실패
+        <CloseCircleOutlined /> {t("status.fail")}
       </span>
     );
   return <span className="sb-badge sb-badge--gray">{status}</span>;
@@ -48,6 +43,13 @@ function statusBadge(status) {
 export default function AdminLoginHistoryPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["loginHistory", "common"]);
+
+  const STATUS_TABS = [
+    { value: "", labelKey: "common:label.all" },
+    { value: "S", labelKey: "status.success" },
+    { value: "F", labelKey: "status.fail" },
+  ];
 
   const { list, totalElements, stats, loading } = useSelector(
     (state) => state.loginHistory,
@@ -116,10 +118,11 @@ export default function AdminLoginHistoryPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <span>&gt;</span> 로그인 이력 관리
+            <Link href="/">{t("list.breadcrumbHome")}</Link> <span>&gt;</span>{" "}
+            {t("list.breadcrumbCurrent")}
           </div>
-          <h1>로그인 이력 관리</h1>
-          <p>사용자의 로그인 성공/실패 이력을 조회합니다.</p>
+          <h1>{t("list.title")}</h1>
+          <p>{t("list.subtitle")}</p>
         </div>
       </div>
 
@@ -129,7 +132,7 @@ export default function AdminLoginHistoryPage() {
             <StatTile
               icon={<HistoryOutlined />}
               tone="blue"
-              label="전체 시도"
+              label={t("list.statsTotal")}
               value={stats.total}
             />
           </div>
@@ -137,7 +140,7 @@ export default function AdminLoginHistoryPage() {
             <StatTile
               icon={<CheckCircleOutlined />}
               tone="green"
-              label="성공"
+              label={t("list.statsSuccess")}
               value={stats.successCount}
             />
           </div>
@@ -145,7 +148,7 @@ export default function AdminLoginHistoryPage() {
             <StatTile
               icon={<SafetyOutlined />}
               tone="red"
-              label="실패"
+              label={t("list.statsFail")}
               value={stats.failCount}
             />
           </div>
@@ -154,17 +157,17 @@ export default function AdminLoginHistoryPage() {
 
       <div className="sb-card">
         <div className="sb-card__head">
-          <h2>로그인 이력</h2>
+          <h2>{t("list.cardTitle")}</h2>
           <div className="right">
             <div className="sb-segment">
-              {STATUS_TABS.map((t) => (
+              {STATUS_TABS.map((tab) => (
                 <button
-                  key={t.value}
+                  key={tab.value}
                   type="button"
-                  className={status === t.value ? "active" : ""}
-                  onClick={() => goStatus(t.value)}
+                  className={status === tab.value ? "active" : ""}
+                  onClick={() => goStatus(tab.value)}
                 >
-                  {t.label}
+                  {t(tab.labelKey)}
                 </button>
               ))}
             </div>
@@ -180,7 +183,9 @@ export default function AdminLoginHistoryPage() {
           }}
         >
           <div className="col-auto" style={{ minWidth: 150 }}>
-            <label className="form-label small fw-semibold mb-1">시작일</label>
+            <label className="form-label small fw-semibold mb-1">
+              {t("list.filterStartDt")}
+            </label>
             <DatePicker
               style={{ width: "100%" }}
               value={startDt ? moment(startDt) : null}
@@ -188,7 +193,9 @@ export default function AdminLoginHistoryPage() {
             />
           </div>
           <div className="col-auto" style={{ minWidth: 150 }}>
-            <label className="form-label small fw-semibold mb-1">종료일</label>
+            <label className="form-label small fw-semibold mb-1">
+              {t("list.filterEndDt")}
+            </label>
             <DatePicker
               style={{ width: "100%" }}
               value={endDt ? moment(endDt) : null}
@@ -197,11 +204,11 @@ export default function AdminLoginHistoryPage() {
           </div>
           <div className="col-auto" style={{ minWidth: 220 }}>
             <label className="form-label small fw-semibold mb-1">
-              이메일 검색
+              {t("list.filterEmail")}
             </label>
             <Input
               style={{ width: "100%" }}
-              placeholder="이메일 일부 입력"
+              placeholder={t("list.filterEmailPlaceholder")}
               value={empEmail}
               onChange={(e) => setEmpEmail(e.target.value)}
               onPressEnter={() => runSearch(1)}
@@ -213,33 +220,34 @@ export default function AdminLoginHistoryPage() {
               icon={<SearchOutlined />}
               onClick={() => runSearch(1)}
             >
-              조회
+              {t("list.searchButton")}
             </Button>
           </div>
         </div>
 
         <div className="sb-search-note px-3">
-          <InfoCircleOutlined /> 기간을 지정하지 않으면 기본으로{" "}
-          <b>최근 30일</b>만 조회합니다.
+          <InfoCircleOutlined /> {t("list.searchNotePrefix")}
+          <b>{t("list.searchNoteEmphasis")}</b>
+          {t("list.searchNoteSuffix")}
         </div>
 
         <div className="sb-card__body--flush">
           {(list || []).length === 0 ? (
             <div className="sb-empty">
               <HistoryOutlined style={{ fontSize: 30, opacity: 0.5 }} />
-              <p>조건에 해당하는 로그인 이력이 없습니다.</p>
+              <p>{t("list.empty")}</p>
             </div>
           ) : (
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th style={{ width: 150 }}>일시</th>
-                  <th>이메일</th>
-                  <th style={{ width: 100 }}>이름</th>
-                  <th style={{ width: 70 }}>결과</th>
-                  <th>실패 사유</th>
-                  <th style={{ width: 130 }}>IP</th>
-                  <th>User-Agent</th>
+                  <th style={{ width: 150 }}>{t("list.tableDatetime")}</th>
+                  <th>{t("list.tableEmail")}</th>
+                  <th style={{ width: 100 }}>{t("list.tableName")}</th>
+                  <th style={{ width: 70 }}>{t("list.tableResult")}</th>
+                  <th>{t("list.tableFailReason")}</th>
+                  <th style={{ width: 130 }}>{t("list.tableIp")}</th>
+                  <th>{t("list.tableUserAgent")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -248,7 +256,7 @@ export default function AdminLoginHistoryPage() {
                     <td>{moment(h.loginAt).format("YYYY-MM-DD HH:mm:ss")}</td>
                     <td>{h.empEmail}</td>
                     <td>{h.empName || "-"}</td>
-                    <td>{statusBadge(h.status)}</td>
+                    <td>{statusBadge(h.status, t)}</td>
                     <td className="text-faint" style={{ fontSize: 12.5 }}>
                       {h.failReason || "-"}
                     </td>
@@ -278,7 +286,9 @@ export default function AdminLoginHistoryPage() {
               style={{ borderTop: "1px solid var(--sb-border)" }}
             >
               <span className="text-faint" style={{ fontSize: 12.5 }}>
-                총 <b>{totalElements}</b>건
+                {t("list.totalCountPrefix")}
+                <b>{totalElements}</b>
+                {t("list.totalCountSuffix")}
               </span>
               <Pagination
                 size="small"
