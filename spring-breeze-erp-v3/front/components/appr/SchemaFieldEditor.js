@@ -1,5 +1,6 @@
 import { Input, Select, Checkbox, Button, Space, Tag } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 const FIELD_TYPES = ["text", "textarea", "date", "number", "select"];
 
@@ -9,6 +10,8 @@ function sanitizeKey(value) {
 }
 
 export default function SchemaFieldEditor({ fields, onChange, readOnly = false }) {
+    const { t } = useTranslation("appr");
+
     const updateField = (index, patch) => {
         const next = fields.map((f, i) => (i === index ? {...f, ...patch} : f));
         onChange(next);
@@ -32,7 +35,7 @@ export default function SchemaFieldEditor({ fields, onChange, readOnly = false }
                     >
                         <Space wrap style={{width: "100%"}}>
                             <div>
-                                <div style={{fontSize: 12, marginBottom: 4}}>필드 라벨</div>
+                                <div style={{fontSize: 12, marginBottom: 4}}>{t("schemaFieldEditor.labelLabel")}</div>
                                 <Input
                                     style={{width: 160}}
                                     value={field.label}
@@ -42,21 +45,21 @@ export default function SchemaFieldEditor({ fields, onChange, readOnly = false }
                             </div>
 
                             <div>
-                                <div style={{fontSize: 12, marginBottom: 4}}>타입</div>
+                                <div style={{fontSize: 12, marginBottom: 4}}>{t("schemaFieldEditor.typeLabel")}</div>
                                 <Select
                                     style={{width: 120}}
                                     value={field.type}
                                     disabled={readOnly}
                                     onChange={(value) => updateField(index, {type: value})}
-                                    options={FIELD_TYPES.map((t) => ({label: t, value: t}))}
+                                    options={FIELD_TYPES.map((ft) => ({label: ft, value: ft}))}
                                 />
                             </div>
 
                             <div>
-                                <div style={{fontSize: 12, marginBottom: 4}}>key</div>
+                                <div style={{fontSize: 12, marginBottom: 4}}>{t("schemaFieldEditor.keyLabel")}</div>
                                 <Input
                                     style={{width: 160}}
-                                    placeholder="예: trip_reason"
+                                    placeholder={t("schemaFieldEditor.keyPlaceholder")}
                                     value={field.key}
                                     disabled={readOnly}
                                     onChange={(e) => updateField(index, {key: sanitizeKey(e.target.value)})}
@@ -69,27 +72,27 @@ export default function SchemaFieldEditor({ fields, onChange, readOnly = false }
                                     disabled={readOnly}
                                     onChange={(e) => updateField(index, {required: e.target.checked})}
                                 >
-                                    필수 입력 여부
+                                    {t("schemaFieldEditor.requiredLabel")}
                                 </Checkbox>
                             </div>
 
                             {!readOnly && (
                             <div style={{paddingTop: 20}}>
-                                <Button 
+                                <Button
                                     danger
                                     size="small"
                                     icon={<DeleteOutlined />}
                                     onClick={() => removeField(index)}
                                 >
-                                    삭제
+                                    {t("schemaFieldEditor.deleteBtn")}
                                 </Button>
                             </div>
                             )}
-                        </Space> 
+                        </Space>
 
                         {field.type === "select" && (
                             <div style={{marginTop: 8}}>
-                                <div style={{fontSize: 12, marginBottom: 4}}>선택지 (Enter로 추가)</div>
+                                <div style={{fontSize: 12, marginBottom: 4}}>{t("schemaFieldEditor.optionsLabel")}</div>
                                 <Select
                                     mode="tags"
                                     style={{width: "100%"}}
@@ -110,7 +113,7 @@ export default function SchemaFieldEditor({ fields, onChange, readOnly = false }
                 onClick={addField}
                 style={{ marginTop: 12}}
             >
-                필드 추가
+                {t("schemaFieldEditor.addBtn")}
             </Button>
             )}
         </div>
@@ -118,22 +121,23 @@ export default function SchemaFieldEditor({ fields, onChange, readOnly = false }
 }
 
 // 저장 전 검증
-export function validateSchemaFields(fields) {
+// t: react-i18next의 t 함수를 이벤트 핸들러(JSX 밖)에서 호출하기 위해 인자로 전달받음
+export function validateSchemaFields(fields, t) {
     // 필드가 존재하는지 확인
     if (fields.length === 0) {
-        return "최소 1개 이상의 필드가 필요합니다.";
+        return t("schemaFieldEditor.validation.minFields");
     }
 
     const keys = fields.map( (f) => f.key.trim());
 
     // key 입력란 비어있는지 확인
     if (keys.some( (k) => k === "")) {
-        return "모든 필드의 key 값을 입력해주세요.";
+        return t("schemaFieldEditor.validation.keyRequired");
     }
 
     // key 값 중복 확인
     if (new Set(keys).size !== keys.length) {
-        return "key 값이 중복되었습니다. 각 필드는 고유한 key를 가져야합니다."
+        return t("schemaFieldEditor.validation.keyDuplicate")
     }
 
     return null;

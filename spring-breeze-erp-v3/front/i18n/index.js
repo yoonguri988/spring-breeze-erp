@@ -22,7 +22,6 @@ import authKo from "./locales/ko/auth.json";
 import comKo from "./locales/ko/com.json";
 // import dashboardKo from "./locales/ko/dashboard.json";
 import deptKo from "./locales/ko/dept.json";
-// import apprKo from "./locales/ko/appr.json";
 import resvKo from "./locales/ko/resv.json";
 import resKo from "./locales/ko/res.json";
 import loginHistoryKo from "./locales/ko/loginHistory.json";
@@ -32,6 +31,7 @@ import empKo from "./locales/ko/emp.json";
 import posKo from "./locales/ko/pos.json";
 import permKo from "./locales/ko/perm.json";
 import evalKo from "./locales/ko/eval.json";
+import apprKo from "./locales/ko/appr.json";
 
 import commonEn from "./locales/en/common.json";
 import headerEn from "./locales/en/header.json";
@@ -41,7 +41,6 @@ import authEn from "./locales/en/auth.json";
 import comEn from "./locales/en/com.json";
 // import dashboardEn from "./locales/en/dashboard.json";
 import deptEn from "./locales/en/dept.json";
-// import apprEn from "./locales/en/appr.json";
 import resvEn from "./locales/en/resv.json";
 import resEn from "./locales/en/res.json";
 import loginHistoryEn from "./locales/en/loginHistory.json";
@@ -51,6 +50,7 @@ import empEn from "./locales/en/emp.json";
 import posEn from "./locales/en/pos.json";
 import permEn from "./locales/en/perm.json";
 import evalEn from "./locales/en/eval.json";
+import apprEn from "./locales/en/appr.json";
 
 export const SUPPORTED_LANGUAGES = ["ko", "en"];
 export const DEFAULT_LANGUAGE = "ko";
@@ -67,7 +67,6 @@ const resources = {
     com: comKo,
     // dashboard: dashboardKo,
     dept: deptKo,
-    // appr: apprKo,
     resv: resvKo,
     res: resKo,
     loginHistory: loginHistoryKo,
@@ -77,6 +76,7 @@ const resources = {
     pos: posKo,
     perm: permKo,
     eval: evalKo,
+    appr: apprKo,
   },
   en: {
     common: commonEn,
@@ -87,7 +87,6 @@ const resources = {
     com: comEn,
     // dashboard: dashboardEn,
     dept: deptEn,
-    // appr: apprEn,
     resv: resvEn,
     res: resEn,
     loginHistory: loginHistoryEn,
@@ -97,6 +96,7 @@ const resources = {
     pos: posEn,
     perm: permEn,
     eval: evalEn,
+    appr: apprEn,
   },
 };
 
