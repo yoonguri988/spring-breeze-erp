@@ -117,14 +117,14 @@ export function* logout() {
 }
 
 // --- 비밀번호 재설정 - 본인확인 ---
+// 성공(state: OK) 시 서버가 등록된 이메일로 재설정 링크를 발송한다.
+// resetToken은 더 이상 응답에 포함되지 않으며, 사용자는 메일의 링크(?token=...)를 통해서만
+// forgotResetPass 페이지에 접근할 수 있다.
 export const confirmApi = (payload) =>
   api.post(`${AUTH_API_BASE}/confirm`, payload);
 export function* confirm(action) {
   try {
     const res = yield call(confirmApi, action.payload);
-    if (res.data.state === "OK" && typeof window !== "undefined") {
-      sessionStorage.setItem("resetToken", res.data.resetToken);
-    }
     yield put(confirmSuccess(res.data));
   } catch (err) {
     yield put(confirmFailure(err.response?.data?.error || "본인확인 실패"));
@@ -132,20 +132,12 @@ export function* confirm(action) {
 }
 
 // --- 비밀번호 재설정 (비로그인, resetToken 기반) ---
+// resetToken은 이메일 링크의 쿼리스트링에서 읽어 forgotResetPass 페이지가 payload로 직접 넘겨준다.
 export const updatePassApi = (payload) =>
   api.post(`${AUTH_API_BASE}/updatePass`, payload);
 export function* updatePass(action) {
   try {
-    const resetToken =
-      typeof window !== "undefined"
-        ? sessionStorage.getItem("resetToken")
-        : null;
-
-    yield call(updatePassApi, { ...action.payload, resetToken });
-
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("resetToken");
-    }
+    yield call(updatePassApi, action.payload);
     yield put(updatePassSuccess());
   } catch (err) {
     yield put(

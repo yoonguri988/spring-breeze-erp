@@ -11,17 +11,18 @@ import resvSaga from "./resv/resvSaga";
 import adminResvSaga from "./resv/adminResvSaga";
 import apprFormSaga from "./appr/apprFormSaga";
 import apprDocSaga from "./appr/apprDocSaga";
-import empSaga from './emp/empSaga';
-import posSaga from './pos/posSaga';
-import evalSaga from './eval/evalSaga';
-import evalPeriodSaga from './eval/evalPeriodSaga';
-import evalReportSaga from './eval/evalReportSaga';
-import permSaga from './perm/permSaga';
+import empSaga from "./emp/empSaga";
+import posSaga from "./pos/posSaga";
+import evalSaga from "./eval/evalSaga";
+import evalPeriodSaga from "./eval/evalPeriodSaga";
+import evalReportSaga from "./eval/evalReportSaga";
+import permSaga from "./perm/permSaga";
 import projSaga from "./proj/projSaga";
 import projMemSaga from "./proj/projMemSaga";
 import taskSaga from "./task/taskSaga";
 import noticeSaga from "./notice/noticeSaga";
 import weekSaga from "./week/weekSaga";
+import loginHistorySaga from "./auth/loginHistorySaga";
 
 export default function* rootSaga() {
   yield all([
@@ -46,5 +47,6 @@ export default function* rootSaga() {
     fork(taskSaga),
     fork(noticeSaga),
     fork(weekSaga),
+    fork(loginHistorySaga),
   ]);
 }

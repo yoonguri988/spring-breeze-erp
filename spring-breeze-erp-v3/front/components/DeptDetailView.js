@@ -6,7 +6,10 @@ import {
   TeamOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import { empStatusLabel } from "../utils/empStatus";
 
+// 사원 상태(empStatus)는 백엔드에서 내려오는 값 그대로 비교/표시하므로 번역하지 않습니다.
 const statusBadgeClass = (status) => {
   if (status === "재직") return "sb-badge sb-badge--green";
   if (status === "휴직") return "sb-badge sb-badge--amber";
@@ -20,11 +23,13 @@ export default function DeptDetailView({
   deptEmpList = [],
   isMyDept = false,
 }) {
+  const { t } = useTranslation(["dept", "common"]);
+
   return (
     <>
       {isMyDept && (
         <div className="my-dept-banner">
-          <CheckCircleOutlined /> 현재 내가 소속된 부서입니다.
+          <CheckCircleOutlined /> {t("detailView.myDeptBanner")}
         </div>
       )}
 
@@ -33,13 +38,13 @@ export default function DeptDetailView({
         <div className="sb-card__head">
           <h2>
             <ApartmentOutlined className="me-2 text-soft" />
-            부서 기본 정보
+            {t("detailView.basicInfo.title")}
           </h2>
         </div>
         <div className="sb-card__body">
           <div className="row g-3">
             <div className="col-md-6">
-              <label className="dd-label">부서 이름</label>
+              <label className="dd-label">{t("detailView.basicInfo.deptNameLabel")}</label>
               <div
                 className="view-val view-val--accent"
                 style={{ fontWeight: 700 }}
@@ -49,14 +54,14 @@ export default function DeptDetailView({
             </div>
 
             <div className="col-md-6">
-              <label className="dd-label">부서 코드</label>
+              <label className="dd-label">{t("detailView.basicInfo.deptCodeLabel")}</label>
               <div className="view-val">
                 <span className="dept-code-chip">{dept.deptCode}</span>
               </div>
             </div>
 
             <div className="col-md-6">
-              <label className="dd-label">상위 부서</label>
+              <label className="dd-label">{t("detailView.basicInfo.parentDeptLabel")}</label>
               <div className="view-val">
                 {dept.parentId ? (
                   <span
@@ -70,7 +75,7 @@ export default function DeptDetailView({
                   </span>
                 ) : (
                   <>
-                    <span className="dept-code-chip">최상위 부서</span>
+                    <span className="dept-code-chip">{t("detailView.basicInfo.topLevelChip")}</span>
                     <span className="view-val-empty ms-1">NULL</span>
                   </>
                 )}
@@ -78,7 +83,7 @@ export default function DeptDetailView({
             </div>
 
             <div className="col-md-6">
-              <label className="dd-label">부서장</label>
+              <label className="dd-label">{t("detailView.basicInfo.leaderLabel")}</label>
               <div className="view-val">
                 {dept.leaderId ? (
                   <>
@@ -99,13 +104,13 @@ export default function DeptDetailView({
                     </span>
                   </>
                 ) : (
-                  <span className="view-val-empty">지정된 부서장 없음</span>
+                  <span className="view-val-empty">{t("detailView.basicInfo.noLeader")}</span>
                 )}
               </div>
             </div>
 
             <div className="col-12">
-              <label className="dd-label">계층 경로</label>
+              <label className="dd-label">{t("detailView.basicInfo.hierPathLabel")}</label>
               <div className="hier-preview">
                 {ancestorChain.map((node, i) => (
                   <React.Fragment key={i}>
@@ -130,11 +135,11 @@ export default function DeptDetailView({
         <div className="sb-card__head">
           <h2>
             <TeamOutlined className="me-2 text-soft" />
-            소속 사원
+            {t("detailView.empSection.title")}
           </h2>
           <div className="right">
             <span className="sb-badge sb-badge--gray">
-              {deptEmpList.length}명
+              {t("detailView.empSection.countValue", { count: deptEmpList.length })}
             </span>
           </div>
         </div>
@@ -143,13 +148,13 @@ export default function DeptDetailView({
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th style={{ width: 70 }}>사원번호</th>
-                  <th>이름</th>
-                  <th style={{ width: 110 }}>직급</th>
-                  <th style={{ width: 180 }}>이메일</th>
-                  <th style={{ width: 130 }}>연락처</th>
-                  <th style={{ width: 100 }}>상태</th>
-                  <th style={{ width: 110 }}>입사일</th>
+                  <th style={{ width: 70 }}>{t("detailView.empSection.table.empNo")}</th>
+                  <th>{t("detailView.empSection.table.empName")}</th>
+                  <th style={{ width: 110 }}>{t("detailView.empSection.table.position")}</th>
+                  <th style={{ width: 180 }}>{t("detailView.empSection.table.email")}</th>
+                  <th style={{ width: 130 }}>{t("detailView.empSection.table.mobile")}</th>
+                  <th style={{ width: 100 }}>{t("detailView.empSection.table.status")}</th>
+                  <th style={{ width: 110 }}>{t("detailView.empSection.table.hireDate")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -181,7 +186,7 @@ export default function DeptDetailView({
                     </td>
                     <td>
                       <span className={statusBadgeClass(e.empStatus)}>
-                        {e.empStatus}
+                        {empStatusLabel(t, e.empStatus)}
                       </span>
                     </td>
                     <td className="sb-hr-cell" style={{ fontSize: 12.5 }}>
@@ -194,7 +199,7 @@ export default function DeptDetailView({
           ) : (
             <div className="sb-empty">
               <TeamOutlined style={{ fontSize: 30, opacity: 0.5 }} />
-              <p>소속 사원이 없습니다.</p>
+              <p>{t("detailView.empSection.emptyMsg")}</p>
             </div>
           )}
         </div>

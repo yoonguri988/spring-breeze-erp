@@ -65,11 +65,28 @@ public class ApiScheduled {
 	@Autowired private ReservationMapper resDao;
 	@Autowired private OpenAiReturnMsg apiReturnMsg;
 	@Autowired private ApiCoolSms apiCoolSms;
- 
+	
 	private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
  
+	/*
+	 * ///////////////////////////////////////////////////////////
+	 * 장비 예약 자동 미반납(NORET) 처리
+	 * ///////////////////////////////////////////////////////////
+	 * - 승인(APP)된 장비(EQUIPMENT) 예약 중, 종료일시(end_dt)가 지났는데 아직 반납(return_dt) 처리가
+	 *   안 된 건을 상태 NORET(미반납)으로 전환한다.
+	 * - AI/SMS 등 외부 유료 API를 호출하지 않는 순수 DB 배치라 노쇼 알림봇과 달리 기본 활성화한다.
+	 */
+	// 매시 정각 실행 (운영 부하를 고려해 주기 조정 가능)
+	@Scheduled(cron = "0 0 * * * *", zone = "Asia/Seoul")
+	public void autoMarkEquipmentNoReturn() {
+		int updated = resDao.updateEquipmentNoReturn();
+		if (updated > 0) {
+			log.info("장비 예약 자동 미반납 처리 완료 - {}건 NORET 전환", updated);
+		}
+	}
+	
 	// 운영 시 트래픽/AI 호출 비용을 고려해 주기 조정 가능 (여기서는 1분마다)
-	//@Scheduled(cron = "0 */1 * * * *")
+	//@Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
 	public void noShowAutoAlert() {
 		List<ResvAlertResponse> targets = resDao.selectNoShowTargets();
  

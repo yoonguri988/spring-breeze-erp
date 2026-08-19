@@ -3,57 +3,51 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 const NAV = [
   {
-    section: null,
+    sectionKey: null,
     items: [
       {
         page: "dashboard",
-        tip: "대시보드",
         href: "/",
         icon: "bi-grid-1x2-fill",
       },
     ],
   },
   {
-    section: "조직 관리",
+    sectionKey: "org",
     items: [
       {
         page: "comlist",
-        tip: "회사 • 부서 관리",
         href: "/com/list",
         icon: "bi-building-fill-gear",
         role: "ROOT",
       },
       {
         page: "commypage",
-        tip: "내 회사 정보",
         href: "/com/my",
         icon: "bi-building",
       },
       {
         page: "deptlist",
-        tip: "회사 내 부서 조회",
         href: "/dept/list",
         icon: "bi-diagram-3",
       },
       {
         page: "deptmy",
-        tip: "내 부서 정보",
         href: "/dept/my",
         icon: "bi-tag",
       },
       {
         page: "deptpending",
-        tip: "부서 이관 대상 관리",
         href: "/dept/transfer/pending",
         icon: "bi-signpost-split",
         role: "ROLE_ADMIN",
       },
       {
         page: "depttranslog",
-        tip: "부서 이력 관리",
         href: "/dept/transfer/log",
         icon: "bi-clock-history",
         role: "ROLE_ADMIN",
@@ -61,110 +55,90 @@ const NAV = [
     ],
   },
   {
-    section: "인사 관리",
+    sectionKey: "hr",
     items: [
       {
         page: "employees",
-        tip: "사원 관리",
-        label: "사원 정보",
         href: "/emp/list",
         icon: "bi-people",
       },
       {
         page: "position",
-        tip: "직급 관리",
         href: "/pos/list",
         icon: "bi-briefcase",
         role: "ROLE_ADMIN",
       },
       {
         page: "permissions",
-        tip: "권한 관리",
         href: "/perm/list",
         icon: "bi-shield-lock",
         role: "ROLE_ADMIN",
       },
       {
         page: "evalperiodlist",
-        tip: "인사 평가",
         href: "/eval/period/list",
         icon: "bi-calendar-event",
         role: "ROLE_ADMIN",
       },
       {
-        page: "evalDashboard",
-        tip: "평가 작성",
+        page: "evaldashboard",
         href: "/eval/dashboard",
         icon: "bi-star",
         role: "ROLE_ADMIN",
       },
       {
         page: "evalreport",
-        tip: "내 평가 리포트",
         href: "/eval/report/my",
         icon: "bi-file-earmark-bar-graph",
       },
     ],
   },
   {
-    section: "업무 관리",
+    sectionKey: "work",
     items: [
       {
         page: "apprlistform",
-        tip: "전자결재",
-        label: "결재 양식 관리",
-        href: "/appr/forms",
+        href: "/appr/list_form",
         icon: "bi-sliders",
         role: "ROOT",
       },
       {
         page: "apprlistdoc",
-        tip: "전자결재",
-        label: "전자결재 기안",
-        href: "/appr/docs",
+        href: "/appr/list_doc",
         icon: "bi-pencil-square",
       },
       {
         page: "projects",
-        tip: "프로젝트",
-        label: "프로젝트 및 태스크",
         href: "/proj/proj_list",
         icon: "bi-kanban",
       },
       {
         page: "tasks",
-        tip: "태스크",
-        label: "내 태스크",
         href: "/proj/task_list",
         icon: "bi-clipboard-check",
       },
       {
         page: "notices",
-        tip: "공지 관리",
         href: "/notice/list",
         icon: "bi-megaphone",
       },
     ],
   },
   {
-    section: "자산 관리",
+    sectionKey: "asset",
     items: [
       {
         page: "reslist",
-        tip: "자원 관리",
         href: "/res/list?keyword=&resType=&resStatus=AVAILABLE",
         icon: "bi-collection",
       },
       {
         page: "resvmy",
-        tip: "내 자원 요청 관리",
         href: "/resv/my",
         icon: "bi-calendar2-check",
       },
       {
         page: "adminresvlist",
-        tip: "전체 자원 요청 관리",
-        label: "자원 예약 요청 관리",
         href: "/admin/resv/list?status=WAI",
         icon: "bi-calendar2-event",
         role: "ROLE_ADMIN",
@@ -188,6 +162,7 @@ function canShow(role, user) {
 
 export default function Sidebar() {
   const router = useRouter();
+  const { t } = useTranslation("sidebar");
   const { user, accessToken } = useSelector((state) => state.auth);
 
   const currentPath = router.pathname;
@@ -210,25 +185,32 @@ export default function Sidebar() {
       <nav className="sb-nav" id="sbNav">
         {NAV.map((group, gi) => (
           <React.Fragment key={gi}>
-            {group.section && (
-              <div className="sb-nav__section">{group.section}</div>
+            {group.sectionKey && (
+              <div className="sb-nav__section">
+                {t(`sections.${group.sectionKey}`)}
+              </div>
             )}
             {group.items
               .filter((it) => canShow(it.role, user))
-              .map((it) => (
+              .map((it) => {
+                const tip = t(`items.${it.page}.tip`);
+                const label = t(`items.${it.page}.label`, { defaultValue: tip });
+                
+                return (
                 <Link key={it.page} href={it.href} passHref>
                   <a
                     className={
                       "sb-nav__item" + (isActive(it.href) ? " active" : "")
                     }
                     data-page={it.page}
-                    data-tip={it.tip}
+                    data-tip={tip}
                   >
                     <i className={"bi " + it.icon} />
-                    <span className="sb-nav__label">{it.label || it.tip}</span>
+                    <span className="sb-nav__label">{label}</span>
                   </a>
                 </Link>
-              ))}
+                );
+              })}
           </React.Fragment>
         ))}
       </nav>

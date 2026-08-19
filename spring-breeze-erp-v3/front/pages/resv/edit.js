@@ -17,25 +17,28 @@ import {
   InboxOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 import { fetchResvDetailRequest, updateResvRequest, resetResvState } from "../../reducers/resv/resvReducer";
 
 const STATUS_MAP = {
-  AVAILABLE: { text: "사용가능", tone: "green" },
-  MAINTENANCE: { text: "점검중", tone: "amber" },
-  DISABLED: { text: "사용불가", tone: "red" },
+  AVAILABLE: { tone: "green" },
+  MAINTENANCE: { tone: "amber" },
+  DISABLED: { tone: "red" },
 };
 
-function statusBadge(status) {
-  if (status === "WAI") return <span className="sb-badge sb-badge--amber">대기</span>;
-  if (status === "APP") return <span className="sb-badge sb-badge--green">승인</span>;
-  if (status === "REJ") return <span className="sb-badge sb-badge--red">반려</span>;
+function statusBadge(status, t) {
+  if (status === "WAI") return <span className="sb-badge sb-badge--amber">{t("status.waiting")}</span>;
+  if (status === "APP") return <span className="sb-badge sb-badge--green">{t("status.approved")}</span>;
+  if (status === "REJ") return <span className="sb-badge sb-badge--red">{t("status.rejected")}</span>;
+  if (status === "NORET") return <span className="sb-badge sb-badge--red">{t("status.notReturned")}</span>;
   return <span className="sb-badge sb-badge--gray">{status}</span>;
 }
 
 export default function ResvEditPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["resv", "common"]);
   const [form] = Form.useForm();
 
   const { detail: resv, loading, error, success } = useSelector((state) => state.resv);
@@ -70,7 +73,7 @@ export default function ResvEditPage() {
     if (!submitting) return;
     if (prevLoading.current && !loading) {
       if (success) {
-        message.success("예약이 수정되었습니다.");
+        message.success(t("edit.updateSuccess"));
         setSubmitting(false);
         dispatch(resetResvState());
         router.push("/resv/my");
@@ -98,6 +101,12 @@ export default function ResvEditPage() {
   const editable = resv.status === "WAI";
   const quantityMax = resv.resQuantity ?? null;
   const infoStatus = STATUS_MAP[resv.resStatus] || null;
+  const infoStatusText =
+    {
+      AVAILABLE: t("resStatus.available"),
+      MAINTENANCE: t("resStatus.maintenance"),
+      DISABLED: t("resStatus.disabled"),
+    }[resv.resStatus] || "-";
 
   const handleStartChange = (d) => {
     const v = d ? d.format("YYYY-MM-DDTHH:mm") : null;
@@ -111,7 +120,7 @@ export default function ResvEditPage() {
 
   const onFinish = (values) => {
     if (moment(endDt).isBefore(moment(startDt))) {
-      form.setFields([{ name: "endDt", errors: ["종료 일시는 시작 일시 이후여야 합니다."] }]);
+      form.setFields([{ name: "endDt", errors: [t("edit.endBeforeStart")] }]);
       return;
     }
     setSubmitting(true);
@@ -134,15 +143,15 @@ export default function ResvEditPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/resv/my">예약 내역</Link> <RightOutlined /> 예약 수정
+            <Link href="/resv/my">{t("edit.breadcrumbList")}</Link> <RightOutlined /> {t("edit.breadcrumbCurrent")}
           </div>
-          <h1>자원 예약 수정</h1>
-          <p>대기 상태(WAI)인 본인 예약 건만 수정할 수 있습니다.</p>
+          <h1>{t("edit.title")}</h1>
+          <p>{t("edit.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/resv/my">
             <Button icon={<ArrowLeftOutlined />}>
-              목록으로
+              {t("edit.backToList")}
             </Button>
           </Link>
         </div>
@@ -155,8 +164,8 @@ export default function ResvEditPage() {
           showIcon
           message={
             resv.status === "APP"
-              ? "이미 승인된 예약은 수정할 수 없습니다. 변경이 필요하면 담당자에게 문의하세요."
-              : "반려된 예약은 수정할 수 없습니다. 새 예약을 신청해주세요."
+              ? t("edit.alreadyApprovedAlert")
+              : t("edit.rejectedAlert")
           }
         />
       )}
@@ -165,41 +174,42 @@ export default function ResvEditPage() {
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <div className="sb-card mb-3">
             <div className="sb-card__head">
-              <h2>예약 정보</h2>
-              <span className="sub">상태 {statusBadge(resv.status)}</span>
+              <h2>{t("edit.cardTitle")}</h2>
+              <span className="sub">{t("edit.statusPrefix")} {statusBadge(resv.status, t)}</span>
             </div>
             <div className="sb-card__body">
               {/* 예약 자원 (수정 불가) */}
               <div className="mb-3">
-                <label className="sb-form-label">예약 자원</label>
+                <label className="sb-form-label">{t("edit.resourceLabel")}</label>
                 <Input value={`${resv.resName} (${resv.resCode})`} readOnly />
                 <span className="sb-field-msg text-faint" style={{ display: "flex" }}>
-                  <LockOutlined /> 예약 자원은 수정할 수 없습니다. 다른 자원을 이용하려면 새 예약을 신청해주세요.
+                  <LockOutlined /> {t("edit.resourceLockedNote")}
                 </span>
               </div>
 
               {/* 선택된 자원 상세 정보 : location / capacity / res_status */}
               <div className="mb-3 p-3" style={{ background: "var(--sb-accent-soft)", borderRadius: 10 }}>
                 <div className="text-faint mb-1" style={{ fontSize: 12 }}>
-                  선택된 자원 정보
+                  {t("edit.selectedResourceInfo")}
                 </div>
                 <div className="d-flex flex-wrap gap-3" style={{ fontSize: 13 }}>
                   <span>
-                    <EnvironmentOutlined className="text-faint" /> 위치 <b>{resv.location || "-"}</b>
+                    <EnvironmentOutlined className="text-faint" /> {t("edit.location")} <b>{resv.location || "-"}</b>
                   </span>
                   <span>
-                    <TeamOutlined className="text-faint" /> 수용인원 <b>{resv.capacity ? `${resv.capacity}명` : "-"}</b>
+                    <TeamOutlined className="text-faint" /> {t("edit.capacity")}{" "}
+                    <b>{resv.capacity ? t("edit.capacityValue", { capacity: resv.capacity }) : "-"}</b>
                   </span>
                   <span>
-                    <InboxOutlined className="text-faint" /> 보유수량 <b>{quantityMax ?? "-"}</b>
+                    <InboxOutlined className="text-faint" /> {t("edit.ownedQuantity")} <b>{quantityMax ?? "-"}</b>
                   </span>
                   <span>
-                    <span className={`sb-badge sb-badge--${infoStatus?.tone || "gray"}`}>{infoStatus?.text || "-"}</span>
+                    <span className={`sb-badge sb-badge--${infoStatus?.tone || "gray"}`}>{infoStatusText}</span>
                   </span>
                 </div>
                 {infoStatus && infoStatus !== STATUS_MAP.AVAILABLE && (
                   <div className="text-danger mt-2" style={{ fontSize: 12.5 }}>
-                    <ExclamationCircleOutlined /> 현재 점검/사용불가 상태인 자원입니다. 승인이 지연될 수 있습니다.
+                    <ExclamationCircleOutlined /> {t("edit.maintenanceWarning")}
                   </div>
                 )}
               </div>
@@ -207,7 +217,7 @@ export default function ResvEditPage() {
               {/* 예약 기간 : START_DT ~ END_DT (기존값 프리필) */}
               <div className="row mb-1">
                 <div className="col-6">
-                  <Form.Item label="시작 일시" name="startDt" rules={[{ required: true, message: "시작 일시를 입력하세요." }]}>
+                  <Form.Item label={t("edit.startDtLabel")} name="startDt" rules={[{ required: true, message: t("edit.startDtRequired") }]}>
                     <DatePicker
                       showTime={{ format: "HH:mm" }}
                       format="YYYY-MM-DD HH:mm"
@@ -217,7 +227,7 @@ export default function ResvEditPage() {
                   </Form.Item>
                 </div>
                 <div className="col-6">
-                  <Form.Item label="종료 일시" name="endDt" rules={[{ required: true, message: "종료 일시를 입력하세요." }]}>
+                  <Form.Item label={t("edit.endDtLabel")} name="endDt" rules={[{ required: true, message: t("edit.endDtRequired") }]}>
                     <DatePicker
                       showTime={{ format: "HH:mm" }}
                       format="YYYY-MM-DD HH:mm"
@@ -229,23 +239,23 @@ export default function ResvEditPage() {
                 </div>
               </div>
               <div className="mb-3 text-faint" style={{ fontSize: 12 }}>
-                <InfoCircleOutlined /> 동일 자원에 예약 시간이 겹치면 신청이 제한될 수 있습니다.
+                <InfoCircleOutlined /> {t("edit.overlapNote")}
               </div>
 
               {/* 예약 수량 */}
               <div className="mb-3">
                 <Form.Item
-                  label="예약 수량"
+                  label={t("edit.quantityLabel")}
                   name="quantity"
                   rules={[
-                    { required: true, message: "1개 이상 입력하세요." },
+                    { required: true, message: t("edit.quantityMin") },
                     {
                       validator: (_, value) => {
                         if (quantityMax != null && value > quantityMax) {
-                          return Promise.reject(new Error(`보유 수량(${quantityMax})을 초과했습니다.`));
+                          return Promise.reject(new Error(t("edit.quantityMaxExceeded", { max: quantityMax })));
                         }
                         if (value != null && value < 1) {
-                          return Promise.reject(new Error("1개 이상 입력하세요."));
+                          return Promise.reject(new Error(t("edit.quantityMin")));
                         }
                         return Promise.resolve();
                       },
@@ -258,8 +268,8 @@ export default function ResvEditPage() {
 
               {/* 신청 사유 */}
               <div className="mb-4">
-                <Form.Item label="신청 사유" name="remark">
-                  <Input.TextArea rows={4} placeholder="사용 목적이나 요청 사항을 입력하세요" />
+                <Form.Item label={t("edit.remarkLabel")} name="remark">
+                  <Input.TextArea rows={4} placeholder={t("edit.remarkPlaceholder")} />
                 </Form.Item>
               </div>
             </div>
@@ -267,10 +277,10 @@ export default function ResvEditPage() {
 
           <div className="d-flex gap-2 justify-content-end">
             <Link href="/resv/my">
-              <Button>취소</Button>
+              <Button>{t("common:button.cancel")}</Button>
             </Link>
             <Button type="primary" htmlType="submit" icon={<CheckOutlined />} loading={submitting && loading}>
-              수정 저장
+              {t("edit.saveButton")}
             </Button>
           </div>
         </Form>

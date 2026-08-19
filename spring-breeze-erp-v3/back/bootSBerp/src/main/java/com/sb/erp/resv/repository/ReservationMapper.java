@@ -1,5 +1,6 @@
 package com.sb.erp.resv.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -32,6 +33,7 @@ public interface ReservationMapper {
     int countReservationsByResourceId(long resId);
 
 	int updateApprove(ResvRequest resvDto);
+	
 	int updateReject(ResvRequest ResvDto);
 
 	// 같은 기간에 이미 예약된 수량 합계 조회
@@ -49,4 +51,17 @@ public interface ReservationMapper {
      * 알림 발송 완료 처리 (중복 발송 방지 플래그 세팅)
      */
     int updateAlertSent(@Param("revId") Long revId);
+    
+    // 자원 반납 처리 - 본인 예약(empId 일치) + 승인(APP)/미반납(NORET) 상태 + 미반납(return_dt IS NULL) 건만 처리
+    int updateReturn(@Param("revId") long revId, @Param("empId") Long empId,
+            @Param("returnDt") LocalDateTime returnDt);
+
+    // 장비(EQUIPMENT) 자동 미반납 처리 - 종료일시가 지났는데 반납되지 않은 승인건을 NORET으로 전환
+    int updateEquipmentNoReturn();
+    
+	/**
+     * 반려(REJ) 예약 이력 정리 - 자원을 실제로 삭제하기 직전에 호출해서 FK 제약조건 위반(ORA-02292)을 막는다.
+     * WAI/APP/NORET 건은 countReservationsByResourceId 에서 이미 걸러지므로 이 메서드가 지우는 대상이 아니다.
+     */
+    int deleteRejectedByResourceId(long resId);
 }

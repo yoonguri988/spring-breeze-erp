@@ -105,7 +105,7 @@ public class ProjectController {
 	@GetMapping("/{proId}")
 	public ResponseEntity<Map<String, Object>> getProjectDetail(
 			@PathVariable("proId") Long proId,
-			@RequestParam(defaultValue = "1") int pstartno,
+			@RequestParam(value = "pstartno", defaultValue = "1") int pstartno,
 			@AuthenticationPrincipal CustomUserPrincipal principal){
 
 		ProjResponse dto = service.select(proId);

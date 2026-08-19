@@ -28,4 +28,5 @@ public interface ResourceMapper {
 
 	// 예약 할 수 있는 회사의 자원 정보
 	List<ResResponse> selectResListForResv(ResSearchRequest search);
+	
 }

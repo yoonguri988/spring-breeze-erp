@@ -25,7 +25,8 @@ const NOTICE_API_BASE="/api/notice";
     export const fetchNoticeDetailAPI=(bno)=>api.get(`${NOTICE_API_BASE}/${bno}`);
     export function* fetchNoticeDetail(action){
         try{
-            const result = yield call(fetchNoticeDetailAPI,action.payload)
+            const { bno } = action.payload;
+            const result = yield call(fetchNoticeDetailAPI, bno);
             yield put(fetchNoticeDetailSuccess(result.data))
         }catch(err){
             yield put(fetchNoticeDetailFailure(err.response?.data?.message || err.message));
@@ -85,8 +86,9 @@ const NOTICE_API_BASE="/api/notice";
     export const deleteNoticeAPI=(bno)=>api.delete(`${NOTICE_API_BASE}/${bno}`);
      export function* deleteNotice(action){
         try{
-            yield call(deleteNoticeAPI,action.payload)
-            yield put(deleteNoticeSuccess(action.payload))
+            const { bno } = action.payload;
+            yield call(deleteNoticeAPI,bno)
+            yield put(deleteNoticeSuccess(bno))
         }catch(err){
             yield put(deleteNoticeFailure(err.response?.data?.message || err.message));
         }

@@ -5,6 +5,7 @@ import {
   CloseCircleFilled,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 export default function RejectResvModal({
   target,
@@ -13,6 +14,7 @@ export default function RejectResvModal({
   onClose,
   onConfirm,
 }) {
+  const { t } = useTranslation(["resv", "common"]);
   const [rejectReason, setRejectReason] = useState("");
   const [showErr, setShowErr] = useState(false);
 
@@ -49,7 +51,7 @@ export default function RejectResvModal({
             gap: 6,
           }}
         >
-          <CloseCircleFilled /> 예약 반려
+          <CloseCircleFilled /> {t("rejectModal.title")}
         </span>
       }
       open={open}
@@ -57,7 +59,7 @@ export default function RejectResvModal({
       width={420}
       footer={[
         <Button key="cancel" onClick={onClose} disabled={loading}>
-          닫기
+          {t("common:button.close")}
         </Button>,
         <Button
           key="confirm"
@@ -66,16 +68,16 @@ export default function RejectResvModal({
           loading={loading}
           onClick={handleConfirm}
         >
-          <CloseCircleFilled /> 반려 처리
+          <CloseCircleFilled /> {t("rejectModal.confirmButton")}
         </Button>,
       ]}
     >
       {target.resName && (
         <div className="mb-2" style={{ fontSize: 13 }}>
-          대상 자원: <b>{target.resName}</b>
+          {t("rejectModal.targetResource")} <b>{target.resName}</b>
         </div>
       )}
-      <label className="sb-form-label">반려 사유</label>
+      <label className="sb-form-label">{t("rejectModal.reasonLabel")}</label>
       <Input.TextArea
         rows={3}
         value={rejectReason}
@@ -84,7 +86,7 @@ export default function RejectResvModal({
       />
       {showErr && (
         <span className="sb-field-msg text-danger" style={{ display: "flex" }}>
-          <ExclamationCircleOutlined /> 반려 사유를 입력하세요.
+          <ExclamationCircleOutlined /> {t("rejectModal.reasonRequired")}
         </span>
       )}
     </Modal>

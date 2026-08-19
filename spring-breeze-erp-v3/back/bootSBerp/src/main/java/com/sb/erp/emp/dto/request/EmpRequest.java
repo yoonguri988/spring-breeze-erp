@@ -10,7 +10,7 @@ import lombok.Setter;
 
 @Setter @Getter @NoArgsConstructor @AllArgsConstructor @Builder
 public class EmpRequest {
-	private long empId;
+	private Long empId;
 
 	@NotBlank(message = "사번은 필수입니다.")
 	private String empNo;
@@ -36,8 +36,8 @@ public class EmpRequest {
 	private String hireDate;
 
 	// FK — URL 또는 세션에서 세팅. 사용자 입력 검증 대상 아님
-	private long posId;
-	private long deptId;
-	private long comId;
+	private Long posId;
+	private Long deptId;
+	private Long comId;
 
 }

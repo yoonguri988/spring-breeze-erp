@@ -33,7 +33,7 @@ public class NoticeRequest {
     @Size(max = 1000, message = "내용은 1000자를 초과할 수 없습니다.")
     private String bcontent;
 
-    @Size(max = 500, message = "첨부파일 경로는 500자를 초과할 수 없습니다.")
+    //@Size(max = 500, message = "첨부파일 경로는 500자를 초과할 수 없습니다.")
     private String bfile;
 }
 

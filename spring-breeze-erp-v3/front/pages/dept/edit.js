@@ -16,6 +16,7 @@ import {
   TeamOutlined,
   UserSwitchOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   updateDeptRequest,
@@ -23,30 +24,32 @@ import {
   deleteDeptRequest,
   fetchDeptDetailRequest,
   fetchDeptFlatRequest,
+  fetchDeptEmpListRequest,
   resetDeptState,
 } from "../../reducers/dept/deptReducer";
-import { listEmpRequest, resetEmpState } from "../../reducers/emp/empReducer";
 import { fetchCompanyDetailRequest, resetCompanyState } from "../../reducers/com/companyReducer";
 import DeptDeleteModal from "../../components/DeptDeleteModal";
-
-const DEPTH_LABELS = ["", "본부", "팀", "셀", "파트"];
+import { empStatusLabel } from "../../utils/empStatus";
 
 export default function DeptEditPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const { t } = useTranslation(["dept", "common"]);
+
+  const DEPTH_LABEL_KEYS = ["", "hq", "team", "cell", "part"];
 
   const { detail: companyDetail } = useSelector((state) => state.company);
   const {
     flatList: depts,
     detail,
     deptCodeCheck,
+    deptEmpList,
     loading,
     error,
     success,
     pendingTransfer,
   } = useSelector((state) => state.dept);
-  const { empList } = useSelector((state) => state.emp);
 
   const deptId = router.query.deptId ? String(router.query.deptId) : "";
   const comId = router.query.comId
@@ -64,15 +67,6 @@ export default function DeptEditPage() {
 
   const dept = detail?.dept || null;
 
-  console.log(empList)
-  const deptEmpList = useMemo(
-    () =>
-      (empList?.list || []).filter(
-        (e) => dept && String(e.deptId) === String(dept.deptId),
-      ),
-    [empList, dept],
-  );
-
   const [parentId, setParentId] = useState("0");
   const [depth, setDepth] = useState(1);
   const [deptName, setDeptName] = useState("");
@@ -84,15 +78,18 @@ export default function DeptEditPage() {
   const prevLoading = useRef(false);
 
   useEffect(() => {
-    dispatch(listEmpRequest());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
-
-  useEffect(() => {
     if (!router.isReady || !deptId) return;
     dispatch(fetchDeptDetailRequest(deptId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, router.isReady, deptId]);
+
+  // dept 가 확정된 이후에만 소속 사원 목록을 조회한다.
+  // (GET /api/dept/{deptId}/emp - 하위 부서 포함, 페이징 없이 전체 반환)
+  useEffect(() => {
+    if (dept?.deptId) {
+      dispatch(fetchDeptEmpListRequest(dept.deptId));
+    }
+  }, [dispatch, dept?.deptId]);
 
   useEffect(() => {
     if (!comId) return;
@@ -132,7 +129,7 @@ export default function DeptEditPage() {
   useEffect(() => {
     if (!submitting) return;
     if (success) {
-      message.success("변경사항이 저장되었습니다.");
+      message.success(t("edit.saveSuccessMsg"));
       setSubmitting(false);
       dispatch(resetDeptState());
       router.push(backUrl);
@@ -148,14 +145,14 @@ export default function DeptEditPage() {
     if (!deleting) return;
     if (success) {
       if (pendingTransfer) {
-        message.info("소속 사원 이관이 필요합니다.");
+        message.info(t("edit.transferRequiredMsg"));
         setConfirmOpen(false);
         setDeleting(false);
         dispatch(resetDeptState());
         router.push({ pathname: "/dept/transfer/list", query: { deptId } });
         return;
       }
-      message.success("삭제 처리되었습니다.");
+      message.success(t("edit.deleteSuccessMsg"));
       setConfirmOpen(false);
       setDeleting(false);
       dispatch(resetDeptState());
@@ -171,7 +168,6 @@ export default function DeptEditPage() {
   useEffect(() => {
     return () => {
       dispatch(resetDeptState());
-      dispatch(resetEmpState());
       dispatch(resetCompanyState());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -184,13 +180,14 @@ export default function DeptEditPage() {
 
   const parentOptions = useMemo(
     () => [
-      { value: "0", label: "없음 (최상위 본부)" },
+      { value: "0", label: t("edit.hierarchy.parentNoneOption") },
       ...selectableParents.map((d) => ({
         value: String(d.deptId),
         label: `${"　".repeat(d.depth || 0)}${d.depth > 0 ? "└ " : ""}${d.deptName} (${d.deptCode})`,
       })),
     ],
-    [selectableParents],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectableParents, t],
   );
 
   const handleParentChange = (value) => {
@@ -231,12 +228,17 @@ export default function DeptEditPage() {
       curId = opt.parentId ? String(opt.parentId) : "0";
       guard++;
     }
-    return [com?.comName || "회사", ...chain];
-  }, [parentId, selectableParents, com]);
+    return [com?.comName || t("edit.hierarchy.defaultComName"), ...chain];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parentId, selectableParents, com, t]);
+
+  const depthLabel = DEPTH_LABEL_KEYS[depth]
+    ? t(`depthLabels.${DEPTH_LABEL_KEYS[depth]}`)
+    : t("depthLabels.fallback");
 
   const onFinish = (values) => {
     if (deptCodeCheck?.checked && deptCodeCheck?.duplicate) {
-      message.error("이미 사용 중인 부서코드입니다.");
+      message.error(t("edit.basicInfo.deptCodeDuplicate"));
       return;
     }
     setSubmitting(true);
@@ -262,6 +264,7 @@ export default function DeptEditPage() {
     dispatch(deleteDeptRequest(deptId));
   };
 
+  // 사원 상태(empStatus)는 백엔드에서 내려오는 값 그대로 비교/표시하므로 번역하지 않습니다.
   const statusBadgeClass = (status) => {
     if (status === "재직") return "sb-badge sb-badge--green";
     if (status === "휴직") return "sb-badge sb-badge--amber";
@@ -275,19 +278,20 @@ export default function DeptEditPage() {
         <div className="sb-page-head">
           <div className="sb-page-head__txt">
             <div className="sb-breadcrumb">
-              <Link href="/">홈</Link> <RightOutlined />{" "}
-              <Link href="/dept/list">부서 관리</Link> <RightOutlined /> 수정
+              <Link href="/">{t("edit.breadcrumbHome")}</Link> <RightOutlined />{" "}
+              <Link href="/dept/list">{t("edit.breadcrumbList")}</Link>{" "}
+              <RightOutlined /> {t("edit.breadcrumbEdit")}
             </div>
-            <h1>부서 수정</h1>
+            <h1>{t("edit.title")}</h1>
           </div>
         </div>
         <div className="sb-card">
           <div className="sb-empty">
             <ExclamationCircleOutlined style={{ fontSize: 34, opacity: 0.5 }} />
-            <p>해당 부서를 찾을 수 없습니다.</p>
+            <p>{t("edit.notFoundMsg")}</p>
             <Link href="/dept/list">
               <Button className="mt-2">
-                목록으로 돌아가기
+                {t("edit.backToListBtn")}
               </Button>
             </Link>
           </div>
@@ -302,20 +306,23 @@ export default function DeptEditPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <RightOutlined />{" "}
-            <Link href={backUrl}>부서 관리</Link> <RightOutlined /> 수정{" "}
-            <span className="admin-tag ms-2">관리자</span>
+            <Link href="/">{t("edit.breadcrumbHome")}</Link> <RightOutlined />{" "}
+            <Link href={backUrl}>{t("edit.breadcrumbList")}</Link>{" "}
+            <RightOutlined /> {t("edit.breadcrumbEdit")}{" "}
+            <span className="admin-tag ms-2">{t("edit.adminBadge")}</span>
           </div>
-          <h1>{dept ? `${dept.deptName} · 수정` : "부서 수정"}</h1>
+          <h1>{dept ? t("edit.titleWithName", { deptName: dept.deptName }) : t("edit.title")}</h1>
           <p>
             {dept &&
-              `DEPT-${String(dept.deptId).padStart(3, "0")} · 부서 정보를 수정합니다.`}
+              t("edit.subtitleWithId", {
+                id: String(dept.deptId).padStart(3, "0"),
+              })}
           </p>
         </div>
         <div className="sb-page-head__actions">
           <Link href={backUrl}>
             <Button icon={<ArrowLeftOutlined />}>
-              목록으로
+              {t("edit.backBtn")}
             </Button>
           </Link>
         </div>
@@ -336,7 +343,7 @@ export default function DeptEditPage() {
             <div className="sb-card__head">
               <h2>
                 <ApartmentOutlined className="me-2 text-soft" />
-                기본 정보
+                {t("edit.basicInfo.title")}
               </h2>
               <div className="right">
                 <span className="sb-badge sb-badge--gray">
@@ -348,10 +355,10 @@ export default function DeptEditPage() {
               <div className="row g-3">
                 <div className="col-md-8">
                   <Form.Item
-                    label="부서명"
+                    label={t("edit.basicInfo.deptNameLabel")}
                     name="deptName"
                     rules={[
-                      { required: true, message: "부서명을 입력하세요." },
+                      { required: true, message: t("edit.basicInfo.deptNameRequired") },
                     ]}
                   >
                     <Input maxLength={100} />
@@ -359,10 +366,10 @@ export default function DeptEditPage() {
                 </div>
                 <div className="col-md-4">
                   <Form.Item
-                    label="부서코드"
+                    label={t("edit.basicInfo.deptCodeLabel")}
                     name="deptCode"
                     rules={[
-                      { required: true, message: "부서코드를 입력하세요." },
+                      { required: true, message: t("edit.basicInfo.deptCodeRequired") },
                     ]}
                     validateStatus={
                       deptCodeCheck?.checked && deptCodeCheck?.duplicate
@@ -371,7 +378,7 @@ export default function DeptEditPage() {
                     }
                     help={
                       deptCodeCheck?.checked && deptCodeCheck?.duplicate
-                        ? "이미 사용 중인 부서코드입니다."
+                        ? t("edit.basicInfo.deptCodeDuplicate")
                         : undefined
                     }
                   >
@@ -396,13 +403,13 @@ export default function DeptEditPage() {
             <div className="sb-card__head">
               <h2>
                 <ApartmentOutlined className="me-2 text-soft" />
-                소속 및 계층
+                {t("edit.hierarchy.title")}
               </h2>
             </div>
             <div className="sb-card__body">
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label className="sb-form-label">소속 회사</label>
+                  <label className="sb-form-label">{t("edit.hierarchy.comLabel")}</label>
                   <Input
                     value={com?.comName || ""}
                     readOnly
@@ -412,12 +419,12 @@ export default function DeptEditPage() {
                     }}
                   />
                   <div className="text-faint mt-1" style={{ fontSize: 12 }}>
-                    소속 회사는 변경할 수 없습니다.
+                    {t("edit.hierarchy.comHint")}
                   </div>
                 </div>
 
                 <div className="col-md-6">
-                  <Form.Item label="상위 부서" name="parentId">
+                  <Form.Item label={t("edit.hierarchy.parentLabel")} name="parentId">
                     <Select
                       options={parentOptions}
                       onChange={handleParentChange}
@@ -425,31 +432,30 @@ export default function DeptEditPage() {
                   </Form.Item>
                   <div className="text-faint mt-1" style={{ fontSize: 12 }}>
                     <InfoCircleOutlined className="me-1" />
-                    자기 자신/하위 부서는 선택할 수 없습니다. 변경 시 하위
-                    부서의 depth가 함께 갱신됩니다.
+                    {t("edit.hierarchy.parentHint")}
                   </div>
                 </div>
 
                 <div className="col-md-4">
-                  <label className="sb-form-label">계층 깊이</label>
+                  <label className="sb-form-label">{t("edit.hierarchy.depthLabel")}</label>
                   <div className="depth-info-box">
                     <BlockOutlined className="text-faint" />
                     <span>depth</span>
                     <span className="depth-val">{depth}</span>
                     <span className="text-faint">
-                      · {DEPTH_LABELS[depth] || "하위"}
+                      · {depthLabel}
                     </span>
                   </div>
                 </div>
 
                 <div className="col-md-4">
-                  <Form.Item label="정렬 순서" name="sortOrder">
+                  <Form.Item label={t("edit.hierarchy.sortOrderLabel")} name="sortOrder">
                     <InputNumber min={1} max={999} style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
 
                 <div className="col-12">
-                  <label className="sb-form-label">계층 미리보기</label>
+                  <label className="sb-form-label">{t("edit.hierarchy.previewLabel")}</label>
                   <div className="hier-preview">
                     {hierNodes.map((n, i) => (
                       <React.Fragment key={i}>
@@ -463,7 +469,7 @@ export default function DeptEditPage() {
                       </span>
                     ) : (
                       <span className="text-faint" style={{ fontSize: 12.5 }}>
-                        부서명 입력 중…
+                        {t("edit.hierarchy.previewTyping")}
                       </span>
                     )}
                   </div>
@@ -477,17 +483,17 @@ export default function DeptEditPage() {
             <div className="sb-card__head">
               <h2>
                 <UserSwitchOutlined className="me-2 text-soft" />
-                부서장
+                {t("edit.leader.title")}
               </h2>
-              <span className="sub">선택 사항</span>
+              <span className="sub">{t("edit.leader.optionalTag")}</span>
             </div>
             <div className="sb-card__body">
               <div className="row g-3 align-items-center">
                 <div className="col-md-6">
-                  <Form.Item label="부서장 사원 선택" name="empId">
+                  <Form.Item label={t("edit.leader.selectLabel")} name="empId">
                     <Select
                       allowClear
-                      placeholder="지정 안 함"
+                      placeholder={t("edit.leader.selectPlaceholder")}
                       onChange={handleLeaderChange}
                       options={deptEmpList.map((e) => ({
                         value: String(e.empId),
@@ -520,20 +526,22 @@ export default function DeptEditPage() {
             <div className="sb-card__head">
               <h2>
                 <TeamOutlined className="me-2 text-soft" />
-                소속 사원 현황
+                {t("edit.empStatus.title")}
               </h2>
-              <span className="sub">총 {deptEmpList.length}명</span>
+              <span className="sub">
+                {t("edit.empStatus.totalCount", { count: deptEmpList.length })}
+              </span>
             </div>
             <div className="sb-card__body--flush">
               {deptEmpList.length > 0 ? (
                 <table className="sb-table">
                   <thead>
                     <tr>
-                      <th style={{ width: 80 }}>사번</th>
-                      <th>이름</th>
-                      <th style={{ width: 100 }}>직급</th>
-                      <th style={{ width: 160 }}>이메일</th>
-                      <th style={{ width: 90 }}>상태</th>
+                      <th style={{ width: 80 }}>{t("edit.empStatus.table.empNo")}</th>
+                      <th>{t("edit.empStatus.table.empName")}</th>
+                      <th style={{ width: 100 }}>{t("edit.empStatus.table.position")}</th>
+                      <th style={{ width: 160 }}>{t("edit.empStatus.table.email")}</th>
+                      <th style={{ width: 90 }}>{t("edit.empStatus.table.status")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -564,7 +572,7 @@ export default function DeptEditPage() {
                         </td>
                         <td>
                           <span className={statusBadgeClass(e.empStatus)}>
-                            {e.empStatus}
+                            {empStatusLabel(t, e.empStatus)}
                           </span>
                         </td>
                       </tr>
@@ -574,7 +582,7 @@ export default function DeptEditPage() {
               ) : (
                 <div className="sb-empty">
                   <TeamOutlined style={{ fontSize: 30, opacity: 0.5 }} />
-                  <p>소속 사원이 없습니다.</p>
+                  <p>{t("edit.empStatus.emptyMsg")}</p>
                 </div>
               )}
             </div>
@@ -586,11 +594,11 @@ export default function DeptEditPage() {
               icon={<DeleteOutlined />}
               onClick={() => setConfirmOpen(true)}
             >
-              부서 삭제
+              {t("edit.deleteBtn")}
             </Button>
             <div className="d-flex gap-2">
               <Link href={backUrl}>
-                <Button>취소</Button>
+                <Button>{t("common:button.cancel")}</Button>
               </Link>
               <Button
                 type="primary"
@@ -598,7 +606,7 @@ export default function DeptEditPage() {
                 icon={<CheckOutlined />}
                 loading={submitting && loading}
               >
-                변경사항 저장
+                {t("edit.saveBtn")}
               </Button>
             </div>
           </div>

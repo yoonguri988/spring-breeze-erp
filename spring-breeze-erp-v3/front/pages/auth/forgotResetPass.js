@@ -8,29 +8,39 @@ import {
   CheckOutlined,
   CheckCircleFilled,
   LoginOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 import {
   updatePassRequest,
   resetUserState,
 } from "../../reducers/auth/authReducer";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 
+// 비밀번호 정책: 8자 이상 + 영문/숫자/특수문자 조합 모두 필수 (백엔드 PasswordPolicy와 동일 기준)
+const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/;
+// 라벨은 t() 없이 모듈 스코프에 존재하는 배열이므로 key만 보관하고,
+// 실제 텍스트는 컴포넌트 내부에서 t(`resetPass.requirements.${key}`)로 렌더링 시점에 resolve한다.
 const REQ_LIST = [
-  { key: "len", label: "8자 이상", test: (pw) => pw.length >= 8 },
-  { key: "alpha", label: "영문 포함", test: (pw) => /[a-zA-Z]/.test(pw) },
-  { key: "num", label: "숫자 포함", test: (pw) => /[0-9]/.test(pw) },
+  { key: "len", test: (pw) => pw.length >= 8 },
+  { key: "alpha", test: (pw) => /[a-zA-Z]/.test(pw) },
+  { key: "num", test: (pw) => /[0-9]/.test(pw) },
+  { key: "special", test: (pw) => SPECIAL_CHAR_REGEX.test(pw) },
 ];
 
 const LEVELS = [
-  { percent: 0, color: "#e5e7eb", label: "" },
-  { percent: 33, color: "var(--sb-red)", label: "약함" },
-  { percent: 66, color: "var(--sb-amber)", label: "보통" },
-  { percent: 100, color: "var(--sb-green)", label: "강함" },
+  { percent: 0, color: "#e5e7eb", key: null },
+  { percent: 33, color: "var(--sb-red)", key: "weak" },
+  { percent: 66, color: "var(--sb-amber)", key: "medium" },
+  { percent: 100, color: "var(--sb-green)", key: "strong" },
 ];
 
 export default function ForgotResetPassPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { empNo, empEmail } = router.query;
+  const { t } = useTranslation("auth");
+  // 이메일로 발송된 재설정 링크의 쿼리스트링(?token=...)에서 resetToken을 읽는다.
+  const { token } = router.query;
 
   const { loading, error, success } = useSelector((state) => state.auth);
 
@@ -69,20 +79,26 @@ export default function ForgotResetPassPage() {
 
   const onFinish = (values) => {
     setLocalError("");
+    if (!token) {
+      setLocalError(t("resetPass.invalidTokenError"));
+      return;
+    }
     if (
       values.newPass.length < 8 ||
       !/[a-zA-Z]/.test(values.newPass) ||
-      !/[0-9]/.test(values.newPass)
+      !/[0-9]/.test(values.newPass) ||
+      !SPECIAL_CHAR_REGEX.test(values.newPass)
     ) {
-      setLocalError("8자 이상, 영문과 숫자를 모두 포함해야 합니다.");
+      setLocalError(t("resetPass.policyError"));
       return;
     }
     if (values.newPass !== values.newPassConfirm) {
-      setLocalError("비밀번호가 일치하지 않습니다.");
+      setLocalError(t("resetPass.mismatchError"));
       return;
     }
     dispatch(
       updatePassRequest({
+        resetToken: token,
         newPass: values.newPass,
         newPassConfirm: values.newPassConfirm,
       }),
@@ -100,8 +116,12 @@ export default function ForgotResetPassPage() {
         boxSizing: "border-box",
         background:
           "linear-gradient(150deg, #eff4ff 0%, #f5f6f8 60%, #f0fdf4 100%)",
+        position: "relative",
       }}
     >
+      <div style={{ position: "absolute", top: 16, right: 20, zIndex: 10 }}>
+        <LanguageSwitcher />
+      </div>
       <div className="rp-wrap">
         <div className="rp-brand">
           <div className="rp-mark">S</div>
@@ -114,22 +134,39 @@ export default function ForgotResetPassPage() {
               <div className="rp-icon-ring">
                 <SafetyOutlined />
               </div>
-              <h1 className="rp-h">비밀번호 변경</h1>
-              <p className="rp-sub">보안을 위해 비밀번호를 변경해 주세요.</p>
+              <h1 className="rp-h">{t("resetPass.title")}</h1>
+              <p className="rp-sub">{t("resetPass.subtitle")}</p>
 
-              {empNo && (
+              {token ? (
                 <div className="rp-user">
-                  <div className="rp-user-av">{String(empNo).slice(0, 1)}</div>
+                  <div className="rp-user-av">
+                    <SafetyOutlined />
+                  </div>
                   <div>
-                    <div className="rp-user-name">{empNo}</div>
-                    <div className="rp-user-sub">{empEmail}</div>
+                    <div className="rp-user-name">
+                      {t("resetPass.tokenUser.title")}
+                    </div>
+                    <div className="rp-user-sub">
+                      {t("resetPass.tokenUser.subtitle")}
+                    </div>
                   </div>
                   <div style={{ marginLeft: "auto" }}>
                     <span className="sb-badge sb-badge--blue">
-                      본인확인 완료
+                      {t("resetPass.verified")}
                     </span>
                   </div>
                 </div>
+              ) : (
+                router.isReady && (
+                  <Alert
+                    className="a-alert on"
+                    type="warning"
+                    showIcon
+                    icon={<ExclamationCircleOutlined />}
+                    message={t("resetPass.invalidAccessAlert")}
+                    style={{ marginBottom: 16 }}
+                  />
+                )
               )}
 
               <Form
@@ -139,16 +176,16 @@ export default function ForgotResetPassPage() {
                 requiredMark={false}
               >
                 <Form.Item
-                  label={<span className="fl">새 비밀번호</span>}
+                  label={<span className="fl">{t("resetPass.newPasswordLabel")}</span>}
                   name="newPass"
                   rules={[
-                    { required: true, message: "새 비밀번호를 입력하세요." },
+                    { required: true, message: t("resetPass.newPasswordRequired") },
                   ]}
                 >
                   <Input.Password
                     className="fi"
                     size="large"
-                    placeholder="8자 이상, 영문 + 숫자 포함"
+                    placeholder={t("resetPass.newPasswordPlaceholder")}
                     autoComplete="new-password"
                     onChange={(e) => setPw(e.target.value)}
                   />
@@ -164,7 +201,7 @@ export default function ForgotResetPassPage() {
                   />
                 </div>
                 <div className="pw-lbl" style={{ color: LEVELS[level].color }}>
-                  {LEVELS[level].label}
+                  {LEVELS[level].key ? t(`resetPass.strength.${LEVELS[level].key}`) : ""}
                 </div>
 
                 <div className="pw-reqs">
@@ -172,26 +209,27 @@ export default function ForgotResetPassPage() {
                     const ok = r.test(pw);
                     return (
                       <span key={r.key} className={`pw-req${ok ? " ok" : ""}`}>
-                        {ok ? <CheckCircleFilled /> : null} {r.label}
+                        {ok ? <CheckCircleFilled /> : null}{" "}
+                        {t(`resetPass.requirements.${r.key}`)}
                       </span>
                     );
                   })}
                 </div>
 
                 <Form.Item
-                  label={<span className="fl">비밀번호 확인</span>}
+                  label={<span className="fl">{t("resetPass.confirmLabel")}</span>}
                   name="newPassConfirm"
                   rules={[
                     {
                       required: true,
-                      message: "비밀번호를 한 번 더 입력하세요.",
+                      message: t("resetPass.confirmRequired"),
                     },
                   ]}
                 >
                   <Input.Password
                     className="fi"
                     size="large"
-                    placeholder="새 비밀번호를 한 번 더 입력"
+                    placeholder={t("resetPass.confirmPlaceholder")}
                     autoComplete="new-password"
                   />
                 </Form.Item>
@@ -205,7 +243,7 @@ export default function ForgotResetPassPage() {
                       localError ||
                       (typeof error === "string"
                         ? error
-                        : "비밀번호 변경 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.")
+                        : t("resetPass.genericError"))
                     }
                   />
                 )}
@@ -215,10 +253,11 @@ export default function ForgotResetPassPage() {
                   type="primary"
                   htmlType="submit"
                   loading={loading}
+                  disabled={router.isReady && !token}
                   icon={<CheckOutlined />}
                   block
                 >
-                  비밀번호 변경 완료
+                  {t("resetPass.submit")}
                 </Button>
               </Form>
             </div>
@@ -227,11 +266,11 @@ export default function ForgotResetPassPage() {
               <div className="rp-check-ring">
                 <CheckOutlined />
               </div>
-              <div className="rp-success-h">비밀번호 변경 완료!</div>
+              <div className="rp-success-h">{t("resetPass.successTitle")}</div>
               <div className="rp-success-sub">
-                새 비밀번호가 설정되었습니다.
+                {t("resetPass.successSub1")}
                 <br />
-                로그인 페이지에서 다시 로그인해 주세요.
+                {t("resetPass.successSub2")}
               </div>
               <Button
                 className="a-btn"
@@ -240,11 +279,9 @@ export default function ForgotResetPassPage() {
                 block
                 onClick={() => router.replace("/auth/login")}
               >
-                로그인 페이지로 이동
+                {t("resetPass.goToLogin")}
               </Button>
-              <div className="rp-countdown">
-                잠시 후 로그인 페이지로 이동합니다…
-              </div>
+              <div className="rp-countdown">{t("resetPass.countdown")}</div>
             </div>
           )}
         </div>

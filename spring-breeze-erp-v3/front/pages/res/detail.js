@@ -5,19 +5,14 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import { fetchResourceDetailRequest } from "../../reducers/res/resourceReducer";
-
-const RES_TYPE_LABEL = { ROOM: "회의실", EQUIPMENT: "장비", VEHICLE: "차량" };
-const RES_STATUS_LABEL = {
-  AVAILABLE: "사용가능",
-  MAINTENANCE: "점검중",
-  DISABLED: "사용중지",
-};
 
 export default function ResourceDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["res", "common"]);
 
   const { detail: res } = useSelector((state) => state.resource);
 
@@ -36,15 +31,16 @@ export default function ResourceDetailPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/res/list">자원 관리</Link> · 자원 상세
+            <Link href="/res/list">{t("shared.title")}</Link> ·{" "}
+            {t("detail.breadcrumbCurrent")}
           </div>
           <h1>{res.resName}</h1>
-          <p>자원 상세 정보를 확인합니다.</p>
+          <p>{t("detail.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/res/list">
-            <Button icon={<ArrowLeftOutlined />} size="small">
-              목록으로
+            <Button icon={<ArrowLeftOutlined />}>
+              {t("shared.backToList")}
             </Button>
           </Link>
         </div>
@@ -52,12 +48,12 @@ export default function ResourceDetailPage() {
 
       <div className="sb-card">
         <div className="sb-card__head">
-          <h2>자원 정보</h2>
+          <h2>{t("detail.sectionTitle")}</h2>
         </div>
         <div className="sb-card__body">
           <div className="row g-3">
             <div className="col-md-3">
-              <label className="sb-form-label">자원코드</label>
+              <label className="sb-form-label">{t("field.resCode")}</label>
               <div
                 className="form-control"
                 style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }}
@@ -66,7 +62,7 @@ export default function ResourceDetailPage() {
               </div>
             </div>
             <div className="col-md-6">
-              <label className="sb-form-label">자원명</label>
+              <label className="sb-form-label">{t("field.resName")}</label>
               <div
                 className="form-control"
                 style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }}
@@ -75,17 +71,19 @@ export default function ResourceDetailPage() {
               </div>
             </div>
             <div className="col-md-3">
-              <label className="sb-form-label">자원 유형</label>
+              <label className="sb-form-label">{t("field.resType")}</label>
               <div
                 className="form-control"
                 style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }}
               >
-                {RES_TYPE_LABEL[res.resType] || res.resType}
+                {t(`enum.resType.${res.resType}`, {
+                  defaultValue: res.resType,
+                })}
               </div>
             </div>
 
             <div className="col-md-4">
-              <label className="sb-form-label">위치</label>
+              <label className="sb-form-label">{t("field.location")}</label>
               <div
                 className="form-control"
                 style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }}
@@ -94,7 +92,7 @@ export default function ResourceDetailPage() {
               </div>
             </div>
             <div className="col-md-2">
-              <label className="sb-form-label">수량</label>
+              <label className="sb-form-label">{t("field.quantity")}</label>
               <div
                 className="form-control"
                 style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }}
@@ -103,7 +101,7 @@ export default function ResourceDetailPage() {
               </div>
             </div>
             <div className="col-md-3">
-              <label className="sb-form-label">수용인원</label>
+              <label className="sb-form-label">{t("field.capacity")}</label>
               <div
                 className="form-control"
                 style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }}
@@ -112,17 +110,19 @@ export default function ResourceDetailPage() {
               </div>
             </div>
             <div className="col-md-3">
-              <label className="sb-form-label">상태</label>
+              <label className="sb-form-label">{t("field.resStatus")}</label>
               <div
                 className="form-control"
                 style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }}
               >
-                {RES_STATUS_LABEL[res.resStatus] || res.resStatus}
+                {t(`enum.resStatus.${res.resStatus}`, {
+                  defaultValue: res.resStatus,
+                })}
               </div>
             </div>
 
             <div className="col-12">
-              <label className="sb-form-label">비고</label>
+              <label className="sb-form-label">{t("field.remark")}</label>
               <div
                 className="form-control"
                 style={{ background: "#fafbfc", color: "var(--sb-ink-soft)" }}
@@ -132,7 +132,7 @@ export default function ResourceDetailPage() {
             </div>
 
             <div className="col-12">
-              <label className="dd-label">담당자</label>
+              <label className="dd-label">{t("field.manager")}</label>
               <div className="view-val">
                 {res.managerEmpId ? (
                   <>
@@ -153,7 +153,9 @@ export default function ResourceDetailPage() {
                     </span>
                   </>
                 ) : (
-                  <span className="view-val-empty">지정 담당자 없음</span>
+                  <span className="view-val-empty">
+                    {t("detail.managerEmpty")}
+                  </span>
                 )}
               </div>
             </div>

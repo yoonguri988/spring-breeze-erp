@@ -1,0 +1,75 @@
+{
+  "appName": "SBerp Integrated ERP System",
+  "brand": "SBerp",
+  "button": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "reset": "Reset",
+    "back": "Back",
+    "list": "List",
+    "submit": "Submit",
+    "close": "Close",
+    "download": "Download",
+    "upload": "Upload",
+    "print": "Print",
+    "next": "Next",
+    "prev": "Previous",
+    "approve": "Approve",
+    "reject": "Reject",
+    "apply": "Apply",
+    "select": "Select",
+    "view": "View",
+    "refresh": "Refresh",
+    "return": "Return"
+  },
+  "label": {
+    "all": "All",
+    "name": "Name",
+    "date": "Date",
+    "status": "Status",
+    "actions": "Actions",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "required": "Required"
+  },
+  "status": {
+    "pending": "Pending",
+    "completed": "Completed",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "inProgress": "In Progress"
+  },
+  "message": {
+    "loading": "Loading...",
+    "processing": "Processing...",
+    "noData": "No data available.",
+    "success": "Processed successfully.",
+    "error": "An error occurred.",
+    "networkError": "A network error occurred. Please try again later.",
+    "deleteConfirmTitle": "Are you sure you want to delete this?",
+    "deleteConfirmContent": "Deleted data cannot be recovered.",
+    "saveSuccess": "Saved successfully.",
+    "deleteSuccess": "Deleted successfully.",
+    "updateSuccess": "Updated successfully.",
+    "invalidRequest": "The request could not be processed."
+  },
+  "confirm": {
+    "yes": "Yes",
+    "no": "No"
+  },
+  "empStatus": {
+    "active": "Active",
+    "leave": "On Leave",
+    "retired": "Retired"
+  },
+  "language": {
+    "label": "Language",
+    "ko": "한국어",
+    "en": "English"
+  }
+}

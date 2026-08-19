@@ -13,6 +13,7 @@ import {
   ThunderboltOutlined,
   WarningFilled,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchImpactRequest,
@@ -24,6 +25,7 @@ import {
 export default function DeptTransferListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["dept", "common"]);
 
   const { impact, loading, error, success } = useSelector(
     (state) => state.deptTransfer,
@@ -46,7 +48,7 @@ export default function DeptTransferListPage() {
   useEffect(() => {
     if (!submitting) return;
     if (success) {
-      message.success("이관이 완료되었습니다.");
+      message.success(t("transfer.list.completeSuccessMsg"));
       setSubmitting(false);
       dispatch(resetDeptTransferState());
       router.push(
@@ -63,7 +65,7 @@ export default function DeptTransferListPage() {
   useEffect(() => {
     if (!canceling) return;
     if (success) {
-      message.success("이관이 취소되고 부서가 원복되었습니다.");
+      message.success(t("transfer.list.cancelSuccessMsg"));
       setCanceling(false);
       dispatch(resetDeptTransferState());
       router.push("/dept/transfer/pending");
@@ -105,11 +107,11 @@ export default function DeptTransferListPage() {
 
   const handleCancelTransfer = () => {
     Modal.confirm({
-      title: "이관 취소",
-      content: "이관을 취소하고 부서를 원래 상태(ACTIVE)로 되돌리시겠습니까?",
-      okText: "취소하기",
+      title: t("transfer.list.cancelModal.title"),
+      content: t("transfer.list.cancelModal.content"),
+      okText: t("transfer.list.cancelModal.okText"),
       okButtonProps: { danger: true },
-      cancelText: "닫기",
+      cancelText: t("transfer.list.cancelModal.cancelText"),
       onOk: () => {
         setCanceling(true);
         dispatch(cancelTransferRequest(deptId));
@@ -158,9 +160,10 @@ export default function DeptTransferListPage() {
           <WarningFilled />
           <span>
             <b>{impact.deptName}</b>{" "}
-            <span className="dept-code-chip">{impact.deptCode}</span> 부서는
-            현재 <b>이관 대기(PENDING_DELETE)</b> 상태입니다. 아래 소속 사원을
-            모두 다른 부서로 이관해야 부서 삭제가 최종 완료됩니다.
+            <span className="dept-code-chip">{impact.deptCode}</span>{" "}
+            {t("transfer.list.bannerPart1")}{" "}
+            <b>{t("transfer.list.bannerStatus")}</b>{" "}
+            {t("transfer.list.bannerPart2")}
           </span>
         </div>
       </div>
@@ -184,7 +187,9 @@ export default function DeptTransferListPage() {
             />
             <div style={{ flex: 1 }}>
               <div className="fw-semibold mb-1">
-                AI 추천 부서: {impact.aiRecom.targetDeptName}
+                {t("transfer.list.aiRecomTitle", {
+                  targetDeptName: impact.aiRecom.targetDeptName,
+                })}
               </div>
               <div style={{ fontSize: 13, color: "var(--sb-ink-soft)" }}>
                 {impact.aiRecom.reason}
@@ -195,7 +200,7 @@ export default function DeptTransferListPage() {
                 icon={<ThunderboltOutlined />}
                 onClick={handleApplyAi}
               >
-                이 추천을 전체 사원에 적용
+                {t("transfer.list.aiApplyBtn")}
               </Button>
             </div>
           </div>
@@ -207,49 +212,51 @@ export default function DeptTransferListPage() {
         <div className="d-flex flex-wrap gap-3 p-3">
           <div className="depth-info-box">
             <TeamOutlined style={{ color: "var(--sb-accent)" }} />
-            소속 사원 <span className="depth-val">{impact.employeeCount}</span>
-            명
+            {t("transfer.list.summary.empCountLabel")}{" "}
+            <span className="depth-val">{impact.employeeCount}</span>
+            {t("transfer.list.summary.empCountUnit")}
           </div>
           <div className="depth-info-box">
             <CalendarOutlined style={{ color: "var(--sb-cyan)" }} />
-            미처리 예약{" "}
-            <span className="depth-val">{impact.reservationCount}</span>건
+            {t("transfer.list.summary.reservationCountLabel")}{" "}
+            <span className="depth-val">{impact.reservationCount}</span>
+            {t("transfer.list.summary.reservationCountUnit")}
           </div>
           <div className="depth-info-box">
             <FileTextOutlined style={{ color: "var(--sb-violet)" }} />
-            결재 대기(라인){" "}
-            <span className="depth-val">{impact.apprLineCount}</span>건
+            {t("transfer.list.summary.apprLineCountLabel")}{" "}
+            <span className="depth-val">{impact.apprLineCount}</span>
+            {t("transfer.list.summary.apprLineCountUnit")}
           </div>
           <div className="depth-info-box">
             <FileTextOutlined style={{ color: "var(--sb-green)" }} />
-            상신 진행중 <span className="depth-val">{impact.apprDocCount}</span>
-            건
+            {t("transfer.list.summary.apprDocCountLabel")}{" "}
+            <span className="depth-val">{impact.apprDocCount}</span>
+            {t("transfer.list.summary.apprDocCountUnit")}
           </div>
         </div>
         <div
           className="px-3 pb-3"
           style={{ fontSize: 12, color: "var(--sb-ink-faint)" }}
         >
-          <InfoCircleOutlined /> 예약·결재 항목은 사원(emp_id) 기준으로 따라가는
-          구조라 별도 이관 작업 없이 사원의 소속 부서만 변경하면 자동으로 함께
-          이동합니다. 아래 목록은 참고용입니다.
+          <InfoCircleOutlined /> {t("transfer.list.summary.infoNote")}
         </div>
       </div>
 
       {/* 이관 폼 */}
       <div className="sb-card">
         <div className="sb-toolbar">
-          <span className="fw-semibold">소속 사원 이관</span>
+          <span className="fw-semibold">{t("transfer.list.form.header")}</span>
           <div className="grow" />
           <Select
             style={{ minWidth: 220 }}
-            placeholder="일괄 적용할 부서 선택"
+            placeholder={t("transfer.list.form.bulkPlaceholder")}
             options={candidates}
             value={bulkTarget}
             onChange={setBulkTarget}
           />
           <Button size="small" onClick={() => applyToAll(bulkTarget)}>
-            전체 적용
+            {t("transfer.list.form.applyAllBtn")}
           </Button>
         </div>
 
@@ -258,11 +265,11 @@ export default function DeptTransferListPage() {
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th style={{ width: 60 }}>NO</th>
-                  <th style={{ width: 120 }}>사번</th>
-                  <th style={{ minWidth: 120 }}>이름</th>
-                  <th style={{ width: 120 }}>직급</th>
-                  <th style={{ minWidth: 220 }}>이관할 부서</th>
+                  <th style={{ width: 60 }}>{t("transfer.list.form.table.no")}</th>
+                  <th style={{ width: 120 }}>{t("transfer.list.form.table.empNo")}</th>
+                  <th style={{ minWidth: 120 }}>{t("transfer.list.form.table.empName")}</th>
+                  <th style={{ width: 120 }}>{t("transfer.list.form.table.position")}</th>
+                  <th style={{ minWidth: 220 }}>{t("transfer.list.form.table.targetDept")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -277,7 +284,7 @@ export default function DeptTransferListPage() {
                     <td>
                       <Select
                         style={{ width: "100%" }}
-                        placeholder="이관할 부서 선택"
+                        placeholder={t("transfer.list.form.rowPlaceholder")}
                         options={candidates}
                         value={targets[emp.empId]}
                         onChange={(value) =>
@@ -295,7 +302,7 @@ export default function DeptTransferListPage() {
           ) : (
             <div className="sb-empty">
               <TeamOutlined style={{ fontSize: 30, opacity: 0.5 }} />
-              <p>소속 사원이 없습니다. 바로 삭제를 완료할 수 있습니다.</p>
+              <p>{t("transfer.list.form.emptyMsg")}</p>
             </div>
           )}
         </div>
@@ -307,7 +314,7 @@ export default function DeptTransferListPage() {
           onClick={handleCancelTransfer}
           loading={canceling && loading}
         >
-          이관 취소 (부서 원복)
+          {t("transfer.list.cancelBtn")}
         </Button>
         <Button
           type="primary"
@@ -316,7 +323,7 @@ export default function DeptTransferListPage() {
           loading={submitting && loading}
           onClick={handleSubmit}
         >
-          이관 완료
+          {t("transfer.list.completeBtn")}
         </Button>
       </div>
 
@@ -324,17 +331,17 @@ export default function DeptTransferListPage() {
       {impact.reservationCount > 0 && (
         <div className="sb-card mt-3">
           <div className="sb-toolbar">
-            <span className="fw-semibold">미처리 예약 (참고용)</span>
+            <span className="fw-semibold">{t("transfer.list.reservations.title")}</span>
           </div>
           <div className="sb-card__body--flush">
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th>사원</th>
-                  <th>자원</th>
-                  <th>상태</th>
-                  <th>장비예약시작일</th>
-                  <th>장비예약종료일</th>
+                  <th>{t("transfer.list.reservations.table.emp")}</th>
+                  <th>{t("transfer.list.reservations.table.resource")}</th>
+                  <th>{t("transfer.list.reservations.table.status")}</th>
+                  <th>{t("transfer.list.reservations.table.startDt")}</th>
+                  <th>{t("transfer.list.reservations.table.endDt")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -361,16 +368,16 @@ export default function DeptTransferListPage() {
       {impact.apprLineCount > 0 && (
         <div className="sb-card mt-3">
           <div className="sb-toolbar">
-            <span className="fw-semibold">결재 대기 라인 (참고용)</span>
+            <span className="fw-semibold">{t("transfer.list.apprLines.title")}</span>
           </div>
           <div className="sb-card__body--flush">
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th>사원</th>
-                  <th>문서명</th>
-                  <th>결재순서</th>
-                  <th>상태</th>
+                  <th>{t("transfer.list.apprLines.table.emp")}</th>
+                  <th>{t("transfer.list.apprLines.table.docTitle")}</th>
+                  <th>{t("transfer.list.apprLines.table.linOrder")}</th>
+                  <th>{t("transfer.list.apprLines.table.status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -396,15 +403,15 @@ export default function DeptTransferListPage() {
       {impact.apprDocCount > 0 && (
         <div className="sb-card mt-3">
           <div className="sb-toolbar">
-            <span className="fw-semibold">상신 진행중 결재문서 (참고용)</span>
+            <span className="fw-semibold">{t("transfer.list.apprDocs.title")}</span>
           </div>
           <div className="sb-card__body--flush">
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th>사원</th>
-                  <th>문서명</th>
-                  <th>상태</th>
+                  <th>{t("transfer.list.apprDocs.table.emp")}</th>
+                  <th>{t("transfer.list.apprDocs.table.docTitle")}</th>
+                  <th>{t("transfer.list.apprDocs.table.status")}</th>
                 </tr>
               </thead>
               <tbody>

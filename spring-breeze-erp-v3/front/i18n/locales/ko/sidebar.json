@@ -1,0 +1,31 @@
+{
+  "sections": {
+    "org": "조직 관리",
+    "hr": "인사 관리",
+    "work": "업무 관리",
+    "asset": "자산 관리"
+  },
+  "items": {
+    "dashboard": { "tip": "대시보드" },
+    "comlist": { "tip": "회사 • 부서 관리" },
+    "commypage": { "tip": "내 회사 정보" },
+    "deptlist": { "tip": "회사 내 부서 조회" },
+    "deptmy": { "tip": "내 부서 정보" },
+    "deptpending": { "tip": "부서 이관 대상 관리" },
+    "depttranslog": { "tip": "부서 이력 관리" },
+    "employees": { "tip": "사원 관리", "label": "사원 정보" },
+    "position": { "tip": "직급 관리" },
+    "permissions": { "tip": "권한 관리" },
+    "evalperiodlist": { "tip": "인사 평가" },
+    "evaldashboard": { "tip": "평가 작성" },
+    "evalreport": { "tip": "내 평가 리포트" },
+    "apprlistform": { "tip": "전자결재", "label": "결재 양식 관리" },
+    "apprlistdoc": { "tip": "전자결재", "label": "전자결재 기안" },
+    "projects": { "tip": "프로젝트", "label": "프로젝트 및 태스크" },
+    "tasks": { "tip": "태스크", "label": "내 태스크" },
+    "notices": { "tip": "공지 관리" },
+    "reslist": { "tip": "자원 관리" },
+    "resvmy": { "tip": "내 자원 요청 관리" },
+    "adminresvlist": { "tip": "전체 자원 요청 관리", "label": "자원 예약 요청 관리" }
+  }
+}

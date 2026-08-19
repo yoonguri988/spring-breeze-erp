@@ -7,8 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sb.erp.emp.dto.EmailSendLogDto;
 import com.sb.erp.emp.dto.WelcomeMailTargetDto;
 import com.sb.erp.emp.dto.request.EmpRequest;
+import com.sb.erp.emp.dto.response.EmpResponse;
 import com.sb.erp.emp.repository.EmailSendLogMapper;
 import com.sb.erp.global.integration.EmailApi;
+import com.sb.erp.global.integration.NaverEmailApi;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class EmailServiceImpl implements EmailService {
 
     private final EmailApi emailApi;
+    private final NaverEmailApi naverEmailApi;
     private final EmailSendLogMapper logMapper;
 
     // 사원 등록 시점엔 회사명 조인 없이 저장하므로 fallback
@@ -110,6 +113,30 @@ public class EmailServiceImpl implements EmailService {
                 System.err.println("[EmailService] 로그 업데이트 실패: " + logEx.getMessage());
             }
             System.err.println("[EmailService] 3일 메일 실패 empId=" + empId + " err=" + msg);
+        }
+    }
+    
+    // ─── 비밀번호 재설정 안내 메일 ──────────────
+    // 발송 로그 테이블(email_send_log)은 (emp_id, mail_type) UNIQUE 제약의 온보딩 메일
+    // 전용이라 재설정 요청마다 반복 발송되는 이 메일에는 재사용하지 않는다(이력 필요 시
+    // login_history/추후 별도 로그로 확장 가능). 실패해도 예외를 밖으로 던지지 않는다.
+    @Override
+    @Async("mailExecutor")
+    public void sendPasswordResetMailAsync(EmpResponse emp, String resetLink) {
+        if (emp == null || emp.getEmpEmail() == null || emp.getEmpEmail().isBlank()) {
+            System.err.println("[EmailService] 비밀번호 재설정 메일 스킵: 이메일 없음");
+            return;
+        }
+        try {
+            String comName = (emp.getComName() != null) ? emp.getComName() : DEFAULT_COM_NAME;
+            String subject = MailTemplates.passwordResetSubject(comName);
+            String body = MailTemplates.passwordResetBody(comName, emp.getEmpName(), resetLink);
+
+            naverEmailApi.sendMail(subject, body, emp.getEmpEmail());
+            System.out.println("[EmailService] 비밀번호 재설정 메일 성공 empId=" + emp.getEmpId());
+        } catch (Exception e) {
+            System.err.println("[EmailService] 비밀번호 재설정 메일 실패 empId=" + emp.getEmpId()
+                    + " err=" + e.getMessage());
         }
     }
 

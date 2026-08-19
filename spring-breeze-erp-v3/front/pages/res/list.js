@@ -11,6 +11,7 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchResourceListRequest,
@@ -24,6 +25,7 @@ const ONE_PAGE_LIST = 10;
 export default function ResourceListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["res", "common"]);
 
   const { list, listCount, loading, error, success, deleteReason } =
     useSelector((state) => state.resource);
@@ -126,21 +128,45 @@ export default function ResourceListPage() {
 
   const typeBadge = (type) => {
     if (type === "ROOM")
-      return <span className="sb-badge sb-badge--blue">회의실</span>;
+      return (
+        <span className="sb-badge sb-badge--blue">
+          {t("enum.resType.ROOM")}
+        </span>
+      );
     if (type === "EQUIPMENT")
-      return <span className="sb-badge sb-badge--amber">장비</span>;
+      return (
+        <span className="sb-badge sb-badge--amber">
+          {t("enum.resType.EQUIPMENT")}
+        </span>
+      );
     if (type === "VEHICLE")
-      return <span className="sb-badge sb-badge--green">차량</span>;
+      return (
+        <span className="sb-badge sb-badge--green">
+          {t("enum.resType.VEHICLE")}
+        </span>
+      );
     return <span className="sb-badge">{type}</span>;
   };
 
   const statusBadge = (status) => {
     if (status === "AVAILABLE")
-      return <span className="sb-badge sb-badge--green">사용가능</span>;
+      return (
+        <span className="sb-badge sb-badge--green">
+          {t("enum.resStatus.AVAILABLE")}
+        </span>
+      );
     if (status === "MAINTENANCE")
-      return <span className="sb-badge sb-badge--amber">점검중</span>;
+      return (
+        <span className="sb-badge sb-badge--amber">
+          {t("enum.resStatus.MAINTENANCE")}
+        </span>
+      );
     if (status === "DISABLED")
-      return <span className="sb-badge sb-badge--gray">사용중지</span>;
+      return (
+        <span className="sb-badge sb-badge--gray">
+          {t("enum.resStatus.DISABLED")}
+        </span>
+      );
     return <span className="sb-badge sb-badge--gray">{status}</span>;
   };
 
@@ -148,14 +174,17 @@ export default function ResourceListPage() {
     <div className="sb-content">
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">홈 · 자산 · 자원 관리</div>
-          <h1>자원 관리</h1>
-          <p>회의실, 장비, 차량 등 예약 가능한 자원을 등록하고 관리합니다.</p>
+          <div className="sb-breadcrumb">
+            {t("list.breadcrumbHome")} · {t("list.breadcrumbAsset")} ·{" "}
+            {t("shared.title")}
+          </div>
+          <h1>{t("list.title")}</h1>
+          <p>{t("list.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/res/insert">
             <Button type="primary" icon={<PlusOutlined />}>
-              자원 등록
+              {t("list.addButton")}
             </Button>
           </Link>
         </div>
@@ -165,7 +194,7 @@ export default function ResourceListPage() {
         <Alert
           className="a-alert on mb-3"
           type="error"
-          message="비밀번호가 일치하지 않아 삭제되지 않았습니다."
+          message={t("list.alert.badPassword")}
           showIcon
         />
       )}
@@ -173,21 +202,21 @@ export default function ResourceListPage() {
         <Alert
           className="a-alert on mb-3"
           type="error"
-          message="예약 이력이 있는 자원은 먼저 예약 내역을 정리해야 삭제할 수 있습니다."
+          message={t("list.alert.hasReservations")}
           showIcon
         />
       )}
 
       <div className="sb-card">
         <div className="sb-card__head">
-          <h2>자원 목록</h2>
-          <span className="sub">검색 조건에 맞는 자원을 확인합니다.</span>
+          <h2>{t("list.cardTitle")}</h2>
+          <span className="sub">{t("list.cardSubtitle")}</span>
         </div>
         <div className="sb-card__body">
           <div className="row g-2 align-items-center">
             <div className="col-12 col-md-4">
               <Input
-                placeholder="자원명 또는 자원코드 검색"
+                placeholder={t("list.searchPlaceholder")}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 onPressEnter={() => runSearch(1)}
@@ -199,10 +228,10 @@ export default function ResourceListPage() {
                 value={resType || ""}
                 onChange={setResType}
                 options={[
-                  { value: "", label: "전체 유형" },
-                  { value: "ROOM", label: "회의실" },
-                  { value: "EQUIPMENT", label: "장비" },
-                  { value: "VEHICLE", label: "차량" },
+                  { value: "", label: t("list.allType") },
+                  { value: "ROOM", label: t("enum.resType.ROOM") },
+                  { value: "EQUIPMENT", label: t("enum.resType.EQUIPMENT") },
+                  { value: "VEHICLE", label: t("enum.resType.VEHICLE") },
                 ]}
               />
             </div>
@@ -212,10 +241,16 @@ export default function ResourceListPage() {
                 value={resStatus || ""}
                 onChange={setResStatus}
                 options={[
-                  { value: "", label: "전체 상태" },
-                  { value: "AVAILABLE", label: "사용가능" },
-                  { value: "MAINTENANCE", label: "점검중" },
-                  { value: "DISABLED", label: "사용중지" },
+                  { value: "", label: t("list.allStatus") },
+                  {
+                    value: "AVAILABLE",
+                    label: t("enum.resStatus.AVAILABLE"),
+                  },
+                  {
+                    value: "MAINTENANCE",
+                    label: t("enum.resStatus.MAINTENANCE"),
+                  },
+                  { value: "DISABLED", label: t("enum.resStatus.DISABLED") },
                 ]}
               />
             </div>
@@ -225,7 +260,7 @@ export default function ResourceListPage() {
                 icon={<SearchOutlined />}
                 onClick={() => runSearch(1)}
               >
-                검색
+                {t("common:button.search")}
               </Button>
             </div>
           </div>
@@ -235,23 +270,25 @@ export default function ResourceListPage() {
           <table className="sb-table">
             <thead>
               <tr>
-                <th style={{ width: 160 }}>자원코드</th>
-                <th>자원명</th>
-                <th style={{ width: 90 }}>유형</th>
-                <th style={{ width: 160 }}>위치</th>
+                <th style={{ width: 160 }}>{t("field.resCode")}</th>
+                <th>{t("field.resName")}</th>
+                <th style={{ width: 90 }}>{t("list.columns.resType")}</th>
+                <th style={{ width: 160 }}>{t("field.location")}</th>
                 <th className="num" style={{ width: 70 }}>
-                  수량
+                  {t("field.quantity")}
                 </th>
-                <th style={{ width: 100 }}>상태</th>
-                <th style={{ width: 110 }}>담당자</th>
-                <th style={{ width: 80, textAlign: "center" }}>관리</th>
+                <th style={{ width: 100 }}>{t("field.resStatus")}</th>
+                <th style={{ width: 110 }}>{t("field.manager")}</th>
+                <th style={{ width: 80, textAlign: "center" }}>
+                  {t("list.columns.actions")}
+                </th>
               </tr>
             </thead>
             <tbody>
               {(list || []).length === 0 ? (
                 <tr>
                   <td colSpan={8} className="text-center text-faint py-4">
-                    등록된 자원이 없습니다.
+                    {t("list.emptyText")}
                   </td>
                 </tr>
               ) : (
@@ -281,7 +318,7 @@ export default function ResourceListPage() {
                           <button
                             type="button"
                             className="sb-iconbtn"
-                            title="상세보기"
+                            title={t("list.detailTooltip")}
                           >
                             <BookOutlined />
                           </button>
@@ -297,7 +334,7 @@ export default function ResourceListPage() {
                               <button
                                 type="button"
                                 className="sb-iconbtn"
-                                title="수정"
+                                title={t("common:button.edit")}
                               >
                                 <EditOutlined />
                               </button>
@@ -306,7 +343,7 @@ export default function ResourceListPage() {
                               type="button"
                               className="sb-iconbtn"
                               style={{ color: "var(--sb-red)" }}
-                              title="삭제"
+                              title={t("common:button.delete")}
                               onClick={() => openDelete(r)}
                             >
                               <DeleteOutlined />
@@ -329,7 +366,8 @@ export default function ResourceListPage() {
         style={{ borderTop: "1px solid var(--sb-border)" }}
       >
         <span className="text-faint" style={{ fontSize: 12.5 }}>
-          총 <b>{paging.listtotal}</b>개 자원
+          {t("list.totalCountPrefix")} <b>{paging.listtotal}</b>
+          {t("list.totalCountSuffix")}
         </span>
 
         {paging.listtotal > ONE_PAGE_LIST && (

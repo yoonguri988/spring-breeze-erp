@@ -7,6 +7,7 @@ import {
   LockOutlined,
   StopOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 export default function ResourceDeleteModal({
   target,
@@ -16,6 +17,7 @@ export default function ResourceDeleteModal({
   onClose,
   onConfirm,
 }) {
+  const { t } = useTranslation(["res", "common"]);
   const [password, setPassword] = useState("");
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function ResourceDeleteModal({
           }}
         >
           {blocked ? <StopOutlined /> : <ExclamationCircleFilled />}
-          {blocked ? "삭제할 수 없습니다" : "자원 삭제"}
+          {blocked ? t("deleteModal.blockedTitle") : t("deleteModal.title")}
         </span>
       }
       open={open}
@@ -51,11 +53,11 @@ export default function ResourceDeleteModal({
       width={380}
       footer={
         blocked ? (
-          <Button onClick={onClose}>닫기</Button>
+          <Button onClick={onClose}>{t("common:button.close")}</Button>
         ) : (
           [
             <Button key="cancel" onClick={onClose} disabled={loading}>
-              취소
+              {t("common:button.cancel")}
             </Button>,
             <Button
               key="confirm"
@@ -65,7 +67,7 @@ export default function ResourceDeleteModal({
               onClick={handleConfirm}
               disabled={!password}
             >
-              삭제 확인
+              {t("deleteModal.confirmButton")}
             </Button>,
           ]
         )
@@ -86,26 +88,30 @@ export default function ResourceDeleteModal({
       {blocked ? (
         <>
           <div className="del-warning">
-            이 자원에는 진행 중인 예약이 <b>{resvCount}</b>건 있습니다.
+            {t("deleteModal.blockedWarningPrefix")} <b>{resvCount}</b>
+            {t("deleteModal.blockedWarningSuffix")}
           </div>
           <div className="del-warn-box">
             <ExclamationCircleFilled />
-            <span>예약이 있는 동안에는 삭제(해체)를 진행할 수 없습니다.</span>
+            <span>{t("deleteModal.blockedHint")}</span>
           </div>
         </>
       ) : (
         <>
           <div className="del-warning">
-            계속하려면 <b>비밀번호</b>를 입력하세요.
+            {t("deleteModal.passwordPromptPrefix")}{" "}
+            <b>{t("deleteModal.passwordInline")}</b>
+            {t("deleteModal.passwordPromptSuffix")}
           </div>
           <div className="mb-2">
             <label className="sb-form-label">
-              비밀번호 <span style={{ color: "var(--sb-red)" }}>*</span>
+              {t("deleteModal.passwordLabel")}{" "}
+              <span style={{ color: "var(--sb-red)" }}>*</span>
             </label>
             <Input.Password
               className="fi"
               prefix={<LockOutlined />}
-              placeholder="비밀번호 입력"
+              placeholder={t("deleteModal.passwordPlaceholder")}
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

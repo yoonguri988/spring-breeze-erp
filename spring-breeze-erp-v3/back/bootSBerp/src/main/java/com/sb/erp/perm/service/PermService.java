@@ -35,5 +35,5 @@ public interface PermService {
 	int grantAuth(EmpAuthRequest dto, Long comId);
 
 	// 권한 회수. 반환: 1=성공, 0=대상 없음
-	int revokeAuth(EmpAuthRequest dto);
+	int revokeAuth(EmpAuthRequest dto, Long comId);
 }

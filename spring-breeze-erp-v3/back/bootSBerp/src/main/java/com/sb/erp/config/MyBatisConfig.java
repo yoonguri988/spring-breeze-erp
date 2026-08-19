@@ -13,11 +13,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
-@MapperScan(
-		basePackages = "com.sb.erp.**.repository",
-		sqlSessionFactoryRef = "sqlSessionFactory",
-		annotationClass = Mapper.class
-)
+@MapperScan(basePackages = "com.sb.erp.**.repository", annotationClass = Mapper.class, sqlSessionFactoryRef = "sqlSessionFactory")
 public class MyBatisConfig {
 
     @Bean

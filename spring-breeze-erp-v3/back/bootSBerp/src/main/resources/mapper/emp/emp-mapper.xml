@@ -121,16 +121,15 @@
 	<!-- jsj: 회사 내 권한 + 사원 정보 -->
 	<select id="selectAuthByComId" parameterType="int" resultType="com.sb.erp.perm.dto.response.EmpAuthResponse">
 		select e.emp_id, e.emp_name, e.emp_no, e.com_id,
-        	   e.dept_id, d.dept_name
-        	   e.pos_id,  p.pos_name
+        	   e.dept_id, d.dept_name,
+        	   e.pos_id,  p.pos_name,
         	   ea.emp_aut_id,
         	   a.aut_id,  a.aut_name
 		from employee e 
 		join emp_position p on e.pos_id = p.pos_id
 		join department   d on e.dept_id = d.dept_id
 		join emp_auth 	 ea on e.emp_id = ea.emp_id
-		join authority    a on a.aut_id = ea.aut_id 
-		and e.com_id = a.com_id
+		join authority    a on a.aut_id = ea.aut_id and e.com_id = a.com_id
 		where e.com_id = #{comId}
 	</select>
 	

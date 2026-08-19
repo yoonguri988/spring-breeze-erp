@@ -1,0 +1,75 @@
+{
+  "appName": "SBerp 통합 ERP 시스템",
+  "brand": "SBerp",
+  "button": {
+    "save": "저장",
+    "cancel": "취소",
+    "confirm": "확인",
+    "delete": "삭제",
+    "edit": "수정",
+    "add": "등록",
+    "search": "검색",
+    "reset": "초기화",
+    "back": "뒤로",
+    "list": "목록",
+    "submit": "제출",
+    "close": "닫기",
+    "download": "다운로드",
+    "upload": "업로드",
+    "print": "인쇄",
+    "next": "다음",
+    "prev": "이전",
+    "approve": "승인",
+    "reject": "반려",
+    "apply": "적용",
+    "select": "선택",
+    "view": "보기",
+    "refresh": "새로고침",
+    "return": "반납"
+  },
+  "label": {
+    "all": "전체",
+    "name": "이름",
+    "date": "날짜",
+    "status": "상태",
+    "actions": "작업",
+    "createdAt": "등록일",
+    "updatedAt": "수정일",
+    "required": "필수"
+  },
+  "status": {
+    "pending": "대기",
+    "completed": "완료",
+    "approved": "승인",
+    "rejected": "반려",
+    "inProgress": "진행중"
+  },
+  "message": {
+    "loading": "불러오는 중...",
+    "processing": "처리 중...",
+    "noData": "데이터가 없습니다.",
+    "success": "성공적으로 처리되었습니다.",
+    "error": "오류가 발생했습니다.",
+    "networkError": "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    "deleteConfirmTitle": "삭제하시겠습니까?",
+    "deleteConfirmContent": "삭제된 데이터는 복구할 수 없습니다.",
+    "saveSuccess": "저장되었습니다.",
+    "deleteSuccess": "삭제되었습니다.",
+    "updateSuccess": "수정되었습니다.",
+    "invalidRequest": "요청을 처리할 수 없습니다."
+  },
+  "confirm": {
+    "yes": "예",
+    "no": "아니오"
+  },
+  "empStatus": {
+    "active": "재직",
+    "leave": "휴직",
+    "retired": "퇴직"
+  },
+  "language": {
+    "label": "언어",
+    "ko": "한국어",
+    "en": "English"
+  }
+}

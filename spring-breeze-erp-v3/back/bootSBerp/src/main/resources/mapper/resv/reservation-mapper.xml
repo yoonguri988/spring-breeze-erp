@@ -141,7 +141,8 @@
             (SELECT COUNT(*) FROM reservation WHERE com_id = #{comId}) AS resvTotal,
             (SELECT COUNT(*) FROM reservation WHERE com_id = #{comId} AND status = 'WAI') AS waiTotal,
             (SELECT COUNT(*) FROM reservation WHERE com_id = #{comId} AND status = 'APP') AS appTotal,
-            (SELECT COUNT(*) FROM reservation WHERE com_id = #{comId} AND status = 'REJ') AS rejTotal
+            (SELECT COUNT(*) FROM reservation WHERE com_id = #{comId} AND status = 'REJ') AS rejTotal,
+            (SELECT COUNT(*) FROM reservation WHERE com_id = #{comId} AND status = 'NORET') AS noRetTotal
         FROM dual
     </select>
 
@@ -150,7 +151,7 @@
         SELECT COUNT(*)
         FROM reservation
         WHERE res_id = #{resId}
-          AND status IN ('WAI', 'APP')
+          AND status IN ('WAI', 'APP', 'NORET')
     </select>
 
 	<!-- 특정 자원의 특정 기간에 이미 예약(대기+승인)된 수량 합계 -->
@@ -158,7 +159,7 @@
 	    SELECT NVL(SUM(quantity), 0)
 	    FROM reservation
 	    WHERE res_id = #{resId}
-	      AND status IN ('WAI','APP')
+	      AND status IN ('WAI','APP','NORET')
 	      <if test="excludeRevId != null">
 	        AND rev_id != #{excludeRevId}  <!-- 수정(update) 시 자기 자신은 제외 -->
 	      </if>
@@ -198,4 +199,30 @@
            SET noshow_alert_at = SYSTIMESTAMP
          WHERE rev_id = #{revId}
     </update>
+    <!-- 반납 처리 -->
+    <update id="updateReturn">
+	    UPDATE reservation
+	       SET return_dt  = #{returnDt},
+	           updated_at = SYSDATE,
+	           status     = 'APP'
+	     WHERE rev_id     = #{revId}
+	       AND emp_id     = #{empId}
+	       AND status IN ('APP', 'NORET')
+	       AND return_dt IS NULL
+	</update>
+	<!-- 자동 미반납 처리 -->
+	<update id="updateEquipmentNoReturn">
+        UPDATE reservation
+           SET status     = 'NORET',
+               updated_at = SYSDATE
+         WHERE status = 'APP'
+           AND return_dt IS NULL
+           AND end_dt <![CDATA[<]]> SYSTIMESTAMP
+    </update>
+    <!-- 반려(REJ) 예약 이력 정리 -->
+    <delete id="deleteRejectedByResourceId" parameterType="long">
+        DELETE FROM reservation
+        WHERE res_id = #{resId}
+          AND status = 'REJ'
+    </delete>
 </mapper>

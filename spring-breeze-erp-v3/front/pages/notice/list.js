@@ -6,11 +6,13 @@ import Link from "next/link";
 import { Table, Input, Select, Button, Pagination, Empty, Tag } from "antd";
 import { PlusOutlined, SearchOutlined, NotificationOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 import { fetchNoticeRequest } from "../../reducers/notice/noticeReducer";
 
 export default function NoticeListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["notice", "common"]);
   const { notices = [], noticesPaging, totalCnt = 0, loading, error } = useSelector((state) => state.notice);
   const [keyword, setKeyword] = useState("");
   const [sortBy, setSortBy] = useState("new");
@@ -63,7 +65,7 @@ export default function NoticeListPage() {
 
   const columns = [
     {
-      title: "제목",
+      title: t("list.table.title"),
       dataIndex: "btitle",
       key: "btitle",
       ellipsis: true,
@@ -77,7 +79,7 @@ export default function NoticeListPage() {
       ),
     },
     {
-      title: "작성자",
+      title: t("list.table.author"),
       dataIndex: "empName",
       key: "empName",
       width: 120,
@@ -85,7 +87,7 @@ export default function NoticeListPage() {
       render: (name) => name || "-",
     },
     {
-      title: "작성일",
+      title: t("list.table.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       width: 130,
@@ -93,7 +95,7 @@ export default function NoticeListPage() {
       render: (value) => value ? dayjs(value).format("YYYY-MM-DD") : "-",
     },
     {
-      title: "조회수",
+      title: t("list.table.views"),
       dataIndex: "bhit",
       key: "bhit",
       width: 100,
@@ -107,18 +109,18 @@ export default function NoticeListPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link>
+            <Link href="/">{t("list.breadcrumbHome")}</Link>
             <i className="bi bi-chevron-right"></i>
-            업무
+            {t("list.breadcrumbWork")}
             <i className="bi bi-chevron-right"></i>
-            공지 관리
+            {t("list.breadcrumbCurrent")}
           </div>
-          <h1>공지 관리</h1>
-          <p>전사 공지사항을 게시하고 카테고리별로 관리합니다.</p>
+          <h1>{t("list.title")}</h1>
+          <p>{t("list.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions my-3">
           <Link href="/notice/write">
-            <Button type="primary" size="small" icon={<PlusOutlined />}>공지 작성</Button>
+            <Button type="primary" size="small" icon={<PlusOutlined />}>{t("list.writeBtn")}</Button>
           </Link>
         </div>
       </div>
@@ -126,13 +128,13 @@ export default function NoticeListPage() {
       <div className="sb-card mb-3">
         <div className="sb-toolbar" style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center" }}>
-            <strong style={{ fontSize: 14 }}>공지 목록</strong>
-            <span className="sb-badge sb-badge--gray ms-2">{totalCnt}건</span>
+            <strong style={{ fontSize: 14 }}>{t("list.cardTitle")}</strong>
+            <span className="sb-badge sb-badge--gray ms-2">{t("list.resultCount", { count: totalCnt })}</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Input.Search style={{ width: 280 }} value={keyword} onChange={(e) => setKeyword(e.target.value)} onSearch={handleSearch} placeholder="제목 검색" allowClear enterButton={<SearchOutlined />} />
-            <Select value={sortBy} onChange={handleSortChange} style={{ width: 120 }} options={[{ value: "new", label: "최신순" }, { value: "views", label: "조회순" }]} />
-            <Button icon={<SearchOutlined />} onClick={() => handleSearch(keyword)}>조회</Button>
+            <Input.Search style={{ width: 280 }} value={keyword} onChange={(e) => setKeyword(e.target.value)} onSearch={handleSearch} placeholder={t("list.searchPlaceholder")} allowClear enterButton={<SearchOutlined />} />
+            <Select value={sortBy} onChange={handleSortChange} style={{ width: 120 }} options={[{ value: "new", label: t("list.sortNew") }, { value: "views", label: t("list.sortViews") }]} />
+            <Button icon={<SearchOutlined />} onClick={() => handleSearch(keyword)}>{t("list.searchBtn")}</Button>
           </div>
         </div>
 
@@ -145,22 +147,33 @@ export default function NoticeListPage() {
             dataSource={notices}
             loading={loading}
             pagination={false}
-            locale={{ emptyText: <Empty image={<NotificationOutlined style={{ fontSize: 32 }} />} description="공지사항이 없습니다." /> }}
+            locale={{ emptyText: <Empty image={<NotificationOutlined style={{ fontSize: 32 }} />} description={t("list.emptyMsg")} /> }}
           />
         </div>
 
-        {pagingTotal > 0 && (
-          <div className="d-flex justify-content-center py-3" style={{ borderTop: "1px solid var(--sb-border)" }}>
-            <Pagination 
-            current={currentPage} 
-            pageSize={pageSize} 
-            total={pagingTotal} 
-            showSizeChanger 
-            pageSizeOptions={["10", "20", "30", "50"]} 
-            onChange={handlePageChange} 
-            onShowSizeChange={handlePageSizeChange} />
-          </div>
+        <div
+          style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "14px 16px",
+          borderTop: "1px solid var(--sb-border)",
+          }}
+          >
+          <span style={{ color: "#999", fontSize: 12.5 }}>
+          {t("list.totalCountPrefix")}<b>{totalCnt}</b>{t("list.totalCountSuffix")}
+          </span>
+        {totalCnt > 0 && (
+          <Pagination
+          size="small"
+          current={currentPage}
+          total={totalCnt}
+          pageSize={pageSize}
+          showSizeChanger={false}
+          onChange={handlePageChange}
+          />
         )}
+        </div>
       </div>
     </main>
   );

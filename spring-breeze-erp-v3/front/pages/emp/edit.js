@@ -162,7 +162,7 @@ export default function EmpEditPage() {
           <Form.Item
             name="empEmail"
             label="이메일"
-            rules={[{ required: true, message: "이메일을 입력하세요" }, { type: "email", message: "올바른 이메일 형식이 아닙니다" }]}
+            rules={[{ required: true, message: "이메일을 입력하세요." }, { type: "email", message: "올바른 이메일 형식이 아닙니다" }]}
             {...checkHelp("email")}
           >
             <Input
@@ -180,7 +180,7 @@ export default function EmpEditPage() {
           <Form.Item
             name="empMobile"
             label="연락처"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "연락처를 입력하세요." }]}
             {...checkHelp("mobile")}
           >
             <Input

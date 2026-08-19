@@ -15,6 +15,7 @@ import {
   StopOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchAdminResvListRequest,
@@ -31,47 +32,51 @@ import StatTile from "../../../components/StatTile";
 const ONE_PAGE_LIST = 10;
 
 const STATUS_TABS = [
-  { value: "", label: "전체" },
-  { value: "WAI", label: "대기" },
-  { value: "APP", label: "승인" },
-  { value: "REJ", label: "반려" },
+  { value: "", labelKey: "common:label.all" },
+  { value: "WAI", labelKey: "status.waiting" },
+  { value: "APP", labelKey: "status.approved" },
+  { value: "REJ", labelKey: "status.rejected" },
+  { value: "NORET", labelKey: "status.notReturned" },
 ];
 
-function typeBadge(type) {
+function typeBadge(type, t) {
   if (type === "ROOM")
-    return <span className="sb-badge sb-badge--blue">회의실</span>;
+    return <span className="sb-badge sb-badge--blue">{t("resType.room")}</span>;
   if (type === "EQUIPMENT")
-    return <span className="sb-badge sb-badge--violet">장비</span>;
+    return <span className="sb-badge sb-badge--violet">{t("resType.equipment")}</span>;
   if (type === "VEHICLE")
-    return <span className="sb-badge sb-badge--cyan">차량</span>;
+    return <span className="sb-badge sb-badge--cyan">{t("resType.vehicle")}</span>;
   return <span className="sb-badge">{type}</span>;
 }
 
-function statusBadge(status) {
+function statusBadge(status, t) {
   if (status === "WAI")
-    return <span className="sb-badge sb-badge--amber">대기</span>;
+    return <span className="sb-badge sb-badge--amber">{t("status.waiting")}</span>;
   if (status === "APP")
-    return <span className="sb-badge sb-badge--green">승인</span>;
+    return <span className="sb-badge sb-badge--green">{t("status.approved")}</span>;
   if (status === "REJ")
-    return <span className="sb-badge sb-badge--red">반려</span>;
+    return <span className="sb-badge sb-badge--red">{t("status.rejected")}</span>;
+  if (status === "NORET")
+    return <span className="sb-badge sb-badge--red">{t("status.notReturned")}</span>;
   return <span className="sb-badge sb-badge--gray">{status}</span>;
 }
 
-function returnCell(r) {
+function returnCell(r, t) {
   if (r.returnDt)
     return (
       <span className="sb-badge sb-badge--green">
         {moment(r.returnDt).format("YYYY-MM-DD HH:mm:ss")}
       </span>
     );
-  if (r.status === "APP" && !r.returnDt)
-    return <span className="sb-badge sb-badge--amber">미반납</span>;
-  return <span className="view-val-empty">해당 없음</span>;
+  if ((r.status === "APP" || r.status === "NORET") && !r.returnDt)
+    return <span className="sb-badge sb-badge--amber">{t("returnStatus.notReturned")}</span>;
+  return <span className="view-val-empty">{t("returnStatus.notApplicable")}</span>;
 }
 
 export default function AdminResvListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["resv", "common"]);
 
   const { list, listCount, stats, loading, error, success } = useSelector(
     (state) => state.adminResv,
@@ -123,7 +128,7 @@ export default function AdminResvListPage() {
     if (!approving) return;
     if (prevLoading.current && !loading) {
       if (success) {
-        message.success("예약이 승인되었습니다.");
+        message.success(t("adminList.approveSuccess"));
         setApproveTarget(null);
         setApproving(false);
         dispatch(resetAdminResvState());
@@ -140,7 +145,7 @@ export default function AdminResvListPage() {
     if (!rejecting) return;
     if (prevLoading.current && !loading) {
       if (success) {
-        message.success("예약이 반려되었습니다.");
+        message.success(t("adminList.rejectSuccess"));
         setRejectTarget(null);
         setRejecting(false);
         dispatch(resetAdminResvState());
@@ -205,15 +210,15 @@ export default function AdminResvListPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <span>&gt;</span>
+            <Link href="/">{t("adminList.breadcrumbHome")}</Link> <span>&gt;</span>
             <Link href="/admin/resv/list?status=WAI">
-              자원 예약 요청 관리
+              {t("adminList.breadcrumbList")}
             </Link>{" "}
             <span>&gt;</span>
-            예약 목록
+            {t("adminList.breadcrumbCurrent")}
           </div>
-          <h1>자원 예약 요청 관리</h1>
-          <p>구성원이 신청한 자원 예약 요청을 검토하고 승인 또는 반려합니다.</p>
+          <h1>{t("adminList.title")}</h1>
+          <p>{t("adminList.subtitle")}</p>
         </div>
       </div>
 
@@ -223,7 +228,7 @@ export default function AdminResvListPage() {
             <StatTile
               icon={<BookOutlined />}
               tone="blue"
-              label="전체 요청"
+              label={t("adminList.statsTotal")}
               value={stats.resvTotal}
             />
           </div>
@@ -231,7 +236,7 @@ export default function AdminResvListPage() {
             <StatTile
               icon={<HourglassOutlined />}
               tone="amber"
-              label="대기"
+              label={t("status.waiting")}
               value={stats.waiTotal}
             />
           </div>
@@ -239,7 +244,7 @@ export default function AdminResvListPage() {
             <StatTile
               icon={<CheckCircleOutlined />}
               tone="green"
-              label="승인"
+              label={t("status.approved")}
               value={stats.appTotal}
             />
           </div>
@@ -247,7 +252,7 @@ export default function AdminResvListPage() {
             <StatTile
               icon={<StopOutlined />}
               tone="red"
-              label="반려"
+              label={t("status.rejected")}
               value={stats.rejTotal}
             />
           </div>
@@ -256,17 +261,17 @@ export default function AdminResvListPage() {
 
       <div className="sb-card">
         <div className="sb-card__head">
-          <h2>예약 목록</h2>
+          <h2>{t("adminList.cardTitle")}</h2>
           <div className="right">
             <div className="sb-segment">
-              {STATUS_TABS.map((t) => (
+              {STATUS_TABS.map((tab) => (
                 <button
-                  key={t.value}
+                  key={tab.value}
                   type="button"
-                  className={status === t.value ? "active" : ""}
-                  onClick={() => goStatus(t.value)}
+                  className={status === tab.value ? "active" : ""}
+                  onClick={() => goStatus(tab.value)}
                 >
-                  {t.label}
+                  {t(tab.labelKey)}
                 </button>
               ))}
             </div>
@@ -283,23 +288,23 @@ export default function AdminResvListPage() {
         >
           <div className="col-auto" style={{ minWidth: 150 }}>
             <label className="form-label small fw-semibold mb-1">
-              자원 유형
+              {t("adminList.filterResType")}
             </label>
             <Select
               style={{ width: "100%" }}
               value={resType || ""}
               onChange={setResType}
               options={[
-                { value: "", label: "전체" },
-                { value: "ROOM", label: "회의실" },
-                { value: "EQUIPMENT", label: "장비" },
-                { value: "VEHICLE", label: "차량" },
+                { value: "", label: t("common:label.all") },
+                { value: "ROOM", label: t("resType.room") },
+                { value: "EQUIPMENT", label: t("resType.equipment") },
+                { value: "VEHICLE", label: t("resType.vehicle") },
               ]}
             />
           </div>
           <div className="col-auto" style={{ minWidth: 150 }}>
             <label className="form-label small fw-semibold mb-1">
-              <CalendarOutlined /> 시작일
+              <CalendarOutlined /> {t("adminList.filterStartDt")}
             </label>
             <DatePicker
               style={{ width: "100%" }}
@@ -308,7 +313,7 @@ export default function AdminResvListPage() {
             />
           </div>
           <div className="col-auto" style={{ minWidth: 150 }}>
-            <label className="form-label small fw-semibold mb-1">종료일</label>
+            <label className="form-label small fw-semibold mb-1">{t("adminList.filterEndDt")}</label>
             <DatePicker
               style={{ width: "100%" }}
               value={endDt ? moment(endDt) : null}
@@ -316,10 +321,10 @@ export default function AdminResvListPage() {
             />
           </div>
           <div className="col-auto" style={{ minWidth: 180 }}>
-            <label className="form-label small fw-semibold mb-1">자원명</label>
+            <label className="form-label small fw-semibold mb-1">{t("adminList.filterResName")}</label>
             <Input
               style={{ width: "100%" }}
-              placeholder="자원명 검색"
+              placeholder={t("adminList.filterResNamePlaceholder")}
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               onPressEnter={() => runSearch(1)}
@@ -331,40 +336,40 @@ export default function AdminResvListPage() {
               icon={<SearchOutlined />}
               onClick={() => runSearch(1)}
             >
-              조회
+              {t("adminList.searchButton")}
             </Button>
           </div>
         </div>
 
         <div className="sb-search-note px-3">
-          <InfoCircleOutlined /> 처리일자를 지정하지 않으면 기본으로{" "}
-          <b>최근 30일</b>만 조회합니다. 전체 기간을 보려면 시작일을 더 과거로
-          넓혀서 조회하세요.
+          <InfoCircleOutlined /> {t("adminList.searchNotePrefix")}
+          <b>{t("adminList.searchNoteEmphasis")}</b>
+          {t("adminList.searchNoteSuffix")}
         </div>
 
         <div className="sb-card__body--flush">
           {(list || []).length === 0 ? (
             <div className="sb-empty">
               <BookOutlined style={{ fontSize: 30, opacity: 0.5 }} />
-              <p>조건에 해당하는 예약 요청이 없습니다.</p>
+              <p>{t("adminList.empty")}</p>
             </div>
           ) : (
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th style={{ width: 56 }}>순서</th>
-                  <th>자원명</th>
-                  <th style={{ width: 90 }}>유형</th>
-                  <th style={{ width: 130 }}>위치</th>
-                  <th style={{ width: 100 }}>신청자</th>
+                  <th style={{ width: 56 }}>{t("adminList.tableNo")}</th>
+                  <th>{t("adminList.tableResName")}</th>
+                  <th style={{ width: 90 }}>{t("adminList.tableType")}</th>
+                  <th style={{ width: 130 }}>{t("adminList.tableLocation")}</th>
+                  <th style={{ width: 100 }}>{t("adminList.tableApplicant")}</th>
                   <th className="num" style={{ width: 60 }}>
-                    수량
+                    {t("adminList.tableQuantity")}
                   </th>
-                  <th style={{ width: 120 }}>시작일</th>
-                  <th style={{ width: 120 }}>종료일</th>
-                  <th style={{ width: 90 }}>반납</th>
-                  <th style={{ width: 50 }}>상태</th>
-                  <th style={{ width: 100, textAlign: "center" }}>관리</th>
+                  <th style={{ width: 120 }}>{t("adminList.tableStartDt")}</th>
+                  <th style={{ width: 120 }}>{t("adminList.tableEndDt")}</th>
+                  <th style={{ width: 90 }}>{t("adminList.tableReturnDt")}</th>
+                  <th style={{ width: 50 }}>{t("adminList.tableStatus")}</th>
+                  <th style={{ width: 100, textAlign: "center" }}>{t("adminList.tableManage")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -374,7 +379,7 @@ export default function AdminResvListPage() {
                     <td>
                       <b>{r.resName}</b>
                     </td>
-                    <td>{typeBadge(r.resType)}</td>
+                    <td>{typeBadge(r.resType, t)}</td>
                     <td className="text-faint" style={{ fontSize: 12.5 }}>
                       {r.location || "-"}
                     </td>
@@ -384,8 +389,8 @@ export default function AdminResvListPage() {
                     <td className="num">{r.quantity}</td>
                     <td>{moment(r.startDt).format("YYYY-MM-DD HH:mm:ss")}</td>
                     <td>{moment(r.endDt).format("YYYY-MM-DD HH:mm:ss")}</td>
-                    <td>{returnCell(r)}</td>
-                    <td>{statusBadge(r.status)}</td>
+                    <td>{returnCell(r, t)}</td>
+                    <td>{statusBadge(r.status, t)}</td>
                     <td>
                       <div className="d-flex justify-content-end gap-1">
                         <Link
@@ -397,7 +402,7 @@ export default function AdminResvListPage() {
                           <button
                             type="button"
                             className="sb-iconbtn"
-                            title="상세보기"
+                            title={t("adminList.detailButtonTitle")}
                           >
                             <BookOutlined />
                           </button>
@@ -408,7 +413,7 @@ export default function AdminResvListPage() {
                               type="button"
                               className="sb-iconbtn"
                               style={{ color: "var(--sb-green, #389e0d)" }}
-                              title="승인"
+                              title={t("common:button.approve")}
                               onClick={() => openApprove(r)}
                             >
                               <CheckCircleOutlined />
@@ -417,7 +422,7 @@ export default function AdminResvListPage() {
                               type="button"
                               className="sb-iconbtn"
                               style={{ color: "var(--sb-red)" }}
-                              title="반려"
+                              title={t("common:button.reject")}
                               onClick={() => openReject(r)}
                             >
                               <CloseCircleOutlined />
@@ -438,7 +443,7 @@ export default function AdminResvListPage() {
               style={{ borderTop: "1px solid var(--sb-border)" }}
             >
               <span className="text-faint" style={{ fontSize: 12.5 }}>
-                총 <b>{listCount}</b>개 예약 건수
+                {t("adminList.totalCountPrefix")} <b>{listCount}</b>{t("adminList.totalCountSuffix")}
               </span>
               <Pagination
                 size="small"

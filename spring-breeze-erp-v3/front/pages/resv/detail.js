@@ -8,19 +8,24 @@ import {
   ArrowLeftOutlined,
   CloseCircleOutlined,
   EditOutlined,
+  RollbackOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchResvDetailRequest,
   cancelResvRequest,
+  returnResvRequest,
   resetResvState,
 } from "../../reducers/resv/resvReducer";
 import ResvDetailView, { statusBadge } from "../../components/ResvDetailView";
 import CancelResvModal from "../../components/CancelResvModal";
+import ReturnResvModal from "../../components/ReturnResvModal";
 
 export default function ResvDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["resv", "common"]);
 
   const {
     detail: resv,
@@ -39,6 +44,8 @@ export default function ResvDetailPage() {
 
   const [cancelTarget, setCancelTarget] = useState(null);
   const [canceling, setCanceling] = useState(false);
+  const [returnTarget, setReturnTarget] = useState(null);
+  const [returning, setReturning] = useState(false);
   const prevLoading = useRef(false);
 
   useEffect(() => {
@@ -51,7 +58,7 @@ export default function ResvDetailPage() {
     if (!canceling) return;
     if (prevLoading.current && !loading) {
       if (success) {
-        message.success("예약이 취소되었습니다.");
+        message.success(t("detail.cancelSuccess"));
         setCancelTarget(null);
         setCanceling(false);
         dispatch(resetResvState());
@@ -66,12 +73,34 @@ export default function ResvDetailPage() {
   }, [loading, success, error, canceling]);
 
   useEffect(() => {
+    if (!returning) return;
+    if (prevLoading.current && !loading) {
+      if (success) {
+        message.success(t("detail.returnSuccess"));
+        setReturnTarget(null);
+        setReturning(false);
+        dispatch(resetResvState());
+        dispatch(fetchResvDetailRequest(revId));
+      } else if (error) {
+        message.error(error);
+        setReturning(false);
+        dispatch(resetResvState());
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, success, error, returning]);
+
+  useEffect(() => {
     prevLoading.current = loading;
   }, [loading]);
 
   if (!resv) return null;
 
   const showActions = resv.status === "WAI" && isSelf;
+  const canReturn =
+    isSelf &&
+    (resv.status === "APP" || resv.status === "NORET") &&
+    !resv.returnDt;
 
   const confirmCancel = () => {
     if (!cancelTarget) return;
@@ -79,19 +108,27 @@ export default function ResvDetailPage() {
     dispatch(cancelResvRequest(cancelTarget.revId));
   };
 
+  const confirmReturn = () => {
+    if (!returnTarget) return;
+    setReturning(true);
+    dispatch(returnResvRequest(returnTarget.revId));
+  };
+
   return (
     <div className="sb-content">
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <span>&gt;</span>
-            <Link href="/resv/my?status=WAI">내 자원 요청 관리</Link>{" "}
+            <Link href="/">{t("detail.breadcrumbHome")}</Link> <span>&gt;</span>
+            <Link href="/resv/my?status=WAI">
+              {t("detail.breadcrumbMyResv")}
+            </Link>{" "}
             <span>&gt;</span>
-            예약 상세
+            {t("detail.breadcrumbCurrent")}
           </div>
           <h1>
-            예약 ID {resv.revId}{" "}
-            <span className="ms-2">{statusBadge(resv.status)}</span>
+            {t("detail.heading", { revId: resv.revId })}{" "}
+            <span className="ms-2">{statusBadge(resv.status, t)}</span>
           </h1>
           <p>{resv.resName}</p>
         </div>
@@ -106,7 +143,7 @@ export default function ResvDetailPage() {
                   }}
                 >
                   <Button icon={<EditOutlined />}>
-                    수정
+                    {t("common:button.edit")}
                   </Button>
                 </Link>
                 <Button
@@ -119,13 +156,27 @@ export default function ResvDetailPage() {
                     })
                   }
                 >
-                  취소
+                  {t("common:button.cancel")}
                 </Button>
               </>
             )}
+            {canReturn && (
+              <Button
+                type="primary"
+                icon={<RollbackOutlined />}
+                onClick={() =>
+                  setReturnTarget({
+                    revId: resv.revId,
+                    resName: resv.resName,
+                  })
+                }
+              >
+                {t("common:button.return")}
+              </Button>
+            )}
             <Link href="/resv/my">
               <Button icon={<ArrowLeftOutlined />}>
-                목록으로
+                {t("detail.backToList")}
               </Button>
             </Link>
           </div>
@@ -140,6 +191,13 @@ export default function ResvDetailPage() {
         loading={canceling && loading}
         onClose={() => setCancelTarget(null)}
         onConfirm={confirmCancel}
+      />
+      <ReturnResvModal
+        target={returnTarget}
+        open={!!returnTarget}
+        loading={returning && loading}
+        onClose={() => setReturnTarget(null)}
+        onConfirm={confirmReturn}
       />
     </div>
   );

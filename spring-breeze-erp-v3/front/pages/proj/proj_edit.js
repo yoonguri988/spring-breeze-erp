@@ -5,27 +5,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-import {
-  Card,
-  Input,
-  Select,
-  DatePicker,
-  Button,
-  Space,
-  message,
-} from "antd";
-
-import {
-  SaveOutlined,
-  ArrowLeftOutlined,
-} from "@ant-design/icons";
-
+import { Button, Input, Select, DatePicker, message } from "antd";
+import { SaveOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
-import {
-  fetchProjDetailRequest,
-  updateProjRequest,
-} from "../../reducers/proj/projReducer";
+import { fetchProjDetailRequest, updateProjRequest, } from "../../reducers/proj/projReducer";
 
 const { TextArea } = Input;
 
@@ -38,6 +23,7 @@ const STATUS_OPTIONS = [
 export default function ProjEditPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("proj");
 
   const { currentProject, loading, error, success } = useSelector(
     (state) => state.proj
@@ -54,16 +40,22 @@ export default function ProjEditPage() {
     endDate: "",
   });
 
+  // 프로젝트 상세 조회
   useEffect(() => {
     if (!router.isReady) return;
 
     const proId = Number(router.query.proId);
-
     if (!proId) return;
 
-    dispatch(fetchProjDetailRequest(proId));
+    dispatch(
+      fetchProjDetailRequest({
+        proId,
+        pstartno: 1,
+      })
+    );
   }, [router.isReady, router.query.proId, dispatch]);
 
+  // 조회된 프로젝트를 form에 세팅
   useEffect(() => {
     if (!dto) return;
 
@@ -77,10 +69,11 @@ export default function ProjEditPage() {
     });
   }, [dto]);
 
+  // 수정 성공
   useEffect(() => {
     if (!success) return;
 
-    message.success("프로젝트가 수정되었습니다.");
+    message.success(t("edit.successMsg"));
 
     router.push({
       pathname: "/proj/proj_detail",
@@ -88,7 +81,7 @@ export default function ProjEditPage() {
         proId: form.proId,
       },
     });
-  }, [success]);
+  }, [success, form.proId, router]);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({
@@ -98,43 +91,20 @@ export default function ProjEditPage() {
   };
 
   const handleSubmit = () => {
-    if (!form.proName.trim()) {
-      message.warning("프로젝트명을 입력하세요.");
-      return;
-    }
-
-    if (!form.proDesc.trim()) {
-      message.warning("프로젝트 설명을 입력하세요.");
-      return;
-    }
-
-    if (!form.proStatus) {
-      message.warning("상태를 선택하세요.");
-      return;
-    }
-
-    if (!form.startDate) {
-      message.warning("시작일을 선택하세요.");
-      return;
-    }
-
-    if (!form.endDate) {
-      message.warning("종료일을 선택하세요.");
-      return;
-    }
-
-    if (dayjs(form.startDate).isAfter(dayjs(form.endDate))) {
-      message.warning("종료일은 시작일보다 빠를 수 없습니다.");
-      return;
-    }
+    if (!form.proName.trim()) { message.warning(t("edit.nameRequired")); return; }
+    if (!form.proDesc.trim()) { message.warning(t("edit.descRequired")); return; }
+    if (!form.proStatus) { message.warning(t("edit.statusRequired")); return; }
+    if (!form.startDate) { message.warning(t("edit.startDateRequired")); return; }
+    if (!form.endDate) { message.warning(t("edit.endDateRequired")); return; }
+    if (dayjs(form.startDate).isAfter(dayjs(form.endDate))) { message.warning(t("edit.dateOrderError")); return; }
 
     dispatch(
       updateProjRequest({
         proId: form.proId,
         dto: {
           proId: form.proId,
-          proName: form.proName,
-          proDesc: form.proDesc,
+          proName: form.proName.trim(),
+          proDesc: form.proDesc.trim(),
           proStatus: form.proStatus,
           startDate: form.startDate,
           endDate: form.endDate,
@@ -152,111 +122,92 @@ export default function ProjEditPage() {
     });
   };
 
+  // 조회 중
   if (!dto) {
     return (
       <main className="sb-content">
         <div className="sb-page-head">
           <div className="sb-page-head__txt">
             <div className="sb-breadcrumb">
-              홈 <i className="bi bi-chevron-right"></i> 업무{" "}
-              <i className="bi bi-chevron-right"></i> 프로젝트{" "}
-              <i className="bi bi-chevron-right"></i> 수정
+              {t("common.breadcrumbHome")} <i className="bi bi-chevron-right"></i> {t("common.breadcrumbWork")}{" "}
+              <i className="bi bi-chevron-right"></i> {t("common.breadcrumbProj")}{" "}
+              <i className="bi bi-chevron-right"></i> {t("edit.breadcrumbCurrent")}
             </div>
 
-            <h1>프로젝트 수정</h1>
-
-            <p>프로젝트 정보를 수정합니다.</p>
+            <h1>{t("edit.title")}</h1>
+            <p>{t("edit.subtitle")}</p>
           </div>
         </div>
 
-        <Card loading={loading} />
+        <div className="sb-card">
+          <div className="sb-card__body text-center">
+            {loading
+              ? t("edit.loadingMsg")
+              : t("edit.notFoundMsg")}
+          </div>
+        </div>
       </main>
     );
   }
 
   return (
     <main className="sb-content">
+      {/* 페이지 헤더 */}
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            홈 <i className="bi bi-chevron-right"></i> 업무{" "}
-            <i className="bi bi-chevron-right"></i> 프로젝트{" "}
-            <i className="bi bi-chevron-right"></i> 수정
+            {t("common.breadcrumbHome")} <i className="bi bi-chevron-right"></i> {t("common.breadcrumbWork")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("common.breadcrumbProj")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("edit.breadcrumbCurrent")}
           </div>
-
-          <h1>프로젝트 수정</h1>
-
-          <p>프로젝트 정보를 수정합니다.</p>
+          <h1>{t("edit.title")}</h1>
+          <p>{t("edit.subtitle")}</p>
         </div>
       </div>
-
-      <Card>
+      <div className="sb-card">
         <div className="sb-card__body">
           {error && (
-            <div
-              style={{
-                color: "#ff4d4f",
-                marginBottom: 16,
-              }}
-            >
+            <div className="text-danger mb-3">
               {error}
             </div>
           )}
-
           <div className="mb-3">
-            <label className="sb-form-label">
-              프로젝트명
-            </label>
-
+            <label className="sb-form-label"> {t("edit.nameLabel")} </label>
             <Input
               value={form.proName}
               onChange={(e) =>
                 handleChange("proName", e.target.value)
               }
-              placeholder="프로젝트명을 입력하세요"
+              placeholder={t("edit.namePlaceholder")}
             />
           </div>
-
           <div className="mb-3">
-            <label className="sb-form-label">
-              프로젝트 설명
-            </label>
-
+            <label className="sb-form-label"> {t("edit.descLabel")} </label>
             <TextArea
               rows={4}
               value={form.proDesc}
               onChange={(e) =>
                 handleChange("proDesc", e.target.value)
               }
-              placeholder="프로젝트에 대한 설명을 입력하세요"
+              placeholder={t("edit.descPlaceholder")}
             />
           </div>
-
           <div className="row g-3 mb-3">
             <div className="col-md-4">
-              <label className="sb-form-label">
-                상태
-              </label>
-
+              <label className="sb-form-label"> {t("edit.statusLabel")} </label>
               <Select
-                style={{ width: "100%" }}
                 value={form.proStatus || undefined}
                 options={STATUS_OPTIONS}
-                placeholder="상태를 선택하세요"
+                placeholder={t("edit.statusPlaceholder")}
                 onChange={(value) =>
                   handleChange("proStatus", value)
                 }
+                style={{ width: "100%" }}
               />
             </div>
-
             <div className="col-md-4">
-              <label className="sb-form-label">
-                시작일
-              </label>
-
+              <label className="sb-form-label"> {t("edit.startDateLabel")} </label>
               <DatePicker
-                style={{ width: "100%" }}
-                format="YYYY-MM-DD"
                 value={
                   form.startDate
                     ? dayjs(form.startDate)
@@ -270,17 +221,13 @@ export default function ProjEditPage() {
                       : ""
                   )
                 }
+                format="YYYY-MM-DD"
+                style={{ width: "100%" }}
               />
             </div>
-
             <div className="col-md-4">
-              <label className="sb-form-label">
-                종료일
-              </label>
-
+              <label className="sb-form-label"> {t("edit.endDateLabel")} </label>
               <DatePicker
-                style={{ width: "100%" }}
-                format="YYYY-MM-DD"
                 value={
                   form.endDate
                     ? dayjs(form.endDate)
@@ -294,23 +241,15 @@ export default function ProjEditPage() {
                       : ""
                   )
                 }
+                format="YYYY-MM-DD"
+                style={{ width: "100%" }}
               />
             </div>
           </div>
-
           <div className="mb-4">
-            <label className="sb-form-label">
-              수정일
-            </label>
-
+            <label className="sb-form-label"> {t("edit.updatedAtLabel")} </label>
             <Input
-              value={
-                dto.updatedAt
-                  ? dayjs(dto.updatedAt).format(
-                      "YYYY-MM-DD HH:mm:ss"
-                    )
-                  : "-"
-              }
+              value={ dto.updatedAt ? dayjs(dto.updatedAt).format( "YYYY-MM-DD HH:mm:ss" ) : "-" }
               readOnly
               style={{
                 maxWidth: 250,
@@ -318,41 +257,23 @@ export default function ProjEditPage() {
               }}
             />
           </div>
-
           <div className="sb-divider"></div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: 8,
-            }}
-          >
-            <Button onClick={handleCancel}>
-              취소
-            </Button>
-
-            <Link
-              href={{
-                pathname: "/proj/proj_list",
-              }}
-            >
-              <Button icon={<ArrowLeftOutlined />}>
-                목록
-              </Button>
+          <div className="d-flex justify-content-end gap-2">
+            <Button onClick={handleCancel}> {t("common.cancelBtn")} </Button>
+            <Link href="/proj/proj_list">
+              <Button> {t("common.listBtn")} </Button>
             </Link>
-
             <Button
               type="primary"
               icon={<SaveOutlined />}
               loading={loading}
               onClick={handleSubmit}
             >
-              수정
+              {t("edit.submitBtn")}
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
     </main>
   );
 }

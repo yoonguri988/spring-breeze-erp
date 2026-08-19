@@ -11,62 +11,70 @@ import {
   EditOutlined,
   InfoCircleOutlined,
   PlusOutlined,
+  RollbackOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchMyResvListRequest,
   fetchMyResvCountRequest,
   cancelResvRequest,
+  returnResvRequest,
   resetResvState,
 } from "../../reducers/resv/resvReducer";
 import CancelResvModal from "../../components/CancelResvModal";
+import ReturnResvModal from "../../components/ReturnResvModal";
 
 const ONE_PAGE_LIST = 10;
 
 const STATUS_TABS = [
-  { value: "", label: "전체" },
-  { value: "WAI", label: "대기" },
-  { value: "APP", label: "승인" },
-  { value: "REJ", label: "반려" },
+  { value: "", labelKey: "common:label.all" },
+  { value: "WAI", labelKey: "status.waiting" },
+  { value: "APP", labelKey: "status.approved" },
+  { value: "REJ", labelKey: "status.rejected" },
+  { value: "NORET", labelKey: "status.notReturned" },
 ];
 
-function typeBadge(type) {
+function typeBadge(type, t) {
   if (type === "ROOM")
-    return <span className="sb-badge sb-badge--blue">회의실</span>;
+    return <span className="sb-badge sb-badge--blue">{t("resType.room")}</span>;
   if (type === "EQUIPMENT")
-    return <span className="sb-badge sb-badge--violet">장비</span>;
+    return <span className="sb-badge sb-badge--violet">{t("resType.equipment")}</span>;
   if (type === "VEHICLE")
-    return <span className="sb-badge sb-badge--cyan">차량</span>;
+    return <span className="sb-badge sb-badge--cyan">{t("resType.vehicle")}</span>;
   return <span className="sb-badge">{type}</span>;
 }
 
-function statusBadge(status) {
+function statusBadge(status, t) {
   if (status === "WAI")
-    return <span className="sb-badge sb-badge--amber">대기</span>;
+    return <span className="sb-badge sb-badge--amber">{t("status.waiting")}</span>;
   if (status === "APP")
-    return <span className="sb-badge sb-badge--green">승인</span>;
+    return <span className="sb-badge sb-badge--green">{t("status.approved")}</span>;
   if (status === "REJ")
-    return <span className="sb-badge sb-badge--red">반려</span>;
+    return <span className="sb-badge sb-badge--red">{t("status.rejected")}</span>;
+  if (status === "NORET")
+    return <span className="sb-badge sb-badge--red">{t("status.notReturned")}</span>;
   return <span className="sb-badge sb-badge--gray">{status}</span>;
 }
 
-function returnCell(r) {
+function returnCell(r, t) {
   if (r.returnDt)
     return (
       <span className="sb-badge sb-badge--green">
         {moment(r.returnDt).format("YYYY-MM-DD HH:mm:ss")}
       </span>
     );
-  if (r.status === "APP" && !r.returnDt)
-    return <span className="sb-badge sb-badge--amber">미반납</span>;
-  return <span className="view-val-empty">해당 없음</span>;
+  if ((r.status === "APP" || r.status === "NORET") && !r.returnDt)
+    return <span className="sb-badge sb-badge--amber">{t("returnStatus.notReturned")}</span>;
+  return <span className="view-val-empty">{t("returnStatus.notApplicable")}</span>;
 }
 
 export default function ResvMyPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["resv", "common"]);
 
   const { myList, myListCount, loading, error, success } = useSelector(
     (state) => state.resv,
@@ -78,6 +86,8 @@ export default function ResvMyPage() {
   const [keyword, setKeyword] = useState("");
   const [target, setTarget] = useState(null); // { revId, resName }
   const [canceling, setCanceling] = useState(false);
+  const [returnTarget, setReturnTarget] = useState(null); // { revId, resName }
+  const [returning, setReturning] = useState(false);
   const prevLoading = useRef(false);
 
   const status = router.query.status || "";
@@ -115,7 +125,7 @@ export default function ResvMyPage() {
     if (!canceling) return;
     if (prevLoading.current && !loading) {
       if (success) {
-        message.success("예약이 취소되었습니다.");
+        message.success(t("my.cancelSuccess"));
         setTarget(null);
         setCanceling(false);
         dispatch(resetResvState());
@@ -127,6 +137,23 @@ export default function ResvMyPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, success, error, canceling]);
+
+  useEffect(() => {
+    if (!returning) return;
+    if (prevLoading.current && !loading) {
+      if (success) {
+        message.success(t("my.returnSuccess"));
+        setReturnTarget(null);
+        setReturning(false);
+        dispatch(resetResvState());
+      } else if (error) {
+        message.error(error);
+        setReturning(false);
+        dispatch(resetResvState());
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, success, error, returning]);
 
   useEffect(() => {
     prevLoading.current = loading;
@@ -164,6 +191,17 @@ export default function ResvMyPage() {
     dispatch(cancelResvRequest(target.revId));
   };
 
+  const openReturn = (r) => {
+    setReturnTarget({ revId: r.revId, resName: r.resName });
+    dispatch(resetResvState());
+  };
+
+  const confirmReturn = () => {
+    if (!returnTarget) return;
+    setReturning(true);
+    dispatch(returnResvRequest(returnTarget.revId));
+  };
+
   const startOffset = (currentPage - 1) * ONE_PAGE_LIST;
 
   return (
@@ -171,17 +209,17 @@ export default function ResvMyPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <span>&gt;</span>{" "}
-            <Link href="/resv/my">내 자원 요청 관리</Link> <span>&gt;</span>{" "}
-            예약 목록
+            <Link href="/">{t("my.breadcrumbHome")}</Link> <span>&gt;</span>{" "}
+            <Link href="/resv/my">{t("my.breadcrumbList")}</Link> <span>&gt;</span>{" "}
+            {t("my.breadcrumbCurrent")}
           </div>
-          <h1>내 자원 요청 관리</h1>
-          <p>내가 신청한 자원 예약 내역을 조회하고 관리합니다.</p>
+          <h1>{t("my.title")}</h1>
+          <p>{t("my.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/resv/insert">
             <Button type="primary" icon={<PlusOutlined />}>
-              예약 신청
+              {t("my.newResvButton")}
             </Button>
           </Link>
         </div>
@@ -189,17 +227,17 @@ export default function ResvMyPage() {
 
       <div className="sb-card">
         <div className="sb-card__head">
-          <h2>예약 목록</h2>
+          <h2>{t("my.cardTitle")}</h2>
           <div className="right">
             <div className="sb-segment">
-              {STATUS_TABS.map((t) => (
+              {STATUS_TABS.map((tab) => (
                 <button
-                  key={t.value}
+                  key={tab.value}
                   type="button"
-                  className={status === t.value ? "active" : ""}
-                  onClick={() => goStatus(t.value)}
+                  className={status === tab.value ? "active" : ""}
+                  onClick={() => goStatus(tab.value)}
                 >
-                  {t.label}
+                  {t(tab.labelKey)}
                 </button>
               ))}
             </div>
@@ -216,23 +254,23 @@ export default function ResvMyPage() {
         >
           <div className="col-auto" style={{ minWidth: 150 }}>
             <label className="form-label small fw-semibold mb-1">
-              자원 유형
+              {t("my.filterResType")}
             </label>
             <Select
               style={{ width: "100%" }}
               value={resType || ""}
               onChange={setResType}
               options={[
-                { value: "", label: "전체" },
-                { value: "ROOM", label: "회의실" },
-                { value: "EQUIPMENT", label: "장비" },
-                { value: "VEHICLE", label: "차량" },
+                { value: "", label: t("common:label.all") },
+                { value: "ROOM", label: t("resType.room") },
+                { value: "EQUIPMENT", label: t("resType.equipment") },
+                { value: "VEHICLE", label: t("resType.vehicle") },
               ]}
             />
           </div>
           <div className="col-auto" style={{ minWidth: 150 }}>
             <label className="form-label small fw-semibold mb-1">
-              <CalendarOutlined /> 시작일
+              <CalendarOutlined /> {t("my.filterStartDt")}
             </label>
             <DatePicker
               style={{ width: "100%" }}
@@ -241,7 +279,7 @@ export default function ResvMyPage() {
             />
           </div>
           <div className="col-auto" style={{ minWidth: 150 }}>
-            <label className="form-label small fw-semibold mb-1">종료일</label>
+            <label className="form-label small fw-semibold mb-1">{t("my.filterEndDt")}</label>
             <DatePicker
               style={{ width: "100%" }}
               value={endDt ? moment(endDt) : null}
@@ -249,10 +287,10 @@ export default function ResvMyPage() {
             />
           </div>
           <div className="col-auto" style={{ minWidth: 180 }}>
-            <label className="form-label small fw-semibold mb-1">자원명</label>
+            <label className="form-label small fw-semibold mb-1">{t("my.filterResName")}</label>
             <Input
               style={{ width: "100%" }}
-              placeholder="자원명 검색"
+              placeholder={t("my.filterResNamePlaceholder")}
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               onPressEnter={() => runSearch(1)}
@@ -264,41 +302,40 @@ export default function ResvMyPage() {
               icon={<SearchOutlined />}
               onClick={() => runSearch(1)}
             >
-              조회
+              {t("my.searchButton")}
             </Button>
           </div>
         </div>
 
         <div className="sb-search-note px-3">
-          <InfoCircleOutlined /> 처리일자를 지정하지 않으면 기본으로{" "}
-          <b>최근 30일</b>만 조회합니다(위 시작일·종료일에 채워진 기본값
-          그대로입니다). 전체 기간을 보려면 시작일을 더 과거로 넓혀서
-          조회하세요.
+          <InfoCircleOutlined /> {t("my.searchNotePrefix")}
+          <b>{t("my.searchNoteEmphasis")}</b>
+          {t("my.searchNoteSuffix")}
         </div>
 
         <div className="sb-card__body--flush">
           {(myList || []).length === 0 ? (
             <div className="sb-empty">
               <BookOutlined style={{ fontSize: 30, opacity: 0.5 }} />
-              <p>조건에 해당하는 예약 내역이 없습니다.</p>
+              <p>{t("my.empty")}</p>
             </div>
           ) : (
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th style={{ width: 56 }}>순서</th>
-                  <th>자원명</th>
-                  <th style={{ width: 90 }}>유형</th>
-                  <th style={{ width: 130 }}>위치</th>
+                  <th style={{ width: 56 }}>{t("my.tableNo")}</th>
+                  <th>{t("my.tableResName")}</th>
+                  <th style={{ width: 90 }}>{t("my.tableType")}</th>
+                  <th style={{ width: 130 }}>{t("my.tableLocation")}</th>
                   <th className="num" style={{ width: 60 }}>
-                    수량
+                    {t("my.tableQuantity")}
                   </th>
-                  <th style={{ width: 120 }}>시작일</th>
-                  <th style={{ width: 120 }}>종료일</th>
-                  <th style={{ width: 90 }}>반납</th>
-                  <th style={{ width: 50 }}>상태</th>
-                  <th style={{ width: 120 }}>승인자 / 반려사유</th>
-                  <th style={{ width: 100, textAlign: "center" }}>관리</th>
+                  <th style={{ width: 120 }}>{t("my.tableStartDt")}</th>
+                  <th style={{ width: 120 }}>{t("my.tableEndDt")}</th>
+                  <th style={{ width: 90 }}>{t("my.tableReturnDt")}</th>
+                  <th style={{ width: 50 }}>{t("my.tableStatus")}</th>
+                  <th style={{ width: 120 }}>{t("my.tableApproverOrReject")}</th>
+                  <th style={{ width: 100, textAlign: "center" }}>{t("my.tableManage")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -308,15 +345,15 @@ export default function ResvMyPage() {
                     <td>
                       <b>{r.resName}</b>
                     </td>
-                    <td>{typeBadge(r.resType)}</td>
+                    <td>{typeBadge(r.resType, t)}</td>
                     <td className="text-faint" style={{ fontSize: 12.5 }}>
                       {r.location || "-"}
                     </td>
                     <td className="num">{r.quantity}</td>
                     <td>{moment(r.startDt).format("YYYY-MM-DD HH:mm:ss")}</td>
                     <td>{moment(r.endDt).format("YYYY-MM-DD HH:mm:ss")}</td>
-                    <td>{returnCell(r)}</td>
-                    <td>{statusBadge(r.status)}</td>
+                    <td>{returnCell(r, t)}</td>
+                    <td>{statusBadge(r.status, t)}</td>
                     <td style={{ fontSize: 12 }}>
                       {r.status === "APP" && (
                         <>
@@ -346,7 +383,7 @@ export default function ResvMyPage() {
                           <button
                             type="button"
                             className="sb-iconbtn"
-                            title="상세보기"
+                            title={t("my.detailButtonTitle")}
                           >
                             <BookOutlined />
                           </button>
@@ -362,7 +399,7 @@ export default function ResvMyPage() {
                               <button
                                 type="button"
                                 className="sb-iconbtn"
-                                title="수정"
+                                title={t("common:button.edit")}
                               >
                                 <EditOutlined />
                               </button>
@@ -371,13 +408,25 @@ export default function ResvMyPage() {
                               type="button"
                               className="sb-iconbtn"
                               style={{ color: "var(--sb-red)" }}
-                              title="취소"
+                              title={t("common:button.cancel")}
                               onClick={() => openCancel(r)}
                             >
                               <CloseCircleOutlined />
                             </button>
                           </>
                         )}
+                        {(r.status === "APP" || r.status === "NORET") &&
+                          !r.returnDt && (
+                            <button
+                              type="button"
+                              className="sb-iconbtn"
+                              style={{ color: "var(--sb-green, #389e0d)" }}
+                              title={t("common:button.return")}
+                              onClick={() => openReturn(r)}
+                            >
+                              <RollbackOutlined />
+                            </button>
+                          )}
                       </div>
                     </td>
                   </tr>
@@ -392,7 +441,7 @@ export default function ResvMyPage() {
               style={{ borderTop: "1px solid var(--sb-border)" }}
             >
               <span className="text-faint" style={{ fontSize: 12.5 }}>
-                총 <b>{myListCount}</b>건
+                {t("my.totalCountPrefix")} <b>{myListCount}</b>{t("my.totalCountSuffix")}
               </span>
               <Pagination
                 size="small"
@@ -413,6 +462,13 @@ export default function ResvMyPage() {
         loading={canceling && loading}
         onClose={() => setTarget(null)}
         onConfirm={confirmCancel}
+      />
+      <ReturnResvModal
+        target={returnTarget}
+        open={!!returnTarget}
+        loading={returning && loading}
+        onClose={() => setReturnTarget(null)}
+        onConfirm={confirmReturn}
       />
     </div>
   );

@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/eval")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class EvalController {
 
 	private final EvalService evalService;

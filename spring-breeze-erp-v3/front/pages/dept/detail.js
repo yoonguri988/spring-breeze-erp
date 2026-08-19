@@ -1,21 +1,24 @@
 // pages/dept/detail.js
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "antd";
 import { ArrowLeftOutlined, RightOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
-import { fetchDeptDetailRequest } from "../../reducers/dept/deptReducer";
-import { listEmpRequest } from "../../reducers/emp/empReducer";
+import {
+  fetchDeptDetailRequest,
+  fetchDeptEmpListRequest,
+} from "../../reducers/dept/deptReducer";
 import DeptDetailView from "../../components/DeptDetailView";
 
 export default function DeptDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["dept", "common"]);
 
-  const { detail } = useSelector((state) => state.dept);
-  const { empList } = useSelector((state) => state.emp);
+  const { detail, deptEmpList } = useSelector((state) => state.dept);
   const { user } = useSelector((state) => state.auth);
 
   const deptId = router.query.deptId ? String(router.query.deptId) : "";
@@ -23,7 +26,6 @@ export default function DeptDetailPage() {
   useEffect(() => {
     if (!router.isReady || !deptId) return;
     dispatch(fetchDeptDetailRequest(deptId));
-    dispatch(listEmpRequest());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, router.isReady, deptId]);
 
@@ -35,13 +37,13 @@ export default function DeptDetailPage() {
     String(user.deptId) === String(dept.deptId)
   );
 
-  const deptEmpList = useMemo(
-    () =>
-      (empList?.list || []).filter(
-        (e) => dept && String(e.deptId) === String(dept.deptId),
-      ),
-    [empList, dept],
-  );
+  // dept 가 확정된 이후에만 소속 사원 목록을 조회한다.
+  // (GET /api/dept/{deptId}/emp - 하위 부서 포함, 페이징 없이 전체 반환)
+  useEffect(() => {
+    if (dept?.deptId) {
+      dispatch(fetchDeptEmpListRequest(dept.deptId));
+    }
+  }, [dispatch, dept?.deptId]);
 
   if (!dept) return null;
 
@@ -51,14 +53,14 @@ export default function DeptDetailPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <RightOutlined />{" "}
+            <Link href="/">{t("detail.breadcrumbHome")}</Link> <RightOutlined />{" "}
             <Link
               href={{
                 pathname: "/dept/detail",
                 query: { deptId: dept.deptId },
               }}
             >
-              부서 상세 현황
+              {t("detail.breadcrumbTitle")}
             </Link>{" "}
             <RightOutlined /> {dept.deptName}
           </div>
@@ -72,8 +74,8 @@ export default function DeptDetailPage() {
               query: dept.comId ? { comId: dept.comId } : {},
             }}
           >
-            <Button icon={<ArrowLeftOutlined />} size="small">
-              목록으로
+            <Button icon={<ArrowLeftOutlined />}>
+              {t("detail.backBtn")}
             </Button>
           </Link>
         </div>

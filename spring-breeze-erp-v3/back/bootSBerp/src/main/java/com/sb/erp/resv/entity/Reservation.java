@@ -52,7 +52,7 @@ public class Reservation {
 	private Long quantity;
 	
 	@Column(name = "STATUS", nullable=false, length = 10)
-	private String status; // REJ, APP, WAI
+	private String status; // WAI(대기), APP(승인), REJ(반려), NORET(미반납)
 	
 	@Column(name="START_DT", nullable=false)
 	private LocalDateTime startDt;
