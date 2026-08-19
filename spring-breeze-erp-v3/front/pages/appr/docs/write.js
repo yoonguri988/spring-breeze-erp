@@ -1,10 +1,12 @@
 import dynamic from "next/dynamic";
+import moment from "moment";
 import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import {
     message, Form, Input, Select, Button, Space, List,
-    Tag, Divider, Empty, DatePicker, InputNumber
+    Tag, Divider, Empty, DatePicker, InputNumber,
+    Card, Row, Col, Modal, Switch, Typography, Spin
 } from "antd";
 import { ArrowUpOutlined, ArrowDownOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
@@ -25,6 +27,7 @@ import "react-quill/dist/quill.snow.css";
 
 const { Option } = Select;
 const { TextArea } = Input;
+const { Text } = Typography;
 
 export default function DocWritePage() {
     const router = useRouter();
@@ -46,6 +49,19 @@ export default function DocWritePage() {
     // empId, empName, posName 순서대로
     const [approvers, setApprovers] = useState([]);
     const [selectedDeptId, setSelectedDeptId] = useState(null);
+    const [isImportant, setIsImportant] = useState(false);
+
+    // 중요문서 결재선인원 조절
+    const requiredApproverCount = isImportant ? 3 : 1;
+
+    // 결재선 순서 패널에 보여줄 고정 슬롯
+    const approverSlots = useMemo(
+        () => Array.from({length: requiredApproverCount}, (_, i) => ({
+            slotIndex : i,
+            approver: approvers[i] || null     
+        })),
+        [approvers, requiredApproverCount]
+    );
 
     // 폼에서 선택한 양식 감시
     const formKey = Form.useWatch("formKey", form);
@@ -71,7 +87,7 @@ export default function DocWritePage() {
     // 양식이 바뀌면 이전값 초기화
     useEffect(() => {
         setSchemaValues({});
-        setDocContent("");
+        setDocContent(selectedForm?.forContent ?? "");
     }, [formKey]);
 
     const updateSchemaValue = (key, value) => {
@@ -89,7 +105,7 @@ export default function DocWritePage() {
                 return (
                     <DatePicker
                         style={{width: "100%"}}
-                        value={value}
+                        value={value ? moment(value) : null}
                         onChange={(date, dateString) => onChange(dateString)}
                     />
                 );
@@ -163,6 +179,27 @@ export default function DocWritePage() {
         setApprovers((prev) => [...prev, person]);
     };
 
+    // 휴직자면 확인 모달창
+    const handleAddApprover = (emp) => {
+        const person = {
+            empId: emp.empId,
+            empName: emp.empName,
+            posName: emp.posName
+        };
+
+        if (emp.empStatus === "휴직") {
+            Modal.confirm({
+                title: "휴직자 추가 확인",
+                content: `${emp.empName}님은 현재 휴직 상태입니다. 그래도 결재선에 추가하시겠습니까?`,
+                okText: "추가",
+                cancelText: "취소",
+                onOk: () => addApprover(person),
+            });
+            return;
+        }
+        addApprover(person);
+    };
+
     // 결재자 삭제
     const removeApprover = (empId) => {
         setApprovers((prev) => prev.filter((a) => a.empId !== empId));
@@ -182,20 +219,39 @@ export default function DocWritePage() {
         });
     }
 
+    // 중요문서 여부 토글 / 초과분 잘라내기
+    const handleImportantChange = (checked) => {
+        setIsImportant(checked);
+        const newRequired = checked ? 3 : 1;
+        setApprovers((prev) => {
+            if (prev.length <= newRequired) return prev;
+            message.info(`결재선이 ${newRequired}명으로 조정되었습니다. 초과된 결재자는 제외됩니다.`);
+            return prev.slice(0, newRequired);
+        })
+    }
+
     // 부서 기준 상사 목록 조회 
     // 결재선 추천 3차 신규기능 추가예정
     const handleAutoSuggest = () => {
         dispatch(fetchApprLinesRequest());
     };
 
+    // 최고 직급자 예외 처리
+    const noApproversAvailable = useMemo(
+        () => deptTree.length > 0 && deptTree.every((d) => d.empCount === 0),
+        [deptTree]  
+    );
+
     // 추천된 상사 목록을 순서대로 결재선에 담기
     useEffect(() => {
         if (apprLines.length > 0 && approvers.length === 0) {
-            setApprovers(apprLines.map((l) => ({
-                empId: l.empId,
-                empName: l.empName,
-                posName: l.posName
-            })));
+            setApprovers(
+                apprLines.slice(0, requiredApproverCount).map((l) => ({
+                    empId: l.empId,
+                    empName: l.empName,
+                    posName: l.posName
+                }))
+            );
         }
     }, [apprLines]);
 
@@ -205,8 +261,8 @@ export default function DocWritePage() {
     };
 
     const handleSubmit = (values) => {
-        if (approvers.length === 0) {
-            message.error("결재선을 1명 이상 지정해주세요.");
+        if (approvers.length !== requiredApproverCount) {
+            message.error(`결재선을 ${requiredApproverCount}명 지정해주세요.`);
             return;
         }
 
@@ -245,13 +301,28 @@ export default function DocWritePage() {
     };
 
     return (
-        <div style={{padding: 24, maxWidth: 900}}>
-            <h2>문서 작성</h2>
+        <div className="sb-page" style={{maxWidth: 900}}>
+            <div className="sb-page-head">
+                <div className="sb-page-head__txt">
+                    <div className="sb-breadcrumb">
+                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>전자결재</a>
+                        <i className="bi bi-chevron-right"/>
+                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>결재 문서함</a>
+                        <i className="bi bi-chevron-right"/>
+                        <span>문서 작성</span>
+                    </div>
+                    <h1>결재 문서 작성</h1>
+                    <p>선택한 양식으로 새로운 결재 문서를 기안합니다.</p>
+                </div>
+                <div className="sb-page-head__actions">
+                    <Button onClick={() => router.push("/appr/docs")}>목록으로</Button>
+                </div>
+            </div>
 
             <Form form={form} layout="vertical" onFinish={handleSubmit}>
                 <Form.Item
                     name="formKey"
-                    label="양식 선택"
+                    label="양식 선택"   
                     rules={[{required: true, message: "양식을 선택해주세요."}]}
                 >
                     <Select
@@ -269,6 +340,7 @@ export default function DocWritePage() {
                     </Select>
                 </Form.Item>
 
+
                 <Form.Item
                     name="docTitle"
                     label="문서 제목"
@@ -276,6 +348,27 @@ export default function DocWritePage() {
                 >
                     <Input/>
                 </Form.Item>
+
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "12px 16px",
+                        border: "1px solid #f0f0f0",
+                        borderRadius: 6,
+                        marginBottom: 24
+                    }}
+                >
+                    <div>
+                        <div style={{fontWeight: 600}}>중요 문서 여부</div>
+                        <div style={{fontSize: 13, color: "rgba(0,0,0,0.45)"}}>
+                            중요문서로 지정하면 결재선을 3명 지정해야 합니다.
+                        </div>
+                    </div>
+                    <Switch checked={isImportant} onChange={handleImportantChange}/>
+                </div>
+
                 {/* 선택한 양식에 따라 동적으로 분기 */}
                 {formKey && (
                     isSchemaForm ? (
@@ -305,115 +398,162 @@ export default function DocWritePage() {
 
                 <Divider>결재선 지정</Divider>
 
+                {noApproversAvailable ? (
+                    <div
+                        style={{
+                            textAlign: "center",
+                            padding: "40px 20px",
+                            color: "var(--sb-ink-faint)",
+                            border: "1px solid var(--sb-border)",
+                            borderRadius: "var(--sb-radius)",
+                            background: "var(--sb-surface)",
+                        }}
+                    >
+                        <i className="bi bi-info-circle" style={{fontSize: 20, display: "block", marginBottom: 8}}/>
+                        최고 직급자는 결재선 지정 없이 문서를 기안할 수 없습니다.<br/>
+                        관리자에게 문의해주세요.
+                    </div>
+                ) : (<>
+
+                <Text type="secondary" style={{display: "block", marginBottom: 12}}>
+                    {isImportant ? "중요 문서는 결재선을 3명 순서대로 지정해야 합니다." : "일반 문서는 결재선을 1명 지정합니다."}
+                </Text>
+
+                {/*
                 <Space style={{marginBottom: 12}}>
                         <Button onClick={handleAutoSuggest} loading={apprLinesLoading}>
                             상사 목록 불러오기
                         </Button>
                 </Space>
+                */}
 
-                <div style={{display: "flex", gap: 16, marginBottom: 16}}>
+                <Row gutter={16} style={{marginBottom: 16}}>
                     {/* 부서 트리 */}
-                    <div style={{flex: 1, border: "1px solid #f0f0f0", padding: 12, borderRadius: 6}}>
-                        <div style={{fontWeight: 600, marginBottom: 8}}>부서 선택</div>
-                        <List
-                            size="small"
-                            loading={deptTreeLoading}
-                            dataSource={deptTree}
-                            locale={{ emptyText: "부서 정보를 불러오는 중입니다."}}
-                            renderItem={(d) => (
-                                <List.Item
-                                    style={{
-                                        cursor: "pointer",
-                                        background: selectedDeptId === d.deptId ? "#e6f6ff" : "transparent"
-                                    }}
-                                    onClick={() => handleDeptSelect(d.deptId)}
-                                >
-                                    {d.deptName} <Tag style={{marginLeft: 8}}>{d.empCount}명</Tag>
-                                </List.Item>
-                            )}
-                        />
-                    </div>
+                    <Col xs={24} md={6}>
+                        <Card size="small" title="부서 선택" bodyStyle={{padding: 8}}>
+                            <div style={{maxHeight: 320, overflowY: "auto"}}>
+                                <List
+                                    size="small"
+                                    loading={deptTreeLoading}
+                                    dataSource={deptTree}
+                                    locale={{ emptyText: "부서 정보를 불러오는 중입니다."}}
+                                    renderItem={(d) => (
+                                        <List.Item
+                                            style={{
+                                                cursor: "pointer",
+                                                background: selectedDeptId === d.deptId ? "#e6f6ff" : "transparent"
+                                            }}
+                                            onClick={() => handleDeptSelect(d.deptId)}
+                                        >
+                                            {d.deptName} <Tag style={{marginLeft: 8}}>{d.empCount}명</Tag>
+                                        </List.Item>
+                                    )}
+                                />
+                            </div>
+                        </Card>
+                    </Col>
                     {/* 선택한 부서의 사원 목록 */}
-                    <div style={{flex: 1, border: "1px solid #f0f0f0", padding: 12, borderRadius: 6}}>
-                        <div style={{ fontWeight: 600, marginBottom: 8}}>사원 선택</div>
-                        <List
-                            size="small"
-                            loading={deptEmpsLoading}
-                            dataSource={deptEmps}
-                            locale={{emptyText: "왼쪽에서 부서를 먼저 선택하세요."}}
-                            renderItem={(e) => (
-                                <List.Item
-                                    actions={[
-                                        <a key="add" onClick={() => addApprover({
-                                            empId: e.empId,
-                                            empName: e.empName,
-                                            posName: e.posName
-                                        })}>추가</a>
-                                    ]}
-                                >
-                                    {e.empName} <Tag style={{marginLeft: 8}}>{e.posName}</Tag>
-                                </List.Item>
+                    <Col xs={24} md={9}>
+                        <Card size="small" title="사원 선택" bodyStyle={{padding: 8}}>
+                            {deptEmpsLoading ? (
+                                <div style={{textAlign: "center", padding: "20px 0"}}>
+                                    <Spin size="small"/>
+                                </div>
+                            ) : ( 
+                                <div className="appr-emp-box">
+                                    {deptEmps.length === 0 ? (
+                                        <div className="text-muted text-center py-4 small">
+                                            왼쪽에서 부서를 먼저 선택하세요.
+                                        </div>    
+                                    ) : (
+                                        deptEmps.map((e) => {
+                                            const already = approverIdSet.has(e.empId);
+                                            return (
+                                                <div
+                                                    key={e.empId}
+                                                    className={"appr-emp-row" + (already ? " disabled" : "")}
+                                                    onClick={() => {if (!already) handleAddApprover(e);}}
+                                                >
+                                                    <span>
+                                                        {e.empName}
+                                                        {e.empStatus === "휴직" && (
+                                                            <Tag color="orange" style={{marginLeft: 6}}>휴직중</Tag>
+                                                        )}
+                                                    </span>
+                                                    <span className="pos-chip">{e.posName}</span>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
                             )}
-                        />
-                    </div>
+                        </Card>
+                    </Col>
                     {/* 선택된 결재선 */}
-                    <div style={{flex: 1, border: "1px solid #f0f0f0", padding: 12, borderRadius: 6}}>
-                        <div style={{fontWeight: 600, marginBottom: 8}}>결재선 순서</div>
-                        {approvers.length === 0 ? (
-                            <Empty
-                                description="결재자를 추가해주세요"
-                                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                            />
-                        ) : (
-                            <List
-                                size="small"
-                                dataSource={approvers}
-                                renderItem={(a, index) => (
-                                    <List.Item
-                                        actions={[
-                                            <Button
-                                                key="up"
-                                                type="text"
-                                                size="small"
-                                                icon={<ArrowUpOutlined/>}
-                                                disabled={index === 0}
-                                                onClick={() => moveApprover(index, -1)}
-                                            />,
-                                            <Button
-                                                key="down"
-                                                type="text"
-                                                size="small"
-                                                icon={<ArrowDownOutlined/>}
-                                                disabled={index === approvers.length - 1}
-                                                onClick={() => moveApprover(index, 1)}
-                                            />,
-                                            <Button
-                                                key="remove"
-                                                type="text"
-                                                danger
-                                                size="small"
-                                                icon={<DeleteOutlined/>}
-                                                onClick={() => removeApprover(a.empId)}
-                                            />
-                                        ]}
-                                    >
-                                        <span>
-                                            {index + 1}. {a.empName} {a.posName && <Tag>{a.posName}</Tag>}
-                                        </span>
-                                    </List.Item>
-                                )}
-                            />
-                        )}
-                    </div>
-                </div>
+                    <Col xs={24} md={9}>
+                        <Card size="small" title="결재선 순서" bodyStyle={{padding: 8}}>
+                            <div className="appr-slots">
+                               {approverSlots.map((slot) => {
+                                    const { slotIndex: index, approver: a} = slot;
+                                    const order = index + 1;
+                                    return (
+                                        <div
+                                            key={index}
+                                            className={"appr-slot" + (a ? " filled" : "")}
+                                        >
+                                            <span className="appr-slot__badge">{order}</span>
+                                            {a ? (<>
+                                                <span
+                                                    className="appr-slot__body"
+                                                    style={{cursor: "pointer"}}
+                                                    onClick={() => removeApprover(a.empId)}
+                                                >
+                                                    {a.empName}
+                                                    <span className="appr-slot__pos">{a.posName}</span>
+                                                </span>
+                                                <Space size={0}>
+                                                    <Button
+                                                        type="text"
+                                                        size="small"
+                                                        icon={<ArrowUpOutlined/>}
+                                                        disabled={index === 0}
+                                                        onClick={(e) => {e.stopPropagation(); moveApprover(index, -1);}}
+                                                    />
+                                                    <Button
+                                                        type="text"
+                                                        size="small"
+                                                        icon={<ArrowDownOutlined/>}
+                                                        disabled={index === approvers.length - 1}
+                                                        onClick={(e) => {e.stopPropagation(); moveApprover(index, 1);}}
+                                                    />
+                                                </Space>
+                                            </>) : (
+                                                <span className="appr-slot__body appr-slot__empty">
+                                                    {order}차 결재자를 선택해주세요
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                               })}
+                            </div>
+                        </Card>
+                    </Col>
+                </Row>
+                </>
+                )}
 
                 <Form.Item>
-                    <Space>
-                        <Button type="primary" htmlType="submit" loading={writeSubmitting}>
+                    <div style={{display: "flex", justifyContent: "flex-end", gap: 8}}>
+                        <Button onClick={() => router.push("/appr/docs")}>취소</Button>
+                        <Button 
+                            type="primary"
+                            htmlType="submit"
+                            loading={writeSubmitting}
+                            disabled={writeSubmitting || noApproversAvailable}
+                        >
                             제출
                         </Button>
-                        <Button onClick={() => router.push("/appr/docs")}>취소</Button>
-                    </Space>
+                    </div>
                 </Form.Item>
             </Form>
         </div>

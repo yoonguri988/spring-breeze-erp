@@ -21,6 +21,7 @@ public class ApprFormResponse {
 	private Boolean forStatus;
 	private String createdAt;
 	private String updatedAt;
+	private boolean deleted;
 	
 	// JPA 경로 - Entity에서 변환
 	public ApprFormResponse(ApprForm form) {

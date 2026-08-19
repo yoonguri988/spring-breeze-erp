@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector} from "react-redux";
 import { useRouter } from "next/router";
-import { Table, Input, Select, Button, Space, Tag, message } from "antd";
+import {
+    Table, Input, Select, Button, Space, Tag, message,
+    Badge, Spin, Card
+} from "antd";
+import { SearchOutlined, BankOutlined, PlusOutlined } from "@ant-design/icons";
 import { fetchFormListRequest, deleteFormRequest } from "../../../reducers/appr/apprFormReducer";
+import { searchCompany } from "../../../api/appr/apprFormApi";
 
 const { Option } = Select;
 
@@ -12,26 +17,73 @@ export default function FormListPage() {
 
     const { list, loading, totalCount, page, pageSize } = useSelector((state) => state.apprForm);
 
-    const [keyword, setKeyword] = useState("");
-    const [forStatus, setForStatus] = useState(undefined);
+    // 서버로 나가는 조회 조건 - 검색 버튼 눌러야 반영
+    const [appliedFilters, setAppliedFilters] = useState({comId: undefined, keyword: "", forStatus: undefined});
     const [currentPage, setCurrentPage] = useState(1);
 
-    // JWT 전까지 임시값
-    const comId = 1;
+    // 입력중인 값들 - 검색 누르기 전까진 여기까지 바뀜
+    const [keywordDraft, setKeywordDraft] = useState("");
+    const [statusDraft, setStatusDraft] = useState(undefined);
+    const [comIdDraft, setComIdDraft] = useState(undefined);
+    const [comNameDraft, setComNameDraft] = useState(undefined);
+    
+
+    // 회사검색
+    const [companyOptions, setCompanyOptions] = useState([]);
+    const [companySearching, setCompanySearching] = useState(false);
+    const debounceRef = useRef(null);
+
+    const handleCompanySearch = (value) => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+
+        if (!value) {
+            setCompanyOptions([]);
+            return;
+        }
+
+        // 타이핑 마다 호출 막기
+        debounceRef.current = setTimeout(async () => {
+            setCompanySearching(true);
+            try {
+                const data = await searchCompany(value);
+                setCompanyOptions(data);
+            } catch (err) {
+                setCompanyOptions([]);
+            } finally {
+                setCompanySearching(false);
+            }
+        }, 300);
+    };
+
+    const handleCompanySelect = (value, option) => {
+        setComIdDraft(value);
+        setComNameDraft(option.children);
+    };
+
+    const handleSearch = () => {
+        setCurrentPage(1);
+        setAppliedFilters({
+            comId: comIdDraft,
+            keyword: keywordDraft,
+            forStatus: statusDraft,
+        });
+    };
 
     useEffect(() => {
+
+        // 많은 데이터 조회 방지 (회사 선택 전엔 조회하지않음)
+        if (!appliedFilters.comId) return;
+
         dispatch(fetchFormListRequest({
-            comId,
-            keyword,
-            forStatus,
+            ...appliedFilters,
             page: currentPage,
             onepagelist: 10,
         }));
-    }, [dispatch, keyword, forStatus, currentPage]);
+    }, [dispatch, appliedFilters, currentPage]);
 
     const handleDelete = (forId, forVersion) => {
         dispatch(deleteFormRequest({forId, forVersion}));
-    }
+    };
 
     // 검색
     /*
@@ -64,17 +116,27 @@ export default function FormListPage() {
         
     */
     const columns = [
-        {title: "코드", dataIndex: "forCode", key: "forCode"},
-        {title: "제목", dataIndex: "forTitle", key: "forTitle"},
+        {
+            title: "번호",
+            key: "no",
+            width: 70,
+            render: (_, __, index) => (page - 1) * (pageSize || 10) + index + 1,
+        },
+        {title: "양식 코드", dataIndex: "forCode", key: "forCode"},
+        {title: "양식 제목", dataIndex: "forTitle", key: "forTitle"},
+        {title: "회사", dataIndex: "comName", key: "comName"},
         {title: "버전", dataIndex: "forVersion", key: "forVersion", width: 80},
         {
-            title: "상태",
+            title: "활성화 여부",
             dataIndex: "forStatus",
             key: "forStatus",
-            width: 100,
-            render: (status) => <Tag color={status ? "green" : "default"}>{status ? "활성" : "비활성"}</Tag>,
+            width: 110,
+            render: (status) => (
+                <Badge status={status ? "success" : "default"} text={status ? "활성화" : "비활성화"}/>
+            ),
         },
-        {title: "등록일", dataIndex: "createdAt", key: "createdAt"},
+        {title: "생성일", dataIndex: "createdAt", key: "createdAt"},
+        {title: "수정일", dataIndex: "updatedAt", key: "updatedAt"},
         {
             title: "관리",
             key: "action",
@@ -83,7 +145,7 @@ export default function FormListPage() {
                 <Space>
                     <Button
                         size="small"
-                        onClick={() => router.push(`/appr/forms/${record.forId}/${record.forVersion}`)}
+                        onClick={() => router.push(`/appr/forms/detail?forId=${record.forId}&forVersion=${record.forVersion}`)}
                     >
                         상세
                     </Button>
@@ -100,60 +162,121 @@ export default function FormListPage() {
     ];
 
     return (
-        <div style={{padding: 24}}>
-            <Space style={{marginBottom: 16}}>
-                <Input.Search
-                    placeholder="양식 코드/제목 검색"
-                    onSearch={(value) => {
-                        setKeyword(value);
-                        setCurrentPage(1);
-                    }}
-                    style={{width: 240}}
-                    allowClear
-                />
-                <Select
-                    placeholder="상태"
-                    onChange={(value) => {
-                        setForStatus(value);
-                        setCurrentPage(1);
-                    }}
-                    style={{width: 120}}
-                    allowClear
-                >
-                    <Option value={true}>활성</Option>
-                    <Option value={false}>비활성</Option>
-                </Select>
-                <Button type="primary" onClick={() => router.push("/appr/forms/write")}>
-                    양식 등록
-                </Button>
-            </Space>
+        <div className="sb-page">
+            <div className="sb-page-head">
+                <div className="sb-page-head__txt">
+                    <div className="sb-breadcrumb">
+                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>전자결재</a>
+                        <i className="bi bi-chevron-right" />
+                        <span>양식 관리</span>
+                    </div>
+                    <h1>결재 양식 관리</h1>
+                    <p>시스템 내 결재 양식을 조회하고 관리합니다.</p>
+                </div>
+                <div className="sb-page-head__actions">
+                    <Button type="primary" icon={<PlusOutlined/>} onClick={() => router.push("/appr/forms/write")}>
+                        양식 등록
+                    </Button>
+                </div>
+            </div>
 
-            {/*
-                react는 리스트를 렌더링할때 항목을 구분할 고유 key가 필요 
-                ${record.forId}-${record.ForVersion}의 경우 복합키이기 때문에
-                3-1, 3-2 처럼 문자열하나로 만들어서 고유키를 만들어줌
-                columns -> 위에 구현한 설계도
-                dataSource -> 채워넣을 데이터
-                current -> 지금 몇 페이지를 보고있나
-                    page는 서버가 알려준 페이지 currentPage는 로컬로 관리하는 값
-                    store 값이 있으면 그걸 쓰고 없으면 로컬 값 사용
-                pageSize -> 한페이지에 몇개씩 보여줄지
-                total -> 전체 데이터 개수
-                onChange -> 사용자가 페이지 번호/다음 버튼을 클릭했을때 호출
-                    클릭한 페이지 번호를 받아서 setCurrentPage(p)로 로컬 상태를 갱신
-            */}
-            <Table
-                rowKey={(record) => `${record.forId}-${record.forVersion}`}
-                columns={columns}
-                dataSource={list}
-                loading={loading}
-                pagination={{
-                    current: page || currentPage,
-                    pageSize: pageSize || 10,
-                    total: totalCount,
-                    onChange: (p) => setCurrentPage(p),
-                }}
-            />
+            <Card>
+                <div style={{display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "flex-end"}}>
+                    <div>
+                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>회사</div>
+                        <Select
+                            showSearch
+                            placeholder="회사명 또는 사업자번호 검색"
+                            style={{width: 240}}
+                            value={comIdDraft}
+                            defaultActiveFirstOption={false}
+                            filterOption={false} // 서버 검색결과를 그대로 사용
+                            suffixIcon={<BankOutlined/>}
+                            notFoundContent={companySearching ? <Spin size="small" /> : "검색어를 입력해주세요"}
+                            onSearch={handleCompanySearch}
+                            onChange={handleCompanySelect}
+                            onClear={() => {
+                                setComIdDraft(undefined); 
+                                setComNameDraft(undefined);
+                            }}
+                            allowClear
+                        >
+                            {companyOptions.map((c) => (
+                                <Option key={c.comId} value={c.comId}>
+                                    {c.comName} ({c.bizNo})
+                                </Option>
+                            ))}
+                        </Select>
+                    </div>
+                    
+                    <div>
+                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>키워드 검색</div>
+                        <Input
+                            placeholder="양식 코드/제목 검색"
+                            style={{width: 220}}
+                            value={keywordDraft}
+                            onChange={(e) => setKeywordDraft(e.target.value)}
+                            onPressEnter={handleSearch}
+                            allowClear
+                        />
+                    </div>
+
+                    <div>
+                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>활성화 여부</div>
+                        <Select
+                            placeholder="전체"
+                            style={{width: 140}}
+                            value={statusDraft}
+                            onChange={(value) => setStatusDraft(value)}
+                            allowClear
+                        >
+                            <Option value={true}>활성</Option>
+                            <Option value={false}>비활성</Option>
+                        </Select>
+                    </div>
+
+                    <Button
+                        type="primary"
+                        icon={<SearchOutlined />}
+                        onClick={handleSearch}
+                        disabled={!comIdDraft}
+                    >
+                        검색
+                    </Button>
+                </div>
+                {/*
+                    react는 리스트를 렌더링할때 항목을 구분할 고유 key가 필요 
+                    ${record.forId}-${record.ForVersion}의 경우 복합키이기 때문에
+                    3-1, 3-2 처럼 문자열하나로 만들어서 고유키를 만들어줌
+                    columns -> 위에 구현한 설계도
+                    dataSource -> 채워넣을 데이터
+                    current -> 지금 몇 페이지를 보고있나
+                        page는 서버가 알려준 페이지 currentPage는 로컬로 관리하는 값
+                        store 값이 있으면 그걸 쓰고 없으면 로컬 값 사용
+                    pageSize -> 한페이지에 몇개씩 보여줄지
+                    total -> 전체 데이터 개수
+                    onChange -> 사용자가 페이지 번호/다음 버튼을 클릭했을때 호출
+                        클릭한 페이지 번호를 받아서 setCurrentPage(p)로 로컬 상태를 갱신
+                */}
+                {!appliedFilters.comId ? (
+                    <div style={{padding: "80px 0", textAlign: "center", color: "#999"}}>
+                        회사를 검색해서 선택한 뒤 검색 버튼을 눌러주세요.
+                    </div>
+                ) : (
+                    <Table
+                        rowKey={(record) => `${record.forId}-${record.forVersion}`}
+                        columns={columns}
+                        dataSource={list}
+                        loading={loading}
+                        pagination={{
+                            current: page || currentPage,
+                            pageSize: pageSize || 10,
+                            total: totalCount,
+                            onChange: (p) => setCurrentPage(p),
+                        }}
+                    />
+                )}
+            </Card>
         </div>
     );
 }

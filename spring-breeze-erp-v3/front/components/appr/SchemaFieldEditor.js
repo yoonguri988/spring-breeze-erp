@@ -8,7 +8,7 @@ function sanitizeKey(value) {
     return value.replace(/[^a-zA-Z0-9_]/g, "");
 }
 
-export default function SchemaFieldEditor({ fields, onChange }) {
+export default function SchemaFieldEditor({ fields, onChange, readOnly = false }) {
     const updateField = (index, patch) => {
         const next = fields.map((f, i) => (i === index ? {...f, ...patch} : f));
         onChange(next);

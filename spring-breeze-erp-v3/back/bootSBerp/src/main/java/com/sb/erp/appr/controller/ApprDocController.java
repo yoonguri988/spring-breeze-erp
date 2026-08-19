@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,15 +15,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.sb.erp.appr.dto.request.ApprDocRequest;
 import com.sb.erp.appr.dto.request.ApprDocSearchCondition;
 import com.sb.erp.appr.dto.response.ApprDocInitResponse;
 import com.sb.erp.appr.dto.response.ApprDocResponse;
 import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
+import com.sb.erp.appr.dto.response.ApprFileResponse;
 import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.ApprLineResponse;
 import com.sb.erp.appr.service.ApprDocService;
+import com.sb.erp.appr.service.ApprFileService;
 import com.sb.erp.dept.dto.response.DeptResponse;
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
 import com.sb.erp.util.dto.PagingUtil;
@@ -39,6 +43,7 @@ import lombok.RequiredArgsConstructor;
 public class ApprDocController {
 
 	private final ApprDocService service;
+	private final ApprFileService fileService;
 
 	//////////////////////////// 문서 작성 처리 파트 /////////////////////////////
 
@@ -82,10 +87,10 @@ public class ApprDocController {
 	@Operation(summary = "문서 목록 조회", description = "결재 했던 문서, 해야될 문서 탭별로 목록 조회")
 	@GetMapping("/list_doc")
 	public ResponseEntity<Map<String, Object>> listDoc(
-			@RequestParam(defaultValue = "history") String tab,
-			@RequestParam(required = false) String keyword,
-			@RequestParam(required = false) String status,
-			@RequestParam(defaultValue = "1") int page,
+			@RequestParam(name = "tab", defaultValue = "history") String tab,
+			@RequestParam(name = "keyword", required = false) String keyword,
+			@RequestParam(name = "status", required = false) String status,
+			@RequestParam(name = "page", defaultValue = "1") int page,
 			@AuthenticationPrincipal CustomUserPrincipal principal) {
 
 		Long empId = principal.getEmpId();
@@ -140,7 +145,7 @@ public class ApprDocController {
 	@Operation(summary = "문서 상세 조회", description = "문서 상세 정보와 결재선, 현재 로그인한 사용자의 결재 가능 여부 반환")
 	@GetMapping("/detail_doc/{docId}")
 	public ResponseEntity<Map<String, Object>> detailDoc(
-			@PathVariable Long docId,
+			@PathVariable("docId") Long docId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 
@@ -163,7 +168,7 @@ public class ApprDocController {
 	@Operation(summary = "문서 승인 처리", description = "해당 결재선의 상태를 승인처리")
 	@PostMapping("/detail_doc/{docId}/app")
 	public ResponseEntity<Void> detailDocApp(
-			@PathVariable Long docId,
+			@PathVariable("docId") Long docId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 		service.processLine(docId, principal.getEmpId(), "APP");
@@ -174,7 +179,7 @@ public class ApprDocController {
 	@Operation(summary = "문서 반려 처리", description = "해당 결재선의 상태를 반려 처리")
 	@PostMapping("/detail_doc/{docId}/rej")
 	public ResponseEntity<Void> detailDocRej(
-			@PathVariable Long docId,
+			@PathVariable("docId") Long docId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 		service.processLine(docId, principal.getEmpId(), "REJ");
@@ -198,7 +203,7 @@ public class ApprDocController {
 	@Operation(summary = "결재선 지정용 부서 트리 조회", description = "부서 상위 체계를 따라가며 각 부서별 결재선 지정 가능 인원수를 함께 반환")
 	@GetMapping("/getDeptTree")
 	public ResponseEntity<List<DeptResponse>> getDeptTree(
-			@RequestParam Long deptId,
+			@RequestParam("deptId") Long deptId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 		return ResponseEntity.ok(service.cntApprovers(deptId, principal.getEmpId()));
@@ -207,9 +212,45 @@ public class ApprDocController {
 	// 특정 부서 소속 사원 목록
 	@Operation(summary = "부서 소속 사원 목록 조회", description = "특정 부서에 소속된 사원 목록을 조회합니다.")
 	@GetMapping("/getDeptEmps")
-	public ResponseEntity<List<ApprLineResponse>> getDeptEmps(@RequestParam Long deptId) {
-		return ResponseEntity.ok(service.selectDeptEmpsForLines(deptId));
+	public ResponseEntity<List<ApprLineResponse>> getDeptEmps(
+			@RequestParam("deptId") Long deptId,
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	) {
+		return ResponseEntity.ok(service.selectDeptEmpsForLines(deptId, principal.getEmpId()));
 	}
 
 	//////////////////////////// 결재선 파트 ///////////////////////////////
+	
+	//////////////////////////// 파일 첨부 ///////////////////////////////
+	
+	@Operation(summary = "첨부파일 업로드", description = "문서에 첨부파일 등록 (최대 5개)")
+	@PostMapping("/{docId}/files")
+	public ResponseEntity<List<ApprFileResponse>> uploadFiles(
+			@PathVariable(name = "docId") Long docId,
+			@RequestParam("files") List<MultipartFile> files
+	) {
+		return ResponseEntity.ok(fileService.uploadFiles(docId, files));
+	}
+	
+	@Operation(summary = "첨부파일 목록 조회", description = "문서에 등록된 첨부파일 목록 조회")
+	@GetMapping("/{docId}/files")
+	public ResponseEntity<List<ApprFileResponse>> getFiles(
+			@PathVariable(name = "docId") Long docId
+	) {
+		return ResponseEntity.ok(fileService.selectFilesByDocId(docId));
+	}
+	
+	@Operation(summary = "첨부파일 삭제", description = "본인이 등록한 문서의 첨부파일을 삭제")
+	@DeleteMapping("/{docId}/files/{fileId}")
+	public ResponseEntity<Void> deleteFile(
+			@PathVariable(name = "docId") Long docId,
+			@PathVariable(name = "fileId") Long fileId,
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	) {
+		fileService.deleteFile(docId, fileId, principal.getEmpId());
+		return ResponseEntity.noContent().build();
+	}
+	
+	//////////////////////////// 파일 첨부 ///////////////////////////////
 }
+

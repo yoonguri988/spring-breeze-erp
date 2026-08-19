@@ -3,11 +3,51 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import {
     Table, Input, Select, Button, Space, Tag,
-    Tabs, Row, Col, Statistic, Card
+    Tabs, Row, Col, Card
 } from "antd";
+import {
+    FolderOpenOutlined,
+    ClockCircleOutlined,
+    CheckCircleOutlined,
+    CloseCircleOutlined,
+    PlusOutlined,
+} from "@ant-design/icons";
 import { fetchDocListRequest } from "../../../reducers/appr/apprDocReducer";
 
 const { Option } = Select;
+
+// 대시보드 통계 카드
+function StatCard({ icon: Icon, label, value, bg, color}) {
+    return (
+        <Card 
+            bodyStyle={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                padding: 16
+            }}
+        >
+            <div
+                style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "50%",
+                    background: bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                }}
+            >
+                <Icon style={{fontSize: 20, color }} />
+            </div>
+            <div>
+                <div style={{fontSize: 13, color: "rgba(0,0,0,0.45)"}}>{label}</div>
+                <div style={{fontSize: 22, fontWeight: 500 }}>{value}</div>
+            </div>
+        </Card>
+    )
+}
 
 export default function DocListPage() {
     const router = useRouter();
@@ -76,52 +116,67 @@ export default function DocListPage() {
     const dataSource = tab === "todo" ? todoDocs : hisDocs;
 
     return(<>
-        <div style={{padding: 24}}>
+        <div className="sb-page">
+            <div className="sb-page-head">
+                <div className="sb-page-head__txt">
+                    <div className="sb-breadcrumb">
+                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>전자결재</a>
+                        <i className="bi bi-chevron-right"/>
+                        <span>결재 문서함</span>
+                    </div>
+                    <h1>결재 문서 조회</h1>
+                    <p>내가 기안/결재한 문서 및 결재 대기 중인 문서를 확인합니다.</p>
+                </div>
+                <div className="sb-page-head__actions">
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined/>}
+                        onClick={() => router.push("/appr/docs/write")}
+                    >
+                        문서 작성
+                    </Button>
+                </div>
+            </div>
+            
             {/* 대시보드 통계 카드 */}
             <Row gutter={16} style={{marginBottom: 24}}>
-                <Col span={5}>
-                    <Card>
-                        <Statistic
-                            title="전체 문서"
-                            value={docCnts?.TOTALCNT ?? 0}
-                        />
-                    </Card>
+                <Col span={6}>
+                    <StatCard
+                        icon={FolderOpenOutlined}
+                        label="전체 문서"
+                        value={docCnts?.TOTALCNT ?? 0}
+                        bg="#e6f4ff"
+                        color="#1677ff"
+                    />
                 </Col>
-                <Col span={5}>
-                    <Card>
-                        <Statistic
-                            title="승인"
-                            value={docCnts?.APPCNT ?? 0}
-                            valueStyle={{color: "#3f8600"}}
-                        />
-                    </Card>
+                <Col span={6}>
+                    <StatCard
+                        icon={ClockCircleOutlined}
+                        label="진행중"
+                        value={docCnts?.INGCNT ?? 0}
+                        bg="#fff7e6"
+                        color="#fa8c16"
+                    />
                 </Col>
-                <Col span={5}>
-                    <Card>
-                        <Statistic
-                            title="반려"
-                            value={docCnts?.REJCNT ?? 0}
-                            valueStyle={{color: "#cf1322"}}
-                        />
-                    </Card>
+                <Col span={6}>
+                    <StatCard
+                        icon={CheckCircleOutlined}
+                        label="승인"
+                        value={docCnts?.APPCNT ?? 0}
+                        bg="#f6ffed"
+                        color="#52c41a"
+                    />
                 </Col>
-                <Col span={5}>
-                    <Card>
-                        <Statistic
-                            title="진행중"
-                            value={docCnts?.INGCNT ?? 0}
-                        />
-                    </Card>
+                <Col span={6}>
+                    <StatCard
+                        icon={CloseCircleOutlined}
+                        label="반려"
+                        value={docCnts?.INGCNT ?? 0}
+                        bg="#fff1f0"
+                        color="#f5222d"
+                    />
                 </Col>
-                <Col span={4}>
-                    <Card>
-                        <Statistic
-                            title="내 할일"
-                            value={myTodoCnt ?? 0}
-                            valueStyle={{color: "#1677ff"}}
-                        />
-                    </Card>
-                </Col>
+
             </Row>
 
             <Space>
@@ -149,9 +204,6 @@ export default function DocListPage() {
                         <Option value="REJ">반려</Option>
                     </Select>
                 )}
-                <Button type="primary" onClick={() => router.push("/appr/docs/write")}>
-                    문서 작성
-                </Button>
             </Space>
 
             <Tabs

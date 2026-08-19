@@ -54,8 +54,8 @@ public class ApprFormController {
 	@Operation(summary = "양식 단건 조회", description = "forId + forVersion 조합으로 특정 버전의 양식 상세정보를 조회")
 	@GetMapping("/{forId}/{forVersion}")
 	public ResponseEntity<ApprFormResponse> getForm(
-			@PathVariable Long forId,
-			@PathVariable Long forVersion
+			@PathVariable("forId") Long forId,
+			@PathVariable("forVersion") Long forVersion
 	){
 		return ResponseEntity.ok(appr.getForm(forId, forVersion));
 	}
@@ -63,7 +63,7 @@ public class ApprFormController {
 	// 특정 양식의 버전 전체 이력 조회
 	@Operation(summary = "양식 버전 이력 조회", description = "특정 forId에 해당하는 모든 버전 목록을 조회")
 	@GetMapping("/{forId}/versions")
-	public ResponseEntity<List<ApprFormResponse>> getFormVersions(@PathVariable Long forId){
+	public ResponseEntity<List<ApprFormResponse>> getFormVersions(@PathVariable("forId") Long forId){
 		return ResponseEntity.ok(appr.getFormVersions(forId));
 	}
 	
@@ -84,8 +84,8 @@ public class ApprFormController {
 	@Operation(summary = "양식 수정", description = "양식을 수정. 제목/내용/스키마중 하나라도 수정될시 버전 증가")
 	@PutMapping("/{forId}/{forVersion}")
 	public ResponseEntity<Void> updateForm(
-			@PathVariable Long forId,
-			@PathVariable Long forVersion,
+			@PathVariable("forId") Long forId,
+			@PathVariable("forVersion") Long forVersion,
 			@Valid
 			@RequestBody ApprFormRequest req
 	){
@@ -97,8 +97,8 @@ public class ApprFormController {
 	@Operation(summary = "양식 삭제", description = "특정 버전의 양식을 소프트 삭제 처리")
 	@DeleteMapping("/{forId}/{forVersion}")
 	public ResponseEntity<Void> deleteForm(
-			@PathVariable Long forId,
-			@PathVariable Long forVersion
+			@PathVariable("forId") Long forId,
+			@PathVariable("forVersion") Long forVersion
 	){
 		appr.deleteForm(forId, forVersion);
 		return ResponseEntity.noContent().build();
@@ -108,9 +108,9 @@ public class ApprFormController {
 	@Operation(summary = "양식 코드 중복 확인", description = "회사 내 양식 코드 중복 확인")
 	@GetMapping("/check-code")
 	public ResponseEntity<CodeCheckResponse> checkCode(
-			@RequestParam String forCode,
-			@RequestParam Long comId,
-			@RequestParam(required = false) Long forId
+			@RequestParam("forCode") String forCode,
+			@RequestParam("comId") Long comId,
+			@RequestParam(value = "forId", required = false) Long forId
 	){
 		return ResponseEntity.ok(appr.checkCode(forCode, comId, forId));
 	}
@@ -118,7 +118,7 @@ public class ApprFormController {
 	// 회사 검색 ( 확인 필요함 )
 	@Operation(summary = "회사 검색", description = "키워드로 회사를 검색함")
 	@GetMapping("/companies")
-	public ResponseEntity<List<ComResponse>> searchCompany(@RequestParam String keyword){
+	public ResponseEntity<List<ComResponse>> searchCompany(@RequestParam("keyword") String keyword){
 		return ResponseEntity.ok(com.getSuggest(keyword));
 	}
 	

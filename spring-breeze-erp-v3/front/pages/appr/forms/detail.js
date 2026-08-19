@@ -2,9 +2,11 @@ import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import { message, Form, Input, Select, Switch,
+import { 
+    message, Form, Input, Select, Switch,
     Button, Descriptions, Tag, Space,
-    Popconfirm, List
+    Popconfirm, Row, Col, Breadcrumb,
+    Typography
  } from "antd";
 import {
     fetchFormDetailRequest,
@@ -15,12 +17,15 @@ import {
 } from "../../../reducers/appr/apprFormReducer";
 import { checkCode, searchCompany } from "../../../api/appr/apprFormApi";
 import SchemaFieldEditor, {validateSchemaFields } from "../../../components/appr/SchemaFieldEditor";
+import { BankOutlined } from "@ant-design/icons";
 
 // react-quill은 SSR이 불가하므로 CSR로 로드
 // () => import("react-quill") -> 처음에 로드 하지않고 필요할때 로드
 // {ssr: false} -> 서버 렌더링 단계에서는 해당 컴포넌트를 렌더링에서 제외함
 const ReactQuill = dynamic( () => import("react-quill"), {ssr: false});
 import "react-quill/dist/quill.snow.css";
+
+const { Title, Text } = Typography;
 
 export default function FormDetailPage() {
 
@@ -85,9 +90,7 @@ export default function FormDetailPage() {
     }, [success]);
 
     useEffect( () => {
-        if (submitError) {
-            message.error(submitError);
-        }
+        if (submitError) message.error(submitError);
     }, [submitError]);
 
     // 페이지 나갈때 submit 상태 초기화
@@ -164,6 +167,23 @@ export default function FormDetailPage() {
         }
 
         dispatch(updateFormRequest({forId, forVersion, data: payload}));
+    };
+
+    const handleCancelEdit = () => {
+        // 편집중 바꾼 값 되돌리기
+        form.setFieldValue({
+            comId: detail.comId,
+            forCode: detail.forCode,
+            forTitle: detail.forTitle,
+            forStatus: detail.forStatus,
+        });
+        setContent(detail.forContent || "");
+        if (detail.forSchema) {
+            try {
+                setSchemaFields(JSON.parse(detail.forSchema).fields || []);
+            } catch (e) {}
+        }
+        setEditMode(false);
     }
 
     // 양식 삭제
@@ -185,141 +205,232 @@ export default function FormDetailPage() {
 
     return(    
         <div style={{padding: 24, maxWidth: 720}}>
-            <Space style={{marginBottom: 16}}>
-                <Button onClick={() => router.push("/appr/forms")}>
-                    목록으로
-                </Button>
-                {!editMode && (
-                    <Button type="primary" onClick={() => setEditMode(true)}>
-                        수정
-                    </Button>
-                )}
-                <Popconfirm title="삭제하시겠습니까?" onConfirm={handleDelete}>
-                    <Button danger>삭제</Button>
-                </Popconfirm>
-            </Space>
+            <Breadcrumb>
+                <Breadcrumb.Item
+                    onClick={() => router.push("/appr/forms")}
+                    style={{cursor: "pointer"}}
+                >전자 결재</Breadcrumb.Item>
+                <Breadcrumb.Item
+                    onClick={() => router.push("/appr/forms")}
+                    style={{cursor: "pointer"}}
+                >양식 관리</Breadcrumb.Item>
+                <Breadcrumb.Item>양식 상세</Breadcrumb.Item>
+            </Breadcrumb>
+
+            <div style={{marginBottom: 20}}>
+                <Title level={3} style={{marginBottom: 4}}>결재 양식 상세조회</Title>
+                <Text type="secondary">결재 양식의 상세 정보를 확인합니다.</Text>
+            </div>
             
-            {!editMode ? (<>
-                <Descriptions bordered column={1}>
-                    <Descriptions.Item label="회사">{detail.comName}</Descriptions.Item>
-                    <Descriptions.Item label="코드">{detail.forCode}</Descriptions.Item>
-                    <Descriptions.Item label="제목">{detail.forTitle}</Descriptions.Item>
-                    <Descriptions.Item label="버전">{detail.forVersion}</Descriptions.Item>
-                    <Descriptions.Item label="상태">
-                        <Tag color={detail.forStatus ? "green" : "default"}>
-                            {detail.forStatus ? "활성" : "비활성"}
-                        </Tag>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="등록일">{detail.createdAt}</Descriptions.Item>
-                </Descriptions>
+            <Row gutter={[24, 16]}>
+                <Col xs={24} md={16}>
+                    {/*
+                        editMode 여부와 무관하게 폼 마크업은 하나만 존재함.
+                        disabled={!editMode}가 Input/Select/Switch에 자동 전파되어
+                        뷰 모드일땐 회색 비활성 텍스트로, 편집모드일땐 그대로 입력 가능하게 렌더링됨.
+                        (ReactQuill/SchemaFieldEditor는 자동전파 대상이 아니라 readOnly를 직접 연결)
+                    */}
+                    <Form
+                        form={form}
+                        layout="vertical"
+                        onFinish={handleUpdate}
+                        
+                    >
+                        <Form.Item
+                            name="comId"
+                            label="회사"
+                            rules={[{required: true, message: "회사를 선택해주세요."}]}
+                        >
+                            <Select
+                                showSearch
+                                placeholder="회사명 또는 사업자번호 검색"
+                                filterOption={false}
+                                suffixIcon={<BankOutlined/>}
+                                onSearch={handleCompanySearch}
+                                options={companyOptions}
+                                disabled={!editMode}
+                            />
+                        </Form.Item>
 
-                <div style={{marginTop: 16}}>
-                    <h4>내용</h4>
-                    {detail.forContent ? (
-                        <div dangerouslySetInnerHTML={{__html: detail.forContent}}/>
-                    ) : (
-                        <SchemaFieldEditor
-                            fields={schemaFields}
-                            onChange={() => {}}
-                            readOnly
-                        />
-                    )}
-                </div>
-
-                <div style={{marginTop: 24}}>
-                    <h4>버전 이력</h4>
-                    <List
-                        loading={versionsLoading}
-                        size="small"
-                        bordered
-                        dataSource={versions}
-                        renderItem={(v) => (
-                            <List.Item
-                                actions={[
-                                    <a
-                                    key="view"
-                                    onClick={() => router.push(`/appr/forms/${v.forId}/${v.forVersion}`)}
+                        <Form.Item label="양식 코드" required>
+                            <Input.Group compact>
+                                <Form.Item
+                                    name="forCode"
+                                    noStyle
+                                    rules={[{required: true, message: "양식 코드를 입력해주세요."}]}
                                 >
-                                    보기
-                                </a>,
-                                ]}
-                            >
-                                v{v.forVersion} - {v.forTitle} ({v.createdAt})
-                            </List.Item>
-                        )}
-                    />
-                </div>
-                
-            </>) : (<>
-                <Form form={form} layout="vertical" onFinish={handleUpdate}>
-                    <Form.Item
-                        name="comId"
-                        label="회사"
-                        rules={[{required: true, message: "회사를 선택해주세요."}]}
-                    >
-                        <Select
-                            showSearch
-                            placeholder="회사명을 검색하세요."
-                            filterOption={false}
-                            onSearch={handleCompanySearch}
-                            options={companyOptions}
-                        />
-                    </Form.Item>
+                                    <Input
+                                        style={{width: "calc(100% - 100px)"}}
+                                        disabled={!editMode}
+                                    />
+                                </Form.Item>
+                                <Button
+                                    style={{width: 100}}
+                                    onClick={handleCodeCheck}
+                                    disabled={!editMode}
+                                >
+                                    중복 확인
+                                </Button>
+                            </Input.Group>
+                        </Form.Item>
 
-                    <Form.Item label="양식 코드" required>
-                        <Input.Group compact>
-                            <Form.Item
-                                name="forCode"
-                                noStyle
-                                rules={[{required: true, message: "양식 코드를 입력해주세요."}]}
-                            >
-                                <Input style={{width: "calc(100% - 100px)"}}/>
+                        <Form.Item
+                            name="forTitle"
+                            label="양식 제목"
+                            rules={[{required: true, message: "양식 제목을 입력해주세요."}]}
+                        >
+                            <Input
+                                disabled={!editMode}
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="forStatus"
+                            label="활성화 여부"
+                            valuePropName="checked"
+                        >
+                            <Switch
+                                disabled={!editMode}
+                            />
+                        </Form.Item>
+                        {isSchemaMode ? (
+                            <Form.Item label="양식 필드 구성">
+                                <SchemaFieldEditor
+                                    fields={schemaFields}
+                                    onChange={setSchemaFields}
+                                    readOnly={!editMode}
+                                />
                             </Form.Item>
-                            <Button style={{width: 100}} onClick={handleCodeCheck}>
-                                중복확인
-                            </Button>
-                        </Input.Group>
-                    </Form.Item>
+                        ) : (
+                            <Form.Item label="양식 내용">
+                                <ReactQuill
+                                    theme="snow"
+                                    value={content}
+                                    onChange={setContent}
+                                    readOnly={!editMode}
+                                />
+                            </Form.Item>
+                        )}
 
-                    <Form.Item
-                        name="forTitle"
-                        label="양식 제목"
-                        rules={[{required: true, message: "양식 제목을 입력해주세요."}]}
-                    >
-                        <Input />
-                    </Form.Item>
+                        <div 
+                            style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                flexWrap: "warp",
+                                gap: 8,
+                                marginTop: 8
+                            }}
+                        >
+                        {editMode ? (
+                            <Space wrap>
+                                <Button onClick={handleCancelEdit}>취소</Button>
+                                <Button type="primary" htmlType="submit" loading={submitting}>
+                                    저장
+                                </Button>
+                            </Space>
+                        ) : (
+                            <Space wrap>
+                                <Button onClick={() => router.push("/appr/forms")}>목록으로</Button>
+                                <Popconfirm title="삭제하시겠습니까?" onConfirm={handleDelete}>
+                                    <Button danger>삭제</Button>
+                                </Popconfirm>
+                                <Button type="primary" onClick={() => setEditMode(true)}>
+                                    수정
+                                </Button>
+                            </Space>
+                        )}
+                        </div>
+                    </Form>
+                </Col>
 
-                    <Form.Item name="forStatus" label="활성화" valuePropName="checked">
-                        <Switch />
-                    </Form.Item>
+                <Col xs={24} md={8}>
+                    <div style={{background: "#fafafa", borderRadius: 8, padding: 16, marginBottom: 16}}>
+                        <div style={{fontWeight: 600, marginBottom: 12}}>양식 상세 정보</div>
+                        <Descriptions4Line label="양식 ID" value={detail.forId}/>
+                        <Descriptions4Line label="버전" value={detail.forVersion}/>
+                        <Descriptions4Line label="생성일" value={detail.createdAt}/>
+                        <Descriptions4Line label="수정일" value={detail.updatedAt}/>
+                        <div style={{display: "flex", justifyContent: "space-between", padding: "6px 0"}}>
+                            <span style={{color: "#888", fontSize: 13}}>사용 여부</span>
+                            <Tag color={detail.forStatus ? "green" : "default"}>
+                                {detail.forStatus ? "활성화" : "비활성화"}
+                            </Tag>
+                        </div>
+                    </div>
 
-                    {isSchemaMode ? (
-                        <Form.Item label="양식 필드 구성">
-                            <SchemaFieldEditor
-                                fields={schemaFields}
-                                onChange={setSchemaFields}
-                            />
-                        </Form.Item>
-                    ) : (
-                        <Form.Item label="내용">
-                            <ReactQuill
-                                theme="snow"
-                                value={content}
-                                onChange={setContent}
-                            />
-                        </Form.Item>
-                    )}
+                    <div style={{background: "#fafafa", borderRadius: 8, padding: 16}}>
+                        <div style={{fontWeight: 600, marginBottom: 12}}>버전 이력</div>
+                        {versionsLoading ? (
+                            <div style={{textAlign: "center", padding: "20px 0", color: "#999", fontSize: 13}}>
+                                불러오는 중...
+                            </div>
+                        ) : versions.length === 0 ? (
+                            <div style={{textAlign: "center", padding: "20px 0", color: "#999", fontSize: 13}}>
+                                버전 이력이 없습니다.
+                            </div>
+                        ) : (
+                            versions.map((v) => {
+                                // 지금 보고있는 버전인지
+                                const isCurrent = String(v.forVersion) === String(forVersion);
+                                const isDeleted = v.deleted;
 
-                    <Form.Item>
-                        <Space>
-                            <Button type="primary" htmlType="submit" loading={submitting}>
-                                저장
-                            </Button>
-                            <Button onClick={() => setEditMode(false)}>취소</Button>
-                        </Space>
-                    </Form.Item>
-                </Form>
-            </>)}
+                                return (
+                                    <div
+                                        key={v.forVersion}
+                                        onClick={() => {
+                                            if (!isCurrent && !isDeleted) {
+                                                router.push(`/appr/forms/detail?forId=${v.forId}&forVersion=${v.forVersion}`);
+                                            }
+                                        }}
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            padding: "10px 12px",
+                                            marginBottom: 6,
+                                            borderRadius: 6,
+                                            background: isDeleted ? "#fafafa" : isCurrent ? "#e6f4ff" : "#fff",
+                                            border: isDeleted ? "1px solid #eee" : isCurrent ? "1px solid #91caff" : "1px solid #eee",
+                                            cursor: isCurrent || isDeleted ? "default" : "pointer",
+                                        }}
+                                    >
+                                        <div>
+                                            <div style={{fontWeight: 600, fontSize: 13}}>
+                                                v{v.forVersion}
+                                                {isCurrent && !isDeleted && (
+                                                    <Tag color="blue" style={{marginLeft: 6}}>
+                                                        현재 보는 중
+                                                    </Tag>
+                                                )}
+                                            </div>
+                                            <div style={{fontSize: 12, color: "#999", marginTop: 2}}>
+                                                {v.createdAt}
+                                            </div>
+                                        </div>
+                                        {isDeleted ? (
+                                            <Tag color="red" style={{margin: 0}}>삭제됨</Tag>
+                                        ) : (
+                                            <Tag color={v.forStatus ? "green" : "default"} style={{margin: 0}}>
+                                                {v.forStatus ? "활성화" : "비활성화"}
+                                            </Tag>
+                                        )}
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </Col>
+            </Row>
+        </div>
+    );
+}
+
+// 사이드 패널 라벨-값 한 줄용 작은 헬퍼 컴포넌트
+function Descriptions4Line({label, value}) {
+    return (
+        <div style={{display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #eee"}}>
+            <span style={{color: "#888", fontSize: 13}}>{label}</span>
+            <span style={{fontSize: 13}}>{value}</span>
         </div>
     );
 }

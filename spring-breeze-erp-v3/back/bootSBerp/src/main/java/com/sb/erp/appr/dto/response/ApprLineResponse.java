@@ -12,6 +12,7 @@ public class ApprLineResponse {
 	private Long docId;
 	private Long empId;
 	private String empName;
+	private String empStatus;
 	private String posName;
 	private int posOrder;
 	private int linOrder;
