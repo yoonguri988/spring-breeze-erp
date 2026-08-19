@@ -98,13 +98,13 @@ const NAV = [
     items: [
       {
         page: "apprlistform",
-        href: "/appr/list_form",
+        href: "/appr/forms",
         icon: "bi-sliders",
         role: "ROOT",
       },
       {
         page: "apprlistdoc",
-        href: "/appr/list_doc",
+        href: "/appr/docs",
         icon: "bi-pencil-square",
       },
       {
@@ -194,21 +194,23 @@ export default function Sidebar() {
               .filter((it) => canShow(it.role, user))
               .map((it) => {
                 const tip = t(`items.${it.page}.tip`);
-                const label = t(`items.${it.page}.label`, { defaultValue: tip });
-                
+                const label = t(`items.${it.page}.label`, {
+                  defaultValue: tip,
+                });
+
                 return (
-                <Link key={it.page} href={it.href} passHref>
-                  <a
-                    className={
-                      "sb-nav__item" + (isActive(it.href) ? " active" : "")
-                    }
-                    data-page={it.page}
-                    data-tip={tip}
-                  >
-                    <i className={"bi " + it.icon} />
-                    <span className="sb-nav__label">{label}</span>
-                  </a>
-                </Link>
+                  <Link key={it.page} href={it.href} passHref>
+                    <a
+                      className={
+                        "sb-nav__item" + (isActive(it.href) ? " active" : "")
+                      }
+                      data-page={it.page}
+                      data-tip={tip}
+                    >
+                      <i className={"bi " + it.icon} />
+                      <span className="sb-nav__label">{label}</span>
+                    </a>
+                  </Link>
                 );
               })}
           </React.Fragment>
