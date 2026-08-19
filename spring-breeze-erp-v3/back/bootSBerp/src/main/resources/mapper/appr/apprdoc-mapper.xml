@@ -15,6 +15,25 @@
 		<result property="linStatus" column="lin_status"/>
 	</resultMap>
 
+	<resultMap id="apprDocDetailMap" type="ApprDocResponse">
+	    <id property="docId" column="doc_id"/>
+	    <result property="forId" column="for_id"/>
+	    <result property="forVersion" column="for_version"/>
+	    <result property="forTitle" column="for_title"/>
+	    <result property="forSchema" column="for_schema"/>
+	    <result property="forContent" column="for_content"/>
+	    <result property="empId" column="emp_id"/>
+	    <result property="empName" column="emp_name"/>
+	    <result property="comId" column="com_id"/>
+	    <result property="docTitle" column="doc_title"/>
+	    <result property="docContent" column="doc_content"/>
+	    <result property="docStatus" column="doc_status"/>
+	    <result property="important" column="is_important"/>
+	    <result property="docRevision" column="doc_revision"/>
+	    <result property="createdAt" column="created_at"/>
+	    <result property="updatedAt" column="updated_at"/>
+	</resultMap>
+		
 	<!-- 결재 문서 작성하려는 사용자의 회사 양식 가져오기 / 활성화된 양식만 -->
 	<select id="findForm" resultType="ApprFormResponse">
 		select * 
@@ -65,14 +84,16 @@
 			for_version,
 			com_id,
 			doc_title,
-			doc_content
+			doc_content,
+			is_important
 		) values (
 			#{empId},
 			#{req.forId},
 			#{req.forVersion},
 			#{comId},
 			#{req.docTitle},
-			#{req.docContent}
+			#{req.docContent},
+			#{req.important}
 		)
 	</insert>
 	
@@ -235,6 +256,7 @@
 		select
 			e.emp_id,
 			e.emp_name,
+			e.emp_status,
 			p.pos_name,
 			p.pos_order
 		from
@@ -244,6 +266,17 @@
 		where
 			e.dept_id = #{deptId}
 			and e.emp_status != '퇴직'
+			and e.emp_id != #{empId}
+			and p.pos_order > (
+				select
+					pp.pos_order
+				from
+					employee ee
+				join
+					emp_position pp on ee.pos_id = pp.pos_id
+				where
+					ee.emp_id = #{empId}
+			)	
 	</select>
 	
 	<!-- 결재선 지정 가능 인원수 / 사용자 본인 빼고, 본인보다 직급 높은사람들 -->
@@ -256,6 +289,7 @@
 		where
 			e.dept_id = #{deptId}
 			and e.emp_id != #{empId}
+			and e.emp_status != '퇴직'
 			and p.pos_order > (
 				select pp.pos_order
 				from employee ee
@@ -265,7 +299,7 @@
 	</select>
 	
 	<!-- 문서 상세 조회 -->
-	<select id="selectDocDetail" resultType="ApprDocResponse">
+	<select id="selectDocDetail" resultMap="apprDocDetailMap">
 		select
 			d.doc_id,
 			d.doc_title,
@@ -274,6 +308,11 @@
 			d.is_important,
 			d.created_at,
 			d.emp_id,
+			f.for_id,
+			f.for_version,
+			f.for_title,
+			f.for_schema,
+			f.for_content,
 			(select 
 				emp_name
 			 from
@@ -281,6 +320,8 @@
 			 where emp_id = d.emp_id) as emp_name
 		from
 			appr_doc d
+		inner join
+			appr_form f on d.for_id = f.for_id and d.for_version = f.for_version
 		where
 			doc_id = #{docId}
 	</select>

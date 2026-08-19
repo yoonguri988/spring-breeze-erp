@@ -3,14 +3,13 @@ import { useDispatch, useSelector} from "react-redux";
 import { useRouter } from "next/router";
 import {
     Table, Input, Select, Button, Space, Tag, message,
-    Badge, Spin, Breadcrumb, Typography
+    Badge, Spin, Card
 } from "antd";
-import { SearchOutlined, BankOutlined } from "@ant-design/icons";
+import { SearchOutlined, BankOutlined, PlusOutlined } from "@ant-design/icons";
 import { fetchFormListRequest, deleteFormRequest } from "../../../reducers/appr/apprFormReducer";
 import { searchCompany } from "../../../api/appr/apprFormApi";
 
 const { Option } = Select;
-const { Title, Text } = Typography;
 
 export default function FormListPage() {
     const router = useRouter();
@@ -163,79 +162,79 @@ export default function FormListPage() {
     ];
 
     return (
-        <div style={{padding: 24}}>
-            <Breadcrumb style={{marginBottom: 8}}>
-                <Breadcrumb.Item>전자결재</Breadcrumb.Item>
-                <Breadcrumb.Item>양식 관리</Breadcrumb.Item>
-            </Breadcrumb>
-
-            <div style={{display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20}}>
-                <div>
-                    <Title level={3} style={{marginBottom: 4}}>결재 양식 관리</Title>
-                    <Text type="secondary">시스템 내 결재 양식을 조회하고 관리합니다.</Text>
+        <div className="sb-page">
+            <div className="sb-page-head">
+                <div className="sb-page-head__txt">
+                    <div className="sb-breadcrumb">
+                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>전자결재</a>
+                        <i className="bi bi-chevron-right" />
+                        <span>양식 관리</span>
+                    </div>
+                    <h1>결재 양식 관리</h1>
+                    <p>시스템 내 결재 양식을 조회하고 관리합니다.</p>
                 </div>
-                <Button type="primary" onClick={() => router.push("/appr/forms/write")}>
-                    양식 등록
-                </Button>
+                <div className="sb-page-head__actions">
+                    <Button type="primary" icon={<PlusOutlined/>} onClick={() => router.push("/appr/forms/write")}>
+                        양식 등록
+                    </Button>
+                </div>
             </div>
 
-            <div style={{background: "#fafafa", padding: 20, borderRadius: 8, marginBottom: 16}}>
-            <Space size={16} wrap align="start">
-                <div>
-                    <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>회사</div>
-                    <Select
-                        showSearch
-                        placeholder="회사명 또는 사업자번호 검색"
-                        style={{width: 240}}
-                        value={comIdDraft}
-                        defaultActiveFirstOption={false}
-                        filterOption={false} // 서버 검색결과를 그대로 사용
-                        suffixIcon={<BankOutlined/>}
-                        notFoundContent={companySearching ? <Spin size="small" /> : "검색어를 입력해주세요"}
-                        onSearch={handleCompanySearch}
-                        onChange={handleCompanySelect}
-                        onClear={() => {
-                            setComIdDraft(undefined); 
-                            setComNameDraft(undefined);
-                        }}
-                        allowClear
-                    >
-                        {companyOptions.map((c) => (
-                            <Option key={c.comId} value={c.comId}>
-                                {c.comName} ({c.bizNo})
-                            </Option>
-                        ))}
-                    </Select>
-                </div>
-                
-                <div>
-                    <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>키워드 검색</div>
-                    <Input
-                        placeholder="양식 코드/제목 검색"
-                        style={{width: 220}}
-                        value={keywordDraft}
-                        onChange={(e) => setKeywordDraft(e.target.value)}
-                        onPressEnter={handleSearch}
-                        allowClear
-                    />
-                </div>
+            <Card>
+                <div style={{display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "flex-end"}}>
+                    <div>
+                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>회사</div>
+                        <Select
+                            showSearch
+                            placeholder="회사명 또는 사업자번호 검색"
+                            style={{width: 240}}
+                            value={comIdDraft}
+                            defaultActiveFirstOption={false}
+                            filterOption={false} // 서버 검색결과를 그대로 사용
+                            suffixIcon={<BankOutlined/>}
+                            notFoundContent={companySearching ? <Spin size="small" /> : "검색어를 입력해주세요"}
+                            onSearch={handleCompanySearch}
+                            onChange={handleCompanySelect}
+                            onClear={() => {
+                                setComIdDraft(undefined); 
+                                setComNameDraft(undefined);
+                            }}
+                            allowClear
+                        >
+                            {companyOptions.map((c) => (
+                                <Option key={c.comId} value={c.comId}>
+                                    {c.comName} ({c.bizNo})
+                                </Option>
+                            ))}
+                        </Select>
+                    </div>
+                    
+                    <div>
+                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>키워드 검색</div>
+                        <Input
+                            placeholder="양식 코드/제목 검색"
+                            style={{width: 220}}
+                            value={keywordDraft}
+                            onChange={(e) => setKeywordDraft(e.target.value)}
+                            onPressEnter={handleSearch}
+                            allowClear
+                        />
+                    </div>
 
-                <div>
-                    <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>활성화 여부</div>
-                    <Select
-                        placeholder="전체"
-                        style={{width: 140}}
-                        value={statusDraft}
-                        onChange={(value) => setStatusDraft(value)}
-                        allowClear
-                    >
-                        <Option value={true}>활성</Option>
-                        <Option value={false}>비활성</Option>
-                    </Select>
-                </div>
+                    <div>
+                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>활성화 여부</div>
+                        <Select
+                            placeholder="전체"
+                            style={{width: 140}}
+                            value={statusDraft}
+                            onChange={(value) => setStatusDraft(value)}
+                            allowClear
+                        >
+                            <Option value={true}>활성</Option>
+                            <Option value={false}>비활성</Option>
+                        </Select>
+                    </div>
 
-                <div>
-                    <div style={{marginBottom: 6, fontSize: 13, color: "#666", visibility: "hidden"}}>검색</div>
                     <Button
                         type="primary"
                         icon={<SearchOutlined />}
@@ -245,40 +244,39 @@ export default function FormListPage() {
                         검색
                     </Button>
                 </div>
-            </Space>
-        </div>
-            {/*
-                react는 리스트를 렌더링할때 항목을 구분할 고유 key가 필요 
-                ${record.forId}-${record.ForVersion}의 경우 복합키이기 때문에
-                3-1, 3-2 처럼 문자열하나로 만들어서 고유키를 만들어줌
-                columns -> 위에 구현한 설계도
-                dataSource -> 채워넣을 데이터
-                current -> 지금 몇 페이지를 보고있나
-                    page는 서버가 알려준 페이지 currentPage는 로컬로 관리하는 값
-                    store 값이 있으면 그걸 쓰고 없으면 로컬 값 사용
-                pageSize -> 한페이지에 몇개씩 보여줄지
-                total -> 전체 데이터 개수
-                onChange -> 사용자가 페이지 번호/다음 버튼을 클릭했을때 호출
-                    클릭한 페이지 번호를 받아서 setCurrentPage(p)로 로컬 상태를 갱신
-            */}
-            {!appliedFilters.comId ? (
-                <div style={{padding: "80px 0", textAlign: "center", color: "#999"}}>
-                    회사를 검색해서 선택한 뒤 검색 버튼을 눌러주세요.
-                </div>
-            ) : (
-                <Table
-                    rowKey={(record) => `${record.forId}-${record.forVersion}`}
-                    columns={columns}
-                    dataSource={list}
-                    loading={loading}
-                    pagination={{
-                        current: page || currentPage,
-                        pageSize: pageSize || 10,
-                        total: totalCount,
-                        onChange: (p) => setCurrentPage(p),
-                    }}
-                />
-            )}
+                {/*
+                    react는 리스트를 렌더링할때 항목을 구분할 고유 key가 필요 
+                    ${record.forId}-${record.ForVersion}의 경우 복합키이기 때문에
+                    3-1, 3-2 처럼 문자열하나로 만들어서 고유키를 만들어줌
+                    columns -> 위에 구현한 설계도
+                    dataSource -> 채워넣을 데이터
+                    current -> 지금 몇 페이지를 보고있나
+                        page는 서버가 알려준 페이지 currentPage는 로컬로 관리하는 값
+                        store 값이 있으면 그걸 쓰고 없으면 로컬 값 사용
+                    pageSize -> 한페이지에 몇개씩 보여줄지
+                    total -> 전체 데이터 개수
+                    onChange -> 사용자가 페이지 번호/다음 버튼을 클릭했을때 호출
+                        클릭한 페이지 번호를 받아서 setCurrentPage(p)로 로컬 상태를 갱신
+                */}
+                {!appliedFilters.comId ? (
+                    <div style={{padding: "80px 0", textAlign: "center", color: "#999"}}>
+                        회사를 검색해서 선택한 뒤 검색 버튼을 눌러주세요.
+                    </div>
+                ) : (
+                    <Table
+                        rowKey={(record) => `${record.forId}-${record.forVersion}`}
+                        columns={columns}
+                        dataSource={list}
+                        loading={loading}
+                        pagination={{
+                            current: page || currentPage,
+                            pageSize: pageSize || 10,
+                            total: totalCount,
+                            onChange: (p) => setCurrentPage(p),
+                        }}
+                    />
+                )}
+            </Card>
         </div>
     );
 }

@@ -212,8 +212,11 @@ public class ApprDocController {
 	// 특정 부서 소속 사원 목록
 	@Operation(summary = "부서 소속 사원 목록 조회", description = "특정 부서에 소속된 사원 목록을 조회합니다.")
 	@GetMapping("/getDeptEmps")
-	public ResponseEntity<List<ApprLineResponse>> getDeptEmps(@RequestParam("deptId") Long deptId) {
-		return ResponseEntity.ok(service.selectDeptEmpsForLines(deptId));
+	public ResponseEntity<List<ApprLineResponse>> getDeptEmps(
+			@RequestParam("deptId") Long deptId,
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	) {
+		return ResponseEntity.ok(service.selectDeptEmpsForLines(deptId, principal.getEmpId()));
 	}
 
 	//////////////////////////// 결재선 파트 ///////////////////////////////

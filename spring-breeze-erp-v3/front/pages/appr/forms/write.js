@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { 
     message, Radio, Form, Input, Select, Switch, Button,
-    Breadcrumb, Typography, Space, Row, Col
+    Space, Row, Col
 } from "antd";
 import { BankOutlined, CheckCircleFilled, CloseCircleFilled } from "@ant-design/icons";
 import { insertFormRequest, resetFormState } from "../../../reducers/appr/apprFormReducer";
@@ -17,8 +17,6 @@ import apprFormTemplates from "../../../constants/apprFormTemplates";
 // {ssr: false} -> 서버 렌더링 단계에서는 해당 컴포넌트를 렌더링에서 제외함
 const ReactQuill = dynamic( () => import("react-quill"), {ssr: false});
 import "react-quill/dist/quill.snow.css";
-
-const { Title, Text } = Typography;
 
 export default function FormWritePage() {
 
@@ -189,22 +187,22 @@ export default function FormWritePage() {
     }
 
     return (
-        <div style={{padding: "24px 16px", maxWidth: 760, margin: "0 auto", width: "100%", boxSizing: "border-box"}}>
-            <Breadcrumb style={{marginBottom: 8}}>
-                <Breadcrumb.Item
-                    onClick={() => router.push("/appr/forms")}
-                    style={{cursor: "pointer"}}
-                >전자결재</Breadcrumb.Item>
-                <Breadcrumb.Item>양식 관리</Breadcrumb.Item>
-                <Breadcrumb.Item>양식 작성</Breadcrumb.Item>
-            </Breadcrumb>
-
-            <div style={{display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20}}>
-                <div>
-                    <Title level={3} style={{marginBottom: 4}}>결재 양식 작성</Title>
-                    <Text type="secondary">새로운 결재 양식을 등록합니다.</Text>
+        <div className="sb-page" style={{maxWidth: 760, margin: "0 auto", width: "100%", boxSizing: "border-box"}}>
+            <div className="sb-page-head">
+                <div className="sb-page-head__txt">
+                    <div className="sb-breadcrumb">
+                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>전자결재</a>
+                        <i className="bi bi-chevron-right"/>
+                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>양식 관리</a>
+                        <i className="bi bi-chevron-right"/>
+                        <span>양식 작성</span>
+                    </div>
+                    <h1>결재 양식 작성</h1>
+                    <p>새로운 결재 양식을 등록합니다.</p>
                 </div>
-                <Button onClick={() => router.push("/appr/forms")}>목록으로</Button>
+                <div className="sb-page-head__actions">
+                    <Button onClick={() => router.push("/appr/forms")}>목록으로</Button>
+                </div>
             </div>
 
             <Form

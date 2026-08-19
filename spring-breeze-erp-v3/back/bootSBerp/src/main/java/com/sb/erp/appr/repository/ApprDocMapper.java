@@ -34,6 +34,6 @@ public interface ApprDocMapper {
 	// 결재선 관련 파트
 	public List<ApprLineResponse> approversByEmpId(@Param("empId") Long empId);
 	public int updateDocStatus(@Param("docId") Long docId, @Param("docStatus") String docStatus);
-	public List<ApprLineResponse> selectDeptEmpsForLines(@Param("deptId") Long deptId);
+	public List<ApprLineResponse> selectDeptEmpsForLines(@Param("deptId") Long deptId, @Param("empId") Long empId);
 	public int cntApprovers(@Param("deptId") Long deptId, @Param("empId") Long empId);
 }

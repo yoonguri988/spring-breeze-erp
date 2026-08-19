@@ -32,7 +32,7 @@ public interface ApprDocService {
 	public List<ApprLineResponse> approversByEmpId(Long empId);
 	public List<ApprLineResponse> selectLinesByDocId(Long docId);
 	public void processLine(Long docId, Long empId, String action);
-	public List<ApprLineResponse> selectDeptEmpsForLines(Long deptId);
+	public List<ApprLineResponse> selectDeptEmpsForLines(Long deptId, Long empId);
 	public List<DeptResponse> cntApprovers(Long deptId, Long empId);
 	
 	// ========= 페이징 ============

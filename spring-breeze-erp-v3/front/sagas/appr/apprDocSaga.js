@@ -1,4 +1,4 @@
-import { all, call, put, takeLatest } from "redux-saga/effects";
+import { all, call, put, takeLatest, takeLeading } from "redux-saga/effects";
 import api from "../../api/axios";
 import {
     fetchWritableFormsRequest, fetchWritableFormsSuccess, fetchWritableFormsFailure,
@@ -70,7 +70,9 @@ export function* writeDoc(action) {
 }
 
 function* watchWriteDoc() {
-    yield takeLatest(writeDocRequest.type, writeDoc);
+    // Latest -> 최신 요청 결과만 필요한경우
+    // Leading -> 한번만 실행되어야 하는경우
+    yield takeLeading(writeDocRequest.type, writeDoc);
 }
 
 // 문서 목록 조회 (토큰 empid값)
@@ -127,7 +129,7 @@ export function* approveDoc(action) {
 }
 
 function* watchApproveDoc() {
-    yield takeLatest(approveDocRequest.type, approveDoc);
+    yield takeLeading(approveDocRequest.type, approveDoc);
 }
 
 // 결재 반려 (토큰 empId)
@@ -146,7 +148,7 @@ export function* rejectDoc(action) {
 }
 
 function* watchRejectDoc() {
-    yield takeLatest(rejectDocRequest.type, rejectDoc);
+    yield takeLeading(rejectDocRequest.type, rejectDoc);
 }
 
 // 기안자 상사 목록 조회 (토큰 empId)

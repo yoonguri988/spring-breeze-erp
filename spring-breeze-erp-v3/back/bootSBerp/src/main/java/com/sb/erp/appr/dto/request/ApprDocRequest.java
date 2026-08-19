@@ -24,6 +24,8 @@ public class ApprDocRequest {
 	@NotBlank(message = "문서 내용을 입력해주세요.")
 	private String docContent;
 	
+	private boolean isImportant;
+	
 	// 결재선 순서대로 emp id 나열
 	@NotEmpty(message = "결재선을 문서 타입에 맞게 지정해주세요.")
 	private List<Long> approverEmpIds;

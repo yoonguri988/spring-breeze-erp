@@ -155,8 +155,8 @@ public class ApprDocServiceImpl implements ApprDocService{
 
 	// 결재선 지정용 - 부서 내 직원 목록
 	@Override
-	public List<ApprLineResponse> selectDeptEmpsForLines(Long deptId) {
-		return dao.selectDeptEmpsForLines(deptId);
+	public List<ApprLineResponse> selectDeptEmpsForLines(Long deptId, Long empId) {
+		return dao.selectDeptEmpsForLines(deptId, empId);
 	}
 
 	// 결재선 지정 가능 인원수
