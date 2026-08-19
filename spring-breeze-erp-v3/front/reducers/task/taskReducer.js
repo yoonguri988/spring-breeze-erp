@@ -11,7 +11,8 @@ const initialState = {
     ganttTasks:[],
     loading:false,
     error:null,
-    success:false
+    success:false,
+    deleteSuccess:false
 }
 const taskReducer = createSlice({
     name:"task",
@@ -113,17 +114,17 @@ const taskReducer = createSlice({
         deleteTaskRequest:(state)=>{
             state.loading=true;
             state.error=null;
-            state.success=false;
+            state.deleteSuccess=false;
         },
         deleteTaskSuccess:(state,action)=>{
             state.loading=false;
             state.tasks=state.tasks.filter(task=>task.taskId!==action.payload);
-            state.success=true;
+            state.deleteSuccess=true;
         },
         deleteTaskFailure:(state,action)=>{
             state.loading=false;
             state.error=action.payload;
-            state.success=false;
+            state.deleteSuccess=false;
         },
 
         // 내 태스크 목록
@@ -161,6 +162,7 @@ const taskReducer = createSlice({
             state.loading=false;
             state.error=null;
             state.success=false;
+            state.deleteSuccess=false;
         },
     }
 });

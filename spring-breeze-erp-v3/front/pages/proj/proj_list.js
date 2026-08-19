@@ -124,17 +124,6 @@ export default function ProjListPage() {
   // 기간(날짜 범위) 변경
   const handleDateChange = (dates) => {
     setDateRange(dates);
-
-    if (!dates || dates.length !== 2) {
-      updateQuery({ startDate: "", endDate: "", pstartno: 1 });
-      return;
-    }
-
-    updateQuery({
-      startDate: dates[0].format("YYYY-MM-DD"),
-      endDate: dates[1].format("YYYY-MM-DD"),
-      pstartno: 1,
-    });
   };
 
   // 페이지 번호 변경
@@ -295,8 +284,19 @@ export default function ProjListPage() {
               format="YYYY-MM-DD"
             />
 
-            <Button icon={<SearchOutlined />} onClick={() => handleSearch(keyword)}>
-              조회
+            <Button
+              icon={<SearchOutlined />}
+              onClick={() => {
+              updateQuery({
+              keyword,
+              proStatus,
+              startDate: dateRange?.[0] ? dateRange[0].format("YYYY-MM-DD") : "",
+              endDate: dateRange?.[1] ? dateRange[1].format("YYYY-MM-DD") : "",
+              pstartno: 1,
+              });
+              }}
+              >
+            조회
             </Button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 // pages/notice/detail.js
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -11,8 +11,7 @@ import {
   deleteNoticeRequest,
   resetNoticeState,
 } from "../../reducers/notice/noticeReducer";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+import api from "../../api/axios";
 
 export default function NoticeDetailPage() {
   const router = useRouter();
@@ -22,6 +21,8 @@ export default function NoticeDetailPage() {
   const { currentNotice: notice, loading, error, deleteSuccess } = useSelector(
     (state) => state.notice
   );
+
+  const [fileObjUrl, setFileObjUrl] = useState(null);
 
   useEffect(() => {
     if (bno) {
@@ -46,39 +47,95 @@ export default function NoticeDetailPage() {
     }
   }, [error]);
 
+  const [fileName, fileType] = notice?.bfile ? notice.bfile.split("|") : [null, null];
+  const attExt = fileName ? fileName.split(".").pop().toLowerCase() : null;
+  const isImage = fileType?.startsWith("image/");
+
+  // 첨부파일을 axios로 받아와서(JWT 인증 헤더 포함) object URL로 변환
+  useEffect(() => {
+    if (!fileName || !bno) {
+      setFileObjUrl(null);
+      return;
+    }
+
+    let objectUrl;
+    api
+      .get(`/api/notice/${bno}/file`, { responseType: "blob" })
+      .then((res) => {
+        objectUrl = URL.createObjectURL(res.data);
+        setFileObjUrl(objectUrl);
+      })
+      .catch(() => {
+        message.error("첨부파일을 불러오지 못했습니다.");
+      });
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [fileName, bno]);
+
   const handleDelete = () => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
       dispatch(deleteNoticeRequest({ bno }));
     }
   };
 
-  const attExt = notice?.bfile ? notice.bfile.split(".").pop().toLowerCase() : null;
-  const isImage = ["png", "jpg", "jpeg", "gif", "webp"].includes(attExt);
-  const fileUrl = notice?.bfile ? `${API_BASE}${notice.bfile}` : null;
-
   let attachmentEl = null;
-  if (fileUrl) {
-    if (isImage) {
-      attachmentEl = React.createElement("img", {
-        src: fileUrl,
-        alt: notice.btitle,
-        className: "img-fluid rounded",
-        style: { maxWidth: 500 },
-      });
-    } else {
-      attachmentEl = React.createElement(
-        "a",
-        {
-          href: fileUrl,
-          className: "btn btn-sb-soft",
-          target: "_blank",
-          rel: "noopener noreferrer",
-        },
-        React.createElement("i", { className: "bi bi-download" }),
-        ` 첨부파일 다운로드 (.${attExt})`
-      );
-    }
+
+if (fileObjUrl) {
+  if (isImage) {
+    attachmentEl = (
+      <div>
+        <img
+          src={fileObjUrl}
+          alt={notice.btitle}
+          className="img-fluid rounded mb-2"
+          style={{ maxWidth: 500 }}
+        />
+
+        <div>
+          <a
+            href={fileObjUrl}
+            download={fileName}
+            className="btn btn-sb-soft"
+          >
+            <i className="bi bi-download"></i>
+            {" 다운로드"}
+          </a>
+        </div>
+      </div>
+    );
+  } else {
+    attachmentEl = (
+      <div className="d-flex align-items-center gap-2">
+        {/* 파일명 */}
+        <span
+          title={fileName}
+          style={{
+            maxWidth: "350px",
+            overflow: "hidden",
+            minWidth: 0,
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <i className="bi bi-paperclip"></i>{" "}
+          {fileName}
+        </span>
+
+        {/* 다운로드 */}
+        <a
+          href={fileObjUrl}
+          download={fileName}
+          className="btn btn-sb-soft"
+        >
+          <i className="bi bi-download"></i>
+          {" 다운로드"}
+        </a>
+      </div>
+    );
   }
+}
 
   return (
     <main className="sb-content">

@@ -27,6 +27,7 @@ export default function TaskDetailPage() {
     loading,
     error,
     success,
+    deleteSuccess
   } = useSelector((state) => state.task);
 
   const task = currentTask?.task;
@@ -34,6 +35,7 @@ export default function TaskDetailPage() {
   const impactTasks = currentTask?.impactTasks || [];
   const isDelayed = currentTask?.isDelayed;
   const proId = currentTask?.proId;
+  const proName = task?.proName;
 
   // 상세 조회
   useEffect(() => {
@@ -50,10 +52,11 @@ export default function TaskDetailPage() {
 
   // 삭제 성공
   useEffect(() => {
-    if (success) {
-      router.push("/proj/task_list");
+    if (deleteSuccess) {
+      router.push({
+        pathname:"/proj/proj_detail", query:{proId}});
     }
-  }, [success, router]);
+  }, [deleteSuccess, router, proId]);
 
   // 페이지 나갈 때 상태 초기화
   useEffect(() => {
@@ -125,9 +128,7 @@ export default function TaskDetailPage() {
             <i className="bi bi-chevron-right"></i>
             업무
             <i className="bi bi-chevron-right"></i>
-            <Link href={`/proj/proj_detail?pro_id=${proId}`}>
-              프로젝트
-            </Link>
+            프로젝트
             <i className="bi bi-chevron-right"></i>
             태스크 상세
           </div>
@@ -180,6 +181,14 @@ export default function TaskDetailPage() {
         <div className="sb-card__body--flush">
           <table className="sb-table">
             <tbody>
+              <tr>
+                <th style={{ width: "25%" }}>프로젝트명</th>
+                <td className="sb-table__name">
+                    <Link href={`/proj/proj_detail?proId=${proId}`}>
+                      {task.proName}
+                    </Link>
+                </td>
+              </tr>
               <tr>
                 <th style={{ width: "25%" }}>태스크명</th>
                 <td className="sb-table__name">

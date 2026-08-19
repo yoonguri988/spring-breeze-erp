@@ -108,6 +108,7 @@ const noticeReducer = createSlice({
             state.error = null;
             state.success = false;
             state.deleteSuccess = false;
+            state.currentNotice = null;
         },
     }
 });

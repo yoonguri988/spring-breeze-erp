@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
+
 import api from "../../api/axios";
 import { Row, Col, Table, Button, Modal, Tag, Pagination, message } from "antd";
 import {
@@ -33,7 +34,6 @@ export default function ProjDetailPage(){
     const {proId} = router.query;
     const user = useSelector((state) => state.auth.user);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const ganttRef = useRef(null);
     const isAdmin =
     user?.roles?.includes("ROOT") ||
     user?.roles?.includes("ROLE_ADMIN");
@@ -45,13 +45,11 @@ export default function ProjDetailPage(){
       success,
       deleteSuccess,
       error,
+      analysis
     } = useSelector((state) => state.proj);
 
     // 간트차트 
-    const {
-    ganttTasks = [],
-    loading: ganttLoading,
-    } = useSelector((state) => state.task);
+    const { ganttTasks = [], loading: ganttLoading, } = useSelector((state) => state.task);
 
     // 태스크 페이징
     const {
@@ -129,28 +127,36 @@ useEffect(() => {
       key: "createdAt",
       width: 110,
       align: "center",
-      render: (value) => (value ? dayjs(value).format("YYYY-MM-DD") : "-"),
+      render: (value) => (value ? moment(value).format("YYYY-MM-DD") : "-"),
     },
   ];
 
   // Ai 분석
   const [aiOpen, setAiOpen] = useState(false);
-
+  const riskMatch = analysis?.match(/위험도:\s*(HIGH|MEDIUM|LOW)/);
+  const riskLevel = riskMatch?.[1];
   const handleAiAnalyze = () => {
   setAiOpen(true);
   dispatch(analyzeProjRequest(proId));
   };
 
   // 간트 차트
+  const ganttWrapperRef = useRef(null);
+  const ganttInstanceRef = useRef(null);
+
  useEffect(() => {
-  if (!ganttRef.current || !ganttTasks.length) return;
+  if (!ganttWrapperRef.current || !ganttTasks.length) return;
 
   let cancelled = false;
 
   (async () => {
     const { default: Gantt } = await import("frappe-gantt");
+    if (cancelled || !ganttWrapperRef.current) return;
 
-    if (cancelled || !ganttRef.current) return;
+    // 이전 렌더 내용을 완전히 비우고 새 svg를 수동으로 생성
+    ganttWrapperRef.current.innerHTML = "";
+    const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    ganttWrapperRef.current.appendChild(svgEl);
 
     const tasks = ganttTasks.map((task) => ({
       id: String(task.taskId),
@@ -161,20 +167,11 @@ useEffect(() => {
       fullName: task.taskName,
       start: task.taskStartDate,
       end: task.taskEndDate,
-      dependencies: task.parentTaskId
-        ? String(task.parentTaskId)
-        : "",
-      progress:
-        task.taskStatus === "DONE"
-          ? 100
-          : task.taskStatus === "DOING"
-            ? 50
-            : 0,
+      dependencies: task.parentTaskId ? String(task.parentTaskId) : "",
+      progress: task.taskStatus === "DONE" ? 100 : task.taskStatus === "DOING" ? 50 : 0,
     }));
 
-    ganttRef.current.innerHTML = "";
-
-    new Gantt(ganttRef.current, tasks, {
+    ganttInstanceRef.current = new Gantt(svgEl, tasks, {
       view_mode: "Week",
       date_format: "YYYY-MM-DD",
       language: "ko",
@@ -189,8 +186,12 @@ useEffect(() => {
 
   return () => {
     cancelled = true;
-  };
-}, [ganttTasks]);
+    // 수동 정리
+    if (ganttWrapperRef.current) {
+        ganttWrapperRef.current.innerHTML = "";
+      }
+    };
+  }, [ganttTasks]);
 
   return(
     <main className="sb-content">
@@ -238,9 +239,9 @@ useEffect(() => {
                     <td><Tag color={STATUS_TAG_COLOR[detail?.proStatus] || "default"}>{detail?.proStatus}</Tag></td>
                   </tr>
                   <tr><th>생성자</th><td>{detail?.empName}</td></tr>
-                  <tr><th>시작일</th><td className="tnum">{detail?.startDate ? dayjs(detail.startDate).format("YYYY-MM-DD") : "-"}</td></tr>
-                  <tr><th>종료일</th><td className="tnum">{detail?.endDate ? dayjs(detail.endDate).format("YYYY-MM-DD") : "-"}</td></tr>
-                  <tr><th>등록일</th><td className="tnum">{detail?.createdAt ? dayjs(detail.createdAt).format("YYYY-MM-DD") : "-"}</td></tr>
+                  <tr><th>시작일</th><td className="tnum">{detail?.startDate ? moment(detail.startDate).format("YYYY-MM-DD") : "-"}</td></tr>
+                  <tr><th>종료일</th><td className="tnum">{detail?.endDate ? moment(detail.endDate).format("YYYY-MM-DD") : "-"}</td></tr>
+                  <tr><th>등록일</th><td className="tnum">{detail?.createdAt ? moment(detail.createdAt).format("YYYY-MM-DD") : "-"}</td></tr>
                 </tbody>
               </table>
             </div>
@@ -293,7 +294,7 @@ useEffect(() => {
           </div>
         </Col>
       </Row>
-            {/* 참여인원 */}
+      {/* 참여인원 */}
       <div className="sb-card mt-3">
         <div className="sb-card__head">
           <h2>참여인원</h2>
@@ -344,9 +345,7 @@ useEffect(() => {
         </div>
 
         <div className="sb-card__body">
-          <div id="gantt-wrapper">
-            <svg ref={ganttRef}></svg>
-          </div>
+          <div id="gantt-wrapper" ref={ganttWrapperRef}></div>
         </div>
       </div>
 
@@ -356,6 +355,11 @@ useEffect(() => {
           <div className="sb-card__head">
             <h2>
               <StarOutlined /> AI 리스크 분석 결과
+               {riskLevel && (
+                <Tag color={RISK_TAG_COLOR[riskLevel] || "default"} style={{ marginLeft: 8 }}>
+                  {riskLevel}
+                </Tag>
+              )}
             </h2>
           </div>
 

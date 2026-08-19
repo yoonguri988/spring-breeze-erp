@@ -41,9 +41,10 @@ export default function TaskCreatePage() {
 
     useEffect(() => {
     if (success) {
-        router.push("/task/task_list");
+        router.push({
+          pathname:"/proj/proj_detail", query:{proId}});
     }
-    }, [success, router]);
+    }, [success, router, proId]);
 
     const handleReset = () => {
         setTaskName("");
