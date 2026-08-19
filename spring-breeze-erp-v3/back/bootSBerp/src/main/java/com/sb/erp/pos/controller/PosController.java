@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/pos")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class PosController {
 
 	private final PosService posService;

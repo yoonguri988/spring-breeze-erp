@@ -139,8 +139,11 @@ public class PermController {
 
 	@Operation(summary = "사원의 권한 회수")
 	@PostMapping("/revoke")
-	public ResponseEntity<Map<String, String>> revoke(@RequestBody EmpAuthRequest request) {
-		int result = permService.revokeAuth(request);
+	public ResponseEntity<Map<String, String>> revoke(
+			Authentication auth,
+			@RequestBody EmpAuthRequest request) {
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		int result = permService.revokeAuth(request, comId);
 		if (result > 0) return ResponseEntity.ok(Map.of("message", "권한이 회수되었습니다."));
 		return ResponseEntity.badRequest()
 				.body(Map.of("message", "권한 회수에 실패했습니다."));
