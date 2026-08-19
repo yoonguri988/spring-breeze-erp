@@ -2,6 +2,7 @@ package com.sb.erp.emp.service;
 
 import com.sb.erp.emp.dto.WelcomeMailTargetDto;
 import com.sb.erp.emp.dto.request.EmpRequest;
+import com.sb.erp.emp.dto.response.EmpResponse;
 
 /**
  * 온보딩 이메일 발송 서비스.
@@ -20,4 +21,9 @@ public interface EmailService {
     // 3일 차 적응 확인 메일.
     // 스케줄러 또는 관리자 수동 트리거에서 호출
     void sendFollowup3DayMailAsync(WelcomeMailTargetDto target);
+    
+    // 비밀번호 재설정 안내 메일 (사용자가 입력한 정보를 바탕으로 비밀번호 재설정)
+    // - /auth/confirm 본인확인 성공 시, resetToken을 응답으로 바로 주지 않고
+    //   등록된 이메일로 재설정 페이지 링크를 발송한다.
+    void sendPasswordResetMailAsync(EmpResponse emp, String resetLink);
 }

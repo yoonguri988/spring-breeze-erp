@@ -8,16 +8,24 @@ import {
   CheckOutlined,
   CheckCircleFilled,
   LoginOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import {
   updatePassRequest,
   resetUserState,
 } from "../../reducers/auth/authReducer";
 
+// 비밀번호 정책: 8자 이상 + 영문/숫자/특수문자 조합 모두 필수 (백엔드 PasswordPolicy와 동일 기준)
+const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/;
 const REQ_LIST = [
   { key: "len", label: "8자 이상", test: (pw) => pw.length >= 8 },
   { key: "alpha", label: "영문 포함", test: (pw) => /[a-zA-Z]/.test(pw) },
   { key: "num", label: "숫자 포함", test: (pw) => /[0-9]/.test(pw) },
+  {
+    key: "special",
+    label: "특수문자 포함",
+    test: (pw) => SPECIAL_CHAR_REGEX.test(pw),
+  },
 ];
 
 const LEVELS = [
@@ -30,7 +38,8 @@ const LEVELS = [
 export default function ForgotResetPassPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { empNo, empEmail } = router.query;
+  // 이메일로 발송된 재설정 링크의 쿼리스트링(?token=...)에서 resetToken을 읽는다.
+  const { token } = router.query;
 
   const { loading, error, success } = useSelector((state) => state.auth);
 
@@ -69,12 +78,19 @@ export default function ForgotResetPassPage() {
 
   const onFinish = (values) => {
     setLocalError("");
+    if (!token) {
+      setLocalError(
+        "유효하지 않은 접근입니다. 이메일로 받은 링크를 다시 확인해주세요.",
+      );
+      return;
+    }
     if (
       values.newPass.length < 8 ||
       !/[a-zA-Z]/.test(values.newPass) ||
-      !/[0-9]/.test(values.newPass)
+      !/[0-9]/.test(values.newPass) ||
+      !SPECIAL_CHAR_REGEX.test(values.newPass)
     ) {
-      setLocalError("8자 이상, 영문과 숫자를 모두 포함해야 합니다.");
+      setLocalError("8자 이상, 영문·숫자·특수문자를 모두 포함해야 합니다.");
       return;
     }
     if (values.newPass !== values.newPassConfirm) {
@@ -83,6 +99,7 @@ export default function ForgotResetPassPage() {
     }
     dispatch(
       updatePassRequest({
+        resetToken: token,
         newPass: values.newPass,
         newPassConfirm: values.newPassConfirm,
       }),
@@ -117,12 +134,18 @@ export default function ForgotResetPassPage() {
               <h1 className="rp-h">비밀번호 변경</h1>
               <p className="rp-sub">보안을 위해 비밀번호를 변경해 주세요.</p>
 
-              {empNo && (
+              {token ? (
                 <div className="rp-user">
-                  <div className="rp-user-av">{String(empNo).slice(0, 1)}</div>
+                  <div className="rp-user-av">
+                    <SafetyOutlined />
+                  </div>
                   <div>
-                    <div className="rp-user-name">{empNo}</div>
-                    <div className="rp-user-sub">{empEmail}</div>
+                    <div className="rp-user-name">
+                      이메일 인증 링크로 접속됨
+                    </div>
+                    <div className="rp-user-sub">
+                      새 비밀번호를 설정하면 바로 적용됩니다.
+                    </div>
                   </div>
                   <div style={{ marginLeft: "auto" }}>
                     <span className="sb-badge sb-badge--blue">
@@ -130,6 +153,17 @@ export default function ForgotResetPassPage() {
                     </span>
                   </div>
                 </div>
+              ) : (
+                router.isReady && (
+                  <Alert
+                    className="a-alert on"
+                    type="warning"
+                    showIcon
+                    icon={<ExclamationCircleOutlined />}
+                    message="유효하지 않은 접근입니다. 이메일로 받은 링크를 통해 다시 시도해주세요."
+                    style={{ marginBottom: 16 }}
+                  />
+                )
               )}
 
               <Form
@@ -148,7 +182,7 @@ export default function ForgotResetPassPage() {
                   <Input.Password
                     className="fi"
                     size="large"
-                    placeholder="8자 이상, 영문 + 숫자 포함"
+                    placeholder="8자 이상, 영문 + 숫자 + 특수문자 포함"
                     autoComplete="new-password"
                     onChange={(e) => setPw(e.target.value)}
                   />
@@ -215,6 +249,7 @@ export default function ForgotResetPassPage() {
                   type="primary"
                   htmlType="submit"
                   loading={loading}
+                  disabled={router.isReady && !token}
                   icon={<CheckOutlined />}
                   block
                 >

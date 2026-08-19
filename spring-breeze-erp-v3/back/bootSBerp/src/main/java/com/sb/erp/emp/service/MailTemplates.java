@@ -47,6 +47,31 @@ public class MailTemplates {
             + "</div>"
             + "<p>" + empName + "님이 잘 적응하실 수 있도록 모든 구성원이 응원하고 있습니다!</p>");
     }
+    
+    // ─── 비밀번호 재설정 안내 메일 ───
+    public static String passwordResetSubject(String comName) {
+        return String.format("[%s] 비밀번호 재설정 안내", comName);
+    }
+
+    public static String passwordResetBody(String comName, String empName, String resetLink) {
+        String greetName = (empName != null && !empName.isBlank()) ? empName : "고객";
+        return wrap(comName + " 비밀번호 재설정",
+              "<h2 style='color:#005bac;'>🔐 비밀번호 재설정 요청</h2>"
+            + "<p><b>" + greetName + "</b>님, 비밀번호 재설정이 요청되었습니다.</p>"
+            + "<p>아래 버튼을 눌러 새 비밀번호를 설정해주세요. 본인이 요청하지 않았다면"
+            + " 이 메일을 무시하셔도 됩니다.</p>"
+            + "<div style='text-align:center;margin:28px 0;'>"
+            + "  <a href='" + resetLink + "' "
+            + "     style='display:inline-block;padding:12px 28px;background:#005bac;color:#fff;"
+            + "     text-decoration:none;border-radius:6px;font-weight:bold;'>"
+            + "     비밀번호 재설정하기</a>"
+            + "</div>"
+            + "<div style='background:#fff7e6;padding:15px;border-radius:6px;margin:20px 0;font-size:13px;'>"
+            + "  ⏱ 이 링크는 <b>발급 후 10분간</b>만 유효합니다. 시간이 지났다면 다시 요청해주세요."
+            + "</div>"
+            + "<p style='font-size:12px;color:#999;'>버튼이 동작하지 않으면 아래 주소를 브라우저에 복사해 붙여넣어주세요.<br>"
+            + resetLink + "</p>");
+    }
 
     // ─── 공통 래퍼 ───
 

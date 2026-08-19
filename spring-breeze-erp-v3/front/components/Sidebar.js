@@ -92,9 +92,9 @@ const NAV = [
         role: "ROLE_ADMIN",
       },
       {
-        page: "evalDashboard",
+        page: "evallist",
         tip: "평가 작성",
-        href: "/eval/dashboard",
+        href: "/eval/list",
         icon: "bi-star",
         role: "ROLE_ADMIN",
       },
@@ -167,6 +167,19 @@ const NAV = [
         label: "자원 예약 요청 관리",
         href: "/admin/resv/list?status=WAI",
         icon: "bi-calendar2-event",
+        role: "ROLE_ADMIN",
+      },
+    ],
+  },
+  {
+    section: "보안 관리",
+    items: [
+      {
+        page: "adminloginhistory",
+        tip: "로그인 이력 관리",
+        label: "로그인 이력 관리",
+        href: "/admin/security/loginHistory",
+        icon: "bi-shield-lock",
         role: "ROLE_ADMIN",
       },
     ],
