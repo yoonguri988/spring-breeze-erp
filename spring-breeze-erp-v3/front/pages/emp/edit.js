@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Card, Form, Input, Select, DatePicker, Button, message, } from "antd";
 import { ArrowLeftOutlined, CheckOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 
 import {
@@ -14,17 +15,18 @@ import {
 import { listPosRequest } from "../../reducers/pos/posReducer";
 import { fetchDeptFlatRequest } from "../../reducers/dept/deptReducer";
 
-const STATUS_OPTIONS = [
-  { value: "재직", label: "재직" },
-  { value: "휴직", label: "휴직" },
-  { value: "퇴직", label: "퇴직" },
-];
-
 export default function EmpEditPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["emp", "common"]);
   const { empId } = router.query;
   const [form] = Form.useForm();
+
+  const STATUS_OPTIONS = [
+    { value: "재직", label: t("common:empStatus.active") },
+    { value: "휴직", label: t("common:empStatus.leave") },
+    { value: "퇴직", label: t("common:empStatus.retired") },
+  ];
 
   const { currentEmp, checkResult, loading, success, error } = useSelector((state) => state.emp);
   const { user } = useSelector((state) => state.auth);
@@ -58,7 +60,7 @@ export default function EmpEditPage() {
   // 수정 결과
   useEffect(() => {
     if (success) {
-      message.success("사원 정보가 수정되었습니다.");
+      message.success(t("edit.successMsg"));
       dispatch(resetEmpState());
       router.push({ pathname: "/emp/detail", query: { empId } });
     } else if (error) {
@@ -75,8 +77,8 @@ export default function EmpEditPage() {
 
   const checkHelp = (field) => {
     const val = checkResult[field];
-    if (val === true) return { validateStatus: "success", help: "사용 가능합니다." };
-    if (val === false) return { validateStatus: "error", help: "이미 사용 중입니다." };
+    if (val === true) return { validateStatus: "success", help: t("common.checkAvailable") };
+    if (val === false) return { validateStatus: "error", help: t("common.checkUnavailable") };
     return {};
   };
 
@@ -88,7 +90,7 @@ export default function EmpEditPage() {
         checkResult.mobile === false ||
         checkResult.empNo === false
       ) {
-        message.warning("중복된 항목이 있습니다.");
+        message.warning(t("edit.duplicateWarning"));
         return;
       }
       dispatch(
@@ -114,19 +116,19 @@ export default function EmpEditPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            조직 관리 &gt; 사원관리 &gt; 정보 수정
+            {t("common.breadcrumbOrg")} &gt; {t("common.breadcrumbList")} &gt; {t("edit.breadcrumbCurrent")}
           </div>
-          <h1>사원 정보 수정</h1>
-          <p>기존 사원의 정보를 수정합니다.</p>
+          <h1>{t("edit.title")}</h1>
+          <p>{t("edit.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href={{ pathname: "/emp/detail", query: { empId } }}>
-            <Button icon={<ArrowLeftOutlined />}>상세로</Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("edit.backToDetailBtn")}</Button>
           </Link>
         </div>
       </div>
 
-      <Card title="사원 정보" loading={loading && !currentEmp}>
+      <Card title={t("common.infoCardTitle")} loading={loading && !currentEmp}>
         <Form
           form={form}
           layout="vertical"
@@ -135,7 +137,7 @@ export default function EmpEditPage() {
         >
           <Form.Item
             name="empNo"
-            label="사번"
+            label={t("common.fieldLabel.empNo")}
             rules={[{ required: true }]}
             {...checkHelp("empNo")}
           >
@@ -153,7 +155,7 @@ export default function EmpEditPage() {
 
           <Form.Item
             name="empName"
-            label="이름"
+            label={t("common.fieldLabel.empName")}
             rules={[{ required: true }]}
           >
             <Input />
@@ -161,8 +163,8 @@ export default function EmpEditPage() {
 
           <Form.Item
             name="empEmail"
-            label="이메일"
-            rules={[{ required: true, message: "이메일을 입력하세요." }, { type: "email", message: "올바른 이메일 형식이 아닙니다" }]}
+            label={t("common.fieldLabel.empEmail")}
+            rules={[{ required: true, message: t("edit.emailRequired") }, { type: "email", message: t("edit.emailInvalid") }]}
             {...checkHelp("email")}
           >
             <Input
@@ -179,8 +181,8 @@ export default function EmpEditPage() {
 
           <Form.Item
             name="empMobile"
-            label="연락처"
-            rules={[{ required: true, message: "연락처를 입력하세요." }]}
+            label={t("common.fieldLabel.empMobile")}
+            rules={[{ required: true, message: t("common.mobileRequired") }]}
             {...checkHelp("mobile")}
           >
             <Input
@@ -197,11 +199,11 @@ export default function EmpEditPage() {
 
           <Form.Item
             name="deptId"
-            label="부서"
-            rules={[{ required: true, message: "부서를 선택하세요." }]}
+            label={t("common.fieldLabel.dept")}
+            rules={[{ required: true, message: t("common.deptRequired") }]}
           >
             <Select
-              placeholder="부서 선택"
+              placeholder={t("common.deptPlaceholder")}
               options={flatList.map((d) => ({
                   value: d.deptId,
                   label: d.deptName,
@@ -211,7 +213,7 @@ export default function EmpEditPage() {
 
           <Form.Item
             name="posId"
-            label="직급"
+            label={t("common.fieldLabel.pos")}
             rules={[{ required: true }]}
           >
             <Select
@@ -224,7 +226,7 @@ export default function EmpEditPage() {
 
           <Form.Item
             name="empStatus"
-            label="재직상태"
+            label={t("common.fieldLabel.empStatus")}
             rules={[{ required: true }]}
           >
             <Select options={STATUS_OPTIONS} />
@@ -232,7 +234,7 @@ export default function EmpEditPage() {
 
           <Form.Item
             name="hireDate"
-            label="입사일"
+            label={t("common.fieldLabel.hireDate")}
             rules={[{ required: true }]}
           >
             <DatePicker style={{ width: "100%" }} />
@@ -240,7 +242,7 @@ export default function EmpEditPage() {
 
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
             <Link href={{ pathname: "/emp/detail", query: { empId } }}>
-              <Button>취소</Button>
+              <Button>{t("common:button.cancel")}</Button>
             </Link>
             <Button
               type="primary"
@@ -248,7 +250,7 @@ export default function EmpEditPage() {
               icon={<CheckOutlined />}
               loading={loading}
             >
-              수정
+              {t("common:button.edit")}
             </Button>
           </div>
         </Form>

@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Card, Descriptions, Tag, Button, Progress, Space, Modal, message, } from "antd";
 import { ArrowLeftOutlined, EditOutlined, PlayCircleOutlined, StopOutlined, RobotOutlined, } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   detailPeriodRequest, openPeriodRequest, closePeriodRequest,
@@ -12,20 +13,21 @@ import {
   clearPeriodDetail,
 } from "../../../reducers/eval/evalPeriodReducer";
 
-const STATUS_CONFIG = {
-  READY: { color: "orange", label: "준비" },
-  OPEN: { color: "green", label: "진행 중" },
-  CLOSED: { color: "blue", label: "마감" },
-  REPORTING: { color: "purple", label: "분석 중" },
-  REPORTED: { color: "cyan", label: "완료" },
-  REPORTING_FAILED: { color: "red", label: "분석 실패" },
-};
-
 export default function EvalPeriodDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["eval", "common"]);
   const { periodId } = router.query;
   const pollingRef = useRef(null);
+
+  const STATUS_CONFIG = {
+    READY: { color: "orange", label: t("common.periodStatus.ready") },
+    OPEN: { color: "green", label: t("common.periodStatus.open") },
+    CLOSED: { color: "blue", label: t("common.periodStatus.closed") },
+    REPORTING: { color: "purple", label: t("common.periodStatus.reporting") },
+    REPORTED: { color: "cyan", label: t("common.periodStatus.reported") },
+    REPORTING_FAILED: { color: "red", label: t("common.periodStatus.reportingFailed") },
+  };
 
   const {
     currentPeriod, evalCount, reportCount,
@@ -36,13 +38,13 @@ export default function EvalPeriodDetailPage() {
   useEffect(() => {
     if (!periodId) return;
     dispatch(detailPeriodRequest(Number(periodId)));
-    
+
     return () => {
       dispatch(clearPeriodDetail());
       dispatch(resetPeriodState());
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-    
+
   }, [dispatch, periodId]);
 
   // REPORTING 상태이면 폴링 시작
@@ -62,7 +64,7 @@ export default function EvalPeriodDetailPage() {
   // 상태 전환 결과
   useEffect(() => {
     if (success) {
-      message.success("상태가 변경되었습니다.");
+      message.success(t("period.detail.statusChangedMsg"));
       dispatch(resetPeriodState());
       dispatch(detailPeriodRequest(Number(periodId)));
     }
@@ -74,22 +76,22 @@ export default function EvalPeriodDetailPage() {
 
   const handleOpen = () => {
     Modal.confirm({
-      title: "회차를 열겠습니까?",
-      content: "열면 사원들이 평가를 시작할 수 있습니다.",
+      title: t("period.detail.openConfirmTitle"),
+      content: t("period.detail.openConfirmContent"),
       onOk: () => { dispatch(openPeriodRequest(Number(periodId))); },
     });
   };
   const handleClose = () => {
     Modal.confirm({
-      title: "회차를 마감하겠습니까?",
-      content: "마감 후에는 평가를 수정할 수 없습니다.",
+      title: t("period.detail.closeConfirmTitle"),
+      content: t("period.detail.closeConfirmContent"),
       onOk: () => { dispatch(closePeriodRequest(Number(periodId))); },
     });
   };
   const handleReport = () => {
     Modal.confirm({
-      title: "AI 분석을 시작하겠습니까?",
-      content: "모든 제출된 평가를 기반으로 AI가 리포트를 생성합니다.",
+      title: t("period.detail.startAiConfirmTitle"),
+      content: t("period.detail.startAiConfirmContent"),
       onOk: () => { dispatch(reportPeriodRequest(Number(periodId))); },
     });
   };
@@ -110,18 +112,18 @@ export default function EvalPeriodDetailPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            인사평가 &gt; 회차 관리 &gt; 상세
+            {t("common.breadcrumbRoot")} &gt; {t("period.list.breadcrumbCurrent")} &gt; {t("period.detail.breadcrumbCurrent")}
           </div>
-          <h1>{p?.title || "..."}</h1>
+          <h1>{p?.title || t("period.detail.namePlaceholder")}</h1>
           {p && (
             <p>
-              {p.evalYear}년 {p.evalTerm}
+              {t("period.detail.periodMetaFormat", { year: p.evalYear, term: p.evalTerm })}
             </p>
           )}
         </div>
         <div className="sb-page-head__actions">
           <Link href="/eval/period/list">
-            <Button icon={<ArrowLeftOutlined />}>목록으로</Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("period.detail.backToListBtn")}</Button>
           </Link>
         </div>
       </div>
@@ -129,17 +131,17 @@ export default function EvalPeriodDetailPage() {
       <Card loading={loading && !p} style={{ marginBottom: 16 }}>
         {p && (
           <Descriptions bordered column={{ xs: 1, sm: 2 }}>
-            <Descriptions.Item label="상태">
+            <Descriptions.Item label={t("period.detail.statusLabel")}>
               <Tag color={sc.color}>{sc.label}</Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="기간">
+            <Descriptions.Item label={t("period.detail.periodRangeLabel")}>
               {p.startDate} ~ {p.endDate}
             </Descriptions.Item>
-            <Descriptions.Item label="평가 건수">
-              {evalCount}건
+            <Descriptions.Item label={t("period.detail.evalCountLabel")}>
+              {t("period.detail.countSuffix", { count: evalCount })}
             </Descriptions.Item>
-            <Descriptions.Item label="리포트 건수">
-              {reportCount}건
+            <Descriptions.Item label={t("period.detail.reportCountLabel")}>
+              {t("period.detail.countSuffix", { count: reportCount })}
             </Descriptions.Item>
           </Descriptions>
         )}
@@ -147,7 +149,7 @@ export default function EvalPeriodDetailPage() {
 
       {/* REPORTING 진행률 */}
       {p?.periodStatus === "REPORTING" && reportProgress && (
-        <Card title="AI 분석 진행률" style={{ marginBottom: 16 }}>
+        <Card title={t("period.detail.aiProgressTitle")} style={{ marginBottom: 16 }}>
           <Progress
             percent={
               reportProgress.total > 0
@@ -173,20 +175,20 @@ export default function EvalPeriodDetailPage() {
                 query: { periodId },
               }}
             >
-              <Button icon={<EditOutlined />}>수정</Button>
+              <Button icon={<EditOutlined />}>{t("period.detail.editBtn")}</Button>
             </Link>
             <Button
               type="primary"
               icon={<PlayCircleOutlined />}
               onClick={handleOpen}
             >
-              회차 열기
+              {t("period.detail.openBtn")}
             </Button>
           </>
         )}
         {p?.periodStatus === "OPEN" && (
           <Button icon={<StopOutlined />} danger onClick={handleClose}>
-            회차 마감
+            {t("period.detail.closeBtn")}
           </Button>
         )}
         {(p?.periodStatus === "CLOSED" ||
@@ -196,7 +198,7 @@ export default function EvalPeriodDetailPage() {
             icon={<RobotOutlined />}
             onClick={handleReport}
           >
-            AI 분석 시작
+            {t("period.detail.startAiBtn")}
           </Button>
         )}
         {p?.periodStatus === "REPORTED" && (
@@ -206,7 +208,7 @@ export default function EvalPeriodDetailPage() {
               query: { periodId },
             }}
           >
-            <Button type="primary">리포트 보기</Button>
+            <Button type="primary">{t("period.detail.viewReportBtn")}</Button>
           </Link>
         )}
       </div>

@@ -5,24 +5,28 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Row, Col, Card, Button, Tag, Avatar, Descriptions, Modal, Form, Input, message, } from "antd";
 import { ArrowLeftOutlined, EditOutlined, KeyOutlined, SafetyCertificateOutlined, } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   detailEmpRequest, updatePasswordRequest, resetPasswordRequest,
   resetEmpState,
 } from "../../reducers/emp/empReducer";
+import { empStatusLabel } from "../../utils/empStatus";
 
 const STATUS_TAG = { 재직: "green", 휴직: "orange", 퇴직: "red" };
-const SENTIMENT = {
-  POSITIVE: { color: "green", label: "긍정적" },
-  NEUTRAL: { color: "default", label: "중립적" },
-  NEGATIVE: { color: "red", label: "부정적" },
-};
 
 export default function EmpDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["emp", "common"]);
   const { empId } = router.query;
   const [passForm] = Form.useForm();
+
+  const SENTIMENT = {
+    POSITIVE: { color: "green", label: t("detail.sentiment.positive") },
+    NEUTRAL: { color: "default", label: t("detail.sentiment.neutral") },
+    NEGATIVE: { color: "red", label: t("detail.sentiment.negative") },
+  };
 
   const { currentEmp, latestReport, loading, passwordSuccess, error } =
     useSelector((state) => state.emp);
@@ -47,8 +51,8 @@ export default function EmpDetailPage() {
     if (passwordSuccess) {
       message.success(
         passModal === "change"
-          ? "비밀번호가 변경되었습니다."
-          : "비밀번호가 초기화되었습니다."
+          ? t("detail.changeSuccessMsg")
+          : t("detail.resetSuccessMsg")
       );
       setPassModal(null);
       setPassSaving(false);
@@ -67,7 +71,7 @@ export default function EmpDetailPage() {
     try {
       const values = await passForm.validateFields();
       if (values.newPassword !== values.confirmPassword) {
-        message.warning("새 비밀번호가 일치하지 않습니다.");
+        message.warning(t("detail.passwordMismatch"));
         return;
       }
       setPassSaving(true);
@@ -103,9 +107,9 @@ export default function EmpDetailPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            조직 관리 &gt; 사원관리 &gt; 상세정보
+            {t("common.breadcrumbOrg")} &gt; {t("common.breadcrumbList")} &gt; {t("detail.breadcrumbCurrent")}
           </div>
-          <h1>{emp?.empName || "..."}</h1>
+          <h1>{emp?.empName || t("detail.namePlaceholder")}</h1>
           {emp && (
             <p>
               {emp.deptName} · {emp.posName}
@@ -114,7 +118,7 @@ export default function EmpDetailPage() {
         </div>
         <div className="sb-page-head__actions">
           <Link href="/emp/list">
-            <Button icon={<ArrowLeftOutlined />}>목록으로</Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("common.backToListBtn")}</Button>
           </Link>
         </div>
       </div>
@@ -145,7 +149,7 @@ export default function EmpDetailPage() {
                   </p>
                   <div style={{ display: "flex", gap: 4 }}>
                     <Tag>{emp.empNo}</Tag>
-                    <Tag color={STATUS_TAG[emp.empStatus]}>{emp.empStatus}</Tag>
+                    <Tag color={STATUS_TAG[emp.empStatus]}>{empStatusLabel(t, emp.empStatus)}</Tag>
                   </div>
                 </div>
 
@@ -153,17 +157,17 @@ export default function EmpDetailPage() {
 
                 <Row gutter={16}>
                   <Col span={8}>
-                    <div style={{ color: "#999", fontSize: 12 }}>이메일</div>
+                    <div style={{ color: "#999", fontSize: 12 }}>{t("detail.table.email")}</div>
                     <div style={{ fontSize: 13, wordBreak: "break-all" }}>
                       {emp.empEmail}
                     </div>
                   </Col>
                   <Col span={8}>
-                    <div style={{ color: "#999", fontSize: 12 }}>연락처</div>
+                    <div style={{ color: "#999", fontSize: 12 }}>{t("detail.table.mobile")}</div>
                     <div style={{ fontSize: 13 }}>{emp.empMobile}</div>
                   </Col>
                   <Col span={8}>
-                    <div style={{ color: "#999", fontSize: 12 }}>입사일</div>
+                    <div style={{ color: "#999", fontSize: 12 }}>{t("detail.table.hireDate")}</div>
                     <div style={{ fontSize: 13 }}>{emp.hireDate}</div>
                   </Col>
                 </Row>
@@ -184,7 +188,7 @@ export default function EmpDetailPage() {
                     marginBottom: 16,
                   }}
                 >
-                  <span style={{ fontWeight: 600 }}>최근 AI 리포트</span>
+                  <span style={{ fontWeight: 600 }}>{t("detail.aiReportTitle")}</span>
                   {isAdmin && (
                     <Link
                       href={{
@@ -192,13 +196,13 @@ export default function EmpDetailPage() {
                         query: { reportId: latestReport.reportId },
                       }}
                     >
-                      <Button size="small">상세 보기</Button>
+                      <Button size="small">{t("detail.aiDetailBtn")}</Button>
                     </Link>
                   )}
                 </div>
                 <Row gutter={16}>
                   <Col span={8} style={{ textAlign: "center" }}>
-                    <div style={{ color: "#999", marginBottom: 4 }}>종합 등급</div>
+                    <div style={{ color: "#999", marginBottom: 4 }}>{t("detail.overallGradeLabel")}</div>
                     <div
                       style={{
                         fontSize: 32,
@@ -214,7 +218,7 @@ export default function EmpDetailPage() {
                       {latestReport.grade}
                     </div>
                     <div style={{ marginTop: 8 }}>
-                      <div style={{ color: "#999", fontSize: 12 }}>종합 점수</div>
+                      <div style={{ color: "#999", fontSize: 12 }}>{t("detail.overallScoreLabel")}</div>
                       <div style={{ fontWeight: 600, fontSize: 18 }}>
                         {latestReport.overallScore?.toFixed(2)}
                       </div>
@@ -229,16 +233,16 @@ export default function EmpDetailPage() {
                   </Col>
                   <Col span={16}>
                     <div style={{ marginBottom: 12 }}>
-                      <div style={{ color: "#999", fontSize: 12 }}>평가 회차</div>
+                      <div style={{ color: "#999", fontSize: 12 }}>{t("detail.evalRoundLabel")}</div>
                       <div>
                         {latestReport.periodTitle}{" "}
                         <Tag>{latestReport.generatedAt}</Tag>
                       </div>
                     </div>
                     <div>
-                      <div style={{ color: "#999", fontSize: 12 }}>요약</div>
+                      <div style={{ color: "#999", fontSize: 12 }}>{t("detail.summaryLabel")}</div>
                       <div style={{ whiteSpace: "pre-line" }}>
-                        {latestReport.aiSummary || "요약문이 아직 생성되지 않았습니다."}
+                        {latestReport.aiSummary || t("detail.summaryEmptyMsg")}
                       </div>
                     </div>
                   </Col>
@@ -253,9 +257,9 @@ export default function EmpDetailPage() {
                 }}
               >
                 <p style={{ fontSize: 28, opacity: 0.5 }}>📄</p>
-                <p>아직 생성된 AI 리포트가 없습니다.</p>
+                <p>{t("detail.aiEmptyMsg")}</p>
                 <p style={{ fontSize: 13 }}>
-                  평가 회차가 마감되고 리포트가 생성되면 여기에 표시됩니다.
+                  {t("detail.aiEmptyHint")}
                 </p>
               </div>
             )}
@@ -265,20 +269,20 @@ export default function EmpDetailPage() {
 
       {/* 상세 정보 */}
       {emp && (
-        <Card style={{ marginBottom: 16 }} title="상세 정보">
+        <Card style={{ marginBottom: 16 }} title={t("detail.cardTitle")}>
           <Descriptions column={{ xs: 1, sm: 2, lg: 4 }}>
-            <Descriptions.Item label="사번">{emp.empNo}</Descriptions.Item>
-            <Descriptions.Item label="이름">{emp.empName}</Descriptions.Item>
-            <Descriptions.Item label="부서">{emp.deptName}</Descriptions.Item>
-            <Descriptions.Item label="직급">{emp.posName}</Descriptions.Item>
-            <Descriptions.Item label="이메일">{emp.empEmail}</Descriptions.Item>
-            <Descriptions.Item label="연락처">{emp.empMobile}</Descriptions.Item>
-            <Descriptions.Item label="입사일">{emp.hireDate}</Descriptions.Item>
-            <Descriptions.Item label="재직상태">
-              <Tag color={STATUS_TAG[emp.empStatus]}>{emp.empStatus}</Tag>
+            <Descriptions.Item label={t("detail.table.empNo")}>{emp.empNo}</Descriptions.Item>
+            <Descriptions.Item label={t("detail.table.empName")}>{emp.empName}</Descriptions.Item>
+            <Descriptions.Item label={t("detail.table.dept")}>{emp.deptName}</Descriptions.Item>
+            <Descriptions.Item label={t("detail.table.pos")}>{emp.posName}</Descriptions.Item>
+            <Descriptions.Item label={t("detail.table.email")}>{emp.empEmail}</Descriptions.Item>
+            <Descriptions.Item label={t("detail.table.mobile")}>{emp.empMobile}</Descriptions.Item>
+            <Descriptions.Item label={t("detail.table.hireDate")}>{emp.hireDate}</Descriptions.Item>
+            <Descriptions.Item label={t("detail.table.status")}>
+              <Tag color={STATUS_TAG[emp.empStatus]}>{empStatusLabel(t, emp.empStatus)}</Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="등록일">{emp.createdAt}</Descriptions.Item>
-            <Descriptions.Item label="최근 수정일">
+            <Descriptions.Item label={t("detail.table.createdAt")}>{emp.createdAt}</Descriptions.Item>
+            <Descriptions.Item label={t("detail.table.updatedAt")}>
               {emp.updatedAt}
             </Descriptions.Item>
           </Descriptions>
@@ -295,13 +299,13 @@ export default function EmpDetailPage() {
                 query: { empId },
               }}
             >
-              <Button icon={<SafetyCertificateOutlined />}>권한 관리</Button>
+              <Button icon={<SafetyCertificateOutlined />}>{t("detail.permManageBtn")}</Button>
             </Link>
             <Button
               icon={<KeyOutlined />}
               onClick={() => setPassModal("reset")}
             >
-              비밀번호 초기화
+              {t("detail.resetPasswordBtn")}
             </Button>
           </>
         )}
@@ -313,48 +317,48 @@ export default function EmpDetailPage() {
               passForm.resetFields();
             }}
           >
-            비밀번호 수정
+            {t("detail.changePasswordBtn")}
           </Button>
         )}
         <Link
           href={{ pathname: "/emp/edit", query: { empId } }}
         >
           <Button type="primary" icon={<EditOutlined />}>
-            정보 수정
+            {t("detail.editBtn")}
           </Button>
         </Link>
       </div>
 
       {/* ── 비밀번호 변경 모달 (본인) ── */}
       <Modal
-        title="비밀번호 수정"
+        title={t("detail.changePasswordModalTitle")}
         open={passModal === "change"}
         onCancel={() => setPassModal(null)}
         onOk={handleChangePassword}
-        okText="변경"
+        okText={t("detail.changeBtn")}
         okButtonProps={{ loading: passSaving }}
-        cancelText="취소"
+        cancelText={t("common:button.cancel")}
         destroyOnClose
       >
         <Form form={passForm} layout="vertical">
           <Form.Item
             name="currentPassword"
-            label="현재 비밀번호"
-            rules={[{ required: true, message: "현재 비밀번호를 입력하세요." }]}
+            label={t("detail.currentPasswordLabel")}
+            rules={[{ required: true, message: t("detail.currentPasswordRequired") }]}
           >
             <Input.Password />
           </Form.Item>
           <Form.Item
             name="newPassword"
-            label="새 비밀번호"
-            rules={[{ required: true, message: "새 비밀번호를 입력하세요." }]}
+            label={t("detail.newPasswordLabel")}
+            rules={[{ required: true, message: t("detail.newPasswordRequired") }]}
           >
             <Input.Password />
           </Form.Item>
           <Form.Item
             name="confirmPassword"
-            label="새 비밀번호 확인"
-            rules={[{ required: true, message: "비밀번호를 다시 입력하세요." }]}
+            label={t("detail.confirmPasswordLabel")}
+            rules={[{ required: true, message: t("detail.confirmPasswordRequired") }]}
           >
             <Input.Password />
           </Form.Item>
@@ -363,20 +367,18 @@ export default function EmpDetailPage() {
 
       {/* ── 비밀번호 초기화 모달 (관리자) ── */}
       <Modal
-        title="비밀번호 초기화"
+        title={t("detail.resetPasswordModalTitle")}
         open={passModal === "reset"}
         onCancel={() => setPassModal(null)}
         onOk={handleResetPassword}
-        okText="초기화"
+        okText={t("common:button.reset")}
         okButtonProps={{ danger: true, loading: passSaving }}
-        cancelText="취소"
+        cancelText={t("common:button.cancel")}
         destroyOnClose
       >
-        <p>
-          <b>{emp?.empName}</b> 사원의 비밀번호를 초기화하시겠습니까?
-        </p>
+        <p>{t("detail.resetPasswordConfirmMsg", { empName: emp?.empName })}</p>
         <p style={{ color: "#999", fontSize: 13 }}>
-          비밀번호가 기본값으로 재설정됩니다.
+          {t("detail.resetPasswordHint")}
         </p>
       </Modal>
     </div>
