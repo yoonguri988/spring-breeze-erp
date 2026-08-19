@@ -38,6 +38,10 @@ import {
   fetchAncestorDeptsRequest,
   fetchAncestorDeptsSuccess,
   fetchAncestorDeptsFailure,
+
+  fetchDeptEmpListRequest,
+  fetchDeptEmpListSuccess,
+  fetchDeptEmpListFailure,
 } from "../../reducers/dept/deptReducer";
 
 const DEPT_API_BASE = "/api/dept";
@@ -194,6 +198,24 @@ export function* fetchAncestorDepts(action) {
 }
 
 // =========================================================
+// 10) 부서(+하위부서) 소속 사원 목록 GET /api/dept/{deptId}/emp
+// action.payload: deptId
+// 응답: { list: EmpResponse[] }
+// =========================================================
+export const fetchDeptEmpListApi = (deptId) => api.get(`${DEPT_API_BASE}/${deptId}/emp`);
+
+export function* fetchDeptEmpList(action) {
+  try {
+    const deptId = action.payload;
+    const res = yield call(fetchDeptEmpListApi, deptId);
+
+    yield put(fetchDeptEmpListSuccess(res.data?.list ?? []));
+  } catch (err) {
+    yield put(fetchDeptEmpListFailure(err.response?.data?.message || "부서 소속 사원 조회에 실패하였습니다."));
+  }
+}
+
+// =========================================================
 // Watcher
 // =========================================================
 function* watchFetchDeptList() { yield takeLatest(fetchDeptListRequest.type, fetchDeptList); }
@@ -205,6 +227,7 @@ function* watchUpdateDept() { yield takeLatest(updateDeptRequest.type, updateDep
 function* watchDeleteDept() { yield takeLatest(deleteDeptRequest.type, deleteDept); }
 function* watchCheckDeptCode() { yield takeLatest(checkDeptCodeRequest.type, checkDeptCode); }
 function* watchFetchAncestorDepts() { yield takeLatest(fetchAncestorDeptsRequest.type, fetchAncestorDepts); }
+function* watchFetchDeptEmpList() { yield takeLatest(fetchDeptEmpListRequest.type, fetchDeptEmpList); }
 
 export default function* deptSaga() {
   yield all([
@@ -217,5 +240,6 @@ export default function* deptSaga() {
     call(watchDeleteDept),
     call(watchCheckDeptCode),
     call(watchFetchAncestorDepts),
+    call(watchFetchDeptEmpList),
   ]);
 }
