@@ -24,18 +24,11 @@ import {
 } from "@ant-design/icons";
 
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 import { fetchProjRequest } from "../../reducers/proj/projReducer";
 
 const { RangePicker } = DatePicker;
-
-// 상태 필터 버튼에 쓰일 옵션
-const STATUS_OPTIONS = [
-  { label: "전체", value: "" },
-  { label: "TODO", value: "TODO" },
-  { label: "DOING", value: "DOING" },
-  { label: "DONE", value: "DONE" },
-];
 
 // 상태값에 따른 태그 색상
 const STATUS_TAG_COLOR = {
@@ -47,6 +40,15 @@ const STATUS_TAG_COLOR = {
 export default function ProjListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("proj");
+
+  // 상태 필터 버튼에 쓰일 옵션
+  const STATUS_OPTIONS = [
+    { label: t("common.statusAll"), value: "" },
+    { label: "TODO", value: "TODO" },
+    { label: "DOING", value: "DOING" },
+    { label: "DONE", value: "DONE" },
+  ];
 
   const {
     projects = [],
@@ -139,7 +141,7 @@ export default function ProjListPage() {
   // 테이블 컬럼 정의
   const columns = [
     {
-      title: "프로젝트명",
+      title: t("list.table.name"),
       dataIndex: "proName",
       key: "proName",
       render: (name, record) => (
@@ -156,14 +158,14 @@ export default function ProjListPage() {
       ),
     },
     {
-      title: "설명",
+      title: t("list.table.desc"),
       dataIndex: "proDesc",
       key: "proDesc",
       ellipsis: true,
       render: (desc) => <span className="sb-table__muted">{desc || "-"}</span>,
     },
     {
-      title: "생성자",
+      title: t("list.table.creator"),
       dataIndex: "empName",
       key: "empName",
       width: 100,
@@ -171,7 +173,7 @@ export default function ProjListPage() {
       render: (name) => name || "-",
     },
     {
-      title: "참여인원",
+      title: t("list.table.memberCnt"),
       key: "memberCnt",
       width: 110,
       align: "center",
@@ -183,13 +185,13 @@ export default function ProjListPage() {
           }}
         >
           <Button type="text" size="small" icon={<TeamOutlined />}>
-            {record.memberCnt ?? 0}명
+            {record.memberCnt ?? 0}{t("list.table.memberCntSuffix")}
           </Button>
         </Link>
       ),
     },
     {
-      title: "상태",
+      title: t("list.table.status"),
       dataIndex: "proStatus",
       key: "proStatus",
       width: 100,
@@ -201,7 +203,7 @@ export default function ProjListPage() {
       ),
     },
     {
-      title: "기간",
+      title: t("list.table.period"),
       key: "period",
       width: 220,
       align: "center",
@@ -214,7 +216,7 @@ export default function ProjListPage() {
       ),
     },
     {
-      title: "등록일",
+      title: t("list.table.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       width: 120,
@@ -234,17 +236,17 @@ export default function ProjListPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            홈 <i className="bi bi-chevron-right"></i> 업무{" "}
-            <i className="bi bi-chevron-right"></i> 프로젝트
+            {t("common.breadcrumbHome")} <i className="bi bi-chevron-right"></i> {t("common.breadcrumbWork")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("common.breadcrumbProj")}
           </div>
-          <h1>프로젝트 목록</h1>
-          <p>전체 프로젝트 현황을 조회하고 관리합니다.</p>
+          <h1>{t("list.title")}</h1>
+          <p>{t("list.subtitle")}</p>
         </div>
 
         <div className="sb-page-head__actions my-3">
           <Link href="/proj/proj_create">
             <Button type="primary" size="small" icon={<PlusOutlined />}>
-              프로젝트 생성
+              {t("list.createBtn")}
             </Button>
           </Link>
         </div>
@@ -257,8 +259,8 @@ export default function ProjListPage() {
           style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}
         >
           <div style={{ display: "flex", alignItems: "center" }}>
-            <strong style={{ fontSize: 14 }}>프로젝트 목록</strong>
-            <span className="sb-badge sb-badge--gray ms-2">{totalCnt}건</span>
+            <strong style={{ fontSize: 14 }}>{t("list.cardTitle")}</strong>
+            <span className="sb-badge sb-badge--gray ms-2">{t("list.resultCount", { count: totalCnt })}</span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -267,7 +269,7 @@ export default function ProjListPage() {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               onSearch={handleSearch}
-              placeholder="프로젝트명 검색"
+              placeholder={t("list.searchPlaceholder")}
               allowClear
               enterButton={<SearchOutlined />}
             />
@@ -296,7 +298,7 @@ export default function ProjListPage() {
               });
               }}
               >
-            조회
+            {t("list.searchBtn")}
             </Button>
           </div>
         </div>
@@ -317,7 +319,7 @@ export default function ProjListPage() {
               emptyText: (
                 <Empty
                   image={<FolderOpenOutlined style={{ fontSize: 32 }} />}
-                  description="조회된 프로젝트가 없습니다."
+                  description={t("list.emptyMsg")}
                 />
               ),
             }}
@@ -334,7 +336,7 @@ export default function ProjListPage() {
           }}
           >
           <span style={{ color: "#999", fontSize: 12.5 }}>
-          총 <b>{totalCnt}</b>개 프로젝트
+          {t("list.totalCountPrefix")}<b>{totalCnt}</b>{t("list.totalCountSuffix")}
           </span>
           {totalCnt > pageSize && (
           <Pagination

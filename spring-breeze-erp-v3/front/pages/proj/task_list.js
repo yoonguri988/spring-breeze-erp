@@ -15,17 +15,10 @@ import {
 } from "@ant-design/icons";
 
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 import { fetchMyTasksRequest } from "../../reducers/task/taskReducer";
 import { checkMyReportRequest, createMyReportRequest , resetWeekState} from "../../reducers/week/weekReducer"
-
-// 상태 필터 버튼에 쓰일 옵션
-const STATUS_OPTIONS = [
-  { label: "전체", value: "" },
-  { label: "TODO", value: "TODO" },
-  { label: "DOING", value: "DOING" },
-  { label: "DONE", value: "DONE" },
-];
 
 // 상태값에 따른 태그 색상
 const STATUS_TAG_COLOR = {
@@ -37,6 +30,15 @@ const STATUS_TAG_COLOR = {
 export default function TaskListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("proj");
+
+  // 상태 필터 버튼에 쓰일 옵션
+  const STATUS_OPTIONS = [
+    { label: t("common.statusAll"), value: "" },
+    { label: "TODO", value: "TODO" },
+    { label: "DOING", value: "DOING" },
+    { label: "DONE", value: "DONE" },
+  ];
 
   const {
     myTasks = [],
@@ -110,7 +112,7 @@ export default function TaskListPage() {
       const canCreate = checkResponse.data;
 
       if (!canCreate) {
-        alert("지난 주 완료된 태스크가 없어 보고서를 생성할 수 없습니다.");
+        alert(t("task.list.reportNoDataAlert"));
         return;
       }
       // 2) pdf 생성
@@ -124,7 +126,7 @@ export default function TaskListPage() {
 
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert("보고서 생성 중 오류가 발생했습니다.");
+      alert(t("task.list.reportErrorAlert"));
     } finally {
       setReportLoading(false);
     }
@@ -133,13 +135,13 @@ export default function TaskListPage() {
   // 테이블 컬럼 정의
   const columns = [
     {
-      title: "프로젝트명",
+      title: t("task.list.table.projName"),
       dataIndex: "proName",
       key: "proName",
       render: (name) => name || "-",
     },
     {
-      title: "태스크명",
+      title: t("task.list.table.taskName"),
       dataIndex: "taskName",
       key: "taskName",
       render: (name, record) => (
@@ -151,14 +153,14 @@ export default function TaskListPage() {
       ),
     },
     {
-      title: "설명",
+      title: t("task.list.table.desc"),
       dataIndex: "taskDesc",
       key: "taskDesc",
       ellipsis: true,
       render: (desc) => <span className="sb-table__muted">{desc || "-"}</span>,
     },
     {
-      title: "상태",
+      title: t("task.list.table.status"),
       dataIndex: "taskStatus",
       key: "taskStatus",
       width: 100,
@@ -168,7 +170,7 @@ export default function TaskListPage() {
       ),
     },
     {
-      title: "비고",
+      title: t("task.list.table.remark"),
       key: "remark",
       width: 110,
       align: "center",
@@ -181,13 +183,13 @@ export default function TaskListPage() {
           (record.parentTaskId == null || record.parentTaskStatus === "DONE");
 
         if (isWaiting) {
-          return <Tag icon={<LockOutlined />}>대기중</Tag>;
+          return <Tag icon={<LockOutlined />}>{t("task.list.table.waitingTag")}</Tag>;
         }
 
         if (isDelayed) {
           return (
             <Tag icon={<WarningOutlined />} color="error">
-              지연
+              {t("task.list.table.delayedTag")}
             </Tag>
           );
         }
@@ -196,7 +198,7 @@ export default function TaskListPage() {
       },
     },
     {
-      title: "기간",
+      title: t("task.list.table.period"),
       key: "period",
       width: 220,
       render: (_, record) => (
@@ -208,7 +210,7 @@ export default function TaskListPage() {
       ),
     },
     {
-      title: "등록일",
+      title: t("task.list.table.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       width: 120,
@@ -228,11 +230,11 @@ export default function TaskListPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            홈 <i className="bi bi-chevron-right"></i> 업무{" "}
-            <i className="bi bi-chevron-right"></i> 내 태스크
+            {t("common.breadcrumbHome")} <i className="bi bi-chevron-right"></i> {t("common.breadcrumbWork")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("task.list.breadcrumbCurrent")}
           </div>
-          <h1>내 태스크 목록</h1>
-          <p>내가 참여 중인 프로젝트의 태스크 현황을 조회합니다.</p>
+          <h1>{t("task.list.title")}</h1>
+          <p>{t("task.list.subtitle")}</p>
         </div>
       </div>
 
@@ -242,8 +244,8 @@ export default function TaskListPage() {
           style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}
         >
           <div style={{ display: "flex", alignItems: "center" }}>
-            <strong style={{ fontSize: 14 }}>태스크 목록</strong>
-            <span className="sb-badge sb-badge--gray ms-2">{totalCnt}건</span>
+            <strong style={{ fontSize: 14 }}>{t("task.list.cardTitle")}</strong>
+            <span className="sb-badge sb-badge--gray ms-2">{t("task.list.resultCount", { count: totalCnt })}</span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center" }}>
@@ -264,7 +266,7 @@ export default function TaskListPage() {
               {reportLoading && (
                 <span>
                   <span className="spinner-border spinner-border-sm text-primary me-1"></span>
-                  생성 중...
+                  {t("task.list.reportGeneratingMsg")}
                 </span>
               )}
 
@@ -275,7 +277,7 @@ export default function TaskListPage() {
                 loading={reportLoading}
                 onClick={handleWeeklyReport}
               >
-                내 주간보고서
+                {t("task.list.reportBtn")}
               </Button>
             </div>
           </div>
@@ -296,7 +298,7 @@ export default function TaskListPage() {
               emptyText: (
                 <Empty
                   image={<UnorderedListOutlined style={{ fontSize: 32 }} />}
-                  description="조회된 태스크가 없습니다."
+                  description={t("task.list.emptyMsg")}
                 />
               ),
             }}
@@ -312,7 +314,7 @@ export default function TaskListPage() {
           }}
           >
           <span style={{ color: "#999", fontSize: 12.5 }}>
-          총 <b>{totalCnt}</b>개 태스크
+          {t("task.list.totalCountPrefix")}<b>{totalCnt}</b>{t("task.list.totalCountSuffix")}
           </span>
         {totalCnt > 0 && (
           <Pagination

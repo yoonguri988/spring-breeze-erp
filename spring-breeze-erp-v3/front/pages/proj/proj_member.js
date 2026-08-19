@@ -25,6 +25,7 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 import {fetchProjMemRequest,createProjMemRequest,deleteProjMemRequest,resetProjMemState} from "../../reducers/proj/projMemReducer";
 
@@ -34,6 +35,7 @@ const { TextArea } = Input;
 export default function ProjMemberPage(){
     const router = useRouter();
     const dispatch = useDispatch();
+    const { t } = useTranslation("proj");
 
     const {projectMems = [], loading, error, createSuccess, deleteSuccess} = useSelector((state)=>state.projMem);
 
@@ -49,7 +51,7 @@ export default function ProjMemberPage(){
     // 사원 검색 자동완성 결과
     const [searchResults, setSearchResults] = useState([]);
     const [searchOpen, setSearchOpen] = useState(false);
-    
+
     useEffect(() => {
     if (!router.isReady || !proId) return;
 
@@ -59,7 +61,7 @@ export default function ProjMemberPage(){
   // 등록 성공 처리
   useEffect(() => {
     if (createSuccess) {
-      message.success("프로젝트 멤버 등록이 완료되었습니다.");
+      message.success(t("member.createSuccessMsg"));
       setModalOpen(false);
       resetForm();
       dispatch(fetchProjMemRequest(proId));
@@ -70,7 +72,7 @@ export default function ProjMemberPage(){
   // 삭제 성공 처리
   useEffect(() => {
     if (deleteSuccess) {
-      message.success("프로젝트 멤버 삭제가 완료되었습니다.");
+      message.success(t("member.deleteSuccessMsg"));
       dispatch(fetchProjMemRequest(proId));
       dispatch(resetProjMemState());
     }
@@ -127,11 +129,11 @@ export default function ProjMemberPage(){
   // 멤버 추가 폼 제출
   const handleCreateSubmit = () => {
     if (!empId) {
-      message.warning("사원을 검색해서 선택해주세요.");
+      message.warning(t("member.empSelectRequired"));
       return;
     }
     if (!memberRole.trim()) {
-      message.warning("역할을 입력해주세요.");
+      message.warning(t("member.roleRequired"));
       return;
     }
 
@@ -151,64 +153,64 @@ export default function ProjMemberPage(){
 
   const columns = [
     {
-        title: "프로젝트명",
+        title: t("member.table.name"),
         dataIndex: "proName",
         key: "proName",
         render: (name,record)=>(
             <span className="sb-table__name" style={{ cursor: "pointer" }}>
             {name}
-            </span>    
+            </span>
         ),
     },
     {
-        title: "부서",
+        title: t("member.table.dept"),
         dataIndex: "deptName",
         key: "deptName",
         render: (name,record)=>(
             <span className="sb-table__name" style={{ cursor: "pointer" }}>
             {name}
-            </span>  
-        ),  
+            </span>
+        ),
     },
     {
-        title: "사원",
+        title: t("member.table.emp"),
         dataIndex: "empName",
         key: "empName",
         render: (name,record)=>(
             <span className="sb-table__name" style={{ cursor: "pointer" }}>
             {name}
-            </span>  
-        ),   
+            </span>
+        ),
     },
         {
-        title: "역할",
+        title: t("member.table.role"),
         dataIndex: "memberRole",
         key: "memberRole",
         render: (name,record)=>(
             <span className="sb-table__name" style={{ cursor: "pointer" }}>
             {name}
-            </span>  
-        ),   
+            </span>
+        ),
     },
     {
-        title: "등록일",
+        title: t("member.table.joinedAt"),
         dataIndex: "joinedAt",
         key: "joinedAt",
-        render: (value) => (value ? dayjs(value).format("YYYY-MM-DD") : "-"),   
+        render: (value) => (value ? dayjs(value).format("YYYY-MM-DD") : "-"),
     },
         {
-      title: "멤버 삭제",
+      title: t("member.table.deleteAction"),
       key: "action",
       align: "center",
       render: (_, record) => (
         <Popconfirm
-          title="이 멤버를 삭제하시겠습니까?"
+          title={t("member.deleteConfirmTitle")}
           onConfirm={() => handleDelete(record.pmId)}
-          okText="삭제"
-          cancelText="취소"
+          okText={t("member.deleteBtn")}
+          cancelText={t("common.cancelBtn")}
         >
           <Button type="text" size="small" danger icon={<DeleteOutlined />}>
-            삭제
+            {t("member.deleteBtn")}
           </Button>
         </Popconfirm>
       ),
@@ -220,26 +222,26 @@ export default function ProjMemberPage(){
     <div className="sb-page-head">
       <div className="sb-page-head__txt">
         <div className="sb-breadcrumb">
-          <Link href="/">홈</Link>
+          <Link href="/">{t("common.breadcrumbHome")}</Link>
           <i className="bi bi-chevron-right"></i>
-          업무{" "}
+          {t("common.breadcrumbWork")}{" "}
           <i className="bi bi-chevron-right"></i>
-          프로젝트{" "}
+          {t("common.breadcrumbProj")}{" "}
           <i className="bi bi-chevron-right"></i>
-          멤버관리
+          {t("member.breadcrumbCurrent")}
         </div>
-        <h1>프로젝트 멤버관리</h1>
-        <p>프로젝트에 참여하는 사원을 추가하거나 제외합니다.</p>
+        <h1>{t("member.title")}</h1>
+        <p>{t("member.subtitle")}</p>
       </div>
       <div className="sb-page-head__actions">
         <Link href="/proj/proj_list">
           <Button icon={<TeamOutlined />}>
-            목록
+            {t("common.listBtn")}
           </Button>
         </Link>
         <Link href={{ pathname: "/proj/proj_detail", query: { proId }, }} >
           <Button icon={<TeamOutlined />}>
-            프로젝트 상세조회
+            {t("member.detailBtn")}
           </Button>
         </Link>
         <Button
@@ -247,7 +249,7 @@ export default function ProjMemberPage(){
           icon={<UserAddOutlined />}
           onClick={() => setModalOpen(true)}
         >
-          멤버 추가
+          {t("member.addBtn")}
         </Button>
       </div>
     </div>
@@ -256,10 +258,10 @@ export default function ProjMemberPage(){
       <div className="sb-toolbar">
         <div style={{ display: "flex", alignItems: "center" }}>
           <strong style={{ fontSize: 14 }}>
-            프로젝트 멤버 목록
+            {t("member.listTitle")}
           </strong>
           <span className="sb-badge sb-badge--gray ms-2">
-            {projectMems.length}명
+            {projectMems.length}{t("member.memberCountSuffix")}
           </span>
         </div>
       </div>
@@ -276,7 +278,7 @@ export default function ProjMemberPage(){
                 image={
                   <TeamOutlined style={{ fontSize: 32 }} />
                 }
-                description="등록된 멤버가 없습니다."
+                description={t("member.emptyMsg")}
               />
             ),
           }}
@@ -286,19 +288,19 @@ export default function ProjMemberPage(){
 
     {/* 멤버 추가 모달 */}
     <Modal
-      title="멤버추가"
+      title={t("member.addModalTitle")}
       open={modalOpen}
       onOk={handleCreateSubmit}
       onCancel={() => {
         setModalOpen(false);
         resetForm();
       }}
-      okText="추가"
-      cancelText="취소"
+      okText={t("member.modalOkText")}
+      cancelText={t("member.modalCancelText")}
       confirmLoading={loading}
     >
       <div className="mb-3" style={{ position: "relative" }} >
-        <label htmlFor="empName" className="sb-form-label" > 사원이름 </label>
+        <label htmlFor="empName" className="sb-form-label" > {t("member.empNameLabel")} </label>
         <Input
           id="empName"
           value={empName}
@@ -317,7 +319,7 @@ export default function ProjMemberPage(){
           >
             {searchResults.length === 0 ? (
               <li className="list-group-item text-muted">
-                검색결과 없음
+                {t("member.noSearchResult")}
               </li>
             ) : (
               searchResults.map((emp) => (
@@ -335,7 +337,7 @@ export default function ProjMemberPage(){
         )}
       </div>
       <div className="mb-3">
-        <label htmlFor="empId" className="sb-form-label" > 사원번호 </label>
+        <label htmlFor="empId" className="sb-form-label" > {t("member.empNoLabel")} </label>
         <Input
           id="empId"
           value={empId}
@@ -343,7 +345,7 @@ export default function ProjMemberPage(){
         />
       </div>
       <div className="mb-3">
-        <label htmlFor="memberRole" className="sb-form-label" > 역할 </label>
+        <label htmlFor="memberRole" className="sb-form-label" > {t("member.roleLabel")} </label>
         <TextArea
           id="memberRole"
           value={memberRole}

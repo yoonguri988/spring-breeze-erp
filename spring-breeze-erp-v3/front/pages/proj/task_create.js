@@ -1,9 +1,12 @@
+// pages/proj/task_create.js
+
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
 import { Button, Input, Select, DatePicker, message } from "antd";
+import { useTranslation } from "react-i18next";
 import { createTaskRequest, createTaskContextRequest } from "../../reducers/task/taskReducer";
 
 import moment from "moment";
@@ -20,6 +23,7 @@ export default function TaskCreatePage() {
     const router = useRouter();
     const { proId } = router.query;
     const dispatch = useDispatch();
+    const { t } = useTranslation("proj");
 
     const { loading, error, success, createContext } = useSelector((state) => state.task);
     const { memberList, taskList } = createContext;
@@ -57,13 +61,13 @@ export default function TaskCreatePage() {
     };
 
     const onFinish = () => {
-    if (!taskName.trim()) { message.warning("태스크명을 입력하세요."); return; }
-    if (!taskDesc.trim()) { message.warning("태스크 설명을 입력하세요."); return; }
-    if (!taskStatus) { message.warning("상태를 선택하세요."); return; }
-    if (!pmId) { message.warning("담당자를 선택하세요."); return; }
-    if (!taskStartDate) { message.warning("시작일을 선택하세요."); return; }
-    if (!taskEndDate) { message.warning("종료일을 선택하세요."); return; }
-    if (moment(taskStartDate).isAfter(moment(taskEndDate))) { message.warning("종료일은 시작일 이후로 선택하세요."); return; }
+    if (!taskName.trim()) { message.warning(t("task.create.nameRequired")); return; }
+    if (!taskDesc.trim()) { message.warning(t("task.create.descRequired")); return; }
+    if (!taskStatus) { message.warning(t("task.create.statusRequired")); return; }
+    if (!pmId) { message.warning(t("task.create.assigneeRequired")); return; }
+    if (!taskStartDate) { message.warning(t("task.create.startDateRequired")); return; }
+    if (!taskEndDate) { message.warning(t("task.create.endDateRequired")); return; }
+    if (moment(taskStartDate).isAfter(moment(taskEndDate))) { message.warning(t("task.create.dateOrderError")); return; }
 
     dispatch(
       createTaskRequest({
@@ -84,16 +88,16 @@ export default function TaskCreatePage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link>
+            <Link href="/">{t("common.breadcrumbHome")}</Link>
             <i className="bi bi-chevron-right"></i>
-            업무
+            {t("common.breadcrumbWork")}
             <i className="bi bi-chevron-right"></i>
-            태스크
+            {t("common.taskLabel")}
             <i className="bi bi-chevron-right"></i>
-            생성
+            {t("task.create.breadcrumbCurrent")}
           </div>
-          <h1>태스크 생성</h1>
-          <p>프로젝트에 새 태스크를 추가합니다.</p>
+          <h1>{t("task.create.title")}</h1>
+          <p>{t("task.create.subtitle")}</p>
         </div>
       </div>
 
@@ -102,25 +106,25 @@ export default function TaskCreatePage() {
           <form id="taskCreateForm" onSubmit={(e) => { e.preventDefault(); }}>
             <div className="mb-3">
               <label htmlFor="task_name" className="sb-form-label">
-                태스크명
+                {t("task.create.nameLabel")}
               </label>
-              <Input id="task_name" 
-                     name="task_name" 
+              <Input id="task_name"
+                     name="task_name"
                      value={taskName}
                      onChange={(e)=>setTaskName(e.target.value)}
-                     placeholder="태스크명을 입력하세요" />
+                     placeholder={t("task.create.namePlaceholder")} />
             </div>
 
             <div className="mb-3">
               <label htmlFor="task_desc" className="sb-form-label">
-                태스크 설명
+                {t("task.create.descLabel")}
               </label>
               <TextArea
                 id="task_desc"
                 name="task_desc"
                 value={taskDesc}
                 onChange={(e)=>setTaskDesc(e.target.value)}
-                placeholder="태스크에 대한 설명을 입력하세요"
+                placeholder={t("task.create.descPlaceholder")}
                 rows={4}
               />
             </div>
@@ -128,20 +132,20 @@ export default function TaskCreatePage() {
             <div className="row g-3 mb-3">
               <div className="col-md-4">
                 <label htmlFor="task_status" className="sb-form-label">
-                  상태
+                  {t("task.create.statusLabel")}
                 </label>
                 <Select
                   id="task_status"
                   value={taskStatus || undefined}
                   onChange={(value) => setTaskStatus(value)}
                   options={STATUS_OPTIONS}
-                  placeholder="상태를 선택하세요"
+                  placeholder={t("task.create.statusPlaceholder")}
                   style={{ width: "100%" }}
                 />
               </div>
               <div className="col-md-4">
                 <label htmlFor="pm_id_name" className="sb-form-label">
-                  담당자 선택
+                  {t("task.create.assigneeLabel")}
                 </label>
                 <Select
                 value={pmId || undefined}
@@ -150,13 +154,13 @@ export default function TaskCreatePage() {
                     label: m.empName,
                     value: m.pmId,
                 }))}
-                placeholder="담당자 선택"
+                placeholder={t("task.create.assigneePlaceholder")}
                 style={{ width: "100%" }}
                 />
                 </div>
                 <div className="col-md-4">
                 <label htmlFor="reg_date" className="sb-form-label">
-                    등록일
+                    {t("task.create.regDateLabel")}
                 </label>
                 <Input
                     id="reg_date"
@@ -168,24 +172,24 @@ export default function TaskCreatePage() {
                 </div>
                 <div className="mb-3">
                 <label className="sb-form-label">
-                    선행 작업
+                    {t("task.create.parentTaskLabel")}
                     <span
                     className="text-faint"
                     style={{ fontWeight: 400, fontSize: "12px" }}
                     >
-                    {" "} (선택, 이 작업이 끝나야 시작 가능)
+                    {t("task.create.parentTaskHint")}
                     </span>
                 </label>
                 <Select
                     value={parentTaskId || undefined}
                     onChange={(value) => setParentTaskId(value)}
-                    placeholder="선행 작업 없음"
+                    placeholder={t("task.create.parentTaskPlaceholder")}
                     allowClear
-                    options={taskList.map((t) => ({
-                    label: `[${t.taskStatus}] ${t.taskName} (~${moment(
-                        t.taskEndDate
+                    options={taskList.map((tk) => ({
+                    label: `[${tk.taskStatus}] ${tk.taskName} (~${moment(
+                        tk.taskEndDate
                     ).format("YYYY-MM-DD")})`,
-                    value: t.taskId,
+                    value: tk.taskId,
                     }))}
                     style={{ width: "100%" }}
                 />
@@ -193,7 +197,7 @@ export default function TaskCreatePage() {
             <div className="row g-3 mb-4">
               <div className="col-md-6">
                 <label htmlFor="task_start_date" className="sb-form-label">
-                  시작일
+                  {t("task.create.startDateLabel")}
                 </label>
                 <DatePicker
                 id="task_start_date"
@@ -206,7 +210,7 @@ export default function TaskCreatePage() {
 
               <div className="col-md-6">
                 <label htmlFor="task_end_date" className="sb-form-label">
-                  종료일
+                  {t("task.create.endDateLabel")}
                 </label>
                 <DatePicker
                 id="task_end_date"
@@ -224,15 +228,15 @@ export default function TaskCreatePage() {
 
             <div className="d-flex justify-content-end gap-2">
               <Button type="default" htmlType="button" onClick={() => router.back()}>
-                취소
+                {t("common.cancelBtn")}
               </Button>
 
               <Link href="/proj/proj_list">
-                <Button>목록</Button>
+                <Button>{t("common.listBtn")}</Button>
               </Link>
 
               <Button type="primary" htmlType="button" loading={loading} onClick={onFinish}>
-                등록
+                {t("task.create.submitBtn")}
               </Button>
             </div>
           </form>

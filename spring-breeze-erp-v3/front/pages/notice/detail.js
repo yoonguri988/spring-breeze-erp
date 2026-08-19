@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 
 import { Button, message } from "antd";
+import { useTranslation } from "react-i18next";
 import {
   fetchNoticeDetailRequest,
   deleteNoticeRequest,
@@ -16,6 +17,7 @@ import api from "../../api/axios";
 export default function NoticeDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["notice", "common"]);
   const { bno } = router.query;
 
   const { currentNotice: notice, loading, error, deleteSuccess } = useSelector(
@@ -35,7 +37,7 @@ export default function NoticeDetailPage() {
 
   useEffect(() => {
     if (deleteSuccess) {
-      message.success("공지사항이 삭제되었습니다.");
+      message.success(t("detail.deleteSuccessMsg"));
       dispatch(resetNoticeState());
       router.push("/notice/list");
     }
@@ -66,7 +68,7 @@ export default function NoticeDetailPage() {
         setFileObjUrl(objectUrl);
       })
       .catch(() => {
-        message.error("첨부파일을 불러오지 못했습니다.");
+        message.error(t("detail.fileLoadError"));
       });
 
     return () => {
@@ -75,7 +77,7 @@ export default function NoticeDetailPage() {
   }, [fileName, bno]);
 
   const handleDelete = () => {
-    if (window.confirm("정말 삭제하시겠습니까?")) {
+    if (window.confirm(t("detail.deleteConfirm"))) {
       dispatch(deleteNoticeRequest({ bno }));
     }
   };
@@ -100,7 +102,7 @@ if (fileObjUrl) {
             className="btn btn-sb-soft"
           >
             <i className="bi bi-download"></i>
-            {" 다운로드"}
+            {" " + t("detail.downloadBtn")}
           </a>
         </div>
       </div>
@@ -130,7 +132,7 @@ if (fileObjUrl) {
           className="btn btn-sb-soft"
         >
           <i className="bi bi-download"></i>
-          {" 다운로드"}
+          {" " + t("detail.downloadBtn")}
         </a>
       </div>
     );
@@ -142,33 +144,33 @@ if (fileObjUrl) {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link>
+            <Link href="/">{t("detail.breadcrumbHome")}</Link>
             <i className="bi bi-chevron-right"></i>
-            업무
+            {t("detail.breadcrumbWork")}
             <i className="bi bi-chevron-right"></i>
-            <Link href="/notice/list">공지 관리</Link>
+            <Link href="/notice/list">{t("detail.breadcrumbList")}</Link>
             <i className="bi bi-chevron-right"></i>
-            상세보기
+            {t("detail.breadcrumbCurrent")}
           </div>
-          <h1>공지 상세</h1>
-          <p>공지사항 내용을 확인합니다.</p>
+          <h1>{t("detail.title")}</h1>
+          <p>{t("detail.subtitle")}</p>
         </div>
       </div>
 
       <div className="sb-card mb-3">
         <div className="sb-card__body">
           <div className="mb-3">
-            <label className="sb-form-label">제목</label>
+            <label className="sb-form-label">{t("detail.titleLabel")}</label>
             <input type="text" className="form-control" value={notice?.btitle || ""} readOnly />
           </div>
           <div className="mb-3">
-            <label className="sb-form-label">내용</label>
+            <label className="sb-form-label">{t("detail.contentLabel")}</label>
             <textarea className="form-control" rows={10} readOnly value={notice?.bcontent || ""} />
           </div>
 
           {notice?.bfile && (
             <div className="mb-3">
-              <label className="sb-form-label">첨부파일</label>
+              <label className="sb-form-label">{t("detail.attachmentLabel")}</label>
               <div className="mt-2">{attachmentEl}</div>
             </div>
           )}
@@ -177,15 +179,15 @@ if (fileObjUrl) {
         <div className="sb-card__footer d-flex justify-content-end gap-2 mb-3 pe-3">
           <Button type="default" className="btn btn-sb-soft" onClick={() => router.push(`/notice/edit?bno=${bno}`)}>
             <i className="bi bi-pencil-square"></i>
-            수정
+            {t("detail.editBtn")}
           </Button>
           <Button type="default" className="btn btn-outline-danger" loading={loading} onClick={handleDelete}>
             <i className="bi bi-trash"></i>
-            삭제
+            {t("detail.deleteBtn")}
           </Button>
           <Button type="default" className="btn btn-sb" onClick={() => router.push("/notice/list")}>
             <i className="bi bi-list"></i>
-            목록
+            {t("detail.listBtn")}
           </Button>
         </div>
       </div>

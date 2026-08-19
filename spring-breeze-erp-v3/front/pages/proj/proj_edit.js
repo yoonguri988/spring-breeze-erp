@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Button, Input, Select, DatePicker, message } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 import { fetchProjDetailRequest, updateProjRequest, } from "../../reducers/proj/projReducer";
 
@@ -22,6 +23,7 @@ const STATUS_OPTIONS = [
 export default function ProjEditPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("proj");
 
   const { currentProject, loading, error, success } = useSelector(
     (state) => state.proj
@@ -71,7 +73,7 @@ export default function ProjEditPage() {
   useEffect(() => {
     if (!success) return;
 
-    message.success("프로젝트가 수정되었습니다.");
+    message.success(t("edit.successMsg"));
 
     router.push({
       pathname: "/proj/proj_detail",
@@ -89,12 +91,12 @@ export default function ProjEditPage() {
   };
 
   const handleSubmit = () => {
-    if (!form.proName.trim()) { message.warning("프로젝트명을 입력하세요."); return; }
-    if (!form.proDesc.trim()) { message.warning("프로젝트 설명을 입력하세요."); return; }
-    if (!form.proStatus) { message.warning("상태를 선택하세요."); return; }
-    if (!form.startDate) { message.warning("시작일을 선택하세요."); return; }
-    if (!form.endDate) { message.warning("종료일을 선택하세요."); return; }
-    if (dayjs(form.startDate).isAfter(dayjs(form.endDate))) { message.warning("종료일은 시작일보다 빠를 수 없습니다."); return; }
+    if (!form.proName.trim()) { message.warning(t("edit.nameRequired")); return; }
+    if (!form.proDesc.trim()) { message.warning(t("edit.descRequired")); return; }
+    if (!form.proStatus) { message.warning(t("edit.statusRequired")); return; }
+    if (!form.startDate) { message.warning(t("edit.startDateRequired")); return; }
+    if (!form.endDate) { message.warning(t("edit.endDateRequired")); return; }
+    if (dayjs(form.startDate).isAfter(dayjs(form.endDate))) { message.warning(t("edit.dateOrderError")); return; }
 
     dispatch(
       updateProjRequest({
@@ -127,21 +129,21 @@ export default function ProjEditPage() {
         <div className="sb-page-head">
           <div className="sb-page-head__txt">
             <div className="sb-breadcrumb">
-              홈 <i className="bi bi-chevron-right"></i> 업무{" "}
-              <i className="bi bi-chevron-right"></i> 프로젝트{" "}
-              <i className="bi bi-chevron-right"></i> 수정
+              {t("common.breadcrumbHome")} <i className="bi bi-chevron-right"></i> {t("common.breadcrumbWork")}{" "}
+              <i className="bi bi-chevron-right"></i> {t("common.breadcrumbProj")}{" "}
+              <i className="bi bi-chevron-right"></i> {t("edit.breadcrumbCurrent")}
             </div>
 
-            <h1>프로젝트 수정</h1>
-            <p>프로젝트 정보를 수정합니다.</p>
+            <h1>{t("edit.title")}</h1>
+            <p>{t("edit.subtitle")}</p>
           </div>
         </div>
 
         <div className="sb-card">
           <div className="sb-card__body text-center">
             {loading
-              ? "프로젝트 정보를 불러오는 중입니다..."
-              : "프로젝트 정보를 찾을 수 없습니다."}
+              ? t("edit.loadingMsg")
+              : t("edit.notFoundMsg")}
           </div>
         </div>
       </main>
@@ -154,12 +156,12 @@ export default function ProjEditPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            홈 <i className="bi bi-chevron-right"></i> 업무{" "}
-            <i className="bi bi-chevron-right"></i> 프로젝트{" "}
-            <i className="bi bi-chevron-right"></i> 수정
+            {t("common.breadcrumbHome")} <i className="bi bi-chevron-right"></i> {t("common.breadcrumbWork")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("common.breadcrumbProj")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("edit.breadcrumbCurrent")}
           </div>
-          <h1>프로젝트 수정</h1>
-          <p>프로젝트 정보를 수정합니다.</p>
+          <h1>{t("edit.title")}</h1>
+          <p>{t("edit.subtitle")}</p>
         </div>
       </div>
       <div className="sb-card">
@@ -170,33 +172,33 @@ export default function ProjEditPage() {
             </div>
           )}
           <div className="mb-3">
-            <label className="sb-form-label"> 프로젝트명 </label>
+            <label className="sb-form-label"> {t("edit.nameLabel")} </label>
             <Input
               value={form.proName}
               onChange={(e) =>
                 handleChange("proName", e.target.value)
               }
-              placeholder="프로젝트명을 입력하세요"
+              placeholder={t("edit.namePlaceholder")}
             />
           </div>
           <div className="mb-3">
-            <label className="sb-form-label"> 프로젝트 설명 </label>
+            <label className="sb-form-label"> {t("edit.descLabel")} </label>
             <TextArea
               rows={4}
               value={form.proDesc}
               onChange={(e) =>
                 handleChange("proDesc", e.target.value)
               }
-              placeholder="프로젝트에 대한 설명을 입력하세요"
+              placeholder={t("edit.descPlaceholder")}
             />
           </div>
           <div className="row g-3 mb-3">
             <div className="col-md-4">
-              <label className="sb-form-label"> 상태 </label>
+              <label className="sb-form-label"> {t("edit.statusLabel")} </label>
               <Select
                 value={form.proStatus || undefined}
                 options={STATUS_OPTIONS}
-                placeholder="상태를 선택하세요"
+                placeholder={t("edit.statusPlaceholder")}
                 onChange={(value) =>
                   handleChange("proStatus", value)
                 }
@@ -204,7 +206,7 @@ export default function ProjEditPage() {
               />
             </div>
             <div className="col-md-4">
-              <label className="sb-form-label"> 시작일 </label>
+              <label className="sb-form-label"> {t("edit.startDateLabel")} </label>
               <DatePicker
                 value={
                   form.startDate
@@ -224,7 +226,7 @@ export default function ProjEditPage() {
               />
             </div>
             <div className="col-md-4">
-              <label className="sb-form-label"> 종료일 </label>
+              <label className="sb-form-label"> {t("edit.endDateLabel")} </label>
               <DatePicker
                 value={
                   form.endDate
@@ -245,7 +247,7 @@ export default function ProjEditPage() {
             </div>
           </div>
           <div className="mb-4">
-            <label className="sb-form-label"> 수정일 </label>
+            <label className="sb-form-label"> {t("edit.updatedAtLabel")} </label>
             <Input
               value={ dto.updatedAt ? dayjs(dto.updatedAt).format( "YYYY-MM-DD HH:mm:ss" ) : "-" }
               readOnly
@@ -257,9 +259,9 @@ export default function ProjEditPage() {
           </div>
           <div className="sb-divider"></div>
           <div className="d-flex justify-content-end gap-2">
-            <Button onClick={handleCancel}> 취소 </Button>
+            <Button onClick={handleCancel}> {t("common.cancelBtn")} </Button>
             <Link href="/proj/proj_list">
-              <Button> 목록 </Button>
+              <Button> {t("common.listBtn")} </Button>
             </Link>
             <Button
               type="primary"
@@ -267,7 +269,7 @@ export default function ProjEditPage() {
               loading={loading}
               onClick={handleSubmit}
             >
-              수정
+              {t("edit.submitBtn")}
             </Button>
           </div>
         </div>
