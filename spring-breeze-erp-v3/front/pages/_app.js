@@ -26,6 +26,7 @@ import "../styles/css/notice.css";
 import "../styles/css/perm.css";
 import "../styles/css/project.css";
 import "../styles/css/resv.css";
+import "../styles/frappe-gantt.css";
 
 const NO_LAYOUT_PREFIXES = ["/auth"];
 

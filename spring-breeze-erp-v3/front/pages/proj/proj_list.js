@@ -323,24 +323,30 @@ export default function ProjListPage() {
             }}
           />
         </div>
-
         {/* 페이지네이션 */}
-        {totalCnt > 0 && (
-          <div
-            className="d-flex justify-content-center py-3"
-            style={{ borderTop: "1px solid var(--sb-border)" }}
+        <div
+          style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "14px 16px",
+          borderTop: "1px solid var(--sb-border)",
+          }}
           >
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={totalCnt}
-              showSizeChanger
-              pageSizeOptions={["10", "20", "30", "50"]}
-              onChange={handlePageChange}
-              onShowSizeChange={handlePageSizeChange}
-            />
+          <span style={{ color: "#999", fontSize: 12.5 }}>
+          총 <b>{totalCnt}</b>개 프로젝트
+          </span>
+          {totalCnt > pageSize && (
+          <Pagination
+          size="small"
+          current={currentPage}
+          total={totalCnt}
+          pageSize={pageSize}
+          showSizeChanger={false}
+          onChange={handlePageChange}
+          />
+          )}
           </div>
-        )}
       </div>
     </main>
   );
