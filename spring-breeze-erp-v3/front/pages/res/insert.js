@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Input, InputNumber, Select, message } from "antd";
 import { ArrowLeftOutlined, CheckOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   addResourceRequest,
@@ -13,22 +14,24 @@ import {
 } from "../../reducers/res/resourceReducer";
 import { listEmpRequest, resetEmpState } from "../../reducers/emp/empReducer";
 
-const RES_TYPE_OPTIONS = [
-  { value: "ROOM", label: "회의실" },
-  { value: "EQUIPMENT", label: "장비" },
-  { value: "VEHICLE", label: "차량" },
-];
-
-const RES_STATUS_OPTIONS = [
-  { value: "AVAILABLE", label: "사용가능" },
-  { value: "MAINTENANCE", label: "점검중" },
-  { value: "DISABLED", label: "사용중지" },
-];
+// label 은 i18n/locales/{ko,en}/res.json 의 enum.resType / enum.resStatus 키와 매핑됩니다.
+const RES_TYPE_VALUES = ["ROOM", "EQUIPMENT", "VEHICLE"];
+const RES_STATUS_VALUES = ["AVAILABLE", "MAINTENANCE", "DISABLED"];
 
 export default function ResourceInsertPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["res", "common"]);
   const [form] = Form.useForm();
+
+  const resTypeOptions = RES_TYPE_VALUES.map((v) => ({
+    value: v,
+    label: t(`enum.resType.${v}`),
+  }));
+  const resStatusOptions = RES_STATUS_VALUES.map((v) => ({
+    value: v,
+    label: t(`enum.resStatus.${v}`),
+  }));
 
   const { resCodeCheck, loading, error, success } = useSelector(
     (state) => state.resource,
@@ -49,7 +52,7 @@ export default function ResourceInsertPage() {
   useEffect(() => {
     if (!submitting) return;
     if (success) {
-      message.success("자원이 등록되었습니다.");
+      message.success(t("insert.successMessage"));
       setSubmitting(false);
       dispatch(resetResourceState());
       router.push(backUrl);
@@ -77,11 +80,11 @@ export default function ResourceInsertPage() {
 
   const onFinish = (values) => {
     if (resCodeCheck?.checked && resCodeCheck?.duplicate) {
-      message.error("이미 사용 중인 자원코드입니다.");
+      message.error(t("insert.duplicateCodeError"));
       return;
     }
     if (values.resType === "ROOM" && !values.capacity) {
-      message.error("회의실은 수용인원을 입력해야 합니다.");
+      message.error(t("shared.roomCapacityRequired"));
       return;
     }
     setSubmitting(true);
@@ -105,15 +108,16 @@ export default function ResourceInsertPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/res/list">자원 관리</Link> · 자원 등록
+            <Link href="/res/list">{t("shared.title")}</Link> ·{" "}
+            {t("insert.breadcrumbCurrent")}
           </div>
-          <h1>자원 등록</h1>
-          <p>예약에 사용할 회의실, 장비, 차량 정보를 입력합니다.</p>
+          <h1>{t("insert.title")}</h1>
+          <p>{t("insert.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href={backUrl}>
             <Button icon={<ArrowLeftOutlined />} size="small">
-              목록으로
+              {t("shared.backToList")}
             </Button>
           </Link>
         </div>
@@ -130,18 +134,21 @@ export default function ResourceInsertPage() {
       >
         <div className="sb-card mb-3">
           <div className="sb-card__head">
-            <h2>기본 정보</h2>
-            <span className="sub">표시는 필수 입력 항목입니다.</span>
+            <h2>{t("shared.basicInfoTitle")}</h2>
+            <span className="sub">{t("insert.requiredNote")}</span>
           </div>
           <div className="sb-card__body">
             <div className="row g-3">
               <div className="col-md-3">
                 <Form.Item
-                  label="자원코드"
+                  label={t("field.resCode")}
                   name="resCode"
                   required
                   rules={[
-                    { required: true, message: "자원코드를 입력하세요." },
+                    {
+                      required: true,
+                      message: t("insert.validation.resCodeRequired"),
+                    },
                   ]}
                   validateStatus={
                     resCodeCheck?.checked && resCodeCheck?.duplicate
@@ -150,12 +157,12 @@ export default function ResourceInsertPage() {
                   }
                   help={
                     resCodeCheck?.checked && resCodeCheck?.duplicate
-                      ? "이미 사용 중인 자원코드입니다."
+                      ? t("insert.duplicateCodeError")
                       : undefined
                   }
                 >
                   <Input
-                    placeholder="예: RM004"
+                    placeholder={t("insert.placeholder.resCode")}
                     maxLength={50}
                     onBlur={handleCodeBlur}
                   />
@@ -163,50 +170,60 @@ export default function ResourceInsertPage() {
               </div>
               <div className="col-md-6">
                 <Form.Item
-                  label="자원명"
+                  label={t("field.resName")}
                   name="resName"
                   required
-                  rules={[{ required: true, message: "자원명을 입력하세요." }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("insert.validation.resNameRequired"),
+                    },
+                  ]}
                 >
                   <Input
-                    placeholder="예: 대회의실, 노트북, 카니발"
+                    placeholder={t("insert.placeholder.resName")}
                     maxLength={100}
                   />
                 </Form.Item>
               </div>
               <div className="col-md-3">
-                <Form.Item label="자원 유형" name="resType">
-                  <Select options={RES_TYPE_OPTIONS} />
+                <Form.Item label={t("field.resType")} name="resType">
+                  <Select options={resTypeOptions} />
                 </Form.Item>
               </div>
 
               <div className="col-md-4">
-                <Form.Item label="위치" name="location">
+                <Form.Item label={t("field.location")} name="location">
                   <Input
-                    placeholder="예: 본관 3층, 지하주차장 2호기"
+                    placeholder={t("insert.placeholder.location")}
                     maxLength={200}
                   />
                 </Form.Item>
               </div>
               <div className="col-md-2">
                 <Form.Item
-                  label="수량"
+                  label={t("field.quantity")}
                   name="quantity"
-                  rules={[{ required: true, message: "수량을 입력하세요." }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("shared.quantityRequired"),
+                    },
+                  ]}
                 >
                   <InputNumber min={0} style={{ width: "100%" }} />
                 </Form.Item>
               </div>
               <div className="col-md-3">
                 <Form.Item
-                  label="수용인원"
+                  label={t("field.capacity")}
                   name="capacity"
                   rules={[
                     {
                       validator: (_, value) => {
                         if (resType === "ROOM" && !value) {
                           return Promise.reject(
-                            new Error("회의실은 수용인원을 입력해야 합니다."),
+                            new Error(t("shared.roomCapacityRequired")),
                           );
                         }
                         return Promise.resolve();
@@ -216,31 +233,31 @@ export default function ResourceInsertPage() {
                 >
                   <InputNumber
                     min={1}
-                    placeholder="회의실인 경우 입력"
+                    placeholder={t("shared.capacityPlaceholder")}
                     style={{ width: "100%" }}
                   />
                 </Form.Item>
                 <div className="text-faint mt-1" style={{ fontSize: 12 }}>
-                  장비·차량은 비워두셔도 됩니다.
+                  {t("shared.capacityHint")}
                 </div>
               </div>
               <div className="col-md-3">
-                <Form.Item label="상태" name="resStatus">
-                  <Select options={RES_STATUS_OPTIONS} />
+                <Form.Item label={t("field.resStatus")} name="resStatus">
+                  <Select options={resStatusOptions} />
                 </Form.Item>
               </div>
 
               <div className="col-12">
-                <Form.Item label="비고" name="remark">
-                  <Input placeholder="필요한 설명을 입력하세요" />
+                <Form.Item label={t("field.remark")} name="remark">
+                  <Input placeholder={t("insert.placeholder.remark")} />
                 </Form.Item>
               </div>
 
               <div className="col-12">
-                <Form.Item label="담당자" name="managerEmpId">
+                <Form.Item label={t("field.manager")} name="managerEmpId">
                   <Select
                     allowClear
-                    placeholder="지정 안 함"
+                    placeholder={t("shared.managerPlaceholder")}
                     options={(empList?.list || []).map((e) => ({
                       value: String(e.empId),
                       label: `${e.empName} (${e.posName})`,
@@ -254,7 +271,7 @@ export default function ResourceInsertPage() {
 
         <div className="d-flex gap-2 justify-content-end">
           <Link href={backUrl}>
-            <Button>취소</Button>
+            <Button>{t("common:button.cancel")}</Button>
           </Link>
           <Button
             type="primary"
@@ -262,7 +279,7 @@ export default function ResourceInsertPage() {
             icon={<CheckOutlined />}
             loading={submitting && loading}
           >
-            등록하기
+            {t("insert.submitButton")}
           </Button>
         </div>
       </Form>
