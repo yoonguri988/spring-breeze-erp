@@ -19,10 +19,10 @@ import headerKo from "./locales/ko/header.json";
 import sidebarKo from "./locales/ko/sidebar.json";
 import footerKo from "./locales/ko/footer.json";
 import authKo from "./locales/ko/auth.json";
+import comKo from "./locales/ko/com.json";
 // import dashboardKo from "./locales/ko/dashboard.json";
 // import deptKo from "./locales/ko/dept.json";
 // import empKo from "./locales/ko/emp.json";
-// import comKo from "./locales/ko/com.json";
 // import apprKo from "./locales/ko/appr.json";
 // import resvKo from "./locales/ko/resv.json";
 // import resKo from "./locales/ko/res.json";
@@ -34,10 +34,10 @@ import headerEn from "./locales/en/header.json";
 import sidebarEn from "./locales/en/sidebar.json";
 import footerEn from "./locales/en/footer.json";
 import authEn from "./locales/en/auth.json";
+import comEn from "./locales/en/com.json";
 // import dashboardEn from "./locales/en/dashboard.json";
 // import deptEn from "./locales/en/dept.json";
 // import empEn from "./locales/en/emp.json";
-// import comEn from "./locales/en/com.json";
 // import apprEn from "./locales/en/appr.json";
 // import resvEn from "./locales/en/resv.json";
 // import resEn from "./locales/en/res.json";
@@ -56,10 +56,10 @@ const resources = {
     sidebar: sidebarKo,
     footer: footerKo,
     auth: authKo,
+    com: comKo,
     // dashboard: dashboardKo,
     // dept: deptKo,
     // emp: empKo,
-    // com: comKo,
     // appr: apprKo,
     // resv: resvKo,
     // res: resKo,
@@ -72,10 +72,10 @@ const resources = {
     sidebar: sidebarEn,
     footer: footerEn,
     auth: authEn,
+    com: comEn,
     // dashboard: dashboardEn,
     // dept: deptEn,
     // emp: empEn,
-    // com: comEn,
     // appr: apprEn,
     // resv: resvEn,
     // res: resEn,

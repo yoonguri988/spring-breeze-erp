@@ -31,6 +31,7 @@ import {
   AppstoreOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchCompanyListRequest,
@@ -43,27 +44,25 @@ import {
 
 import StatTile from "../../components/StatTile";
 import resolveFileUrl from "../../constants/resolveFileUrl";
-// 업종 대분류 코드 <-> 라벨 (com-list 화면 전용, 원본 list.html 기준)
-const INDUSTRY_GRP_OPTIONS = [
-  { value: "", label: "전체 업종" },
-  { value: "C", label: "제조업" },
-  { value: "F", label: "건설업" },
-  { value: "G", label: "도매 및 소매업" },
-  { value: "H", label: "운수 및 창고업" },
-  { value: "I", label: "숙박 및 음식점업" },
-  { value: "J", label: "정보통신업" },
-  { value: "K", label: "금융 및 보험업" },
-  { value: "M", label: "전문, 과학 및 기술 서비스업" },
+// 업종 대분류 코드 <-> 번역 key (com-list 화면 전용, 원본 list.html 기준)
+// 실제 라벨 텍스트는 i18n/locales/{ko,en}/com.json 의 list.industry.* 키에서 조회합니다.
+const INDUSTRY_GRP_CODES = [
+  { value: "", key: "all" },
+  { value: "C", key: "manufacturing" },
+  { value: "F", key: "construction" },
+  { value: "G", key: "wholesaleRetail" },
+  { value: "H", key: "transportation" },
+  { value: "I", key: "accommodationFood" },
+  { value: "J", key: "informationCommunication" },
+  { value: "K", key: "financeInsurance" },
+  { value: "M", key: "professionalScientific" },
 ];
-const INDUSTRY_GRP_MAP = INDUSTRY_GRP_OPTIONS.reduce((acc, cur) => {
-  if (cur.value) acc[cur.value] = cur.label;
-  return acc;
-}, {});
 
 export default function ComListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const { t, i18n } = useTranslation(["com", "common"]);
 
   const {
     list,
@@ -121,7 +120,7 @@ export default function ComListPage() {
     if (!deleting || loading) return;
 
     if (success) {
-      message.success(companyMessage || "회사가 삭제되었습니다.");
+      message.success(companyMessage || t("edit.messages.deleteSuccess"));
       setDeleteTarget(null);
       setDeleting(false);
       setDeleteError("");
@@ -178,6 +177,23 @@ export default function ComListPage() {
     [suggestList],
   );
 
+  const industryGrpOptions = useMemo(
+    () =>
+      INDUSTRY_GRP_CODES.map((item) => ({
+        value: item.value,
+        label: t(`list.industry.${item.key}`),
+      })),
+    [t],
+  );
+  const industryGrpMap = useMemo(
+    () =>
+      industryGrpOptions.reduce((acc, cur) => {
+        if (cur.value) acc[cur.value] = cur.label;
+        return acc;
+      }, {}),
+    [industryGrpOptions],
+  );
+
   const openDelete = (record) => {
     setDeleteTarget({ comId: record.comId, comName: record.comName });
     setDeleteError("");
@@ -202,14 +218,14 @@ export default function ComListPage() {
 
   const columns = [
     {
-      title: "번호",
+      title: t("list.columns.no"),
       key: "no",
       width: 60,
       render: (_, __, idx) =>
         listTotal - (filters.pstartno - 1) * filters.onepagelist - idx,
     },
     {
-      title: "회사명",
+      title: t("list.columns.comName"),
       dataIndex: "comName",
       key: "comName",
       render: (name, record) => (
@@ -223,28 +239,28 @@ export default function ComListPage() {
         </div>
       ),
     },
-    { title: "대표자", dataIndex: "comCeo", key: "comCeo", width: 90 },
-    { title: "사업자번호", dataIndex: "bizNo", key: "bizNo", width: 140 },
+    { title: t("list.columns.ceo"), dataIndex: "comCeo", key: "comCeo", width: 90 },
+    { title: t("list.columns.bizNo"), dataIndex: "bizNo", key: "bizNo", width: 140 },
     {
-      title: "업종",
+      title: t("list.columns.industry"),
       dataIndex: "industryGrpCode",
       key: "industryGrpCode",
       render: (code) =>
         code ? (
-          <Tag>{INDUSTRY_GRP_MAP[code] || "기타"}</Tag>
+          <Tag>{industryGrpMap[code] || t("list.industry.etc")}</Tag>
         ) : (
           <span style={{ color: "#bbb" }}>-</span>
         ),
     },
     {
-      title: "임직원 수",
+      title: t("list.columns.empCount"),
       dataIndex: "empCount",
       key: "empCount",
       width: 110,
       align: "right",
     },
     {
-      title: "관리",
+      title: t("list.columns.actions"),
       key: "actions",
       width: 170,
       align: "center",
@@ -257,7 +273,7 @@ export default function ComListPage() {
               type="text"
               size="small"
               icon={<EyeOutlined />}
-              title="상세보기"
+              title={t("list.actionTitles.detail")}
             />
           </Link>
           <Link
@@ -267,7 +283,7 @@ export default function ComListPage() {
               type="text"
               size="small"
               icon={<EditOutlined />}
-              title="수정"
+              title={t("list.actionTitles.edit")}
             />
           </Link>
           <Link
@@ -277,7 +293,7 @@ export default function ComListPage() {
               type="text"
               size="small"
               icon={<ApartmentOutlined />}
-              title="조직도 보기"
+              title={t("list.actionTitles.org")}
             />
           </Link>
           <Button
@@ -285,7 +301,7 @@ export default function ComListPage() {
             size="small"
             danger
             icon={<DeleteOutlined />}
-            title="삭제"
+            title={t("list.actionTitles.delete")}
             onClick={() => openDelete(record)}
           />
         </div>
@@ -307,15 +323,15 @@ export default function ComListPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            조직 관리 &gt; 회사 관리 &gt; 목록
+            {t("list.breadcrumb")}
           </div>
-          <h1>회사 관리</h1>
-          <p>등록된 회사를 조회하고 관리합니다.</p>
+          <h1>{t("list.title")}</h1>
+          <p>{t("list.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/com/add">
             <Button type="primary" icon={<PlusOutlined />}>
-              회사 등록
+              {t("list.addButton")}
             </Button>
           </Link>
         </div>
@@ -327,7 +343,7 @@ export default function ComListPage() {
           <StatTile
             icon={<BankOutlined />}
             tone="blue"
-            label="전체 회사"
+            label={t("list.stats.totalCompanies")}
             value={stats?.comTotal}
           />
         </Col>
@@ -335,7 +351,7 @@ export default function ComListPage() {
           <StatTile
             icon={<TeamOutlined />}
             tone="green"
-            label="전체 임직원"
+            label={t("list.stats.totalEmployees")}
             value={stats?.empTotal}
           />
         </Col>
@@ -343,7 +359,7 @@ export default function ComListPage() {
           <StatTile
             icon={<AppstoreOutlined />}
             tone="violet"
-            label="업종 수"
+            label={t("list.stats.industryCount")}
             value={stats?.industTotal}
           />
         </Col>
@@ -351,7 +367,7 @@ export default function ComListPage() {
           <StatTile
             icon={<CalendarOutlined />}
             tone="amber"
-            label="최근 등록 회사"
+            label={t("list.stats.latestCompany")}
             value={stats?.comLatest}
           />
         </Col>
@@ -374,12 +390,12 @@ export default function ComListPage() {
             options={suggestOptions}
             onChange={handleKeywordChange}
             onSelect={(value) => handleSearch(value)}
-            placeholder="회사명 또는 사업자번호로 검색"
+            placeholder={t("list.searchPlaceholder")}
           >
             <Input.Search
               allowClear
               onSearch={(value) => handleSearch(value)}
-              placeholder="회사명 또는 사업자번호로 검색"
+              placeholder={t("list.searchPlaceholder")}
             />
           </AutoComplete>
 
@@ -387,7 +403,7 @@ export default function ComListPage() {
             style={{ width: 200 }}
             value={filters.industryGrpCode || ""}
             onChange={handleIndustryChange}
-            options={INDUSTRY_GRP_OPTIONS}
+            options={industryGrpOptions}
           />
 
           <Select
@@ -395,9 +411,9 @@ export default function ComListPage() {
             value={filters.onepagelist || 10}
             onChange={handlePageSizeChange}
             options={[
-              { value: 10, label: "10개씩 보기" },
-              { value: 30, label: "30개씩 보기" },
-              { value: 50, label: "50개씩 보기" },
+              { value: 10, label: t("list.pageSize10") },
+              { value: 30, label: t("list.pageSize30") },
+              { value: 50, label: t("list.pageSize50") },
             ]}
           />
 
@@ -405,11 +421,11 @@ export default function ComListPage() {
             icon={<SearchOutlined />}
             onClick={() => handleSearch(keyword)}
           >
-            검색
+            {t("list.searchButton")}
           </Button>
           {filters.keyword ? (
             <Button onClick={() => pushQuery({ keyword: "", pstartno: 1 })}>
-              초기화
+              {t("list.resetButton")}
             </Button>
           ) : null}
         </div>
@@ -421,7 +437,7 @@ export default function ComListPage() {
           dataSource={list}
           loading={loading && !deleting}
           pagination={false}
-          locale={{ emptyText: "등록된 회사가 없습니다." }}
+          locale={{ emptyText: t("list.emptyText") }}
         />
 
         {/* 페이지네이션 */}
@@ -434,7 +450,8 @@ export default function ComListPage() {
           }}
         >
           <span style={{ color: "#999", fontSize: 12.5 }}>
-            총 <b>{listTotal || 0}</b>개 회사
+            {t("list.totalCountPrefix")} <b>{listTotal || 0}</b>
+            {t("list.totalCountSuffix")}
           </span>
           {listTotal > filters.onepagelist && (
             <Pagination
@@ -451,26 +468,31 @@ export default function ComListPage() {
 
       {/* 삭제 확인 모달 — DELETE /api/com/{comId}, payload: { comId, password } */}
       <Modal
-        title={`회사 삭제${deleteTarget?.comName ? " — " + deleteTarget.comName : ""}`}
+        title={
+          deleteTarget?.comName
+            ? t("list.delete.modalTitleWithName", { name: deleteTarget.comName })
+            : t("list.delete.modalTitle")
+        }
         open={!!deleteTarget}
         onCancel={closeDelete}
         onOk={submitDelete}
-        okText="삭제"
+        okText={t("list.delete.okText")}
         okButtonProps={{ danger: true, loading: deleting }}
-        cancelText="취소"
+        cancelText={t("list.delete.cancelText")}
         destroyOnClose
       >
         <p>
-          정말로 <b>{deleteTarget?.comName}</b> 회사를 삭제하시겠습니까? 본인
-          확인을 위해 비밀번호를 입력해주세요.
+          {t("list.delete.confirmPrefix")}
+          <b>{deleteTarget?.comName}</b>
+          {t("list.delete.confirmSuffix")}
         </p>
         <Form form={form} layout="vertical" onFinish={submitDelete}>
           <Form.Item
             name="password"
-            label="비밀번호"
+            label={t("list.delete.passwordLabel")}
             validateStatus={deleteError ? "error" : ""}
             help={deleteError || undefined}
-            rules={[{ required: true, message: "비밀번호를 입력해주세요." }]}
+            rules={[{ required: true, message: t("list.delete.passwordRequired") }]}
           >
             <Input.Password autoFocus onPressEnter={submitDelete} />
           </Form.Item>
