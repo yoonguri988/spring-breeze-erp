@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { 
     message, Radio, Form, Input, Select, Switch, Button,
-    Space, Row, Col
+    Space, Row, Col, Typography
 } from "antd";
 import { BankOutlined, CheckCircleFilled, CloseCircleFilled } from "@ant-design/icons";
 import { insertFormRequest, resetFormState } from "../../../reducers/appr/apprFormReducer";
@@ -17,6 +17,8 @@ import apprFormTemplates from "../../../constants/apprFormTemplates";
 // {ssr: false} -> 서버 렌더링 단계에서는 해당 컴포넌트를 렌더링에서 제외함
 const ReactQuill = dynamic( () => import("react-quill"), {ssr: false});
 import "react-quill/dist/quill.snow.css";
+
+const { Text } = Typography;
 
 export default function FormWritePage() {
 
