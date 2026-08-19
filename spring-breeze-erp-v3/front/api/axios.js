@@ -1,6 +1,8 @@
 // api/axios.js
 import axios from "axios";
 import Cookies from "js-cookie";
+import { message } from "antd";
+import i18n from "../i18n";
 
 const api = axios.create({
   // 기본 api 서버 주소, 환경변수 없으면 로컬 서버 사용
@@ -97,6 +99,19 @@ api.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
+    }
+
+    // 400 안전망: 이 프로젝트는 saga(try/catch) → xxxFailure 액션 → 페이지 컴포넌트의
+    // message.error(error) 패턴으로 이미 대부분의 API 에러를 처리하고 있습니다.
+    // 여기서 무조건 토스트를 띄우면 그 위에 또 message.error가 겹쳐서 이중 토스트가 됩니다.
+    // 그래서 기본은 조용히 reject만 하고, saga 없이 컴포넌트에서 바로 api.xxx(...)를
+    // 호출하는 등 별도 에러 처리가 없는 호출부에 한해서만 요청 시
+    // `notifyOnError: true`를 명시적으로 넘기면 여기서 토스트를 대신 띄워줍니다.
+    //   예) api.post("/api/foo", data, { notifyOnError: true })
+    if (status === 400 && original?.notifyOnError) {
+      const serverMessage =
+        error.response?.data?.error || error.response?.data?.message;
+      message.error(serverMessage || i18n.t("common:message.invalidRequest"));
     }
 
     return Promise.reject(error);

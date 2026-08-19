@@ -71,5 +71,20 @@
     "label": "Language",
     "ko": "한국어",
     "en": "English"
+  },
+  "error": {
+    "backHome": "Back to Home",
+    "404": {
+      "title": "Page Not Found",
+      "desc": "The page you requested does not exist or has been moved."
+    },
+    "500": {
+      "title": "Server Error",
+      "desc": "Please try again later. If the problem persists, contact your administrator."
+    },
+    "generic": {
+      "title": "An error occurred ({{code}})",
+      "desc": "Something went wrong while processing your request."
+    }
   }
 }
