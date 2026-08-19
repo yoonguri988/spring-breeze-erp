@@ -3,12 +3,17 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { RightOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
-import { fetchMyDeptRequest, fetchDeptEmpListRequest } from "../../reducers/dept/deptReducer";
+import {
+  fetchMyDeptRequest,
+  fetchDeptEmpListRequest,
+} from "../../reducers/dept/deptReducer";
 import DeptDetailView from "../../components/DeptDetailView";
 
 export default function DeptMyPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation(["dept", "common"]);
 
   const { myDept, deptEmpList } = useSelector((state) => state.dept);
 
@@ -35,10 +40,11 @@ export default function DeptMyPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <RightOutlined /> 내 부서
+            <Link href="/">{t("my.breadcrumbHome")}</Link> <RightOutlined />{" "}
+            {t("my.breadcrumbTitle")}
           </div>
           <h1>{dept.deptName}</h1>
-          <p>내가 소속된 부서 정보입니다.</p>
+          <p>{t("my.subtitle")}</p>
         </div>
       </div>
 

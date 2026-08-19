@@ -11,12 +11,14 @@ import {
   InfoCircleOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import { fetchPendingListRequest } from "../../../reducers/dept/deptTransferReducer";
 
 export default function DeptTransferPendingPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["dept", "common"]);
 
   const { pendingList } = useSelector((state) => state.deptTransfer);
 
@@ -45,18 +47,18 @@ export default function DeptTransferPendingPage() {
       <div className="sb-card mb-3">
         <div className="sb-toolbar">
           <span className="fw-semibold">
-            <BranchesOutlined /> 이관 대기 부서
+            <BranchesOutlined /> {t("transfer.pending.title")}
           </span>
           <div className="grow" />
           <form onSubmit={handleSearch} className="d-flex gap-2">
             <Input
-              placeholder="부서명 또는 부서코드 검색"
+              placeholder={t("transfer.pending.searchPlaceholder")}
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               style={{ minWidth: 200 }}
             />
             <Button htmlType="submit" icon={<SearchOutlined />}>
-              검색
+              {t("common:button.search")}
             </Button>
           </form>
         </div>
@@ -65,8 +67,7 @@ export default function DeptTransferPendingPage() {
           className="px-3 pt-3"
           style={{ fontSize: 12, color: "var(--sb-ink-faint)" }}
         >
-          <InfoCircleOutlined /> 부서 삭제(해체)를 진행하다가 사원 이관을 마치지
-          못하고 나가신 경우, 여기서 다시 찾아 이어서 진행할 수 있습니다.
+          <InfoCircleOutlined /> {t("transfer.pending.infoNote")}
         </div>
 
         <div className="sb-card__body--flush mt-2">
@@ -74,10 +75,10 @@ export default function DeptTransferPendingPage() {
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th>부서명</th>
-                  <th style={{ width: 140 }}>부서코드</th>
-                  <th style={{ width: 120 }}>소속 사원 수</th>
-                  <th style={{ width: 180 }}>이관 대기 시작</th>
+                  <th>{t("transfer.pending.table.deptName")}</th>
+                  <th style={{ width: 140 }}>{t("transfer.pending.table.deptCode")}</th>
+                  <th style={{ width: 120 }}>{t("transfer.pending.table.empCount")}</th>
+                  <th style={{ width: 180 }}>{t("transfer.pending.table.pendingSince")}</th>
                   <th style={{ width: 160 }}></th>
                 </tr>
               </thead>
@@ -90,7 +91,7 @@ export default function DeptTransferPendingPage() {
                     </td>
                     <td>
                       <span className="sb-badge sb-badge--amber">
-                        {d.empCount}명
+                        {t("transfer.pending.table.empCountValue", { count: d.empCount })}
                       </span>
                     </td>
                     <td>{d.updatedAt}</td>
@@ -106,7 +107,7 @@ export default function DeptTransferPendingPage() {
                           size="small"
                           icon={<ArrowRightOutlined />}
                         >
-                          이관 이어하기
+                          {t("transfer.pending.continueBtn")}
                         </Button>
                       </Link>
                     </td>
@@ -118,9 +119,9 @@ export default function DeptTransferPendingPage() {
             <div className="sb-empty">
               <CheckCircleOutlined style={{ fontSize: 30, opacity: 0.5 }} />
               {keyword ? (
-                <p>"{keyword}"에 해당하는 이관 대기 부서가 없습니다.</p>
+                <p>{t("transfer.pending.noMatchEmpty", { keyword })}</p>
               ) : (
-                <p>이관 대기중인 부서가 없습니다.</p>
+                <p>{t("transfer.pending.emptyMsg")}</p>
               )}
             </div>
           )}

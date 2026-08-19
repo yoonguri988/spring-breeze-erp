@@ -10,6 +10,7 @@ import {
   ThunderboltOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 import { fetchTransferLogRequest } from "../../../reducers/dept/deptTransferReducer";
 
@@ -18,6 +19,7 @@ const ONE_PAGE_LIST = 10;
 export default function DeptTransferLogPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["dept", "common"]);
 
   const { logs, logTotal, deptOptions } = useSelector(
     (state) => state.deptTransfer,
@@ -81,7 +83,7 @@ export default function DeptTransferLogPage() {
       <div className="sb-card mb-3">
         <div className="sb-toolbar">
           <span className="fw-semibold">
-            <HistoryOutlined /> 부서 이관 이력
+            <HistoryOutlined /> {t("transfer.log.title")}
           </span>
         </div>
 
@@ -95,10 +97,12 @@ export default function DeptTransferLogPage() {
           }}
         >
           <div className="col-auto" style={{ minWidth: 170 }}>
-            <label className="form-label small fw-semibold mb-1">원부서</label>
+            <label className="form-label small fw-semibold mb-1">
+              {t("transfer.log.filter.originDept")}
+            </label>
             <Select
               style={{ width: "100%" }}
-              placeholder="전체"
+              placeholder={t("common:label.all")}
               allowClear
               value={originDeptId}
               onChange={setOriginDeptId}
@@ -110,11 +114,11 @@ export default function DeptTransferLogPage() {
           </div>
           <div className="col-auto" style={{ minWidth: 170 }}>
             <label className="form-label small fw-semibold mb-1">
-              대상부서
+              {t("transfer.log.filter.targetDept")}
             </label>
             <Select
               style={{ width: "100%" }}
-              placeholder="전체"
+              placeholder={t("common:label.all")}
               allowClear
               value={targetDeptId}
               onChange={setTargetDeptId}
@@ -126,22 +130,22 @@ export default function DeptTransferLogPage() {
           </div>
           <div className="col-auto" style={{ minWidth: 150 }}>
             <label className="form-label small fw-semibold mb-1">
-              AI 제안 여부
+              {t("transfer.log.filter.aiRecommended")}
             </label>
             <Select
               style={{ width: "100%" }}
               value={aiRecommended || ""}
               onChange={setAiRecommended}
               options={[
-                { value: "", label: "전체" },
-                { value: "Y", label: "AI 추천 수용" },
-                { value: "N", label: "수동 선택" },
+                { value: "", label: t("common:label.all") },
+                { value: "Y", label: t("transfer.log.filter.aiAccepted") },
+                { value: "N", label: t("transfer.log.filter.manual") },
               ]}
             />
           </div>
           <div className="col-auto" style={{ maxWidth: 150 }}>
             <label className="form-label small fw-semibold mb-1">
-              처리일자(시작)
+              {t("transfer.log.filter.dateFrom")}
             </label>
             <DatePicker
               style={{ width: "100%" }}
@@ -151,7 +155,7 @@ export default function DeptTransferLogPage() {
           </div>
           <div className="col-auto" style={{ maxWidth: 150 }}>
             <label className="form-label small fw-semibold mb-1">
-              처리일자(종료)
+              {t("transfer.log.filter.dateTo")}
             </label>
             <DatePicker
               style={{ width: "100%" }}
@@ -165,9 +169,9 @@ export default function DeptTransferLogPage() {
               icon={<SearchOutlined />}
               onClick={() => runSearch(1)}
             >
-              조회
+              {t("common:button.search")}
             </Button>
-            <Button onClick={handleReset}>초기화</Button>
+            <Button onClick={handleReset}>{t("common:button.reset")}</Button>
           </div>
         </div>
 
@@ -175,8 +179,8 @@ export default function DeptTransferLogPage() {
           className="px-3 pt-2"
           style={{ fontSize: 12, color: "var(--sb-ink-faint)" }}
         >
-          <InfoCircleOutlined /> 기본으로 <b>최근 30일</b>만 조회합니다. 전체
-          기간을 보려면 시작일을 더 과거로 넓혀서 조회하세요.
+          <InfoCircleOutlined /> {t("transfer.log.infoNotePrefix")}{" "}
+          <b>{t("transfer.log.infoNoteBold")}</b> {t("transfer.log.infoNoteSuffix")}
         </div>
 
         <div className="sb-card__body--flush mt-2">
@@ -184,13 +188,13 @@ export default function DeptTransferLogPage() {
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th style={{ width: 150 }}>처리일자</th>
-                  <th>원부서</th>
-                  <th>대상부서</th>
-                  <th>사원</th>
-                  <th style={{ width: 110 }}>AI 제안</th>
-                  <th>AI 사유</th>
-                  <th style={{ width: 100 }}>처리자</th>
+                  <th style={{ width: 150 }}>{t("transfer.log.table.processedAt")}</th>
+                  <th>{t("transfer.log.table.originDept")}</th>
+                  <th>{t("transfer.log.table.targetDept")}</th>
+                  <th>{t("transfer.log.table.emp")}</th>
+                  <th style={{ width: 110 }}>{t("transfer.log.table.aiSuggested")}</th>
+                  <th>{t("transfer.log.table.aiReason")}</th>
+                  <th style={{ width: 100 }}>{t("transfer.log.table.processedBy")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -205,10 +209,12 @@ export default function DeptTransferLogPage() {
                     <td>
                       {l.aiRecommended === "Y" ? (
                         <span className="sb-badge sb-badge--accent">
-                          <ThunderboltOutlined /> 수용
+                          <ThunderboltOutlined /> {t("transfer.log.aiAcceptedBadge")}
                         </span>
                       ) : (
-                        <span className="sb-badge sb-badge--gray">수동</span>
+                        <span className="sb-badge sb-badge--gray">
+                          {t("transfer.log.manualBadge")}
+                        </span>
                       )}
                     </td>
                     <td
@@ -228,7 +234,7 @@ export default function DeptTransferLogPage() {
           ) : (
             <div className="sb-empty">
               <HistoryOutlined style={{ fontSize: 30, opacity: 0.5 }} />
-              <p>조건에 해당하는 이관 이력이 없습니다.</p>
+              <p>{t("transfer.log.emptyMsg")}</p>
             </div>
           )}
 
@@ -243,7 +249,8 @@ export default function DeptTransferLogPage() {
               }}
             >
               <span style={{ color: "var(--sb-ink-faint)", fontSize: 12 }}>
-                총 <b>{logTotal}</b>건
+                {t("transfer.log.totalCountPrefix")} <b>{logTotal}</b>
+                {t("transfer.log.totalCountSuffix")}
               </span>
               <Pagination
                 size="small"

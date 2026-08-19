@@ -9,6 +9,7 @@ import {
   ArrowRightOutlined,
   WarningFilled,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 export default function DeptDeleteModal({
   target,
@@ -17,6 +18,8 @@ export default function DeptDeleteModal({
   onClose,
   onConfirm,
 }) {
+  const { t } = useTranslation(["dept", "common"]);
+
   if (!target) return null;
   const { deptName, deptCode, empCount = 0, childCount = 0 } = target;
   const hasChild = childCount > 0;
@@ -29,17 +32,17 @@ export default function DeptDeleteModal({
     blocked: {
       color: "var(--sb-red)",
       icon: <StopOutlined />,
-      text: "삭제할 수 없습니다",
+      text: t("deleteModal.header.blocked"),
     },
     transfer: {
       color: "var(--sb-amber)",
       icon: <TeamOutlined />,
-      text: "사원 이관이 필요합니다",
+      text: t("deleteModal.header.transfer"),
     },
     delete: {
       color: "var(--sb-red)",
       icon: <WarningFilled />,
-      text: "부서 삭제",
+      text: t("deleteModal.header.delete"),
     },
   }[mode];
 
@@ -80,11 +83,11 @@ export default function DeptDeleteModal({
       width={380}
       footer={
         mode === "blocked" ? (
-          <Button onClick={onClose}>닫기</Button>
+          <Button onClick={onClose}>{t("common:button.close")}</Button>
         ) : (
           [
             <Button key="cancel" onClick={onClose} disabled={loading}>
-              취소
+              {t("common:button.cancel")}
             </Button>,
             <Button
               key="confirm"
@@ -110,7 +113,7 @@ export default function DeptDeleteModal({
               }
               onClick={onConfirm}
             >
-              {mode === "transfer" ? "이관 진행" : "삭제 확인"}
+              {mode === "transfer" ? t("deleteModal.transferBtn") : t("deleteModal.deleteBtn")}
             </Button>,
           ]
         )
@@ -130,15 +133,14 @@ export default function DeptDeleteModal({
       {mode === "blocked" && (
         <>
           <div className="del-warning">
-            이 부서에는 하위 부서가 <b>{childCount}</b>개 존재합니다.
+            {t("deleteModal.blocked.warningPrefix")} <b>{childCount}</b>
+            {t("deleteModal.blocked.warningSuffix")}
             <br />
-            하위 부서를 먼저 삭제하거나 다른 부서로 이동한 뒤 다시 시도해주세요.
+            {t("deleteModal.blocked.hint")}
           </div>
           <div className="del-warn-box">
             <WarningFilled />
-            <span>
-              하위 부서가 있는 동안에는 삭제(해체)를 진행할 수 없습니다.
-            </span>
+            <span>{t("deleteModal.blocked.warnBox")}</span>
           </div>
         </>
       )}
@@ -146,16 +148,17 @@ export default function DeptDeleteModal({
       {mode === "transfer" && (
         <>
           <div className="del-warning">
-            삭제를 진행하면 부서 상태가 <b>이관 대기(PENDING_DELETE)</b>로
-            변경되고,
+            {t("deleteModal.transfer.warningPrefix")}{" "}
+            <b>{t("deleteModal.transfer.warningStatus")}</b>
+            {t("deleteModal.transfer.warningSuffix")}
             <br />
-            바로 사원 이관 화면으로 이동합니다.
+            {t("deleteModal.transfer.warningLine2")}
           </div>
           <div className="del-warn-box">
             <TeamOutlined />
             <span>
-              소속 사원 <b>{empCount}</b>명을 다른 부서로 이관해야 최종 삭제가
-              완료됩니다.
+              {t("deleteModal.transfer.warnBoxPrefix")} <b>{empCount}</b>
+              {t("deleteModal.transfer.warnBoxSuffix")}
             </span>
           </div>
         </>
@@ -163,8 +166,9 @@ export default function DeptDeleteModal({
 
       {mode === "delete" && (
         <div className="del-warning">
-          삭제 시 연결된 데이터에 영향을 줄 수 있습니다.
-          <br />이 작업은 되돌릴 수 없습니다.
+          {t("deleteModal.delete.warningLine1")}
+          <br />
+          {t("deleteModal.delete.warningLine2")}
         </div>
       )}
     </Modal>

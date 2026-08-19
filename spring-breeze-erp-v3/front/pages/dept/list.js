@@ -17,6 +17,7 @@ import {
   ApartmentOutlined,
   RightOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchDeptListRequest,
@@ -31,6 +32,7 @@ import DeptDeleteModal from "../../components/DeptDeleteModal";
 export default function DeptListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["dept", "common"]);
 
   const { user } = useSelector((state) => state.auth);
   const { list: companies } = useSelector((state) => state.company);
@@ -69,7 +71,7 @@ export default function DeptListPage() {
     if (success) {
       if (pendingTransfer && target) {
         // 완전삭제가 아니라 "이관 대기" 상태로 전환된 경우 → 사원 이관 화면으로 바로 이동
-        message.info(deptMessage || "소속 사원 이관이 필요합니다.");
+        message.info(deptMessage || t("list.transferRequiredMsg"));
         const deptIdForTransfer = target.deptId;
         setTarget(null);
         setDeleting(false);
@@ -80,7 +82,7 @@ export default function DeptListPage() {
         });
         return;
       }
-      message.success(deptMessage || "처리되었습니다.");
+      message.success(deptMessage || t("common:message.success"));
       setTarget(null);
       setDeleting(false);
       dispatch(resetDeptState());
@@ -163,11 +165,11 @@ export default function DeptListPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <RightOutlined /> 회사/부서 관리{" "}
-            <RightOutlined /> 부서 관리
+            <Link href="/">{t("list.breadcrumbHome")}</Link> <RightOutlined />{" "}
+            {t("list.breadcrumbOrg")} <RightOutlined /> {t("list.breadcrumbDept")}
           </div>
-          <h1>{comId ? `부서 관리` : "부서 관리"}</h1>
-          <p>부서 구조를 조회하고 관리합니다.</p>
+          <h1>{t("list.title")}</h1>
+          <p>{t("list.subtitle")}</p>
         </div>
       </div>
 
@@ -177,7 +179,7 @@ export default function DeptListPage() {
           <StatTile
             icon={<ApartmentOutlined />}
             tone="blue"
-            label="전체 부서"
+            label={t("list.stats.totalDept")}
             value={comId ? stats?.deptTotal : "—"}
           />
         </div>
@@ -185,7 +187,7 @@ export default function DeptListPage() {
           <StatTile
             icon={<BankOutlined />}
             tone="violet"
-            label="본부"
+            label={t("list.stats.hq")}
             value={comId ? stats?.dept1Total : "—"}
           />
         </div>
@@ -193,7 +195,7 @@ export default function DeptListPage() {
           <StatTile
             icon={<TeamOutlined />}
             tone="green"
-            label="부서/팀"
+            label={t("list.stats.deptTeam")}
             value={comId ? stats?.dept2Total : "—"}
           />
         </div>
@@ -201,7 +203,7 @@ export default function DeptListPage() {
           <StatTile
             icon={<UserOutlined />}
             tone="amber"
-            label="전체 인원"
+            label={t("list.stats.totalEmp")}
             value={comId ? stats?.empTotal : "—"}
           />
         </div>
@@ -214,7 +216,7 @@ export default function DeptListPage() {
             <div className="sb-field">
               <Select
                 style={{ minWidth: 200 }}
-                placeholder="회사 선택 (필수)"
+                placeholder={t("list.comSelectPlaceholder")}
                 value={comId || undefined}
                 onChange={handleComChange}
                 options={(companies || []).map((c) => ({
@@ -240,7 +242,7 @@ export default function DeptListPage() {
               >
                 <SearchOutlined />
                 <input
-                  placeholder="부서명 또는 코드 검색"
+                  placeholder={t("list.searchPlaceholder")}
                   autoComplete="off"
                   style={{ width: "100%" }}
                   value={keyword}
@@ -252,12 +254,12 @@ export default function DeptListPage() {
           <div className="grow" />
 
           <span className="text-faint" style={{ fontSize: 12.5 }}>
-            {filteredRows.length}건
+            {t("list.resultCount", { count: filteredRows.length })}
           </span>
 
           <Link href={{ pathname: "/dept/add", query: comId ? { comId } : {} }}>
             <Button type="primary" icon={<PlusOutlined />}>
-              부서 등록
+              {t("list.addBtn")}
             </Button>
           </Link>
         </div>
@@ -266,29 +268,31 @@ export default function DeptListPage() {
           {!comId ? (
             <div className="sb-empty">
               <BankOutlined style={{ fontSize: 34, opacity: 0.5 }} />
-              <p>조회할 회사를 선택하세요.</p>
+              <p>{t("list.selectCompanyEmpty")}</p>
               <p style={{ fontSize: 12.5, marginTop: 4 }}>
-                회사명은 필수 검색 조건입니다.
+                {t("list.selectCompanyHint")}
               </p>
             </div>
           ) : filteredRows.length === 0 ? (
             <div className="sb-empty">
               <ApartmentOutlined style={{ fontSize: 34, opacity: 0.5 }} />
-              <p>일치하는 부서가 없습니다.</p>
+              <p>{t("list.noMatchEmpty")}</p>
             </div>
           ) : (
             <table className="sb-table">
               <thead>
                 <tr>
-                  <th style={{ width: 60 }}>NO</th>
-                  <th style={{ minWidth: 180 }}>부서명</th>
-                  <th style={{ width: 80 }}>코드</th>
-                  <th style={{ width: 130 }}>상위부서</th>
-                  <th style={{ width: 130 }}>부서장</th>
+                  <th style={{ width: 60 }}>{t("list.table.no")}</th>
+                  <th style={{ minWidth: 180 }}>{t("list.table.deptName")}</th>
+                  <th style={{ width: 80 }}>{t("list.table.code")}</th>
+                  <th style={{ width: 130 }}>{t("list.table.parentDept")}</th>
+                  <th style={{ width: 130 }}>{t("list.table.leader")}</th>
                   <th className="num" style={{ width: 72 }}>
-                    인원
+                    {t("list.table.empCount")}
                   </th>
-                  <th style={{ width: 80, textAlign: "center" }}>관리</th>
+                  <th style={{ width: 80, textAlign: "center" }}>
+                    {t("list.table.actions")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -319,7 +323,7 @@ export default function DeptListPage() {
                               className="sb-badge sb-badge--blue ms-1"
                               style={{ fontSize: 10.5, padding: "1px 7px" }}
                             >
-                              최상위
+                              {t("list.topLevelBadge")}
                             </span>
                           )}
                         </div>
@@ -334,7 +338,9 @@ export default function DeptListPage() {
                     <td style={{ fontSize: 13 }}>
                       {d.leaderName || <span className="text-faint">—</span>}
                     </td>
-                    <td className="num tnum">{d.empCount}명</td>
+                    <td className="num tnum">
+                      {t("list.table.empCountValue", { count: d.empCount })}
+                    </td>
                     <td>
                       <div
                         style={{
@@ -352,7 +358,7 @@ export default function DeptListPage() {
                           <button
                             type="button"
                             className="sb-iconbtn"
-                            title="상세보기"
+                            title={t("list.detailTooltip")}
                           >
                             <BookOutlined />
                           </button>
@@ -366,7 +372,7 @@ export default function DeptListPage() {
                           <button
                             type="button"
                             className="sb-iconbtn"
-                            title="수정"
+                            title={t("list.editTooltip")}
                           >
                             <EditOutlined />
                           </button>
@@ -375,7 +381,7 @@ export default function DeptListPage() {
                           type="button"
                           className="sb-iconbtn"
                           style={{ color: "var(--sb-red)" }}
-                          title="삭제"
+                          title={t("list.deleteTooltip")}
                           onClick={() => openDelete(d)}
                         >
                           <DeleteOutlined />
@@ -400,9 +406,9 @@ export default function DeptListPage() {
           >
             <BuildOutlined />
             <span>
-              총 <b>{filteredRows.length}</b>개 부서 ·{" "}
-              <code style={{ fontSize: 11 }}>상위 부서</code> 기준 트리 구조로
-              표시됩니다.
+              {t("list.footerSummary", { count: filteredRows.length })}{" "}
+              <code style={{ fontSize: 11 }}>{t("list.footerHierLabel")}</code>{" "}
+              {t("list.footerNote")}
             </span>
           </div>
         )}
