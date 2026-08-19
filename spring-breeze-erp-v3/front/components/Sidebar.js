@@ -92,9 +92,9 @@ const NAV = [
         role: "ROLE_ADMIN",
       },
       {
-        page: "evallist",
+        page: "evaldashboard",
         tip: "평가 작성",
-        href: "/eval/list",
+        href: "/eval/dashboard",
         icon: "bi-star",
         role: "ROLE_ADMIN",
       },
