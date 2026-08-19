@@ -110,7 +110,7 @@ public class PermServiceImpl implements PermService {
 	 * @return 1=성공, 0=대상 없음
 	 */
 	@Override
-	public int revokeAuth(EmpAuthRequest dto) {
+	public int revokeAuth(EmpAuthRequest dto,  Long comId) {
 		return permMapper.revokeAuth(dto);
 	}
 }
