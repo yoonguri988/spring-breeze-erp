@@ -238,7 +238,7 @@ public class EmpController {
 	@Operation(summary = "연락처 중복 검사")
 	@GetMapping("/check-mobile")
 	public ResponseEntity<Map<String, Boolean>> checkMobile(
-			@RequestParam("empMobile") String empMobile) {
+			@RequestParam("mobile") String empMobile) {
 		return ResponseEntity.ok(
 				Map.of("duplicate", empService.isMobileDuplicate(empMobile)));
 	}

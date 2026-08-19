@@ -36,10 +36,11 @@ const empReducer=createSlice({
     reducers: {
 
         // --- 상태 초기화 ---
-        resetEmpState : (state)=>{
+        resetEmpState: (state) => {
             state.loading = false;
             state.success = false;
-            state.error   = null;
+            state.error = null;
+            state.checkResult = { email: null, mobile: null, empNo: null };
         },
         
         // --- 사원 목록 조회 ---

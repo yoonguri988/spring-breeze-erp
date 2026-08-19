@@ -9,6 +9,7 @@ import { ArrowLeftOutlined, EditOutlined, PlayCircleOutlined, StopOutlined, Robo
 import {
   detailPeriodRequest, openPeriodRequest, closePeriodRequest,
   reportPeriodRequest, reportStatusRequest, resetPeriodState,
+  clearPeriodDetail,
 } from "../../../reducers/eval/evalPeriodReducer";
 
 const STATUS_CONFIG = {
