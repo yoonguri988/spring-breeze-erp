@@ -52,7 +52,8 @@ public class Notice {
 	@Column(name="BHIT", nullable = false)
 	private Integer bhit;         
 	
-	@Column(name="BFILE", length=500)
+	@Lob
+	@Column(name="BFILE")
 	private String bfile;    
 	
 	@Column(name = "CREATED_AT", insertable = false, updatable = false)
