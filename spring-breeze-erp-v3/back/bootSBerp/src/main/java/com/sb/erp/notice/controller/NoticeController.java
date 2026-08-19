@@ -1,5 +1,6 @@
 package com.sb.erp.notice.controller;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,18 +176,26 @@ public class NoticeController {
 	@Operation(summary = "공지 상세조회", description = "공지 상세 정보를 조회합니다. (조회수 1 증가)")
 	@GetMapping("/{bno}")
 	public ResponseEntity<NoticeResponse> getNotice(
-			@PathVariable("bno") Long bno,
-			@AuthenticationPrincipal CustomUserPrincipal principal) {
-		noticeService.updateHit(bno); // 게시글 상세 진입 시 조회수 1 증가 처리
-		NoticeResponse dto = noticeService.select(bno);
-		if (dto == null) {
-			return ResponseEntity.notFound().build();
-		}
-		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !dto.getComId().equals(principal.getComId())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-		}
-		return ResponseEntity.ok(dto);
+	        @PathVariable("bno") Long bno,
+	        @AuthenticationPrincipal CustomUserPrincipal principal) {
+
+	    NoticeResponse dto = noticeService.select(bno);
+
+	    if (dto == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+
+	    boolean isRoot = principal.getRoles().contains("ROOT");
+
+	    if (!isRoot && !dto.getComId().equals(principal.getComId())) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	    }
+
+	    noticeService.updateHit(bno);
+
+	    dto = noticeService.select(bno);
+
+	    return ResponseEntity.ok(dto);
 	}
 
     // 검색 결과 카운트 (GET 방식) //어디서 쓰이는지 잘 모르겠음
@@ -194,6 +203,27 @@ public class NoticeController {
 	@GetMapping("/search-count")
 	public ResponseEntity<Integer> getSearchCount(NoticeSearchRequest search) {
 		return ResponseEntity.ok(noticeService.selectCountNoticeList(search));
+	}
+	
+	@GetMapping("/{bno}/file")
+	public ResponseEntity<byte[]> downloadFile(@PathVariable("bno") Long bno,
+	        @AuthenticationPrincipal CustomUserPrincipal principal) throws Exception {
+	    NoticeResponse notice = noticeService.select(bno);
+	    if (notice == null || notice.getBfile() == null) return ResponseEntity.notFound().build();
+
+	    boolean isRoot = principal.getRoles().contains("ROOT");
+	    if (!isRoot && !notice.getComId().equals(principal.getComId()))
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+	    String[] parts = notice.getBfile().split("\\|", 3);
+	    String fileName = parts[0], contentType = parts[1];
+	    byte[] data = Base64.getDecoder().decode(parts[2]);
+
+	    String encodedName = java.net.URLEncoder.encode(fileName, "UTF-8");
+	    return ResponseEntity.ok()
+	        .contentType(MediaType.parseMediaType(contentType))
+	        .header("Content-Disposition", "attachment; filename*=UTF-8''" + encodedName)
+	        .body(data);
 	}
 }
 /*//공지 목록 조회
