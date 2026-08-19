@@ -37,6 +37,10 @@ import deptReducer, {
   fetchAncestorDeptsFailure,
   clearAncestorDepts,
 
+  fetchDeptEmpListRequest,
+  fetchDeptEmpListSuccess,
+  fetchDeptEmpListFailure,
+
   resetDeptState,
 } from '../dept/deptReducer';
 
@@ -52,6 +56,8 @@ const initialState = {
 
   detail: null,
   myDept: null,
+
+  deptEmpList: [],
 
   deptCodeCheck: {
     checked: false,
@@ -419,7 +425,54 @@ describe('deptReducer', () => {
   });
 
   // ---------------------------------------------------------
-  // 10) 공통 상태 초기화
+  // 10) 부서(+하위부서) 소속 사원 목록 (deptEmpList)
+  // ---------------------------------------------------------
+  describe('fetchDeptEmpList', () => {
+    test('fetchDeptEmpListRequest: loading true, error/deptEmpList 초기화', () => {
+      const prevState = {
+        ...initialState,
+        error: '이전 에러',
+        deptEmpList: [{ empId: 1, empName: '홍길동' }],
+      };
+      const state = deptReducer(prevState, fetchDeptEmpListRequest(2));
+
+      expect(state.loading).toBe(true);
+      expect(state.error).toBeNull();
+      // 다른 부서로 이동 시 이전 부서의 목록이 잠깐 남아있지 않도록 즉시 비운다
+      expect(state.deptEmpList).toEqual([]);
+    });
+
+    test('fetchDeptEmpListSuccess: deptEmpList 반영', () => {
+      const payload = [
+        { empId: 10, empName: '홍길동', deptId: 2 },
+        { empId: 11, empName: '김철수', deptId: 2 },
+      ];
+      const state = deptReducer({ ...initialState, loading: true }, fetchDeptEmpListSuccess(payload));
+
+      expect(state.loading).toBe(false);
+      expect(state.deptEmpList).toEqual(payload);
+    });
+
+    test('fetchDeptEmpListSuccess: payload 없으면 빈 배열', () => {
+      const state = deptReducer(
+        { ...initialState, loading: true, deptEmpList: [{ empId: 1 }] },
+        fetchDeptEmpListSuccess()
+      );
+
+      expect(state.deptEmpList).toEqual([]);
+    });
+
+    test('fetchDeptEmpListFailure: error 반영', () => {
+      const error = '본인 소속 회사의 부서만 조회할 수 있습니다.';
+      const state = deptReducer({ ...initialState, loading: true }, fetchDeptEmpListFailure(error));
+
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe(error);
+    });
+  });
+
+  // ---------------------------------------------------------
+  // 11) 공통 상태 초기화
   // ---------------------------------------------------------
   describe('resetDeptState', () => {
     test('loading/error/success/message/pendingTransfer 를 초기값으로 되돌린다', () => {

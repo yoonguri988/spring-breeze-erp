@@ -26,7 +26,11 @@ import {
   cancelResvRequest,
   cancelResvSuccess,
   cancelResvFailure,
- 
+
+  returnResvRequest,
+  returnResvSuccess,
+  returnResvFailure,
+
   fetchAvailableQtyRequest,
   fetchAvailableQtySuccess,
   fetchAvailableQtyFailure,
@@ -138,7 +142,24 @@ export function* cancelResv(action) {
 }
  
 // =========================================================
-// 7) 실시간 잔여수량 조회 GET /api/resv/available
+// 7) 자원 반납 처리 PUT /api/resv/{revId}/return
+// =========================================================
+export const returnResvApi = (revId) => api.put(`${RESV_API_BASE}/${revId}/return`);
+
+export function* returnResv(action) {
+  try {
+    const revId = action.payload;
+    const res = yield call(returnResvApi, revId);
+
+    // 응답에 revId 가 없으므로, 목록/상세를 갱신할 수 있도록 항상 revId 를 함께 전달한다.
+    yield put(returnResvSuccess({ ...res.data, revId }));
+  } catch (err) {
+    yield put(returnResvFailure(err.response?.data?.message || "반납 처리에 실패하였습니다."));
+  }
+}
+
+// =========================================================
+// 8) 실시간 잔여수량 조회 GET /api/resv/available
 // =========================================================
 export const fetchAvailableQtyApi = (search) =>
   api.get(`${RESV_API_BASE}/available`, { params: search });
@@ -162,8 +183,9 @@ function* watchFetchResvDetail() { yield takeLatest(fetchResvDetailRequest.type,
 function* watchAddResv() { yield takeLatest(addResvRequest.type, addResv); }
 function* watchUpdateResv() { yield takeLatest(updateResvRequest.type, updateResv); }
 function* watchCancelResv() { yield takeLatest(cancelResvRequest.type, cancelResv); }
+function* watchReturnResv() { yield takeLatest(returnResvRequest.type, returnResv); }
 function* watchFetchAvailableQty() { yield takeLatest(fetchAvailableQtyRequest.type, fetchAvailableQty); }
- 
+
 export default function* resvSaga() {
   yield all([
     call(watchFetchMyResvList),
@@ -172,6 +194,7 @@ export default function* resvSaga() {
     call(watchAddResv),
     call(watchUpdateResv),
     call(watchCancelResv),
+    call(watchReturnResv),
     call(watchFetchAvailableQty),
   ]);
 }

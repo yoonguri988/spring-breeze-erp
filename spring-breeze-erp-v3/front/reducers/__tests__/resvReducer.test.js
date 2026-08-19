@@ -24,6 +24,10 @@ import resvReducer, {
   cancelResvSuccess,
   cancelResvFailure,
 
+  returnResvRequest,
+  returnResvSuccess,
+  returnResvFailure,
+
   fetchAvailableQtyRequest,
   fetchAvailableQtySuccess,
   fetchAvailableQtyFailure,
@@ -272,7 +276,78 @@ describe('resvReducer', () => {
   });
 
   // ---------------------------------------------------------
-  // 7) 실시간 잔여수량 조회 (available)
+  // 7) 자원 반납 처리 (return)
+  // ---------------------------------------------------------
+  describe('returnResv', () => {
+    test('returnResvRequest: loading true, error/success 초기화', () => {
+      const prevState = { ...initialState, error: '이전 에러', success: true };
+      const state = resvReducer(prevState, returnResvRequest());
+
+      expect(state.loading).toBe(true);
+      expect(state.error).toBeNull();
+      expect(state.success).toBe(false);
+    });
+
+    test('returnResvSuccess: myList/detail 의 해당 건에 returnDt 를 반영하고 상태를 APP 으로 정리한다', () => {
+      const prevState = {
+        ...initialState,
+        loading: true,
+        myList: [
+          { revId: 1, resName: '노트북 A', status: 'APP', returnDt: null },
+          { revId: 2, resName: '빔프로젝터', status: 'NORET', returnDt: null },
+        ],
+        detail: { revId: 1, resName: '노트북 A', status: 'APP', returnDt: null },
+      };
+      const payload = {
+        success: true,
+        message: '반납 처리되었습니다.',
+        revId: 1,
+        returnDt: '2026-08-19T10:00:00',
+      };
+      const state = resvReducer(prevState, returnResvSuccess(payload));
+
+      expect(state.loading).toBe(false);
+      expect(state.success).toBe(true);
+      expect(state.message).toBe('반납 처리되었습니다.');
+      expect(state.myList[0].returnDt).toBe('2026-08-19T10:00:00');
+      expect(state.myList[0].status).toBe('APP');
+      expect(state.myList[1].returnDt).toBeNull();
+      expect(state.detail.returnDt).toBe('2026-08-19T10:00:00');
+      expect(state.detail.status).toBe('APP');
+    });
+
+    test('returnResvSuccess: NORET(미반납) 상태였던 건도 반납 처리되면 APP 으로 바뀐다', () => {
+      const prevState = {
+        ...initialState,
+        loading: true,
+        myList: [{ revId: 2, resName: '빔프로젝터', status: 'NORET', returnDt: null }],
+        detail: { revId: 2, resName: '빔프로젝터', status: 'NORET', returnDt: null },
+      };
+      const payload = {
+        success: true,
+        message: '반납 처리되었습니다.',
+        revId: 2,
+        returnDt: '2026-08-19T11:00:00',
+      };
+      const state = resvReducer(prevState, returnResvSuccess(payload));
+
+      expect(state.myList[0].status).toBe('APP');
+      expect(state.myList[0].returnDt).toBe('2026-08-19T11:00:00');
+      expect(state.detail.status).toBe('APP');
+    });
+
+    test('returnResvFailure: error 반영', () => {
+      const error = '본인이 예약한 자원만 반납할 수 있습니다.';
+      const state = resvReducer({ ...initialState, loading: true }, returnResvFailure(error));
+
+      expect(state.loading).toBe(false);
+      expect(state.success).toBe(false);
+      expect(state.error).toBe(error);
+    });
+  });
+
+  // ---------------------------------------------------------
+  // 8) 실시간 잔여수량 조회 (available)
   // ---------------------------------------------------------
   describe('fetchAvailableQty', () => {
     test('fetchAvailableQtyRequest: loading true, availableQty 초기화', () => {

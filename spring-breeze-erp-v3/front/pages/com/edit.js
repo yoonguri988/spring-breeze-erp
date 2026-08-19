@@ -1,5 +1,4 @@
 // pages/com/edit.js
-// 원본: pages/com/edit.html
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -30,6 +29,7 @@ import {
   LockOutlined,
   ExclamationCircleFilled,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchCompanyDetailRequest,
@@ -45,6 +45,7 @@ export default function ComEditPage() {
   const { comId } = router.query;
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const { t, i18n } = useTranslation(["com", "common"]);
 
   // companyReducer: detail = ComDetailResponse { com, deptStats, deptList }
   // update/delete는 loading/error/success/message를 공용으로 사용하므로
@@ -65,7 +66,18 @@ export default function ComEditPage() {
   const [delPwError, setDelPwError] = useState("");
   const [deleting, setDeleting] = useState(false);
 
-  const codeOptions = useMemo(() => getCodeOptions(industryGrpCode), [industryGrpCode]);
+  const codeOptions = useMemo(
+    () => getCodeOptions(industryGrpCode, i18n.language),
+    [industryGrpCode, i18n.language],
+  );
+  const grpOptions = useMemo(
+    () =>
+      GRP_OPTIONS.map((o) => ({
+        value: o.value,
+        label: i18n.language === "en" ? o.labelEn : o.label,
+      })),
+    [i18n.language],
+  );
 
   // 상세 조회
   useEffect(() => {
@@ -94,7 +106,7 @@ export default function ComEditPage() {
   useEffect(() => {
     if (!submitting || loading) return;
     if (success) {
-      message.success(apiMessage || "회사 정보가 수정되었습니다.");
+      message.success(apiMessage || t("edit.messages.updateSuccess"));
       setSubmitting(false);
       dispatch(resetCompanyState());
       router.push("/com/list");
@@ -110,14 +122,14 @@ export default function ComEditPage() {
   useEffect(() => {
     if (!deleting || loading) return;
     if (success) {
-      message.success(apiMessage || "회사가 삭제되었습니다.");
+      message.success(apiMessage || t("edit.messages.deleteSuccess"));
       setDeleting(false);
       setDelOpen(false);
       dispatch(resetCompanyState());
       router.push("/com/list");
     } else if (error) {
       setDeleting(false);
-      setDelPwError(error || "비밀번호가 올바르지 않습니다.");
+      setDelPwError(error || t("edit.messages.deletePasswordInvalid"));
       dispatch(resetCompanyState());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,7 +139,7 @@ export default function ComEditPage() {
     const file = info.file?.originFileObj || info.file;
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      message.error("파일 크기는 2MB 이하여야 합니다.");
+      message.error(t("form.logoSizeError"));
       return;
     }
     setLogoFile(file);
@@ -177,7 +189,7 @@ export default function ComEditPage() {
   const handleDeleteConfirm = () => {
     // 관리자 비밀번호는 서버(DeleteCompanyRequest.password)에서 검증한다.
     if (!adminPw) {
-      setDelPwError("관리자 비밀번호를 입력하세요.");
+      setDelPwError(t("edit.delete.passwordRequired"));
       return;
     }
     setDeleting(true);
@@ -201,19 +213,20 @@ export default function ComEditPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <span>&gt;</span>{" "}
-            <Link href="/com/list">회사 관리</Link> <span>&gt;</span> 수정{" "}
-            <Tag color="blue">관리자</Tag>
+            <Link href="/">{t("breadcrumb.home")}</Link> <span>&gt;</span>{" "}
+            <Link href="/com/list">{t("breadcrumb.comManagement")}</Link>{" "}
+            <span>&gt;</span> {t("common:button.edit")}{" "}
+            <Tag color="blue">{t("edit.adminTag")}</Tag>
           </div>
-          <h1>{com ? `${com.comName} · 수정` : "회사 수정"}</h1>
-          <p>회사 정보를 수정합니다.</p>
+          <h1>{com ? t("edit.titleWithName", { name: com.comName }) : t("edit.title")}</h1>
+          <p>{t("edit.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions" style={{ display: "flex", gap: 8 }}>
           <Button danger icon={<DeleteOutlined />} onClick={openDeleteModal}>
-            삭제
+            {t("edit.deleteButton")}
           </Button>
           <Link href="/com/list">
-            <Button icon={<ArrowLeftOutlined />}>목록으로</Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("form.backToListButton")}</Button>
           </Link>
         </div>
       </div>
@@ -230,20 +243,20 @@ export default function ComEditPage() {
           className="sb-card mb-3"
           title={
             <span>
-              <TagOutlined className="me-2 text-soft" /> 업종 분류
+              <TagOutlined className="me-2 text-soft" /> {t("form.industryCard")}
             </span>
           }
         >
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
-                label="업종"
+                label={t("form.industryLabel")}
                 name="industryGrpCode"
-                rules={[{ required: true, message: "업종을 선택하세요." }]}
+                rules={[{ required: true, message: t("form.industryRequired") }]}
               >
                 <Select
-                  placeholder="-- 업종 선택 --"
-                  options={GRP_OPTIONS}
+                  placeholder={t("form.industryPlaceholder")}
+                  options={grpOptions}
                   onChange={(v) => {
                     setIndustryGrpCode(v);
                     form.setFieldsValue({ industryCode: undefined });
@@ -253,13 +266,15 @@ export default function ComEditPage() {
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="세부 업종"
+                label={t("form.detailIndustryLabel")}
                 name="industryCode"
-                rules={[{ required: true, message: "세부 업종을 선택하세요." }]}
+                rules={[{ required: true, message: t("form.detailIndustryRequired") }]}
               >
                 <Select
                   placeholder={
-                    industryGrpCode ? "-- 세부업종 선택 --" : "-- 업종을 먼저 선택하세요 --"
+                    industryGrpCode
+                      ? t("form.detailIndustryPlaceholder")
+                      : t("form.detailIndustryPlaceholderDisabled")
                   }
                   disabled={!industryGrpCode}
                   options={codeOptions}
@@ -274,7 +289,7 @@ export default function ComEditPage() {
           className="sb-card mb-3"
           title={
             <span>
-              <BankOutlined className="me-2 text-soft" /> 기본 정보
+              <BankOutlined className="me-2 text-soft" /> {t("form.basicInfoCard")}
             </span>
           }
           extra={com ? <Tag>COM-{String(com.comId).padStart(3, "0")}</Tag> : null}
@@ -282,24 +297,24 @@ export default function ComEditPage() {
           <Row gutter={16}>
             <Col xs={24} md={16}>
               <Form.Item
-                label="회사명"
+                label={t("form.comNameLabel")}
                 name="comName"
-                rules={[{ required: true, message: "회사명은 필수입니다. (최대 100자)" }]}
+                rules={[{ required: true, message: t("form.comNameRequired") }]}
               >
-                <Input placeholder="예: (주)선빈테크놀로지" maxLength={100} />
+                <Input placeholder={t("form.comNamePlaceholder")} maxLength={100} />
               </Form.Item>
             </Col>
             <Col xs={24} md={8}>
               <Form.Item
-                label="대표자"
+                label={t("form.ceoLabel")}
                 name="comCeo"
-                rules={[{ required: true, message: "대표자명은 필수입니다." }]}
+                rules={[{ required: true, message: t("form.ceoRequired") }]}
               >
-                <Input placeholder="대표자명" maxLength={100} />
+                <Input placeholder={t("form.ceoPlaceholder")} maxLength={100} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="사업자등록번호">
+              <Form.Item label={t("form.bizNoLabel")}>
                 <Input
                   value={com?.bizNo}
                   readOnly
@@ -307,13 +322,13 @@ export default function ComEditPage() {
                   style={{ background: "#fafbfc", color: "rgba(0,0,0,0.45)" }}
                 />
                 <div className="text-faint mt-1" style={{ fontSize: 12 }}>
-                  사업자번호는 수정할 수 없습니다.
+                  {t("edit.bizNoReadonlyNote")}
                 </div>
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="대표 전화" name="comTel" extra="선택 입력">
-                <Input placeholder="02-0000-0000" maxLength={100} />
+              <Form.Item label={t("form.telLabel")} name="comTel" extra={t("form.telExtra")}>
+                <Input placeholder={t("form.telPlaceholder")} maxLength={100} />
               </Form.Item>
             </Col>
           </Row>
@@ -324,10 +339,10 @@ export default function ComEditPage() {
           className="sb-card mb-3"
           title={
             <span>
-              <PictureOutlined className="me-2 text-soft" /> 회사 로고
+              <PictureOutlined className="me-2 text-soft" /> {t("form.logoCard")}
             </span>
           }
-          extra={<span className="sub">PNG · JPG · SVG · WEBP, 최대 2MB</span>}
+          extra={<span className="sub">{t("form.logoExtra")}</span>}
         >
           <div className="logo-zone" style={{ display: "flex", gap: 16, alignItems: "center" }}>
             <div
@@ -347,7 +362,7 @@ export default function ComEditPage() {
               {logoPreview ? (
                 <img
                   src={logoPreview}
-                  alt="로고 미리보기"
+                  alt={t("form.logoPreviewAlt")}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               ) : (
@@ -361,10 +376,10 @@ export default function ComEditPage() {
                 beforeUpload={() => false}
                 onChange={handleLogoChange}
               >
-                <Button icon={<UploadOutlined />}>로고 파일 선택</Button>
+                <Button icon={<UploadOutlined />}>{t("form.logoSelectButton")}</Button>
               </Upload>
               <div className="text-faint mt-1" style={{ fontSize: 12 }}>
-                파일을 선택하지 않으면 기존 로고가 유지됩니다.
+                {t("edit.logoKeepNote")}
               </div>
             </div>
           </div>
@@ -372,9 +387,9 @@ export default function ComEditPage() {
 
         {/* 폼 버튼 */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <Button onClick={handleReset}>초기화</Button>
+          <Button onClick={handleReset}>{t("form.resetButton")}</Button>
           <Link href="/com/list">
-            <Button>목록</Button>
+            <Button>{t("form.listButton")}</Button>
           </Link>
           <Button
             type="primary"
@@ -382,7 +397,7 @@ export default function ComEditPage() {
             icon={<SaveOutlined />}
             loading={submitting && loading}
           >
-            저장
+            {t("edit.saveButton")}
           </Button>
         </div>
       </Form>
@@ -391,7 +406,7 @@ export default function ComEditPage() {
       <Modal
         title={
           <span style={{ color: "#cf1322" }}>
-            <ExclamationCircleFilled /> 회사 삭제
+            <ExclamationCircleFilled /> {t("edit.delete.modalTitle")}
           </span>
         }
         open={delOpen}
@@ -399,7 +414,7 @@ export default function ComEditPage() {
         destroyOnClose
         footer={[
           <Button key="cancel" onClick={closeDeleteModal} disabled={deleting}>
-            취소
+            {t("edit.delete.cancelButton")}
           </Button>,
           <Button
             key="confirm"
@@ -409,7 +424,7 @@ export default function ComEditPage() {
             loading={deleting && loading}
             onClick={handleDeleteConfirm}
           >
-            삭제 확인
+            {t("edit.delete.confirmButton")}
           </Button>,
         ]}
       >
@@ -423,14 +438,14 @@ export default function ComEditPage() {
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
-          message="삭제 시 연결된 부서·사원 데이터에 영향을 줄 수 있습니다."
-          description="계속하려면 관리자 비밀번호를 입력하세요."
+          message={t("edit.delete.warningMessage")}
+          description={t("edit.delete.warningDescription")}
         />
         <div className="sb-form-label">
-          관리자 비밀번호 <span style={{ color: "#cf1322" }}>*</span>
+          {t("edit.delete.passwordLabel")} <span style={{ color: "#cf1322" }}>*</span>
         </div>
         <Input.Password
-          placeholder="비밀번호 입력"
+          placeholder={t("edit.delete.passwordPlaceholder")}
           autoComplete="new-password"
           value={adminPw}
           status={delPwError ? "error" : ""}
