@@ -150,7 +150,7 @@ export default function TaskListPage() {
       dataIndex: "taskName",
       key: "taskName",
       render: (name, record) => (
-        <Link href={{ pathname: "/proj/task_detail", query: { task_id: record.taskId } }}>
+        <Link href={{ pathname: "/proj/task_detail", query: { taskId: record.taskId } }}>
           <span className="sb-table__name" style={{ cursor: "pointer" }}>
             {name}
           </span>
@@ -309,23 +309,29 @@ export default function TaskListPage() {
             }}
           />
         </div>
-
-        {totalCnt > 0 && (
-          <div
-            className="d-flex justify-content-center py-3"
-            style={{ borderTop: "1px solid var(--sb-border)" }}
+        <div
+          style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "14px 16px",
+          borderTop: "1px solid var(--sb-border)",
+          }}
           >
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={totalCnt}
-              showSizeChanger
-              pageSizeOptions={["10", "20", "30", "50"]}
-              onChange={handlePageChange}
-              onShowSizeChange={handlePageSizeChange}
-            />
-          </div>
+          <span style={{ color: "#999", fontSize: 12.5 }}>
+          총 <b>{totalCnt}</b>개 태스크
+          </span>
+        {totalCnt > 0 && (
+          <Pagination
+          size="small"
+          current={currentPage}
+          total={totalCnt}
+          pageSize={pageSize}
+          showSizeChanger={false}
+          onChange={handlePageChange}
+          />
         )}
+        </div>
       </div>
     </main>
   );

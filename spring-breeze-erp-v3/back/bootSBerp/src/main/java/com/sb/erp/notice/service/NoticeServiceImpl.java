@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sb.erp.global.exception.FileUploadException;
 import com.sb.erp.notice.dto.request.NoticeRequest;
 import com.sb.erp.notice.dto.request.NoticeSearchRequest;
 import com.sb.erp.notice.dto.response.NoticeResponse;
@@ -13,6 +14,8 @@ import com.sb.erp.notice.repository.NoticeMapper;
 import com.sb.erp.util.dto.FileUploadDto;
 import com.sb.erp.util.dto.FileUploadType;
 import com.sb.erp.util.dto.FileUploadUtil;
+import java.io.IOException;
+import java.util.Base64;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,22 +27,26 @@ public class NoticeServiceImpl implements NoticeService{
 	
 		private final NoticeMapper noticeMapper;
 
-	    @Override // 공지등록
-	    @Transactional
-	    public int insert(NoticeRequest dto , MultipartFile file) {
-	        if (dto.getBcontent() != null && dto.getBcontent().contains("긴급")) {
-	            int urgentCount = noticeMapper.countUrgentNotices(dto.getComId());
-	            if (urgentCount >= 5) {
-	                throw new IllegalStateException("긴급 공지는 최대 5개까지만 등록할 수 있습니다. 기존 긴급 공지를 해제한 후 다시 시도해주세요.");
-	            }
-	        }
-			if (file != null && !file.isEmpty()) {
-				FileUploadDto uploaded = FileUploadUtil.upload(file, FileUploadType.NOTICE_ATTACH);
-				dto.setBfile(uploaded.getFileUrl()); // DB에는 웹 접근용 URL을 저장 (/upload/notice/attach/xxxx.pdf)
-			}
-			// 첨부파일이 없으면 bfile은 null로 두고, insert 쿼리의 <if>가 알아서 컬럼을 생략한다.
-	        return noticeMapper.insert(dto);
-	    }
+		@Override // 공지등록
+		@Transactional
+		public int insert(NoticeRequest dto , MultipartFile file) {
+		    if (dto.getBcontent() != null && dto.getBcontent().contains("긴급")) {
+		        int urgentCount = noticeMapper.countUrgentNotices(dto.getComId());
+		        if (urgentCount >= 5) {
+		            throw new IllegalStateException("긴급 공지는 최대 5개까지만 등록할 수 있습니다. 기존 긴급 공지를 해제한 후 다시 시도해주세요.");
+		        }
+		    }
+		    if (file != null && !file.isEmpty()) {
+		        FileUploadUtil.validate(file, FileUploadType.NOTICE_ATTACH);
+		        try {
+		            String base64 = Base64.getEncoder().encodeToString(file.getBytes());
+		            dto.setBfile(file.getOriginalFilename() + "|" + file.getContentType() + "|" + base64);
+		        } catch (java.io.IOException e) {
+		            throw new FileUploadException("파일을 읽는 중 오류가 발생했습니다.", e);
+		        }
+		    }
+		    return noticeMapper.insert(dto);
+		}
 
 	    @Override // 공지수정
 	    @Transactional
@@ -57,16 +64,14 @@ public class NoticeServiceImpl implements NoticeService{
 	        }
 	    	
 			if (file != null && !file.isEmpty()) {
-				// 새 파일을 올리기 전에 기존 첨부파일 URL을 먼저 확보해둔다. (교체 후 정리용)
-				String oldFileUrl = origin != null ? origin.getBfile() : null;
-
-				FileUploadDto uploaded = FileUploadUtil.upload(file, FileUploadType.NOTICE_ATTACH);
-				dto.setBfile(uploaded.getFileUrl());
-
-				if (oldFileUrl != null && !oldFileUrl.isEmpty()) {
-					FileUploadUtil.delete(FileUploadUtil.resolveDiskPath(oldFileUrl)); // 교체된 옛 파일 정리
-				}
-			}
+		        FileUploadUtil.validate(file, FileUploadType.NOTICE_ATTACH);
+		        try {
+		            String base64 = Base64.getEncoder().encodeToString(file.getBytes());
+		            dto.setBfile(file.getOriginalFilename() + "|" + file.getContentType() + "|" + base64);
+		        } catch (java.io.IOException e) {
+		            throw new FileUploadException("파일을 읽는 중 오류가 발생했습니다.", e);
+		        }
+		    }
 			// 새 파일이 없으면 dto.getBfile()은 null → update 쿼리의 <if>가 기존 값을 그대로 유지시켜준다.
 	        return noticeMapper.update(dto);
 	    }
@@ -74,10 +79,6 @@ public class NoticeServiceImpl implements NoticeService{
 	    @Override // 공지삭제
 	    @Transactional
 	    public int delete(long bno) {
-	    	NoticeResponse origin = noticeMapper.select(bno);
-			if (origin != null && origin.getBfile() != null && !origin.getBfile().isEmpty()) {
-				FileUploadUtil.delete(FileUploadUtil.resolveDiskPath(origin.getBfile())); // 게시글과 함께 첨부파일도 정리
-			}
 	        return noticeMapper.delete(bno);
 	    }
 

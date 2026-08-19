@@ -95,7 +95,7 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 			if(parent.getTaskEndDate().isAfter(task.getTaskStartDate()))
 			{
 				long taskDuration = ChronoUnit.DAYS.between(task.getTaskStartDate(), task.getTaskEndDate());
-				LocalDate nextStartDate = task.getTaskEndDate().plusDays(1);
+				LocalDate nextStartDate = parent.getTaskEndDate().plusDays(1);
 				LocalDate nextEndDate = nextStartDate.plusDays(taskDuration);
 				
 				task.setTaskStartDate(nextStartDate);

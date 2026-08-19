@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-import { Button, Input, Select, DatePicker } from "antd";
+import { Button, Input, Select, DatePicker, message } from "antd";
 import { createProjRequest } from "../../reducers/proj/projReducer";
 
 import moment from "moment";
@@ -24,97 +24,67 @@ export default function ProjCreatePage() {
 
   const { loading, error, success } = useSelector((state) => state.proj);
 
-  const [form, setForm] = useState({
-    proName: "",
-    proDesc: "",
-    proStatus: "",
-    startDate: "",
-    endDate: "",
-  });
+  const [proStatus, setProStatus] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const [errors, setErrors] = useState({});
-
-  // 생성 성공하면 목록 페이지로 이동
   useEffect(() => {
     if (success) {
       router.push("/proj/proj_list");
     }
   }, [success, router]);
 
-  // 입력값 하나 바꿀 때 실행 (폼 값 갱신 + 해당 항목 에러 지우기)
-  const handleChange = (name, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
+  const handleReset = () => {
+    document.getElementById("pro_name").value = "";
+    document.getElementById("pro_desc").value = "";
+    setProStatus("");
+    setStartDate("");
+    setEndDate("");
   };
 
-  // 등록 버튼(폼 제출) 클릭 시 실행
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const onFinish = () => {
+    const proName = document.getElementById("pro_name").value;
+    const proDesc = document.getElementById("pro_desc").value;
 
-    const newErrors = {};
-
-    if (!form.proName.trim()) {
-      newErrors.proName = "프로젝트명을 입력하세요.";
+    if (!proName.trim()) {
+      message.warning("프로젝트명을 입력하세요.");
+      return;
     }
 
-    if (!form.proDesc.trim()) {
-      newErrors.proDesc = "프로젝트 설명을 입력하세요.";
+    if (!proDesc.trim()) {
+      message.warning("프로젝트 설명을 입력하세요.");
+      return;
     }
 
-    if (!form.proStatus) {
-      newErrors.proStatus = "상태를 선택하세요.";
+    if (!proStatus) {
+      message.warning("상태를 선택하세요.");
+      return;
     }
 
-    if (!form.startDate) {
-      newErrors.startDate = "시작일을 선택하세요.";
+    if (!startDate) {
+      message.warning("시작일을 선택하세요.");
+      return;
     }
 
-    if (!form.endDate) {
-      newErrors.endDate = "종료일을 선택하세요.";
+    if (!endDate) {
+      message.warning("종료일을 선택하세요.");
+      return;
     }
 
-    if (
-      form.startDate &&
-      form.endDate &&
-      moment(form.startDate).isAfter(moment(form.endDate))
-    ) {
-      newErrors.endDate = "종료일은 시작일 이후로 선택하세요.";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (moment(startDate).isAfter(moment(endDate))) {
+      message.warning("종료일은 시작일 이후로 선택하세요.");
       return;
     }
 
     dispatch(
       createProjRequest({
-        proName: form.proName.trim(),
-        proDesc: form.proDesc.trim(),
-        proStatus: form.proStatus,
-        startDate: form.startDate,
-        endDate: form.endDate,
+        proName: proName.trim(),
+        proDesc: proDesc.trim(),
+        proStatus,
+        startDate,
+        endDate,
       })
     );
-  };
-
-  // 취소 버튼: 입력값 전체 초기화
-  const handleReset = () => {
-    setForm({
-      proName: "",
-      proDesc: "",
-      proStatus: "",
-      startDate: "",
-      endDate: "",
-    });
-
-    setErrors({});
   };
 
   return (
@@ -132,49 +102,30 @@ export default function ProjCreatePage() {
           </div>
 
           <h1>프로젝트 생성</h1>
-
           <p>새로운 프로젝트의 기본 정보를 입력하세요.</p>
         </div>
       </div>
 
       <div className="sb-card">
         <div className="sb-card__body">
-          <form onSubmit={handleSubmit}>
+          <form id="projCreateForm" onSubmit={(e) => { e.preventDefault(); }}>
             <div className="mb-3">
               <label htmlFor="pro_name" className="sb-form-label">
                 프로젝트명
               </label>
-
-              <Input
-                id="pro_name"
-                value={form.proName}
-                onChange={(e) => handleChange("proName", e.target.value)}
-                placeholder="프로젝트명을 입력하세요"
-                status={errors.proName ? "error" : ""}
-              />
-
-              {errors.proName && (
-                <div className="text-danger mt-1">{errors.proName}</div>
-              )}
+              <Input id="pro_name" name="pro_name" placeholder="프로젝트명을 입력하세요" />
             </div>
 
             <div className="mb-3">
               <label htmlFor="pro_desc" className="sb-form-label">
                 프로젝트 설명
               </label>
-
               <TextArea
                 id="pro_desc"
-                value={form.proDesc}
-                onChange={(e) => handleChange("proDesc", e.target.value)}
+                name="pro_desc"
                 placeholder="프로젝트에 대한 설명을 입력하세요"
                 rows={4}
-                status={errors.proDesc ? "error" : ""}
               />
-
-              {errors.proDesc && (
-                <div className="text-danger mt-1">{errors.proDesc}</div>
-              )}
             </div>
 
             <div className="row g-3 mb-3">
@@ -182,62 +133,40 @@ export default function ProjCreatePage() {
                 <label htmlFor="pro_status" className="sb-form-label">
                   상태
                 </label>
-
                 <Select
                   id="pro_status"
-                  value={form.proStatus || undefined}
-                  onChange={(value) => handleChange("proStatus", value)}
+                  value={proStatus || undefined}
+                  onChange={(value) => setProStatus(value)}
                   options={STATUS_OPTIONS}
                   placeholder="상태를 선택하세요"
                   style={{ width: "100%" }}
-                  status={errors.proStatus ? "error" : ""}
                 />
-
-                {errors.proStatus && (
-                  <div className="text-danger mt-1">{errors.proStatus}</div>
-                )}
               </div>
 
               <div className="col-md-4">
                 <label htmlFor="start_date" className="sb-form-label">
                   시작일
                 </label>
-
                 <DatePicker
                   id="start_date"
-                  value={form.startDate ? moment(form.startDate, "YYYY-MM-DD") : null}
-                  onChange={(date) =>
-                    handleChange("startDate", date ? date.format("YYYY-MM-DD") : "")
-                  }
+                  value={startDate ? moment(startDate, "YYYY-MM-DD") : null}
+                  onChange={(date) => setStartDate(date ? date.format("YYYY-MM-DD") : "")}
                   format="YYYY-MM-DD"
                   style={{ width: "100%" }}
-                  status={errors.startDate ? "error" : ""}
                 />
-
-                {errors.startDate && (
-                  <div className="text-danger mt-1">{errors.startDate}</div>
-                )}
               </div>
 
               <div className="col-md-4">
                 <label htmlFor="end_date" className="sb-form-label">
                   종료일
                 </label>
-
                 <DatePicker
                   id="end_date"
-                  value={form.endDate ? moment(form.endDate, "YYYY-MM-DD") : null}
-                  onChange={(date) =>
-                    handleChange("endDate", date ? date.format("YYYY-MM-DD") : "")
-                  }
+                  value={endDate ? moment(endDate, "YYYY-MM-DD") : null}
+                  onChange={(date) => setEndDate(date ? date.format("YYYY-MM-DD") : "")}
                   format="YYYY-MM-DD"
                   style={{ width: "100%" }}
-                  status={errors.endDate ? "error" : ""}
                 />
-
-                {errors.endDate && (
-                  <div className="text-danger mt-1">{errors.endDate}</div>
-                )}
               </div>
             </div>
 
@@ -245,7 +174,6 @@ export default function ProjCreatePage() {
               <label htmlFor="reg_date" className="sb-form-label">
                 등록일
               </label>
-
               <Input
                 id="reg_date"
                 value={moment().format("YYYY-MM-DD")}
@@ -267,7 +195,7 @@ export default function ProjCreatePage() {
                 <Button>목록</Button>
               </Link>
 
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button type="primary" htmlType="button" loading={loading} onClick={onFinish}>
                 등록
               </Button>
             </div>

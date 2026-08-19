@@ -13,7 +13,8 @@ const initialState = {
     empList: [],
     analysis: null,
     error:null,
-    success:false
+    success:false,
+    deleteSuccess:false
 }
 const projReducer = createSlice({
     name:"project",
@@ -100,16 +101,20 @@ const projReducer = createSlice({
             state.loading=true;
             state.error=null;
             state.success=false;
+            state.deleteSuccess=false;
         },
         deleteProjSuccess:(state,action)=>{
             state.loading=false;
             state.projects=state.projects.filter(project=>project.proId!==action.payload);
             state.success=true;
+            state.deleteSuccess=true;
         },
         deleteProjFailure:(state,action)=>{
             state.loading=false;
             state.error=action.payload;
             state.success=false;
+            state.deleteSuccess=false;
+          
         },
 
         // 초기화
@@ -117,6 +122,7 @@ const projReducer = createSlice({
             state.loading=false;
             state.error=null;
             state.success=false;
+            state.deleteSuccess=false;
         },
 
         // 사원 검색
