@@ -57,40 +57,13 @@ export default function TaskCreatePage() {
     };
 
     const onFinish = () => {
-    if (!taskName.trim()) {
-      message.warning("태스크명을 입력하세요.");
-      return;
-    }
-
-    if (!taskDesc.trim()) {
-      message.warning("태스크 설명을 입력하세요.");
-      return;
-    }
-
-    if (!taskStatus) {
-      message.warning("상태를 선택하세요.");
-      return;
-    }
-
-    if (!pmId) {
-    message.warning("담당자를 선택하세요.");
-    return;
-    }
-
-    if (!taskStartDate) {
-      message.warning("시작일을 선택하세요.");
-      return;
-    }
-
-    if (!taskEndDate) {
-      message.warning("종료일을 선택하세요.");
-      return;
-    }
-
-    if (moment(taskStartDate).isAfter(moment(taskEndDate))) {
-      message.warning("종료일은 시작일 이후로 선택하세요.");
-      return;
-    }
+    if (!taskName.trim()) { message.warning("태스크명을 입력하세요."); return; }
+    if (!taskDesc.trim()) { message.warning("태스크 설명을 입력하세요."); return; }
+    if (!taskStatus) { message.warning("상태를 선택하세요."); return; }
+    if (!pmId) { message.warning("담당자를 선택하세요."); return; }
+    if (!taskStartDate) { message.warning("시작일을 선택하세요."); return; }
+    if (!taskEndDate) { message.warning("종료일을 선택하세요."); return; }
+    if (moment(taskStartDate).isAfter(moment(taskEndDate))) { message.warning("종료일은 시작일 이후로 선택하세요."); return; }
 
     dispatch(
       createTaskRequest({

@@ -5,14 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import api from "../../api/axios";
-import {
-  Table,
-  Segmented,
-  Button,
-  Pagination,
-  Empty,
-  Tag,
-} from "antd";
+import { Table, Segmented, Button, Pagination, Empty, Tag, } from "antd";
 
 import {
   FilePdfOutlined,

@@ -1,4 +1,5 @@
 // pages/proj/proj_detail.js
+
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
@@ -6,23 +7,11 @@ import Link from "next/link";
 
 import api from "../../api/axios";
 import { Row, Col, Table, Button, Modal, Tag, Pagination, message } from "antd";
-import {
-  StarOutlined,
-  UnorderedListOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  TeamOutlined,
-  CheckSquareOutlined,
-} from "@ant-design/icons";
+import { StarOutlined, UnorderedListOutlined, EditOutlined, DeleteOutlined, TeamOutlined, CheckSquareOutlined, } from "@ant-design/icons";
 import ProjDeleteModal from "../../components/ProjDeleteModal";
 import moment from "moment";
 
-import {
-  fetchProjDetailRequest,
-  deleteProjRequest,
-  resetProjState,
-  analyzeProjRequest,
-} from "../../reducers/proj/projReducer";
+import { fetchProjDetailRequest, deleteProjRequest, resetProjState, analyzeProjRequest, } from "../../reducers/proj/projReducer";
 import { fetchGanttRequest } from "../../reducers/task/taskReducer";
 
 const STATUS_TAG_COLOR = { TODO: "default", DOING: "processing", DONE: "success" };
@@ -78,11 +67,11 @@ export default function ProjDetailPage(){
     dispatch(fetchGanttRequest({ proId }));
     }, [router.isReady, proId, dispatch]);
 
-useEffect(() => {
-  if (deleteSuccess) {
-    router.push("/proj/proj_list");
-  }
-}, [deleteSuccess, router]);
+    useEffect(() => {
+      if (deleteSuccess) {
+        router.push("/proj/proj_list");
+      }
+    }, [deleteSuccess, router]);
 
     useEffect(()=>{
       return()=>{
@@ -298,7 +287,6 @@ useEffect(() => {
       <div className="sb-card mt-3">
         <div className="sb-card__head">
           <h2>참여인원</h2>
-
           <div className="right">
             {(isAdmin || detail?.empId === user?.empId) && (
               <Link href={{ pathname: "/proj/proj_member", query: { proId } }}>
@@ -313,7 +301,6 @@ useEffect(() => {
             )}
           </div>
         </div>
-
         <div className="sb-card__body">
           <div className="sb-avstack mb-2">
             {memberList.map((m) => (
@@ -326,7 +313,6 @@ useEffect(() => {
               </span>
             ))}
           </div>
-
           <span
             className="text-faint"
             style={{ fontSize: 13 }}
@@ -338,7 +324,7 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* 태스크 진행 현황 */}
+      {/* 태스크 진행 현황-간트차트 */}
       <div className="sb-card mt-3">
         <div className="sb-card__head">
           <h2>태스크 진행 현황</h2>
