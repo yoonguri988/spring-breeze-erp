@@ -90,6 +90,7 @@ jsj:
 # OpenAI API
 openai:
   api:
+    baseurl: ${OPENAI_API_BASEURL}
     key: ${OPENAI_API_KEY}
 
 # KJY OpenAI API
