@@ -54,7 +54,7 @@ api.interceptors.response.use(
     if (original?.url?.includes("/auth/refresh")) {
       if (typeof window !== "undefined") {
         Cookies.remove("accessToken");
-        //window.location.href = "/auth/login";
+        window.location.href = "/auth/login";
       }
       return Promise.reject(error);
     }
@@ -91,7 +91,7 @@ api.interceptors.response.use(
         if (typeof window !== "undefined") {
           // localStorage.removeItem("accessToken"); // Access Token 제거
           Cookies.remove("accessToken"); // Access Token 제거
-          //window.location.href = "/auth/login"; // 로그인 페이지로 이동 (실제 로그인 라우트는 /login이 아니라 /auth/login)
+          window.location.href = "/auth/login"; // 로그인 페이지로 이동 (실제 로그인 라우트는 /login이 아니라 /auth/login)
         }
         return Promise.reject(refreshErr);
       } finally {

@@ -23,6 +23,7 @@
 		<if test="forId != null and forId != '' and forId != 0">
 			and for_id != #{forId}
 		</if>
+		fetch first 1 rows only
 	</select>
 	
 	<!-- 양식 생성 -->
@@ -38,7 +39,7 @@
 			#{comId},
 			#{forCode},
 			#{forTitle},
-			#{forContent},
+			#{forContent, jdbcType=VARCHAR},
 			#{forSchema, jdbcType=VARCHAR},
 			#{forStatus}
 		)
@@ -57,7 +58,7 @@
 			com_id = #{req.comId},
 			for_code = #{req.forCode},
 			for_title = #{req.forTitle},
-			for_content = #{req.forContent},
+			for_content = #{req.forContent, jdbcType=VARCHAR},
 			for_schema = #{req.forSchema, jdbcType=VARCHAR},
 			for_status = #{req.forStatus}
 		where
@@ -82,7 +83,7 @@
 			#{req.comId},
 			#{req.forCode},
 			#{req.forTitle},
-			#{req.forContent},
+			#{req.forContent, jdbcType=VARCHAR},
 			#{req.forSchema, jdbcType=VARCHAR},
 			#{req.forStatus},
 			sysdate,
@@ -113,6 +114,7 @@
 	        f.for_content,
 	        f.for_schema,
 	        f.for_status,
+	        f.is_deleted as deleted,
 	        f.created_at,
 	        f.updated_at
 		from
@@ -153,7 +155,7 @@
 				)
 			</if>
 		</where>
-		order by f.for_id desc, f.for_version desc
+		order by f.updated_at desc, f.for_id desc
 		offset #{pstartno} rows fetch next #{onepagelist} rows only
 	</select>
 	

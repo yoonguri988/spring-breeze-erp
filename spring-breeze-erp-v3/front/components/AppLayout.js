@@ -25,7 +25,7 @@ function AppLayout({ children }) {
   useEffect(() => {
     if (!initialized) return;
     if (!accessToken) {
-      //router.replace("/auth/login");
+      router.replace("/auth/login");
     }
   }, [initialized, accessToken, router]);
 

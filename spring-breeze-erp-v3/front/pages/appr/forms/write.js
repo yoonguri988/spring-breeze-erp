@@ -6,7 +6,7 @@ import {
     message, Radio, Form, Input, Select, Switch, Button,
     Breadcrumb, Typography, Space, Row, Col
 } from "antd";
-import { BankOutlined } from "@ant-design/icons";
+import { BankOutlined, CheckCircleFilled, CloseCircleFilled } from "@ant-design/icons";
 import { insertFormRequest, resetFormState } from "../../../reducers/appr/apprFormReducer";
 import { checkCode, searchCompany, generateAiSchema } from "../../../api/appr/apprFormApi";
 import SchemaFieldEditor, {validateSchemaFields} from "../../../components/appr/SchemaFieldEditor";
@@ -128,7 +128,7 @@ export default function FormWritePage() {
         
         try {
             const res = await checkCode(forCode, comId, null);
-            setCodeStatus(res.available ? "avilable" : "duplicate");
+            setCodeStatus(res.available ? "available" : "duplicate");
             if (res.available) {
                 message.success("사용 가능한 코드입니다.")
             }
@@ -189,7 +189,7 @@ export default function FormWritePage() {
     }
 
     return (
-        <div style={{padding: 24, maxWidth: 720}}>
+        <div style={{padding: "24px 16px", maxWidth: 760, margin: "0 auto", width: "100%", boxSizing: "border-box"}}>
             <Breadcrumb style={{marginBottom: 8}}>
                 <Breadcrumb.Item
                     onClick={() => router.push("/appr/forms")}
@@ -229,15 +229,23 @@ export default function FormWritePage() {
                 </Form.Item>
 
                 <Form.Item label="양식 코드" required>
-                    <Input.Group compact>
+                    <Input.Group compact style={{display: "flex"}}>
                         <Form.Item
                             name="forCode"
                             noStyle
                             rules={[{required: true, message: "양식 코드를 입력해주세요."}]}
                         >
                             <Input
-                                style={{width: "calc(100% - 100px)"}}
+                                style={{flex: 1}}
                                 placeholder="ex) TEST-01"
+                                status={codeStatus === "duplicate" ? "error" : undefined}
+                                suffix={
+                                    codeStatus === "available" ? (
+                                        <CheckCircleFilled style={{color: "#52c41a"}}/>
+                                    ) : codeStatus === "duplicate" ? (
+                                        <CloseCircleFilled style={{color: "#ff4d4f"}}/>
+                                    ) : null
+                                }
                             />
                         </Form.Item>
                         <Button style={{width: 100}} onClick={handleCodeCheck}>

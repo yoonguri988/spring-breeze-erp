@@ -87,10 +87,10 @@ public class ApprDocController {
 	@Operation(summary = "문서 목록 조회", description = "결재 했던 문서, 해야될 문서 탭별로 목록 조회")
 	@GetMapping("/list_doc")
 	public ResponseEntity<Map<String, Object>> listDoc(
-			@RequestParam(defaultValue = "history") String tab,
-			@RequestParam(required = false) String keyword,
-			@RequestParam(required = false) String status,
-			@RequestParam(defaultValue = "1") int page,
+			@RequestParam(name = "tab", defaultValue = "history") String tab,
+			@RequestParam(name = "keyword", required = false) String keyword,
+			@RequestParam(name = "status", required = false) String status,
+			@RequestParam(name = "page", defaultValue = "1") int page,
 			@AuthenticationPrincipal CustomUserPrincipal principal) {
 
 		Long empId = principal.getEmpId();
@@ -223,7 +223,7 @@ public class ApprDocController {
 	@Operation(summary = "첨부파일 업로드", description = "문서에 첨부파일 등록 (최대 5개)")
 	@PostMapping("/{docId}/files")
 	public ResponseEntity<List<ApprFileResponse>> uploadFiles(
-			@PathVariable Long docId,
+			@PathVariable(name = "docId") Long docId,
 			@RequestParam("files") List<MultipartFile> files
 	) {
 		return ResponseEntity.ok(fileService.uploadFiles(docId, files));
@@ -232,7 +232,7 @@ public class ApprDocController {
 	@Operation(summary = "첨부파일 목록 조회", description = "문서에 등록된 첨부파일 목록 조회")
 	@GetMapping("/{docId}/files")
 	public ResponseEntity<List<ApprFileResponse>> getFiles(
-			@PathVariable Long docId
+			@PathVariable(name = "docId") Long docId
 	) {
 		return ResponseEntity.ok(fileService.selectFilesByDocId(docId));
 	}
@@ -240,8 +240,8 @@ public class ApprDocController {
 	@Operation(summary = "첨부파일 삭제", description = "본인이 등록한 문서의 첨부파일을 삭제")
 	@DeleteMapping("/{docId}/files/{fileId}")
 	public ResponseEntity<Void> deleteFile(
-			@PathVariable Long docId,
-			@PathVariable Long fileId,
+			@PathVariable(name = "docId") Long docId,
+			@PathVariable(name = "fileId") Long fileId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 		fileService.deleteFile(docId, fileId, principal.getEmpId());

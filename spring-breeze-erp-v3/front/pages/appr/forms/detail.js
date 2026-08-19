@@ -5,7 +5,8 @@ import { useRouter } from "next/router";
 import { 
     message, Form, Input, Select, Switch,
     Button, Descriptions, Tag, Space,
-    Popconfirm, List, Row, Col
+    Popconfirm, Row, Col, Breadcrumb,
+    Typography
  } from "antd";
 import {
     fetchFormDetailRequest,
@@ -16,13 +17,15 @@ import {
 } from "../../../reducers/appr/apprFormReducer";
 import { checkCode, searchCompany } from "../../../api/appr/apprFormApi";
 import SchemaFieldEditor, {validateSchemaFields } from "../../../components/appr/SchemaFieldEditor";
+import { BankOutlined } from "@ant-design/icons";
 
 // react-quill은 SSR이 불가하므로 CSR로 로드
 // () => import("react-quill") -> 처음에 로드 하지않고 필요할때 로드
 // {ssr: false} -> 서버 렌더링 단계에서는 해당 컴포넌트를 렌더링에서 제외함
 const ReactQuill = dynamic( () => import("react-quill"), {ssr: false});
 import "react-quill/dist/quill.snow.css";
-import { BankOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 export default function FormDetailPage() {
 
@@ -87,9 +90,7 @@ export default function FormDetailPage() {
     }, [success]);
 
     useEffect( () => {
-        if (submitError) {
-            message.error(submitError);
-        }
+        if (submitError) message.error(submitError);
     }, [submitError]);
 
     // 페이지 나갈때 submit 상태 초기화
@@ -204,22 +205,25 @@ export default function FormDetailPage() {
 
     return(    
         <div style={{padding: 24, maxWidth: 720}}>
-            <Space style={{marginBottom: 16}}>
-                <Button onClick={() => router.push("/appr/forms")}>
-                    목록으로
-                </Button>
-                {!editMode && (
-                    <Button type="primary" onClick={() => setEditMode(true)}>
-                        수정
-                    </Button>
-                )}
-                <Popconfirm title="삭제하시겠습니까?" onConfirm={handleDelete}>
-                    <Button danger>삭제</Button>
-                </Popconfirm>
-            </Space>
+            <Breadcrumb>
+                <Breadcrumb.Item
+                    onClick={() => router.push("/appr/forms")}
+                    style={{cursor: "pointer"}}
+                >전자 결재</Breadcrumb.Item>
+                <Breadcrumb.Item
+                    onClick={() => router.push("/appr/forms")}
+                    style={{cursor: "pointer"}}
+                >양식 관리</Breadcrumb.Item>
+                <Breadcrumb.Item>양식 상세</Breadcrumb.Item>
+            </Breadcrumb>
+
+            <div style={{marginBottom: 20}}>
+                <Title level={3} style={{marginBottom: 4}}>결재 양식 상세조회</Title>
+                <Text type="secondary">결재 양식의 상세 정보를 확인합니다.</Text>
+            </div>
             
-            <Row gutter={24}>
-                <Col span={16}>
+            <Row gutter={[24, 16]}>
+                <Col xs={24} md={16}>
                     {/*
                         editMode 여부와 무관하게 폼 마크업은 하나만 존재함.
                         disabled={!editMode}가 Input/Select/Switch에 자동 전파되어
@@ -230,7 +234,7 @@ export default function FormDetailPage() {
                         form={form}
                         layout="vertical"
                         onFinish={handleUpdate}
-                        disabled={!editMode}
+                        
                     >
                         <Form.Item
                             name="comId"
@@ -244,6 +248,7 @@ export default function FormDetailPage() {
                                 suffixIcon={<BankOutlined/>}
                                 onSearch={handleCompanySearch}
                                 options={companyOptions}
+                                disabled={!editMode}
                             />
                         </Form.Item>
 
@@ -254,7 +259,10 @@ export default function FormDetailPage() {
                                     noStyle
                                     rules={[{required: true, message: "양식 코드를 입력해주세요."}]}
                                 >
-                                    <Input style={{width: "calc(100% - 100px)"}}/>
+                                    <Input
+                                        style={{width: "calc(100% - 100px)"}}
+                                        disabled={!editMode}
+                                    />
                                 </Form.Item>
                                 <Button
                                     style={{width: 100}}
@@ -271,7 +279,9 @@ export default function FormDetailPage() {
                             label="양식 제목"
                             rules={[{required: true, message: "양식 제목을 입력해주세요."}]}
                         >
-                            <Input />
+                            <Input
+                                disabled={!editMode}
+                            />
                         </Form.Item>
 
                         <Form.Item
@@ -279,7 +289,9 @@ export default function FormDetailPage() {
                             label="활성화 여부"
                             valuePropName="checked"
                         >
-                            <Switch />
+                            <Switch
+                                disabled={!editMode}
+                            />
                         </Form.Item>
                         {isSchemaMode ? (
                             <Form.Item label="양식 필드 구성">
@@ -300,26 +312,38 @@ export default function FormDetailPage() {
                             </Form.Item>
                         )}
 
-                        {editMode && (
-                            <Form.Item>
-                                <div style={{display: "flex", justifyContent: "flex-end"}}>
-                                    <Space>
-                                        <Button onClick={handleCancelEdit}>취소</Button>
-                                        <Button
-                                            type="primary"
-                                            htmlType="submit"
-                                            loading={submitting}
-                                        >
-                                            저장
-                                        </Button>
-                                    </Space>
-                                </div>
-                            </Form.Item>
+                        <div 
+                            style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                flexWrap: "warp",
+                                gap: 8,
+                                marginTop: 8
+                            }}
+                        >
+                        {editMode ? (
+                            <Space wrap>
+                                <Button onClick={handleCancelEdit}>취소</Button>
+                                <Button type="primary" htmlType="submit" loading={submitting}>
+                                    저장
+                                </Button>
+                            </Space>
+                        ) : (
+                            <Space wrap>
+                                <Button onClick={() => router.push("/appr/forms")}>목록으로</Button>
+                                <Popconfirm title="삭제하시겠습니까?" onConfirm={handleDelete}>
+                                    <Button danger>삭제</Button>
+                                </Popconfirm>
+                                <Button type="primary" onClick={() => setEditMode(true)}>
+                                    수정
+                                </Button>
+                            </Space>
                         )}
+                        </div>
                     </Form>
                 </Col>
 
-                <Col span={8}>
+                <Col xs={24} md={8}>
                     <div style={{background: "#fafafa", borderRadius: 8, padding: 16, marginBottom: 16}}>
                         <div style={{fontWeight: 600, marginBottom: 12}}>양식 상세 정보</div>
                         <Descriptions4Line label="양식 ID" value={detail.forId}/>
@@ -336,22 +360,64 @@ export default function FormDetailPage() {
 
                     <div style={{background: "#fafafa", borderRadius: 8, padding: 16}}>
                         <div style={{fontWeight: 600, marginBottom: 12}}>버전 이력</div>
-                        <List
-                            loading={versionsLoading}
-                            size="small"
-                            dataSource={versions}
-                            renderItem={(v) => (
-                                <List.Item
-                                    actions={[
-                                        <a key="view" onClick={() => router.push(`/appr/forms/detail?forId=${v.forId}&forVersion=${v.forVersion}`)}>
-                                            보기
-                                        </a>,
-                                    ]}
-                                >
-                                    v{v.forVersion} · {v.createdAt}
-                                </List.Item>
-                            )}
-                        />
+                        {versionsLoading ? (
+                            <div style={{textAlign: "center", padding: "20px 0", color: "#999", fontSize: 13}}>
+                                불러오는 중...
+                            </div>
+                        ) : versions.length === 0 ? (
+                            <div style={{textAlign: "center", padding: "20px 0", color: "#999", fontSize: 13}}>
+                                버전 이력이 없습니다.
+                            </div>
+                        ) : (
+                            versions.map((v) => {
+                                // 지금 보고있는 버전인지
+                                const isCurrent = String(v.forVersion) === String(forVersion);
+                                const isDeleted = v.deleted;
+
+                                return (
+                                    <div
+                                        key={v.forVersion}
+                                        onClick={() => {
+                                            if (!isCurrent && !isDeleted) {
+                                                router.push(`/appr/forms/detail?forId=${v.forId}&forVersion=${v.forVersion}`);
+                                            }
+                                        }}
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            padding: "10px 12px",
+                                            marginBottom: 6,
+                                            borderRadius: 6,
+                                            background: isDeleted ? "#fafafa" : isCurrent ? "#e6f4ff" : "#fff",
+                                            border: isDeleted ? "1px solid #eee" : isCurrent ? "1px solid #91caff" : "1px solid #eee",
+                                            cursor: isCurrent || isDeleted ? "default" : "pointer",
+                                        }}
+                                    >
+                                        <div>
+                                            <div style={{fontWeight: 600, fontSize: 13}}>
+                                                v{v.forVersion}
+                                                {isCurrent && !isDeleted && (
+                                                    <Tag color="blue" style={{marginLeft: 6}}>
+                                                        현재 보는 중
+                                                    </Tag>
+                                                )}
+                                            </div>
+                                            <div style={{fontSize: 12, color: "#999", marginTop: 2}}>
+                                                {v.createdAt}
+                                            </div>
+                                        </div>
+                                        {isDeleted ? (
+                                            <Tag color="red" style={{margin: 0}}>삭제됨</Tag>
+                                        ) : (
+                                            <Tag color={v.forStatus ? "green" : "default"} style={{margin: 0}}>
+                                                {v.forStatus ? "활성화" : "비활성화"}
+                                            </Tag>
+                                        )}
+                                    </div>
+                                );
+                            })
+                        )}
                     </div>
                 </Col>
             </Row>

@@ -113,7 +113,7 @@ const NAV = [
         page: "apprlistform",
         tip: "전자결재",
         label: "결재 양식 관리",
-        href: "/appr/list_form",
+        href: "/appr/forms",
         icon: "bi-sliders",
         role: "ROOT",
       },
@@ -121,7 +121,7 @@ const NAV = [
         page: "apprlistdoc",
         tip: "전자결재",
         label: "전자결재 기안",
-        href: "/appr/list_doc",
+        href: "/appr/docs",
         icon: "bi-pencil-square",
       },
       {
