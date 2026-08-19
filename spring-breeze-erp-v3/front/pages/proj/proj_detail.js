@@ -8,6 +8,7 @@ import Link from "next/link";
 import api from "../../api/axios";
 import { Row, Col, Table, Button, Modal, Tag, Pagination, message } from "antd";
 import { StarOutlined, UnorderedListOutlined, EditOutlined, DeleteOutlined, TeamOutlined, CheckSquareOutlined, } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 import ProjDeleteModal from "../../components/ProjDeleteModal";
 import moment from "moment";
 
@@ -20,6 +21,7 @@ const RISK_TAG_COLOR = { HIGH: "red", MEDIUM: "blue", LOW: "green" };
 export default function ProjDetailPage(){
     const router = useRouter();
     const dispatch = useDispatch();
+    const { t } = useTranslation("proj");
     const {proId} = router.query;
     const user = useSelector((state) => state.auth.user);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -37,7 +39,7 @@ export default function ProjDetailPage(){
       analysis
     } = useSelector((state) => state.proj);
 
-    // 간트차트 
+    // 간트차트
     const { ganttTasks = [], loading: ganttLoading, } = useSelector((state) => state.task);
 
     // 태스크 페이징
@@ -84,16 +86,20 @@ export default function ProjDetailPage(){
       setDeleteModalOpen(false);
     }
 
+    const handleTaskPageChange = (page) => {
+      setTaskPage(page);
+    };
+
     const taskColumns = [
     {
-      title: "번호",
+      title: t("detail.taskTable.no"),
       key: "no",
       width: 56,
       align: "center",
       render: (_, __, idx) => (taskPaging?.listtotal ?? 0) - (taskPage - 1) * taskPageSize - idx,
     },
     {
-      title: "업무명",
+      title: t("detail.taskTable.name"),
       dataIndex: "taskName",
       key: "taskName",
       render: (name, record) => (
@@ -103,7 +109,7 @@ export default function ProjDetailPage(){
       ),
     },
     {
-      title: "상태",
+      title: t("detail.taskTable.status"),
       dataIndex: "taskStatus",
       key: "taskStatus",
       width: 90,
@@ -111,7 +117,7 @@ export default function ProjDetailPage(){
       render: (status) => <Tag color={STATUS_TAG_COLOR[status] || "default"}>{status || "-"}</Tag>,
     },
     {
-      title: "등록일",
+      title: t("detail.taskTable.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       width: 110,
@@ -188,27 +194,27 @@ export default function ProjDetailPage(){
      <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <i className="bi bi-chevron-right"></i> 업무{" "}
+            <Link href="/">{t("common.breadcrumbHome")}</Link> <i className="bi bi-chevron-right"></i> {t("common.breadcrumbWork")}{" "}
             <i className="bi bi-chevron-right"></i>{" "}
-            <Link href="/proj/proj_list">프로젝트</Link>{" "}
-            <i className="bi bi-chevron-right"></i> 상세
+            <Link href="/proj/proj_list">{t("common.breadcrumbProj")}</Link>{" "}
+            <i className="bi bi-chevron-right"></i> {t("detail.breadcrumbCurrent")}
           </div>
-          <h1>프로젝트 상세조회</h1>
-          <p>프로젝트의 기본정보, 태스크, 참여인원을 확인합니다.</p>
+          <h1>{t("detail.title")}</h1>
+          <p>{t("detail.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Button size="small" className="btn-sb" icon={<StarOutlined />} onClick={handleAiAnalyze}>
-            AI 리스크 분석
+            {t("detail.aiAnalyzeBtn")}
           </Button>
           <Link href="/proj/proj_list">
-            <Button size="small" icon={<UnorderedListOutlined />}>목록</Button>
+            <Button size="small" icon={<UnorderedListOutlined />}>{t("common.listBtn")}</Button>
           </Link>
           <Link href={{ pathname: "/proj/proj_edit", query: { proId } }}>
-            <Button size="small" icon={<EditOutlined />}>수정</Button>
+            <Button size="small" icon={<EditOutlined />}>{t("detail.editBtn")}</Button>
           </Link>
           {(isAdmin || detail?.empId === user?.empId) && (
             <Button size="small" danger icon={<DeleteOutlined />} onClick={() => setDeleteModalOpen(true)}>
-              삭제
+              {t("detail.deleteBtn")}
             </Button>
           )}
         </div>
@@ -217,20 +223,20 @@ export default function ProjDetailPage(){
         {/* 기본정보 */}
         <Col md={14}>
           <div className="sb-card">
-            <div className="sb-card__head"><h2>기본정보</h2></div>
+            <div className="sb-card__head"><h2>{t("detail.basicInfoTitle")}</h2></div>
             <div className="sb-card__body--flush">
               <table className="sb-table">
                 <tbody>
-                  <tr><th style={{ width: "30%" }}>프로젝트명</th><td className="sb-table__name">{detail?.proName}</td></tr>
-                  <tr><th>설명</th><td className="sb-table__muted">{detail?.proDesc}</td></tr>
+                  <tr><th style={{ width: "30%" }}>{t("detail.nameLabel")}</th><td className="sb-table__name">{detail?.proName}</td></tr>
+                  <tr><th>{t("detail.descLabel")}</th><td className="sb-table__muted">{detail?.proDesc}</td></tr>
                   <tr>
-                    <th>상태</th>
+                    <th>{t("detail.statusLabel")}</th>
                     <td><Tag color={STATUS_TAG_COLOR[detail?.proStatus] || "default"}>{detail?.proStatus}</Tag></td>
                   </tr>
-                  <tr><th>생성자</th><td>{detail?.empName}</td></tr>
-                  <tr><th>시작일</th><td className="tnum">{detail?.startDate ? moment(detail.startDate).format("YYYY-MM-DD") : "-"}</td></tr>
-                  <tr><th>종료일</th><td className="tnum">{detail?.endDate ? moment(detail.endDate).format("YYYY-MM-DD") : "-"}</td></tr>
-                  <tr><th>등록일</th><td className="tnum">{detail?.createdAt ? moment(detail.createdAt).format("YYYY-MM-DD") : "-"}</td></tr>
+                  <tr><th>{t("detail.creatorLabel")}</th><td>{detail?.empName}</td></tr>
+                  <tr><th>{t("detail.startDateLabel")}</th><td className="tnum">{detail?.startDate ? moment(detail.startDate).format("YYYY-MM-DD") : "-"}</td></tr>
+                  <tr><th>{t("detail.endDateLabel")}</th><td className="tnum">{detail?.endDate ? moment(detail.endDate).format("YYYY-MM-DD") : "-"}</td></tr>
+                  <tr><th>{t("detail.createdAtLabel")}</th><td className="tnum">{detail?.createdAt ? moment(detail.createdAt).format("YYYY-MM-DD") : "-"}</td></tr>
                 </tbody>
               </table>
             </div>
@@ -240,10 +246,10 @@ export default function ProjDetailPage(){
         <Col md={10}>
           <div className="sb-card">
             <div className="sb-card__head">
-              <h2>태스크목록</h2>
+              <h2>{t("detail.taskListTitle")}</h2>
               <div className="right">
                 <Link href={{ pathname: "/proj/task_create", query: { proId } }}>
-                  <Button size="small" className="btn-sb" icon={<CheckSquareOutlined />}>태스크추가</Button>
+                  <Button size="small" className="btn-sb" icon={<CheckSquareOutlined />}>{t("detail.addTaskBtn")}</Button>
                 </Link>
               </div>
             </div>
@@ -254,7 +260,7 @@ export default function ProjDetailPage(){
                 dataSource={taskList}
                 loading={loading}
                 pagination={false}
-                locale={{ emptyText: "등록된 태스크가 없습니다." }}
+                locale={{ emptyText: t("detail.taskEmptyMsg") }}
               />
               <div
                 style={{
@@ -266,7 +272,7 @@ export default function ProjDetailPage(){
                 }}
               >
                 <span style={{ color: "#999", fontSize: 12.5 }}>
-                  총 <b>{taskPaging?.listtotal ?? 0}</b>개 태스크
+                  {t("detail.taskTotalPrefix")}<b>{taskPaging?.listtotal ?? 0}</b>{t("detail.taskTotalSuffix")}
                 </span>
                 {(taskPaging?.listtotal ?? 0) > taskPageSize && (
                   <Pagination
@@ -286,7 +292,7 @@ export default function ProjDetailPage(){
       {/* 참여인원 */}
       <div className="sb-card mt-3">
         <div className="sb-card__head">
-          <h2>참여인원</h2>
+          <h2>{t("detail.memberTitle")}</h2>
           <div className="right">
             {(isAdmin || detail?.empId === user?.empId) && (
               <Link href={{ pathname: "/proj/proj_member", query: { proId } }}>
@@ -295,7 +301,7 @@ export default function ProjDetailPage(){
                   className="btn-sb"
                   icon={<TeamOutlined />}
                 >
-                  참여인원 관리
+                  {t("detail.memberManageBtn")}
                 </Button>
               </Link>
             )}
@@ -319,7 +325,7 @@ export default function ProjDetailPage(){
           >
             {memberList.length > 0
               ? memberList.map((m) => m.empName).join(", ")
-              : "참여 인원이 없습니다."}
+              : t("detail.memberEmptyMsg")}
           </span>
         </div>
       </div>
@@ -327,7 +333,7 @@ export default function ProjDetailPage(){
       {/* 태스크 진행 현황-간트차트 */}
       <div className="sb-card mt-3">
         <div className="sb-card__head">
-          <h2>태스크 진행 현황</h2>
+          <h2>{t("detail.ganttTitle")}</h2>
         </div>
 
         <div className="sb-card__body">
@@ -340,7 +346,7 @@ export default function ProjDetailPage(){
         <div className="sb-card mt-3">
           <div className="sb-card__head">
             <h2>
-              <StarOutlined /> AI 리스크 분석 결과
+              <StarOutlined /> {t("detail.aiResultTitle")}
                {riskLevel && (
                 <Tag color={RISK_TAG_COLOR[riskLevel] || "default"} style={{ marginLeft: 8 }}>
                   {riskLevel}
@@ -352,7 +358,7 @@ export default function ProjDetailPage(){
           <div className="sb-card__body">
             {loading ? (
               <div className="text-faint">
-                AI가 프로젝트를 분석하고 있습니다...
+                {t("detail.aiLoadingMsg")}
               </div>
             ) : (
               <div
@@ -361,7 +367,7 @@ export default function ProjDetailPage(){
                   lineHeight: 1.6,
                 }}
               >
-                {analysis || "분석 결과가 없습니다."}
+                {analysis || t("detail.aiEmptyMsg")}
               </div>
             )}
           </div>
@@ -370,7 +376,7 @@ export default function ProjDetailPage(){
 
       {/* 프로젝트 삭제 모달 */}
       <ProjDeleteModal
-        itemName="프로젝트"
+        itemName={t("common.projLabel")}
         open={deleteModalOpen}
         onConfirm={handleDelete}
         onCancel={() => setDeleteModalOpen(false)}

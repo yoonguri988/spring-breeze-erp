@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { Button, Input, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 import {
   fetchNoticeDetailRequest,
   updateNoticeRequest,
@@ -18,6 +19,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"
 export default function NoticeEditPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["notice", "common"]);
   const { bno } = router.query;
   const { currentNotice: notice, loading, error, success } = useSelector(
     (state) => state.notice
@@ -45,7 +47,7 @@ export default function NoticeEditPage() {
 
   useEffect(() => {
     if (success) {
-      message.success("공지사항이 성공적으로 수정되었습니다.");
+      message.success(t("edit.successMsg"));
       setFileList([]);
       dispatch(resetNoticeState());
       router.push(`/notice/detail?bno=${bno}`);
@@ -54,11 +56,11 @@ export default function NoticeEditPage() {
 
   const onFinish = () => {
     if (!btitle.trim()) {
-      message.warning("제목을 입력해주세요.");
+      message.warning(t("edit.titleRequired"));
       return;
     }
     if (!bcontent.trim()) {
-      message.warning("내용을 입력해주세요.");
+      message.warning(t("edit.contentRequired"));
       return;
     }
 
@@ -81,16 +83,16 @@ export default function NoticeEditPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link>
+            <Link href="/">{t("edit.breadcrumbHome")}</Link>
             <i className="bi bi-chevron-right"></i>
-            업무
+            {t("edit.breadcrumbWork")}
             <i className="bi bi-chevron-right"></i>
-            <Link href="/notice/list">공지 관리</Link>
+            <Link href="/notice/list">{t("edit.breadcrumbList")}</Link>
             <i className="bi bi-chevron-right"></i>
-            공지 수정
+            {t("edit.breadcrumbCurrent")}
           </div>
-          <h1>공지 수정</h1>
-          <p>등록된 공지사항의 내용을 수정합니다.</p>
+          <h1>{t("edit.title")}</h1>
+          <p>{t("edit.subtitle")}</p>
         </div>
       </div>
 
@@ -99,19 +101,19 @@ export default function NoticeEditPage() {
           <form id="noticeEditForm" onSubmit={(e) => { e.preventDefault(); }}>
             <div className="row g-3">
               <div className="col-12">
-                <label htmlFor="btitle" className="sb-form-label"> 제목 </label>
+                <label htmlFor="btitle" className="sb-form-label"> {t("edit.titleLabel")} </label>
                 <Input
                   id="btitle"
                   name="btitle"
                   className="form-control"
                   value={btitle}
                   onChange={(e) => setBtitle(e.target.value)}
-                  placeholder="공지 제목을 입력하세요"
+                  placeholder={t("edit.titlePlaceholder")}
                 />
               </div>
 
               <div className="col-12">
-                <label htmlFor="bcontent" className="sb-form-label"> 내용 </label>
+                <label htmlFor="bcontent" className="sb-form-label"> {t("edit.contentLabel")} </label>
                 <Input.TextArea
                   id="bcontent"
                   name="bcontent"
@@ -119,13 +121,13 @@ export default function NoticeEditPage() {
                   value={bcontent}
                   onChange={(e) => setBcontent(e.target.value)}
                   rows={8}
-                  placeholder="공지 내용을 입력하세요"
+                  placeholder={t("edit.contentPlaceholder")}
                 />
               </div>
 
               {notice?.bfile && (
                 <div className="col-12">
-                  <label className="sb-form-label">기존 첨부파일</label>
+                  <label className="sb-form-label">{t("edit.existingFileLabel")}</label>
                   <div className="mt-1">
                     {isImage ? (
                       <img
@@ -137,34 +139,34 @@ export default function NoticeEditPage() {
                     ) : (
                       <a href={fileUrl} className="btn btn-sb-soft btn-sm" target="_blank" rel="noopener noreferrer">
                         <i className="bi bi-paperclip"></i>
-                        현재 첨부파일 보기 (.{attExt})
+                        {t("edit.viewFileBtn", { ext: attExt })}
                       </a>
                     )}
                   </div>
-                  <div className="form-text">새 파일을 첨부하면 기존 첨부파일은 교체(삭제)됩니다.</div>
+                  <div className="form-text">{t("edit.fileReplaceNote")}</div>
                 </div>
               )}
 
               <div className="col-12">
-                <label htmlFor="file" className="sb-form-label"> 파일 첨부 </label>
+                <label htmlFor="file" className="sb-form-label"> {t("edit.fileLabel")} </label>
                 <Upload
                   beforeUpload={() => false}
                   fileList={fileList}
                   onChange={handleChange}
                   maxCount={1}
                 >
-                  <Button icon={<UploadOutlined />}>파일 선택</Button>
+                  <Button icon={<UploadOutlined />}>{t("edit.fileSelectBtn")}</Button>
                 </Upload>
-                <div className="form-text"> 이미지 · pdf · office 문서 · hwp · zip, 최대 10MB (선택사항) </div>
+                <div className="form-text"> {t("edit.fileHint")} </div>
               </div>
             </div>
 
             <div className="sb-form-actions mt-4 mb-4 pe-2 text-end">
               <Button type="default" className="btn btn-ghost" onClick={() => router.push(`/notice/detail?bno=${bno}`)}>
-                취소
+                {t("edit.cancelBtn")}
               </Button>
               <Button type="default" className="btn btn-sb-soft" onClick={() => router.push("/notice/list")}>
-                목록
+                {t("edit.listBtn")}
               </Button>
               <Button
                 type="default"
@@ -174,7 +176,7 @@ export default function NoticeEditPage() {
                 onClick={onFinish}
               >
                 <i className="bi bi-pencil-square"></i>
-                수정
+                {t("edit.submitBtn")}
               </Button>
             </div>
           </form>

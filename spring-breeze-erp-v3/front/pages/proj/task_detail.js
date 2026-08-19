@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 
 import { Button, message } from "antd";
+import { useTranslation } from "react-i18next";
 import ProjDeleteModal from "../../components/ProjDeleteModal";
 
 import {
@@ -19,6 +20,7 @@ import moment from "moment";
 export default function TaskDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("proj");
   const { taskId } = router.query;
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
@@ -90,7 +92,7 @@ export default function TaskDetailPage() {
       <main className="sb-content">
         <div className="sb-card">
           <div className="sb-card__body text-center">
-            태스크 정보를 불러오는 중입니다...
+            {t("task.detail.loadingMsg")}
           </div>
         </div>
       </main>
@@ -101,13 +103,13 @@ export default function TaskDetailPage() {
       <main className="sb-content">
         <div className="sb-card">
           <div className="sb-card__body text-center">
-            <p>태스크 정보를 찾을 수 없습니다.</p>
+            <p>{t("task.detail.notFoundMsg")}</p>
             {error && (
               <p className="text-danger">
-                오류: {error}
+                {t("task.detail.errorPrefix")}{error}
               </p>
             )}
-            <p>taskId: {taskId}</p>
+            <p>{t("task.detail.taskIdLabel")}{taskId}</p>
           </div>
         </div>
       </main>
@@ -119,15 +121,15 @@ export default function TaskDetailPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link>
+            <Link href="/">{t("common.breadcrumbHome")}</Link>
             <i className="bi bi-chevron-right"></i>
-            업무
+            {t("common.breadcrumbWork")}
             <i className="bi bi-chevron-right"></i>
-            프로젝트
+            {t("common.breadcrumbProj")}
             <i className="bi bi-chevron-right"></i>
-            태스크 상세
+            {t("task.detail.breadcrumbCurrent")}
           </div>
-          <h1>태스크 상세조회</h1>
+          <h1>{t("task.detail.title")}</h1>
         </div>
 
         <div className="sb-page-head__actions">
@@ -137,13 +139,13 @@ export default function TaskDetailPage() {
             onClick={() => router.back()}
           >
             <i className="bi bi-arrow-left"></i>{" "}
-            이전
+            {t("task.detail.backBtn")}
           </Button>
 
           <Link href="/proj/proj_list">
             <Button type="default" size="small">
               <i className="bi bi-list"></i>{" "}
-              목록
+              {t("common.listBtn")}
             </Button>
           </Link>
 
@@ -152,7 +154,7 @@ export default function TaskDetailPage() {
           >
             <Button type="default" size="small">
               <i className="bi bi-pencil"></i>{" "}
-              수정
+              {t("task.detail.editBtn")}
             </Button>
           </Link>
 
@@ -163,21 +165,21 @@ export default function TaskDetailPage() {
             onClick={() => setDeleteModalOpen(true)}
           >
             <i className="bi bi-trash3"></i>{" "}
-            삭제
+            {t("task.detail.deleteBtn")}
           </Button>
         </div>
       </div>
 
       <div className="sb-card">
         <div className="sb-card__head">
-          <h2>태스크 상세조회</h2>
+          <h2>{t("task.detail.cardTitle")}</h2>
         </div>
 
         <div className="sb-card__body--flush">
           <table className="sb-table">
             <tbody>
               <tr>
-                <th style={{ width: "25%" }}>프로젝트명</th>
+                <th style={{ width: "25%" }}>{t("task.detail.projNameLabel")}</th>
                 <td className="sb-table__name">
                     <Link href={`/proj/proj_detail?proId=${proId}`}>
                       {task.proName}
@@ -185,25 +187,25 @@ export default function TaskDetailPage() {
                 </td>
               </tr>
               <tr>
-                <th style={{ width: "25%" }}>태스크명</th>
+                <th style={{ width: "25%" }}>{t("task.detail.taskNameLabel")}</th>
                 <td className="sb-table__name">
                   {task.taskName}
                   {isDelayed && (
                     <span className="sb-badge sb-badge--red ms-2">
                       <i className="bi bi-exclamation-triangle-fill"></i>{" "}
-                      지연
+                      {t("task.detail.delayedTag")}
                     </span>
                   )}
                 </td>
               </tr>
 
               <tr>
-                <th>태스크설명</th>
+                <th>{t("task.detail.descLabel")}</th>
                 <td className="sb-table__muted">{task.taskDesc}</td>
               </tr>
 
               <tr>
-                <th>태스크상태</th>
+                <th>{t("task.detail.statusLabel")}</th>
                 <td>
                   <span className={getStatusClass(task.taskStatus)}>
                     <span className="pip"></span>
@@ -213,12 +215,12 @@ export default function TaskDetailPage() {
               </tr>
 
               <tr>
-                <th>담당자이름</th>
+                <th>{t("task.detail.assigneeLabel")}</th>
                 <td>{task.pmName}</td>
               </tr>
 
               <tr>
-                <th>태스크시작일</th>
+                <th>{t("task.detail.startDateLabel")}</th>
                 <td className="tnum">
                   {task.taskStartDate
                     ? moment(task.taskStartDate).format("YYYY-MM-DD")
@@ -227,7 +229,7 @@ export default function TaskDetailPage() {
               </tr>
 
               <tr>
-                <th>태스크종료일</th>
+                <th>{t("task.detail.endDateLabel")}</th>
                 <td className="tnum">
                   {task.taskEndDate
                     ? moment(task.taskEndDate).format("YYYY-MM-DD")
@@ -243,13 +245,13 @@ export default function TaskDetailPage() {
         <div className="sb-card__head">
           <h2>
             <i className="bi bi-diagram-3"></i>{" "}
-            작업 의존성
+            {t("task.detail.dependencyTitle")}
           </h2>
         </div>
 
         <div className="sb-card__body">
           <div className="flow-box">
-            <div className="flow-title">선행 작업</div>
+            <div className="flow-title">{t("task.detail.parentTaskTitle")}</div>
 
             {parentTask ? (
               <div className="flow-task">
@@ -263,7 +265,7 @@ export default function TaskDetailPage() {
               </div>
             ) : (
               <div className="text-faint">
-                최상위 태스크입니다.
+                {t("task.detail.noParentTaskMsg")}
               </div>
             )}
           </div>
@@ -273,7 +275,7 @@ export default function TaskDetailPage() {
           </div>
 
           <div className="flow-box current-flow">
-            <div className="flow-title">현재 작업</div>
+            <div className="flow-title">{t("task.detail.currentTaskTitle")}</div>
 
             <div className="flow-task">
               <b>{task.taskName}</b>
@@ -292,7 +294,7 @@ export default function TaskDetailPage() {
 
               <div className="flow-box">
                 <div className="flow-title">
-                  영향받는 후속 작업
+                  {t("task.detail.impactTaskTitle")}
                 </div>
 
                 {impactTasks.map((impactTask) => (
@@ -325,7 +327,7 @@ export default function TaskDetailPage() {
       </div>
 
       <ProjDeleteModal
-        itemName="태스크"
+        itemName={t("common.taskLabel")}
         open={deleteModalOpen}
         onConfirm={handleDelete}
         onCancel={() => setDeleteModalOpen(false)}

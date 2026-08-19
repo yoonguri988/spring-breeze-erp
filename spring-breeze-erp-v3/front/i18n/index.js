@@ -29,6 +29,8 @@ import resKo from "./locales/ko/res.json";
 // import permKo from "./locales/ko/perm.json";
 // import posKo from "./locales/ko/pos.json";
 import loginHistoryKo from "./locales/ko/loginHistory.json";
+import noticeKo from "./locales/ko/notice.json";
+import projKo from "./locales/ko/proj.json";
 
 
 import commonEn from "./locales/en/common.json";
@@ -46,6 +48,8 @@ import resEn from "./locales/en/res.json";
 // import permEn from "./locales/en/perm.json";
 // import posEn from "./locales/en/pos.json";
 import loginHistoryEn from "./locales/en/loginHistory.json";
+import noticeEn from "./locales/en/notice.json";
+import projEn from "./locales/en/proj.json";
 
 
 export const SUPPORTED_LANGUAGES = ["ko", "en"];
@@ -70,6 +74,8 @@ const resources = {
     // perm: permKo,
     // pos: posKo,
     loginHistory: loginHistoryKo,
+    notice: noticeKo,
+    proj: projKo,
   },
   en: {
     common: commonEn,
@@ -87,6 +93,8 @@ const resources = {
     // perm: permEn,
     // pos: posEn,
     loginHistory: loginHistoryEn,
+    notice: noticeEn,
+    proj: projEn,
   },
 };
 

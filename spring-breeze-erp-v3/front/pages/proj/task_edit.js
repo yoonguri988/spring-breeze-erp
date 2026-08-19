@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 
 import { Button, Input, Select, DatePicker, message } from "antd";
+import { useTranslation } from "react-i18next";
 import {
   updateTaskRequest,
   updateTaskContextRequest,
@@ -24,6 +25,7 @@ const STATUS_OPTIONS = [
 export default function TaskEditPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("proj");
 
   const { taskId, proId } = router.query;
 
@@ -85,7 +87,7 @@ export default function TaskEditPage() {
   useEffect(() => {
     if (!success) return;
 
-    message.success("태스크가 수정되었습니다.");
+    message.success(t("task.edit.successMsg"));
 
     router.push({
       pathname: "/proj/task_detail",
@@ -102,37 +104,37 @@ export default function TaskEditPage() {
 
   const handleSubmit = () => {
     if (!form.taskName.trim()) {
-      message.warning("태스크명을 입력하세요.");
+      message.warning(t("task.edit.nameRequired"));
       return;
     }
 
     if (!form.taskDesc.trim()) {
-      message.warning("태스크 설명을 입력하세요.");
+      message.warning(t("task.edit.descRequired"));
       return;
     }
 
     if (!form.taskStatus) {
-      message.warning("상태를 선택하세요.");
+      message.warning(t("task.edit.statusRequired"));
       return;
     }
 
     if (!form.pmId) {
-      message.warning("담당자를 선택하세요.");
+      message.warning(t("task.edit.assigneeRequired"));
       return;
     }
 
     if (!form.taskStartDate) {
-      message.warning("시작일을 선택하세요.");
+      message.warning(t("task.edit.startDateRequired"));
       return;
     }
 
     if (!form.taskEndDate) {
-      message.warning("종료일을 선택하세요.");
+      message.warning(t("task.edit.endDateRequired"));
       return;
     }
 
     if (moment(form.taskStartDate).isAfter(moment(form.taskEndDate))) {
-      message.warning("종료일은 시작일보다 빠를 수 없습니다.");
+      message.warning(t("task.edit.dateOrderError"));
       return;
     }
 
@@ -160,8 +162,8 @@ export default function TaskEditPage() {
         <div className="sb-card">
           <div className="sb-card__body text-center">
             {loading
-              ? "태스크 정보를 불러오는 중입니다..."
-              : "태스크 정보를 찾을 수 없습니다."}
+              ? t("task.edit.loadingMsg")
+              : t("task.edit.notFoundMsg")}
           </div>
         </div>
       </main>
@@ -173,12 +175,12 @@ export default function TaskEditPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            홈 <i className="bi bi-chevron-right"></i> 업무{" "}
-            <i className="bi bi-chevron-right"></i> 프로젝트{" "}
-            <i className="bi bi-chevron-right"></i> 태스크 수정
+            {t("common.breadcrumbHome")} <i className="bi bi-chevron-right"></i> {t("common.breadcrumbWork")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("common.breadcrumbProj")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("task.edit.breadcrumbCurrent")}
           </div>
-          <h1>태스크 수정</h1>
-          <p>태스크 정보를 수정합니다.</p>
+          <h1>{t("task.edit.title")}</h1>
+          <p>{t("task.edit.subtitle")}</p>
         </div>
       </div>
 
@@ -191,35 +193,35 @@ export default function TaskEditPage() {
           )}
 
           <div className="mb-3">
-            <label className="sb-form-label">태스크명</label>
+            <label className="sb-form-label">{t("task.edit.nameLabel")}</label>
             <Input
               value={form.taskName}
               onChange={(e) =>
                 handleChange("taskName", e.target.value)
               }
-              placeholder="태스크명을 입력하세요"
+              placeholder={t("task.edit.namePlaceholder")}
             />
           </div>
 
           <div className="mb-3">
-            <label className="sb-form-label">태스크 설명</label>
+            <label className="sb-form-label">{t("task.edit.descLabel")}</label>
             <TextArea
               rows={4}
               value={form.taskDesc}
               onChange={(e) =>
                 handleChange("taskDesc", e.target.value)
               }
-              placeholder="태스크 설명을 입력하세요"
+              placeholder={t("task.edit.descPlaceholder")}
             />
           </div>
 
           <div className="row g-3 mb-3">
             <div className="col-md-4">
-              <label className="sb-form-label">상태</label>
+              <label className="sb-form-label">{t("task.edit.statusLabel")}</label>
               <Select
                 value={form.taskStatus || undefined}
                 options={STATUS_OPTIONS}
-                placeholder="상태를 선택하세요"
+                placeholder={t("task.edit.statusPlaceholder")}
                 onChange={(value) =>
                   handleChange("taskStatus", value)
                 }
@@ -228,14 +230,14 @@ export default function TaskEditPage() {
             </div>
 
             <div className="col-md-4">
-              <label className="sb-form-label">담당자</label>
+              <label className="sb-form-label">{t("task.edit.assigneeLabel")}</label>
               <Select
                 value={form.pmId || undefined}
                 options={memberList.map((m) => ({
                   label: m.empName,
                   value: m.pmId,
                 }))}
-                placeholder="담당자를 선택하세요"
+                placeholder={t("task.edit.assigneePlaceholder")}
                 onChange={(value) =>
                   handleChange("pmId", value)
                 }
@@ -244,7 +246,7 @@ export default function TaskEditPage() {
             </div>
 
             <div className="col-md-4">
-              <label className="sb-form-label">수정일</label>
+              <label className="sb-form-label">{t("task.edit.updatedAtLabel")}</label>
               <Input
                 value={moment().format("YYYY-MM-DD")}
                 readOnly
@@ -255,26 +257,26 @@ export default function TaskEditPage() {
 
           <div className="mb-3">
             <label className="sb-form-label">
-              선행 작업
+              {t("task.edit.parentTaskLabel")}
               <span
                 className="text-faint"
                 style={{ fontWeight: 400, fontSize: "12px" }}
               >
-                {" "} (선택, 이 작업이 끝나야 시작 가능)
+                {t("task.edit.parentTaskHint")}
               </span>
             </label>
 
             <Select
               value={form.parentTaskId || undefined}
               allowClear
-              placeholder="선행 작업 없음"
+              placeholder={t("task.edit.parentTaskPlaceholder")}
               options={taskList
-                .filter((t) => t.taskId !== form.taskId)
-                .map((t) => ({
-                  label: `[${t.taskStatus}] ${t.taskName} (~${moment(
-                    t.taskEndDate
+                .filter((tk) => tk.taskId !== form.taskId)
+                .map((tk) => ({
+                  label: `[${tk.taskStatus}] ${tk.taskName} (~${moment(
+                    tk.taskEndDate
                   ).format("YYYY-MM-DD")})`,
-                  value: t.taskId,
+                  value: tk.taskId,
                 }))}
               onChange={(value) =>
                 handleChange("parentTaskId", value || "")
@@ -285,7 +287,7 @@ export default function TaskEditPage() {
 
           <div className="row g-3 mb-4">
             <div className="col-md-6">
-              <label className="sb-form-label">시작일</label>
+              <label className="sb-form-label">{t("task.edit.startDateLabel")}</label>
               <DatePicker
                 value={
                   form.taskStartDate
@@ -304,7 +306,7 @@ export default function TaskEditPage() {
             </div>
 
             <div className="col-md-6">
-              <label className="sb-form-label">종료일</label>
+              <label className="sb-form-label">{t("task.edit.endDateLabel")}</label>
               <DatePicker
                 value={
                   form.taskEndDate
@@ -327,11 +329,11 @@ export default function TaskEditPage() {
 
           <div className="d-flex justify-content-end gap-2">
             <Button onClick={() => router.back()}>
-              취소
+              {t("common.cancelBtn")}
             </Button>
 
             <Link href="/proj/proj_list">
-              <Button>목록</Button>
+              <Button>{t("common.listBtn")}</Button>
             </Link>
 
             <Button
@@ -339,7 +341,7 @@ export default function TaskEditPage() {
               loading={loading}
               onClick={handleSubmit}
             >
-              수정
+              {t("task.edit.submitBtn")}
             </Button>
           </div>
         </div>
