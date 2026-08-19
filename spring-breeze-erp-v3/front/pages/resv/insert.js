@@ -24,6 +24,7 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 import {
   addResvRequest,
@@ -36,14 +37,15 @@ import {
 } from "../../reducers/res/resourceReducer";
 
 const STATUS_MAP = {
-  AVAILABLE: { text: "사용가능", tone: "green" },
-  MAINTENANCE: { text: "점검중", tone: "amber" },
-  DISABLED: { text: "사용불가", tone: "red" },
+  AVAILABLE: { tone: "green" },
+  MAINTENANCE: { tone: "amber" },
+  DISABLED: { tone: "red" },
 };
 
 export default function ResvInsertPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["resv", "common"]);
   const [form] = Form.useForm();
 
   const { list: resourceList } = useSelector((state) => state.resource);
@@ -75,7 +77,7 @@ export default function ResvInsertPage() {
     if (!submitting) return;
     if (prevLoading.current && !loading) {
       if (success) {
-        message.success("예약이 신청되었습니다.");
+        message.success(t("insert.submitSuccess"));
         setSubmitting(false);
         dispatch(resetResvState());
         router.push("/resv/my");
@@ -113,6 +115,14 @@ export default function ResvInsertPage() {
     availableQty && availableQty.availableQty <= 0
       ? STATUS_MAP.DISABLED
       : STATUS_MAP[selectedResource?.resStatus] || null;
+  const infoStatusText =
+    availableQty && availableQty.availableQty <= 0
+      ? t("resStatus.disabled")
+      : {
+          AVAILABLE: t("resStatus.available"),
+          MAINTENANCE: t("resStatus.maintenance"),
+          DISABLED: t("resStatus.disabled"),
+        }[selectedResource?.resStatus] || "-";
 
   const handleResourceChange = (value) => {
     setResId(value);
@@ -135,7 +145,7 @@ export default function ResvInsertPage() {
   const onFinish = (values) => {
     if (moment(endDt).isBefore(moment(startDt))) {
       form.setFields([
-        { name: "endDt", errors: ["종료 일시는 시작 일시 이후여야 합니다."] },
+        { name: "endDt", errors: [t("insert.endBeforeStart")] },
       ]);
       return;
     }
@@ -143,7 +153,7 @@ export default function ResvInsertPage() {
       form.setFields([
         {
           name: "quantity",
-          errors: ["해당 기간에는 예약 가능한 수량이 없습니다."],
+          errors: [t("insert.noAvailableQuantity")],
         },
       ]);
       return;
@@ -166,17 +176,17 @@ export default function ResvInsertPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/resv/my">자원 요청</Link> <RightOutlined /> 예약 신청
+            <Link href="/resv/my">{t("insert.breadcrumbList")}</Link> <RightOutlined /> {t("insert.breadcrumbCurrent")}
           </div>
-          <h1>자원 예약 신청</h1>
+          <h1>{t("insert.title")}</h1>
           <p>
-            사용할 자원과 기간을 선택하면 관리자 승인 대기 상태로 접수됩니다.
+            {t("insert.subtitle")}
           </p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/resv/my">
             <Button icon={<ArrowLeftOutlined />}>
-              목록으로
+              {t("insert.backToList")}
             </Button>
           </Link>
         </div>
@@ -190,27 +200,31 @@ export default function ResvInsertPage() {
       >
         <div className="sb-card mb-3">
           <div className="sb-card__head">
-            <h2>예약 정보</h2>
+            <h2>{t("insert.cardTitle")}</h2>
             <span className="sub">
-              예약 상태는 최초 대기(WAI)로 저장됩니다.
+              {t("insert.cardSub")}
             </span>
           </div>
           <div className="sb-card__body">
             {/* 자원 선택 */}
             <div className="mb-3">
               <Form.Item
-                label="예약 자원"
+                label={t("insert.resourceLabel")}
                 name="resId"
                 rules={[
-                  { required: true, message: "예약할 자원을 선택하세요." },
+                  { required: true, message: t("insert.resourceRequired") },
                 ]}
               >
                 <Select
-                  placeholder="자원을 선택하세요"
+                  placeholder={t("insert.resourcePlaceholder")}
                   onChange={handleResourceChange}
                   options={(resourceList || []).map((r) => ({
                     value: String(r.resId),
-                    label: `${r.resName} (${r.resCode}) / 보유 수량 ${r.quantity}`,
+                    label: t("insert.resourceOption", {
+                      resName: r.resName,
+                      resCode: r.resCode,
+                      quantity: r.quantity,
+                    }),
                   }))}
                 />
               </Form.Item>
@@ -226,26 +240,26 @@ export default function ResvInsertPage() {
                 }}
               >
                 <div className="text-faint mb-1" style={{ fontSize: 12 }}>
-                  선택된 자원 정보
+                  {t("insert.selectedResourceInfo")}
                 </div>
                 <div
                   className="d-flex flex-wrap gap-3"
                   style={{ fontSize: 13 }}
                 >
                   <span>
-                    <EnvironmentOutlined className="text-faint" /> 위치{" "}
+                    <EnvironmentOutlined className="text-faint" /> {t("insert.location")}{" "}
                     <b>{selectedResource.location || "-"}</b>
                   </span>
                   <span>
-                    <TeamOutlined className="text-faint" /> 수용인원{" "}
+                    <TeamOutlined className="text-faint" /> {t("insert.capacity")}{" "}
                     <b>
                       {selectedResource.capacity
-                        ? `${selectedResource.capacity}명`
+                        ? t("insert.capacityValue", { capacity: selectedResource.capacity })
                         : "-"}
                     </b>
                   </span>
                   <span>
-                    <InboxOutlined className="text-faint" /> 보유수량{" "}
+                    <InboxOutlined className="text-faint" /> {t("insert.ownedQuantity")}{" "}
                     <b>
                       {availableQty
                         ? `${availableQty.availableQty} / ${availableQty.totalQuantity}`
@@ -256,14 +270,13 @@ export default function ResvInsertPage() {
                     <span
                       className={`sb-badge sb-badge--${infoStatus?.tone || "gray"}`}
                     >
-                      {infoStatus?.text || "-"}
+                      {infoStatusText}
                     </span>
                   </span>
                 </div>
                 {infoStatus && infoStatus !== STATUS_MAP.AVAILABLE && (
                   <div className="text-danger mt-2" style={{ fontSize: 12.5 }}>
-                    <ExclamationCircleOutlined /> 현재 점검/사용불가 상태인
-                    자원입니다. 승인이 지연될 수 있습니다.
+                    <ExclamationCircleOutlined /> {t("insert.maintenanceWarning")}
                   </div>
                 )}
               </div>
@@ -273,10 +286,10 @@ export default function ResvInsertPage() {
             <div className="row mb-1">
               <div className="col-6">
                 <Form.Item
-                  label="시작 일시"
+                  label={t("insert.startDtLabel")}
                   name="startDt"
                   rules={[
-                    { required: true, message: "시작 일시를 입력하세요." },
+                    { required: true, message: t("insert.startDtRequired") },
                   ]}
                 >
                   <DatePicker
@@ -289,10 +302,10 @@ export default function ResvInsertPage() {
               </div>
               <div className="col-6">
                 <Form.Item
-                  label="종료 일시"
+                  label={t("insert.endDtLabel")}
                   name="endDt"
                   rules={[
-                    { required: true, message: "종료 일시를 입력하세요." },
+                    { required: true, message: t("insert.endDtRequired") },
                   ]}
                 >
                   <DatePicker
@@ -308,29 +321,28 @@ export default function ResvInsertPage() {
               </div>
             </div>
             <div className="mb-3 text-faint" style={{ fontSize: 12 }}>
-              <InfoCircleOutlined /> 동일 자원에 예약 시간이 겹치면 신청이
-              제한될 수 있습니다.
+              <InfoCircleOutlined /> {t("insert.overlapNote")}
             </div>
 
             {/* 예약 수량 */}
             <div className="mb-3">
               <Form.Item
-                label="예약 수량"
+                label={t("insert.quantityLabel")}
                 name="quantity"
                 rules={[
-                  { required: true, message: "1개 이상 입력하세요." },
+                  { required: true, message: t("insert.quantityMin") },
                   {
                     validator: (_, value) => {
                       if (quantityMax != null && value > quantityMax) {
                         return Promise.reject(
                           new Error(
-                            `보유 수량(${quantityMax})을 초과했습니다.`,
+                            t("insert.quantityMaxExceeded", { max: quantityMax }),
                           ),
                         );
                       }
                       if (value != null && value < 1) {
                         return Promise.reject(
-                          new Error("1개 이상 입력하세요."),
+                          new Error(t("insert.quantityMin")),
                         );
                       }
                       return Promise.resolve();
@@ -348,10 +360,10 @@ export default function ResvInsertPage() {
 
             {/* 신청 사유 */}
             <div className="mb-4">
-              <Form.Item label="신청 사유" name="remark">
+              <Form.Item label={t("insert.remarkLabel")} name="remark">
                 <Input.TextArea
                   rows={4}
-                  placeholder="사용 목적이나 요청 사항을 입력하세요"
+                  placeholder={t("insert.remarkPlaceholder")}
                 />
               </Form.Item>
             </div>
@@ -360,7 +372,7 @@ export default function ResvInsertPage() {
 
         <div className="d-flex gap-2 justify-content-end">
           <Link href="/resv/my">
-            <Button>취소</Button>
+            <Button>{t("common:button.cancel")}</Button>
           </Link>
           <Button
             type="primary"
@@ -368,7 +380,7 @@ export default function ResvInsertPage() {
             icon={<CheckOutlined />}
             loading={submitting && loading}
           >
-            예약 신청
+            {t("insert.submitButton")}
           </Button>
         </div>
       </Form>
