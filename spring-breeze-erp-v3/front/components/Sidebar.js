@@ -145,6 +145,17 @@ const NAV = [
       },
     ],
   },
+  {
+    sectionKey: "security",
+    items: [
+      {
+        page: "loginHistory",
+        href: "/admin/security/loginHistory",
+        icon: "bi-shield-exclamation",
+        role: "ROOT",
+      },
+    ],
+  },
 ];
 
 // 백엔드 roles는 AuthResponse.autName 목록(예: "ROOT", "ROLE_ADMIN") 기준.

@@ -3,9 +3,11 @@
     "org": "Organization",
     "hr": "HR Management",
     "work": "Work Management",
-    "asset": "Asset Management"
+    "asset": "Asset Management",
+    "security": "Security"
   },
   "items": {
+    "loginHistory": { "tip": "Login History", "label": "Login History" },
     "dashboard": { "tip": "Dashboard" },
     "comlist": { "tip": "Company / Department Management" },
     "commypage": { "tip": "My Company Info" },

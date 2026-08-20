@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin/login-history")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
+@PreAuthorize("hasAuthority('ROOT')")
 public class LoginHistoryController {
 
     private final LoginHistoryService loginHistoryService;
