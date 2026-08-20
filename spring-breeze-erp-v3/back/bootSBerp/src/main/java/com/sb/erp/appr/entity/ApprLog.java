@@ -30,8 +30,8 @@ import lombok.Setter;
 public class ApprLog {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "appr_log_seq")
-	@SequenceGenerator(name = "appr_log_seq", sequenceName = "appr_log_seq", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "appr_audit_log_seq")
+	@SequenceGenerator(name = "appr_audit_log_seq", sequenceName = "appr_audit_log_seq", allocationSize = 1)
 	@Column(name = "log_id")
 	private Long logId;
 	

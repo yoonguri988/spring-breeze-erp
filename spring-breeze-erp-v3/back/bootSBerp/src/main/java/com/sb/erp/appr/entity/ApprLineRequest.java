@@ -30,8 +30,8 @@ import lombok.Setter;
 public class ApprLineRequest {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "appr_line_req_seq")
-	@SequenceGenerator(name = "appr_line_req_seq", sequenceName = "appr_line_req_seq", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "appr_lcr_seq")
+	@SequenceGenerator(name = "appr_lcr_seq", sequenceName = "appr_lcr_seq", allocationSize = 1)
 	@Column(name = "req_id")
 	private Long reqId;
 	
@@ -54,6 +54,11 @@ public class ApprLineRequest {
 	private Employee newEmp;
 	
 	// 요청자
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "req_emp_id", nullable = false)
+	private Employee reqEmp;
+	
+	// 요청 승인/반려 처리자
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "pro_emp_id")
 	private Employee proEmp;
