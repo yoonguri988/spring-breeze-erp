@@ -97,6 +97,9 @@ public class SalaryStandardService {
 
         // 요구사항 6-4: 수정 시 이전 값은 이력으로 보존한다 -> in-place 수정이 아니라 버저닝으로 처리
         before.closeAsHistory(request.getStartDate().minusDays(1));
+        
+        // 변경된 UPDATE 쿼리를 DB에 즉시 강제 반영
+        salaryStandardRepository.flush();
 
         SalStd newVersion = SalStd.builder()
                 .employee(before.getEmployee())
