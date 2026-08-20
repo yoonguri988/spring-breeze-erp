@@ -1,0 +1,47 @@
+package com.sb.erp.apct.dto.response;
+
+import com.sb.erp.apct.entity.Applicant;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter @NoArgsConstructor
+public class ApplicantResponse {
+
+	private Long apctId;
+	private Long comId;
+	private Long recId;
+	private String apctName;
+	private String apctEmail;
+	private String apctPhone;
+	private String apctStatus;
+	private String apctDate;
+    private String createdAt;
+    private String updatedAt;
+    
+    // 조회(JOIN) 결과 전용 - DB에 없는 컬럼
+    private String recTitle;      // 지원한 공고 제목 (목록 화면에서 필요할 수 있음)
+    private Integer resumeCnt;    // 첨부된 이력서 수
+    
+	public ApplicantResponse(Applicant applicant) {
+		this.apctId = applicant.getApctId();
+		this.comId = applicant.getCompany().getComId();
+		this.recId = applicant.getRecruit().getRecId();
+		this.apctName = applicant.getApctName();
+		this.apctEmail = applicant.getApctEmail();
+		this.apctPhone = applicant.getApctPhone();
+		this.apctStatus = applicant.getApctStatus();
+		this.apctDate = applicant.getApctDate() != null ? applicant.getApctDate().toString() : null;
+		this.createdAt = applicant.getCreatedAt() != null ? applicant.getCreatedAt().toString() : null;
+		this.updatedAt = applicant.getUpdatedAt() != null ? applicant.getUpdatedAt().toString() : null;
+
+	}
+
+	public ApplicantResponse(Applicant applicant,String recTitle, Integer resumeCnt) {
+		this(applicant);
+		this.recTitle = recTitle;
+		this.resumeCnt = resumeCnt;
+	}
+    
+    
+}
