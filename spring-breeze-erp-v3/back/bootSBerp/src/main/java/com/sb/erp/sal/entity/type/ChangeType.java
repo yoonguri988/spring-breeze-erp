@@ -5,5 +5,6 @@ public enum ChangeType {
     CREATE,
     UPDATE,
     DELETE,
-    STATUS_CHANGE
+    STATUS_CHANGE,
+    MANUAL_ADJUST
 }
