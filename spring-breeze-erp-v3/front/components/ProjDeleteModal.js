@@ -1,6 +1,7 @@
 // components/ConfirmDeleteModal.js
 
 import { Modal } from "antd";
+import { useTranslation } from "react-i18next";
 
 export default function ProjDeleteModal({
   itemName,
@@ -9,22 +10,24 @@ export default function ProjDeleteModal({
   onCancel,
   loading = false,
 }) {
+  const { t } = useTranslation("proj");
+
   return (
     <Modal
-      title="정말 삭제하시겠습니까?"
+      title={t("deleteModal.title")}
       open={open}
       onOk={onConfirm}
       onCancel={onCancel}
-      okText="삭제"
-      cancelText="취소"
+      okText={t("deleteModal.okText")}
+      cancelText={t("deleteModal.cancelText")}
       okButtonProps={{ danger: true, loading }}
     >
       <p style={{ textAlign: "center" }}>
-        {itemName}을(를) 삭제하면 관련 데이터가
+        {t("deleteModal.bodyLine1", { itemName })}
         <br />
-        모두 삭제되며, 복구할 수 없습니다.
+        {t("deleteModal.bodyLine2")}
         <br />
-        계속 진행하시겠습니까?
+        {t("deleteModal.bodyLine3")}
       </p>
     </Modal>
   );

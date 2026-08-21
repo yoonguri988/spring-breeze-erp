@@ -5,25 +5,27 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Card, Descriptions, Tag, Button } from "antd";
 import { ArrowLeftOutlined, EditOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import { detailEvalRequest, clearEvalDetail, } from "../../reducers/eval/evalReducer";
-
-const STATUS_TAG = {
-  DRAFT: { color: "default", label: "임시저장" },
-  SUBMITTED: { color: "green", label: "제출완료" },
-};
-const SCORE_LABELS = {
-  scorePerformance: "업무 성과",
-  scoreExpertise: "전문성",
-  scoreTeamwork: "팀워크",
-  scoreAttitude: "근무 태도",
-  scoreGrowth: "성장 잠재력",
-};
 
 export default function EvalDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["eval", "common"]);
   const { evalId } = router.query;
+
+  const STATUS_TAG = {
+    DRAFT: { color: "default", label: t("common.evalStatus.draft") },
+    SUBMITTED: { color: "green", label: t("common.evalStatus.submitted") },
+  };
+  const SCORE_LABELS = {
+    scorePerformance: t("common.scoreLabel.performance"),
+    scoreExpertise: t("common.scoreLabel.expertise"),
+    scoreTeamwork: t("common.scoreLabel.teamwork"),
+    scoreAttitude: t("common.scoreLabel.attitude"),
+    scoreGrowth: t("common.scoreLabel.growth"),
+  };
 
   const { currentEval, loading } = useSelector((state) => state.eval);
 
@@ -49,9 +51,9 @@ export default function EvalDetailPage() {
         }}
       >
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">인사평가 &gt; 평가 상세</div>
-          <h1>평가 상세</h1>
-          {e && <p>대상: {e.targetEmpName}</p>}
+          <div className="sb-breadcrumb">{t("common.breadcrumbRoot")} &gt; {t("detail.breadcrumbCurrent")}</div>
+          <h1>{t("detail.title")}</h1>
+          {e && <p>{t("detail.targetLabel", { name: e.targetEmpName })}</p>}
         </div>
         <div
           className="sb-page-head__actions"
@@ -63,7 +65,7 @@ export default function EvalDetailPage() {
               query: { periodId: e?.periodId },
             }}
           >
-            <Button icon={<ArrowLeftOutlined />}>목록으로</Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("detail.backToListBtn")}</Button>
           </Link>
           {e?.evalStatus === "DRAFT" && (
             <Link
@@ -73,7 +75,7 @@ export default function EvalDetailPage() {
               }}
             >
               <Button type="primary" icon={<EditOutlined />}>
-                수정
+                {t("common:button.edit")}
               </Button>
             </Link>
           )}
@@ -88,22 +90,22 @@ export default function EvalDetailPage() {
               column={{ xs: 1, sm: 2 }}
               style={{ marginBottom: 24 }}
             >
-              <Descriptions.Item label="평가 대상">
+              <Descriptions.Item label={t("detail.descTargetLabel")}>
                 {e.targetEmpName} ({e.targetDeptName} · {e.targetPosName})
               </Descriptions.Item>
-              <Descriptions.Item label="상태">
+              <Descriptions.Item label={t("detail.statusLabel")}>
                 <Tag color={st.color}>{st.label}</Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="평가 유형">
+              <Descriptions.Item label={t("detail.typeLabel")}>
                 {e.evalType}
               </Descriptions.Item>
-              <Descriptions.Item label="가중 점수">
+              <Descriptions.Item label={t("detail.weightedScoreLabel")}>
                 {e.weightedScore?.toFixed(2) || "—"}
               </Descriptions.Item>
             </Descriptions>
 
             {/* 점수 항목 */}
-            <Card type="inner" title="점수" style={{ marginBottom: 16 }}>
+            <Card type="inner" title={t("detail.scoreCardTitle")} style={{ marginBottom: 16 }}>
               <Descriptions column={{ xs: 1, sm: 2, lg: 3 }}>
                 {Object.entries(SCORE_LABELS).map(([key, label]) => (
                   <Descriptions.Item key={key} label={label}>
@@ -117,10 +119,10 @@ export default function EvalDetailPage() {
             </Card>
 
             {/* 코멘트 */}
-            <Card type="inner" title="코멘트">
+            <Card type="inner" title={t("detail.commentCardTitle")}>
               <div style={{ marginBottom: 16 }}>
                 <div style={{ color: "#999", fontSize: 12, marginBottom: 4 }}>
-                  강점
+                  {t("detail.strengthLabel")}
                 </div>
                 <div style={{ whiteSpace: "pre-line" }}>
                   {e.strengthComment || "—"}
@@ -128,7 +130,7 @@ export default function EvalDetailPage() {
               </div>
               <div>
                 <div style={{ color: "#999", fontSize: 12, marginBottom: 4 }}>
-                  개선점
+                  {t("detail.improvementLabel")}
                 </div>
                 <div style={{ whiteSpace: "pre-line" }}>
                   {e.improvementComment || "—"}

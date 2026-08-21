@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 import {
     message, Descriptions, Button,
     Popconfirm, Row, Col
@@ -14,6 +15,7 @@ export default function DocDetailPage() {
     const router = useRouter();
     const { docId } = router.query;
     const dispatch = useDispatch();
+    const { t } = useTranslation(["appr", "common"]);
 
     const {
         detailDoc, detailLines, canProcess,
@@ -30,7 +32,7 @@ export default function DocDetailPage() {
     // 승인/반려 성공하면 최신 상태로 재조회
     useEffect(() => {
         if (processSuccess) {
-            message.success("처리되었습니다.");
+            message.success(t("docs.detail.processedMsg"));
             dispatch(fetchDocDetailRequest({docId}));
             dispatch(resetProcessState());
         }
@@ -81,7 +83,7 @@ export default function DocDetailPage() {
     }, [isSchemaDoc, detailDoc]);
 
     if (detailLoading || !detailDoc) {
-        return <div style={{padding: 24}}>불러오는 중..</div>
+        return <div style={{padding: 24}}>{t("common.loadingMsg")}</div>
     }
 
     if (detailError) {
@@ -90,16 +92,16 @@ export default function DocDetailPage() {
 
     // 결재선 상태들 출력할것들
     const statusBadgeMap ={
-        ING: <span className="sb-badge sb-badge--blue"><span className="pip"/>진행중</span>,
-        APP: <span className="sb-badge sb-badge--green"><span className="pip"/>최종승인</span>,
-        REJ: <span className="sb-badge sb-badge--red"><span className="pip"/>반려됨</span>,
+        ING: <span className="sb-badge sb-badge--blue"><span className="pip"/>{t("docs.detail.docStatusBadge.ing")}</span>,
+        APP: <span className="sb-badge sb-badge--green"><span className="pip"/>{t("docs.detail.docStatusBadge.app")}</span>,
+        REJ: <span className="sb-badge sb-badge--red"><span className="pip"/>{t("docs.detail.docStatusBadge.rej")}</span>,
     };
 
     const lineBadgeMap = {
-        WAI: <span className="sb-badge sb-badge--amber"><span className="pip"/>검토중</span>,
-        NOT: <span className="sb-badge sb-badge--gray"><span className="pip"/>대기</span>,
-        APP: <span className="sb-badge sb-badge--green"><span className="pip"/>승인</span>,
-        REJ: <span className="sb-badge sb-badge--red"><span className="pip"/>반려</span>,
+        WAI: <span className="sb-badge sb-badge--amber"><span className="pip"/>{t("docs.detail.lineStatusBadge.wai")}</span>,
+        NOT: <span className="sb-badge sb-badge--gray"><span className="pip"/>{t("docs.detail.lineStatusBadge.not")}</span>,
+        APP: <span className="sb-badge sb-badge--green"><span className="pip"/>{t("docs.detail.lineStatusBadge.app")}</span>,
+        REJ: <span className="sb-badge sb-badge--red"><span className="pip"/>{t("docs.detail.lineStatusBadge.rej")}</span>,
     };
 
     const roleClassMap = {
@@ -114,14 +116,14 @@ export default function DocDetailPage() {
             <div className="sb-page-head">
                 <div className="sb-page-head__txt">
                     <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>전자결재</a>
+                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
                         <i className="bi bi-chevron-right"/>
-                        <span>문서 상세</span>
+                        <span>{t("docs.detail.breadcrumbCurrent")}</span>
                     </div>
                     <h1>{detailDoc.docTitle}</h1>
                 </div>
                 <div className="sb-page-head__actions">
-                    <Button onClick={() => router.push("/appr/docs")}>목록으로</Button>
+                    <Button onClick={() => router.push("/appr/docs")}>{t("common.backToListBtn")}</Button>
                 </div>
             </div>
 
@@ -129,30 +131,30 @@ export default function DocDetailPage() {
                 <Col xs={24} md={10}>
                     <div className="sb-card equal-height-card">
                         <div className="sb-card__head">
-                            <h2>문서 정보</h2>
+                            <h2>{t("docs.detail.infoCardTitle")}</h2>
                         </div>
                         <div className="sb-card__body">
                             <div style={{marginBottom: 12}}>
-                                <label className="sb-form-label text-soft">기안자</label>
+                                <label className="sb-form-label text-soft">{t("docs.detail.drafterLabel")}</label>
                                 <div style={{fontWeight: 700}}>{detailDoc.empName}</div>
                             </div>
                             <div style={{marginBottom: 12}}>
-                                <label className="sb-form-label text-soft">기안일시</label>
+                                <label className="sb-form-label text-soft">{t("docs.detail.draftedAtLabel")}</label>
                                 <div className="text-soft">{detailDoc.createdAt}</div>
                             </div>
                             <div>
-                                <label className="sb-form-label text-soft">결재 상태</label>
+                                <label className="sb-form-label text-soft">{t("docs.detail.statusLabel")}</label>
                                 <div style={{display: "flex", alignItems: "center", gap: 12, marginTop: 4}}>
                                     <div>{statusBadgeMap[detailDoc.docStatus]}</div>
                                     <div style={{display: "flex", alignItems: "center", gap: 4, fontSize: 13}}>
-                                        <span style={{fontWeight: 700}}>기안</span>
+                                        <span style={{fontWeight: 700}}>{t("docs.detail.stepDraft")}</span>
                                         <i className="bi bi-chevron-right text-black-50"/>
-                                        <span style={detailDoc.docStatus === "ING" ? {color: "#2563eb", fontWeight: 700} : {color: "#8a93a3"}}>검토</span>
+                                        <span style={detailDoc.docStatus === "ING" ? {color: "#2563eb", fontWeight: 700} : {color: "#8a93a3"}}>{t("docs.detail.stepReview")}</span>
                                         <i className="bi bi-chevron-right text-black-50"/>
                                         <span style={
                                             detailDoc.docStatus === "APP" ? {color: "#16a34a", fontWeight: 700} :
                                             detailDoc.docStatus === "REJ" ? {color: "#dc2626", fontWeight: 700} : {color: "#8a93a3"}
-                                        }>완료</span>
+                                        }>{t("docs.detail.stepComplete")}</span>
                                     </div>
                                 </div>
                             </div>
@@ -163,7 +165,7 @@ export default function DocDetailPage() {
                 <Col xs={24} md={14}>
                     <div className="sb-card equal-height-card">
                         <div className="sb-card__head">
-                            <h2>결재선</h2>
+                            <h2>{t("docs.detail.lineCardTitle")}</h2>
                         </div>
                         <div className="sb-card__body">
                             <div className="appr-timeline scrollable-timeline">
@@ -177,7 +179,7 @@ export default function DocDetailPage() {
                                         <div className="appr-timeline__time">{detailDoc.createdAt}</div>
                                     </div>
                                     <div className="appr-timeline__status">
-                                        <span className="sb-badge sb-badge--gray">기안</span>
+                                        <span className="sb-badge sb-badge--gray">{t("docs.detail.draftBadge")}</span>
                                     </div>
                                 </div>
 
@@ -207,7 +209,7 @@ export default function DocDetailPage() {
 
             <div className="sb-card" style={{marginBottom: 16}}>
                 <div className="sb-card__head">
-                    <h2>문서 내용</h2>
+                    <h2>{t("docs.detail.contentCardTitle")}</h2>
                 </div>
                 <div className="sb-card__body">
                     {isSchemaDoc ? (
@@ -240,14 +242,14 @@ export default function DocDetailPage() {
             {canProcess && (
                 <div style={{display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 24}}>
                     {/* 위임 요청 버튼은 appr_line_request 기능 만들 때 여기에 추가 예정 */}
-                    <Popconfirm title="반려 하시겠습니까?" onConfirm={handleReject}>
+                    <Popconfirm title={t("docs.detail.rejectConfirmTitle")} onConfirm={handleReject}>
                         <Button danger loading={processSubmitting} disabled={processSubmitting}>
-                            반려
+                            {t("docs.detail.rejectBtn")}
                         </Button>
                     </Popconfirm>
-                    <Popconfirm title="승인 하시겠습니까?" onConfirm={handleApprove}>
+                    <Popconfirm title={t("docs.detail.approveConfirmTitle")} onConfirm={handleApprove}>
                         <Button type="primary" loading={processSubmitting} disabled={processSubmitting}>
-                            승인
+                            {t("docs.detail.approveBtn")}
                         </Button>
                     </Popconfirm>
                 </div>
