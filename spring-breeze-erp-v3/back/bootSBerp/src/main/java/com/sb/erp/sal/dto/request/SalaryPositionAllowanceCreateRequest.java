@@ -24,12 +24,12 @@ public class SalaryPositionAllowanceCreateRequest {
     private String pos;
 
     @NotNull(message = "회사 정보는 필수입니다.")
-    private Long com_id;
+    private Long comId;
 
     @NotNull(message = "지급액은 필수입니다.")
     @PositiveOrZero(message = "지급액은 0 이상이어야 합니다.")
     private Long amt;
 
     @NotNull(message = "적용 시작일은 필수입니다.")
-    private LocalDate eff_from;
+    private LocalDate effFrom;
 }

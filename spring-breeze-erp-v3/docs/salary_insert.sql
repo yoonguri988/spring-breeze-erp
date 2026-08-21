@@ -373,4 +373,38 @@ Insert into SBERP.SAL_HIST (HIST_ID,ACTOR_EMP_ID,ACTOR_NAME,TRGT_EMP_ID,COM_ID,D
 Insert into SBERP.SAL_HIST (HIST_ID,ACTOR_EMP_ID,ACTOR_NAME,TRGT_EMP_ID,COM_ID,DOM_TYPE,TRGT_ID,CHG_TYPE,BFR_VAL,AFT_VAL,DESCR) values (11,132,'허철아',142,1,'SALARY_ACCOUNT',11,'CREATE',NULL,'bankName=하나은행,acctNo=567-890123-45678','관리자 대행 등록(신규 입사자)');
 Insert into SBERP.SAL_HIST (HIST_ID,ACTOR_EMP_ID,ACTOR_NAME,TRGT_EMP_ID,COM_ID,DOM_TYPE,TRGT_ID,CHG_TYPE,BFR_VAL,AFT_VAL,DESCR) values (12,139,'한도훈',139,1,'SALARY_ACCOUNT',8,'UPDATE','bankName=우리은행,acctNo=110-000-111111','bankName=SC제일은행,acctNo=110-567-890123','주거래 은행 변경으로 계좌 정보 수정');
 
+-- ------------------------------------------------------------
+-- 12) 시퀀스 재동기화 (필수)
+--     위 9번~11번에서 PK를 시퀀스(nextval) 없이 직접 숫자로 INSERT했기 때문에,
+--     시퀀스 자체는 여전히 1(START WITH 1)을 가리키고 있다.
+--     이 상태로 애플리케이션이 등록 API를 호출하면 nextval이 이미 존재하는 PK와
+--     충돌해서 ORA-00001이 발생한다 (실제로 sal_meal_alw_plcy에서 이 문제가 발생함).
+--     각 시퀀스를 "테이블의 현재 MAX(PK)+1"부터 시작하도록 앞으로 당겨준다.
+-- ------------------------------------------------------------
+DECLARE
+    PROCEDURE sync_seq(p_seq_name VARCHAR2, p_table_name VARCHAR2, p_pk_col VARCHAR2) IS
+        v_max_id  NUMBER;
+        v_cur     NUMBER;
+    BEGIN
+        EXECUTE IMMEDIATE 'SELECT NVL(MAX(' || p_pk_col || '),0) FROM ' || p_table_name INTO v_max_id;
+        EXECUTE IMMEDIATE 'SELECT ' || p_seq_name || '.NEXTVAL FROM dual' INTO v_cur;
+        IF v_cur <= v_max_id THEN
+            EXECUTE IMMEDIATE 'ALTER SEQUENCE ' || p_seq_name || ' INCREMENT BY ' || (v_max_id - v_cur + 1);
+            EXECUTE IMMEDIATE 'SELECT ' || p_seq_name || '.NEXTVAL FROM dual' INTO v_cur;
+            EXECUTE IMMEDIATE 'ALTER SEQUENCE ' || p_seq_name || ' INCREMENT BY 1';
+        END IF;
+    END;
+BEGIN
+    sync_seq('sal_std_seq',          'sal_std',           'std_id');
+    sync_seq('sal_acct_seq',         'sal_acct',          'acct_id');
+    sync_seq('sal_pay_seq',          'sal_pay',           'pay_id');
+    sync_seq('sal_pay_item_seq',     'sal_pay_item',      'item_id');
+    sync_seq('sal_hist_seq',         'sal_hist',          'hist_id');
+    sync_seq('sal_rate_plcy_seq',    'sal_rate_plcy',     'rate_id');
+    sync_seq('sal_pos_alw_seq',      'sal_pos_alw',       'alw_id');
+    sync_seq('sal_inc_tax_brkt_seq', 'sal_inc_tax_brkt',  'brkt_id');
+    sync_seq('sal_meal_alw_plcy_seq','sal_meal_alw_plcy', 'meal_plcy_id');
+END;
+/
+
 COMMIT;
