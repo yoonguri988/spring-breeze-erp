@@ -19,7 +19,7 @@ import com.sb.erp.emp.entity.Employee;
            columnNames = {"emp_id", "att_date"}
        ))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Attendance {
+public class Attendance { // 사원 근태 확인
 
     // 근태 PK
     @Id
@@ -60,7 +60,7 @@ public class Attendance {
     @Builder.Default
     private Integer nightMinutes = 0;
 
-    //근무 상태 표시(출근/지각/조퇴 등)
+    //근무 상태 표시(출근/지각/조퇴/휴가 등)
     @Column(name = "att_status", length = 20)
     @Builder.Default
     private String attStatus = "ABSENT";
