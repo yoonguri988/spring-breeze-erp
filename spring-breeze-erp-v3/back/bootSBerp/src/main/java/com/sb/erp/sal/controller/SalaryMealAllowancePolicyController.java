@@ -24,30 +24,33 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 식대 정책 관리 (salary-calculation-engine-design.md "API 변경/추가(안)", 선택적).
- * comId를 비우면 전사 공통 기본값(ROOT 전용), comId를 지정하면 해당 회사 전용 정책(그 회사 ADMIN도 가능).
+ * 식대 정책 관리
+ * 해당 회사 전용 정책(ADMIN이 가능).
  */
-@Tag(name = "급여 산정 - 식대 정책", description = "회사별/전사 공통 월 식대 고정액 정책 조회·등록 API")
+@Tag(name = "Salary Meal Allowance Policy REST API", description = "회사별 월 식대 고정액 정책 조회·등록 API")
 @RestController
-@RequestMapping("/api/salary-meal-allowance-policy")
+@RequestMapping("/api/calc/salmealalwplcy")
 @RequiredArgsConstructor
 public class SalaryMealAllowancePolicyController {
 
     private final SalaryMealAllowancePolicyService salaryMealAllowancePolicyService;
     private final AuthUserJwtService authUserJwtService;
 
-    @Operation(summary = "식대 정책 등록 (comId 없으면 전사 공통 기본값, ROOT 전용)")
-    @PreAuthorize("hasAnyAuthority('ROOT','ROLE_ADMIN')")
+    @Operation(summary = "식대 정책 등록")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<SalaryMealAllowancePolicyResponse> register(
             @Valid @RequestBody SalaryMealAllowancePolicyCreateRequest request, Authentication authentication) {
+    	Long comId = authUserJwtService.getCurrentComId(authentication);
+    	request.setComId(comId);
+    	
         SalaryMealAllowancePolicyResponse response =
                 salaryMealAllowancePolicyService.register(request, actor(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "식대 정책 조회 (ROOT는 전체, 그 외는 자기 회사 것만)")
-    @PreAuthorize("hasAnyAuthority('ROOT','ROLE_ADMIN')")
+    @Operation(summary = "식대 정책 조회")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<List<SalaryMealAllowancePolicyResponse>> findAll(Authentication authentication) {
         return ResponseEntity.ok(salaryMealAllowancePolicyService.findAll(actor(authentication)));

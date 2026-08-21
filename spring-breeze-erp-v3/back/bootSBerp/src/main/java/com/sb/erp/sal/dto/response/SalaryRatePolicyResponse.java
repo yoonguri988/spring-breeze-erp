@@ -16,27 +16,27 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class SalaryRatePolicyResponse {
 
-    private Long rate_id;
-    private Integer plcy_year;
-    private BigDecimal pens_rate;
-    private BigDecimal hlth_rate;
-    private BigDecimal care_rate;
-    private BigDecimal empl_rate;
-    private LocalDate eff_from;
-    private LocalDate eff_to;
-    private LocalDateTime creat_at;
+    private Long rateId;
+    private Integer plcyYear;
+    private BigDecimal pensRate;
+    private BigDecimal hlthRate;
+    private BigDecimal careRate;
+    private BigDecimal emplRate;
+    private LocalDate effFrom;
+    private LocalDate effTo;
+    private LocalDateTime createdAt;
 
     public static SalaryRatePolicyResponse from(SalRatePlcy entity) {
         return SalaryRatePolicyResponse.builder()
-                .rate_id(entity.getRateId())
-                .plcy_year(entity.getPlcyYear())
-                .pens_rate(entity.getPensRate())
-                .hlth_rate(entity.getHlthRate())
-                .care_rate(entity.getCareRate())
-                .empl_rate(entity.getEmplRate())
-                .eff_from(entity.getEffFrom())
-                .eff_to(entity.getEffTo())
-                .creat_at(entity.getCreatAt())
+                .rateId(entity.getRateId())
+                .plcyYear(entity.getPlcyYear())
+                .pensRate(entity.getPensRate())
+                .hlthRate(entity.getHlthRate())
+                .careRate(entity.getCareRate())
+                .emplRate(entity.getEmplRate())
+                .effFrom(entity.getEffFrom())
+                .effTo(entity.getEffTo())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 }

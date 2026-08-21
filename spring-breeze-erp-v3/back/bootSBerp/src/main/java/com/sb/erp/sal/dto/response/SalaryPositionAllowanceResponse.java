@@ -15,23 +15,23 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class SalaryPositionAllowanceResponse {
 
-    private Long alw_id;
+    private Long alwId;
     private String pos;
-    private Long com_id;
+    private Long comId;
     private Long amt;
-    private LocalDate eff_from;
-    private LocalDate eff_to;
-    private LocalDateTime creat_at;
+    private LocalDate effFrom;
+    private LocalDate effTo;
+    private LocalDateTime createdAt;
 
     public static SalaryPositionAllowanceResponse from(SalPosAlw entity) {
         return SalaryPositionAllowanceResponse.builder()
-                .alw_id(entity.getAlwId())
+                .alwId(entity.getAlwId())
                 .pos(entity.getPos())
-                .com_id(entity.getComId())
+                .comId(entity.getComId())
                 .amt(entity.getAmt())
-                .eff_from(entity.getEffFrom())
-                .eff_to(entity.getEffTo())
-                .creat_at(entity.getCreatAt())
+                .effFrom(entity.getEffFrom())
+                .effTo(entity.getEffTo())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 }

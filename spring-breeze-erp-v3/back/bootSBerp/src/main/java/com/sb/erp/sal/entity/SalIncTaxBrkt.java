@@ -55,8 +55,8 @@ public class SalIncTaxBrkt {
     @Column(name = "eff_to")
     private LocalDate effTo;
 
-    @Column(name = "creat_at", nullable = false, insertable = false)
-    private LocalDateTime creatAt;
+    @Column(name = "created_at", nullable = false, insertable = false)
+    private LocalDateTime createdAt;
 
     public void closeAsHistory(LocalDate endDate) {
         this.effTo = endDate;

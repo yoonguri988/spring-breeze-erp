@@ -20,20 +20,20 @@ import lombok.Setter;
 public class SalaryRatePolicyCreateRequest {
 
     @NotNull(message = "적용 연도는 필수입니다.")
-    private Integer plcy_year;
+    private Integer plcyYear;
 
     @NotNull(message = "국민연금 요율은 필수입니다.")
-    private BigDecimal pens_rate;
+    private BigDecimal pensRate;
 
     @NotNull(message = "건강보험 요율은 필수입니다.")
-    private BigDecimal hlth_rate;
+    private BigDecimal hlthRate;
 
     @NotNull(message = "장기요양보험료율은 필수입니다.")
-    private BigDecimal care_rate;
+    private BigDecimal careRate;
 
     @NotNull(message = "고용보험 요율은 필수입니다.")
-    private BigDecimal empl_rate;
+    private BigDecimal emplRate;
 
     @NotNull(message = "적용 시작일은 필수입니다.")
-    private LocalDate eff_from;
+    private LocalDate effFrom;
 }

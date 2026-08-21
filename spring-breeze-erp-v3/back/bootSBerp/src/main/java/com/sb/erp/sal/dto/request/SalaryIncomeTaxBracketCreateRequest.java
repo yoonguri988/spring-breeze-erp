@@ -24,14 +24,14 @@ public class SalaryIncomeTaxBracketCreateRequest {
 
     @NotNull(message = "구간 하한은 필수입니다.")
     @PositiveOrZero(message = "구간 하한은 0 이상이어야 합니다.")
-    private Long min_amt;
+    private Long minAmt;
 
     /** NULL이면 상한 없음(최고 구간) */
-    private Long max_amt;
+    private Long maxAmt;
 
     @NotNull(message = "세율은 필수입니다.")
-    private BigDecimal tax_rate;
+    private BigDecimal taxRate;
 
     @NotNull(message = "적용 시작일은 필수입니다.")
-    private LocalDate eff_from;
+    private LocalDate effFrom;
 }
