@@ -21,7 +21,6 @@ import com.sb.erp.sal.calc.SalPayItemCandidate;
 import com.sb.erp.sal.calc.SalaryCalculationService;
 import com.sb.erp.sal.dto.request.SalaryPaymentCreateRequest;
 import com.sb.erp.sal.dto.request.SalaryPaymentItemAdjustRequest;
-import com.sb.erp.sal.dto.request.SalaryPaymentItemRequest;
 import com.sb.erp.sal.dto.request.SalaryPaymentStatusChangeRequest;
 import com.sb.erp.sal.dto.request.SalaryPaymentUpdateRequest;
 import com.sb.erp.sal.dto.response.SalaryPaymentResponse;
@@ -132,36 +131,52 @@ public class SalaryPaymentService {
                 .map(SalaryPaymentResponse::from);
     }
 
-    // 급여 수정 (대기 상태)
-    // 수당/공제 세부 금액을 관리자가 일괄 재입력하는 기존 방식(전체 교체). 급여 산정 엔진 도입 이후에도
-    // 관리자의 예외적인 전체 재계산/교체 용도로 유지한다. 개별 항목만 사유와 함께 조정하려면
-    // adjustItem()(PATCH /api/salpay/{id}/items/{itemId})을 사용한다.
+    // 급여 재산정 (대기 상태)
+    // 관리자가 items를 자유 입력해 통째로 갈아끼우던 방식은 제거했다 (계산 엔진 우회 + reason 미강제 문제,
+    // salary-calculation-engine-design.md "관리자 수동 조정 정책" 참고). 대신 SalaryCalculationService를
+    // 다시 호출해 재산정한다 — 예: SalStd(급여기준)가 Draft 생성 이후 바뀐 경우 최신 기준으로 다시 계산.
+    // 개별 항목 하나만 근거 남기며 조정하려면 adjustItem()(PATCH /api/salpay/{id}/items/{itemId})을 사용한다.
     @Transactional
     public SalaryPaymentResponse update(Long payId, SalaryPaymentUpdateRequest request, ActorContext actor) {
         SalPay payment = salaryPaymentRepository.findById(payId)
                 .orElseThrow(() -> new ResourceNotFoundException("급여 지급 내역을 찾을 수 없습니다. id=" + payId));
 
-        Long targetComId = payment.getEmployee().getCompany().getComId();
+        Employee employee = payment.getEmployee();
+        Long targetComId = employee.getCompany().getComId();
         if (!actor.canAccessCompany(targetComId)) {
             throw new AccessDeniedException("다른 회사 소속 직원의 급여는 수정할 수 없습니다.");
         }
 
         if (!payment.isEditable()) {
-            throw new IllegalStateException("대기 상태의 급여만 수정할 수 있습니다.");
+            throw new IllegalStateException("대기 상태의 급여만 재산정할 수 있습니다.");
         }
+
+        SalStd standard = salaryStandardRepository.findByEmployee_EmpIdAndActvTrue(employee.getEmpId())
+                .orElseThrow(() -> new ResourceNotFoundException("적용 중인 급여기준이 없습니다. empId=" + employee.getEmpId()));
 
         String beforeSnapshot = toJson(payment);
 
+        List<SalPayItemCandidate> candidates =
+                salaryCalculationService.calculate(standard, employee, YearMonth.from(payment.getPayMonth()));
+
         payment.clearItems();
-        request.getItems().forEach(itemRequest -> payment.addItem(toItemEntity(itemRequest)));
+        candidates.forEach(candidate -> payment.addItem(toItemEntity(candidate)));
 
-        Long allowTotal = sumByType(request.getItems(), PaymentItemType.ALLOWANCE);
-        Long dedtTotal = sumByType(request.getItems(), PaymentItemType.DEDUCTION);
-        payment.updateAmounts(payment.getBaseSal(), allowTotal, dedtTotal);
+        Long allowTotal = sumCandidatesByType(candidates, PaymentItemType.ALLOWANCE);
+        Long dedtTotal = sumCandidatesByType(candidates, PaymentItemType.DEDUCTION);
+        payment.setSalStd(standard);
+        payment.updateAmounts(standard.getBaseSal(), allowTotal, dedtTotal);
 
-        salaryChangeHistoryService.record(actor.empId(), payment.getEmployee().getEmpId(), targetComId,
+        String calcSummary = candidates.stream()
+                .map(c -> c.getItemCode() + "=" + c.getAmt() + "원(" + c.getCalcBasis() + ")")
+                .collect(Collectors.joining(" | "));
+        String reasonSuffix = (request != null && request.getReason() != null && !request.getReason().isBlank())
+                ? " 사유: " + request.getReason()
+                : "";
+
+        salaryChangeHistoryService.record(actor.empId(), employee.getEmpId(), targetComId,
                 ChangeDomainType.SALARY_PAYMENT, payment.getPayId(), ChangeType.UPDATE, beforeSnapshot, toJson(payment),
-                "급여 항목(수당/공제) 전체 재입력");
+                "급여 산정 엔진 재산정." + reasonSuffix + " " + calcSummary);
 
         return SalaryPaymentResponse.from(payment);
     }
@@ -266,13 +281,6 @@ public class SalaryPaymentService {
         }
     }
 
-    private Long sumByType(List<SalaryPaymentItemRequest> items, PaymentItemType type) {
-        return items.stream()
-                .filter(i -> i.getItemCode().getItemType() == type)
-                .map(SalaryPaymentItemRequest::getAmt)
-                .reduce(0L, Long::sum);
-    }
-
     private Long sumCandidatesByType(List<SalPayItemCandidate> candidates, PaymentItemType type) {
         return candidates.stream()
                 .filter(c -> c.getItemCode().getItemType() == type)
@@ -285,13 +293,6 @@ public class SalaryPaymentService {
                 .filter(i -> i.getItemType() == type)
                 .map(SalPayItem::getAmt)
                 .reduce(0L, Long::sum);
-    }
-
-    private SalPayItem toItemEntity(SalaryPaymentItemRequest request) {
-        return SalPayItem.builder()
-                .itemCode(request.getItemCode())
-                .amt(request.getAmt())
-                .build();
     }
 
     private SalPayItem toItemEntity(SalPayItemCandidate candidate) {

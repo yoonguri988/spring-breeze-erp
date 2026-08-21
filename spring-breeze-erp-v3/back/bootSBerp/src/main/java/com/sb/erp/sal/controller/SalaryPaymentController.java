@@ -88,13 +88,13 @@ public class SalaryPaymentController {
                 salaryPaymentService.findMyPayments(authUserJwtService.getCurrentEmpId(authentication), pageable));
     }
 
-    /** 7-4 급여수정 */
-    @Operation(summary = "급여 항목(수당/공제) 수정 (대기 상태 건만 가능)")
+    /** 7-4 급여 재산정 (관리자가 항목 금액을 직접 입력하지 않는다 - 계산 엔진을 다시 호출해 최신 급여기준으로 재산정) */
+    @Operation(summary = "급여 재산정 (대기 상태 건만 가능, SalaryCalculationService 재호출)")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/{payId}")
     public ResponseEntity<SalaryPaymentResponse> update(
     		@PathVariable("payId") Long payId,
-            @Valid @RequestBody SalaryPaymentUpdateRequest request,
+            @RequestBody(required = false) SalaryPaymentUpdateRequest request,
             @Parameter(hidden = true) Authentication authentication) {
         SalaryPaymentResponse response = salaryPaymentService.update(payId, request, actor(authentication));
         return ResponseEntity.ok(response);
