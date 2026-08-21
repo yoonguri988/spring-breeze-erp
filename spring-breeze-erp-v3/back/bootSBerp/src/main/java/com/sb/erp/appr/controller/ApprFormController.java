@@ -16,12 +16,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sb.erp.appr.dto.request.ApprFormAiSchemaRequest;
+import com.sb.erp.appr.dto.request.ApprFormDelegationConfigRequest;
 import com.sb.erp.appr.dto.request.ApprFormRequest;
 import com.sb.erp.appr.dto.request.ApprFormSearchCondition;
 import com.sb.erp.appr.dto.response.ApprFormAiSchemaResponse;
+import com.sb.erp.appr.dto.response.ApprFormDelegationConfigResponse;
 import com.sb.erp.appr.dto.response.ApprFormListResponse;
 import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.CodeCheckResponse;
+import com.sb.erp.appr.service.ApprFormDelegationConfigService;
 import com.sb.erp.appr.service.ApprFormService;
 import com.sb.erp.com.dto.response.ComResponse;
 import com.sb.erp.com.service.CompanyService;
@@ -42,6 +45,7 @@ public class ApprFormController {
 	private final ApprFormService appr;
 	private final CompanyService com; // 회사 검색
 	private final ApprFormAiService gpt;
+	private final ApprFormDelegationConfigService deleCfg;
 	
 	// 양식 목록 조회 ( 검색 + 페이징 )
 	@Operation(summary = "양식 목록 조회", description = "검색 조건과 페이징으로 결재양식을 조회, 최신버전만 노출")
@@ -123,9 +127,8 @@ public class ApprFormController {
 	}
 	
 	// AI 기반 양식 스키마 생성
-	
-	@PostMapping("/ai-schema")
 	@Operation(summary = "AI 양식 스키마 생성", description = "프롬프르틀 기반으로 AI호출하여 스키마 생성")
+	@PostMapping("/ai-schema")
 	public ResponseEntity<ApprFormAiSchemaResponse> generateSchema(
 			@Valid
 			@RequestBody ApprFormAiSchemaRequest req
@@ -138,5 +141,31 @@ public class ApprFormController {
 			// -> 여기서만 예외적으로 캐치
 			return ResponseEntity.ok(ApprFormAiSchemaResponse.fail("AI 양식 생성에 실패했습니다"));
 		}
+	}
+	
+	// 위임전결 설정 조회
+	@Operation(summary = "위임전결 설정 조회", description = "양식 버전별 위임 전결 트리거 설정 조회")
+	@GetMapping("/{forId}/{forVersion}/delegation-config")
+	public ResponseEntity<ApprFormDelegationConfigResponse> getDelegationConfig(
+			@PathVariable("forId") Long forId,
+			@PathVariable("forVersion") Long forVersion
+	) {
+		ApprFormDelegationConfigResponse res = deleCfg.getByForm(forId, forVersion);
+		return res != null ? ResponseEntity.ok(res) : ResponseEntity.noContent().build();
+	}
+	
+	// 위임전결 설정 저장 (없으면 생성, 있으면 수정)
+	@Operation(summary = "위임전결 설정 저장", description = "양식 버전별 위임전결 트리거 설정 저장")
+	@PutMapping("/{forId}/{forVersion}/delegation-config")
+	public ResponseEntity<Void> saveDelegationConfig(
+			@PathVariable("forId") Long forId,
+			@PathVariable("forVersion") Long forVersion,
+			@Valid
+			@RequestBody ApprFormDelegationConfigRequest req
+	) {
+		req.setForId(forId);
+		req.setForVersion(forVersion);
+		deleCfg.save(req);
+		return ResponseEntity.noContent().build();
 	}
 }
