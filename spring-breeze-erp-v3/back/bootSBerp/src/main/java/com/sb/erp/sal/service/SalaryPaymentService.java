@@ -137,9 +137,9 @@ public class SalaryPaymentService {
     // 관리자의 예외적인 전체 재계산/교체 용도로 유지한다. 개별 항목만 사유와 함께 조정하려면
     // adjustItem()(PATCH /api/salpay/{id}/items/{itemId})을 사용한다.
     @Transactional
-    public SalaryPaymentResponse update(Long id, SalaryPaymentUpdateRequest request, ActorContext actor) {
-        SalPay payment = salaryPaymentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("급여 지급 내역을 찾을 수 없습니다. id=" + id));
+    public SalaryPaymentResponse update(Long payId, SalaryPaymentUpdateRequest request, ActorContext actor) {
+        SalPay payment = salaryPaymentRepository.findById(payId)
+                .orElseThrow(() -> new ResourceNotFoundException("급여 지급 내역을 찾을 수 없습니다. id=" + payId));
 
         Long targetComId = payment.getEmployee().getCompany().getComId();
         if (!actor.canAccessCompany(targetComId)) {
