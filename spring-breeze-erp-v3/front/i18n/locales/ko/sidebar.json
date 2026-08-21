@@ -3,9 +3,11 @@
     "org": "조직 관리",
     "hr": "인사 관리",
     "work": "업무 관리",
-    "asset": "자산 관리"
+    "asset": "자산 관리",
+    "security": "보안 관리"
   },
   "items": {
+    "loginHistory": { "tip": "로그인 이력", "label": "로그인 이력 조회" },
     "dashboard": { "tip": "대시보드" },
     "comlist": { "tip": "회사 • 부서 관리" },
     "commypage": { "tip": "내 회사 정보" },

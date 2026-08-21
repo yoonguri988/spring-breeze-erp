@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector} from "react-redux";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 import {
     Table, Input, Select, Button, Space, Tag, message,
     Badge, Spin, Card
@@ -14,6 +15,7 @@ const { Option } = Select;
 export default function FormListPage() {
     const router = useRouter();
     const dispatch = useDispatch();
+    const { t } = useTranslation(["appr", "common"]);
 
     const { list, loading, totalCount, page, pageSize } = useSelector((state) => state.apprForm);
 
@@ -117,28 +119,28 @@ export default function FormListPage() {
     */
     const columns = [
         {
-            title: "번호",
+            title: t("forms.list.table.no"),
             key: "no",
             width: 70,
             render: (_, __, index) => (page - 1) * (pageSize || 10) + index + 1,
         },
-        {title: "양식 코드", dataIndex: "forCode", key: "forCode"},
-        {title: "양식 제목", dataIndex: "forTitle", key: "forTitle"},
-        {title: "회사", dataIndex: "comName", key: "comName"},
-        {title: "버전", dataIndex: "forVersion", key: "forVersion", width: 80},
+        {title: t("forms.list.table.forCode"), dataIndex: "forCode", key: "forCode"},
+        {title: t("forms.list.table.forTitle"), dataIndex: "forTitle", key: "forTitle"},
+        {title: t("forms.list.table.comName"), dataIndex: "comName", key: "comName"},
+        {title: t("forms.list.table.forVersion"), dataIndex: "forVersion", key: "forVersion", width: 80},
         {
-            title: "활성화 여부",
+            title: t("forms.list.table.forStatus"),
             dataIndex: "forStatus",
             key: "forStatus",
             width: 110,
             render: (status) => (
-                <Badge status={status ? "success" : "default"} text={status ? "활성화" : "비활성화"}/>
+                <Badge status={status ? "success" : "default"} text={status ? t("common.statusActive") : t("common.statusInactive")}/>
             ),
         },
-        {title: "생성일", dataIndex: "createdAt", key: "createdAt"},
-        {title: "수정일", dataIndex: "updatedAt", key: "updatedAt"},
+        {title: t("forms.list.table.createdAt"), dataIndex: "createdAt", key: "createdAt"},
+        {title: t("forms.list.table.updatedAt"), dataIndex: "updatedAt", key: "updatedAt"},
         {
-            title: "관리",
+            title: t("forms.list.table.actions"),
             key: "action",
             width: 160,
             render: (_, record) => (
@@ -147,14 +149,14 @@ export default function FormListPage() {
                         size="small"
                         onClick={() => router.push(`/appr/forms/detail?forId=${record.forId}&forVersion=${record.forVersion}`)}
                     >
-                        상세
+                        {t("forms.list.detailBtn")}
                     </Button>
                     <Button
                         size="small"
                         danger
                         onClick={() => handleDelete(record.forId, record.forVersion)}
                     >
-                        삭제
+                        {t("forms.list.deleteBtn")}
                     </Button>
                 </Space>
             ),
@@ -166,16 +168,16 @@ export default function FormListPage() {
             <div className="sb-page-head">
                 <div className="sb-page-head__txt">
                     <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>전자결재</a>
+                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
                         <i className="bi bi-chevron-right" />
-                        <span>양식 관리</span>
+                        <span>{t("forms.list.breadcrumbCurrent")}</span>
                     </div>
-                    <h1>결재 양식 관리</h1>
-                    <p>시스템 내 결재 양식을 조회하고 관리합니다.</p>
+                    <h1>{t("forms.list.title")}</h1>
+                    <p>{t("forms.list.subtitle")}</p>
                 </div>
                 <div className="sb-page-head__actions">
                     <Button type="primary" icon={<PlusOutlined/>} onClick={() => router.push("/appr/forms/write")}>
-                        양식 등록
+                        {t("forms.list.addBtn")}
                     </Button>
                 </div>
             </div>
@@ -183,20 +185,20 @@ export default function FormListPage() {
             <Card>
                 <div style={{display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "flex-end"}}>
                     <div>
-                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>회사</div>
+                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>{t("forms.list.companyLabel")}</div>
                         <Select
                             showSearch
-                            placeholder="회사명 또는 사업자번호 검색"
+                            placeholder={t("forms.list.companySearchPlaceholder")}
                             style={{width: 240}}
                             value={comIdDraft}
                             defaultActiveFirstOption={false}
                             filterOption={false} // 서버 검색결과를 그대로 사용
                             suffixIcon={<BankOutlined/>}
-                            notFoundContent={companySearching ? <Spin size="small" /> : "검색어를 입력해주세요"}
+                            notFoundContent={companySearching ? <Spin size="small" /> : t("forms.list.companySearchEmpty")}
                             onSearch={handleCompanySearch}
                             onChange={handleCompanySelect}
                             onClear={() => {
-                                setComIdDraft(undefined); 
+                                setComIdDraft(undefined);
                                 setComNameDraft(undefined);
                             }}
                             allowClear
@@ -208,11 +210,11 @@ export default function FormListPage() {
                             ))}
                         </Select>
                     </div>
-                    
+
                     <div>
-                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>키워드 검색</div>
+                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>{t("forms.list.keywordLabel")}</div>
                         <Input
-                            placeholder="양식 코드/제목 검색"
+                            placeholder={t("forms.list.keywordPlaceholder")}
                             style={{width: 220}}
                             value={keywordDraft}
                             onChange={(e) => setKeywordDraft(e.target.value)}
@@ -222,16 +224,16 @@ export default function FormListPage() {
                     </div>
 
                     <div>
-                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>활성화 여부</div>
+                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>{t("forms.list.activeLabel")}</div>
                         <Select
-                            placeholder="전체"
+                            placeholder={t("forms.list.activeAllPlaceholder")}
                             style={{width: 140}}
                             value={statusDraft}
                             onChange={(value) => setStatusDraft(value)}
                             allowClear
                         >
-                            <Option value={true}>활성</Option>
-                            <Option value={false}>비활성</Option>
+                            <Option value={true}>{t("forms.list.activeOption")}</Option>
+                            <Option value={false}>{t("forms.list.inactiveOption")}</Option>
                         </Select>
                     </div>
 
@@ -241,7 +243,7 @@ export default function FormListPage() {
                         onClick={handleSearch}
                         disabled={!comIdDraft}
                     >
-                        검색
+                        {t("forms.list.searchBtn")}
                     </Button>
                 </div>
                 {/*
@@ -260,7 +262,7 @@ export default function FormListPage() {
                 */}
                 {!appliedFilters.comId ? (
                     <div style={{padding: "80px 0", textAlign: "center", color: "#999"}}>
-                        회사를 검색해서 선택한 뒤 검색 버튼을 눌러주세요.
+                        {t("forms.list.selectCompanyMsg")}
                     </div>
                 ) : (
                     <Table

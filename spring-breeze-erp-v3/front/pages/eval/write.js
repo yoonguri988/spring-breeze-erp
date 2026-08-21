@@ -17,24 +17,26 @@ import {
   SaveOutlined,
   SendOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
-import { 
+import {
   detailEvalRequest, draftEvalRequest, submitEvalRequest, resetEvalState,
 } from "../../reducers/eval/evalReducer";
-
-const SCORE_ITEMS = [
-  { name: "scorePerformance", label: "업무 성과", desc: "목표 달성도, 업무 품질" },
-  { name: "scoreExpertise", label: "전문성", desc: "직무 지식, 기술 역량" },
-  { name: "scoreTeamwork", label: "팀워크", desc: "협업, 커뮤니케이션" },
-  { name: "scoreAttitude", label: "근무 태도", desc: "성실성, 책임감" },
-  { name: "scoreGrowth", label: "성장 잠재력", desc: "자기개발, 도전 의지" },
-];
 
 export default function EvalWritePage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["eval", "common"]);
   const { evalId, periodId, targetEmpId } = router.query;
   const [form] = Form.useForm();
+
+  const SCORE_ITEMS = [
+    { name: "scorePerformance", label: t("common.scoreLabel.performance"), desc: t("common.scoreDesc.performance") },
+    { name: "scoreExpertise", label: t("common.scoreLabel.expertise"), desc: t("common.scoreDesc.expertise") },
+    { name: "scoreTeamwork", label: t("common.scoreLabel.teamwork"), desc: t("common.scoreDesc.teamwork") },
+    { name: "scoreAttitude", label: t("common.scoreLabel.attitude"), desc: t("common.scoreDesc.attitude") },
+    { name: "scoreGrowth", label: t("common.scoreLabel.growth"), desc: t("common.scoreDesc.growth") },
+  ];
 
   const { currentEval, loading, success, error } = useSelector(
     (state) => state.eval
@@ -65,7 +67,7 @@ export default function EvalWritePage() {
   // 결과 처리
   useEffect(() => {
     if (!success) return;
-    message.success("저장되었습니다.");
+    message.success(t("write.savedMsg"));
     dispatch(resetEvalState());
     router.push({
       pathname: "/eval/dashboard",
@@ -99,6 +101,8 @@ export default function EvalWritePage() {
     } catch (e) {}
   };
 
+  const mode = isEdit ? t("write.editMode") : t("write.createMode");
+
   //////
   return (
     <div className="sb-page">
@@ -112,12 +116,12 @@ export default function EvalWritePage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            인사평가 &gt; 평가 작성 &gt; {isEdit ? "수정" : "작성"}
+            {t("common.breadcrumbRoot")} &gt; {t("dashboard.breadcrumbCurrent")} &gt; {mode}
           </div>
-          <h1>평가 {isEdit ? "수정" : "작성"}</h1>
+          <h1>{t("write.title", { mode })}</h1>
           {currentEval && (
             <p>
-              대상: {currentEval.targetEmpName} ({currentEval.targetDeptName})
+              {t("write.targetLabel", { name: currentEval.targetEmpName, dept: currentEval.targetDeptName })}
             </p>
           )}
         </div>
@@ -128,7 +132,7 @@ export default function EvalWritePage() {
               query: { periodId: periodId || currentEval?.periodId },
             }}
           >
-            <Button icon={<ArrowLeftOutlined />}>돌아가기</Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("write.backBtn")}</Button>
           </Link>
         </div>
       </div>
@@ -149,19 +153,19 @@ export default function EvalWritePage() {
                 },
               ]}
             >
-              <InputNumber min={1} max={5} style={{ width: "100%" }} placeholder="1 ~ 5" />
+              <InputNumber min={1} max={5} style={{ width: "100%" }} placeholder={t("write.scorePlaceholder")} />
             </Form.Item>
           ))}
 
           <Divider />
 
           {/* 코멘트 */}
-          <Form.Item name="strengthComment" label="강점 코멘트">
-            <Input.TextArea rows={3} placeholder="이 사원의 강점을 작성하세요." />
+          <Form.Item name="strengthComment" label={t("write.strengthCommentLabel")}>
+            <Input.TextArea rows={3} placeholder={t("write.strengthCommentPlaceholder")} />
           </Form.Item>
 
-          <Form.Item name="improvementComment" label="개선 코멘트">
-            <Input.TextArea rows={3} placeholder="개선이 필요한 부분을 작성하세요." />
+          <Form.Item name="improvementComment" label={t("write.improvementCommentLabel")}>
+            <Input.TextArea rows={3} placeholder={t("write.improvementCommentPlaceholder")} />
           </Form.Item>
 
           {/* 버튼 */}
@@ -174,7 +178,7 @@ export default function EvalWritePage() {
             }}
           >
             <Button icon={<SaveOutlined />} onClick={handleDraft} loading={loading}>
-              임시 저장
+              {t("write.draftBtn")}
             </Button>
             <Button
               type="primary"
@@ -182,7 +186,7 @@ export default function EvalWritePage() {
               onClick={handleSubmit}
               loading={loading}
             >
-              최종 제출
+              {t("write.submitBtn")}
             </Button>
           </div>
         </Form>

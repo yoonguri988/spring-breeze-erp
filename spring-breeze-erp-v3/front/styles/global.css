@@ -418,6 +418,16 @@ a {
   max-width: none;
 }
 
+/* ----- Error pages (404 / 500 / _error) ----- */
+.sb-error-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sb-bg);
+  padding: 24px;
+}
+
 .sb-page-head {
   display: flex;
   align-items: flex-start;

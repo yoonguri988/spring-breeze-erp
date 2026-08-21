@@ -5,24 +5,26 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Card, Row, Col, Table, Tag, Button, Statistic, message } from "antd";
 import { PlusOutlined, EyeOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   listPeriodRequest,
   resetPeriodState,
 } from "../../../reducers/eval/evalPeriodReducer";
 
-const STATUS_CONFIG = {
-  READY: { color: "orange", label: "준비" },
-  OPEN: { color: "green", label: "진행 중" },
-  CLOSED: { color: "blue", label: "마감" },
-  REPORTING: { color: "purple", label: "분석 중" },
-  REPORTED: { color: "cyan", label: "완료" },
-  REPORTING_FAILED: { color: "red", label: "분석 실패" },
-};
-
 export default function EvalPeriodListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["eval", "common"]);
+
+  const STATUS_CONFIG = {
+    READY: { color: "orange", label: t("common.periodStatus.ready") },
+    OPEN: { color: "green", label: t("common.periodStatus.open") },
+    CLOSED: { color: "blue", label: t("common.periodStatus.closed") },
+    REPORTING: { color: "purple", label: t("common.periodStatus.reporting") },
+    REPORTED: { color: "cyan", label: t("common.periodStatus.reported") },
+    REPORTING_FAILED: { color: "red", label: t("common.periodStatus.reportingFailed") },
+  };
 
   const { periodList, stats, loading, success, error } = useSelector(
     (state) => state.period
@@ -47,7 +49,7 @@ export default function EvalPeriodListPage() {
 
   const columns = [
     {
-      title: "상태",
+      title: t("period.list.table.status"),
       dataIndex: "periodStatus",
       key: "status",
       width: 100,
@@ -57,30 +59,30 @@ export default function EvalPeriodListPage() {
       },
     },
     {
-      title: "제목",
+      title: t("period.list.table.title"),
       dataIndex: "title",
       key: "title",
-      render: (t, r) => (
+      render: (title, r) => (
         <Link
           href={{
             pathname: "/eval/period/detail",
             query: { periodId: r.periodId },
           }}
         >
-          <a style={{ fontWeight: 600 }}>{t}</a>
+          <a style={{ fontWeight: 600 }}>{title}</a>
         </Link>
       ),
     },
     {
-      title: "연도",
+      title: t("period.list.table.year"),
       dataIndex: "evalYear",
       key: "year",
       width: 80,
       align: "center",
     },
-    { title: "구분", dataIndex: "evalTerm", key: "term", width: 100 },
+    { title: t("period.list.table.term"), dataIndex: "evalTerm", key: "term", width: 100 },
     {
-      title: "기간",
+      title: t("period.list.table.period"),
       key: "range",
       width: 200,
       render: (_, r) => `${r.startDate} ~ ${r.endDate}`,
@@ -114,14 +116,14 @@ export default function EvalPeriodListPage() {
         }}
       >
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">인사평가 &gt; 회차 관리</div>
-          <h1>인사평가 회차 관리</h1>
-          <p>정기 인사평가 회차를 등록·수정하고, 상태를 관리합니다.</p>
+          <div className="sb-breadcrumb">{t("common.breadcrumbRoot")} &gt; {t("period.list.breadcrumbCurrent")}</div>
+          <h1>{t("period.list.title")}</h1>
+          <p>{t("period.list.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/eval/period/form">
             <Button type="primary" icon={<PlusOutlined />}>
-              회차 등록
+              {t("period.list.addBtn")}
             </Button>
           </Link>
         </div>
@@ -152,7 +154,7 @@ export default function EvalPeriodListPage() {
           dataSource={periodList}
           loading={loading}
           pagination={false}
-          locale={{ emptyText: "등록된 회차가 없습니다." }}
+          locale={{ emptyText: t("period.list.emptyMsg") }}
         />
       </Card>
     </div>

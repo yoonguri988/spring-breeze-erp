@@ -5,18 +5,20 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Card, Row, Col, Table, Tag, Button, Progress } from "antd";
 import { CalendarOutlined, EditOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import { dashboardEvalRequest, clearEvalDetail, } from "../../reducers/eval/evalReducer";
-
-const STATUS_TAG = {
-  DRAFT: { color: "default", label: "임시저장" },
-  SUBMITTED: { color: "green", label: "제출완료" },
-};
 
 export default function EvalDashboardPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["eval", "common"]);
   const { periodId } = router.query;
+
+  const STATUS_TAG = {
+    DRAFT: { color: "default", label: t("common.evalStatus.draft") },
+    SUBMITTED: { color: "green", label: t("common.evalStatus.submitted") },
+  };
 
   const {
     openPeriods, currentPeriod, targets,
@@ -34,22 +36,22 @@ export default function EvalDashboardPage() {
   // 평가 대상 테이블 컬럼
   const columns = [
     {
-      title: "사원",
+      title: t("dashboard.table.emp"),
       key: "emp",
       render: (_, r) => (
         <span style={{ fontWeight: 600 }}>{r.targetEmpName}</span>
       ),
     },
-    { title: "부서", dataIndex: "targetDeptName", key: "dept" },
-    { title: "직급", dataIndex: "targetPosName", key: "pos" },
+    { title: t("dashboard.table.dept"), dataIndex: "targetDeptName", key: "dept" },
+    { title: t("dashboard.table.pos"), dataIndex: "targetPosName", key: "pos" },
     {
-      title: "상태",
+      title: t("dashboard.table.status"),
       dataIndex: "evalStatus",
       key: "status",
       width: 100,
       render: (s) => {
-        const t = STATUS_TAG[s] || { color: "default", label: s || "미작성" };
-        return <Tag color={t.color}>{t.label}</Tag>;
+        const st = STATUS_TAG[s] || { color: "default", label: s || t("common.evalStatus.draft") };
+        return <Tag color={st.color}>{st.label}</Tag>;
       },
     },
     {
@@ -66,7 +68,7 @@ export default function EvalDashboardPage() {
           }}
         >
           <Button type="link" size="small" icon={<EditOutlined />}>
-            {r.evalId ? "보기" : "작성"}
+            {r.evalId ? t("dashboard.viewBtn") : t("dashboard.writeBtn")}
           </Button>
         </Link>
       ),
@@ -86,9 +88,9 @@ export default function EvalDashboardPage() {
         }}
       >
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">인사평가 &gt; 평가 작성</div>
-          <h1>평가 작성</h1>
-          <p>내가 평가해야 할 부서원 목록을 확인하고 평가를 작성합니다.</p>
+          <div className="sb-breadcrumb">{t("common.breadcrumbRoot")} &gt; {t("dashboard.breadcrumbCurrent")}</div>
+          <h1>{t("dashboard.title")}</h1>
+          <p>{t("dashboard.subtitle")}</p>
         </div>
         <div
           className="sb-page-head__actions"
@@ -99,12 +101,12 @@ export default function EvalDashboardPage() {
               dispatch(clearEvalDetail());
               router.push("/eval/dashboard");
             }}>
-              회차 변경
+              {t("dashboard.periodChangeBtn")}
             </Button>
           )}
           {isAdmin && (
             <Link href="/eval/period/list">
-              <Button icon={<CalendarOutlined />}>회차 관리</Button>
+              <Button icon={<CalendarOutlined />}>{t("dashboard.periodManageBtn")}</Button>
             </Link>
           )}
         </div>
@@ -117,9 +119,9 @@ export default function EvalDashboardPage() {
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ fontSize: 24, color: "#1890ff" }}>ℹ️</span>
               <div>
-                <div style={{ fontWeight: 650 }}>평가할 회차를 선택하세요</div>
+                <div style={{ fontWeight: 650 }}>{t("dashboard.selectPeriodTitle")}</div>
                 <div style={{ color: "#999", fontSize: 13 }}>
-                  진행 중(OPEN)인 회차만 표시됩니다.
+                  {t("dashboard.selectPeriodHint")}
                 </div>
               </div>
             </div>
@@ -135,7 +137,7 @@ export default function EvalDashboardPage() {
                 }}
               >
                 <CalendarOutlined style={{ fontSize: 32, marginBottom: 8 }} />
-                <p>진행 중인 회차가 없습니다.</p>
+                <p>{t("dashboard.noOpenPeriodMsg")}</p>
               </div>
             </Card>
           ) : (
@@ -157,7 +159,7 @@ export default function EvalDashboardPage() {
                     </Tag>
                     <h3 style={{ margin: "4px 0" }}>{p.title}</h3>
                     <div style={{ color: "#999", fontSize: 13 }}>
-                      {p.evalYear}년 {p.evalTerm} · {p.startDate} ~ {p.endDate}
+                      {t("dashboard.periodMetaFormat", { year: p.evalYear, term: p.evalTerm, start: p.startDate, end: p.endDate })}
                     </div>
                   </Card>
                 </Col>
@@ -181,13 +183,12 @@ export default function EvalDashboardPage() {
                   {currentPeriod.title}
                 </span>
                 <div style={{ color: "#999", fontSize: 13, marginTop: 4 }}>
-                  {currentPeriod.evalYear}년 {currentPeriod.evalTerm} ·{" "}
-                  {currentPeriod.startDate} ~ {currentPeriod.endDate}
+                  {t("dashboard.periodMetaFormat", { year: currentPeriod.evalYear, term: currentPeriod.evalTerm, start: currentPeriod.startDate, end: currentPeriod.endDate })}
                 </div>
               </Col>
               <Col>
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ color: "#999", fontSize: 12 }}>제출 진행률</div>
+                  <div style={{ color: "#999", fontSize: 12 }}>{t("dashboard.submitProgressLabel")}</div>
                   <Progress
                     type="circle"
                     size={64}
@@ -211,7 +212,7 @@ export default function EvalDashboardPage() {
               dataSource={targets}
               loading={loading}
               pagination={false}
-              locale={{ emptyText: "평가 대상이 없습니다." }}
+              locale={{ emptyText: t("dashboard.noTargetMsg") }}
             />
           </Card>
         </>

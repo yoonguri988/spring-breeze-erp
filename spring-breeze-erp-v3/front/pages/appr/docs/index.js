@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 import {
     Table, Input, Select, Button, Space, Tag,
     Tabs, Row, Col, Card
@@ -52,6 +53,7 @@ function StatCard({ icon: Icon, label, value, bg, color}) {
 export default function DocListPage() {
     const router = useRouter();
     const dispatch = useDispatch();
+    const { t } = useTranslation(["appr", "common"]);
 
     const {
         hisDocs, todoDocs, docCnts, myTodoCnt,
@@ -74,40 +76,44 @@ export default function DocListPage() {
 
     // forms 에서 사용한 columns와 동일
     const columns = [
-        {title: "문서번호", dataIndex: "docId", key: "docId", width: 90},
-        {title: "제목", dataIndex: "docTitle", key: "docTitle"},
-        {title: "기안자", dataIndex: "empName", key: "empName", width: 120},
+        {title: t("docs.list.table.docId"), dataIndex: "docId", key: "docId", width: 90},
+        {title: t("docs.list.table.docTitle"), dataIndex: "docTitle", key: "docTitle"},
+        {title: t("docs.list.table.empName"), dataIndex: "empName", key: "empName", width: 120},
         {
-            title: "중요",
+            title: t("docs.list.table.important"),
             dataIndex: "important",
             key: "important",
             width: 80,
-            render: (important) => (important ? <Tag color="red">중요</Tag> : null)
+            render: (important) => (important ? <Tag color="red">{t("docs.list.importantTag")}</Tag> : null)
         },
         {
-            title: "상태",
+            title: t("docs.list.table.status"),
             dataIndex: "docStatus",
             key: "docStatus",
             width: 100,
             render: (docStatus) => {
                 const colorMap = {ING: "blue", APP: "green", REJ: "red"};
-                const labelMap = {ING: "진행중", APP: "승인", REJ: "반려"};
+                const labelMap = {
+                    ING: t("docs.list.docStatus.ing"),
+                    APP: t("docs.list.docStatus.app"),
+                    REJ: t("docs.list.docStatus.rej"),
+                };
                 return <Tag color={colorMap[docStatus] || "default"}>{labelMap[docStatus] || docStatus}</Tag>
             },
 
         },
         // todo 탭에서만 내 결재 상태 표시
         ...(tab === "todo"
-            ? [{title: "내 결재상태", dataIndex: "linStatus", key: "linStatus", width: 110}]
+            ? [{title: t("docs.list.table.myLinStatus"), dataIndex: "linStatus", key: "linStatus", width: 110}]
             : []),
-        {title: "등록일", dataIndex: "createdAt", key: "createdAt", width: 160},
+        {title: t("docs.list.table.createdAt"), dataIndex: "createdAt", key: "createdAt", width: 160},
         {
-            title: "관리",
+            title: t("docs.list.table.actions"),
             key: "action",
             width: 100,
             render: (_, record) => (
                 <Button size="small" onClick={() => router.push(`/appr/docs/detail?docId=${record.docId}`)}>
-                    상세
+                    {t("docs.list.detailBtn")}
                 </Button>
             ),
         },
@@ -120,12 +126,12 @@ export default function DocListPage() {
             <div className="sb-page-head">
                 <div className="sb-page-head__txt">
                     <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>전자결재</a>
+                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
                         <i className="bi bi-chevron-right"/>
-                        <span>결재 문서함</span>
+                        <span>{t("docs.list.breadcrumbCurrent")}</span>
                     </div>
-                    <h1>결재 문서 조회</h1>
-                    <p>내가 기안/결재한 문서 및 결재 대기 중인 문서를 확인합니다.</p>
+                    <h1>{t("docs.list.title")}</h1>
+                    <p>{t("docs.list.subtitle")}</p>
                 </div>
                 <div className="sb-page-head__actions">
                     <Button
@@ -133,17 +139,17 @@ export default function DocListPage() {
                         icon={<PlusOutlined/>}
                         onClick={() => router.push("/appr/docs/write")}
                     >
-                        문서 작성
+                        {t("docs.list.writeBtn")}
                     </Button>
                 </div>
             </div>
-            
+
             {/* 대시보드 통계 카드 */}
             <Row gutter={16} style={{marginBottom: 24}}>
                 <Col span={6}>
                     <StatCard
                         icon={FolderOpenOutlined}
-                        label="전체 문서"
+                        label={t("docs.list.stat.total")}
                         value={docCnts?.TOTALCNT ?? 0}
                         bg="#e6f4ff"
                         color="#1677ff"
@@ -152,7 +158,7 @@ export default function DocListPage() {
                 <Col span={6}>
                     <StatCard
                         icon={ClockCircleOutlined}
-                        label="진행중"
+                        label={t("docs.list.stat.ing")}
                         value={docCnts?.INGCNT ?? 0}
                         bg="#fff7e6"
                         color="#fa8c16"
@@ -161,7 +167,7 @@ export default function DocListPage() {
                 <Col span={6}>
                     <StatCard
                         icon={CheckCircleOutlined}
-                        label="승인"
+                        label={t("docs.list.stat.app")}
                         value={docCnts?.APPCNT ?? 0}
                         bg="#f6ffed"
                         color="#52c41a"
@@ -170,7 +176,7 @@ export default function DocListPage() {
                 <Col span={6}>
                     <StatCard
                         icon={CloseCircleOutlined}
-                        label="반려"
+                        label={t("docs.list.stat.rej")}
                         value={docCnts?.INGCNT ?? 0}
                         bg="#fff1f0"
                         color="#f5222d"
@@ -191,7 +197,7 @@ export default function DocListPage() {
                 {/* status 필터는 history 탭에서만 todo는 항상 ING+WAI */}
                 {tab === "history" && (
                     <Select
-                        placeholder="상태"
+                        placeholder={t("docs.list.statusPlaceholder")}
                         allowClear
                         style={{width: 120}}
                         onChange={(value) => {
@@ -199,9 +205,9 @@ export default function DocListPage() {
                             setCurrentPage(1);
                         }}
                     >
-                        <Option value="ING">진행중</Option>
-                        <Option value="APP">승인</Option>
-                        <Option value="REJ">반려</Option>
+                        <Option value="ING">{t("docs.list.docStatus.ing")}</Option>
+                        <Option value="APP">{t("docs.list.docStatus.app")}</Option>
+                        <Option value="REJ">{t("docs.list.docStatus.rej")}</Option>
                     </Select>
                 )}
             </Space>
@@ -210,8 +216,8 @@ export default function DocListPage() {
                 activeKey={tab}
                 onChange={handleTabChange}
                 items={[
-                    {key: "history", label: "결재 이력"},
-                    {key: "todo", label: `내 할일${myTodoCnt ? `(${myTodoCnt})` : ""}`},
+                    {key: "history", label: t("docs.list.tabs.history")},
+                    {key: "todo", label: `${t("docs.list.tabs.todo")}${myTodoCnt ? `(${myTodoCnt})` : ""}`},
                 ]}
             />
             <Table

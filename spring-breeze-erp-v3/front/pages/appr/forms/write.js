@@ -2,7 +2,8 @@ import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import { 
+import { useTranslation } from "react-i18next";
+import {
     message, Radio, Form, Input, Select, Switch, Button,
     Space, Row, Col, Typography, Card
 } from "antd";
@@ -25,6 +26,7 @@ export default function FormWritePage() {
     const router = useRouter();
     const dispatch = useDispatch();
     const [form] = Form.useForm();
+    const { t } = useTranslation(["appr", "common"]);
 
     const { submitting, submitError, success } = useSelector((state) => state.apprForm)
 
@@ -49,7 +51,7 @@ export default function FormWritePage() {
     // 등록 성공하면 목록으로 이동, 실패하면 에러 메세지 표시
     useEffect(() => {
         if (success) {
-            message.success("양식이 등록되었습니다.");
+            message.success(t("forms.write.successMsg"));
             router.push("/appr/forms");
         }
     }, [success]);
@@ -81,14 +83,14 @@ export default function FormWritePage() {
                     value: c.comId
                 })));
             } catch (e) {
-                message.error("회사 검색에 실패했습니다.");
+                message.error(t("forms.write.companySearchFailedMsg"));
             }
         }, 300);
     };
 
     const handleGenerateSchema = async () => {
         if (!aiPrompt.trim()) {
-            message.warning("생성할 양식에 대한 설명을 입력해주세요.");
+            message.warning(t("forms.write.aiPromptRequired"));
             return;
         }
 
@@ -106,13 +108,13 @@ export default function FormWritePage() {
                     form.setFieldsValue({forTitle: parsed.title});
                 }
 
-                message.success("AI 스키마가 생성되었습니다. \n필드를 확인/수정한 뒤 등록해주세요.")
+                message.success(t("forms.write.aiSuccessMsg"))
             }
             else {
-                message.error(res.message || "AI 양식 생성에 실패했습니다.")
+                message.error(res.message || t("forms.write.aiFailedMsg"))
             }
         } catch (e) {
-            message.error("AI 양식 생성 중 오류가 발생했습니다.")
+            message.error(t("forms.write.aiErrorMsg"))
         } finally {
             setAiLoading(false);
         }
@@ -122,29 +124,29 @@ export default function FormWritePage() {
         const forCode = form.getFieldValue("forCode");
         const comId = form.getFieldValue("comId");
         if (!forCode || !comId){
-            message.warning("회사와 양식 코드를 먼저 입력해주세요.");
+            message.warning(t("forms.write.codeCheckRequiredMsg"));
             return;
         }
-        
+
         try {
             const res = await checkCode(forCode, comId, null);
             setCodeStatus(res.available ? "available" : "duplicate");
             if (res.available) {
-                message.success("사용 가능한 코드입니다.")
+                message.success(t("forms.write.codeAvailableMsg"))
             }
             else {
-                message.error("이미 사용 중인 코드입니다.");
+                message.error(t("forms.write.codeUnavailableMsg"));
             }
         } catch (e) {
             setCodeStatus(null);
-            message.error("코드 확인 중 오류 발생");
+            message.error(t("forms.write.codeCheckErrorMsg"));
         }
     };
 
     // 템플릿 주입 - 기존 내용 있을시 확인후 덮어씀
     const handleInjectTemplate = (type) => {
         if (content && content !== "<p><br></p>") {
-            if (!window.confirm("선택한 결재 템플릿을 불러오시겠습니까? 기존 작성 내용은 사라집니다.")) {
+            if (!window.confirm(t("forms.write.templateInjectConfirm"))) {
                 return;
             }
         }
@@ -155,14 +157,14 @@ export default function FormWritePage() {
 
         // 코드 중복확인 안했거나, 확인한 값이 중복(duplicate)일경우 제출 차단
         if (codeStatus !== "available") {
-            message.warning("양식 코드 중복확인을 먼저 진행해주세요.");
+            message.warning(t("forms.write.codeCheckFirstWarning"));
             return;
         }
 
         let payload;
 
         if (contentMode === "ai") {
-            const errorMsg = validateSchemaFields(schemaFields);
+            const errorMsg = validateSchemaFields(schemaFields, t);
             if (errorMsg) {
                 message.error(errorMsg);
                 return;
@@ -175,7 +177,7 @@ export default function FormWritePage() {
         }
         else {
             if (!content.trim() || content === "<p><br></p>") {
-                message.error("양식 내용을 입력해주세요.");
+                message.error(t("forms.write.contentRequired"));
                 return;
             }
             payload = {
@@ -193,17 +195,17 @@ export default function FormWritePage() {
             <div className="sb-page-head">
                 <div className="sb-page-head__txt">
                     <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>전자결재</a>
+                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
                         <i className="bi bi-chevron-right"/>
-                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>양식 관리</a>
+                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>{t("forms.write.breadcrumbForms")}</a>
                         <i className="bi bi-chevron-right"/>
-                        <span>양식 작성</span>
+                        <span>{t("forms.write.breadcrumbCurrent")}</span>
                     </div>
-                    <h1>결재 양식 작성</h1>
-                    <p>새로운 결재 양식을 등록합니다.</p>
+                    <h1>{t("forms.write.title")}</h1>
+                    <p>{t("forms.write.subtitle")}</p>
                 </div>
                 <div className="sb-page-head__actions">
-                    <Button onClick={() => router.push("/appr/forms")}>목록으로</Button>
+                    <Button onClick={() => router.push("/appr/forms")}>{t("common.backToListBtn")}</Button>
                 </div>
             </div>
 

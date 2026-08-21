@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import { Card, Table, Button, Tag, Modal, Form, Input, InputNumber, message, } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 import {
   listPosRequest, createPosRequest, updatePosRequest,
@@ -14,6 +15,7 @@ import {
 export default function PosListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation(["pos", "common"]);
   const [form] = Form.useForm();
 
   // Redux state
@@ -32,7 +34,7 @@ export default function PosListPage() {
   // ─── 페이지 진입 시 목록 조회 ───
   useEffect(() => {
     dispatch(listPosRequest());
-    
+
     return () => {
       dispatch(resetPosState());
       dispatch(clearCodeCheck());
@@ -46,13 +48,13 @@ export default function PosListPage() {
     if (success) {
       if (saving) {
         message.success(
-          formTarget === "add" ? "직급이 등록되었습니다." : "직급이 수정되었습니다."
+          formTarget === "add" ? t("list.addSuccessMsg") : t("list.editSuccessMsg")
         );
         closeFormModal();
         dispatch(listPosRequest()); // 목록 새로고침
       }
       if (deleting) {
-        message.success("직급이 삭제되었습니다.");
+        message.success(t("list.deleteSuccessMsg"));
         setDeleteTarget(null);
         setDeleting(false);
       }
@@ -91,7 +93,7 @@ export default function PosListPage() {
   };
 
   const isEditMode = formTarget !== null && formTarget !== "add";
-  const formTitle = isEditMode ? "직급 수정" : "직급 등록";
+  const formTitle = isEditMode ? t("list.editModalTitle") : t("list.addModalTitle");
 
   // 코드 중복검사 (blur 시)
   const handleCodeBlur = (e) => {
@@ -115,9 +117,9 @@ export default function PosListPage() {
   // 중복검사 결과에 따른 도움말
   const codeHelp =
     codeCheck === true
-      ? { validateStatus: "error", help: "이미 사용 중인 코드입니다." }
+      ? { validateStatus: "error", help: t("list.codeUnavailable") }
       : codeCheck === false
-        ? { validateStatus: "success", help: "사용 가능한 코드입니다." }
+        ? { validateStatus: "success", help: t("list.codeAvailable") }
         : {};
 
   // 폼 제출
@@ -127,7 +129,7 @@ export default function PosListPage() {
 
       // 중복 코드 차단
       if (codeCheck === true) {
-        message.warning("중복된 직급 코드입니다. 다른 코드를 입력하세요.");
+        message.warning(t("list.duplicateWarning"));
         return;
       }
 
@@ -151,27 +153,27 @@ export default function PosListPage() {
   // ─── 테이블 컬럼 ───
   const columns = [
     {
-      title: "순서",
+      title: t("list.table.order"),
       dataIndex: "posOrder",
       key: "posOrder",
       width: 80,
       align: "center",
     },
     {
-      title: "코드",
+      title: t("list.table.code"),
       dataIndex: "posCode",
       key: "posCode",
       width: 180,
       render: (code) => <Tag>{code}</Tag>,
     },
     {
-      title: "직급명",
+      title: t("list.table.name"),
       dataIndex: "posName",
       key: "posName",
       render: (name) => <span style={{ fontWeight: 600 }}>{name}</span>,
     },
     {
-      title: "관리",
+      title: t("list.table.actions"),
       key: "actions",
       width: 120,
       align: "center",
@@ -181,7 +183,7 @@ export default function PosListPage() {
             type="text"
             size="small"
             icon={<EditOutlined />}
-            title="수정"
+            title={t("common:button.edit")}
             onClick={() => openEditModal(record)}
           />
           <Button
@@ -189,7 +191,7 @@ export default function PosListPage() {
             size="small"
             danger
             icon={<DeleteOutlined />}
-            title="삭제"
+            title={t("common:button.delete")}
             onClick={() => setDeleteTarget(record)}
           />
         </div>
@@ -211,17 +213,16 @@ export default function PosListPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            조직 관리 &gt; 직급 관리 &gt; 목록
+            {t("list.breadcrumbOrg")} &gt; {t("list.breadcrumbCurrent")} &gt; {t("common:button.list")}
           </div>
-          <h1>직급 관리</h1>
+          <h1>{t("list.title")}</h1>
           <p>
-            회사별 직급을 등록·수정·삭제합니다. 직급은 사원 등록·수정 시 선택
-            항목으로 사용됩니다.
+            {t("list.subtitle")}
           </p>
         </div>
         <div className="sb-page-head__actions">
           <Button type="primary" icon={<PlusOutlined />} onClick={openAddModal}>
-            직급 등록
+            {t("list.addBtn")}
           </Button>
         </div>
       </div>
@@ -234,14 +235,13 @@ export default function PosListPage() {
           dataSource={posList}
           loading={loading && !saving && !deleting}
           pagination={false}
-          locale={{ emptyText: "등록된 직급이 없습니다." }}
+          locale={{ emptyText: t("list.emptyMsg") }}
         />
       </Card>
 
       {/* 안내 문구 */}
       <div style={{ marginTop: 12, color: "#999", fontSize: 13 }}>
-        ℹ 직급 삭제는 해당 직급을 사용 중인 사원이 없을 때만 가능합니다. 먼저
-        사원의 직급을 다른 직급으로 변경한 후 삭제하세요.
+        {t("list.deleteHint")}
       </div>
 
       {/* ── 등록/수정 모달 ── */}
@@ -250,21 +250,21 @@ export default function PosListPage() {
         open={formTarget !== null}
         onCancel={closeFormModal}
         onOk={handleSubmit}
-        okText={isEditMode ? "수정" : "등록"}
+        okText={isEditMode ? t("common:button.edit") : t("common:button.add")}
         okButtonProps={{ loading: saving, disabled: codeCheck === true }}
-        cancelText="취소"
+        cancelText={t("common:button.cancel")}
         destroyOnClose
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="posCode"
-            label="직급 코드"
-            rules={[{ required: true, message: "직급 코드를 입력하세요." }]}
-            extra="회사 내에서 중복되지 않는 짧은 식별 코드입니다."
+            label={t("list.codeLabel")}
+            rules={[{ required: true, message: t("list.codeRequired") }]}
+            extra={t("list.codeExtra")}
             {...codeHelp}
           >
             <Input
-              placeholder="예: MGR"
+              placeholder={t("list.codePlaceholder")}
               maxLength={20}
               onBlur={handleCodeBlur}
             />
@@ -272,20 +272,20 @@ export default function PosListPage() {
 
           <Form.Item
             name="posName"
-            label="직급명"
-            rules={[{ required: true, message: "직급명을 입력하세요." }]}
+            label={t("list.nameLabel")}
+            rules={[{ required: true, message: t("list.nameRequired") }]}
           >
-            <Input placeholder="예: 부장" maxLength={50} />
+            <Input placeholder={t("list.namePlaceholder")} maxLength={50} />
           </Form.Item>
 
           <Form.Item
             name="posOrder"
-            label="순서"
-            rules={[{ required: true, message: "순서를 입력하세요." }]}
-            extra="직급 목록에서 표시 순서(오름차순)."
+            label={t("list.orderLabel")}
+            rules={[{ required: true, message: t("list.orderRequired") }]}
+            extra={t("list.orderExtra")}
           >
             <InputNumber
-              placeholder="숫자가 작을수록 상위"
+              placeholder={t("list.orderPlaceholder")}
               min={1}
               style={{ width: "100%" }}
             />
@@ -295,20 +295,20 @@ export default function PosListPage() {
 
       {/* ── 삭제 확인 모달 ── */}
       <Modal
-        title="직급 삭제"
+        title={t("list.deleteModalTitle")}
         open={!!deleteTarget}
         onCancel={() => setDeleteTarget(null)}
         onOk={confirmDelete}
-        okText="삭제"
+        okText={t("common:button.delete")}
         okButtonProps={{ danger: true, loading: deleting }}
-        cancelText="취소"
+        cancelText={t("common:button.cancel")}
         destroyOnClose
       >
         <p>
-          정말로 <b>{deleteTarget?.posName}</b> 직급을 삭제하시겠습니까?
+          {t("list.deleteConfirmMsg", { posName: deleteTarget?.posName })}
         </p>
         <p style={{ color: "#999", fontSize: 13 }}>
-          이 직급을 사용 중인 사원이 있으면 삭제할 수 없습니다.
+          {t("list.deleteHint2")}
         </p>
       </Modal>
     </div>

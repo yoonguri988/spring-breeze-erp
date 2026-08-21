@@ -33,14 +33,18 @@ import "../styles/css/resv.css";
 import "../styles/frappe-gantt.css";
 
 const NO_LAYOUT_PREFIXES = ["/auth"];
+// 404/500/_error는 로그인 여부와 무관하게 떠야 하므로 AppLayout(사이드바/헤더) 밖에서 렌더링합니다.
+// (AppLayout은 accessToken이 없으면 /auth/login으로 리다이렉트하므로,
+//  AppLayout 안에 두면 비로그인 사용자가 404를 볼 새도 없이 로그인 페이지로 튕겨 나갑니다.)
+const NO_LAYOUT_EXACT = ["/404", "/500", "/_error"];
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const isBareLayout = NO_LAYOUT_PREFIXES.some((p) =>
-    router.pathname.startsWith(p),
-  );
+  const isBareLayout =
+    NO_LAYOUT_PREFIXES.some((p) => router.pathname.startsWith(p)) ||
+    NO_LAYOUT_EXACT.includes(router.pathname);
 
   useEffect(() => {
     if (isBareLayout) return;

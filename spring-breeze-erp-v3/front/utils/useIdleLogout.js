@@ -11,6 +11,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { message } from "antd";
+import { useTranslation } from "react-i18next";
 import { logoutRequest } from "../reducers/auth/authReducer";
 
 export const IDLE_LIMIT_MS = 30 * 60 * 1000; // 30분
@@ -27,6 +28,7 @@ const ACTIVITY_EVENTS = [
 export default function useIdleLogout(active) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("common");
   const idleTimerRef = useRef(null);
   const warnTimerRef = useRef(null);
   const warnedRef = useRef(false);
@@ -42,7 +44,7 @@ export default function useIdleLogout(active) {
     const doLogout = () => {
       clearTimers();
       dispatch(logoutRequest());
-      message.warning("30분간 활동이 없어 자동으로 로그아웃되었습니다.");
+      message.warning(t("session.idleLogoutMsg"));
       router.replace("/auth/login?reason=idle_timeout");
     };
 
@@ -52,9 +54,7 @@ export default function useIdleLogout(active) {
 
       warnTimerRef.current = setTimeout(() => {
         warnedRef.current = true;
-        message.warning(
-          "1분 후 자동으로 로그아웃됩니다. 계속 이용하시려면 화면을 조작해주세요.",
-        );
+        message.warning(t("session.idleWarningMsg"));
       }, IDLE_LIMIT_MS - WARNING_BEFORE_MS);
 
       idleTimerRef.current = setTimeout(doLogout, IDLE_LIMIT_MS);
