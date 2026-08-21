@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import {
     message, Radio, Form, Input, Select, Switch, Button,
-    Space, Row, Col, Typography
+    Space, Row, Col, Typography, Card
 } from "antd";
 import { BankOutlined, CheckCircleFilled, CloseCircleFilled } from "@ant-design/icons";
 import { insertFormRequest, resetFormState } from "../../../reducers/appr/apprFormReducer";
@@ -191,7 +191,7 @@ export default function FormWritePage() {
     }
 
     return (
-        <div className="sb-page" style={{maxWidth: 760, margin: "0 auto", width: "100%", boxSizing: "border-box"}}>
+        <div className="sb-page" style={{maxWidth: 1100, margin: "0 auto"}}>
             <div className="sb-page-head">
                 <div className="sb-page-head__txt">
                     <div className="sb-breadcrumb">
@@ -214,153 +214,170 @@ export default function FormWritePage() {
                 layout="vertical"
                 onFinish={handleSubmit}
                 initialValues={{forStatus: true}}
+                style={{maxWidth: 760}}
             >
-                <Form.Item
-                    name="comId"
-                    label={t("forms.write.companyLabel")}
-                    rules={[{ required: true, message: t("forms.write.companyRequired")}]}
-                >
-                    <Select
-                        showSearch
-                        placeholder={t("forms.write.companySearchPlaceholder")}
-                        filterOption={false}
-                        suffixIcon={<BankOutlined/>}
-                        onSearch={handleCompanySearch}
-                        options={companyOptions}
-                    />
-                </Form.Item>
+                {/* 1. 기본정보 */}
+                <Card title="기본 정보" style={{marginBottom: 24}}>
+                    <Row gutter={16}>
+                        <Col xs={24} md={12}>
+                            <Form.Item
+                                name="comId"
+                                label="양식을 추가할 회사"
+                                rules={[{ required: true, message: "회사를 선택해주세요."}]}
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder="회사명을 검색하세요."
+                                    filterOption={false}
+                                    suffixIcon={<BankOutlined/>}
+                                    onSearch={handleCompanySearch}
+                                    options={companyOptions}
+                                />
+                            </Form.Item>
+                        </Col>
 
-                <Form.Item label={t("forms.write.codeLabel")} required>
-                    <Input.Group compact style={{display: "flex"}}>
-                        <Form.Item
-                            name="forCode"
-                            noStyle
-                            rules={[{required: true, message: t("forms.write.codeRequired")}]}
-                        >
-                            <Input
-                                style={{flex: 1}}
-                                placeholder={t("forms.write.codePlaceholder")}
-                                status={codeStatus === "duplicate" ? "error" : undefined}
-                                suffix={
-                                    codeStatus === "available" ? (
-                                        <CheckCircleFilled style={{color: "#52c41a"}}/>
-                                    ) : codeStatus === "duplicate" ? (
-                                        <CloseCircleFilled style={{color: "#ff4d4f"}}/>
-                                    ) : null
-                                }
+                        <Col xs={24} md={12}>
+                            <Form.Item label="양식 코드" required>
+                                <Input.Group compact style={{display: "flex"}}>
+                                    <Form.Item
+                                        name="forCode"
+                                        noStyle
+                                        rules={[{required: true, message: "양식 코드를 입력해주세요."}]}
+                                    >
+                                        <Input
+                                            style={{flex: 1}}
+                                            placeholder="ex) TEST-01"
+                                            status={codeStatus === "duplicate" ? "error" : undefined}
+                                            suffix={
+                                                codeStatus === "available" ? (
+                                                    <CheckCircleFilled style={{color: "#52c41a"}}/>
+                                                ) : codeStatus === "duplicate" ? (
+                                                    <CloseCircleFilled style={{color: "#ff4d4f"}}/>
+                                                ) : null
+                                            }
+                                        />
+                                    </Form.Item>
+                                    <Button style={{width: 100}} onClick={handleCodeCheck}>
+                                        중복확인
+                                    </Button>
+                                </Input.Group>
+                                {codeStatus === "available" && (
+                                    <Text
+                                        type="success"
+                                        style={{display: "block", marginTop: 4, fontSize: 13}}
+                                    >
+                                        사용 가능한 양식코드입니다.
+                                    </Text>
+                                )}
+                                {codeStatus === "duplicate" && (
+                                    <Text
+                                        type="danger"
+                                        style={{display: "block", marginTop: 4, fontSize: 13}}
+                                    >
+                                        중복된 양식코드입니다.
+                                    </Text>
+                                )}
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24}>
+                            <Form.Item
+                                name="forTitle"
+                                label="양식 제목"
+                                rules={[{required: true, message: "양식 제목을 입력해주세요."}]}
+                            >
+                                <Input placeholder="ex) 병가신청서" />
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} md={12}>
+                            <Form.Item label="작성 방식">
+                                <Radio.Group
+                                    value={contentMode}
+                                    onChange={(e) => setContentMode(e.target.value)}
+                                    optionType="button"
+                                    buttonStyle="solid"
+                                >
+                                    <Radio.Button value="editor">직접 작성</Radio.Button>
+                                    <Radio.Button value="ai">AI 생성</Radio.Button>
+                                </Radio.Group>
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} md={12}>
+                            <Form.Item
+                                name="forStatus"
+                                label="활성화 여부"
+                                valuePropName="checked"
+                                extra="활성화된 양식만 문서 작성 시 선택 목록에 나타납니다."
+                            >
+                                <Switch />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                </Card>
+
+                {/* 2. 본문 / 스키마 */}
+                <Card title={contentMode === "editor" ? "양식 본문 편집" : "AI 스키마 설정"}>
+                    {contentMode === "editor" ? (
+                        <Form.Item label="양식 내용">
+                            <Space style={{marginBottom: 8}} wrap>
+                                <Text type="secondary" style={{fontSize: 13}}>기본 양식 프레임 주입</Text>
+                                <Button size="small" onClick={() => handleInjectTemplate("leave")}>휴가 신청서</Button>
+                                <Button size="small" onClick={() => handleInjectTemplate("expense")}>지출 결의서</Button>
+                                <Button size="small" onClick={() => handleInjectTemplate("biz")}>일반 기안서</Button>
+                            </Space>
+                            <ReactQuill
+                                theme="snow"
+                                value={content}
+                                onChange={setContent}
+                                // 핸들 영역 겹치는것 방지
+                                style={{height: 320, marginBottom: 48}}
                             />
+                        </Form.Item>    
+                    ) : (<>
+                        <Form.Item label="AI 프롬프트">
+                            <Input.Group compact>
+                                <Input
+                                    style={{width: "calc(100% - 100px)"}}
+                                    placeholder="예: 휴가 신청서"
+                                    value={aiPrompt}
+                                    onChange={(e) => setAiPrompt(e.target.value)}
+                                    onPressEnter={handleGenerateSchema}
+                                />
+                                <Button
+                                    style={{width: 100}}
+                                    loading={aiLoading}
+                                    onClick={handleGenerateSchema}
+                                >
+                                    생성
+                                </Button>
+                            </Input.Group>
                         </Form.Item>
-                        <Button style={{width: 100}} onClick={handleCodeCheck}>
-                            {t("forms.write.codeCheckBtn")}
+                        
+                        {schemaFields.length > 0 && (
+                            <Form.Item label="생성된 필드 구성 (수정 가능)">
+                                <SchemaFieldEditor
+                                    fields={schemaFields}
+                                    onChange={setSchemaFields}
+                                />
+                            </Form.Item>
+                        )}
+
+                    </>
+                    )}
+                    
+                    <div style={{display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 24}}>
+                        <Button onClick={() => router.push("/appr/forms")}>취소</Button>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={submitting}
+                        >
+                            작성
                         </Button>
-                    </Input.Group>
-                    {codeStatus === "available" && (
-                        <Text
-                            type="success"
-                            style={{display: "block", marginTop: 4, fontSize: 13}}
-                        >
-                            {t("forms.write.codeAvailableText")}
-                        </Text>
-                    )}
-                    {codeStatus === "duplicate" && (
-                        <Text
-                            type="danger"
-                            style={{display: "block", marginTop: 4, fontSize: 13}}
-                        >
-                            {t("forms.write.codeDuplicateText")}
-                        </Text>
-                    )}
-                </Form.Item>
-
-                <Form.Item
-                    name="forTitle"
-                    label={t("forms.write.titleLabel")}
-                    rules={[{required: true, message: t("forms.write.titleRequired")}]}
-                >
-                    <Input placeholder={t("forms.write.titlePlaceholder")} />
-                </Form.Item>
-                <Row gutter={24}>
-                    <Col span={12}>
-                        <Form.Item label={t("forms.write.modeLabel")}>
-                            <Radio.Group
-                                value={contentMode}
-                                onChange={(e) => setContentMode(e.target.value)}
-                            >
-                                <Radio.Button value="editor">{t("forms.write.modeEditor")}</Radio.Button>
-                                <Radio.Button value="ai">{t("forms.write.modeAi")}</Radio.Button>
-                            </Radio.Group>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item
-                            name="forStatus"
-                            label={t("forms.write.activeLabel")}
-                            valuePropName="checked"
-                            extra={t("forms.write.activeExtra")}
-                        >
-                            <Switch />
-                        </Form.Item>
-                    </Col>
-                </Row>
-
-                {contentMode === "editor" ? (
-                    <Form.Item label={t("forms.write.contentLabel")}>
-                        <Space style={{marginBottom: 8}} wrap>
-                            <Text type="secondary" style={{fontSize: 13}}>{t("forms.write.templateInjectLabel")}</Text>
-                            <Button size="small" onClick={() => handleInjectTemplate("leave")}>{t("forms.write.templateLeaveBtn")}</Button>
-                            <Button size="small" onClick={() => handleInjectTemplate("expense")}>{t("forms.write.templateExpenseBtn")}</Button>
-                            <Button size="small" onClick={() => handleInjectTemplate("biz")}>{t("forms.write.templateBizBtn")}</Button>
-                        </Space>
-                        <ReactQuill
-                            theme="snow"
-                            value={content}
-                            onChange={setContent}
-                        />
-                    </Form.Item>
-                ) : (<>
-                    <Form.Item label={t("forms.write.aiPromptLabel")}>
-                        <Input.Group compact>
-                            <Input
-                                style={{width: "calc(100% - 100px)"}}
-                                placeholder={t("forms.write.aiPromptPlaceholder")}
-                                value={aiPrompt}
-                                onChange={(e) => setAiPrompt(e.target.value)}
-                            />
-                            <Button
-                                style={{width: 100}}
-                                loading={aiLoading}
-                                onClick={handleGenerateSchema}
-                            >
-                                {t("forms.write.aiGenerateBtn")}
-                            </Button>
-                        </Input.Group>
-                    </Form.Item>
-
-                    {schemaFields.length > 0 && (
-                        <Form.Item label={t("forms.write.schemaFieldsGeneratedLabel")}>
-                            <SchemaFieldEditor
-                                fields={schemaFields}
-                                onChange={setSchemaFields}
-                            />
-                        </Form.Item>
-                    )}
-
-                </>
-            )}
-                <div style={{display: "flex", justifyContent: "flex-end"}}>
-                    <Form.Item>
-                        <Space>
-                            <Button onClick={() => router.push("/appr/forms")}>{t("forms.write.cancelBtn")}</Button>
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                loading={submitting}
-                            >
-                                {t("forms.write.submitBtn")}
-                            </Button>
-                        </Space>
-                    </Form.Item>
-                </div>
+                    </div>
+                </Card>
             </Form>
         </div>
     )
