@@ -21,7 +21,6 @@ public class ApplicantRequest {
     @NotBlank(message = "지원자 이름은 필수입니다.")
 	private String apctName;
 	
-    @NotBlank(message = "이메일은 필수입니다.")
     @Email(message = "이메일 형식이 올바르지 않습니다.")
 	private String apctEmail;
 	

@@ -57,10 +57,10 @@ public interface ApplicantRepository extends JpaRepository<Applicant, Long>{
 	@Query(
 	value="""
 		  SELECT apct.*, r.rec_title AS recTitle,
-		  (SELECT COUNT(*) FROM RESUME rs WHERE r.apct_id = apct.apct_id) AS resumeCnt
+		  (SELECT COUNT(*) FROM RESUME rs WHERE rs.apct_id = apct.apct_id) AS resumeCnt
 		  FROM APPLICANT apct
 		  JOIN RECRUIT r on apct.rec_id=r.rec_id
-		  WHERE apct.apct_id = :apct_id
+		  WHERE apct.apct_id = :apctId
 		  """,
 	nativeQuery=true)
 	Optional<Object[]>findDetailById(@Param("apctId")Long apctId);
@@ -75,5 +75,46 @@ public interface ApplicantRepository extends JpaRepository<Applicant, Long>{
             """,
     nativeQuery = true )
     List<Object[]> countByStatusGrouped(@Param("comId") Long comId);
+    
+    // 공고별 지원자 fit_score 순위 (적합도 높은 순)
+    @Query(
+        value = """
+            SELECT * FROM (
+              SELECT a.*, ROWNUM AS rnum FROM (
+                SELECT apct.*, r.rec_title AS recTitle, rs.rsm_fit_score AS fitScore
+                FROM APPLICANT apct
+                JOIN RECRUIT r ON apct.rec_id = r.rec_id
+                LEFT JOIN RESUME rs ON rs.apct_id = apct.apct_id
+                WHERE apct.rec_id = :recId
+                ORDER BY rs.rsm_fit_score DESC NULLS LAST
+              ) a
+            ) WHERE rnum BETWEEN :start AND :end
+            """,
+        nativeQuery = true
+    )
+    List<Object[]> findByRecIdOrderByFitScore(
+        @Param("recId") Long recId,
+        @Param("start") int start,
+        @Param("end") int end
+    );
+    
+    // 내 지원현황
+    List<Applicant> findByProviderAndProviderId(String provider, String providerId);
+    
+    // 중복 지원 체크
+    boolean existsByRecruit_RecIdAndProviderAndProviderId(Long recId, String provider, String providerId);
+    
+    // 내 지원현황 - 공고명 포함 조회
+    @Query(
+    value="""
+          SELECT apct.*, r.rec_title AS recTitle
+          FROM APPLICANT apct
+          JOIN RECRUIT r ON apct.rec_id = r.rec_id
+          WHERE apct.APCT_PROVIDER = :provider
+          AND apct.APCT_PROVIDER_ID = :providerId
+          ORDER BY apct.apct_id DESC
+          """,
+    nativeQuery=true)
+    List<Object[]> findMyApplications(@Param("provider") String provider, @Param("providerId") String providerId);
 
 }

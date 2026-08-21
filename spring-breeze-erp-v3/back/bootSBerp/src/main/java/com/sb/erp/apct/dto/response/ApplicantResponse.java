@@ -22,6 +22,7 @@ public class ApplicantResponse {
     // 조회(JOIN) 결과 전용 - DB에 없는 컬럼
     private String recTitle;      // 지원한 공고 제목 (목록 화면에서 필요할 수 있음)
     private Integer resumeCnt;    // 첨부된 이력서 수
+    private Long rsmFitScore; 
     
 	public ApplicantResponse(Applicant applicant) {
 		this.apctId = applicant.getApctId();
@@ -37,10 +38,11 @@ public class ApplicantResponse {
 
 	}
 
-	public ApplicantResponse(Applicant applicant,String recTitle, Integer resumeCnt) {
+	public ApplicantResponse(Applicant applicant,String recTitle, Integer resumeCnt,Long rsmFitScore) {
 		this(applicant);
 		this.recTitle = recTitle;
 		this.resumeCnt = resumeCnt;
+		this.rsmFitScore = rsmFitScore;
 	}
     
     

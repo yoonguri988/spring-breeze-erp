@@ -20,6 +20,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +33,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor 
 @Builder
-@Table(name="APPLICANT")
+@Table(name="APPLICANT",uniqueConstraints = @UniqueConstraint( // 한 공고에 중복 지원 불가
+        name = "uq_applicant_provider",
+        columnNames = {"REC_ID", "APCT_PROVIDER", "APCT_PROVIDER_ID"}))
 public class Applicant { // 지원자 등록/관리
 	
 	@Id
@@ -52,7 +55,13 @@ public class Applicant { // 지원자 등록/관리
 	@Column(name="APCT_NAME", nullable = false, length=50)
 	private String apctName;
 	
-	@Column(name="APCT_EMAIL", nullable = false, length=100)
+	@Column(name = "APCT_PROVIDER")
+	private String provider;
+
+	@Column(name = "APCT_PROVIDER_ID")
+	private String providerId;
+	
+	@Column(name="APCT_EMAIL", length=100)
 	private String apctEmail;
 	
 	@Column(name="APCT_PHONE", nullable = false, length=20)
