@@ -1,0 +1,28 @@
+package com.sb.erp.apct.dto.response;
+
+import com.sb.erp.apct.entity.Applicant;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter @NoArgsConstructor
+public class MyApplicationResponse {
+	private Long apctId;
+	private String recTitle;    // 지원한 공고 제목
+	private String apctStatus;
+	private String apctDate;
+
+	public MyApplicationResponse(Applicant applicant, String recTitle) {
+		this.apctId = applicant.getApctId();
+		this.recTitle = recTitle;
+		this.apctStatus = applicant.getApctStatus();
+		this.apctDate = applicant.getApctDate() != null ? applicant.getApctDate().toString() : null;
+	}
+	
+	// native query(Object[]) 매핑용 - 추가
+	public MyApplicationResponse(Long apctId, String recTitle, String apctStatus, String apctDate) {
+		this.apctId = apctId;
+		this.recTitle = recTitle;
+		this.apctStatus = apctStatus;
+		this.apctDate = apctDate;
+	}
+}

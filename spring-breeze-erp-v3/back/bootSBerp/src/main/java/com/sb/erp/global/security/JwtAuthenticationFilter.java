@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sb.erp.apct.oauth2.ApplicantPrincipal;
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
 
 import io.jsonwebtoken.Claims;
@@ -56,7 +57,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(7);
             try {
                 Claims claims = jwtProvider.parse(token).getBody();  
+                String type = claims.get("type", String.class); // "APPLICANT" or null(=사원)
                 // subject  →  empId, comId, empEmail, role
+                
+                if ("APPLICANT".equals(type)) {
+                    String providerId = claims.getSubject();
+                    String provider = claims.get("provider", String.class);
+                    String email = claims.get("email", String.class);
+
+                    ApplicantPrincipal applicantPrincipal =
+                            new ApplicantPrincipal(provider, providerId, email);
+
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(
+                                    applicantPrincipal, null, applicantPrincipal.getAuthorities()
+                            );
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+
+                    logger.debug("[Filter] SecurityContext에 지원자 인증 정보 저장 완료 (providerId=" + providerId + ")");
+
+                } else {
                 Long empId = Long.parseLong(claims.getSubject());
                 Long comId = claims.get("comId", Long.class);
                 String empEmail = claims.get("empEmail", String.class);
@@ -76,6 +96,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                  SecurityContextHolder.getContext().setAuthentication(auth);
  
                  logger.debug("[Filter] SecurityContext에 인증 정보 저장 완료 (empId=" + empId + ")");
+                }
             } catch (ExpiredJwtException e) {
             	// 정상적으로 발생할 수 있는 상황(accessToken 만료) → 스택트레이스 없이 debug 로그만
             	logger.debug("[Filter] accessToken 만료: " + e.getMessage());
