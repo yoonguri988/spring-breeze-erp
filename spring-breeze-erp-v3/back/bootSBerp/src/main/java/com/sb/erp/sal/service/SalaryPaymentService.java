@@ -1,7 +1,9 @@
 package com.sb.erp.sal.service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +17,10 @@ import com.sb.erp.emp.entity.Employee;
 import com.sb.erp.emp.repository.EmpRepository;
 import com.sb.erp.global.exception.ResourceNotFoundException;
 import com.sb.erp.global.security.ActorContext;
+import com.sb.erp.sal.calc.SalPayItemCandidate;
+import com.sb.erp.sal.calc.SalaryCalculationService;
 import com.sb.erp.sal.dto.request.SalaryPaymentCreateRequest;
+import com.sb.erp.sal.dto.request.SalaryPaymentItemAdjustRequest;
 import com.sb.erp.sal.dto.request.SalaryPaymentItemRequest;
 import com.sb.erp.sal.dto.request.SalaryPaymentStatusChangeRequest;
 import com.sb.erp.sal.dto.request.SalaryPaymentUpdateRequest;
@@ -29,6 +34,7 @@ import com.sb.erp.sal.entity.type.ChangeType;
 import com.sb.erp.sal.entity.type.PaymentItemType;
 import com.sb.erp.sal.entity.type.PaymentStatus;
 import com.sb.erp.sal.repository.SalaryAccountRepository;
+import com.sb.erp.sal.repository.SalaryPaymentItemRepository;
 import com.sb.erp.sal.repository.SalaryPaymentRepository;
 import com.sb.erp.sal.repository.SalaryStandardRepository;
 import com.sb.erp.sal.repository.spec.SalaryPaymentSpecs;
@@ -41,14 +47,19 @@ import lombok.RequiredArgsConstructor;
 public class SalaryPaymentService {
 
     private final SalaryPaymentRepository salaryPaymentRepository;
+    private final SalaryPaymentItemRepository salaryPaymentItemRepository;
     private final SalaryStandardRepository salaryStandardRepository;
     private final SalaryAccountRepository salaryAccountRepository;
+    
+    private final SalaryCalculationService salaryCalculationService;
     private final SalaryChangeHistoryService salaryChangeHistoryService;
 
     private final EmpRepository employeeRepository;
     private final ObjectMapper objectMapper;
 
     // 급여 등록 (산정)
+    // 2026-08-20: 관리자가 items(수당/공제 금액)를 직접 입력하던 방식에서, 급여 산정 엔진(SalaryCalculationService)이
+    // 급여기준/직책/정책 테이블을 근거로 자동 산정하는 방식으로 변경(salary-calculation-engine-design.md 참고).
     @Transactional
     public SalaryPaymentResponse register(SalaryPaymentCreateRequest request, ActorContext actor) {
         Employee employee = employeeRepository.findById(request.getEmpId())
@@ -67,30 +78,39 @@ public class SalaryPaymentService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "급여 수령 계좌가 등록되지 않았습니다. 계좌를 먼저 등록해주세요. empId=" + employee.getEmpId()));
 
-        Long allowTotal = sumByType(request.getItems(), PaymentItemType.ALLOWANCE);
-        Long dedtTotal = sumByType(request.getItems(), PaymentItemType.DEDUCTION);
+        LocalDate normalizedPayMonth = request.getPayMonth().withDayOfMonth(1);
+        List<SalPayItemCandidate> candidates =
+                salaryCalculationService.calculate(standard, employee, YearMonth.from(normalizedPayMonth));
+
+        Long allowTotal = sumCandidatesByType(candidates, PaymentItemType.ALLOWANCE);
+        Long dedtTotal = sumCandidatesByType(candidates, PaymentItemType.DEDUCTION);
         Long netPay = standard.getBaseSal() + allowTotal - dedtTotal;
 
         SalPay payment = SalPay.builder()
                 .employee(employee)
                 .salStd(standard)
-                .payMonth(request.getPayMonth().withDayOfMonth(1))
+                .payMonth(normalizedPayMonth)
                 .baseSal(standard.getBaseSal())
                 .allowTotal(allowTotal)
                 .dedtTotal(dedtTotal)
                 .netPay(netPay)
-                .stat(PaymentStatus.PENDING)
+                .stat(PaymentStatus.PENDING) // "산정 대기" - 관리자 확인/조정 전까지는 대기 상태
                 .bankName(account.getBankName())
                 .acctNo(account.getAcctNo())
                 .hldrName(account.getHldrName())
                 .build();
 
-        request.getItems().forEach(itemRequest -> payment.addItem(toItemEntity(itemRequest)));
+        candidates.forEach(candidate -> payment.addItem(toItemEntity(candidate)));
 
         SalPay saved = salaryPaymentRepository.save(payment);
 
+        String calcSummary = candidates.stream()
+                .map(c -> c.getItemCode() + "=" + c.getAmt() + "원(" + c.getCalcBasis() + ")")
+                .collect(Collectors.joining(" | "));
+
         salaryChangeHistoryService.record(actor.empId(), employee.getEmpId(), targetComId,
-                ChangeDomainType.SALARY_PAYMENT, saved.getPayId(), ChangeType.CREATE, null, toJson(saved), "급여 산정 등록");
+                ChangeDomainType.SALARY_PAYMENT, saved.getPayId(), ChangeType.CREATE, null, toJson(saved),
+                "급여 산정 엔진 자동 산정 결과 등록. " + calcSummary);
 
         return SalaryPaymentResponse.from(saved);
     }
@@ -113,7 +133,9 @@ public class SalaryPaymentService {
     }
 
     // 급여 수정 (대기 상태)
-    // 수당/공제 세부 금액 수정
+    // 수당/공제 세부 금액을 관리자가 일괄 재입력하는 기존 방식(전체 교체). 급여 산정 엔진 도입 이후에도
+    // 관리자의 예외적인 전체 재계산/교체 용도로 유지한다. 개별 항목만 사유와 함께 조정하려면
+    // adjustItem()(PATCH /api/salpay/{id}/items/{itemId})을 사용한다.
     @Transactional
     public SalaryPaymentResponse update(Long id, SalaryPaymentUpdateRequest request, ActorContext actor) {
         SalPay payment = salaryPaymentRepository.findById(id)
@@ -139,7 +161,47 @@ public class SalaryPaymentService {
 
         salaryChangeHistoryService.record(actor.empId(), payment.getEmployee().getEmpId(), targetComId,
                 ChangeDomainType.SALARY_PAYMENT, payment.getPayId(), ChangeType.UPDATE, beforeSnapshot, toJson(payment),
-                "급여 항목(수당/공제) 수정");
+                "급여 항목(수당/공제) 전체 재입력");
+
+        return SalaryPaymentResponse.from(payment);
+    }
+
+    // 급여 산정 결과 개별 항목 수동 조정 (대기 상태에서만 허용, 사유 필수)
+    // salary-calculation-engine-design.md "관리자 수동 조정 정책" 참고
+    @Transactional
+    public SalaryPaymentResponse adjustItem(Long payId, Long itemId, SalaryPaymentItemAdjustRequest request,
+                                             ActorContext actor) {
+        SalPay payment = salaryPaymentRepository.findById(payId)
+                .orElseThrow(() -> new ResourceNotFoundException("급여 지급 내역을 찾을 수 없습니다. id=" + payId));
+
+        Long targetComId = payment.getEmployee().getCompany().getComId();
+        if (!actor.canAccessCompany(targetComId)) {
+            throw new AccessDeniedException("다른 회사 소속 직원의 급여는 조정할 수 없습니다.");
+        }
+
+        if (!payment.isEditable()) {
+            throw new IllegalStateException("대기 상태의 급여 항목만 수동 조정할 수 있습니다.");
+        }
+
+        SalPayItem item = salaryPaymentItemRepository.findById(itemId)
+                .orElseThrow(() -> new ResourceNotFoundException("급여 항목을 찾을 수 없습니다. itemId=" + itemId));
+
+        if (!item.getSalPay().getPayId().equals(payId)) {
+            throw new IllegalArgumentException("해당 급여 지급 건에 속하지 않는 항목입니다. itemId=" + itemId);
+        }
+
+        Long beforeAmt = item.getAmt();
+        item.setAmt(request.getAmt());
+
+        Long allowTotal = sumItemsByType(payment.getItems(), PaymentItemType.ALLOWANCE);
+        Long dedtTotal = sumItemsByType(payment.getItems(), PaymentItemType.DEDUCTION);
+        payment.updateAmounts(payment.getBaseSal(), allowTotal, dedtTotal);
+
+        salaryChangeHistoryService.record(actor.empId(), payment.getEmployee().getEmpId(), targetComId,
+                ChangeDomainType.SALARY_PAYMENT, payment.getPayId(), ChangeType.MANUAL_ADJUST, String.valueOf(beforeAmt),
+                String.valueOf(request.getAmt()),
+                item.getItemCode() + " 자동 산정값 " + beforeAmt + "원 -> 관리자 조정값 " + request.getAmt() + "원, 사유: "
+                        + request.getReason());
 
         return SalaryPaymentResponse.from(payment);
     }
@@ -211,10 +273,31 @@ public class SalaryPaymentService {
                 .reduce(0L, Long::sum);
     }
 
+    private Long sumCandidatesByType(List<SalPayItemCandidate> candidates, PaymentItemType type) {
+        return candidates.stream()
+                .filter(c -> c.getItemCode().getItemType() == type)
+                .map(SalPayItemCandidate::getAmt)
+                .reduce(0L, Long::sum);
+    }
+
+    private Long sumItemsByType(List<SalPayItem> items, PaymentItemType type) {
+        return items.stream()
+                .filter(i -> i.getItemType() == type)
+                .map(SalPayItem::getAmt)
+                .reduce(0L, Long::sum);
+    }
+
     private SalPayItem toItemEntity(SalaryPaymentItemRequest request) {
         return SalPayItem.builder()
                 .itemCode(request.getItemCode())
                 .amt(request.getAmt())
+                .build();
+    }
+
+    private SalPayItem toItemEntity(SalPayItemCandidate candidate) {
+        return SalPayItem.builder()
+                .itemCode(candidate.getItemCode())
+                .amt(candidate.getAmt())
                 .build();
     }
 

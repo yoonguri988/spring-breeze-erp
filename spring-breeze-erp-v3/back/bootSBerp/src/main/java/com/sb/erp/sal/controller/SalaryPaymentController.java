@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sb.erp.auth.service.AuthUserJwtService;
 import com.sb.erp.global.security.ActorContext;
 import com.sb.erp.sal.dto.request.SalaryPaymentCreateRequest;
+import com.sb.erp.sal.dto.request.SalaryPaymentItemAdjustRequest;
 import com.sb.erp.sal.dto.request.SalaryPaymentStatusChangeRequest;
 import com.sb.erp.sal.dto.request.SalaryPaymentUpdateRequest;
 import com.sb.erp.sal.dto.response.SalaryItemCodeResponse;
@@ -90,6 +91,18 @@ public class SalaryPaymentController {
                                                           @Valid @RequestBody SalaryPaymentUpdateRequest request,
                                                           Authentication authentication) {
         SalaryPaymentResponse response = salaryPaymentService.update(id, request, actor(authentication));
+        return ResponseEntity.ok(response);
+    }
+
+    /** 7-4-1 급여 산정 결과 개별 항목 수동 조정 (급여 산정 엔진 도입, 2026-08-20) */
+    @Operation(summary = "급여 산정 결과 개별 항목 수동 조정 (대기 상태 건만 가능, 사유 필수)")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PatchMapping("/{payId}/items/{itemId}")
+    public ResponseEntity<SalaryPaymentResponse> adjustItem(@PathVariable Long payId,
+                                                              @PathVariable Long itemId,
+                                                              @Valid @RequestBody SalaryPaymentItemAdjustRequest request,
+                                                              Authentication authentication) {
+        SalaryPaymentResponse response = salaryPaymentService.adjustItem(payId, itemId, request, actor(authentication));
         return ResponseEntity.ok(response);
     }
 
