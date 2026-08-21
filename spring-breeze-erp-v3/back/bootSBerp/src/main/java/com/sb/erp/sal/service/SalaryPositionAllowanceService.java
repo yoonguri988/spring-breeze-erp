@@ -27,20 +27,22 @@ public class SalaryPositionAllowanceService {
 
     @Transactional
     public SalaryPositionAllowanceResponse register(SalaryPositionAllowanceCreateRequest request, ActorContext actor) {
-        if (!actor.canAccessCompany(request.getCom_id())) {
+        if (!actor.canAccessCompany(request.getComId())) {
             throw new AccessDeniedException("다른 회사의 직책수당 정책은 등록할 수 없습니다.");
         }
 
         // 동일 com_id+pos 조합 중 기존에 유효 중이던 정책은 신규 정책 시작일 전날짜로 종료 처리(이력 보존)
         salaryPositionAllowanceRepository
-                .findByComIdAndPosAndEffToIsNull(request.getCom_id(), request.getPos())
-                .ifPresent(prev -> prev.closeAsHistory(request.getEff_from().minusDays(1)));
+                .findByComIdAndPosAndEffToIsNull(request.getComId(), request.getPos())
+                .ifPresent(prev -> prev.closeAsHistory(request.getEffFrom().minusDays(1)));
 
+        salaryPositionAllowanceRepository.flush();
+        
         SalPosAlw entity = SalPosAlw.builder()
                 .pos(request.getPos())
-                .comId(request.getCom_id())
+                .comId(request.getComId())
                 .amt(request.getAmt())
-                .effFrom(request.getEff_from())
+                .effFrom(request.getEffFrom())
                 .build();
 
         SalPosAlw saved = salaryPositionAllowanceRepository.save(entity);
@@ -48,14 +50,10 @@ public class SalaryPositionAllowanceService {
     }
 
     public List<SalaryPositionAllowanceResponse> findAll(Long comId, ActorContext actor) {
-        Long targetComId = actor.root() ? comId : actor.comId();
-        if (targetComId == null) {
-            throw new AccessDeniedException("조회할 회사(com_id)를 지정해야 합니다.");
-        }
-        if (!actor.canAccessCompany(targetComId)) {
+        if (!actor.canAccessCompany(comId)) {
             throw new AccessDeniedException("다른 회사의 직책수당 정책은 조회할 수 없습니다.");
         }
-        return salaryPositionAllowanceRepository.findAllByComIdOrderByPosAscEffFromDesc(targetComId).stream()
+        return salaryPositionAllowanceRepository.findAllByComIdOrderByPosAscEffFromDesc(comId).stream()
                 .map(SalaryPositionAllowanceResponse::from)
                 .toList();
     }

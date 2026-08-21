@@ -57,9 +57,9 @@ public class SalaryStandardController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<Page<SalaryStandardResponse>> findAll(
-    		@Parameter(description = "사원 이름", example = "132", required = false) @RequestParam(value="empName", required = false) String empName,
-    		@Parameter(description = "부서명", example = "132", required = false) @RequestParam(value="department", required = false) String department,
-    		@Parameter(description = "직급명", example = "132", required = false) @RequestParam(value="position", required = false) String position,
+    		@Parameter(description = "사원 이름", example = "", required = false) @RequestParam(value="empName", required = false) String empName,
+    		@Parameter(description = "부서명", example = "", required = false) @RequestParam(value="department", required = false) String department,
+    		@Parameter(description = "직급명", example = "", required = false) @RequestParam(value="position", required = false) String position,
     		@Parameter(hidden = true) Authentication authentication,
     		@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(salaryStandardService.findAll(empName, department, position, actor(authentication), pageable));
@@ -69,7 +69,7 @@ public class SalaryStandardController {
     @Operation(summary = "본인 급여기준 조회")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
-    public ResponseEntity<SalaryStandardResponse> findMyCurrent(Authentication authentication) {
+    public ResponseEntity<SalaryStandardResponse> findMyCurrent(@Parameter(hidden = true) Authentication authentication) {
         return ResponseEntity.ok(salaryStandardService.findMyCurrent(authUserJwtService.getCurrentEmpId(authentication)));
     }
 

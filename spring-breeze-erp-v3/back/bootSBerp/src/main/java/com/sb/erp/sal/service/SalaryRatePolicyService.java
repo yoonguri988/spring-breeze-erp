@@ -29,15 +29,18 @@ public class SalaryRatePolicyService {
     public SalaryRatePolicyResponse register(SalaryRatePolicyCreateRequest request) {
         // 기존에 유효 중이던(eff_to가 NULL인) 정책이 있다면 신규 정책 시작일 전날짜로 종료 처리(이력 보존)
         salaryRatePolicyRepository.findByEffToIsNull()
-                .ifPresent(prev -> prev.closeAsHistory(request.getEff_from().minusDays(1)));
-
+                .ifPresent(prev -> prev.closeAsHistory(request.getEffFrom().minusDays(1)));
+        
+        // 변경된 UPDATE 쿼리를 DB에 즉시 강제 반영
+        salaryRatePolicyRepository.flush();
+        
         SalRatePlcy entity = SalRatePlcy.builder()
-                .plcyYear(request.getPlcy_year())
-                .pensRate(request.getPens_rate())
-                .hlthRate(request.getHlth_rate())
-                .careRate(request.getCare_rate())
-                .emplRate(request.getEmpl_rate())
-                .effFrom(request.getEff_from())
+                .plcyYear(request.getPlcyYear())
+                .pensRate(request.getPensRate())
+                .hlthRate(request.getHlthRate())
+                .careRate(request.getCareRate())
+                .emplRate(request.getEmplRate())
+                .effFrom(request.getEffFrom())
                 .build();
 
         SalRatePlcy saved = salaryRatePolicyRepository.save(entity);

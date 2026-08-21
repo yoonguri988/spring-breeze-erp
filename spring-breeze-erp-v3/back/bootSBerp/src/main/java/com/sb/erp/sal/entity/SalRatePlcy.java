@@ -63,8 +63,8 @@ public class SalRatePlcy {
     @Column(name = "eff_to")
     private LocalDate effTo; // NULL = 현재 유효
 
-    @Column(name = "creat_at", nullable = false, insertable = false)
-    private LocalDateTime creatAt;
+    @Column(name = "created_at", nullable = false, insertable = false)
+    private LocalDateTime createdAt;
 
     /** 새 요율 정책이 등록될 때 기존 유효 정책을 이력으로 종료 처리한다(SalStd와 동일한 버저닝 패턴). */
     public void closeAsHistory(LocalDate endDate) {

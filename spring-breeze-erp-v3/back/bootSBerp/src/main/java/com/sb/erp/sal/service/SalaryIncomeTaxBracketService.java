@@ -26,10 +26,10 @@ public class SalaryIncomeTaxBracketService {
     @Transactional
     public SalaryIncomeTaxBracketResponse register(SalaryIncomeTaxBracketCreateRequest request) {
         SalIncTaxBrkt entity = SalIncTaxBrkt.builder()
-                .minAmt(request.getMin_amt())
-                .maxAmt(request.getMax_amt())
-                .taxRate(request.getTax_rate())
-                .effFrom(request.getEff_from())
+                .minAmt(request.getMinAmt())
+                .maxAmt(request.getMaxAmt())
+                .taxRate(request.getTaxRate())
+                .effFrom(request.getEffFrom())
                 .build();
 
         SalIncTaxBrkt saved = salaryIncomeTaxBracketRepository.save(entity);
