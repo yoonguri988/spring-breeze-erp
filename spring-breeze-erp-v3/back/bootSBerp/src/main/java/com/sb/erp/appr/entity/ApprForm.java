@@ -67,5 +67,8 @@ public class ApprForm {
 	@Column(name = "updated_at", nullable = false, insertable = false)
 	private LocalDateTime updatedAt;
 	
+	@Column(name = "for_category", nullable = false, length = 20)
+	@Builder.Default
+	private String forCategory = "GENERAL";
 }
 		  

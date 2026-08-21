@@ -6,8 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
     message, Form, Input, Select, Switch,
     Button, Descriptions, Tag, Space,
-    Popconfirm, Row, Col, Breadcrumb,
-    Typography
+    Popconfirm, Row, Col
  } from "antd";
 import {
     fetchFormDetailRequest,
@@ -25,8 +24,6 @@ import { BankOutlined } from "@ant-design/icons";
 // {ssr: false} -> 서버 렌더링 단계에서는 해당 컴포넌트를 렌더링에서 제외함
 const ReactQuill = dynamic( () => import("react-quill"), {ssr: false});
 import "react-quill/dist/quill.snow.css";
-
-const { Title, Text } = Typography;
 
 export default function FormDetailPage() {
 
@@ -197,31 +194,29 @@ export default function FormDetailPage() {
 
     // 로딩중 안내
     if (detailLoading || !detail) {
-        return <div style={{padding: 24}}>{t("common.loadingMsg")}</div>;
+        return <div className="sb-page">불러오는 중..</div>;
     }
 
     // 오류 안내
     if (detailError) {
-        return <div style={{padding: 24}}>{detailError}</div>;
+        return <div className="sb-page">{detailError}</div>;
     }
 
     return(    
-        <div style={{padding: 24, maxWidth: 720}}>
-            <Breadcrumb>
-                <Breadcrumb.Item
-                    onClick={() => router.push("/appr/forms")}
-                    style={{cursor: "pointer"}}
-                >{t("common.breadcrumbRoot")}</Breadcrumb.Item>
-                <Breadcrumb.Item
-                    onClick={() => router.push("/appr/forms")}
-                    style={{cursor: "pointer"}}
-                >{t("forms.detail.breadcrumbForms")}</Breadcrumb.Item>
-                <Breadcrumb.Item>{t("forms.detail.breadcrumbCurrent")}</Breadcrumb.Item>
-            </Breadcrumb>
+        <div className="sb-page">
+            <div className="sb-page-head">
+                <div className="sb-page-head__txt">
+                    <div className="sb-breadcrumb">
+                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>전자결재</a>
+                        <i className="bi bi-chevron-right"/>
+                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>양식 관리</a>
+                        <i className="bi bi-chevron-right"/>
+                        <span>양식 상세</span>
+                    </div>
+                    <h1>결재 양식 상세조회</h1>
+                    <p>결재 양식의 상세 정보를 확인합니다.</p>
+                </div>
 
-            <div style={{marginBottom: 20}}>
-                <Title level={3} style={{marginBottom: 4}}>{t("forms.detail.title")}</Title>
-                <Text type="secondary">{t("forms.detail.subtitle")}</Text>
             </div>
             
             <Row gutter={[24, 16]}>
