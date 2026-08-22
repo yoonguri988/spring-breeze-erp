@@ -257,6 +257,15 @@ EXCEPTION
 END;
 /
 
+CREATE TRIGGER trg_sal_meal_alw_plcy_ins
+BEFORE INSERT ON sal_meal_alw_plcy
+FOR EACH ROW
+BEGIN
+    :NEW.created_at := SYSDATE;
+END;
+/
+
+
 -- 닫힌 행(eff_to 존재)은 표현식 자체가 NULL -> 인덱스에서 완전히 제외
 -- 열린 행(eff_to IS NULL)만 com_id 기준으로 유니크 체크
 CREATE UNIQUE INDEX ux_sal_meal_alw_plcy_open
