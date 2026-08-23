@@ -39,9 +39,9 @@ public class SalaryAccountService {
     // 급여 수령 계좌 등록
     // 직원당 1건, 이미 있으면 등록 불가
     @Transactional
-    public SalaryAccountResponse register(SalaryAccountCreateRequest request, ActorContext actor) {
-        Employee employee = empRepo.findById(request.getEmpId())
-                .orElseThrow(() -> new ResourceNotFoundException("직원 정보를 찾을 수 없습니다. empId=" + request.getEmpId()));
+    public SalaryAccountResponse register(Long empId, SalaryAccountCreateRequest request, ActorContext actor) {
+        Employee employee = empRepo.findById(empId)
+                .orElseThrow(() -> new ResourceNotFoundException("직원 정보를 찾을 수 없습니다. empId=" + empId));
 
         Long targetComId = employee.getCompany().getComId();
         if (!actor.canAccessCompany(targetComId)) {
