@@ -23,6 +23,12 @@ import taskSaga from "./task/taskSaga";
 import noticeSaga from "./notice/noticeSaga";
 import weekSaga from "./week/weekSaga";
 import loginHistorySaga from "./auth/loginHistorySaga";
+// 급여 관련 사가
+import salStdSaga from "./sal/salStdSaga";
+import salPaySaga from "./sal/salPaySaga";
+import salAcctSaga from "./sal/salAcctSaga";
+import salHistSaga from "./sal/salHistSaga";
+import salPolicySaga from "./sal/salPolicySaga";
 
 export default function* rootSaga() {
   yield all([
@@ -48,5 +54,11 @@ export default function* rootSaga() {
     fork(noticeSaga),
     fork(weekSaga),
     fork(loginHistorySaga),
+    // 급여 관련 사가
+    fork(salStdSaga),
+    fork(salPaySaga),
+    fork(salAcctSaga),
+    fork(salHistSaga),
+    fork(salPolicySaga),
   ]);
 }
