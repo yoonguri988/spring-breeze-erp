@@ -36,4 +36,11 @@ public class ApplicantController {
     public ResponseEntity<List<MyApplicationResponse>> getMyApplications(Authentication authentication) {
         return ResponseEntity.ok(applicantService.getMyApplications(authentication));
     }
+    
+    // 지원 취소 - 소셜로그인 필요, 본인 것만
+    @DeleteMapping("/{apctId}")
+    public ResponseEntity<Void> cancel(@PathVariable Long apctId, Authentication authentication) {
+        applicantService.cancel(apctId, authentication);
+        return ResponseEntity.noContent().build();
+    }
 }
