@@ -288,17 +288,15 @@ export default function Sidebar() {
 
       {isAuthenticated && (
         <div className="sb-sidebar__foot">
-          <div className="sb-userchip">
-            <div className="sb-avatar">{user?.empName?.[0]}</div>
-            <div className="sb-userchip__meta">
-              <b>{user?.empName}</b>
-              <span>{user?.posName}</span>
+          <Link href={`/emp/detail?empId=${user?.empId}`} passHref>
+            <div className="sb-userchip">
+              <div className="sb-avatar">{user?.empName?.[0]}</div>
+              <div className="sb-userchip__meta">
+                <b>{user?.empName}</b>
+                <span>{user?.posName}</span>
+              </div>
             </div>
-            <i
-              className="bi bi-chevron-expand ms-auto sb-nav__label"
-              style={{ color: "var(--sb-ink-faint)", fontSize: 14 }}
-            />
-          </div>
+          </Link>
         </div>
       )}
     </>
