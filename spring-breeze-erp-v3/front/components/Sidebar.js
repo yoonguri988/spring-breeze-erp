@@ -31,36 +31,43 @@ const NAV = [
       {
         page: "salstdlist",
         label: "급여기준 관리",
-        href: "/sal/std/list",
+        href: "/sal/std",
         icon: "bi-card-checklist",
         role: "ROLE_ADMIN",
       },
       {
         page: "salpaylist",
         label: "급여지급 관리",
-        href: "/sal/pay/list",
+        href: "/sal/pay",
         icon: "bi-cash-coin",
         role: "ROLE_ADMIN",
       },
       {
         page: "salacctadmin",
         label: "수령계좌 조회",
-        href: "/sal/acct/admin",
+        href: "/sal/acct-admin",
         icon: "bi-bank",
         role: "ROLE_ADMIN",
       },
       {
         page: "salhistlist",
         label: "급여 변경이력",
-        href: "/sal/hist/list",
+        href: "/sal/hist",
         icon: "bi-clock-history",
         role: "ROLE_ADMIN",
       },
       {
         page: "salpolicylist",
         label: "급여계산 정책관리",
-        href: "/sal/policy/list",
+        href: "/sal/policy",
         icon: "bi-sliders2",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salaidocadmin",
+        label: "AI Q&A 근거 문서 관리",
+        href: "/sal/aidoc-admin",
+        icon: "bi-file-earmark-pdf",
         role: "ROLE_ADMIN",
       },
     ],
@@ -290,10 +297,12 @@ export default function Sidebar() {
             {group.items
               .filter((it) => canShow(it.role, user))
               .map((it) => {
-                const tip = t(`items.${it.page}.tip`);
-                const label = t(`items.${it.page}.label`, {
-                  defaultValue: tip,
-                });
+                const tip = it.label || t(`items.${it.page}.tip`);
+                const label =
+                  it.label ||
+                  t(`items.${it.page}.label`, {
+                    defaultValue: tip,
+                  });
 
                 return (
                   <Link key={it.page} href={it.href} passHref>
@@ -316,17 +325,15 @@ export default function Sidebar() {
 
       {isAuthenticated && (
         <div className="sb-sidebar__foot">
-          <div className="sb-userchip">
-            <div className="sb-avatar">{user?.empName?.[0]}</div>
-            <div className="sb-userchip__meta">
-              <b>{user?.empName}</b>
-              <span>{user?.posName}</span>
+          <Link href={`/emp/detail?empId=${user?.empId}`} passHref>
+            <div className="sb-userchip">
+              <div className="sb-avatar">{user?.empName?.[0]}</div>
+              <div className="sb-userchip__meta">
+                <b>{user?.empName}</b>
+                <span>{user?.posName}</span>
+              </div>
             </div>
-            <i
-              className="bi bi-chevron-expand ms-auto sb-nav__label"
-              style={{ color: "var(--sb-ink-faint)", fontSize: 14 }}
-            />
-          </div>
+          </Link>
         </div>
       )}
     </>

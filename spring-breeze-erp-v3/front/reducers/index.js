@@ -28,6 +28,8 @@ import salPayReducer from "./sal/salPayReducer";
 import salAcctReducer from "./sal/salAcctReducer";
 import salHistReducer from "./sal/salHistReducer";
 import salPolicyReducer from "./sal/salPolicyReducer";
+import salAiChatReducer from "./sal/salAiChatReducer";
+import salAiDocReducer from "./sal/salAiDocReducer";
 
 const rootReducer = combineReducers({
   auth: authReducer, // state.auth
@@ -58,6 +60,8 @@ const rootReducer = combineReducers({
   salAcct: salAcctReducer, // state.salAcct
   salHist: salHistReducer, // state.salHist
   salPolicy: salPolicyReducer, // state.salPolicy
+  salAiChat: salAiChatReducer, // state.salAiChat
+  salAiDoc: salAiDocReducer, // state.salAiDoc
 });
 
 export default rootReducer;

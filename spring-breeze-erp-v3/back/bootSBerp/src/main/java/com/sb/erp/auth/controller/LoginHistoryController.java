@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
  * 로그인 이력 관리 - 시스템 관리자 확인 페이지
  * ADMIN 또는 ROOT 권한만 접근 가능.
  */
-@Tag(name = "로그인 이력(관리자)", description = "로그인 성공/실패 이력 조회 API")
+@Tag(name = "Login History REST API", description = "시스템 관리자(ROOT)만 로그인 성공/실패 이력 조회 API")
 @RestController
 @RequestMapping("/api/admin/login-history")
 @RequiredArgsConstructor
