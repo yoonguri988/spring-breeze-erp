@@ -61,7 +61,7 @@ public class Applicant { // 지원자 등록/관리
 	@Column(name = "APCT_PROVIDER_ID")
 	private String providerId;
 	
-	@Column(name="APCT_EMAIL", length=100)
+	@Column(name="APCT_EMAIL", nullable = false, length=100)
 	private String apctEmail;
 	
 	@Column(name="APCT_PHONE", nullable = false, length=20)

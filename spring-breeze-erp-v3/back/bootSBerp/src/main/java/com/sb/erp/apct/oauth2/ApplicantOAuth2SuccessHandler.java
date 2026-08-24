@@ -36,6 +36,6 @@ public class ApplicantOAuth2SuccessHandler implements AuthenticationSuccessHandl
         String accessToken = jwtProvider.createAccessToken(user.getProviderId(), claims);
 
         res.sendRedirect(redirectUrl + "?token=" + accessToken);
-        // 경로도 /oauth2/callback으로 통일 (기존 컨벤션과 일치)
+        
     }
 }
