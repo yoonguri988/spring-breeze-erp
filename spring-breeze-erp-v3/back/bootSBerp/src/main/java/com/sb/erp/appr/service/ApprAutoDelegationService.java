@@ -9,7 +9,7 @@ public interface ApprAutoDelegationService {
 	
 	public List<ApprAutoDelegationResponse> myDelegation(Long empId);
 	public List<ApprAutoDelegationResponse> listByStatus(String delegStatus);
-	public void reqeustCancel(Long autoDelegId, Long empId, ApprAutoDelegationCancelRequest req);
+	public void requestCancel(Long autoDelegId, Long empId, ApprAutoDelegationCancelRequest req);
 	public void approveCancel(Long autoDelegId, Long adminEmpId);
 	public void rejectCancel(Long autoDelegId, Long adminEmpId);
 }

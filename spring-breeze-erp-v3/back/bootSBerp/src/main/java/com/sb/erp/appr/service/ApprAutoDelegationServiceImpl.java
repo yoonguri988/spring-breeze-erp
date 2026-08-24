@@ -10,7 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sb.erp.appr.dto.request.ApprAutoDelegationCancelRequest;
 import com.sb.erp.appr.dto.response.ApprAutoDelegationResponse;
 import com.sb.erp.appr.entity.ApprAutoDelegation;
+import com.sb.erp.appr.entity.ApprLine;
+import com.sb.erp.appr.entity.ApprLog;
 import com.sb.erp.appr.repository.ApprAutoDelegationRepository;
+import com.sb.erp.appr.repository.ApprLineRepository;
+import com.sb.erp.appr.repository.ApprLogRepository;
 import com.sb.erp.emp.entity.Employee;
 import com.sb.erp.global.exception.ResourceNotFoundException;
 
@@ -23,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 public class ApprAutoDelegationServiceImpl implements ApprAutoDelegationService {
 	
 	private final ApprAutoDelegationRepository autoDao;
+	private final ApprLineRepository lineDao;
+	private final ApprLogRepository logDao;
 	private final EntityManager em;
 	
 	@Override
@@ -41,7 +47,7 @@ public class ApprAutoDelegationServiceImpl implements ApprAutoDelegationService 
 
 	@Override
 	@Transactional
-	public void reqeustCancel(Long autoDelegId, Long empId, ApprAutoDelegationCancelRequest req) {
+	public void requestCancel(Long autoDelegId, Long empId, ApprAutoDelegationCancelRequest req) {
 		
 		ApprAutoDelegation deleg = autoDao.findById(autoDelegId)
 				.orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 위임전결입니다."));
@@ -73,6 +79,23 @@ public class ApprAutoDelegationServiceImpl implements ApprAutoDelegationService 
 		deleg.setDelegStatus("CANC");
 		deleg.setProcEmp(admin);
 		deleg.setProcessedAt(LocalDateTime.now());
+		
+		// 일괄 복귀
+		/*
+			이 위임전결이 건드린 로그중, 아직도 WAI 상태로 남아있는 라인만 되돌림
+		 	이미 수임자가 처리해버린 라인은 그대로
+		 	이미 벌어진 결재 행위를 취소하는 건 X
+		 */
+		List<ApprLog> logs = logDao.findByAutoDeleg_AutoDelegId(autoDelegId);
+		for (ApprLog log : logs) {
+			ApprLine line = lineDao.findByApprDoc_DocIdAndEmployee_EmpId(
+					log.getApprDoc().getDocId(), log.getActEmp().getEmpId()
+			).orElse(null);
+			
+			if (line != null && "WAI".equals(line.getLinStatus())) {
+				line.setEmployee(log.getOriEmp());
+			}
+		}
 	}
 
 	@Override

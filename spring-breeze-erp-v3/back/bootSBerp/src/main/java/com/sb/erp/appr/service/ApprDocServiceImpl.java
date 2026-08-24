@@ -28,6 +28,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 	private final ApprDocMapper dao;
 	private final ApprLineMapper lineDao;
 	private final DeptService deptService;
+	private final ApprAutoDelegationTriggerService autoTrigger;
 	
 	// 작성하려는 사용자의 회사 양식
 	@Override
@@ -149,6 +150,10 @@ public class ApprDocServiceImpl implements ApprDocService{
 		else {
 			// 없는경우
 			dao.updateDocStatus(docId, "APP");
+			
+			// 위임전결 자동발동 트리거
+			ApprDocResponse doc = dao.selectDocDetail(docId);
+			autoTrigger.tryTrigger(docId, doc.getForId(), doc.getForVersion(), doc.getEmpId(), doc.getDocContent());
 		}
 		
 	}
