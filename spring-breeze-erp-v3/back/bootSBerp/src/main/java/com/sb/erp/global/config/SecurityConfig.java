@@ -87,11 +87,9 @@ public class SecurityConfig {
 //                        "/emp/checkEmpNo", "/perm/**", "/pos/**", "/dept/transfer/pending",
 //                        "/dept/transfer/list", "/dept/transfer/log", "/eval/**").hasRole("ADMIN")
                 // ─── 그 외 API: 세션 또는 JWT 둘 중 하나로 인증 ───
-            	// 지원자용 - 공고 조회/지원서 제출은 공개
-            	.requestMatchers(HttpMethod.GET, "/public/api/recruit/**").permitAll()
-            	.requestMatchers(HttpMethod.POST, "/public/api/applicant/apply").permitAll()
-            	// 지원자용 - 내 지원현황은 소셜로그인 필요
-            	.requestMatchers("/public/api/applicant/me/**").authenticated()
+            	// 소셜)채용공고 지원자용
+            	.requestMatchers(HttpMethod.GET, "/api/public/recruit/**").authenticated()
+            	.requestMatchers("/api/public/applicant/**").authenticated()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
@@ -118,11 +116,6 @@ public class SecurityConfig {
             // 시큐리티 체인 안에서 동작
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-    
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
     }
 
     @Bean
