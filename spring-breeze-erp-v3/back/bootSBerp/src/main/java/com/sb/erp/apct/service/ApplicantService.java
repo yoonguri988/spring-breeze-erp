@@ -70,9 +70,10 @@ public class ApplicantService {
     }
 
     // 관리자용 - 지원자 목록 (상태 선택 필터 + 페이징)
-    public Page<ApplicantResponse> getAdminList(Long comId, Long recId, String apctStatus, Pageable pageable) {
-        return applicantRepository.findAll(ApplicantSpecs.search(comId, recId, apctStatus), pageable)
-                .map(this::mapToResponse);
+    public Page<ApplicantResponse> getAdminList( Long comId, Long recId, String apctStatus, Pageable pageable) {
+
+        return applicantRepository .findAll( ApplicantSpecs.search(comId, recId, apctStatus), pageable ) .map(this::mapToResponse); 
+        
     }
 
     // 관리자용 - 지원자 상세 (이력서 수 포함)

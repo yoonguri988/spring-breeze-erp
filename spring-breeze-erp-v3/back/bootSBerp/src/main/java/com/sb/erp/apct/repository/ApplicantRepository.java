@@ -1,6 +1,7 @@
 package com.sb.erp.apct.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +64,9 @@ public interface ApplicantRepository extends JpaRepository<Applicant, Long>,
     	    ORDER BY a.apctId DESC
     	    """)
     	List<MyApplicationResponse> findMyApplications(@Param("provider") String provider,
-    	                                                 @Param("providerId") String providerId);
+    	                                               @Param("providerId") String providerId);
+    
+    // 특정 지원자의 이력서 상세
+    Optional<Applicant> findByApctIdAndRecruit_RecId( Long apctId, Long recId );
 
 }

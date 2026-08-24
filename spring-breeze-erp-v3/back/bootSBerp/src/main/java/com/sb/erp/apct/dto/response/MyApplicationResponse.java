@@ -1,6 +1,9 @@
 package com.sb.erp.apct.dto.response;
 
+import java.time.LocalDateTime;
+
 import com.sb.erp.apct.entity.Applicant;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,10 +22,10 @@ public class MyApplicationResponse {
 	}
 	
 	// native query(Object[]) 매핑용 - 추가
-	public MyApplicationResponse(Long apctId, String recTitle, String apctStatus, String apctDate) {
+	public MyApplicationResponse(Long apctId, String recTitle, String apctStatus, LocalDateTime apctDate) {
 		this.apctId = apctId;
 		this.recTitle = recTitle;
 		this.apctStatus = apctStatus;
-		this.apctDate = apctDate;
+		this.apctDate = apctDate != null ? apctDate.toString() : null;
 	}
 }
