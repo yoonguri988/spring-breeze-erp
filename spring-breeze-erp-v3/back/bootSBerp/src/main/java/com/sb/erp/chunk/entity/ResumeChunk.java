@@ -13,6 +13,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,7 +26,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "RESUME_CHUNK")
+@Table(name = "RESUME_CHUNK", uniqueConstraints = 
+{ @UniqueConstraint( name = "UK_RESUME_CHUNK_ORDER", columnNames = {"RSM_ID", "CHUNK_ORDER"} ) })
 public class ResumeChunk { // 이력서 청크+임베딩
 	/* dto 없는 이유(임베딩,청크 노출x인 이유):벡터 값만 있으면 원본 텍스트를 역으로 유추하거나(임베딩 인버전 공격), 
 	 * 최소한 그 문서가 어떤 내용인지 유사도 비교로 추정할 수 있어서 보안상으로도 노출 안 시키는 게 원칙입니다. 

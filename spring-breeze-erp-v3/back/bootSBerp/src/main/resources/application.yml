@@ -153,3 +153,6 @@ cyj:
       key: ${CYJ_OPENAI_API_KEY}
     model: ${CYJ_OPENAI_MODEL}
 
+logging:
+  level:
+    org.springframework.security: DEBUG

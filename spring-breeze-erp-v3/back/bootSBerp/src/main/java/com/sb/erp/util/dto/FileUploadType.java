@@ -57,6 +57,13 @@ public enum FileUploadType {
     ),
  
     // TODO: 팀원별 기능에 맞는 업로드 타입을 여기에 추가
+    // 이력서 pdf
+    RESUME(
+    	    Arrays.asList("pdf"),
+    	    Arrays.asList("application/pdf"),
+    	    10L * 1024 * 1024,
+    	    "resume"
+    	),
     ;
  
     private final List<String> allowedExtensions;

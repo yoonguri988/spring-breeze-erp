@@ -10,6 +10,7 @@ public class ResumeResponse {
 	
     private Long rsmId;
     private Long apctId;
+    private String apctName;
     private String rsmFileName;
     private String rsmFileUrl;
     private String rsmAiSummary;
@@ -21,6 +22,7 @@ public class ResumeResponse {
 	public ResumeResponse(Resume resume) {
 		this.rsmId = resume.getRsmId();
 		this.apctId = resume.getApplicant().getApctId();
+		this.apctName = resume.getApplicant().getApctName();
 		this.rsmFileName = resume.getRsmFileName();
 		this.rsmFileUrl = resume.getRsmFileUrl();
 		this.rsmAiSummary = resume.getRsmAiSummary();

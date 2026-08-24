@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sb.erp.global.integration.ReportApi.ReportSections;
 import com.sb.erp.proj.dto.response.ProjectAnalysisResponse;
+import com.sb.erp.rec.entity.Recruit;
 import com.sb.erp.week.dto.response.MyWeeklyReportResponse;
 import com.sb.erp.week.dto.response.WeeklyReportResponse;
 
@@ -221,4 +222,56 @@ public class OpenAiGpt {
 				throw new RuntimeException("OpenAI 개인 주간보고서 생성 실패", e);
 			}
 		}
+		
+		// 채용공고 - 지원자 직무 적합도
+		public ResumeAnalysis analyzeResume(String resumeText, Recruit recruit) {
+		    String prompt = String.format("""
+		            당신은 채용 전문 AI 평가자입니다.
+
+		            아래 채용공고와 지원자의 이력서를 비교하여 지원자의 직무 적합도를 평가하세요.
+
+		            [채용공고]
+		            공고명: %s
+		            부서: %s
+		            직무: %s
+		            채용내용:
+		            %s
+
+		            [지원자 이력서]
+		            %s
+
+		            다음 JSON 형식으로만 응답하세요.
+		            다른 설명은 절대 하지 마세요.
+
+		            {
+		              "summary": "지원자의 주요 경력과 채용공고 적합성을 3~5문장으로 요약",
+		              "fitScore": 0
+		            }
+
+		            fitScore는 0~100 사이의 정수입니다.
+		            채용공고의 직무, 기술스택, 경력, 요구사항과
+		            지원자의 이력서를 종합적으로 비교하여 평가하세요.
+		            """,
+		            recruit.getRecTitle(),
+		            recruit.getRecDepartment(),
+		            recruit.getRecPosition(),
+		            recruit.getRecDescription(),
+		            resumeText
+		    );
+
+		    try {
+		        String content = callOpenAi(prompt);
+
+		        JsonNode json = objectMapper.readTree(content);
+
+		        return new ResumeAnalysis(
+		                json.path("summary").asText(),
+		                json.path("fitScore").asLong()
+		        );
+
+		    } catch (Exception e) {
+		        throw new RuntimeException("이력서 AI 분석 실패", e);
+		    }
+		}
+		public record ResumeAnalysis( String summary, Long fitScore ) {}
 }

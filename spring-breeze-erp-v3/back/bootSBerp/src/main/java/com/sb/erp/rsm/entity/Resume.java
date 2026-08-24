@@ -42,7 +42,7 @@ public class Resume { // 이력서
     private Long rsmId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "APCT_ID", nullable = false)
+    @JoinColumn(name = "APCT_ID", nullable = false, unique = true)
     private Applicant applicant;
     
     @Column(name = "RSM_FILE_NAME", length = 200)
@@ -65,7 +65,7 @@ public class Resume { // 이력서
     @Column(name = "RSM_STATUS", nullable = false, length = 20)
     private String rsmStatus;
     
-    @Column(name = "RSM_UPLOADED_AT", insertable = false, updatable = false)
+    @Column(name = "RSM_UPLOADED_AT", updatable = false)
     private LocalDateTime rsmUploadedAt;
     
     @Column(name = "RSM_ANALYZED_AT")
