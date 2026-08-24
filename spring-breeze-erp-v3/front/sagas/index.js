@@ -31,6 +31,9 @@ import salHistSaga from "./sal/salHistSaga";
 import salPolicySaga from "./sal/salPolicySaga";
 import salAiChatSaga from "./sal/salAiChatSaga";
 import salAiDocSaga from "./sal/salAiDocSaga";
+// 근태, 연차
+import attSaga from "./att/attSaga";
+import leaveBalanceSaga from "./att/leaveBalanceSaga"
 
 export default function* rootSaga() {
   yield all([
@@ -64,5 +67,8 @@ export default function* rootSaga() {
     fork(salPolicySaga),
     fork(salAiChatSaga),
     fork(salAiDocSaga),
+    // 근태, 연차
+    fork(attSaga),
+    fork(leaveBalanceSaga),
   ]);
 }
