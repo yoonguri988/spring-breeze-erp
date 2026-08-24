@@ -17,6 +17,55 @@ const NAV = [
     ],
   },
   {
+    // sal 모듈은 아직 다국어 지원 전이라, 라벨은 t() 대신 label/sectionLabel을 직접 하드코딩한다.
+    // (아래 렌더링부에서 label/sectionLabel이 있으면 i18n보다 우선 사용)
+    sectionKey: "salary",
+    sectionLabel: "급여관리",
+    items: [
+      {
+        page: "salmy",
+        label: "내 급여정보",
+        href: "/sal/my",
+        icon: "bi-wallet2",
+      },
+      {
+        page: "salstdlist",
+        label: "급여기준 관리",
+        href: "/sal/std/list",
+        icon: "bi-card-checklist",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salpaylist",
+        label: "급여지급 관리",
+        href: "/sal/pay/list",
+        icon: "bi-cash-coin",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salacctadmin",
+        label: "수령계좌 조회",
+        href: "/sal/acct/admin",
+        icon: "bi-bank",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salhistlist",
+        label: "급여 변경이력",
+        href: "/sal/hist/list",
+        icon: "bi-clock-history",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salpolicylist",
+        label: "급여계산 정책관리",
+        href: "/sal/policy/list",
+        icon: "bi-sliders2",
+        role: "ROLE_ADMIN",
+      },
+    ],
+  },
+  {
     sectionKey: "org",
     items: [
       {
@@ -198,7 +247,7 @@ export default function Sidebar() {
           <React.Fragment key={gi}>
             {group.sectionKey && (
               <div className="sb-nav__section">
-                {t(`sections.${group.sectionKey}`)}
+                {group.sectionLabel || t(`sections.${group.sectionKey}`)}
               </div>
             )}
             {group.items

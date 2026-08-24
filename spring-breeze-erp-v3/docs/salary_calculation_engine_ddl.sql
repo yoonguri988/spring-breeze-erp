@@ -58,7 +58,7 @@ CREATE TABLE sal_rate_plcy (
     empl_rate    NUMBER(5,4)  NOT NULL,
     eff_from     DATE         NOT NULL,
     eff_to       DATE,
-    creat_at     DATE         NOT NULL,
+    created_at     DATE         NOT NULL,
     CONSTRAINT pk_sal_rate_plcy PRIMARY KEY (rate_id)
 );
 
@@ -77,12 +77,12 @@ END;
 CREATE UNIQUE INDEX ux_sal_rate_plcy_open
     ON sal_rate_plcy (CASE WHEN eff_to IS NULL THEN 1 END);
 
--- creat_at은 애플리케이션이 아니라 DB 트리거가 채운다(엔티티에서 insertable=false).
+-- created_at은 애플리케이션이 아니라 DB 트리거가 채운다(엔티티에서 insertable=false).
 CREATE TRIGGER trg_sal_rate_plcy_ins
 BEFORE INSERT ON sal_rate_plcy
 FOR EACH ROW
 BEGIN
-    :NEW.creat_at := SYSDATE;
+    :NEW.created_at := SYSDATE;
 END;
 /
 
@@ -122,7 +122,7 @@ CREATE TABLE sal_pos_alw (
     amt          NUMBER(15)    NOT NULL,
     eff_from     DATE          NOT NULL,
     eff_to       DATE,
-    creat_at     DATE          NOT NULL,
+    created_at     DATE          NOT NULL,
     CONSTRAINT pk_sal_pos_alw PRIMARY KEY (alw_id),
     CONSTRAINT fk_sal_pos_alw_com FOREIGN KEY (com_id) REFERENCES company (com_id)
 );
@@ -146,7 +146,7 @@ CREATE TRIGGER trg_sal_pos_alw_ins
 BEFORE INSERT ON sal_pos_alw
 FOR EACH ROW
 BEGIN
-    :NEW.creat_at := SYSDATE;
+    :NEW.created_at := SYSDATE;
 END;
 /
 
@@ -186,7 +186,7 @@ CREATE TABLE sal_inc_tax_brkt (
     tax_rate     NUMBER(5,4)  NOT NULL,
     eff_from     DATE         NOT NULL,
     eff_to       DATE,
-    creat_at     DATE         NOT NULL,
+    created_at     DATE         NOT NULL,
     CONSTRAINT pk_sal_inc_tax_brkt PRIMARY KEY (brkt_id)
 );
 
@@ -201,7 +201,7 @@ CREATE TRIGGER trg_sal_inc_tax_brkt_ins
 BEFORE INSERT ON sal_inc_tax_brkt
 FOR EACH ROW
 BEGIN
-    :NEW.creat_at := SYSDATE;
+    :NEW.created_at := SYSDATE;
 END;
 /
 
@@ -240,7 +240,7 @@ CREATE TABLE sal_meal_alw_plcy (
     amt           NUMBER(15)  NOT NULL,
     eff_from      DATE        NOT NULL,
     eff_to        DATE,
-    creat_at      DATE        NOT NULL,
+    created_at      DATE        NOT NULL,
     CONSTRAINT pk_sal_meal_alw_plcy PRIMARY KEY (meal_plcy_id),
     CONSTRAINT fk_sal_meal_alw_plcy_com FOREIGN KEY (com_id) REFERENCES company (com_id)
 );
@@ -257,13 +257,18 @@ EXCEPTION
 END;
 /
 
-CREATE UNIQUE INDEX ux_sal_meal_alw_plcy_open
-    ON sal_meal_alw_plcy (com_id, CASE WHEN eff_to IS NULL THEN 1 END);
-
 CREATE TRIGGER trg_sal_meal_alw_plcy_ins
 BEFORE INSERT ON sal_meal_alw_plcy
 FOR EACH ROW
 BEGIN
-    :NEW.creat_at := SYSDATE;
+    :NEW.created_at := SYSDATE;
 END;
 /
+
+
+-- 닫힌 행(eff_to 존재)은 표현식 자체가 NULL -> 인덱스에서 완전히 제외
+-- 열린 행(eff_to IS NULL)만 com_id 기준으로 유니크 체크
+CREATE UNIQUE INDEX ux_sal_meal_alw_plcy_open
+    ON sal_meal_alw_plcy (
+        CASE WHEN eff_to IS NULL THEN TO_CHAR(com_id) END
+    );

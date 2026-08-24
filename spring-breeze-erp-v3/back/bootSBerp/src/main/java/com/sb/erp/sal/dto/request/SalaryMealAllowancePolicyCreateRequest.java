@@ -21,12 +21,12 @@ import lombok.Setter;
 public class SalaryMealAllowancePolicyCreateRequest {
 
     /** NULL이면 전사 공통 기본값(fallback) 정책으로 등록 */
-    private Long com_id;
+    private Long comId;
 
     @NotNull(message = "식대 금액은 필수입니다.")
     @PositiveOrZero(message = "식대 금액은 0 이상이어야 합니다.")
     private Long amt;
 
     @NotNull(message = "적용 시작일은 필수입니다.")
-    private LocalDate eff_from;
+    private LocalDate effFrom;
 }
