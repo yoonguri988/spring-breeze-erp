@@ -22,6 +22,12 @@ spring:
     driver-class-name: oracle.jdbc.OracleDriver
   jackson:
     time-zone: Asia/Seoul
+    
+  messages:
+    basename: messages          # messages.properties(ko, 기본) / messages_en.properties
+    encoding: UTF-8
+    fallback-to-system-locale: false  # 서버가 뜬 OS/JVM 로케일에 좌우되지 않도록 고정
+    cache-duration: -1          # 운영에서도 문제 없으면 이후 배포 주기에 맞춰 늘려도 됨
 
   jpa:
     hibernate:
