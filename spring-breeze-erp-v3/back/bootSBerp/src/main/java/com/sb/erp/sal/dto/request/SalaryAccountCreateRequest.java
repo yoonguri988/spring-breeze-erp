@@ -11,9 +11,6 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class SalaryAccountCreateRequest {
 
-    @NotNull(message = "직원 정보는 필수입니다.")
-    private Long empId;
-
     @NotBlank(message = "은행명은 필수입니다.")
     private String bankName;
 

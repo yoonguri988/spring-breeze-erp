@@ -43,5 +43,12 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	// 출근 기록
 	Optional<Attendance> findByEmployee_EmpIdAndAttDate(Long empId, LocalDate attDate);
 
-	
+	// 급여 산정(고정연장수당, sal 모듈 OvertimeAllowanceCalculator)용 - 기간 내 연장근로시간(분) 합계.
+	// 해당 기간에 근태 기록이 아예 없으면 SUM은 NULL이 되므로 COALESCE로 0을 반환한다.
+	@Query("SELECT COALESCE(SUM(a.overtimeMinutes), 0) FROM Attendance a " +
+			"WHERE a.employee.empId = :empId AND a.attDate BETWEEN :start AND :end")
+	Integer sumOvertimeMinutesByEmpIdAndDateRange(@Param("empId") Long empId,
+			@Param("start") LocalDate start,
+			@Param("end") LocalDate end);
+
 }
