@@ -39,7 +39,7 @@ public class SecurityConfig {
     private final ApplicantOAuth2SuccessHandler applicantOAuth2SuccessHandler;
     // ────cdy────
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, PasswordEncoder passEncoder) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
 	        .csrf(csrf -> csrf.disable())
