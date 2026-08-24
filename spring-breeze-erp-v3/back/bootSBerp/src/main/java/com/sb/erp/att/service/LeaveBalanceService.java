@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -93,12 +94,11 @@ public class LeaveBalanceService {
 
         // ── 중복 부여 방지 ──
         // 해당 연도에 이미 REG 타입 이력이 있으면 중복 발생 차단
-        // Repository: LeaveGrantRepository.findByEmployee_EmpIdAndGrantYear()
-        List<LeaveGrant> existingGrants = leaveGrantRepository
-                .findByEmployee_EmpIdAndGrantYear(empId, year);
-
-        boolean alreadyGranted = existingGrants.stream()
-                .anyMatch(g -> "REG".equals(g.getGrantType()));
+        // balance 테이블에서 이미 해당 연도 행이 있고, totalDays > 0 이면 중복
+        Optional<LeaveBalance> existing = leaveBalanceRepository
+                .findByEmployee_EmpIdAndYear(empId, year);
+        boolean alreadyGranted = existing.isPresent()
+                && existing.get().getTotalDays().compareTo(BigDecimal.ZERO) > 0;
 
         if (alreadyGranted) {
             throw new IllegalArgumentException(year + "년 정기 연차가 이미 부여되었습니다.");
