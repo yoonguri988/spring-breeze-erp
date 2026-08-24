@@ -150,6 +150,43 @@ const NAV = [
     ],
   },
   {
+    sectionKey: "att",
+    items: [
+      {
+        page: "attdashboard",
+        label: "출퇴근 대시보드",
+        href: "/att/dashboard",
+        icon: "bi-clock",
+      },
+      {
+        page: "attmy",
+        label: "내 근태 이력",
+        href: "/att/my",
+        icon: "bi-person-lines-fill",
+      },
+      {
+        page: "attadmin",
+        label: "근태 현황 관리",
+        href: "/att/admin",
+        icon: "bi-calendar2-week",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "leavemy",
+        label: "내 연차 현황",
+        href: "/att/leave/my",
+        icon: "bi-calendar-check",
+      },
+      {
+        page: "leaveadmin",
+        label: "연차 관리",
+        href: "/att/leave/admin",
+        icon: "bi-calendar2-plus",
+        role: "ROLE_ADMIN",
+      },
+    ],
+  },
+  {
     sectionKey: "work",
     items: [
       {
@@ -288,17 +325,15 @@ export default function Sidebar() {
 
       {isAuthenticated && (
         <div className="sb-sidebar__foot">
-          <div className="sb-userchip">
-            <div className="sb-avatar">{user?.empName?.[0]}</div>
-            <div className="sb-userchip__meta">
-              <b>{user?.empName}</b>
-              <span>{user?.posName}</span>
+          <Link href={`/emp/detail?empId=${user?.empId}`} passHref>
+            <div className="sb-userchip">
+              <div className="sb-avatar">{user?.empName?.[0]}</div>
+              <div className="sb-userchip__meta">
+                <b>{user?.empName}</b>
+                <span>{user?.posName}</span>
+              </div>
             </div>
-            <i
-              className="bi bi-chevron-expand ms-auto sb-nav__label"
-              style={{ color: "var(--sb-ink-faint)", fontSize: 14 }}
-            />
-          </div>
+          </Link>
         </div>
       )}
     </>

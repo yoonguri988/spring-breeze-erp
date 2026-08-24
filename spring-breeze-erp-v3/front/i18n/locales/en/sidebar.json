@@ -28,6 +28,11 @@
     "notices": { "tip": "Notice Management" },
     "reslist": { "tip": "Resource Management" },
     "resvmy": { "tip": "My Resource Requests" },
-    "adminresvlist": { "tip": "All Resource Requests", "label": "Resource Reservation Requests" }
+    "adminresvlist": { "tip": "All Resource Requests", "label": "Resource Reservation Requests" },
+    "attdashboard": { "tip": "Clock In/Out", "label": "Clock In/Out" },
+    "attmy": { "tip": "My Attendance", "label": "My Attendance" },
+    "attadmin": { "tip": "Attendance Admin", "label": "Attendance Admin" },
+    "leavemy": { "tip": "My Leave Balance", "label": "My Leave Balance" },
+    "leaveadmin": { "tip": "Leave Admin", "label": "Leave Admin" }
   }
 }

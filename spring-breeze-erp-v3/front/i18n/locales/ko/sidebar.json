@@ -4,7 +4,8 @@
     "hr": "인사 관리",
     "work": "업무 관리",
     "asset": "자산 관리",
-    "security": "보안 관리"
+    "security": "보안 관리",
+    "att": "근태 관리"
   },
   "items": {
     "loginHistory": { "tip": "로그인 이력", "label": "로그인 이력 조회" },
@@ -28,6 +29,11 @@
     "notices": { "tip": "공지 관리" },
     "reslist": { "tip": "자원 관리" },
     "resvmy": { "tip": "내 자원 요청 관리" },
-    "adminresvlist": { "tip": "전체 자원 요청 관리", "label": "자원 예약 요청 관리" }
+    "adminresvlist": { "tip": "전체 자원 요청 관리", "label": "자원 예약 요청 관리" },
+    "attdashboard": { "tip": "출퇴근 대시보드", "label": "출퇴근 대시보드" },
+    "attmy": { "tip": "내 근태 이력", "label": "내 근태 이력" },
+    "attadmin": { "tip": "근태 현황 관리", "label": "근태 현황 관리" },
+    "leavemy": { "tip": "내 연차 현황", "label": "내 연차 현황" },
+    "leaveadmin": { "tip": "연차 관리", "label": "연차 관리" }
   }
 }
