@@ -63,6 +63,13 @@ const NAV = [
         icon: "bi-sliders2",
         role: "ROLE_ADMIN",
       },
+      {
+        page: "salaidocadmin",
+        label: "AI Q&A 근거 문서 관리",
+        href: "/sal/aidoc-admin",
+        icon: "bi-file-earmark-pdf",
+        role: "ROLE_ADMIN",
+      },
     ],
   },
   {
