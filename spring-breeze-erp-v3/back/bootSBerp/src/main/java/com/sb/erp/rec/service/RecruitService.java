@@ -1,7 +1,11 @@
 package com.sb.erp.rec.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +13,7 @@ import com.sb.erp.apct.repository.ApplicantRepository;
 import com.sb.erp.com.entity.Company;
 import com.sb.erp.emp.entity.Employee;
 import com.sb.erp.rec.dto.request.RecruitRequest;
+import com.sb.erp.rec.dto.request.RecruitSearchRequest;
 import com.sb.erp.rec.dto.response.RecruitResponse;
 import com.sb.erp.rec.entity.Recruit;
 import com.sb.erp.rec.repository.RecruitRepository;
@@ -35,6 +40,22 @@ public class RecruitService {
     public Page<RecruitResponse> getAdminList(Long comId, String recStatus, Pageable pageable) {
         return recruitRepository.findAll(RecruitSpecs.search(comId, recStatus), pageable)
                 .map(this::mapToResponse);
+    }
+    // 관리자용 - 전체 건수
+    public int selectCnt(RecruitSearchRequest search) {
+        Specification<Recruit> spec = RecruitSpecs.search(search.getComId(), search.getRecStatus());
+        return (int) recruitRepository.count(spec);
+    }
+
+    // 관리자용 - 목록 (List로 딱 받기)
+    public List<RecruitResponse> selectAll(RecruitSearchRequest search) {
+    	 System.out.println("comId=" + search.getComId() + ", recStatus=[" + search.getRecStatus() + "]");
+        Specification<Recruit> spec = RecruitSpecs.search(search.getComId(), search.getRecStatus());
+        Pageable pageable = PageRequest.of(search.getPageIndex(), search.getOnepagelist());
+
+        return recruitRepository.findAll(spec, pageable)
+                .map(this::mapToResponse)
+                .getContent();
     }
 
     // 상세 조회 (공개/관리자 공통)
@@ -108,5 +129,18 @@ public class RecruitService {
                 recruit.getEmployee().getEmpName(),
                 recruit.getApplicants().size()
         );
+    }
+    
+    // 공개용 - 전체 건수
+    public int getOpenCnt(Long comId) {
+        return (int) recruitRepository.countByCompany_ComIdAndRecStatus(comId, "OPEN");
+    }
+
+    // 공개용 - 목록 (List로 딱 받기)
+    public List<RecruitResponse> getOpenListAsList(Long comId, int pstartno, int onepagelist) {
+        Pageable pageable = PageRequest.of(pstartno - 1 < 0 ? 0 : pstartno - 1, onepagelist);
+        return recruitRepository.findByCompany_ComIdAndRecStatus(comId, "OPEN", pageable)
+                .map(this::mapToResponse)
+                .getContent();
     }
 }

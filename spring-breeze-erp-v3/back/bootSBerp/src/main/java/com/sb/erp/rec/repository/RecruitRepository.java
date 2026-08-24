@@ -18,5 +18,7 @@ JpaSpecificationExecutor<Recruit> // JpaSpecificationExecutor: Specification(조
 	// 공개용 - 특정 회사의 OPEN 공고만 목록 조회 (비회원 지원자용)
 	Page<Recruit> findByCompany_ComIdAndRecStatus(Long comId, String recStatus, Pageable pageable);
 	
+	// 공개용 - 검색결과
+	long countByCompany_ComIdAndRecStatus(Long comId, String recStatus);
 
 }
