@@ -41,7 +41,7 @@ public class IncomeTaxCalculator implements SalaryItemCalculator {
     public SalPayItemCandidate calculate(SalStd std, Employee employee, YearMonth payMonth) {
         LocalDate date = payMonth.atDay(1);
         SalIncTaxBrkt bracket = incomeTaxBracketRepository.findApplicable(std.getBaseSal(), date)
-                .orElseThrow(() -> new ResourceNotFoundException(
+                .orElseThrow(() -> new IllegalStateException(
                         "baseSal " + std.getBaseSal() + "에 해당하는 소득세 구간이 없습니다. "
                                 + "관리자가 sal_inc_tax_brkt을 먼저 등록해야 합니다. payMonth=" + date));
 

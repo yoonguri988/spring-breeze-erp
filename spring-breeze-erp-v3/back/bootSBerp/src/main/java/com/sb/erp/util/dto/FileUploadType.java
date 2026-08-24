@@ -47,6 +47,14 @@ public enum FileUploadType {
         10L * 1024 * 1024,
         "notice/attach"
     ),
+    
+    // AI 급여 Q&A 근거 문서(급여 규정집/수당기준/연말정산 가이드) : PDF만 / 최대 5MB
+    SALARY_POLICY_DOC(
+        Arrays.asList("pdf"),
+        Arrays.asList("application/pdf"),
+        5L * 1024 * 1024,
+        "salary/policy"
+    ),
  
     // TODO: 팀원별 기능에 맞는 업로드 타입을 여기에 추가
     ;
