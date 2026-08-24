@@ -150,6 +150,43 @@ const NAV = [
     ],
   },
   {
+    sectionKey: "att",
+    items: [
+      {
+        page: "attdashboard",
+        label: "출퇴근 대시보드",
+        href: "/att/dashboard",
+        icon: "bi-clock",
+      },
+      {
+        page: "attmy",
+        label: "내 근태 이력",
+        href: "/att/my",
+        icon: "bi-person-lines-fill",
+      },
+      {
+        page: "attadmin",
+        label: "근태 현황 관리",
+        href: "/att/admin",
+        icon: "bi-calendar2-week",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "leavemy",
+        label: "내 연차 현황",
+        href: "/att/leave/my",
+        icon: "bi-calendar-check",
+      },
+      {
+        page: "leaveadmin",
+        label: "연차 관리",
+        href: "/att/leave/admin",
+        icon: "bi-calendar2-plus",
+        role: "ROLE_ADMIN",
+      },
+    ],
+  },
+  {
     sectionKey: "work",
     items: [
       {
