@@ -30,6 +30,8 @@ import salHistReducer from "./sal/salHistReducer";
 import salPolicyReducer from "./sal/salPolicyReducer";
 import salAiChatReducer from "./sal/salAiChatReducer";
 import salAiDocReducer from "./sal/salAiDocReducer";
+import attReducer from "./att/attReducer";
+import leaveBalanceReducer from "./att/leaveBalanceReducer";
 
 const rootReducer = combineReducers({
   auth: authReducer, // state.auth
@@ -62,6 +64,10 @@ const rootReducer = combineReducers({
   salPolicy: salPolicyReducer, // state.salPolicy
   salAiChat: salAiChatReducer, // state.salAiChat
   salAiDoc: salAiDocReducer, // state.salAiDoc
+  // 근태/연차
+  att: attReducer, // state.att
+  leave : leaveBalanceReducer, //state.leave
+
 });
 
 export default rootReducer;

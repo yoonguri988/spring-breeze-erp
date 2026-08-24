@@ -4,7 +4,8 @@
     "hr": "HR Management",
     "work": "Work Management",
     "asset": "Asset Management",
-    "security": "Security"
+    "security": "Security",
+    "att": "Attendance"
   },
   "items": {
     "loginHistory": { "tip": "Login History", "label": "Login History" },
