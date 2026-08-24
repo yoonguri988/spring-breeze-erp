@@ -10,10 +10,13 @@ import com.sb.erp.chunk.entity.ResumeChunk;
 @Repository
 public interface ResumeChunkRepository extends JpaRepository<ResumeChunk, Long>{
 	
-	// 특정 이력서의 청크 전체 조회 (순서대로) - 재분석 시 필요
-	List<ResumeChunk> findByResume_RsmIdOrderByChunkOrder(Long rsmId);
+    // 특정 이력서의 청크 전체 조회
+    List<ResumeChunk> findByResume_RsmIdOrderByChunkOrder(Long rsmId);
+
+    // 특정 채용공고에 지원한 지원자들의 이력서 청크 조회
+    List<ResumeChunk> findByResume_Applicant_Recruit_RecId(Long recId);
 	
-	// 검색 대상 청크 전체 조회 (회사 스코프) - 유사도 계산은 Java에서
-	List<ResumeChunk> findByResume_Applicant_Company_ComId(Long comId);
+	// 기존 청크 삭제
+	void deleteByResume_RsmId(Long rsmId);
 	
 }
