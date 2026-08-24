@@ -47,9 +47,8 @@ public class SalaryAccountController {
     		@Parameter(hidden = true) Authentication authentication) {
     	// 로그인한 본인만이 자신의 급여 수령 계좌를 등록할 수 있다.
     	Long empId = authUserJwtService.getCurrentEmpId(authentication);
-    	request.setEmpId(empId);
     	
-        SalaryAccountResponse response = salaryAccountService.register(request, actor(authentication));
+        SalaryAccountResponse response = salaryAccountService.register(empId, request, actor(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
