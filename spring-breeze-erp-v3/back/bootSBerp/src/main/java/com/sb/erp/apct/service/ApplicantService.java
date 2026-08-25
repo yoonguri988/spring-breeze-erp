@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,6 +122,26 @@ public class ApplicantService {
         );
     }
     
+    // 지원 수정
+    @Transactional
+    public void update(Long apctId, ApplicantRequest req, Authentication authentication) {
+        ApplicantPrincipal principal = (ApplicantPrincipal) authentication.getPrincipal();
+        Applicant entity = applicantRepository.findById(apctId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지원입니다."));
+
+        if (!entity.getProvider().equals(principal.getProvider())
+                || !entity.getProviderId().equals(principal.getProviderId())) {
+            throw new IllegalArgumentException("본인 지원 내역만 수정할 수 있습니다.");
+        }
+        if (!"RECEIVED".equals(entity.getApctStatus())) {
+            throw new IllegalStateException("이미 검토가 시작된 지원 건은 수정할 수 없습니다.");
+        }
+
+        entity.setApctName(req.getApctName());
+        entity.setApctEmail(req.getApctEmail());
+        entity.setApctPhone(req.getApctPhone());
+    }
+    
     // 지원 취소 (본인만 가능)
     @Transactional
     public void cancel(Long apctId, Authentication authentication) {
@@ -133,7 +154,19 @@ public class ApplicantService {
                 || !entity.getProviderId().equals(applicant.getProviderId())) {
             throw new IllegalArgumentException("본인 지원 내역만 취소할 수 있습니다.");
         }
+        
+        if (!"RECEIVED".equals(entity.getApctStatus())) {
+            throw new IllegalStateException("이미 검토가 시작된 지원은 취소할 수 없습니다. 담당자에게 문의해 주세요.");
+        }
 
         applicantRepository.delete(entity);
+    }
+    
+    // 칸반보드용
+    public List<ApplicantResponse> getKanbanList(Long comId, Long recId) {
+        Specification<Applicant> spec = ApplicantSpecs.search(comId, recId, null); // apctStatus는 null → 전체
+        return applicantRepository.findAll(spec).stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 }

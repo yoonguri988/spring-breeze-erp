@@ -50,6 +50,19 @@ public class ApplicantAdminController {
 
         return ResponseEntity.ok( applicantService.getAdminList( comId, recId, apctStatus, pageable ) );
     }
+    
+    // 지원자 칸반보드 — 공고 하나의 지원자 전체 (페이징 없음). 같은 회사만 조회, ROOT는 전체 조회
+    @Operation(summary = "지원자 칸반보드 (공고별 전체 조회)")
+    @GetMapping("/kanban")
+    public ResponseEntity<List<ApplicantResponse>> getKanban(
+            @RequestParam(name = "recId") Long recId,
+            @AuthenticationPrincipal CustomUserPrincipal principal) {
+
+        boolean isRoot = principal.getRoles().contains("ROOT");
+        Long comId = isRoot ? null : principal.getComId();
+
+        return ResponseEntity.ok(applicantService.getKanbanList(comId, recId));
+    }
 
     // 지원자 상세
     @Operation(summary = "지원자 상세")

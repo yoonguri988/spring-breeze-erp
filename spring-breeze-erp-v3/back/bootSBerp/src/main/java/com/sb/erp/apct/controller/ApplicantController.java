@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +52,21 @@ public class ApplicantController {
     @GetMapping("/me")
     public ResponseEntity<List<MyApplicationResponse>> getMyApplications(Authentication authentication) {
         return ResponseEntity.ok(applicantService.getMyApplications(authentication));
+    }
+    
+    // 지원 정보 수정 - 소셜로그인 필요
+    @Operation(summary = "지원 정보 수정")
+    @PutMapping("/{apctId}")
+    public ResponseEntity<Map<String, Object>> update(
+            @PathVariable Long apctId,
+            @Valid @RequestBody ApplicantRequest req,
+            Authentication authentication) {
+        applicantService.update(apctId, req, authentication);
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("message", "지원 정보 수정 성공");
+        result.put("apctId", apctId);
+        return ResponseEntity.ok(result);
     }
 
     // 지원 취소 - 소셜로그인 필요, 본인 것만

@@ -67,6 +67,11 @@ public class ResumeService {
                 || !applicant.getProviderId().equals(principal.getProviderId())) {
             throw new IllegalArgumentException("본인 지원 건의 이력서만 업로드할 수 있습니다.");
         }
+        
+        // 검토 후 이력서 재업로드 방지
+        if (!"RECEIVED".equals(applicant.getApctStatus())) {
+            throw new IllegalStateException("이미 검토가 시작된 지원 건은 이력서를 재업로드할 수 없습니다.");
+        }
 
         // 3. 기존 이력서 조회
         Resume existing = resumeRepository
