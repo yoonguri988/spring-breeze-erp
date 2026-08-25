@@ -32,20 +32,20 @@ public class RecruitService {
     private final EntityManager em;   
 
     // 관리자용 - 회사 내 공고 목록 (상태 선택 필터 + 페이징)
-    public Page<RecruitResponse> getAdminList(Long comId, String recStatus, Pageable pageable) {
-        return recruitRepository.findAll(RecruitSpecs.search(comId, recStatus), pageable)
+    public Page<RecruitResponse> getAdminList(Long comId, String recStatus, String recTitle,Pageable pageable) {
+        return recruitRepository.findAll(RecruitSpecs.search(comId, recStatus,recTitle), pageable)
                 .map(this::mapToResponse);
     }
     // 관리자용 - 전체 건수
     public int selectCnt(RecruitSearchRequest search) {
-        Specification<Recruit> spec = RecruitSpecs.search(search.getComId(), search.getRecStatus());
+        Specification<Recruit> spec = RecruitSpecs.search(search.getComId(), search.getRecStatus(), search.getRecTitle());
         return (int) recruitRepository.count(spec);
     }
 
     // 관리자용 - 목록 (List로 딱 받기)
-    public List<RecruitResponse> selectAll(RecruitSearchRequest search) {
+    public List<RecruitResponse> selectAll(RecruitSearchRequest search) { 
     	 System.out.println("comId=" + search.getComId() + ", recStatus=[" + search.getRecStatus() + "]");
-        Specification<Recruit> spec = RecruitSpecs.search(search.getComId(), search.getRecStatus());
+        Specification<Recruit> spec = RecruitSpecs.search(search.getComId(), search.getRecStatus(), search.getRecTitle());
         Pageable pageable = PageRequest.of(search.getPageIndex(), search.getOnepagelist());
 
         return recruitRepository.findAll(spec, pageable)
@@ -128,7 +128,7 @@ public class RecruitService {
     
     // 공개용 - 전체 건수
     public int getOpenCnt(Long comId) {
-        return (int) recruitRepository.count(RecruitSpecs.search(comId, "OPEN"));
+        return (int) recruitRepository.count(RecruitSpecs.search(comId, "OPEN",null));
     }
 
     //  공개용 - 특정 회사의 OPEN 공고만 목록 조회 (비회원 지원자용)
@@ -138,7 +138,7 @@ public class RecruitService {
                 onepagelist,
                 Sort.by(Sort.Direction.DESC, "recStartDate")
         );
-        return recruitRepository.findAll(RecruitSpecs.search(comId, "OPEN"), pageable)
+        return recruitRepository.findAll(RecruitSpecs.search(comId, "OPEN",null), pageable)
                 .map(this::mapToResponse)
                 .getContent();
     }

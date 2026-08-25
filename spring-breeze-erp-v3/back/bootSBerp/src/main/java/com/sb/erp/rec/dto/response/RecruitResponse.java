@@ -12,6 +12,7 @@ public class RecruitResponse {
 
     private Long recId;
     private Long comId;
+    private String comName;
     private Long empId;
     private String recTitle;
     private String recDepartment;
@@ -33,6 +34,7 @@ public class RecruitResponse {
     public RecruitResponse(Recruit recruit) {
         this.recId = recruit.getRecId();
         this.comId = recruit.getCompany().getComId();
+        this.comName = recruit.getCompany().getComName();
         this.empId = recruit.getEmployee().getEmpId();
         this.recTitle = recruit.getRecTitle();
         this.recDepartment = recruit.getRecDepartment();
