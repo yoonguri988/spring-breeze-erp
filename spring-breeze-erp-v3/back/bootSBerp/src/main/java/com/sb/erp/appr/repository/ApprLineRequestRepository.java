@@ -1,8 +1,13 @@
 package com.sb.erp.appr.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.sb.erp.appr.entity.ApprLineRequest;
@@ -15,4 +20,26 @@ public interface ApprLineRequestRepository extends JpaRepository<ApprLineRequest
 	
 	// 사용자용 - 본인이 신청한 요청 목록
 	public List<ApprLineRequest> findByReqEmp_EmpIdOrderByCreatedAtDesc(Long empId);
+	
+	// 관리자 콘솔 - 상태/요청자/기간 필터 조회 (전부 선택적, 전체이력용)
+	@Query("""
+		select
+			r
+		from
+			ApprLineRequest r
+		where
+			(:reqStatus is null or r.reqStatus = :reqStatus)
+			and (:reqEmpId is null or r.reqEmp.empId = :reqEmpId)
+			and (:startDate is null or r.createdAt >= :startDate)
+			and (:endDate is null or r.createdAt < :endDate)
+		order by
+			r.createdAt desc
+	""")
+	public Page<ApprLineRequest> search(
+			@Param("reqStatus") String reqStatus,
+			@Param("reqEmpId") Long reqEmpId,
+			@Param("startDate") LocalDateTime startDate,
+			@Param("endDate") LocalDateTime endDate,
+			Pageable pageable
+	);
 }

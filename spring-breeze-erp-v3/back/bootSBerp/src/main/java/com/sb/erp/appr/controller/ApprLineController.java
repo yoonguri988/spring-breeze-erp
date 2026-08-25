@@ -3,6 +3,10 @@ package com.sb.erp.appr.controller;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sb.erp.appr.dto.request.ApprLineDelegationRequest;
 import com.sb.erp.appr.dto.request.ApprLineFavoriteRequest;
+import com.sb.erp.appr.dto.request.ApprLineRequestSearchCondition;
 import com.sb.erp.appr.dto.response.ApprLineDelegationResponse;
 import com.sb.erp.appr.dto.response.ApprLineFavoriteResponse;
 import com.sb.erp.appr.service.ApprLineDelegationService;
@@ -87,6 +92,17 @@ public class ApprLineController {
 		delService.reject(reqId, principal.getEmpId());
 		return ResponseEntity.noContent().build();
 	}
+	
+	@Operation(summary = "위임요청 처리 이력 조회 (관리자)", description = "상태/요청자/기간 필터로 전체 위임")
+	@PreAuthorize("hasRole('ADMIN')")
+	@GetMapping("/requests/history")
+	public ResponseEntity<Page<ApprLineDelegationResponse>> searchRequestHistory(
+			ApprLineRequestSearchCondition cond,
+			@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		return ResponseEntity.ok(delService.searchHistory(cond, pageable));
+	}
+	
 	
 	////////////////////////////// 위임/대결 //////////////////////////////
 	
