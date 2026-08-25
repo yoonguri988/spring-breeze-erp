@@ -32,7 +32,7 @@ public class ApprFormDelegationConfigServiceImpl implements ApprFormDelegationCo
 				.orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 양식입니다."));
 		
 		ApprFormDelegationConfig cfg = cfgDao
-				.findByApprForm_ForIdAndApprForm_FormVersion(req.getForId(), req.getForVersion())
+				.findByApprForm_ForIdAndApprForm_ForVersion(req.getForId(), req.getForVersion())
 				.orElse(null);
 		
 		if (cfg == null) {
@@ -59,7 +59,7 @@ public class ApprFormDelegationConfigServiceImpl implements ApprFormDelegationCo
 
 	@Override
 	public ApprFormDelegationConfigResponse getByForm(Long forId, Long forVersion) {
-		return cfgDao.findByApprForm_ForIdAndApprForm_FormVersion(forId, forVersion)
+		return cfgDao.findByApprForm_ForIdAndApprForm_ForVersion(forId, forVersion)
 				.map(ApprFormDelegationConfigResponse::new)
 				.orElse(null);
 	}

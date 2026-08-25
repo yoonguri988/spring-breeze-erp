@@ -42,7 +42,7 @@ public class ApprAutoDelegationTriggerService {
 
 		// 이 양식이 위임전결 트리거 대상인지 확인
 		ApprFormDelegationConfig cfg = cfgDao
-				.findByApprForm_ForIdAndApprForm_FormVersion(forId, forVersion)
+				.findByApprForm_ForIdAndApprForm_ForVersion(forId, forVersion)
 				.orElse(null);
 		
 		// 트리거 대상이 아닐경우 종료
