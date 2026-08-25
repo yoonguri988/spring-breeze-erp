@@ -88,7 +88,7 @@ public class SecurityConfig {
 //                        "/dept/transfer/list", "/dept/transfer/log", "/eval/**").hasRole("ADMIN")
                 // ─── 그 외 API: 세션 또는 JWT 둘 중 하나로 인증 ───
             	// 소셜)채용공고 지원자용
-            	.requestMatchers(HttpMethod.GET, "/api/public/recruit/**").authenticated()
+            	.requestMatchers(HttpMethod.GET,"/api/public/recruit", "/api/public/recruit/**").authenticated()
             	.requestMatchers("/api/public/applicant/**").authenticated()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
