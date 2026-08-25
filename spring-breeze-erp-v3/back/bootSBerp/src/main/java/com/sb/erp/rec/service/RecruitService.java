@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +30,6 @@ public class RecruitService {
     private final RecruitRepository recruitRepository;
     private final ApplicantRepository applicantRepository;
     private final EntityManager em;   
-
-    // 공개용 - 특정 회사의 OPEN 공고만 목록 조회 (비회원 지원자용)
-    public Page<RecruitResponse> getOpenList(Long comId, Pageable pageable) {
-        return recruitRepository.findByCompany_ComIdAndRecStatus(comId, "OPEN", pageable)
-                .map(this::mapToResponse);
-    }
 
     // 관리자용 - 회사 내 공고 목록 (상태 선택 필터 + 페이징)
     public Page<RecruitResponse> getAdminList(Long comId, String recStatus, Pageable pageable) {
@@ -133,13 +128,17 @@ public class RecruitService {
     
     // 공개용 - 전체 건수
     public int getOpenCnt(Long comId) {
-        return (int) recruitRepository.countByCompany_ComIdAndRecStatus(comId, "OPEN");
+        return (int) recruitRepository.count(RecruitSpecs.search(comId, "OPEN"));
     }
 
-    // 공개용 - 목록 (List로 딱 받기)
+    //  공개용 - 특정 회사의 OPEN 공고만 목록 조회 (비회원 지원자용)
     public List<RecruitResponse> getOpenListAsList(Long comId, int pstartno, int onepagelist) {
-        Pageable pageable = PageRequest.of(pstartno - 1 < 0 ? 0 : pstartno - 1, onepagelist);
-        return recruitRepository.findByCompany_ComIdAndRecStatus(comId, "OPEN", pageable)
+        Pageable pageable = PageRequest.of(
+                pstartno - 1 < 0 ? 0 : pstartno - 1,
+                onepagelist,
+                Sort.by(Sort.Direction.DESC, "recStartDate")
+        );
+        return recruitRepository.findAll(RecruitSpecs.search(comId, "OPEN"), pageable)
                 .map(this::mapToResponse)
                 .getContent();
     }
