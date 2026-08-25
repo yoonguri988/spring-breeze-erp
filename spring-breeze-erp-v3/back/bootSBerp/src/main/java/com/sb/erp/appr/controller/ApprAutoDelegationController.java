@@ -40,7 +40,7 @@ public class ApprAutoDelegationController {
 	}
 	
 	@Operation(summary = "위임전결 현황 조회 (관리자)", description = "상태별 위임전결 목록 조회")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@GetMapping
 	public ResponseEntity<List<ApprAutoDelegationResponse>> listByStatus(
 			@RequestParam("status") String deleStatus
@@ -61,7 +61,7 @@ public class ApprAutoDelegationController {
 	}
 	
 	@Operation(summary = "위임전결 취소 승인 (관리자)", description = "취소 요청 승인, 즉시 원 결재자로 복귀")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@PostMapping("/{autoDelegId}/cancel-approve")
 	public ResponseEntity<Void> approveCancel(
 			@PathVariable("autoDelegId") Long autoDelegId,
@@ -72,7 +72,7 @@ public class ApprAutoDelegationController {
 	}
 	
 	@Operation(summary = "위임전결 취소 반려 (관리자)", description = "취소 요청 려, 위임 계속 유지")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@PostMapping("/{autoDelegId}/cancel-reject")
 	public ResponseEntity<Void> rejectCancel(
 			@PathVariable("autoDelegId") Long autoDelegId,

@@ -27,7 +27,7 @@ public class ApprLogController {
 	private final ApprLogService logService;
 	
 	@Operation(summary = "결재선 감사로그 조회", description = "문서/사원/기간 필터로 감사로그 조회")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@GetMapping
 	public ResponseEntity<Page<ApprLogResponse>> searchLog(
 			ApprLogSearchCondition cond,
