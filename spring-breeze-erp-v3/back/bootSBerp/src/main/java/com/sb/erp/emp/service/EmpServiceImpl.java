@@ -8,9 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import com.sb.erp.att.entity.LeaveBalance;
+import com.sb.erp.att.repository.LeaveBalanceRepository;
 import com.sb.erp.emp.dto.request.EmpRequest;
 import com.sb.erp.emp.dto.request.EmpSearchRequest;
 import com.sb.erp.emp.dto.response.EmpResponse;
+import com.sb.erp.emp.entity.Employee;
 import com.sb.erp.emp.repository.EmpMapper;
 import com.sb.erp.perm.dto.response.EmpAuthResponse;
 
@@ -23,6 +26,7 @@ public class EmpServiceImpl implements EmpService {
 	private final EmpMapper empMapper;
 	private final PasswordEncoder passEncoder;
 	private final EmailService emailService;
+	private final LeaveBalanceRepository leaveBalanceRepository;
 
 	// ─── 조회 ────────────────────────────
 	@Override
@@ -74,6 +78,16 @@ public class EmpServiceImpl implements EmpService {
 		result = empMapper.insert(dto);
 
 		if (result > 0) {
+			
+			// 신규 사원 연차 balance 초기화(0/0 - 관리자가 추후 연차 발생 실행)
+			LeaveBalance balance = LeaveBalance.builder()
+					.employee(Employee.builder()
+					.empId(dto.getEmpId()).build())
+					.year(java.time.LocalDate.now().getYear())
+					.totalDays(java.math.BigDecimal.ZERO)
+					.usedDays(java.math.BigDecimal.ZERO).build();
+			leaveBalanceRepository.save(balance);
+
 			// ⭐ 트랜잭션 커밋 후에만 비동기 메일 발송 예약
 			// - 롤백되면 실행 안 됨 → 존재하지 않는 사원에게 메일 나갈 위험 없음
 			// - @Async 스레드로 위임 → 응답 지연 없음
