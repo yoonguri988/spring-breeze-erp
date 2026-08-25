@@ -271,11 +271,11 @@ CREATE TABLE sal_hist (
     chg_type      VARCHAR2(20)    NOT NULL,
     bfr_val       CLOB,
     aft_val       CLOB,
-    descr         VARCHAR2(500),
+    descr         VARCHAR2(2000),
     created_at    DATE            NOT NULL,
     CONSTRAINT pk_sal_hist PRIMARY KEY (hist_id),
     CONSTRAINT ck_sal_hist_dom CHECK (dom_type IN ('SALARY_STANDARD', 'SALARY_PAYMENT', 'SALARY_ACCOUNT')),
-    CONSTRAINT ck_sal_hist_chg CHECK (chg_type IN ('CREATE', 'UPDATE', 'DELETE', 'STATUS_CHANGE'))
+    CONSTRAINT ck_sal_hist_chg CHECK (chg_type IN ('CREATE', 'UPDATE', 'DELETE', 'STATUS_CHANGE', 'MANUAL_ADJUST'))
 );
 
 CREATE SEQUENCE sal_hist_seq START WITH 1 INCREMENT BY 1 NOCACHE;

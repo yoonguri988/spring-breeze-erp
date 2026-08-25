@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -18,6 +19,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.sb.erp.apct.oauth2.ApplicantOAuth2SuccessHandler;
+import com.sb.erp.apct.oauth2.ApplicantOAuth2UserService;
 import com.sb.erp.global.security.JwtAuthenticationFilter;
 import com.sb.erp.global.security.JwtProvider;
 
@@ -31,9 +34,12 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
-
+    // ────cdy────
+    private final ApplicantOAuth2UserService applicantOAuth2UserService;
+    private final ApplicantOAuth2SuccessHandler applicantOAuth2SuccessHandler;
+    // ────cdy────
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, PasswordEncoder passEncoder) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
 	        .csrf(csrf -> csrf.disable())
@@ -54,7 +60,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
             	//Swagger 인증관련경로 권한 설정
             	.requestMatchers(
-                "/auth/**", "/login/**",
+                "/auth/**", "/login/**", "/oauth2/**",
                 "/swagger-ui/**", "/v3/api-docs/**",
                 "/swagger-resources/**", "/webjars/**", 
                 "/configuration/**", "/uploads/**"  , "/api/deptusers/**" , "/api/likes/**",
@@ -81,6 +87,9 @@ public class SecurityConfig {
 //                        "/emp/checkEmpNo", "/perm/**", "/pos/**", "/dept/transfer/pending",
 //                        "/dept/transfer/list", "/dept/transfer/log", "/eval/**").hasRole("ADMIN")
                 // ─── 그 외 API: 세션 또는 JWT 둘 중 하나로 인증 ───
+            	// 소셜)채용공고 지원자용
+            	.requestMatchers(HttpMethod.GET,"/api/public/recruit", "/api/public/recruit/**").authenticated()
+            	.requestMatchers("/api/public/applicant/**").authenticated()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
@@ -100,14 +109,13 @@ public class SecurityConfig {
                     response.getWriter().write("{\"error\":\"FORBIDDEN\"}");
                 })
             )
+            .oauth2Login(oauth2 -> oauth2
+            	    .userInfoEndpoint(userInfo -> userInfo.userService(applicantOAuth2UserService))
+            	    .successHandler(applicantOAuth2SuccessHandler)
+        	)
             // 시큐리티 체인 안에서 동작
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-    
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
     }
 
     @Bean

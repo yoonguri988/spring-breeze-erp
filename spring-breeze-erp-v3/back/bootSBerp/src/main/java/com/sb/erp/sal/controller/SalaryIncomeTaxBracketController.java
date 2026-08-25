@@ -21,12 +21,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 소득세 간이 구간표 관리 (salary-calculation-engine-design.md "API 변경/추가(안)").
+ * 소득세 간이 구간표 관리
  * 회사 무관 전국 공통 근사치 정책이므로 등록은 ROOT 전용이다.
  */
-@Tag(name = "급여 산정 - 소득세 구간표", description = "기본급 구간별 단순 정률 소득세 근사치 구간표 조회·등록 API (부양가족 미반영)")
+@Tag(name = "Salary Income Tax Bracket REST API", description = "기본급 구간별 단순 정률 소득세 근사치 구간표 조회·등록 API (부양가족 미반영)")
 @RestController
-@RequestMapping("/api/salary-income-tax-brackets")
+@RequestMapping("/api/calc/salinctaxbrkt")
 @RequiredArgsConstructor
 public class SalaryIncomeTaxBracketController {
 

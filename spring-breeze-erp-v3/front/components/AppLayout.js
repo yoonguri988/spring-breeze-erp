@@ -7,6 +7,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Footer from "./Footer";
 import useIdleLogout from "../utils/useIdleLogout";
+import SalAiChatWidget from "./sal/SalAiChatWidget";
 
 const { Sider, Content } = Layout;
 const LS_LAYOUT_KEY = "sberp.layout"; // "standard" | "rail"
@@ -41,6 +42,8 @@ function AppLayout({ children }) {
   };
 
   const isRail = layoutMode === "rail";
+  // AI 급여 Q&A 챗봇 위젯: /sal/** 경로(급여관리 화면)를 보고 있을 때만 띄운다.
+  const showSalAiChat = router.pathname.startsWith("/sal");
 
   // 아직 loadUser(쿠키 → accessToken 복원)가 끝나지 않았거나(initialized===false),
   // 끝났는데도 accessToken이 없는 경우(리다이렉트 대상) 모두 레이아웃을 그리지 않는다.
@@ -71,6 +74,7 @@ function AppLayout({ children }) {
         </Content>
         <Footer />
       </Layout>
+      {showSalAiChat && <SalAiChatWidget />}
     </Layout>
   );
 }

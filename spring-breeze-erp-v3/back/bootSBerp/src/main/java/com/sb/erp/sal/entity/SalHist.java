@@ -74,7 +74,7 @@ public class SalHist {
     private String aftVal; // 변경 후 값(JSON 스냅샷)
 
     // "desc"는 Oracle 예약어(ORDER BY DESC)라 컬럼명으로 쓰면 안 되므로 "descr"로 표기
-    @Column(name = "descr", length = 500)
+    @Column(name = "descr", length = 2000)
     private String descr;
 
     @Column(name = "created_at", nullable = false, insertable = false)

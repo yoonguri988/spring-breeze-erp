@@ -22,6 +22,16 @@ import taskReducer from "./task/taskReducer";
 import noticeReducer from "./notice/noticeReducer";
 import weekReducer from "./week/weekReducer";
 import loginHistoryReducer from "./auth/loginHistoryReducer";
+// 급여 관련 리듀서
+import salStdReducer from "./sal/salStdReducer";
+import salPayReducer from "./sal/salPayReducer";
+import salAcctReducer from "./sal/salAcctReducer";
+import salHistReducer from "./sal/salHistReducer";
+import salPolicyReducer from "./sal/salPolicyReducer";
+import salAiChatReducer from "./sal/salAiChatReducer";
+import salAiDocReducer from "./sal/salAiDocReducer";
+import attReducer from "./att/attReducer";
+import leaveBalanceReducer from "./att/leaveBalanceReducer";
 
 const rootReducer = combineReducers({
   auth: authReducer, // state.auth
@@ -46,6 +56,18 @@ const rootReducer = combineReducers({
   notice: noticeReducer, // state.notice
   week: weekReducer,
   loginHistory: loginHistoryReducer, // state.loginHistory
+  // 급여 관련 리듀서
+  salStd: salStdReducer, // state.salStd
+  salPay: salPayReducer, // state.salPay
+  salAcct: salAcctReducer, // state.salAcct
+  salHist: salHistReducer, // state.salHist
+  salPolicy: salPolicyReducer, // state.salPolicy
+  salAiChat: salAiChatReducer, // state.salAiChat
+  salAiDoc: salAiDocReducer, // state.salAiDoc
+  // 근태/연차
+  att: attReducer, // state.att
+  leave : leaveBalanceReducer, //state.leave
+
 });
 
 export default rootReducer;

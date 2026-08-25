@@ -16,13 +16,13 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class SalaryIncomeTaxBracketResponse {
 
-    private Long brkt_id;
-    private Long min_amt;
-    private Long max_amt;
-    private BigDecimal tax_rate;
-    private LocalDate eff_from;
-    private LocalDate eff_to;
-    private LocalDateTime creat_at;
+    private Long brktId;
+    private Long minAmt;
+    private Long maxAmt;
+    private BigDecimal taxRate;
+    private LocalDate effFrom;
+    private LocalDate effTo;
+    private LocalDateTime createdAt;
 
     /** 부양가족 수 미반영 근사치임을 화면에서도 항상 노출하기 위한 고정 안내 문구 (엔티티에 저장하지 않는 상수) */
     public String getDisclaimer() {
@@ -31,13 +31,13 @@ public class SalaryIncomeTaxBracketResponse {
 
     public static SalaryIncomeTaxBracketResponse from(SalIncTaxBrkt entity) {
         return SalaryIncomeTaxBracketResponse.builder()
-                .brkt_id(entity.getBrktId())
-                .min_amt(entity.getMinAmt())
-                .max_amt(entity.getMaxAmt())
-                .tax_rate(entity.getTaxRate())
-                .eff_from(entity.getEffFrom())
-                .eff_to(entity.getEffTo())
-                .creat_at(entity.getCreatAt())
+                .brktId(entity.getBrktId())
+                .minAmt(entity.getMinAmt())
+                .maxAmt(entity.getMaxAmt())
+                .taxRate(entity.getTaxRate())
+                .effFrom(entity.getEffFrom())
+                .effTo(entity.getEffTo())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 }

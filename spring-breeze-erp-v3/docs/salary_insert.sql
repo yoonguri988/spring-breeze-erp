@@ -4,13 +4,18 @@
 --
 -- 이 스크립트는 [기존 더미 데이터 전체 삭제] -> [정책 테이블부터 새로 등록] -> 
 -- [정책 테이블 값(요율/직책수당/소득세 구간/식대)을 실제로 참조해서 산정한 sal_pay/sal_pay_item 재등록]
--- 순서로 동작한다. 즉 06_sal_dummy_data.sql 을 대체한다(그 스크립트는 더 이상 사용하지 않는다).
+-- 순서로 동작한다. 즉 06_sal_dummy_data.sql / 이전 버전 07 을 대체한다.
 --
 -- salary-calculation-engine-design.md / -implementation.md 의 계산 규칙을 그대로 반영:
 --   MEAL_ALLOWANCE            = sal_meal_alw_plcy.amt (com_id=1 우선, 없으면 com_id=NULL 공통값)
 --   POSITION_ALLOWANCE        = sal_pos_alw 에서 com_id+pos(POS_CODE) 매칭 (없으면 0)
---   ANNUAL_LEAVE_ALLOWANCE    = 0 (연차 모듈 미연동 스텁 - 항상 0원)
---   OVERTIME_ALLOWANCE        = 0 (근태 모듈 미연동 스텁 - 항상 0원)
+--   ANNUAL_LEAVE_ALLOWANCE    = leave_balance(연도별)의 (total_days-used_days) x 통상일급(baseSal/209x8).
+--                                09_attendance_leave_dummy_data.sql(담당자 원본, 회사 전체 46명 대상)에는 우리 12명
+--                                (emp_id 132~143)의 leave_balance 행이 없어 전부 0원(신규 입사자 등 데이터 없음 -
+--                                design 문서상 정상 케이스, 에러 아님)으로 산정된다.
+--   OVERTIME_ALLOWANCE        = attendance.overtime_minutes 월합계 x 통상시급(baseSal/209) x 1.5 (원단위 절사).
+--                                마찬가지로 우리 12명의 6~7월 attendance 행이 없어 전부 0원(근태 기록 없는 달 -
+--                                정상 케이스)으로 산정된다.
 --   NATIONAL_PENSION          = baseSal x sal_rate_plcy.pens_rate (원단위 절사)
 --   HEALTH_INSURANCE          = baseSal x sal_rate_plcy.hlth_rate (원단위 절사)
 --   LONG_TERM_CARE_INSURANCE  = 절사된 HEALTH_INSURANCE x sal_rate_plcy.care_rate (원단위 절사)
@@ -148,9 +153,8 @@ Insert into SBERP.SAL_ACCT (ACCT_ID,EMP_ID,BANK_NAME,ACCT_NO,HLDR_NAME) values (
 
 -- ------------------------------------------------------------
 -- 9) sal_pay (급여 지급) : 6월 6건 + 7월 12건 = 18건
---    sal_rate_policy(2026,유효)/sal_position_allowance(com_id=1)/
---    sal_income_tax_bracket(2026,유효)/sal_meal_allowance_policy(com_id=1,20만원)를
---    그대로 적용해서 계산한 값이다.
+--    OVERTIME_ALLOWANCE/ANNUAL_LEAVE_ALLOWANCE 는 09_attendance_leave_dummy_data.sql 에 우리 12명의
+--    6~7월 근태/연차 데이터가 없어 전부 0원이다 (데이터 없음 = 정상 케이스, 에러 아님).
 -- ------------------------------------------------------------
 Insert into SBERP.SAL_PAY (PAY_ID,EMP_ID,STD_ID,PAY_MONTH,BASE_SAL,ALLOW_TOTAL,DEDT_TOTAL,NET_PAY,STAT,REJ_RSN,PAID_AT,BANK_NAME,ACCT_NO,HLDR_NAME) values (1,135,5,to_date('26/06/01','RR/MM/DD'),3700000,200000,490400,3409600,'PAID',NULL,to_date('26/07/05','RR/MM/DD'),'하나은행','456-789012-34567','이규우'); -- 이규우 26-06월
 Insert into SBERP.SAL_PAY (PAY_ID,EMP_ID,STD_ID,PAY_MONTH,BASE_SAL,ALLOW_TOTAL,DEDT_TOTAL,NET_PAY,STAT,REJ_RSN,PAID_AT,BANK_NAME,ACCT_NO,HLDR_NAME) values (2,138,7,to_date('26/06/01','RR/MM/DD'),3700000,200000,490400,3409600,'PAID',NULL,to_date('26/07/05','RR/MM/DD'),'IBK기업은행','234567-89-012345','주현율'); -- 주현율 26-06월
@@ -172,7 +176,7 @@ Insert into SBERP.SAL_PAY (PAY_ID,EMP_ID,STD_ID,PAY_MONTH,BASE_SAL,ALLOW_TOTAL,D
 Insert into SBERP.SAL_PAY (PAY_ID,EMP_ID,STD_ID,PAY_MONTH,BASE_SAL,ALLOW_TOTAL,DEDT_TOTAL,NET_PAY,STAT,REJ_RSN,PAID_AT,BANK_NAME,ACCT_NO,HLDR_NAME) values (18,143,3,to_date('26/07/01','RR/MM/DD'),3200000,200000,424129,2975871,'PENDING',NULL,NULL,'우리은행','123-45-678901','공창형'); -- 공창형 26-07월
 
 -- ------------------------------------------------------------
--- 10) sal_pay_item (급여 지급 세부 항목) : 180건 (18건 x 10개 항목, 0원 스텁 항목 포함)
+-- 10) sal_pay_item (급여 지급 세부 항목) : 180건 (18건 x 10개 항목, 0원 항목 포함)
 -- ------------------------------------------------------------
 Insert into SBERP.SAL_PAY_ITEM (ITEM_ID,PAY_ID,ITEM_CODE,AMT) values (1,1,'MEAL_ALLOWANCE',200000);
 Insert into SBERP.SAL_PAY_ITEM (ITEM_ID,PAY_ID,ITEM_CODE,AMT) values (2,1,'POSITION_ALLOWANCE',0);
@@ -357,8 +361,6 @@ Insert into SBERP.SAL_PAY_ITEM (ITEM_ID,PAY_ID,ITEM_CODE,AMT) values (180,18,'LO
 
 -- ------------------------------------------------------------
 -- 11) sal_hist (급여 변경이력) : 12건
---     주의: 4개 신규 정책 테이블은 sal_hist.dom_type CHECK 제약(SALARY_STANDARD/
---     SALARY_PAYMENT/SALARY_ACCOUNT)에 포함되지 않으므로 이력 기록 대상이 아니다.
 -- ------------------------------------------------------------
 Insert into SBERP.SAL_HIST (HIST_ID,ACTOR_EMP_ID,ACTOR_NAME,TRGT_EMP_ID,COM_ID,DOM_TYPE,TRGT_ID,CHG_TYPE,BFR_VAL,AFT_VAL,DESCR) values (1,132,'허철아',134,1,'SALARY_STANDARD',1,'CREATE',NULL,'baseSal=2800000','사원 노경형 급여기준 최초 등록');
 Insert into SBERP.SAL_HIST (HIST_ID,ACTOR_EMP_ID,ACTOR_NAME,TRGT_EMP_ID,COM_ID,DOM_TYPE,TRGT_ID,CHG_TYPE,BFR_VAL,AFT_VAL,DESCR) values (2,132,'허철아',142,1,'SALARY_STANDARD',10,'CREATE',NULL,'baseSal=5800000','부장 안예준 급여기준 최초 등록');

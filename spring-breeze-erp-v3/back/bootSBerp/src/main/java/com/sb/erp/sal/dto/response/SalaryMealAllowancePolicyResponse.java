@@ -15,21 +15,21 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class SalaryMealAllowancePolicyResponse {
 
-    private Long meal_plcy_id;
-    private Long com_id; // NULL = 전사 공통 기본값
+    private Long mealPlcyId;
+    private Long comId; // NULL = 전사 공통 기본값
     private Long amt;
-    private LocalDate eff_from;
-    private LocalDate eff_to;
-    private LocalDateTime creat_at;
+    private LocalDate effFrom;
+    private LocalDate effTo;
+    private LocalDateTime createdAt;
 
     public static SalaryMealAllowancePolicyResponse from(SalMealAlwPlcy entity) {
         return SalaryMealAllowancePolicyResponse.builder()
-                .meal_plcy_id(entity.getMealPlcyId())
-                .com_id(entity.getComId())
+                .mealPlcyId(entity.getMealPlcyId())
+                .comId(entity.getComId())
                 .amt(entity.getAmt())
-                .eff_from(entity.getEffFrom())
-                .eff_to(entity.getEffTo())
-                .creat_at(entity.getCreatAt())
+                .effFrom(entity.getEffFrom())
+                .effTo(entity.getEffTo())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 }

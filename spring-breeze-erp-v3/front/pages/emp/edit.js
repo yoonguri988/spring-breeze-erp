@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card, Form, Input, Select, DatePicker, Button, message, } from "antd";
 import { ArrowLeftOutlined, CheckOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import dayjs from "dayjs";
+import moment from "moment";
 
 import {
   detailEmpRequest, updateEmpRequest, checkEmailRequest,
@@ -53,7 +53,7 @@ export default function EmpEditPage() {
       deptId: currentEmp.deptId,
       posId: currentEmp.posId,
       empStatus: currentEmp.empStatus,
-      hireDate: currentEmp.hireDate ? dayjs(currentEmp.hireDate) : null,
+      hireDate: currentEmp.hireDate ? moment(currentEmp.hireDate) : null,
     });
   }, [currentEmp, form]);
 

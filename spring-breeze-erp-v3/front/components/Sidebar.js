@@ -17,6 +17,62 @@ const NAV = [
     ],
   },
   {
+    // sal 모듈은 아직 다국어 지원 전이라, 라벨은 t() 대신 label/sectionLabel을 직접 하드코딩한다.
+    // (아래 렌더링부에서 label/sectionLabel이 있으면 i18n보다 우선 사용)
+    sectionKey: "salary",
+    sectionLabel: "급여관리",
+    items: [
+      {
+        page: "salmy",
+        label: "내 급여정보",
+        href: "/sal/my",
+        icon: "bi-wallet2",
+      },
+      {
+        page: "salstdlist",
+        label: "급여기준 관리",
+        href: "/sal/std",
+        icon: "bi-card-checklist",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salpaylist",
+        label: "급여지급 관리",
+        href: "/sal/pay",
+        icon: "bi-cash-coin",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salacctadmin",
+        label: "수령계좌 조회",
+        href: "/sal/acct-admin",
+        icon: "bi-bank",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salhistlist",
+        label: "급여 변경이력",
+        href: "/sal/hist",
+        icon: "bi-clock-history",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salpolicylist",
+        label: "급여계산 정책관리",
+        href: "/sal/policy",
+        icon: "bi-sliders2",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "salaidocadmin",
+        label: "AI Q&A 근거 문서 관리",
+        href: "/sal/aidoc-admin",
+        icon: "bi-file-earmark-pdf",
+        role: "ROLE_ADMIN",
+      },
+    ],
+  },
+  {
     sectionKey: "org",
     items: [
       {
@@ -90,6 +146,43 @@ const NAV = [
         page: "evalreport",
         href: "/eval/report/my",
         icon: "bi-file-earmark-bar-graph",
+      },
+    ],
+  },
+  {
+    sectionKey: "att",
+    items: [
+      {
+        page: "attdashboard",
+        label: "출퇴근 대시보드",
+        href: "/att/dashboard",
+        icon: "bi-clock",
+      },
+      {
+        page: "attmy",
+        label: "내 근태 이력",
+        href: "/att/my",
+        icon: "bi-person-lines-fill",
+      },
+      {
+        page: "attadmin",
+        label: "근태 현황 관리",
+        href: "/att/admin",
+        icon: "bi-calendar2-week",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "leavemy",
+        label: "내 연차 현황",
+        href: "/att/leave/my",
+        icon: "bi-calendar-check",
+      },
+      {
+        page: "leaveadmin",
+        label: "연차 관리",
+        href: "/att/leave/admin",
+        icon: "bi-calendar2-plus",
+        role: "ROLE_ADMIN",
       },
     ],
   },
@@ -198,16 +291,18 @@ export default function Sidebar() {
           <React.Fragment key={gi}>
             {group.sectionKey && (
               <div className="sb-nav__section">
-                {t(`sections.${group.sectionKey}`)}
+                {group.sectionLabel || t(`sections.${group.sectionKey}`)}
               </div>
             )}
             {group.items
               .filter((it) => canShow(it.role, user))
               .map((it) => {
-                const tip = t(`items.${it.page}.tip`);
-                const label = t(`items.${it.page}.label`, {
-                  defaultValue: tip,
-                });
+                const tip = it.label || t(`items.${it.page}.tip`);
+                const label =
+                  it.label ||
+                  t(`items.${it.page}.label`, {
+                    defaultValue: tip,
+                  });
 
                 return (
                   <Link key={it.page} href={it.href} passHref>
@@ -230,17 +325,15 @@ export default function Sidebar() {
 
       {isAuthenticated && (
         <div className="sb-sidebar__foot">
-          <div className="sb-userchip">
-            <div className="sb-avatar">{user?.empName?.[0]}</div>
-            <div className="sb-userchip__meta">
-              <b>{user?.empName}</b>
-              <span>{user?.posName}</span>
+          <Link href={`/emp/detail?empId=${user?.empId}`} passHref>
+            <div className="sb-userchip">
+              <div className="sb-avatar">{user?.empName?.[0]}</div>
+              <div className="sb-userchip__meta">
+                <b>{user?.empName}</b>
+                <span>{user?.posName}</span>
+              </div>
             </div>
-            <i
-              className="bi bi-chevron-expand ms-auto sb-nav__label"
-              style={{ color: "var(--sb-ink-faint)", fontSize: 14 }}
-            />
-          </div>
+          </Link>
         </div>
       )}
     </>

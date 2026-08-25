@@ -97,7 +97,8 @@
 			pos_id = #{posId},
 			emp_email = #{empEmail},
 			emp_mobile = #{empMobile},
-			emp_status = #{empStatus}
+			emp_status = #{empStatus},
+    		hire_date = #{hireDate}
 		where emp_id = #{empId} and com_id = #{comId}
 	</update>
 

@@ -11,7 +11,30 @@ import java.math.RoundingMode;
  */
 public final class SalaryCalculationSupport {
 
+    /** 월 소정근로시간(통상임금 산정 기준, 근로기준법 통상 관행). 시급/일급 계산의 공통 분모다. */
+    private static final BigDecimal MONTHLY_STANDARD_HOURS = BigDecimal.valueOf(209);
+
+    /** 1일 소정근로시간(통상 8시간). 일급 = 시급 x 이 값. */
+    private static final BigDecimal DAILY_STANDARD_HOURS = BigDecimal.valueOf(8);
+
     private SalaryCalculationSupport() {
+    }
+
+    /**
+     * 통상시급 = baseSal / 209(월 소정근로시간). 연장수당/연차수당 계산의 공통 기준값이다.
+     * 최종 truncate는 이 값이 아니라 이 값을 사용해 계산된 "최종 금액"에서 한 번만 수행한다
+     * (중간 단계에서 절사를 반복하면 절사 오차가 누적되므로, scale은 넉넉히 주고 버림 오차만 방지한다).
+     */
+    public static BigDecimal hourlyWage(Long baseSal, int scale) {
+        if (baseSal == null) {
+            return BigDecimal.ZERO;
+        }
+        return BigDecimal.valueOf(baseSal).divide(MONTHLY_STANDARD_HOURS, scale, RoundingMode.DOWN);
+    }
+
+    /** 통상일급 = 통상시급 x 8시간(연차수당 계산 기준값). */
+    public static BigDecimal dailyWage(Long baseSal, int scale) {
+        return hourlyWage(baseSal, scale).multiply(DAILY_STANDARD_HOURS);
     }
 
     /** baseSal x rate 를 계산한 뒤 원 단위 절사(버림)하여 Long으로 반환한다. */
