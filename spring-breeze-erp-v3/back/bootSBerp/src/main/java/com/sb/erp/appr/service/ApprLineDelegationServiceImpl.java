@@ -4,10 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.appr.dto.request.ApprLineDelegationRequest;
+import com.sb.erp.appr.dto.request.ApprLineRequestSearchCondition;
 import com.sb.erp.appr.dto.response.ApprLineDelegationResponse;
 import com.sb.erp.appr.entity.ApprLine;
 import com.sb.erp.appr.entity.ApprLineRequest;
@@ -131,6 +134,16 @@ public class ApprLineDelegationServiceImpl implements ApprLineDelegationService{
 		reqEntity.setProEmp(admin);
 		reqEntity.setReqStatus("REJ");
 		reqEntity.setProcessedAt(LocalDateTime.now());
+	}
+
+	@Override
+	public Page<ApprLineDelegationResponse> searchHistory(ApprLineRequestSearchCondition cond, Pageable pageable) {
+		
+		LocalDateTime start = cond.getStartDate() != null ? cond.getStartDate().atStartOfDay() : null;
+		LocalDateTime end = cond.getEndDate() != null ? cond.getEndDate().plusDays(1).atStartOfDay() : null;
+		
+		return reqDao.search(cond.getReqStatus(), cond.getReqEmpId(), start, end, pageable)
+				.map(ApprLineDelegationResponse::new);
 	}
 
 }

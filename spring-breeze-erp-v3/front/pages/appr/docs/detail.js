@@ -1,15 +1,19 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import {
-    message, Descriptions, Button,
-    Popconfirm, Row, Col
+    message, Descriptions, Button, Card, List, Tag, Spin,
+    Row, Col, Modal, Form, Input
 } from "antd";
 import {
     fetchDocDetailRequest, approveDocRequest,
     rejectDocRequest, resetProcessState,
+    fetchWriterInfoRequest, fetchDeptTreeRequest, fetchDeptEmpsRequest,
 } from "../../../reducers/appr/apprDocReducer";
+import {
+    createDelegReqRequest, resetCreateStats,
+} from "../../../reducers/appr/apprLineDelegationReducer";
 
 export default function DocDetailPage() {
     const router = useRouter();
@@ -21,13 +25,47 @@ export default function DocDetailPage() {
         detailDoc, detailLines, canProcess,
         detailLoading, detailError,
         processSubmitting, processError, processSuccess,
+        writerInfo, deptTree, deptTreeLoading,
+        deptEmps, deptEmpsLoading,
     } = useSelector((state) => state.apprDoc);
+
+    const {
+        createSubmitting, createError, createSuccess,
+    } = useSelector((state) => state.apprLineDelegation);
+
+    // 위임요청 모달
+    const [delegModalOpen, setDelegModalOpen] = useState(false);
+    const [selectedDeptId, setSelectedDeptId] = useState(null);
+    const [selectedDelegate, setSelectedDelegate] = useState(null);
+    const [form] = Form.useForm();
+
+    // 승인/반려 확인 모달
+    const [confirmAction, setConfirmAction] = useState(null);
 
     // docId가 준비 되면 상세 조회
     useEffect(() => {
         if (!docId) return;
         dispatch(fetchDocDetailRequest({docId}));
     }, [dispatch, docId]);
+
+    // 부서트리 조회 - 본인 정보 필요
+    useEffect(() => {
+        dispatch(fetchWriterInfoRequest());
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (writerInfo?.deptId) {
+            dispatch(fetchDeptTreeRequest({
+                deptId: writerInfo.deptId,
+                empId: writerInfo.empId
+            }));
+        }
+    }, [dispatch, writerInfo]);
+
+    const handleDeptSelect = (deptId) => {
+        setSelectedDeptId(deptId);
+        dispatch(fetchDeptEmpsRequest(deptId));
+    }
 
     // 승인/반려 성공하면 최신 상태로 재조회
     useEffect(() => {
@@ -82,7 +120,40 @@ export default function DocDetailPage() {
         }
     }, [isSchemaDoc, detailDoc]);
 
-    if (detailLoading || !detailDoc) {
+    // 위임요청 모달 관련
+
+    // 현재 로그인한 사원의 결재 순번 - 대기중(WAI)인 라인이 곧 본인 차례
+    // canProcess가 true일 때만 버튼이 보임
+    const myLine = detailLines.find((line) => line.linStatus === "WAI");
+
+    useEffect(() => {
+        if (createSuccess) {
+            message.success("위임/대결 요청이 접수되었습니다.")
+            setDelegModalOpen(false);
+            setSelectedDelegate(null);
+            setSelectedDeptId(null);
+            form.resetFields();
+            dispatch(resetCreateStats());
+        }
+    }, [createSuccess]);
+
+    useEffect(() => {
+        if (createError) {
+            message.error(createError);
+        }
+    }, [createError]);
+
+    const handleDelegSubmit = () => {
+        form.validateFields().then((values) => {
+            dispatch(createDelegReqRequest({
+                linId: myLine.linId,
+                newEmpId: selectedDelegate.empId,
+                reqReason: values.reqReason,
+            }));
+        });
+    }
+
+        if (detailLoading || !detailDoc) {
         return <div style={{padding: 24}}>{t("common.loadingMsg")}</div>
     }
 
@@ -241,19 +312,149 @@ export default function DocDetailPage() {
 
             {canProcess && (
                 <div style={{display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 24}}>
-                    {/* 위임 요청 버튼은 appr_line_request 기능 만들 때 여기에 추가 예정 */}
-                    <Popconfirm title={t("docs.detail.rejectConfirmTitle")} onConfirm={handleReject}>
-                        <Button danger loading={processSubmitting} disabled={processSubmitting}>
-                            {t("docs.detail.rejectBtn")}
-                        </Button>
-                    </Popconfirm>
-                    <Popconfirm title={t("docs.detail.approveConfirmTitle")} onConfirm={handleApprove}>
-                        <Button type="primary" loading={processSubmitting} disabled={processSubmitting}>
-                            {t("docs.detail.approveBtn")}
-                        </Button>
-                    </Popconfirm>
+                    <Button onClick={() => setDelegModalOpen(true)}>
+                        위임/대결 요청
+                    </Button>
+                    <Button danger onClick={() => setConfirmAction("reject")}>
+                        반려
+                    </Button>
+                    <Button type="primary" onClick={() => setConfirmAction("approve")}>
+                        승인
+                    </Button>
                 </div>
             )}
+
+            {/* 승인/반려 확인 모달 */}
+            <Modal
+                title={confirmAction === "approve" ? "결재 승인" : "결재 반려"}
+                open={confirmAction !== null}
+                onCancel={() => setConfirmAction(null)}
+                onOk={confirmAction === "approve" ? handleApprove : handleReject}
+                confirmLoading={processSubmitting}
+                okText={confirmAction === "approve" ? "승인" : "반려"}
+                cancelText="취소"
+                okButtonProps={{danger: confirmAction === "reject"}}
+            >
+                <p>
+                   {confirmAction === "approve"
+                    ? "이 문서를 승인하시겠습니까?"
+                    : "이 문서를 반려하시겠습니까?"
+                   } 
+                </p>
+            </Modal>
+
+            {/* 위임/대결 요청 모달 */}
+            <Modal
+                title="위임/대결 요청"
+                open={delegModalOpen}
+                onCancel={() => {
+                    setDelegModalOpen(false);
+                    setSelectedDelegate(null);
+                    setSelectedDeptId(null);
+                }}
+                onOk={handleDelegSubmit}
+                confirmLoading={createSubmitting}
+                okText="요청"
+                cancelText="취소"
+                okButtonProps={{disabled: !selectedDelegate}}
+                width={700}
+            >
+                <Form form={form} layout="vertical">
+                    <Row gutter={16}>
+                        <Col span={10}>
+                            <Card size="small" title="부서 선택" bodyStyle={{padding: 8}}>
+                                <div style={{maxHeight: 240, overflowY: "auto"}}>
+                                    <List
+                                        size="small"
+                                        loading={deptTreeLoading}
+                                        dataSource={deptTree}
+                                        locale={{emptyText: "부서 정보를 불러오는 중입니다."}}
+                                        renderItem={(d) => (
+                                            <List.Item
+                                                style={{
+                                                    cursor: "pointer",
+                                                    background: selectedDeptId === d.deptId ? "#e6f6ff" : "transparent"
+                                                }}
+                                                onClick={() => handleDeptSelect(d.deptId)}
+                                            >
+                                                {d.deptName} <Tag style={{marginLeft: 8}}>{d.empCount}명</Tag>
+                                            </List.Item>
+                                        )}
+                                    />
+                                </div>
+                            </Card>
+                        </Col>
+                        <Col span={14}>
+                            <Card size="small" title="대결자 선택" bodyStyle={{padding: 8}}>
+                                {deptEmpsLoading ? (
+                                    <div style={{textAlign: "center", padding: "20px 0"}}>
+                                        <Spin size="small"/>
+                                    </div>
+                                ) : (
+                                    <div className="appr-emp-box">
+                                        {deptEmps.length === 0 ? (
+                                            <div className="text-muted text-center py-4 small">
+                                                왼쪽에서 부서를 먼저 선택하세요.
+                                            </div>
+                                        ) : (
+                                            deptEmps.map((e) => {
+                                                const isSelected = selectedDelegate?.empId === e.empId;
+                                                return (
+                                                    <div
+                                                        key={e.empId}
+                                                        className={"appr-emp-row" + (isSelected ? " selected" : "")}
+                                                        onClick={() => setSelectedDelegate(isSelected ? null : e)}
+                                                    >
+                                                        <span>
+                                                            {e.empName}
+                                                            {e.empStatus === "휴직" && (
+                                                                <Tag color="orange" style={{marginLeft: 6}}>휴직중</Tag>
+                                                            )}
+                                                        </span>
+                                                        <span className="pos-chip">{e.posName}</span>
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                )}
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    {selectedDelegate && (
+                        <div
+                            style={{
+                                marginTop: 12,
+                                marginBottom: 4,
+                                padding: "10px 14px",
+                                borderRadius: 8,
+                                background: "#e6f4ff",
+                                border: "1px solid #91caff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <div style={{display: "flex", alignItems: "center", gap: 8}}>
+                                <span style={{color: "#8a93a3", fontSize: 13}}>선택된 대결자</span>
+                                <span style={{fontWeight: 700, fontSize: 15}}>{selectedDelegate.empName}</span>
+                                <span className="pos-chip">{selectedDelegate.posName}</span>
+                            </div>
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<i className="bi bi-x-lg" />}
+                                onClick={() => setSelectedDelegate(null)}
+                            />
+                        </div>
+                    )}
+
+                    <Form.Item name="reqReason" label="사유">
+                        <Input.TextArea rows={3} placeholder="위임/대결 사유 (선택)"/>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 }

@@ -10,6 +10,7 @@ import resvReducer from "./resv/resvReducer";
 import adminResvReducer from "./resv/adminResvReducer";
 import apprFormReducer from "./appr/apprFormReducer";
 import apprDocReducer from "./appr/apprDocReducer";
+import apprLineDelegationReducer from "./appr/apprLineDelegationReducer";
 import empReducer from "./emp/empReducer";
 import posReducer from "./pos/posReducer";
 import permReducer from "./perm/permReducer";
@@ -44,6 +45,7 @@ const rootReducer = combineReducers({
   adminResv: adminResvReducer, // state.adminResv
   apprForm: apprFormReducer, // state.apprForm
   apprDoc: apprDocReducer, // state.apprDoc
+  apprLineDelegation: apprLineDelegationReducer, // state.apprLineDelegation
   emp: empReducer, // state.emp
   pos: posReducer, // state.pos
   perm: permReducer, // state.perm

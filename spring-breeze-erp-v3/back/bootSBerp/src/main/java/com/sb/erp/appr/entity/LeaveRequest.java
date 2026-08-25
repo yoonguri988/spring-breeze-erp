@@ -1,4 +1,4 @@
-package com.sb.erp.lev.entity;
+package com.sb.erp.appr.entity;
 
 import java.time.LocalDate;
 

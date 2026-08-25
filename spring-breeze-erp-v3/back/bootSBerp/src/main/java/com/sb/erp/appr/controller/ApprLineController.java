@@ -3,6 +3,10 @@ package com.sb.erp.appr.controller;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,12 +14,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sb.erp.appr.dto.request.ApprLineDelegationRequest;
 import com.sb.erp.appr.dto.request.ApprLineFavoriteRequest;
+import com.sb.erp.appr.dto.request.ApprLineRequestSearchCondition;
 import com.sb.erp.appr.dto.response.ApprLineDelegationResponse;
 import com.sb.erp.appr.dto.response.ApprLineFavoriteResponse;
 import com.sb.erp.appr.service.ApprLineDelegationService;
@@ -23,7 +29,6 @@ import com.sb.erp.appr.service.ApprLineFavoriteService;
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,12 +50,12 @@ public class ApprLineController {
 			@Valid
 			@RequestBody ApprLineDelegationRequest req,
 			@AuthenticationPrincipal CustomUserPrincipal principal
-	) {
+	) { 
 		Long reqId = delService.createRequest(req, principal.getEmpId());
 		URI location = URI.create("/appr/lines/requests/" + reqId);
 		return ResponseEntity.created(location).build();
 	}
-	
+
 	@Operation(summary = "내 위임 요청 목록", description = "본인이 신청한 위임 요청 확인")
 	@GetMapping("/requests/my")
 	public ResponseEntity<List<ApprLineDelegationResponse>> myRequests(
@@ -87,6 +92,17 @@ public class ApprLineController {
 		delService.reject(reqId, principal.getEmpId());
 		return ResponseEntity.noContent().build();
 	}
+	
+	@Operation(summary = "위임요청 처리 이력 조회 (관리자)", description = "상태/요청자/기간 필터로 전체 위임")
+	@PreAuthorize("hasRole('ADMIN')")
+	@GetMapping("/requests/history")
+	public ResponseEntity<Page<ApprLineDelegationResponse>> searchRequestHistory(
+			ApprLineRequestSearchCondition cond,
+			@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		return ResponseEntity.ok(delService.searchHistory(cond, pageable));
+	}
+	
 	
 	////////////////////////////// 위임/대결 //////////////////////////////
 	
