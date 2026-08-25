@@ -245,7 +245,7 @@ export default function ProjListPage() {
 
         <div className="sb-page-head__actions my-3">
           <Link href="/proj/proj_create">
-            <Button type="primary" size="small" icon={<PlusOutlined />}>
+            <Button type="primary" icon={<PlusOutlined />}>
               {t("list.createBtn")}
             </Button>
           </Link>
