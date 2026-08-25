@@ -32,6 +32,7 @@ import posKo from "./locales/ko/pos.json";
 import permKo from "./locales/ko/perm.json";
 import evalKo from "./locales/ko/eval.json";
 import apprKo from "./locales/ko/appr.json";
+import attKo from "./locales/ko/att.json";
 
 import commonEn from "./locales/en/common.json";
 import headerEn from "./locales/en/header.json";
@@ -51,6 +52,8 @@ import posEn from "./locales/en/pos.json";
 import permEn from "./locales/en/perm.json";
 import evalEn from "./locales/en/eval.json";
 import apprEn from "./locales/en/appr.json";
+import attEn from "./locales/en/att.json";
+
 
 export const SUPPORTED_LANGUAGES = ["ko", "en"];
 export const DEFAULT_LANGUAGE = "ko";
@@ -77,6 +80,7 @@ const resources = {
     perm: permKo,
     eval: evalKo,
     appr: apprKo,
+    att: attKo,
   },
   en: {
     common: commonEn,
@@ -97,6 +101,7 @@ const resources = {
     perm: permEn,
     eval: evalEn,
     appr: apprEn,
+    att: attEn,
   },
 };
 

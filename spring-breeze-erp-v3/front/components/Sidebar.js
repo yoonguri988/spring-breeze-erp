@@ -154,7 +154,7 @@ const NAV = [
     items: [
       {
         page: "attdashboard",
-        label: "출퇴근 대시보드",
+        label: "출퇴근 현황",
         href: "/att/dashboard",
         icon: "bi-clock",
       },

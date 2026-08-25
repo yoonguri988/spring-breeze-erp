@@ -1,6 +1,7 @@
 package com.sb.erp.att.dto.request;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -19,6 +20,10 @@ public class LeaveGrantRequest {
     // BigDecimal : 반차(0.5일) 처리
     @NotNull
     private BigDecimal grantDays;
+    
+    // 실제 휴가 사용일
+    @NotNull
+    private LocalDate leaveDate;
 
     // 부여 타입
     // "REG" = 정기 부여 (근로기준법 기반 자동 계산)
@@ -38,5 +43,6 @@ public class LeaveGrantRequest {
     // ADJ 타입일 때 "특별휴가 부여", "징계에 따른 차감" 등 기록
     // REG/USE 타입에서는 null 허용
     private String reason;
+    
 
 }

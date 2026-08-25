@@ -47,11 +47,12 @@ public class AttendanceController {
 			Authentication auth,
 			@RequestParam("startDate") LocalDate startDate,
 			@RequestParam("endDate") LocalDate endDate,
+			@RequestParam(name="keyword", required=false) String keyword,
 			@RequestParam("start") int start,
 			@RequestParam("end") int end) {
 		
 		List<AttendanceResponse> list = attendanceService
-				.getAllAttendances(startDate, endDate, start, end);
+				.getAllAttendances(startDate, endDate, keyword, start, end);
 
 		return ResponseEntity.ok(list);
 	}
@@ -82,6 +83,22 @@ public class AttendanceController {
 	public ResponseEntity<AttendanceResponse> checkOut(Authentication auth){
 		Long empId = authUserJwtService.getCurrentEmpId(auth);
 		return ResponseEntity.ok(attendanceService.checkOut(empId));
+	}
+	
+	//POST
+	@Operation(summary = "관리자 근태 등록")
+	@PostMapping("/admin")
+	public ResponseEntity<?> create(
+			Authentication auth,
+			@RequestBody AttendanceRequest request){
+		
+		if(!isAdmin(auth)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "등록 권한이 없습니다."));
+		}
+		
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(attendanceService.createAtt(request));
 	}
 	
 	

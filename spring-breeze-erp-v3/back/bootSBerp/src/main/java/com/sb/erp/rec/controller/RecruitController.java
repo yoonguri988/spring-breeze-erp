@@ -30,7 +30,7 @@ public class RecruitController {
     @Operation(summary = "채용공고 목록")
     @GetMapping
     public ResponseEntity<Map<String, Object>> getOpenList(
-            @RequestParam("comId") Long comId,
+    		@RequestParam(name = "comId", required = false) Long comId,
             @RequestParam(name = "pstartno", defaultValue = "1") int pstartno) {
 
         int onepagelist = 10;

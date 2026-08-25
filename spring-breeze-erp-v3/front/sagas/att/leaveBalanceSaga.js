@@ -5,6 +5,7 @@ import api from '../../api/axios';
 
 import {
     fetchMyBalancesRequest, fetchMyBalancesSuccess, fetchMyBalancesFailure,
+    fetchMyGrantsRequest, fetchMyGrantsSuccess, fetchMyGrantsFailure,
     fetchAllBalancesRequest, fetchAllBalancesSuccess, fetchAllBalancesFailure,
     fetchBalanceRequest, fetchBalanceSuccess, fetchBalanceFailure,
     fetchGrantHistoryRequest, fetchGrantHistorySuccess, fetchGrantHistoryFailure,
@@ -36,16 +37,32 @@ export function* fetchMyBalances(action) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// fetchMyBalances  -GET /api/att/leave/grant/my 내 연차 사용 이력 조회  ---
+//////////////////////////////////////////////////////////////////////////////
+
+export const fetchMyGrantsApi = () =>
+    api.get(`${LEAVE_API_BASE}/grant/my`);
+
+export function* fetchMyGrants(action) {
+    try {
+        const result = yield call(fetchMyGrantsApi);
+        yield put(fetchMyGrantsSuccess(result.data));
+    } catch (err) {
+        yield put(fetchMyGrantsFailure(err.response?.data?.message || err.message));
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // fetchAllBalances  - GET /api/att/leave/balance?year={year} 전체 사원 연차 조회 
 //////////////////////////////////////////////////////////////////////////////
 
-export const fetchAllBalancesApi = (year) =>
-    api.get(`${LEAVE_API_BASE}/balance`, { params: { year } });
+export const fetchAllBalancesApi = ({ year, keyword }) =>
+    api.get(`${LEAVE_API_BASE}/balance`, { params: { year, keyword } });
 
 export function* fetchAllBalances(action) {
     try {
-        // action.payload = { year: 2026 }
-        const result = yield call(fetchAllBalancesApi, action.payload.year);
+        // action.payload = { year: 2026, keyword: "name" }
+        const result = yield call(fetchAllBalancesApi, action.payload);
         yield put(fetchAllBalancesSuccess(result.data));
     } catch (err) {
         yield put(fetchAllBalancesFailure(
@@ -158,6 +175,7 @@ export function* adjust(action) {
 //////////////////////////////////////////////////////////////////////////////
 
 function* watchFetchMyBalances()  { yield takeLatest(fetchMyBalancesRequest.type, fetchMyBalances); }
+function* watchFetchMyGrants()    { yield takeLatest(fetchMyGrantsRequest.type, fetchMyGrants); }
 function* watchFetchAllBalances() { yield takeLatest(fetchAllBalancesRequest.type, fetchAllBalances); }
 function* watchFetchBalance()     { yield takeLatest(fetchBalanceRequest.type, fetchBalance); }
 function* watchFetchGrantHistory(){ yield takeLatest(fetchGrantHistoryRequest.type, fetchGrantHistory); }
@@ -179,5 +197,6 @@ export default function* leaveBalanceSaga() {
         call(watchCalculate),
         call(watchDeduct),
         call(watchAdjust),
+        call(watchFetchMyGrants),
     ]);
 }

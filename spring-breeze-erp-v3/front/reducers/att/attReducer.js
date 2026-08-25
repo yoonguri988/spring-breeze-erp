@@ -2,11 +2,16 @@
 
 import { createSlice } from "@reduxjs/toolkit";
 
+// ============================================================
+//  1. initialState
+// ============================================================
+
 const initialState = {
-    // ── 목록  ──
+
+    // ── 목록 관련 ──
     attList: [],
 
-    // 페이징 정보
+    // 페이징 정보 (start, end, total 등)
     paging: null,
 
     // ── 개인 기록 ──
@@ -15,15 +20,16 @@ const initialState = {
     // ── 출퇴근 대시보드 ──
     todayAtt: null,
 
-    // ── 공통 상태 플래그 ──
+    // ── 공통 상태 ──
     loading: false,
     error: null,
     success: false,
 };
 
 // ============================================================
-//  2. createSlice — action + reducer
+//  2. createSlice — action + reducer 를 한 번에 생성
 // ============================================================
+
 const attSlice = createSlice({
     name: "att",
     initialState,
@@ -37,12 +43,14 @@ const attSlice = createSlice({
         },
 
         // ── 관리자 근태 목록 조회 ──
+        // action.payload = { startDate, endDate, start, end }
         listAttRequest: (state) => {
             state.loading = true;
             state.error = null;
         },
         listAttSuccess: (state, action) => {
             state.loading = false;
+            // action.payload = { list: [...], paging: {...} }
             state.attList = action.payload.list;
             state.paging = action.payload.paging;
         },
@@ -58,6 +66,7 @@ const attSlice = createSlice({
         },
         myAttSuccess: (state, action) => {
             state.loading = false;
+            // action.payload = AttendanceResponse[] (배열)
             state.myAttList = action.payload;
         },
         myAttFailure: (state, action) => {
@@ -65,13 +74,14 @@ const attSlice = createSlice({
             state.error = action.payload;
         },
 
-        // ── 출근 여부 ──
+        // ── 출근 ──
         checkInRequest: (state) => {
             state.loading = true;
             state.error = null;
         },
         checkInSuccess: (state, action) => {
             state.loading = false;
+            // action.payload = AttendanceResponse (단건)
             state.todayAtt = action.payload;
             state.success = true;
         },
@@ -80,7 +90,7 @@ const attSlice = createSlice({
             state.error = action.payload;
         },
 
-        // ── 퇴근 여부 ──
+        // ── 퇴근 ──
         checkOutRequest: (state) => {
             state.loading = true;
             state.error = null;
@@ -97,6 +107,7 @@ const attSlice = createSlice({
         },
 
         // ── 근태 수정 (관리자) ──
+        // action.payload = { attId, ...수정할 필드들 }
         editAttRequest: (state) => {
             state.loading = true;
             state.error = null;
@@ -109,12 +120,28 @@ const attSlice = createSlice({
             state.loading = false;
             state.error = action.payload;
         },
+
+        // ── 근태 등록 (관리자) ──
+        // action.payload = { empId, attDate, checkIn, checkOut, attStatus }
+        createAttRequest: (state) => {
+            state.loading = true;
+            state.error = null;
+        },
+        createAttSuccess: (state, action) => {
+            state.loading = false;
+            state.success = true;
+        },
+        createAttFailure: (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        },
     },
 });
 
 // ============================================================
 //  3. action creator export
 // ============================================================
+
 export const {
     resetAttState,
     listAttRequest, listAttSuccess, listAttFailure,
@@ -122,9 +149,11 @@ export const {
     checkInRequest, checkInSuccess, checkInFailure,
     checkOutRequest, checkOutSuccess, checkOutFailure,
     editAttRequest, editAttSuccess, editAttFailure,
+    createAttRequest, createAttSuccess, createAttFailure,
 } = attSlice.actions;
 
 // ============================================================
 //  4. reducer export
 // ============================================================
+
 export default attSlice.reducer;

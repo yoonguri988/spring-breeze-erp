@@ -16,7 +16,7 @@ import com.sb.erp.att.dto.response.AttendanceResponse;
 import com.sb.erp.att.entity.Attendance;
 import com.sb.erp.att.repository.AttendanceRepository;
 import com.sb.erp.emp.entity.Employee;
-import com.sb.erp.emp.repository.EmployeeRepository;
+import com.sb.erp.emp.repository.EmpRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,12 +26,14 @@ import lombok.RequiredArgsConstructor;
 public class AttendanceService {
 	
 	private final AttendanceRepository attendanceRepository;
-	private final EmployeeRepository employeeRepository;
+	private final EmpRepository empRepository;
 	
 	
 	//	목록 조회	읽기
-	public List<AttendanceResponse> getAllAttendances(LocalDate startDate, LocalDate endDate, int start, int end){
-		return attendanceRepository.findAttendanceWithPaging(startDate, endDate, start, end)
+	public List<AttendanceResponse> getAllAttendances(
+			LocalDate startDate, LocalDate endDate, String keyword, 
+			int start, int end){
+		return attendanceRepository.findAttendanceWithSearch(startDate, endDate, keyword, start, end)
 				.stream()
 				.map(AttendanceResponse::from)
 				.collect(Collectors.toList());
@@ -72,7 +74,7 @@ public class AttendanceService {
 		String status = now.toLocalTime().isAfter(LocalTime.of(9, 0))? "LATE" : "NORMAL";
 		
 		// Entity
-		Employee emp = employeeRepository.findById(empId)
+		Employee emp = empRepository.findById(empId)
 				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));
 		
 		Attendance attendance = Attendance.builder()
@@ -88,6 +90,7 @@ public class AttendanceService {
 		return AttendanceResponse.from(saved);
 		
 	}
+	
 	
 	// 퇴근 check-out
 	@Transactional
@@ -114,6 +117,42 @@ public class AttendanceService {
 
 	}
 
+	
+	// 누락된 근태가 있을 경우 관리자가 새로운 근태 내용 작성
+	@Transactional
+	public AttendanceResponse createAtt(AttendanceRequest request) {
+		
+		// 근태 내용 중복 체크하기
+		long count = attendanceRepository.countByEmployee_EmpIdAndAttDate(request.getEmpId(), request.getAttDate());
+		
+		if(count > 0) {
+			throw new IllegalArgumentException("해당 날짜에 이미 근태 기록이 존재합니다.");
+		}
+		
+		// 등록된 사원이 맞는지/사번 맞는지
+		Employee emp = empRepository.findByEmpNo(request.getEmpNo())
+				.orElseThrow(()-> new IllegalArgumentException("존재하지 않는 사원입니다."));
+		
+		// 근태 없고 등록된 사원 맞으면 누락된 근태를 생성해주기
+		Attendance att = Attendance.builder()
+				.employee(emp) // 사원 정보
+				.attDate(request.getAttDate()) // 날짜
+				.checkIn(request.getCheckIn()) // 출근시간
+				.checkOut(request.getCheckOut()) // 퇴근시간
+				.attStatus(request.getAttStatus() != null? request.getAttStatus(): "NORMAL") // 등록한 상태 or 정상근무
+				.build();
+		
+		// 출/퇴근 모두 입력했으면 근무시간 계산
+		if(request.getCheckOut() != null) {
+			calculateWorkMinutes(att);
+		}
+		
+		attendanceRepository.save(att);
+		
+		return AttendanceResponse.from(att);
+	}
+	
+	
 	// 관리자 보정 쓰기 attId, AttendanceRequest AttendanceResponse
 	@Transactional
 	public AttendanceResponse editAtt(Long attId, AttendanceRequest request) {
@@ -126,15 +165,18 @@ public class AttendanceService {
 		attendance.setCheckIn(request.getCheckIn());
 		attendance.setCheckOut(request.getCheckOut());
 
-		// 근무시간 다시 계산하기
-		calculateWorkMinutes(attendance);
+		// 상태가 지정되면 그 값을 사용하고
+		if (request.getAttStatus() != null) { attendance.setAttStatus(request.getAttStatus()); }
+		
+		// 근무시간 계산
+		if (request.getCheckOut() != null) { calculateWorkMinutes(attendance); }
 
 		return AttendanceResponse.from(attendance);
 	}
 	
+	
+	
 	private void calculateWorkMinutes(Attendance att) {
-	    	    
-		
 	    // 1. 총 근무 시간 (check_out - check_in)
 		LocalDateTime checkIn = att.getCheckIn();
 	    LocalDateTime checkOut = att.getCheckOut();

@@ -9,6 +9,7 @@ import {
     checkInRequest, checkInSuccess, checkInFailure,
     checkOutRequest, checkOutSuccess, checkOutFailure,
     editAttRequest, editAttSuccess, editAttFailure,
+    createAttRequest, createAttSuccess, createAttFailure,
 } from '../../reducers/att/attReducer';
 
 const ATT_API_BASE = '/api/att';
@@ -87,6 +88,22 @@ export function* checkOut() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// createAtt  - POST /api/att/admin 근태 등록  ---
+//////////////////////////////////////////////////////////////////////////////
+export const createAttApi = (data) =>
+    api.post(`${ATT_API}/admin`, data);
+
+export function* createAtt(action) {
+    try {
+        // action.payload = { empId, attDate, checkIn, checkOut, attStatus }
+        const result = yield call(createAttApi, action.payload);
+        yield put(createAttSuccess(result.data));
+    } catch (err) {
+        yield put(createAttFailure(err.response?.data?.message || err.message));
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // editAtt  - PUT /api/att/{attId} 근태 수정  ---
 //////////////////////////////////////////////////////////////////////////////
 
@@ -112,6 +129,7 @@ function* watchMyAtt()      { yield takeLatest(myAttRequest.type, myAtt); }
 function* watchCheckIn()    { yield takeLatest(checkInRequest.type, checkIn); }
 function* watchCheckOut()   { yield takeLatest(checkOutRequest.type, checkOut); }
 function* watchEditAtt()    { yield takeLatest(editAttRequest.type, editAtt); }
+function* watchCreateAtt()  { yield takeLatest(createAttRequest.type, createAtt); }
 
 //////////////////////////////////////////////////////////////////////////////
 //  루트 saga export
@@ -124,5 +142,6 @@ export default function* attSaga() {
         call(watchCheckIn),
         call(watchCheckOut),
         call(watchEditAtt),
+        call(watchCreateAtt),
     ]);
 }

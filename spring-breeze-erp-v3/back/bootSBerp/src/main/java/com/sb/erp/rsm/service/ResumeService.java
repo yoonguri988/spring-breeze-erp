@@ -8,11 +8,13 @@ import java.util.List;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sb.erp.apct.entity.Applicant;
+import com.sb.erp.apct.oauth2.ApplicantPrincipal;
 import com.sb.erp.apct.repository.ApplicantRepository;
 import com.sb.erp.chunk.entity.ResumeChunk;
 import com.sb.erp.chunk.repository.ResumeChunkRepository;
@@ -43,7 +45,7 @@ public class ResumeService {
     
     // 이력서 업로드
     @Transactional
-    public ResumeResponse upload(ResumeRequest req, MultipartFile file) {
+    public ResumeResponse upload(ResumeRequest req, MultipartFile file, Authentication authentication) {
 
     	// 1. 파일 검증
         if (file == null || file.isEmpty()) {
@@ -58,6 +60,13 @@ public class ResumeService {
         Applicant applicant = applicantRepository.findById(req.getApctId())
                 .orElseThrow(() ->
                         new IllegalArgumentException("존재하지 않는 지원자입니다."));
+        
+        // ★ 소유권 검증 
+        ApplicantPrincipal principal = (ApplicantPrincipal) authentication.getPrincipal();
+        if (!applicant.getProvider().equals(principal.getProvider())
+                || !applicant.getProviderId().equals(principal.getProviderId())) {
+            throw new IllegalArgumentException("본인 지원 건의 이력서만 업로드할 수 있습니다.");
+        }
 
         // 3. 기존 이력서 조회
         Resume existing = resumeRepository
