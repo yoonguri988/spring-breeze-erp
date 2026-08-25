@@ -1,52 +1,19 @@
 // pages/att/leave/admin.js
-//
-// ┌────────────────────────────────────────────────────────────────┐
-// │  이 페이지는 가장 복잡한 패턴이다.                              │
-// │  앞의 4개 페이지에서 배운 것을 모두 조합한다:                    │
-// │                                                                │
-// │  1) 검색 조건(연도)을 payload로 전달                            │
-// │  2) 3개의 쓰기 action (calculate, deduct, adjust)              │
-// │  3) 2개의 모달 (차감, 조정) + 1개의 이력 모달                   │
-// │  4) 2개의 서로 다른 reducer에서 데이터 사용                     │
-// │     → state.leave (연차 데이터)                                │
-// │     → 하나의 컴포넌트에서 여러 reducer 조합 가능                │
-// │                                                                │
-// │  [새로운 패턴]                                                  │
-// │    - 하나의 success를 여러 쓰기 action이 공유                   │
-// │      → calculateSuccess, deductSuccess, adjustSuccess 모두      │
-// │        success=true를 세팅하므로, success 감시 useEffect에서     │
-// │        어떤 작업이 성공했는지 구분하지 않고 동일하게 처리한다     │
-// │      → 구분이 필요하면 별도 상태(lastAction 등)를 추가한다       │
-// │                                                                │
-// │    - 모달에서 다른 사원의 이력을 조회할 때                       │
-// │      dispatch(fetchGrantHistoryRequest(empId))                  │
-// │      → saga가 GET /api/att/leave/grant/{empId} 호출             │
-// │      → grantHistory 상태에 저장                                │
-// │      → 모달 닫을 때 clearLeaveDetail()로 정리                  │
-// └────────────────────────────────────────────────────────────────┘
 
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   Card, Table, Tag, Button, Select, Space,
-  Modal, InputNumber, Input, message,
+  Modal, InputNumber, Input, message, DatePicker
 } from "antd";
-import {
-  CalculatorOutlined,
-  MinusCircleOutlined,
-  ToolOutlined,
-  HistoryOutlined,
+import { CalculatorOutlined, MinusCircleOutlined, ToolOutlined, HistoryOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import moment from "moment";
 
 import {
-  fetchAllBalancesRequest,
-  fetchGrantHistoryRequest,
-  calculateRequest,
-  deductRequest,
-  adjustRequest,
-  resetLeaveState,
+  fetchAllBalancesRequest, fetchGrantHistoryRequest, calculateRequest,
+  deductRequest, adjustRequest, resetLeaveState,
   clearLeaveDetail,
 } from "../../../reducers/att/leaveBalanceReducer";
 
@@ -62,29 +29,18 @@ export default function LeaveAdminPage() {
   const dispatch = useDispatch();
   const { t } = useTranslation(["att", "common"]);
 
-  // ── 2개 state에서 데이터를 가져온다 ──
-  //
-  // useSelector를 2번 호출해도 되고, 1번에 객체로 묶어도 된다.
-  // 여기서는 가독성을 위해 1번으로 묶었다.
-  //
-  // [주의] 이렇게 객체를 반환하면 매 렌더링마다 새 객체가 만들어져서
-  //        불필요한 리렌더링이 발생할 수 있다.
-  //        성능 최적화가 필요하면 shallowEqual을 사용하거나
-  //        useSelector를 필드별로 분리한다.
-  //        지금은 학습 단계이므로 간단한 방식을 사용한다.
-  //
   const { allBalances, grantHistory, loading, success } =
     useSelector((state) => state.leave);
 
   // ── 로컬 상태: 검색 조건 ──
-  const [selectedYear, setSelectedYear] = useState(
-    new Date().getFullYear()
-  );
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [keyword, setKeyword] = useState("");
 
   // ── 로컬 상태: 차감 모달 ──
   const [deductTarget, setDeductTarget] = useState(null);   // 대상 사원 정보
   const [deductHalfType, setDeductHalfType] = useState(null); // null=연차, "AM", "PM"
   const [deductReason, setDeductReason] = useState("");
+  const [deductDate, setDeductDate] = useState(null);
 
   // ── 로컬 상태: 조정 모달 ──
   const [adjustTarget, setAdjustTarget] = useState(null);
@@ -104,10 +60,6 @@ export default function LeaveAdminPage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── success 감시 ──
-  //
-  // calculate, deduct, adjust 중 어떤 것이든 성공하면
-  // success=true → 메시지 표시 → 목록 새로고침 → 모달 닫기
-  //
   useEffect(() => {
     if (success) {
       // 어떤 모달이 열려있는지에 따라 메시지를 구분
@@ -129,7 +81,7 @@ export default function LeaveAdminPage() {
     // payload 형태: { year: 2026 }
     // → leaveBalanceSaga의 fetchAllBalances에서
     //   action.payload.year 로 꺼내 쓴다
-    dispatch(fetchAllBalancesRequest({ year: selectedYear }));
+    dispatch(fetchAllBalancesRequest({ year: selectedYear, keyword: keyword.trim() || null }));
   };
 
   // ── 연차 발생 ──
@@ -151,19 +103,23 @@ export default function LeaveAdminPage() {
     setDeductTarget(record);
     setDeductHalfType(null);
     setDeductReason("");
+    setDeductDate(null);
   };
 
   // ── 차감 실행 ──
   const handleDeduct = () => {
     if (!deductTarget) return;
-    // payload가 그대로 @RequestBody LeaveGrantRequest로 전송된다
-    // saga의 deductApi에서 api.post(LEAVE_API + "/deduct", data) 호출
+    if (!deductDate) {
+      message.warning("휴가 사용일을 선택해주세요.");
+      return;
+    }
     dispatch(deductRequest({
       empId: deductTarget.empId,
       amount: deductHalfType ? 0.5 : 1,
       halfType: deductHalfType,
       reason: deductReason,
       year: selectedYear,
+      leaveDate: deductDate.format("YYYY-MM-DD"),
     }));
   };
 
@@ -361,6 +317,14 @@ export default function LeaveAdminPage() {
               </Select.Option>
             ))}
           </Select>
+          <Input
+            placeholder="사원명 또는 사번"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onPressEnter={loadBalances}
+            style={{ width: 180 }}
+            allowClear
+          />
           <Button type="primary" onClick={loadBalances} loading={loading}>
             {t("att:admin.search.btnSearch")}
           </Button>
@@ -408,6 +372,14 @@ export default function LeaveAdminPage() {
                   {t("att:leaveAdmin.deductModal.halfPM")}
                 </Select.Option>
               </Select>
+            </div>
+            <div>
+              <label>휴가 사용일</label>
+              <DatePicker
+                value={deductDate}
+                onChange={setDeductDate}
+                style={{ width: "100%", marginTop: 4 }}
+              />
             </div>
             <div>
               <label>{t("att:leaveAdmin.deductModal.reason")}</label>

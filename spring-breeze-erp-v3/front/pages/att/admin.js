@@ -2,12 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Card, Table, Tag, Button, DatePicker, Space, Modal, TimePicker, Select, message, } from "antd";
-import { EditOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  Card, Table, Tag, Button, DatePicker, Input,
+  Space, Modal, TimePicker, Select, message,
+} from "antd";
+import { EditOutlined, SearchOutlined, PlusOutlined, } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import moment from "moment";
 
-import { listAttRequest, editAttRequest, resetAttState, } from "../../reducers/att/attReducer";
+import { listAttRequest, editAttRequest, createAttRequest, resetAttState, } from "../../reducers/att/attReducer";
 
 const STATUS_COLOR = {
   NORMAL: "green",
@@ -19,7 +22,6 @@ const STATUS_COLOR = {
   ANNUAL_LEAVE: "purple",
 };
 
-// 상태 목록 (Select 옵션용)
 const STATUS_OPTIONS = [
   "NORMAL", "LATE", "EARLY_LEAVE", "ABSENT",
   "HALF_DAY_AM", "HALF_DAY_PM", "ANNUAL_LEAVE",
@@ -29,68 +31,80 @@ export default function AttAdminPage() {
   const dispatch = useDispatch();
   const { t } = useTranslation(["att", "common"]);
 
-  const { attList, loading, success } = useSelector((state) => state.att);
+  const { attList, loading, success, error } = useSelector((state) => state.att);
 
-  // ── 로컬 상태: 검색 조건 ──
-  const [startDate, setStartDate] = useState(
-    moment().startOf("month") // 이번 달 1일
-  );
+  // ── 검색 조건 ──
+  const [startDate, setStartDate] = useState(moment().startOf("month"));
+  const [endDate, setEndDate] = useState(moment());
+  // keyword: 사원명 또는 사번 검색어 (빈 문자열이면 전체 조회)
+  const [keyword, setKeyword] = useState("");
 
-  const [endDate, setEndDate] = useState(
-    moment() // 오늘
-  );
-
-  // ── 로컬 상태: 수정 모달 ──
+  // ── 수정 모달 ──
   const [editingRecord, setEditingRecord] = useState(null);
   const [editCheckIn, setEditCheckIn] = useState(null);
   const [editCheckOut, setEditCheckOut] = useState(null);
   const [editStatus, setEditStatus] = useState(null);
 
+  // ── 등록 모달 ──
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [createEmpNo, setCreateEmpNo] = useState(null);
+  const [createDate, setCreateDate] = useState(null);
+  const [createCheckIn, setCreateCheckIn] = useState(null);
+  const [createCheckOut, setCreateCheckOut] = useState(null);
+  const [createStatus, setCreateStatus] = useState("NORMAL");
+
+  // ── 어떤 모달에서 성공했는지 구분하기 위한 플래그 ──
+  const [lastAction, setLastAction] = useState(null); // "edit" | "create"
+
   // ── 마운트 시 검색 실행 ──
   useEffect(() => {
     handleSearch();
-
     return () => {
       dispatch(resetAttState());
     };
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── 쓰기 성공 감시 ──
+  // ── 성공 감시 ──
   useEffect(() => {
     if (success) {
-      message.success(t("att:msg.editSuccess"));
-      setEditingRecord(null); // 모달 닫기
-      handleSearch();         // 목록 새로고침
+      if (lastAction === "create") {
+        message.success(t("att:msg.createSuccess", "근태가 등록되었습니다."));
+        setCreateModalVisible(false);
+        resetCreateForm();
+      } else {
+        message.success(t("att:msg.editSuccess"));
+        setEditingRecord(null);
+      }
+      handleSearch();
       dispatch(resetAttState());
+      setLastAction(null);
     }
   }, [success]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── 검색 실행 ──
-  // [dispatch에 payload를 넘기는 과정]
-  //   handleSearch()
-  //   → dispatch(listAttRequest({ startDate: "2026-08-01", ... }))
-  //   → attReducer: state.att.loading = true
-  //   → attSaga: takeLatest 감지
-  //     → action.payload = { startDate: "2026-08-01", ... }
-  //     → listAttApi(action.payload) 호출
-  //     → GET /api/att?startDate=2026-08-01&endDate=2026-08-24&start=0&end=100
-  //   → 성공: listAttSuccess({ list, paging })
-  //   → attReducer: state.att.attList = list
-  //
+  // ── 에러 감시 ──
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+      dispatch(resetAttState());
+    }
+  }, [error]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── 검색 ──
+  // keyword가 빈 문자열이면 null로 변환해서 전송
+  // → 백엔드에서 (:keyword IS NULL OR ...) 조건으로 전체 조회
   const handleSearch = () => {
     dispatch(
       listAttRequest({
         startDate: startDate.format("YYYY-MM-DD"),
         endDate: endDate.format("YYYY-MM-DD"),
+        keyword: keyword.trim() || null,
         start: 0,
         end: 100,
       })
     );
   };
 
-  // ── 수정 모달 열기 ──
-  // record = 테이블에서 클릭한 행의 데이터 (AttendanceResponse 객체)
-  // 모달의 초기값을 현재 기록으로 세팅
+  // ── 수정 모달 ──
   const openEditModal = (record) => {
     setEditingRecord(record);
     setEditCheckIn(record.checkIn ? moment(record.checkIn) : null);
@@ -98,22 +112,18 @@ export default function AttAdminPage() {
     setEditStatus(record.attStatus);
   };
 
-  // ── 수정 ──
-  // [payload 구조]
-  //   editAttRequest({ attId, checkInTime, checkOutTime, attStatus })
-  //   → attSaga: editAttApi({ attId, ...rest })
-  //   → PUT /api/att/{attId} body: { checkInTime, checkOutTime, attStatus }
-  //
   const handleEditSave = () => {
     if (!editingRecord) return;
+    if (!editCheckIn) {
+      message.warning("출근 시간을 입력해주세요.");
+      return;
+    }
 
-    // 원래 근무일의 날짜 가져오기
     const dateStr = moment(editingRecord.attDate).format("YYYY-MM-DD");
-
+    setLastAction("edit");
     dispatch(
       editAttRequest({
         attId: editingRecord.attId,
-        // 필드명을 백엔드 AttendanceRequest와 일치
         checkIn: editCheckIn
           ? moment(`${dateStr} ${editCheckIn.format("HH:mm:ss")}`,
                    "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DDTHH:mm:ss")
@@ -122,6 +132,52 @@ export default function AttAdminPage() {
           ? moment(`${dateStr} ${editCheckOut.format("HH:mm:ss")}`,
                    "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DDTHH:mm:ss")
           : null,
+        attStatus: editStatus,
+      })
+    );
+  };
+
+  // ── 등록 모달 ──
+  const resetCreateForm = () => {
+    setCreateEmpNo(null);
+    setCreateDate(null);
+    setCreateCheckIn(null);
+    setCreateCheckOut(null);
+    setCreateStatus("NORMAL");
+  };
+
+  const openCreateModal = () => {
+    resetCreateForm();
+    setCreateModalVisible(true);
+  };
+
+  const handleCreateSave = () => {
+    // 유효성 검사
+    if (!createEmpNo.trim()) {
+      message.warning("사번을 입력해주세요.");
+      return;
+    }
+    if (!createDate) {
+      message.warning("근무일을 선택해주세요.");
+      return;
+    }
+
+    const dateStr = createDate.format("YYYY-MM-DD");
+    setLastAction("create");
+
+    dispatch(
+      createAttRequest({
+        empNo: createEmpNo,
+        attDate: dateStr,
+        checkIn: createCheckIn
+          ? moment(`${dateStr} ${createCheckIn.format("HH:mm:ss")}`,
+                   "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DDTHH:mm:ss")
+          : null,
+        checkOut: createCheckOut
+          ? moment(`${dateStr} ${createCheckOut.format("HH:mm:ss")}`,
+                   "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DDTHH:mm:ss")
+          : null,
+        attStatus: createStatus,
       })
     );
   };
@@ -187,9 +243,6 @@ export default function AttAdminPage() {
       key: "action",
       width: 80,
       align: "center",
-      // ── render의 두 번째 인자 record ──
-      // record = 해당 행의 전체 데이터 객체 (AttendanceResponse)
-      // 이 값을 openEditModal에 전달해서 모달 초기값으로 사용
       render: (_, record) => (
         <Button
           type="text"
@@ -217,7 +270,7 @@ export default function AttAdminPage() {
 
       {/* ── 검색 영역 ── */}
       <Card style={{ marginBottom: 16 }}>
-        <Space>
+        <Space wrap>
           <DatePicker
             value={startDate}
             onChange={(v) => setStartDate(v)}
@@ -229,6 +282,15 @@ export default function AttAdminPage() {
             onChange={(v) => setEndDate(v)}
             placeholder={t("att:admin.search.endDate")}
           />
+          {/* 사원명/사번 검색 필터 */}
+          <Input
+            placeholder="사원명 또는 사번"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onPressEnter={handleSearch}
+            style={{ width: 180 }}
+            allowClear
+          />
           <Button
             type="primary"
             icon={<SearchOutlined />}
@@ -236,6 +298,13 @@ export default function AttAdminPage() {
             loading={loading}
           >
             {t("att:admin.search.btnSearch")}
+          </Button>
+          {/* 등록 버튼 */}
+          <Button
+            icon={<PlusOutlined />}
+            onClick={openCreateModal}
+          >
+            근태 등록
           </Button>
         </Space>
       </Card>
@@ -247,21 +316,14 @@ export default function AttAdminPage() {
           columns={columns}
           dataSource={attList}
           loading={loading}
-          pagination={{ pageSize: 20 }}
+          pagination={{ defaultPageSize: 10, showSizeChanger: true }}
           locale={{ emptyText: t("att:admin.emptyMsg") }}
         />
       </Card>
 
-      {/* ── 수정 모달 ── */}
-      {/*
-        visible={!!editingRecord}
-          → editingRecord가 null이 아니면 true → 모달 열림
-          → editingRecord가 null이면 false → 모달 닫힘
-          → !!는 truthy/falsy를 boolean으로 변환하는 관용 표현
-
-        onCancel: 모달 닫기 → editingRecord를 null로 되돌림
-        onOk: 저장 → editAttRequest dispatch
-      */}
+      {/* ══════════════════════════════════════════════ */}
+      {/*  수정 모달                                     */}
+      {/* ══════════════════════════════════════════════ */}
       <Modal
         title={t("att:admin.editModal.title")}
         visible={!!editingRecord}
@@ -273,7 +335,6 @@ export default function AttAdminPage() {
       >
         {editingRecord && (
           <Space direction="vertical" style={{ width: "100%" }} size="middle">
-            {/* 출근 시간 */}
             <div>
               <label>{t("att:admin.editModal.checkIn")}</label>
               <TimePicker
@@ -283,8 +344,6 @@ export default function AttAdminPage() {
                 style={{ width: "100%", marginTop: 4 }}
               />
             </div>
-
-            {/* 퇴근 시간 */}
             <div>
               <label>{t("att:admin.editModal.checkOut")}</label>
               <TimePicker
@@ -294,8 +353,6 @@ export default function AttAdminPage() {
                 style={{ width: "100%", marginTop: 4 }}
               />
             </div>
-
-            {/* 상태 선택 */}
             <div>
               <label>{t("att:admin.editModal.status")}</label>
               <Select
@@ -312,6 +369,80 @@ export default function AttAdminPage() {
             </div>
           </Space>
         )}
+      </Modal>
+
+      {/* ══════════════════════════════════════════════ */}
+      {/*  등록 모달                                     */}
+      {/* ══════════════════════════════════════════════ */}
+      <Modal
+        title="근태 등록"
+        visible={createModalVisible}
+        onCancel={() => setCreateModalVisible(false)}
+        onOk={handleCreateSave}
+        okText="등록"
+        cancelText={t("att:admin.editModal.btnCancel")}
+        confirmLoading={loading}
+      >
+        <Space direction="vertical" style={{ width: "100%" }} size="middle">
+          {/* 사원 ID */}
+          <div>
+            <label>사번</label>
+            <Input
+              value={createEmpNo}
+              onChange={(e) => setCreateEmpNo(e.target.value)}
+              placeholder="예: EMP-001"
+              style={{ width: "100%", marginTop: 4 }}
+            />
+          </div>
+
+          {/* 근무일 */}
+          <div>
+            <label>근무일</label>
+            <DatePicker
+              value={createDate}
+              onChange={setCreateDate}
+              style={{ width: "100%", marginTop: 4 }}
+            />
+          </div>
+
+          {/* 출근 시간 */}
+          <div>
+            <label>{t("att:admin.editModal.checkIn")}</label>
+            <TimePicker
+              value={createCheckIn}
+              onChange={setCreateCheckIn}
+              format="HH:mm"
+              style={{ width: "100%", marginTop: 4 }}
+            />
+          </div>
+
+          {/* 퇴근 시간 */}
+          <div>
+            <label>{t("att:admin.editModal.checkOut")}</label>
+            <TimePicker
+              value={createCheckOut}
+              onChange={setCreateCheckOut}
+              format="HH:mm"
+              style={{ width: "100%", marginTop: 4 }}
+            />
+          </div>
+
+          {/* 상태 */}
+          <div>
+            <label>{t("att:admin.editModal.status")}</label>
+            <Select
+              value={createStatus}
+              onChange={setCreateStatus}
+              style={{ width: "100%", marginTop: 4 }}
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <Select.Option key={s} value={s}>
+                  {t(`att:status.${s}`, s)}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+        </Space>
       </Modal>
     </div>
   );

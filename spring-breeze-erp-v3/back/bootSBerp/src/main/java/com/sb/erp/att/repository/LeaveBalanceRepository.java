@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.sb.erp.att.entity.LeaveBalance;
@@ -24,8 +26,16 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, Long
 
 
     // ──────────────────────────────────────────────
-    // 3. 특정 연도 전체 사원 연차 목록 (관리자 화면)
+    // 3. 특정 연도 전체 사원 연차 목록 + 검색 키워드 (관리자 화면)
     // ──────────────────────────────────────────────
-    List<LeaveBalance> findByYearOrderByEmployee_EmpIdAsc(Integer year);
+    @Query("SELECT lb FROM LeaveBalance lb JOIN lb.employee e " +
+    	       "WHERE lb.year = :year " +
+    	       "AND (:keyword IS NULL " +
+    	       "OR e.empName LIKE CONCAT('%', :keyword, '%') " +
+    	       "OR e.empNo LIKE CONCAT('%', :keyword, '%')) " +
+    	       "ORDER BY e.empId ASC")
+    	List<LeaveBalance> findByYearAndKeyword(
+    	    @Param("year") Integer year,
+    	    @Param("keyword") String keyword);
 
 }

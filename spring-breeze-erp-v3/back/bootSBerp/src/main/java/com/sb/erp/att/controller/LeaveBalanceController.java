@@ -56,6 +56,16 @@ public class LeaveBalanceController {
         List<LeaveBalanceResponse> list = leaveBalanceService.getMyBalances(empId);
         return ResponseEntity.ok(list);
     }
+    
+    // 본인 연차 사용 내역 확인
+    @Operation(summary = "본인 연차 사용 이력")
+    @GetMapping("/grant/my")
+    public ResponseEntity<List<LeaveGrantResponse>> myGrantHistory(Authentication auth) {
+        Long empId = authUserJwtService.getCurrentEmpId(auth);
+        List<LeaveGrantResponse> list = leaveBalanceService.getGrantHistory(empId);
+        return ResponseEntity.ok(list);
+    }
+    
 
     // 관리자 — 특정 연도 전체 사원 연차 현황
     @Operation(summary = "전체 사원 연차 현황", description = "특정 연도 전체 사원의 연차 잔여 현황")
@@ -63,14 +73,15 @@ public class LeaveBalanceController {
     public ResponseEntity<?> allBalances(
             Authentication auth,
             @Parameter(description = "조회 연도 (예: 2026)")
-            @RequestParam("year") Integer year) {
+            @RequestParam("year") Integer year,
+            @RequestParam(name = "keyword", required = false) String keyword) {
 
         if (!isAdmin(auth)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("message", "조회 권한이 없습니다."));
         }
 
-        List<LeaveBalanceResponse> list = leaveBalanceService.getAllBalances(year);
+        List<LeaveBalanceResponse> list = leaveBalanceService.getAllBalances(year, keyword);
         return ResponseEntity.ok(list);
     }
 
@@ -91,6 +102,7 @@ public class LeaveBalanceController {
         LeaveBalanceResponse result = leaveBalanceService.getBalance(empId, year);
         return ResponseEntity.ok(result);
     }
+    
 
     // 관리자 — 특정 사원의 부여/차감 이력
     @Operation(summary = "연차 부여/차감 이력 조회", description = "특정 사원의 연차 부여 및 사용 이력")
