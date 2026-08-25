@@ -28,14 +28,7 @@ const initialState = {
 // ============================================================
 //  2. createSlice
 // ============================================================
-//  name: "leaveBalance"
-//  → action type prefix: "leaveBalance/fetchMyBalancesRequest" 등
-//  → state 접근: useSelector(s => s.leaveBalance.myBalances)
-//
-//  [주의] rootReducer에서 등록하는 키 이름이 곧 state 접근 경로:
-//    leaveBalance: leaveBalanceReducer  →  state.leaveBalance
-//    만약 키를 "leave"로 바꾸면 → state.leave 로 접근해야 한다
-//
+
 const leaveBalanceSlice = createSlice({
     name: "leave",
     initialState,
@@ -58,7 +51,7 @@ const leaveBalanceSlice = createSlice({
         //  조회 actions
         // ================================================================
         
-        // ── 내 연차 현황 조회 ──
+        // ── 사용자: 내 연차 현황 조회 ──
         fetchMyBalancesRequest: (state) => {
             state.loading = true;
             state.error = null;
@@ -68,6 +61,20 @@ const leaveBalanceSlice = createSlice({
             state.myBalances = action.payload;
         },
         fetchMyBalancesFailure: (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        },
+
+        // ── 사용자: 본인 이력 조회 ──
+        fetchMyGrantsRequest: (state) => {
+            state.loading = true;
+            state.error = null;
+        },
+        fetchMyGrantsSuccess: (state, action) => {
+            state.loading = false;
+            state.grantHistory = action.payload;
+        },
+        fetchMyGrantsFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
         },
@@ -115,6 +122,7 @@ const leaveBalanceSlice = createSlice({
             state.loading = false;
             state.error = action.payload;
         },
+
 
         // ================================================================
         //  쓰기
@@ -170,6 +178,7 @@ const leaveBalanceSlice = createSlice({
 export const {
     resetLeaveState, clearLeaveDetail,
     fetchMyBalancesRequest, fetchMyBalancesSuccess, fetchMyBalancesFailure,
+    fetchMyGrantsRequest, fetchMyGrantsSuccess, fetchMyGrantsFailure,
     fetchAllBalancesRequest, fetchAllBalancesSuccess, fetchAllBalancesFailure,
     fetchBalanceRequest, fetchBalanceSuccess, fetchBalanceFailure,
     fetchGrantHistoryRequest, fetchGrantHistorySuccess, fetchGrantHistoryFailure,

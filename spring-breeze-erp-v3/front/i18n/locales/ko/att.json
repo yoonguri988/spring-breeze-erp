@@ -32,9 +32,9 @@
   },
 
   "dashboard": {
-    "title": "출퇴근 대시보드",
+    "title": "출퇴근 현황",
     "subtitle": "오늘의 출퇴근 현황을 확인하고 출근/퇴근을 처리합니다.",
-    "breadcrumb": "출퇴근 대시보드",
+    "breadcrumb": "출퇴근 현황",
     "notCheckedIn": "아직 출근하지 않았습니다.",
     "checkedIn": "출근 완료",
     "checkedOut": "퇴근 완료",

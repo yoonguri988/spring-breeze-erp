@@ -39,8 +39,8 @@ public class LeaveBalanceService {
     //  1. 조회
     // ================================================================
     // 관리자용 — 특정 연도 전체 사원 연차 현황
-    public List<LeaveBalanceResponse> getAllBalances(Integer year) {
-        return leaveBalanceRepository.findByYearOrderByEmployee_EmpIdAsc(year)
+    public List<LeaveBalanceResponse> getAllBalances(Integer year, String keyword) {
+        return leaveBalanceRepository.findByYearAndKeyword(year, keyword)
                 .stream()
                 .map(LeaveBalanceResponse::from)
                 .collect(Collectors.toList());

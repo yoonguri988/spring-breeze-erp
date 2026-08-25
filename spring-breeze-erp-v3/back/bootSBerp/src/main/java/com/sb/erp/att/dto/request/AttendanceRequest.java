@@ -1,5 +1,6 @@
 package com.sb.erp.att.dto.request;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotNull;
@@ -10,8 +11,14 @@ import lombok.Setter;
 public class AttendanceRequest {
 	
 	@NotNull
-	private LocalDateTime checkIn;
-	@NotNull
-	private LocalDateTime checkOut;
+	private LocalDateTime checkIn; // 출근
 	
+	private LocalDateTime checkOut; // 퇴근
+	
+	private String attStatus; // 상태
+	
+	private Long empId; 
+	private String empNo;
+	private LocalDate attDate; // 근무일
+
 }
