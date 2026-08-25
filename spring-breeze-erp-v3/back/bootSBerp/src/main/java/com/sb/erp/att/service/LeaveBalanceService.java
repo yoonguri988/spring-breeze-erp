@@ -21,7 +21,7 @@ import com.sb.erp.att.repository.AttendanceRepository;
 import com.sb.erp.att.repository.LeaveBalanceRepository;
 import com.sb.erp.att.repository.LeaveGrantRepository;
 import com.sb.erp.emp.entity.Employee;
-import com.sb.erp.emp.repository.EmployeeRepository;
+import com.sb.erp.emp.repository.EmpRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +33,7 @@ public class LeaveBalanceService {
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final LeaveGrantRepository leaveGrantRepository;
     private final AttendanceRepository attendanceRepository;
-    private final EmployeeRepository employeeRepository;
+    private final EmpRepository empRepository;
 
     // ================================================================
     //  1. 조회
@@ -89,7 +89,7 @@ public class LeaveBalanceService {
     @Transactional
     public LeaveBalanceResponse calculateAnnual(Long empId, Integer year) {
 
-        Employee emp = employeeRepository.findById(empId)
+        Employee emp = empRepository.findById(empId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));
 
         // ── 중복 부여 방지 ──
@@ -162,14 +162,19 @@ public class LeaveBalanceService {
     // ================================================================
     //  3. 연차 사용 차감
     // ================================================================
-    //연차 사용 차감 — leave_request 전자결재 승인 시 호출
+    // 연차 사용 차감 — leave_request 전자결재 승인 시 호출
     @Transactional
     public LeaveGrantResponse deductLeave(Long empId, LeaveGrantRequest request) {
 
-        Employee emp = employeeRepository.findById(empId)
+        Employee emp = empRepository.findById(empId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));
-
-        int currentYear = LocalDate.now().getYear();
+        
+        // 연차 사용할 날짜 확인
+        LocalDate leaveDate = request.getLeaveDate();
+        if (leaveDate == null) {
+            leaveDate = LocalDate.now();
+        }
+        int currentYear = leaveDate.getYear();
 
         // ── 잔여 연차 확인 ──
         LeaveBalance balance = leaveBalanceRepository
@@ -202,21 +207,19 @@ public class LeaveBalanceService {
         // ── attendance 테이블에 연차/반차 행 INSERT ──
         // leave_request 승인시 이 메서드 호출 → attendance에 기록
         // AttendanceService.checkIn()에서 ANNUAL/HALF 상태를 확인하여 출근 차단
-        insertLeaveAttendance(emp, deductAmount, request.getHalfType());
+        insertLeaveAttendance(emp, deductAmount, request.getHalfType(), leaveDate);
 
         return LeaveGrantResponse.from(grant);
     }
 
 
     // attendance 테이블에 연차/반차 행 INSERT
-    private void insertLeaveAttendance(Employee emp, BigDecimal deductAmount, String halfType){
-
-        LocalDate today = LocalDate.now();
+    private void insertLeaveAttendance(Employee emp, BigDecimal deductAmount, String halfType, LocalDate leaveDate){
 
         // 이미 해당 날짜에 근태 기록이 있는지 확인
         // (출근 후 연차 신청은 불가 — 비즈니스 규칙)
         long existing = attendanceRepository
-                .countByEmployee_EmpIdAndAttDate(emp.getEmpId(), today);
+                .countByEmployee_EmpIdAndAttDate(emp.getEmpId(), leaveDate);
 
         if (existing > 0) {
             throw new IllegalArgumentException("해당 날짜에 이미 근태 기록이 존재합니다.");
@@ -235,7 +238,7 @@ public class LeaveBalanceService {
 
         Attendance leaveAtt = Attendance.builder()
                 .employee(emp)
-                .attDate(today)
+                .attDate(leaveDate)
                 .attStatus(attStatus)
                 .workMinutes(0)
                 .overtimeMinutes(0)
@@ -254,7 +257,7 @@ public class LeaveBalanceService {
     @Transactional
     public LeaveGrantResponse adjustLeave(LeaveGrantRequest request) {
 
-        Employee emp = employeeRepository.findById(request.getEmpId())
+        Employee emp = empRepository.findById(request.getEmpId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));
 
         int currentYear = LocalDate.now().getYear();
