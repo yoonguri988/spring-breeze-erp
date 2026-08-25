@@ -56,15 +56,15 @@ public interface ApplicantRepository extends JpaRepository<Applicant, Long>,
     
     // 내 지원현황 - 공고명 포함 조회
     @Query("""
-    	    SELECT new com.sb.erp.apct.dto.response.MyApplicationResponse(
-    	        a.apctId, r.recTitle, a.apctStatus, a.apctDate)
-    	    FROM Applicant a
-    	    JOIN a.recruit r
-    	    WHERE a.provider = :provider AND a.providerId = :providerId
-    	    ORDER BY a.apctId DESC
-    	    """)
-    	List<MyApplicationResponse> findMyApplications(@Param("provider") String provider,
-    	                                               @Param("providerId") String providerId);
+            SELECT new com.sb.erp.apct.dto.response.MyApplicationResponse(
+                a.apctId, r.recTitle, a.apctStatus, a.apctDate, a.apctEmail, a.apctPhone)
+            FROM Applicant a
+            JOIN a.recruit r
+            WHERE a.provider = :provider AND a.providerId = :providerId
+            ORDER BY a.apctId DESC
+            """)
+    List<MyApplicationResponse> findMyApplications(@Param("provider") String provider,
+                                                   @Param("providerId") String providerId);
     
     // 특정 지원자의 이력서 상세
     Optional<Applicant> findByApctIdAndRecruit_RecId( Long apctId, Long recId );
