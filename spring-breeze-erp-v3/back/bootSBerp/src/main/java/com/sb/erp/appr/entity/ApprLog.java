@@ -39,6 +39,10 @@ public class ApprLog {
 	@JoinColumn(name = "doc_id", nullable = false)
 	private ApprDoc apprDoc;
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "auto_deleg_id")
+	private ApprAutoDelegation autoDeleg;
+	
 	// 원래 결재선상의 결재자
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ori_emp_id", nullable = false)

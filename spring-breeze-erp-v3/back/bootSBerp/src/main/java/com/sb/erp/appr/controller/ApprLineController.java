@@ -95,7 +95,7 @@ public class ApprLineController {
 	@Operation(summary = "결재선 즐겨찾기 추천 목록", description = "부서+양식 기준, 재직상태/직급 재검증 후 반환")
 	@GetMapping("/favorites")
 	public ResponseEntity<List<ApprLineFavoriteResponse>> recommend(
-			@RequestParam("depeId") Long deptId,
+			@RequestParam("deptId") Long deptId,
 			@RequestParam("forId") Long forId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
@@ -116,7 +116,7 @@ public class ApprLineController {
 	@Operation(summary = "결재선 즐겨찾기 삭제", description = "즐겨찾기 항목 삭제")
 	@DeleteMapping("/favorites/{favId}")
 	public ResponseEntity<Void> deleteFavorite(
-			@PathVariable Long favId
+			@PathVariable("favId") Long favId
 	) {
 		favService.delete(favId);
 		return ResponseEntity.noContent().build();

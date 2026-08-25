@@ -18,7 +18,7 @@ public class ApprLogResponse {
 	private String actEmpName;
 	private Long perEmpId;
 	private String perEmpName;
-	private String cretaedAt;
+	private String createdAt;
 	
 	public ApprLogResponse(ApprLog log) {
 		this.logId = log.getLogId();
@@ -29,6 +29,6 @@ public class ApprLogResponse {
 		this.actEmpName = log.getActEmp().getEmpName();
 		this.perEmpId = log.getPerEmp().getEmpId();
 		this.perEmpName = log.getPerEmp().getEmpName();
-		this.cretaedAt = log.getCreatedAt() != null ? log.getCreatedAt().toString() : null;
+		this.createdAt = log.getCreatedAt() != null ? log.getCreatedAt().toString() : null;
 	}
 }

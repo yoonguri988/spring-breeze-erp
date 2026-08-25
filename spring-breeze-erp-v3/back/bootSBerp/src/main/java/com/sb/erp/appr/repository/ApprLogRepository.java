@@ -11,4 +11,7 @@ import com.sb.erp.appr.entity.ApprLog;
 public interface ApprLogRepository  extends JpaRepository<ApprLog, Long>{
 	
 	public List<ApprLog> findByApprDoc_DocIdOrderByCreatedAtDesc(Long docId);
+	
+	// 취소 승인시 해당 위임전결이 건드릴 로그만 조회
+	public List<ApprLog> findByAutoDeleg_AutoDelegId(Long autoDelegId);
 }
