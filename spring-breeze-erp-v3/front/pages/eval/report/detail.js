@@ -90,6 +90,46 @@ export default function EvalReportDetailPage() {
               <Descriptions.Item label={t("report.detail.generatedAtLabel")}>{r.generatedAt}</Descriptions.Item>
             </Descriptions>
 
+            {/* ★ 근태 현황 카드 */}
+            {(r.attWorkDays > 0 || r.attLateCount > 0 || r.attAbsentCount > 0) && (
+              <Card type="inner" title={t("report.detail.attTitle")} style={{ marginBottom: 16 }}>
+                <Row gutter={[16, 16]}>
+                  <Col span={4} style={{ textAlign: "center" }}>
+                    <div style={{ color: "#999", fontSize: 12, marginBottom: 4 }}>{t("report.detail.attWorkDays")}</div>
+                    <div style={{ fontSize: 22, fontWeight: 600 }}>{r.attWorkDays ?? 0}<span style={{ fontSize: 13, color: "#999" }}>{t("report.detail.attDayUnit")}</span></div>
+                  </Col>
+                  <Col span={4} style={{ textAlign: "center" }}>
+                    <div style={{ color: "#999", fontSize: 12, marginBottom: 4 }}>{t("report.detail.attLate")}</div>
+                    <div style={{ fontSize: 22, fontWeight: 600, color: r.attLateCount > 0 ? "#fa8c16" : undefined }}>
+                      {r.attLateCount ?? 0}<span style={{ fontSize: 13, color: "#999" }}>{t("report.detail.attCountUnit")}</span>
+                    </div>
+                  </Col>
+                  <Col span={4} style={{ textAlign: "center" }}>
+                    <div style={{ color: "#999", fontSize: 12, marginBottom: 4 }}>{t("report.detail.attEarlyLeave")}</div>
+                    <div style={{ fontSize: 22, fontWeight: 600, color: r.attEarlyLeaveCount > 0 ? "#fa8c16" : undefined }}>
+                      {r.attEarlyLeaveCount ?? 0}<span style={{ fontSize: 13, color: "#999" }}>{t("report.detail.attCountUnit")}</span>
+                    </div>
+                  </Col>
+                  <Col span={4} style={{ textAlign: "center" }}>
+                    <div style={{ color: "#999", fontSize: 12, marginBottom: 4 }}>{t("report.detail.attAbsent")}</div>
+                    <div style={{ fontSize: 22, fontWeight: 600, color: r.attAbsentCount > 0 ? "#ff4d4f" : undefined }}>
+                      {r.attAbsentCount ?? 0}<span style={{ fontSize: 13, color: "#999" }}>{t("report.detail.attCountUnit")}</span>
+                    </div>
+                  </Col>
+                  <Col span={4} style={{ textAlign: "center" }}>
+                    <div style={{ color: "#999", fontSize: 12, marginBottom: 4 }}>{t("report.detail.attAnnual")}</div>
+                    <div style={{ fontSize: 22, fontWeight: 600 }}>{r.attAnnualUsed ?? 0}<span style={{ fontSize: 13, color: "#999" }}>{t("report.detail.attDayUnit")}</span></div>
+                  </Col>
+                  <Col span={4} style={{ textAlign: "center" }}>
+                    <div style={{ color: "#999", fontSize: 12, marginBottom: 4 }}>{t("report.detail.attRate")}</div>
+                    <div style={{ fontSize: 22, fontWeight: 600, color: r.attRate >= 95 ? "#52c41a" : r.attRate >= 80 ? "#fa8c16" : "#ff4d4f" }}>
+                      {r.attRate?.toFixed(1) ?? "0.0"}<span style={{ fontSize: 13, color: "#999" }}>%</span>
+                    </div>
+                  </Col>
+                </Row>
+              </Card>
+            )}
+
             <Card type="inner" title={t("report.detail.aiSummaryTitle")} style={{ marginBottom: 16 }}>
               <div style={{ whiteSpace: "pre-line", lineHeight: 1.8 }}>
                 {r.aiSummary || t("report.detail.summaryEmptyMsg")}
