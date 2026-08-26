@@ -22,6 +22,7 @@ public class ApprFormResponse {
 	private String createdAt;
 	private String updatedAt;
 	private boolean deleted;
+	private String forCategory;
 	
 	// JPA 경로 - Entity에서 변환
 	public ApprFormResponse(ApprForm form) {
@@ -36,5 +37,6 @@ public class ApprFormResponse {
 		this.forStatus = form.getForStatus();
 		this.createdAt = form.getCreatedAt() != null ? form.getCreatedAt().toString() : null;
 		this.updatedAt = form.getUpdatedAt() != null ? form.getUpdatedAt().toString() : null;
+		this.forCategory = form.getForCategory();
 	}
 }

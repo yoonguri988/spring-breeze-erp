@@ -1,11 +1,15 @@
 package com.sb.erp.appr.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sb.erp.appr.dto.request.ApprFormRequest;
 import com.sb.erp.appr.dto.request.ApprFormSearchCondition;
 import com.sb.erp.appr.dto.response.ApprFormListResponse;
@@ -24,6 +28,50 @@ import lombok.RequiredArgsConstructor;
 public class ApprFormServiceImpl implements ApprFormService {
 	
 	private final ApprFormMapper formMapper;
+	private final ObjectMapper objMapper;
+	
+	// 연차 양식이 스키마에 반드시 들어가야하는 키
+	private static final Set<String> LEAVE_REQUIRED_KEYS = Set.of("leaveType", "startDate", "endDate");
+	
+	// 연차 카테고리 양식은 스키마 + 필수키 포함 강제
+	private void validateLeaveSchema(ApprFormRequest req) {
+		// 연차 양식이 아닐경우 검증 X
+		if (!"LEAVE".equals(req.getForCategory())) {
+			return;
+		}
+		
+		if (!StringUtils.hasText(req.getForSchema())) {
+			throw new IllegalArgumentException("연차 카테고리 양식은 반드시 스키마 방식으로 작성해야합니다.");
+		}
+		
+		try {
+			JsonNode root = objMapper.readTree(req.getForSchema());
+			JsonNode fields = root.get("fields");
+			
+			Set<String> keys = new HashSet<>();
+			if (fields != null && fields.isArray()) {
+				for (JsonNode f : fields) {
+					JsonNode keyNode = f.get("key");
+					if (keyNode != null) {
+						keys.add(keyNode.asText());
+					}
+				}
+			}
+			
+			Set<String> missing = new HashSet<>(LEAVE_REQUIRED_KEYS);
+			missing.removeAll(keys);
+			
+			if (!missing.isEmpty()) {
+				throw new IllegalArgumentException(
+						"연차 양식에는 다음 필드가 반드시 포함되어야 합니다: " + String.join(", ", missing)
+				);
+			}
+		} catch (IllegalArgumentException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IllegalArgumentException("양식 스키마 형식이 올바르지않습니다.");
+		}
+	}
 	
 	// 양식 content/schema 방어코드
 	// forContent 또는 forSchema 중 한쪽에만 데이터가 들어가야 정상
@@ -45,6 +93,7 @@ public class ApprFormServiceImpl implements ApprFormService {
 	
 	@Override
 	public ApprFormListResponse listForms(ApprFormSearchCondition condition) {
+		
 		// 검색 조건에 맞는 전체 건수 먼저 조회
 		int totalCnt = formMapper.listFormCnt(condition);
 		
@@ -80,13 +129,15 @@ public class ApprFormServiceImpl implements ApprFormService {
 	@Transactional
 	public Long insertForm(ApprFormRequest req) {
 		
-		// forStatus가 null 로 들어왔을때 false 처리
-		if(req.getForStatus() == null) {
-			req.setForStatus(false);
-		}
+		// null 로 들어왔을때 처리
+		if (req.getForStatus() == null) req.setForStatus(false);
+		if (!StringUtils.hasText(req.getForCategory())) req.setForCategory("GENERAL");
 		
 		// forContent / forSchema 둘중 하나만 있는지 검증	
 		validateContentXor(req);
+		
+		// 연차카테코리 필드 검증
+		validateLeaveSchema(req);
 		
 		formMapper.insertForm(req);
 		// for_id를 시퀀스로 조회해서 반환
@@ -115,6 +166,11 @@ public class ApprFormServiceImpl implements ApprFormService {
 
 		// 내용이 바뀐경우 버전 처리
 		if(changed) {
+			// 새 버전 생성 시에만 카테고리 변경이 반영되므로, 이시점에만 검증
+			if (!StringUtils.hasText(req.getForCategory())) {
+				req.setForCategory(original.getForCategory());
+			}
+			validateLeaveSchema(req);
 			formMapper.updateFormNewVersion(forId, req);
 		}
 		// 같은 경우 버전 처리하지않고 update

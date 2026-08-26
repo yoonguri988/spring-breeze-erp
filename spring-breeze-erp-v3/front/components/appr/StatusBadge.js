@@ -24,7 +24,7 @@ const I18N_PREFIX = {
  * @param {string} status - 상태 코드 (예: "WAI", "APP", "REJ" ...)
  * @param {string} [label] - 라벨 직접 지정 (있으면 domain 매핑보다 우선)
  */
-export default function StatusBadge({ domain, status, label }) {
+export default function StatusBadge({ domain, status, label, i18nKeyPrefix }) {
      const { t } = useTranslation("appr");
 
     const color = COLOR_MAP[domain]?.[status] || "gray";

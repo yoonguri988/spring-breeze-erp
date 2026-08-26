@@ -42,9 +42,12 @@ public class ApprLineDelegationServiceImpl implements ApprLineDelegationService{
 		ApprLine line = lineDao.findById(req.getLinId())
 				.orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 결재선입니다."));
 		
-		// 본인의 결재 순번에 대해서만 위임 요청 가능
-		if (!line.getEmployee().getEmpId().equals(reqEmpId)) {
-			throw new IllegalArgumentException("본인의 결재 순번만 위임 요청할 수 있습니다.");
+		boolean isLineOwner = line.getEmployee().getEmpId().equals(reqEmpId);
+		boolean isDrafter = line.getApprDoc().getEmployee().getEmpId().equals(reqEmpId);
+		
+		// 본인이 기안한 문서/결재 당사자 만 위임요청 가능
+		if (!isLineOwner && !isDrafter) {
+			throw new IllegalArgumentException("본인이 기안한 문서에 대해서만 위임 요청할 수 있습니다.");
 		}
 		
 		if (!"WAI".equals(line.getLinStatus())) {

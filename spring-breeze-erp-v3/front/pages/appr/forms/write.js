@@ -45,6 +45,30 @@ export default function FormWritePage() {
     const forCodeValue = Form.useWatch("forCode", form);
     const comIdValue = Form.useWatch("comId", form);
 
+    // 연차 관련 //
+    const [forCategory, setForCategory] = useState("GENARAL");
+
+    const LEAVE_REQUIRED_FIELDS = [
+        {key: "leaveType", label: "휴가 종류", type: "select", required: true, options: ["ANNUAL", "HALF_AM", "HALF_PM"]},
+        {key: "startDate", label: "시작일", type: "date", required: true, options: []},
+        {key: "endDate", label: "종료일", type: "date", required: true, options: []},
+    ]
+
+    const handleCategoryChange = (value) => {
+        setForCategory(value);
+
+        if (value === "LEAVE") {
+            // 스키마 방식 강제
+            setContentMode("ai");
+
+            setSchemaFields((prev) => {
+                const existingKeys = new Set(prev.map((f) => f.key));
+                const missing = LEAVE_REQUIRED_FIELDS.filter((f) => !existingKeys.has(f.key));
+                return missing.length > 0 ? [...prev, ...missing] : prev;
+            });
+        }
+    }
+
     useEffect(() => {
         setCodeStatus(null);
     }, [forCodeValue, comIdValue]);
@@ -162,6 +186,20 @@ export default function FormWritePage() {
             return;
         }
 
+        // 연차 카테고리는 스키마 방식만 허용 + 필수 필드 체크
+        if (forCategory === "LEAVE") {
+            if (contentMode !== "ai") {
+                message.error("연차 카테고리 양식은 필드 구성 방식으로만 작성할 수 있습니다.")
+                return;
+            }
+            const schemaKeys = schemaFields.map((f) => f.key);
+            const missing = LEAVE_REQUIRED_FIELDS.filter((f) => !schemaKeys.includes(f.key));
+            if (missing.length > 0) {
+                message.error(`연차 양식에는 다음 필드가 필요합니다: ${missing.map((f) => f.key).join(", ")}`);
+                return;
+            }
+        }
+
         let payload;
 
         if (contentMode === "ai") {
@@ -174,6 +212,7 @@ export default function FormWritePage() {
                 ...values,
                 forContent: null,
                 forSchema: JSON.stringify({fields: schemaFields}),
+                forCategory,
             };
         }
         else {
@@ -293,8 +332,22 @@ export default function FormWritePage() {
                                     optionType="button"
                                     buttonStyle="solid"
                                 >
-                                    <Radio.Button value="editor">직접 작성</Radio.Button>
+                                    <Radio.Button value="editor" disabled={forCategory === "LEAVE"}>직접 작성</Radio.Button>
                                     <Radio.Button value="ai">AI 생성</Radio.Button>
+                                </Radio.Group>
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} md={12}>
+                            <Form.Item label="양식 카테고리" extra="연차로 지정하면 승인 시 연차가 자동 차감됩니다.">
+                                <Radio.Group
+                                    value={forCategory}
+                                    onChange={(e) => handleCategoryChange(e.target.value)}
+                                    optionType="button"
+                                    buttonStyle="solid"
+                                >
+                                    <Radio.Button value="GENERAL">일반</Radio.Button>
+                                    <Radio.Button value="LEAVE">연차</Radio.Button>
                                 </Radio.Group>
                             </Form.Item>
                         </Col>
@@ -350,14 +403,18 @@ export default function FormWritePage() {
                             </Input.Group>
                         </Form.Item>
                         
-                        {schemaFields.length > 0 && (
+                        {schemaFields.length > 0 ? (
                             <Form.Item label="생성된 필드 구성 (수정 가능)">
                                 <SchemaFieldEditor
                                     fields={schemaFields}
                                     onChange={setSchemaFields}
                                 />
                             </Form.Item>
-                        )}
+                        ) : forCategory === "LEAVE" ? (
+                            <Text type="secondary" style={{fontSize: 13}}>
+                                연차 카테고리를 선택하면 필수 필드(휴가종류/시작일/종료일)가 자동으로 채워집니다.<br/>카테고리를 다시 선택해주세요.
+                            </Text>
+                        ) : null}
 
                     </>
                     )}
