@@ -74,6 +74,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleUnexpected(Exception ex) {
+    	ex.printStackTrace();   // ★ 이 한 줄 추가 — 콘솔에 실제 에러 출력
         String message = messageSource.getMessage("error.internal", null, LocaleContextHolder.getLocale());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorBody(message));
     }
