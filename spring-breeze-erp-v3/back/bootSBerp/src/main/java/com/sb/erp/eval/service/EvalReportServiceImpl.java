@@ -147,8 +147,16 @@ public class EvalReportServiceImpl implements EvalReportService {
 				.count();
 
 		Map<Long, AttStatDto> attStatMap = attendanceRepository
-				.findAttStatsByEmpIdsAndDateRange(empIds, startDate, endDate).stream().map(AttStatDto::from)
+				.findAttStatsByEmpIdsAndDateRange(empIds, startDate, endDate)
+				.stream()
+				.map(AttStatDto::from)
 				.collect(Collectors.toMap(AttStatDto::getEmpId, s -> s));
+		
+		// ★ 디버그
+		System.out.println("[EvalReport] 영업일 수: " + businessDays + " (기간: " + startDate + " ~ " + endDate + ")");
+		System.out.println("[EvalReport] 근태 조회 결과: " + attStatMap.size() + "명 / 대상: " + empIds.size() + "명");
+		attStatMap.forEach((id, stat) -> System.out.println("  empId=" + id
+		        + " workDays=" + stat.getWorkDays() + " late=" + stat.getLateCount()));
 
 		// 사원별 리포트 생성 (기존 존재 시 update)
 		for (Map<String, Object> agg : aggregates) {
@@ -306,7 +314,7 @@ public class EvalReportServiceImpl implements EvalReportService {
 			dto.setSentimentPositive(sentiment[0]);
 			dto.setSentimentNeutral(sentiment[1]);
 			dto.setSentimentNegative(sentiment[2]);
-			dto.setAiSummary(mockSummary(empName, overall, dto.getGrade(), strengths, improvements, evalCount));
+			dto.setAiSummary(mockSummary(empName, overall, dto.getGrade(), strengths, improvements, evalCount, attStat, dto.getAttRate()));
 			dto.setModelName(MOCK_MODEL_NAME);
 			System.err.println("[EvalReport] GPT 실패 → Mock 사용 empId=" + dto.getEmpId());
 		}
@@ -352,14 +360,27 @@ public class EvalReportServiceImpl implements EvalReportService {
 
 	// Mock 요약문 (API 연동 실패 시 fallback 템플릿)
 	private String mockSummary(String empName, BigDecimal overall, String grade,
-			String strengths, String improvements, int evalCount) {
+			String strengths, String improvements, int evalCount,
+	        AttStatDto attStat, BigDecimal attRate) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[Mock 요약] ").append(empName == null ? "대상 사원" : empName)
 				.append("님은 총 ").append(evalCount)
 				.append("건의 평가를 받았으며, ").append("종합 점수 ")
 				.append(overall.toPlainString()).append("점(").append(grade)
 				.append(" 등급)을 획득했습니다.\n\n");
-
+		
+		sb.append("■ 근태 현황\n");
+		if (attStat != null) {
+		    sb.append("출근일 ").append(attStat.getWorkDays()).append("일")
+		      .append(" / 지각 ").append(attStat.getLateCount()).append("회")
+		      .append(" / 조퇴 ").append(attStat.getEarlyLeaveCount()).append("회")
+		      .append(" / 결근 ").append(attStat.getAbsentCount()).append("회")
+		      .append(" / 연차 ").append(attStat.getAnnualUsed()).append("일")
+		      .append(" / 출근율 ").append(attRate != null ? attRate.toPlainString() : "0").append("%\n\n");
+		} else {
+		    sb.append("(근태 데이터 없음)\n\n");
+		}
+		
 		sb.append("■ 주요 강점\n");
 		sb.append(strengths != null && !strengths.isBlank()
 				? truncate(strengths, 300) + "\n\n"

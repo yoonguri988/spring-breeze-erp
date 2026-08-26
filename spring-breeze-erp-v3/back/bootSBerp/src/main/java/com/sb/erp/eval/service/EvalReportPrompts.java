@@ -65,32 +65,37 @@ public class EvalReportPrompts {
             Integer totalWorkMin,
             Integer overtimeMin) {
 
-        return """
-            [사원 정보]
-            이름: %s
-            직급: %s
-            부서: %s
+    	return """
+    		    [사원 정보]
+    		    이름: %s
+    		    직급: %s
+    		    부서: %s
 
-            [강점 코멘트]
-            %s
+    		    [근태 현황]
+    		    출근일: %d일 | 지각: %d회 | 조퇴: %d회 | 결근: %d회
+    		    연차 사용: %s일 | 출근율: %s%%
+    		    총 근로시간: %,d분 (약 %d시간) | 연장근로: %,d분 (약 %d시간)
 
-            [개선 코멘트]
-            %s
-            """.formatted(
-                nullSafe(empName),
-                nullSafe(posName),
-                nullSafe(deptName),
-                safe(workDays),
-                safe(lateCount),
-                safe(earlyLeaveCount),
-                safe(absentCount),
-                nullSafe(annualUsed, "0"),
-                nullSafe(attRate, "0"),
-                safe(totalWorkMin), safe(totalWorkMin) / 60,
-                safe(overtimeMin), safe(overtimeMin) / 60,
-                nullSafe(strengthComments, "(수집된 강점 코멘트 없음)"),
-                nullSafe(improvementComments, "(수집된 개선 코멘트 없음)")
-            );
+    		    [강점 코멘트]
+    		    %s
+
+    		    [개선 코멘트]
+    		    %s
+    		    """.formatted(
+    		        nullSafe(empName),
+    		        nullSafe(posName),
+    		        nullSafe(deptName),
+    		        safe(workDays),
+    		        safe(lateCount),
+    		        safe(earlyLeaveCount),
+    		        safe(absentCount),
+    		        nullSafe(annualUsed, "0"),
+    		        nullSafe(attRate, "0"),
+    		        safe(totalWorkMin), safe(totalWorkMin) / 60,
+    		        safe(overtimeMin), safe(overtimeMin) / 60,
+    		        nullSafe(strengthComments, "(수집된 강점 코멘트 없음)"),
+    		        nullSafe(improvementComments, "(수집된 개선 코멘트 없음)")
+    		    );
     }
 
 

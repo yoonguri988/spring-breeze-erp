@@ -31,6 +31,7 @@ public class OpenAiClient {
     }
 
     public ReportContent generateReport(List<ChatMessage> messages) {
+    	System.out.println("[OpenAiClient] model=[" + model + "] length=" + model.length());
         try {
             ChatRequest request = new ChatRequest(
                 model,
@@ -38,6 +39,9 @@ public class OpenAiClient {
                 ChatRequest.ResponseFormat.jsonObject(),
                 0.3
             );
+            
+         // ★ 디버그: 실제 전송 JSON 확인
+            System.out.println("[OpenAiClient] request JSON: " + objectMapper.writeValueAsString(request));
 
             ChatResponse response = openAiRestClient.post()
                 .uri("/chat/completions")
