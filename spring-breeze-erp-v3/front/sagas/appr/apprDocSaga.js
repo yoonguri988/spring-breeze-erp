@@ -12,6 +12,8 @@ import {
     fetchDeptTreeRequest, fetchDeptTreeSuccess, fetchDeptTreeFailure,
     fetchDeptEmpsRequest, fetchDeptEmpsSuccess, fetchDeptEmpsFailure,
     resetProcessState, resetWriteState,
+    fetchFavoriteLinesRequest, fetchFavoriteLinesSuccess, fetchFavoriteLinesFailure,
+    updateDocRequest, updateDocSuccess, updateDocFailure,
 } from "../../reducers/appr/apprDocReducer";
 
 const APPR_API_BASE = "/appr";
@@ -132,6 +134,25 @@ function* watchApproveDoc() {
     yield takeLeading(approveDocRequest.type, approveDoc);
 }
 
+// 문서 수정 (토큰 empId, 낙관적 락)
+// put /appr/{docId}
+export const updateDocApi = ({docId, data}) => 
+    api.put(`${APPR_API_BASE}/${docId}`,data);
+
+export function* updateDoc(action) {
+    // {docId, data: {docTitle, docContent, docRevision}}
+    try {
+        yield call(updateDocApi, action.payload);
+        yield put(updateDocSuccess());
+    } catch (err) {
+        yield put(updateDocFailure(err.response?.data?.error || err.message));
+    }
+}
+
+function* watchUpdateDoc() {
+    yield takeLeading(updateDocRequest.type, updateDoc);
+}
+
 // 결재 반려 (토큰 empId)
 // POST /appr/detail_doc/{docId}/rej?empid=
 export const rejectDocApi = ({docId}) =>
@@ -208,6 +229,24 @@ function* watchFetchDeptEmps() {
     yield takeLatest(fetchDeptEmpsRequest.type, fetchDeptEmps);
 }
 
+// 결재선 즐겨찾기 추천 조회
+// get /appr/lines/favorites?deptId=&forId=
+export const fetchFavoriteLinesApi = ({deptId, forId}) =>
+    api.get(`/appr/lines/favorites`, {params: {deptId, forId}});
+
+export function* fetchFavoriteLines(action) {
+    try {
+        const result = yield call(fetchFavoriteLinesApi, action.payload);
+        yield put(fetchFavoriteLinesSuccess(result.data));
+    } catch (err) {
+        yield put(fetchFavoriteLinesFailure(err.response?.data?.error || err.message));
+    }
+}
+
+function* watchFetchFavoriteLines() {
+    yield takeLatest(fetchFavoriteLinesRequest.type, fetchFavoriteLines);
+}
+
 export default function* apprDocSaga() {
     yield all([
         call(watchFetchWritableForms),
@@ -220,5 +259,7 @@ export default function* apprDocSaga() {
         call(watchFetchApprLines),
         call(watchFetchDeptTree),
         call(watchFetchDeptEmps),
+        call(watchFetchFavoriteLines),
+        call(watchUpdateDoc),
     ]);
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.sb.erp.appr.dto.request.ApprDocRequest;
 import com.sb.erp.appr.dto.request.ApprDocSearchCondition;
+import com.sb.erp.appr.dto.request.ApprDocUpdateRequest;
 import com.sb.erp.appr.dto.response.ApprDocInitResponse;
 import com.sb.erp.appr.dto.response.ApprDocResponse;
 import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
@@ -136,6 +138,18 @@ public class ApprDocController {
 
 		return ResponseEntity.ok(result);
 	}
+	
+	@Operation(summary = "문서 수정", description = "기안자 본인, 결재 미착수 상태에서만 제목/내용 수정 (낙관적 락)")
+	@PutMapping("/{docId}")
+	public ResponseEntity<Void> updateDoc(
+			@PathVariable("docId") Long docId,
+			@Valid
+			@RequestBody ApprDocUpdateRequest req,
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	) {
+		service.updateDoc(docId, req, principal.getEmpId());
+		return ResponseEntity.noContent().build();
+	}
 
 	//////////////////////////// 문서 조회 처리 파트 /////////////////////////////
 
@@ -155,11 +169,17 @@ public class ApprDocController {
 		// 전체 결재선 목록에 결재상태가 'WAI'인 데이터가 있나 검증
 		boolean canProcess = lines.stream()
 				.anyMatch(l -> l.getEmpId().equals(principal.getEmpId()) && "WAI".equals(l.getLinStatus()));
+		
+		boolean isDrafter = doc.getEmpId().equals(principal.getEmpId());
+		boolean noneProcessed = lines.stream()
+				.noneMatch(l -> "APP".equals(l.getLinStatus()) || "REJ".equals(l.getLinStatus()));
+		boolean canEdit = isDrafter && noneProcessed;
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("doc", doc);
 		result.put("lines", lines);
 		result.put("canProcess", canProcess);
+		result.put("canEdit", canEdit);
 
 		return ResponseEntity.ok(result);
 	}

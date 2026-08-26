@@ -6,18 +6,18 @@ import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import {
     message, Form, Input, Select, Button, Space, List,
-    Tag, Divider, Empty, DatePicker, InputNumber,
+    Tag, Divider, DatePicker, InputNumber,
     Card, Row, Col, Modal, Switch, Typography, Spin
 } from "antd";
-import { ArrowUpOutlined, ArrowDownOutlined, DeleteOutlined } from "@ant-design/icons";
+import { ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
 import {
     fetchWriterInfoRequest,
     fetchWritableFormsRequest,
-    fetchApprLinesRequest,
     fetchDeptTreeRequest,
     fetchDeptEmpsRequest,
     writeDocRequest,
     resetWriteState,
+    fetchFavoriteLinesRequest,
 } from "../../../reducers/appr/apprDocReducer";
 import PageHeader from "../../../components/appr/PageHeader";
 
@@ -40,10 +40,10 @@ export default function DocWritePage() {
     const {
         writerInfo, writerInfoLoading,
         writableForms, writableFormsLoading,
-        apprLines, apprLinesLoading,
         deptTree, deptTreeLoading,
         deptEmps, deptEmpsLoading,
         writeSubmitting, writeError, writeSuccess,
+        favoriteLines, favoriteLinesLoading,
     } = useSelector((state) => state.apprDoc);
 
     const [docContent, setDocContent] = useState("");
@@ -233,30 +233,11 @@ export default function DocWritePage() {
         })
     }
 
-    // 부서 기준 상사 목록 조회 
-    // 결재선 추천 3차 신규기능 추가예정
-    const handleAutoSuggest = () => {
-        dispatch(fetchApprLinesRequest());
-    };
-
     // 최고 직급자 예외 처리
     const noApproversAvailable = useMemo(
         () => deptTree.length > 0 && deptTree.every((d) => d.empCount === 0),
         [deptTree]  
     );
-
-    // 추천된 상사 목록을 순서대로 결재선에 담기
-    useEffect(() => {
-        if (apprLines.length > 0 && approvers.length === 0) {
-            setApprovers(
-                apprLines.slice(0, requiredApproverCount).map((l) => ({
-                    empId: l.empId,
-                    empName: l.empName,
-                    posName: l.posName
-                }))
-            );
-        }
-    }, [apprLines]);
 
     const handleDeptSelect = (deptId) => {
         setSelectedDeptId(deptId);
@@ -302,6 +283,22 @@ export default function DocWritePage() {
 
         dispatch(writeDocRequest({data: payload}));
     };
+
+    // 결재선 추천
+    useEffect(() => {
+        if (formKey && writerInfo?.deptId) {
+            const [forId] = formKey.split("-");
+            dispatch(fetchFavoriteLinesRequest({deptId: writerInfo.deptId, forId: Number(forId)}));
+        }
+    }, [dispatch, formKey, writerInfo]);
+
+    const applyFavoriteLine = (fav) => {
+        setApprovers(fav.approvers.map((a) => ({
+            empId: a.empId,
+            empName: a.empName,
+            posName: a.posName,
+        })));
+    }
 
     return (
         <div className="sb-page" style={{maxWidth: 900}}>
@@ -416,13 +413,25 @@ export default function DocWritePage() {
                     {isImportant ? t("docs.write.importantHint") : t("docs.write.normalHint")}
                 </Text>
 
-                {/*
-                <Space style={{marginBottom: 12}}>
-                        <Button onClick={handleAutoSuggest} loading={apprLinesLoading}>
-                            상사 목록 불러오기
-                        </Button>
-                </Space>
-                */}
+                {favoriteLinesLoading ? (
+                    <Spin size="small" />
+                ) : favoriteLines.length > 0 && (
+                    <Space direction="vertical" style={{width: "100%", marginBottom: 16}}>
+                        <Text type="secondary" style={{fontSize: 13}}>자주 쓰는 결재선</Text>
+                        <Space wrap>
+                            {favoriteLines.map((fav) => (
+                                <Button
+                                    key={fav.favId}
+                                    size="small"
+                                    onClick={() => applyFavoriteLine(fav)}
+                                >
+                                    {fav.approvers.map((a) => a.empName).join(" → ")}
+                                    <span style={{marginLeft: 6, color: "#8a93a3"}}>({fav.useCount}회)</span>
+                                </Button>
+                            ))}
+                        </Space>
+                    </Space>
+                )}
 
                 <Row gutter={16} style={{marginBottom: 16}}>
                     {/* 부서 트리 */}

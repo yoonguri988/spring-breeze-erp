@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.sb.erp.appr.dto.request.ApprDocRequest;
 import com.sb.erp.appr.dto.request.ApprDocSearchCondition;
+import com.sb.erp.appr.dto.request.ApprDocUpdateRequest;
 import com.sb.erp.appr.dto.response.ApprDocInitResponse;
 import com.sb.erp.appr.dto.response.ApprDocResponse;
 import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
@@ -22,6 +23,7 @@ public interface ApprDocMapper {
 	public ApprDocInitResponse initResponse(@Param("empId") Long empId);
 	public int insertDoc(@Param("req") ApprDocRequest request, @Param("empId") Long empId, @Param("comId") Long comId);
 	public Long selectCurrentDocSeq();
+	public int updateDoc(@Param("docId") Long docId, @Param("req") ApprDocUpdateRequest req);
 
 	// 문서 조회 파트
 	public Map<String, Object> selectDocCnt(@Param("empId") Long empId);
