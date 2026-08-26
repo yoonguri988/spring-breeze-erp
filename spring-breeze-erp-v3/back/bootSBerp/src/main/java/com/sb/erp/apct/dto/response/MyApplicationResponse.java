@@ -12,6 +12,7 @@ public class MyApplicationResponse {
 	private Long apctId;
 	private String recTitle;    // 지원한 공고 제목
 	private String apctStatus;
+	private String apctName;
 	private String apctDate;
     private String apctEmail;
     private String apctPhone;
@@ -20,17 +21,19 @@ public class MyApplicationResponse {
 		this.apctId = applicant.getApctId();
 		this.recTitle = recTitle;
 		this.apctStatus = applicant.getApctStatus();
+		this.apctName = applicant.getApctName();
 		this.apctDate = applicant.getApctDate() != null ? applicant.getApctDate().toString() : null;
         this.apctEmail = applicant.getApctEmail();
         this.apctPhone = applicant.getApctPhone();
 	}
 	
 	// native query(Object[]) 매핑용 - 추가
-	public MyApplicationResponse(Long apctId, String recTitle, String apctStatus, LocalDateTime apctDate,
+	public MyApplicationResponse(Long apctId, String recTitle, String apctStatus, String apctName, LocalDateTime apctDate,
 			 String apctEmail, String apctPhone) {
 		this.apctId = apctId;
 		this.recTitle = recTitle;
 		this.apctStatus = apctStatus;
+		this.apctName = apctName;
 		this.apctDate = apctDate != null ? apctDate.toString() : null;
         this.apctEmail = apctEmail;
         this.apctPhone = apctPhone; 

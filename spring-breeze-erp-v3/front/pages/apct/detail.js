@@ -36,7 +36,7 @@ const STATUS_OPTIONS = Object.entries(STATUS_LABEL).map(([value, { text }]) => (
   value,
   label: text,
 }));
-
+const API_ORIGIN = "http://localhost:8080";
 export default function ApplicantDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -162,7 +162,7 @@ export default function ApplicantDetailPage() {
                 <Descriptions bordered column={2} size="middle">
                   <Descriptions.Item label="파일명" span={2}>
                     {adminResume.rsmFileUrl ? (
-                      <a href={adminResume.rsmFileUrl} target="_blank" rel="noreferrer">
+                      <a href={`${API_ORIGIN}${adminResume.rsmFileUrl}`} target="_blank" rel="noreferrer">
                         <FilePdfOutlined /> {adminResume.rsmFileName}
                       </a>
                     ) : (

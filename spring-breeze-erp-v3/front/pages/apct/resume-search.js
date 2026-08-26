@@ -42,11 +42,6 @@ export default function ResumeSearchPage() {
     <main className="sb-content">
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
-          <Link href="/rec/list">
-            <Button type="text" className="sb-page-back" icon={<ArrowLeftOutlined />}>
-              채용공고 목록으로
-            </Button>
-          </Link>
           <div className="sb-breadcrumb">
             홈 <i className="bi bi-chevron-right"></i> 채용관리{" "}
             <i className="bi bi-chevron-right"></i> 이력서 AI 검색
