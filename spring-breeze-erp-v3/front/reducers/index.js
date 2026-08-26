@@ -34,6 +34,14 @@ import salAiChatReducer from "./sal/salAiChatReducer";
 import salAiDocReducer from "./sal/salAiDocReducer";
 import attReducer from "./att/attReducer";
 import leaveBalanceReducer from "./att/leaveBalanceReducer";
+// 채용관리 관련 리듀서
+import recruitReducer from "./rec/recruitReducer";
+import recruitPublicReducer from "./rec/recruitPublicReducer";
+import applicantReducer from "./apct/applicantReducer";
+import applicantPublicReducer from "./apct/applicantPublicReducer";
+import apctAuthReducer from "./apct/apctAuthReducer";
+import resumeReducer from "./rsm/resumeReducer";
+import resumePublicReducer from "./rsm/resumePublicReducer";
 
 const rootReducer = combineReducers({
   auth: authReducer, // state.auth
@@ -71,7 +79,14 @@ const rootReducer = combineReducers({
   // 근태/연차
   att: attReducer, // state.att
   leave : leaveBalanceReducer, //state.leave
-
+  // 채용관리 관련 리듀서
+  recruit: recruitReducer, // state.recruit
+  recruitPublic: recruitPublicReducer, // state.recruitPublic
+  applicant: applicantReducer, // state.applicant
+  applicantPublic: applicantPublicReducer, // state.applicantPublic
+  apctAuth: apctAuthReducer, // state.apctAuth
+  resume: resumeReducer, // state.resume
+  resumePublic: resumePublicReducer, // state.resumePublic
 });
 
 export default rootReducer;

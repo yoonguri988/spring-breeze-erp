@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,8 @@ public class ApplicantController {
     // 지원서 제출 - 소셜로그인 필요
     @Operation(summary = "지원서 제출")
     @PostMapping("/apply")
-    public ResponseEntity<Map<String, Object>> apply(@Valid @RequestBody ApplicantRequest req,
+    public ResponseEntity<Map<String, Object>> apply(@Validated(ApplicantRequest.OnCreate.class)
+    								   @RequestBody ApplicantRequest req,
                                        Authentication authentication) {
         Long apctId = applicantService.apply(req, authentication);
         Map<String, Object> result = new HashMap<>();
@@ -58,7 +60,7 @@ public class ApplicantController {
     @Operation(summary = "지원 정보 수정")
     @PutMapping("/{apctId}")
     public ResponseEntity<Map<String, Object>> update(
-            @PathVariable Long apctId,
+    		@PathVariable("apctId") Long apctId,
             @Valid @RequestBody ApplicantRequest req,
             Authentication authentication) {
         applicantService.update(apctId, req, authentication);

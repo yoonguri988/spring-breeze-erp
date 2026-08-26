@@ -2,11 +2,15 @@ package com.sb.erp.eval.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.sb.erp.att.dto.response.AttStatDto;
+import com.sb.erp.att.repository.AttendanceRepository;
 import com.sb.erp.eval.dto.request.ReportRequest;
 import com.sb.erp.eval.dto.request.ReportSearchRequest;
 import com.sb.erp.eval.dto.response.PeriodResponse;
@@ -26,6 +30,7 @@ public class EvalReportServiceImpl implements EvalReportService {
 	private final EvalReportMapper evalReportMapper;
 	private final EvalPeriodMapper evalPeriodMapper;
 	private final OpenAiClient openAiClient;
+	private final AttendanceRepository attendanceRepository;
 
 	// 실제 GPT 사용 시 모델 이름
 	private static final String REAL_MODEL_NAME = "gpt-4o-mini";
@@ -105,28 +110,57 @@ public class EvalReportServiceImpl implements EvalReportService {
 
 	@Override
 	public int generateReports(long periodId, Long comId) {
+		
+		// 평가 회차 확인
 		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalReport] 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
 		}
-
+		
+		// 회차 상태 확인
 		String status = period.getPeriodStatus();
 		if (!"REPORTING".equals(status) && !"REPORTED".equals(status)) {
 			System.err.println("[EvalReport] 실패(-2): 허용되지 않은 상태 status=" + status
 					+ " (REPORTING/REPORTED만 가능) periodId=" + periodId);
 			return -2;
 		}
-
+		
+		// 사원 평가 내용 있는지 확인
 		List<Map<String, Object>> aggregates = evalReportMapper.selectAggregatesByPeriod(periodId);
 		if (aggregates == null || aggregates.isEmpty()) {
 			System.err.println("[EvalReport] 실패(-3): 집계 대상 없음 (SUBMITTED 상태 평가 부재) periodId=" + periodId);
 			return -3;
 		}
+		
+		// ★ 근태 통계 일괄 조회 (N+1 방지)
+		List<Long> empIds = aggregates.stream()
+				.map(agg -> toLong(agg.get("empId")))
+				.collect(Collectors.toList());
+
+		LocalDate startDate = LocalDate.parse(period.getStartDate()); // "YYYY-MM-DD"
+		LocalDate endDate = LocalDate.parse(period.getEndDate());
+
+		// 기간 내 영업일 수 (토/일 제외, 공휴일 미반영)
+		long businessDays = startDate.datesUntil(endDate.plusDays(1))
+				.filter(d -> d.getDayOfWeek().getValue() <= 5)
+				.count();
+
+		Map<Long, AttStatDto> attStatMap = attendanceRepository
+				.findAttStatsByEmpIdsAndDateRange(empIds, startDate, endDate)
+				.stream()
+				.map(AttStatDto::from)
+				.collect(Collectors.toMap(AttStatDto::getEmpId, s -> s));
+		
+		// ★ 디버그
+		System.out.println("[EvalReport] 영업일 수: " + businessDays + " (기간: " + startDate + " ~ " + endDate + ")");
+		System.out.println("[EvalReport] 근태 조회 결과: " + attStatMap.size() + "명 / 대상: " + empIds.size() + "명");
+		attStatMap.forEach((id, stat) -> System.out.println("  empId=" + id
+		        + " workDays=" + stat.getWorkDays() + " late=" + stat.getLateCount()));
 
 		// 사원별 리포트 생성 (기존 존재 시 update)
 		for (Map<String, Object> agg : aggregates) {
-			ReportRequest report = buildReportFromAggregate(periodId, agg);
+			ReportRequest report = buildReportFromAggregate(periodId, agg, attStatMap, businessDays);
 
 			ReportResponse existing = evalReportMapper.selectByPeriodAndEmp(periodId, report.getEmpId());
 			if (existing == null) {
@@ -140,28 +174,41 @@ public class EvalReportServiceImpl implements EvalReportService {
 
 	@Override
 	public int regenerateReport(long periodId, long empId, Long comId) {
+		
+		// 재생성할 회차 확인
 		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, comId);
 		if (period == null) {
 			System.err.println("[EvalReport] 재생성 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
 		}
-
+		
+		// 회차 상태 확인, 재생성은 REPORTED만 허용
 		String status = period.getPeriodStatus();
-		// REPORTED만 허용:
-		// - CLOSED/REPORTING/REPORTING_FAILED는 배치 시스템이 관장 (개별 우회 금지)
-		// - 개별 재생성은 완료된 리포트를 수정하는 도구
 		if (!"REPORTED".equals(status)) {
 			System.err.println("[EvalReport] 재생성 실패(-2): 허용되지 않은 상태 status=" + status
 					+ " (REPORTED만 가능) periodId=" + periodId);
 			return -2;
 		}
+		
+		// ★ 근태 통계 조회 (1명)
+	    LocalDate startDate = LocalDate.parse(period.getStartDate());
+	    LocalDate endDate = LocalDate.parse(period.getEndDate());
+	    long businessDays = startDate.datesUntil(endDate.plusDays(1))
+	            .filter(d -> d.getDayOfWeek().getValue() <= 5)
+	            .count();
+
+	    Map<Long, AttStatDto> attStatMap = attendanceRepository
+	            .findAttStatsByEmpIdsAndDateRange(List.of(empId), startDate, endDate)
+	            .stream()
+	            .map(AttStatDto::from)
+	            .collect(Collectors.toMap(AttStatDto::getEmpId, s -> s));
 
 		// 해당 사원의 집계만 찾기 (전체 집계 조회 후 필터링)
 		List<Map<String, Object>> aggregates = evalReportMapper.selectAggregatesByPeriod(periodId);
 		for (Map<String, Object> agg : aggregates) {
 			long aggEmpId = toLong(agg.get("empId"));
 			if (aggEmpId == empId) {
-				ReportRequest report = buildReportFromAggregate(periodId, agg);
+				ReportRequest report = buildReportFromAggregate(periodId, agg, attStatMap, businessDays);
 				ReportResponse existing = evalReportMapper.selectByPeriodAndEmp(periodId, empId);
 				if (existing == null) {
 					evalReportMapper.insert(report);
@@ -179,7 +226,8 @@ public class EvalReportServiceImpl implements EvalReportService {
 
 
 	// ─── 리포트 생성 로직 ─────────────────────────
-	private ReportRequest buildReportFromAggregate(long periodId, Map<String, Object> agg) {
+	private ReportRequest buildReportFromAggregate(long periodId, Map<String, Object> agg,
+			Map<Long, AttStatDto> attStatMap, long businessDays) {
 		ReportRequest dto = new ReportRequest();
 		dto.setPeriodId(periodId);
 		dto.setEmpId(toLong(agg.get("empId")));
@@ -197,6 +245,27 @@ public class EvalReportServiceImpl implements EvalReportService {
 		dto.setAvgAttitude(avgA);
 		dto.setAvgGrowth(avgG);
 
+		// ★ 2) 근태 통계 반영하기
+		AttStatDto attStat = attStatMap.get(dto.getEmpId());
+		if (attStat != null) {
+			dto.setAttWorkDays(attStat.getWorkDays());
+			dto.setAttLateCount(attStat.getLateCount());
+			dto.setAttEarlyLeaveCount(attStat.getEarlyLeaveCount());
+			dto.setAttAbsentCount(attStat.getAbsentCount());
+			dto.setAttAnnualUsed(attStat.getAnnualUsed());
+			dto.setAttTotalWorkMin(attStat.getTotalWorkMin());
+			dto.setAttOvertimeMin(attStat.getOvertimeMin());
+
+			// 출근율 = 출근일 / 영업일 × 100
+			if (businessDays > 0) {
+				BigDecimal rate = new BigDecimal(attStat.getWorkDays())
+						.divide(new BigDecimal(businessDays), 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"))
+						.setScale(2, RoundingMode.HALF_UP);
+				dto.setAttRate(rate);
+			}
+		}
+		// 근태 기록이 없으면 DEFAULT 0 유지 (DTO 초기값)
+
 		BigDecimal overall = avgP.multiply(W_PERFORMANCE)
 				.add(avgE.multiply(W_EXPERTISE))
 				.add(avgT.multiply(W_TEAMWORK))
@@ -206,17 +275,28 @@ public class EvalReportServiceImpl implements EvalReportService {
 		dto.setOverallScore(overall);
 		dto.setGrade(calcGrade(overall));
 
-		// 2) GPT 호출 시도 (실패 시 Mock fallback)
+		// 3) GPT 호출 시도 (실패 시 Mock fallback)
 		String empName = (String) agg.get("empName");
 		String posName = (String) agg.get("posName");
 		String deptName = (String) agg.get("deptName");
 		String strengths = (String) agg.get("allStrengthComments");
 		String improvements = (String) agg.get("allImprovementComments");
 		int evalCount = toInt(agg.get("evalCount"));
-
+		
+		// 4) buildUserPrompt에 사용될 근태 내용 설정
 		List<ChatMessage> messages = List.of(
-				ChatMessage.system(EvalReportPrompts.SYSTEM_INSTRUCTION),
-				ChatMessage.user(EvalReportPrompts.buildUserPrompt(empName, posName, deptName, strengths, improvements)));
+		        ChatMessage.system(EvalReportPrompts.SYSTEM_INSTRUCTION),
+		        ChatMessage.user(EvalReportPrompts.buildUserPrompt(
+		                empName, posName, deptName,
+		                strengths, improvements,
+		                attStat != null ? attStat.getWorkDays() : 0,
+		                attStat != null ? attStat.getLateCount() : 0,
+		                attStat != null ? attStat.getEarlyLeaveCount() : 0,
+		                attStat != null ? attStat.getAbsentCount() : 0,
+		                attStat != null ? attStat.getAnnualUsed().toPlainString() : "0",
+		                dto.getAttRate() != null ? dto.getAttRate().toPlainString() : "0",
+		                attStat != null ? attStat.getTotalWorkMin() : 0,
+		                attStat != null ? attStat.getOvertimeMin() : 0)));
 
 		ReportContent gptResult = openAiClient.generateReport(messages);
 
@@ -234,14 +314,14 @@ public class EvalReportServiceImpl implements EvalReportService {
 			dto.setSentimentPositive(sentiment[0]);
 			dto.setSentimentNeutral(sentiment[1]);
 			dto.setSentimentNegative(sentiment[2]);
-			dto.setAiSummary(mockSummary(empName, overall, dto.getGrade(), strengths, improvements, evalCount));
+			dto.setAiSummary(mockSummary(empName, overall, dto.getGrade(), strengths, improvements, evalCount, attStat, dto.getAttRate()));
 			dto.setModelName(MOCK_MODEL_NAME);
 			System.err.println("[EvalReport] GPT 실패 → Mock 사용 empId=" + dto.getEmpId());
 		}
 
-		// 3) sentimentLabel은 자바가 판단 (감성 3개 중 최대값 기반)
-		dto.setSentimentLabel(labelFromSentiment(
-				dto.getSentimentPositive(), dto.getSentimentNeutral(), dto.getSentimentNegative()));
+		// 5) sentimentLabel은 자바가 판단 (감성 3개 중 최대값 기반)
+		dto.setSentimentLabel(
+				labelFromSentiment(dto.getSentimentPositive(), dto.getSentimentNeutral(), dto.getSentimentNegative()));
 
 		return dto;
 	}
@@ -280,14 +360,27 @@ public class EvalReportServiceImpl implements EvalReportService {
 
 	// Mock 요약문 (API 연동 실패 시 fallback 템플릿)
 	private String mockSummary(String empName, BigDecimal overall, String grade,
-			String strengths, String improvements, int evalCount) {
+			String strengths, String improvements, int evalCount,
+	        AttStatDto attStat, BigDecimal attRate) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[Mock 요약] ").append(empName == null ? "대상 사원" : empName)
 				.append("님은 총 ").append(evalCount)
 				.append("건의 평가를 받았으며, ").append("종합 점수 ")
 				.append(overall.toPlainString()).append("점(").append(grade)
 				.append(" 등급)을 획득했습니다.\n\n");
-
+		
+		sb.append("■ 근태 현황\n");
+		if (attStat != null) {
+		    sb.append("출근일 ").append(attStat.getWorkDays()).append("일")
+		      .append(" / 지각 ").append(attStat.getLateCount()).append("회")
+		      .append(" / 조퇴 ").append(attStat.getEarlyLeaveCount()).append("회")
+		      .append(" / 결근 ").append(attStat.getAbsentCount()).append("회")
+		      .append(" / 연차 ").append(attStat.getAnnualUsed()).append("일")
+		      .append(" / 출근율 ").append(attRate != null ? attRate.toPlainString() : "0").append("%\n\n");
+		} else {
+		    sb.append("(근태 데이터 없음)\n\n");
+		}
+		
 		sb.append("■ 주요 강점\n");
 		sb.append(strengths != null && !strengths.isBlank()
 				? truncate(strengths, 300) + "\n\n"

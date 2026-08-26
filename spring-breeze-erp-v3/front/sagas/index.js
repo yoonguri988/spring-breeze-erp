@@ -36,6 +36,14 @@ import salAiDocSaga from "./sal/salAiDocSaga";
 // 근태, 연차
 import attSaga from "./att/attSaga";
 import leaveBalanceSaga from "./att/leaveBalanceSaga"
+// 채용관리
+import recruitSaga from "./rec/recruitSaga";
+import recruitPublicSaga from "./rec/recruitPublicSaga";
+import applicantSaga from "./apct/applicantSaga";
+import applicantPublicSaga from "./apct/applicantPublicSaga";
+import apctAuthSaga from "./apct/apctAuthSaga";
+import resumeSaga from "./rsm/resumeSaga";
+import resumePublicSaga from "./rsm/resumePublicSaga";
 
 export default function* rootSaga() {
   yield all([
@@ -74,5 +82,13 @@ export default function* rootSaga() {
     // 근태, 연차
     fork(attSaga),
     fork(leaveBalanceSaga),
+    // 채용관리 관련 사가
+    fork(recruitSaga),
+    fork(recruitPublicSaga),
+    fork(applicantSaga),
+    fork(applicantPublicSaga),
+    fork(apctAuthSaga),
+    fork(resumeSaga),
+    fork(resumePublicSaga),
   ]);
 }

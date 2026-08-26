@@ -100,7 +100,16 @@
       "aiSummaryTitle": "AI 요약",
       "summaryEmptyMsg": "요약문이 아직 생성되지 않았습니다.",
       "strengthAnalysisTitle": "강점 분석",
-      "improvementTitle": "개선 제언"
+      "improvementTitle": "개선 제언",
+      "attTitle": "근태 현황",
+      "attWorkDays": "출근일",
+      "attLate": "지각",
+      "attEarlyLeave": "조퇴",
+      "attAbsent": "결근",
+      "attAnnual": "연차 사용",
+      "attRate": "출근율",
+      "attDayUnit": "일",
+      "attCountUnit": "회"
     },
     "list": {
       "breadcrumbCurrent": "AI 리포트",

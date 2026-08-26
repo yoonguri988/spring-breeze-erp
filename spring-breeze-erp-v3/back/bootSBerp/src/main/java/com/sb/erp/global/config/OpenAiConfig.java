@@ -10,7 +10,7 @@ import org.springframework.web.client.RestClient;
 public class OpenAiConfig {
 	
 	// application.properties의 값을 읽어 필드에 넣기
-    @Value("${openai.api.baseurl}") private String baseUrl;
+    @Value("${jsj.openai.api.baseurl}") private String baseUrl;
     @Value("${jsj.openai.api.key}")     private String apiKey;
     
     /* OpenAI 통신 전용 RestClient.
@@ -23,6 +23,7 @@ public class OpenAiConfig {
     // 메서드가 리턴하는 객체(RestClient)를 openAiRestClient라는 이름의 Bean으로 등록하여 공유
     @Bean(name = "openAiRestClient")
     public RestClient openAiRestClient() {
+
         return RestClient.builder() // 빌더 패턴. 필요한 설정을 체이닝으로
             .baseUrl(baseUrl) // 이후 모든 요청에서 이 URL 뒤에 붙는 형태로 처리됨
             .defaultHeader("Authorization", "Bearer " + apiKey)

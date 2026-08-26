@@ -246,6 +246,34 @@ const NAV = [
     ],
   },
   {
+    // rec/apct/rsm 모듈도 sal과 마찬가지로 아직 다국어 지원 전이라 label/sectionLabel을 하드코딩한다.
+    sectionKey: "recruit",
+    sectionLabel: "채용관리",
+    items: [
+      {
+        page: "reclist",
+        label: "채용공고 관리",
+        href: "/rec/list",
+        icon: "bi-person-badge",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "apctlist",
+        label: "지원자 관리",
+        href: "/apct/list",
+        icon: "bi-people-fill",
+        role: "ROLE_ADMIN",
+      },
+      {
+        page: "resumesearch",
+        label: "이력서 AI 검색",
+        href: "/apct/resume-search",
+        icon: "bi-robot",
+        role: "ROLE_ADMIN",
+      },
+    ],
+  },
+  {
     sectionKey: "security",
     items: [
       {

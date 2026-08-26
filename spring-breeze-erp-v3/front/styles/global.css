@@ -471,6 +471,23 @@ a {
   color: var(--sb-accent);
 }
 
+/* 채용관리(rec/apct) 상세·순위·검색 화면의 "목록으로" 뒤로가기 버튼.
+   기존 모듈은 breadcrumb 안에 목록 링크를 넣는 방식(notice/detail.js 등)을 쓰지만,
+   rec/apct는 상세 화면 진입 경로가 여러 곳(목록/대시보드/공고상세 등)이라 breadcrumb만으로는
+   "어디로 돌아갈지"가 애매해 별도의 명시적 뒤로가기 버튼을 추가로 둔다.
+   반드시 .sb-page-head__txt 안에서만 써야 한다 — .sb-page-head 자체는 flex 컨테이너라
+   버튼/breadcrumb/h1/p가 그 직속 자식으로 나열되면 세로로 쌓이지 않고 가로로 밀려 깨진다. */
+.sb-page-back {
+  padding: 0 0 6px;
+  height: auto;
+  color: var(--sb-ink-faint);
+  font-size: 12.5px;
+}
+.sb-page-back:hover {
+  color: var(--sb-accent);
+  background: transparent;
+}
+
 /* ----- Footer ----- */
 .sb-footer {
   border-top: 1px solid var(--sb-border);
