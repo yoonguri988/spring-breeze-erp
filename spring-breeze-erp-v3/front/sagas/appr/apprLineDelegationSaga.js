@@ -8,6 +8,7 @@ import {
     approveDelegReqRequest, approveDelegReqSuccess, approveDelegReqFailure,
     rejectDelegReqRequest, rejectDelegReqSuccess, rejectDelegReqFailure,
     resetProcessState,
+    fetchDelegHistoryRequest, fetchDelegHistorySuccess, fetchDelegHistoryFailure,
 } from "../../reducers/appr/apprLineDelegationReducer";
 
 const APPR_API_BASE = "/appr/lines";
@@ -103,6 +104,30 @@ function* watchRejectDelegRequest() {
     yield takeLeading(rejectDelegReqRequest.type, rejectDelegRequest);
 }
 
+// 관리자 - 처리이력 조회
+export const fetchDelegHistoryApi = ({cond, page, size}) =>
+    api.get(`${APPR_API_BASE}/requests/history`, {
+        params: {
+            ...cond,
+            page,
+            size,
+        },
+    });
+
+export function* fetchDelegHistory(action) {
+    //{cond: {reqStatus, reqEmpId, startDate, endDate}, page, size}
+    try {
+        const result = yield call(fetchDelegHistoryApi, action.payload);
+        yield put(fetchDelegHistorySuccess(result.data));
+    } catch (err) {
+        yield put(fetchDelegHistoryFailure(err.response?.data?.error || err.message));
+    }
+}
+
+function* watchFetchDelegHistory() {
+    yield takeLatest(fetchDelegHistoryRequest.type, fetchDelegHistory);
+}
+
 export default function* apprLineDelegationSaga() {
     yield all([
        call(watchCreateDelegRequest),
@@ -110,5 +135,6 @@ export default function* apprLineDelegationSaga() {
        call(watchFetchPendingDelegRequests),
        call(watchApproveDelegRequest),
        call(watchRejectDelegRequest),
+       call(watchFetchDelegHistory),
     ]);
 }

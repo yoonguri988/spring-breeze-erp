@@ -14,6 +14,8 @@ import {
     PlusOutlined,
 } from "@ant-design/icons";
 import { fetchDocListRequest } from "../../../reducers/appr/apprDocReducer";
+import PageHeader from "../../../components/appr/PageHeader";
+import StatusBadge from "../../../components/appr/StatusBadge";
 
 const { Option } = Select;
 
@@ -91,16 +93,9 @@ export default function DocListPage() {
             dataIndex: "docStatus",
             key: "docStatus",
             width: 100,
-            render: (docStatus) => {
-                const colorMap = {ING: "blue", APP: "green", REJ: "red"};
-                const labelMap = {
-                    ING: t("docs.list.docStatus.ing"),
-                    APP: t("docs.list.docStatus.app"),
-                    REJ: t("docs.list.docStatus.rej"),
-                };
-                return <Tag color={colorMap[docStatus] || "default"}>{labelMap[docStatus] || docStatus}</Tag>
-            },
-
+            render: (docStatus) => (
+                <StatusBadge domain="doc" status={docStatus} i18nKeyPrefix="docs.list.docStatus" />
+            ),
         },
         // todo 탭에서만 내 결재 상태 표시
         ...(tab === "todo"
@@ -123,17 +118,14 @@ export default function DocListPage() {
 
     return(<>
         <div className="sb-page">
-            <div className="sb-page-head">
-                <div className="sb-page-head__txt">
-                    <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
-                        <i className="bi bi-chevron-right"/>
-                        <span>{t("docs.list.breadcrumbCurrent")}</span>
-                    </div>
-                    <h1>{t("docs.list.title")}</h1>
-                    <p>{t("docs.list.subtitle")}</p>
-                </div>
-                <div className="sb-page-head__actions">
+            <PageHeader
+                breadcrumb={[
+                    { label: t("common.breadcrumbRoot"), href: "/appr/docs" },
+                    { label: t("docs.list.breadcrumbCurrent") },
+                ]}
+                title={t("docs.list.title")}
+                subtitle={t("docs.list.subtitle")}
+                actions={
                     <Button
                         type="primary"
                         icon={<PlusOutlined/>}
@@ -141,8 +133,8 @@ export default function DocListPage() {
                     >
                         {t("docs.list.writeBtn")}
                     </Button>
-                </div>
-            </div>
+                }
+            />
 
             {/* 대시보드 통계 카드 */}
             <Row gutter={16} style={{marginBottom: 24}}>

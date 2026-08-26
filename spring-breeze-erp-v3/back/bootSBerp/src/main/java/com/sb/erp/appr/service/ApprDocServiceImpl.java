@@ -1,11 +1,17 @@
 package com.sb.erp.appr.service;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sb.erp.appr.dto.request.ApprDocRequest;
 import com.sb.erp.appr.dto.request.ApprDocSearchCondition;
 import com.sb.erp.appr.dto.response.ApprDocInitResponse;
@@ -13,11 +19,20 @@ import com.sb.erp.appr.dto.response.ApprDocResponse;
 import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
 import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.dto.response.ApprLineResponse;
+import com.sb.erp.appr.entity.ApprDoc;
+import com.sb.erp.appr.entity.ApprForm;
+import com.sb.erp.appr.entity.ApprFormId;
+import com.sb.erp.appr.entity.LeaveRequest;
 import com.sb.erp.appr.repository.ApprDocMapper;
+import com.sb.erp.appr.repository.ApprFormRepository;
 import com.sb.erp.appr.repository.ApprLineMapper;
+import com.sb.erp.appr.repository.LeaveRequestRepository;
+import com.sb.erp.att.dto.request.LeaveGrantRequest;
+import com.sb.erp.att.service.LeaveBalanceService;
 import com.sb.erp.dept.dto.response.DeptResponse;
 import com.sb.erp.dept.service.DeptService;
-
+import com.sb.erp.emp.entity.Employee;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,6 +45,13 @@ public class ApprDocServiceImpl implements ApprDocService{
 	private final DeptService deptService;
 	private final ApprAutoDelegationTriggerService autoTrigger;
 	
+	// 연차 연동
+	private final ApprFormRepository formDao;
+	private final LeaveRequestRepository leaveReqDao;
+	private final LeaveBalanceService leaveBalService;
+	private final EntityManager em;
+	private final ObjectMapper objectMapper;
+
 	// 작성하려는 사용자의 회사 양식
 	@Override
 	public List<ApprFormResponse> findForm(Long comId) {
@@ -63,6 +85,16 @@ public class ApprDocServiceImpl implements ApprDocService{
 				lineDao.insertLine(docId, approverEmpIds.get(i), linOrder, status);
 			}
 		}
+		
+		// 연차 신청서면 기안시점에 LeaveRequest 생성
+		createLeaveRequestIfNeeded(
+				docId,
+				req.getForId(),
+				req.getForVersion(),
+				empId,
+				req.getDocContent()
+		);
+		
 		return docId;
 	}
 
@@ -122,6 +154,10 @@ public class ApprDocServiceImpl implements ApprDocService{
 		// 반려했을시 처리
 		if ("REJ".equals(action)) {
 			dao.updateDocStatus(docId, "REJ");
+			
+			// 연차 신청서면 반려 이력 남김
+			leaveReqDao.findByApprDoc_DocId(docId)
+				.ifPresent(lr -> lr.setReqStatus("REJ"));
 			return;
 		}
 		
@@ -154,6 +190,9 @@ public class ApprDocServiceImpl implements ApprDocService{
 			// 위임전결 자동발동 트리거
 			ApprDocResponse doc = dao.selectDocDetail(docId);
 			autoTrigger.tryTrigger(docId, doc.getForId(), doc.getForVersion(), doc.getEmpId(), doc.getDocContent());
+			
+			// 연차 신청서면 최종 승인시 잔여 연차 차감 + LeaveRequest 상태 갱신
+			processLeaveApprovalIfNeeded(docId, doc);
 		}
 		
 	}
@@ -188,4 +227,126 @@ public class ApprDocServiceImpl implements ApprDocService{
 		return dao.selectMyTodoDocsCnt(condition);
 	}
 	
+	//////////////// 연차
+	
+	// 연차 필드 파싱 내부클래스
+	private static class LeaveDocFields {
+		LocalDate startDate;
+		LocalDate endDate;
+		Double reqDays;
+		String leaveType;
+		String halfType;
+	}
+	
+	// start~end 범위중 주말 제외한 날짜 목록 / 공휴일은 생각 안함
+	private List<LocalDate> businessDaysBetween(LocalDate start, LocalDate end) {
+		List<LocalDate> days = new ArrayList<>();
+		LocalDate cur = start;
+		while (!cur.isAfter(end)) {
+			DayOfWeek dow = cur.getDayOfWeek();
+			if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
+				days.add(cur);
+			}
+			cur = cur.plusDays(1);
+		}
+		return days;
+	}
+	
+	// docContent(JSON) -> leaveType/startDate/endDate 파싱 + 연차/반차 계산
+	private LeaveDocFields parseLeaveFields (String docContent) {
+		try {
+			Map<String, Object> content = objectMapper.readValue(
+					docContent, new TypeReference<Map<String, Object>>() {}
+			);
+			
+			String leaveType = (String) content.get("leaveType");
+			LocalDate startDate = LocalDate.parse((String) content.get("startDate"));
+			LocalDate endDate = LocalDate.parse((String) content.get("endDate"));
+			
+			LeaveDocFields fields = new LeaveDocFields();
+			fields.leaveType = leaveType;
+			
+			if (leaveType != null && leaveType.startsWith("HALF")) {
+				// 반차는 단일일, 0.5일
+				fields.startDate = startDate;
+				fields.endDate = startDate;
+				fields.reqDays = 0.5;
+				fields.halfType = "HALF_PM".equals(leaveType) ? "PM" : "AM";
+			}
+			else {
+				fields.startDate = startDate;
+				fields.endDate = endDate;
+				fields.reqDays = (double) businessDaysBetween(startDate, endDate).size();
+			}
+			
+			return fields;
+		} catch (Exception e) {
+			throw new IllegalArgumentException("연차 신청서 필드를 읽을수 없습니다.");
+		}
+	}
+	
+	// 기안 시점
+	private void createLeaveRequestIfNeeded(Long docId, Long forId, Long forVersion, Long empId, String docContent) {
+		
+		ApprForm form = formDao.findById(new ApprFormId(forId, forVersion)).orElse(null);
+		// 일반 문서 제외
+		if (form == null || !"LEAVE".equals(form.getForCategory())) {
+			return; 
+		}
+		
+		LeaveDocFields fields = parseLeaveFields(docContent);
+		
+		Employee emp = em.getReference(Employee.class, empId);
+		ApprDoc apprDocRef = em.getReference(ApprDoc.class, docId);
+		
+		LeaveRequest leaveRequest = LeaveRequest.builder()
+				.apprDoc(apprDocRef)
+				.emp(emp)
+				.startDate(fields.startDate)
+				.endDate(fields.endDate)
+				.reqDays(fields.reqDays)
+				.reqStatus("PEN")
+				.build();
+		
+		leaveReqDao.save(leaveRequest);
+	}
+	
+	// 최종 승인
+	private void processLeaveApprovalIfNeeded(Long docId, ApprDocResponse doc) {
+		LeaveRequest leaveRequest = leaveReqDao.findByApprDoc_DocId(docId).orElse(null);
+		// LEAVE 문서 아닐시 제외
+		if (leaveRequest == null) {
+			return;
+		}
+		
+		leaveRequest.setReqStatus("APP");
+		
+		boolean isHalfDay = leaveRequest.getReqDays() != null && leaveRequest.getReqDays() == 0.5;
+		
+		if (isHalfDay) {
+			LeaveDocFields fields = parseLeaveFields(doc.getDocContent());
+			
+			LeaveGrantRequest request = new LeaveGrantRequest();
+			request.setEmpId(doc.getEmpId());
+			request.setGrantDays(BigDecimal.valueOf(-0.5));
+			request.setLeaveDate(leaveRequest.getStartDate());
+			request.setGrantType("USE");
+			request.setHalfType(fields.halfType);
+			request.setReason("연차 신청서 승인 (docId="+ docId + ")");
+			
+			leaveBalService.deductLeave(doc.getEmpId(), request);
+		}
+		else {
+			for (LocalDate day : businessDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate())) {
+				LeaveGrantRequest request = new LeaveGrantRequest();
+				request.setEmpId(doc.getEmpId());
+				request.setGrantDays(BigDecimal.valueOf(-1.0));
+				request.setLeaveDate(day);
+				request.setGrantType("USE");
+				request.setReason("연차 신청서 승인 (docId="+ docId + ")");
+				
+				leaveBalService.deductLeave(doc.getEmpId(), request);
+			}
+		}
+	}
 }

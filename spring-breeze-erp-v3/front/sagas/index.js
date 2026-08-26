@@ -12,6 +12,7 @@ import adminResvSaga from "./resv/adminResvSaga";
 import apprFormSaga from "./appr/apprFormSaga";
 import apprDocSaga from "./appr/apprDocSaga";
 import apprLineDelegationSaga from "./appr/apprLineDelegationSaga";
+import apprLogSaga from "./appr/apprLogSaga";
 import empSaga from "./emp/empSaga";
 import posSaga from "./pos/posSaga";
 import evalSaga from "./eval/evalSaga";
@@ -57,6 +58,7 @@ export default function* rootSaga() {
     fork(apprFormSaga),
     fork(apprDocSaga),
     fork(apprLineDelegationSaga),
+    fork(apprLogSaga),
     fork(empSaga),
     fork(posSaga),
     fork(permSaga),

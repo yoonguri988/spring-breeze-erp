@@ -65,14 +65,14 @@ public class ApprLineController {
 	}
 	
 	@Operation(summary = "위임 요청 승인 대기 목록 (관리자)", description = "승인 대기중인 요청 확인")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@GetMapping("/requests/pending")
 	public ResponseEntity<List<ApprLineDelegationResponse>> pendingRequests() {
 		return ResponseEntity.ok(delService.pendingRequests());
 	}
 	
 	@Operation(summary = "위임 요청 승인 (관리자)", description = "결재선 emp_id 교체 + 감사로그 기록")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@PostMapping("/requests/{reqId}/app")
 	public ResponseEntity<Void> approveRequest(
 			@PathVariable("reqId") Long reqId,
@@ -83,7 +83,7 @@ public class ApprLineController {
 	}
 	
 	@Operation(summary = "위임 요청 반려 (관리자)", description = "위임 요청을 반려")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@PostMapping("/requests/{reqId}/rej")
 	public ResponseEntity<Void> rejectRequest(
 			@PathVariable("reqId") Long reqId,
@@ -94,7 +94,7 @@ public class ApprLineController {
 	}
 	
 	@Operation(summary = "위임요청 처리 이력 조회 (관리자)", description = "상태/요청자/기간 필터로 전체 위임")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@GetMapping("/requests/history")
 	public ResponseEntity<Page<ApprLineDelegationResponse>> searchRequestHistory(
 			ApprLineRequestSearchCondition cond,

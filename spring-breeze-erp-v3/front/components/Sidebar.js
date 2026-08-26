@@ -201,6 +201,13 @@ const NAV = [
         icon: "bi-pencil-square",
       },
       {
+        page: "apprDelegadmin",
+        label: "결재선 위임 관리",
+        href: "/appr/admin/delegations",
+        icon: "bi-arrow-left-right",
+        role: "ROOT",
+      },
+      {
         page: "projects",
         href: "/proj/proj_list",
         icon: "bi-kanban",

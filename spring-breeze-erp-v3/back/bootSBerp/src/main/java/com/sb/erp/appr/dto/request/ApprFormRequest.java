@@ -1,7 +1,5 @@
 package com.sb.erp.appr.dto.request;
 
-
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -23,4 +21,5 @@ public class ApprFormRequest {
 	private String forContent;
 	private String forSchema;
 	private Boolean forStatus;
+	private String forCategory;
 }

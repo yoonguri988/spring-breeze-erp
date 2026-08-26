@@ -3,8 +3,6 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sb.erp.appr.repository.ApprFormMapper">
-
-	<!-- applicaion.yml mybatis 경로 보고 파라미터타입 경로 수정해야할수도있음 -->
 	
 	<!-- 회사 이름 -->
 	<select id="getCompanyName" resultType="string">
@@ -34,14 +32,16 @@
 			for_title,
 			for_content,
 			for_schema,
-			for_status
+			for_status,
+			for_category
 		) values (
 			#{comId},
 			#{forCode},
 			#{forTitle},
 			#{forContent, jdbcType=VARCHAR},
 			#{forSchema, jdbcType=VARCHAR},
-			#{forStatus}
+			#{forStatus},
+			#{forCategory, jdbcType=VARCHAR}
 		)
 	</insert>
 	
@@ -77,7 +77,8 @@
 			for_schema,
 			for_status,
 			created_at,
-			for_version
+			for_version,
+			for_category
 		) values (
 			#{forId},
 			#{req.comId},
@@ -87,7 +88,8 @@
 			#{req.forSchema, jdbcType=VARCHAR},
 			#{req.forStatus},
 			sysdate,
-			(select nvl(max(for_version), 0) + 1 from appr_form where for_id = #{forId})
+			(select nvl(max(for_version), 0) + 1 from appr_form where for_id = #{forId}),
+			#{req.forCategory, jdbcType=VARCHAR}
 		)
 	</insert>
 	
@@ -116,7 +118,8 @@
 	        f.for_status,
 	        f.is_deleted as deleted,
 	        f.created_at,
-	        f.updated_at
+	        f.updated_at,
+	        f.for_category
 		from
 			appr_form f
 		left outer join

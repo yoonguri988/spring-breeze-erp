@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,6 +67,7 @@ public class ApprFormController {
 	
 	// 특정 양식의 버전 전체 이력 조회
 	@Operation(summary = "양식 버전 이력 조회", description = "특정 forId에 해당하는 모든 버전 목록을 조회")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@GetMapping("/{forId}/versions")
 	public ResponseEntity<List<ApprFormResponse>> getFormVersions(@PathVariable("forId") Long forId){
 		return ResponseEntity.ok(appr.getFormVersions(forId));
@@ -74,6 +76,7 @@ public class ApprFormController {
 	// 양식 등록
 	@Operation(summary = "양식 등록", description = "새 결재 양식을 등록")
 	@ApiResponse(responseCode = "201", description = "생성 성공")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@PostMapping
 	public ResponseEntity<Void> insertForm(@Valid @RequestBody ApprFormRequest req){
 		Long forId = appr.insertForm(req);
@@ -86,6 +89,7 @@ public class ApprFormController {
 	// 양식 수정
 	// 버전 증가 처리는 서비스 파트에서 처리
 	@Operation(summary = "양식 수정", description = "양식을 수정. 제목/내용/스키마중 하나라도 수정될시 버전 증가")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@PutMapping("/{forId}/{forVersion}")
 	public ResponseEntity<Void> updateForm(
 			@PathVariable("forId") Long forId,
@@ -99,6 +103,7 @@ public class ApprFormController {
 	
 	// 양식 삭제
 	@Operation(summary = "양식 삭제", description = "특정 버전의 양식을 소프트 삭제 처리")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@DeleteMapping("/{forId}/{forVersion}")
 	public ResponseEntity<Void> deleteForm(
 			@PathVariable("forId") Long forId,
@@ -110,6 +115,7 @@ public class ApprFormController {
 	
 	// 양식 코드 중복 확인
 	@Operation(summary = "양식 코드 중복 확인", description = "회사 내 양식 코드 중복 확인")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@GetMapping("/check-code")
 	public ResponseEntity<CodeCheckResponse> checkCode(
 			@RequestParam("forCode") String forCode,
@@ -119,8 +125,9 @@ public class ApprFormController {
 		return ResponseEntity.ok(appr.checkCode(forCode, comId, forId));
 	}
 	
-	// 회사 검색 ( 확인 필요함 )
+	// 회사 검색
 	@Operation(summary = "회사 검색", description = "키워드로 회사를 검색함")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@GetMapping("/companies")
 	public ResponseEntity<List<ComResponse>> searchCompany(@RequestParam("keyword") String keyword){
 		return ResponseEntity.ok(com.getSuggest(keyword));
@@ -128,6 +135,7 @@ public class ApprFormController {
 	
 	// AI 기반 양식 스키마 생성
 	@Operation(summary = "AI 양식 스키마 생성", description = "프롬프르틀 기반으로 AI호출하여 스키마 생성")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@PostMapping("/ai-schema")
 	public ResponseEntity<ApprFormAiSchemaResponse> generateSchema(
 			@Valid
@@ -145,6 +153,7 @@ public class ApprFormController {
 	
 	// 위임전결 설정 조회
 	@Operation(summary = "위임전결 설정 조회", description = "양식 버전별 위임 전결 트리거 설정 조회")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@GetMapping("/{forId}/{forVersion}/delegation-config")
 	public ResponseEntity<ApprFormDelegationConfigResponse> getDelegationConfig(
 			@PathVariable("forId") Long forId,
@@ -156,6 +165,7 @@ public class ApprFormController {
 	
 	// 위임전결 설정 저장 (없으면 생성, 있으면 수정)
 	@Operation(summary = "위임전결 설정 저장", description = "양식 버전별 위임전결 트리거 설정 저장")
+	@PreAuthorize("hasAuthority('ROOT')")
 	@PutMapping("/{forId}/{forVersion}/delegation-config")
 	public ResponseEntity<Void> saveDelegationConfig(
 			@PathVariable("forId") Long forId,
