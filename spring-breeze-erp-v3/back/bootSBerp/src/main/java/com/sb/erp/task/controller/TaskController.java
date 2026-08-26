@@ -44,7 +44,6 @@ import lombok.RequiredArgsConstructor;
 public class TaskController {
 	private final TaskService service;
 	private final ProjectMemberService memberservice;
-	private final EmpService empservice;
 	private final TaskDependencyService dependencyService; 
 	private final ProjectService projectService;
 	
@@ -386,5 +385,12 @@ public class TaskController {
 			}
 			return ResponseEntity.ok(dependencyService.selectTaskDependencies(proId));
 		}//간트차트
+		
+		// 핵심 병목 탐색
+		@Operation(summary = "핵심 병목 탐색")
+		@GetMapping("/critical-path")
+		public ResponseEntity<List<TaskResponse>> findCriticalPath(@RequestParam("proId") Long proId) {
+		    return ResponseEntity.ok(dependencyService.findCriticalPath(proId));
+		}
 }
 

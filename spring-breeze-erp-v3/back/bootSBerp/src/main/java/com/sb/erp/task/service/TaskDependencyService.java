@@ -21,5 +21,8 @@ public interface TaskDependencyService {
 	   
 	   //후속 작업
 	   public List<TaskResponse> selectImpactTasks(Long taskId);
+	   
+	   //병목 탐색기
+	   public List<TaskResponse> findCriticalPath(Long proId);
 
 }
