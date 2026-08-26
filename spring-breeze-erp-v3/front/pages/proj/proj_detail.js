@@ -13,7 +13,7 @@ import ProjDeleteModal from "../../components/ProjDeleteModal";
 import moment from "moment";
 
 import { fetchProjDetailRequest, deleteProjRequest, resetProjState, analyzeProjRequest, } from "../../reducers/proj/projReducer";
-import { fetchGanttRequest } from "../../reducers/task/taskReducer";
+import { fetchGanttRequest, fetchCriticalPathRequest } from "../../reducers/task/taskReducer";
 
 const STATUS_TAG_COLOR = { TODO: "default", DOING: "processing", DONE: "success" };
 const RISK_TAG_COLOR = { HIGH: "red", MEDIUM: "blue", LOW: "green" };
@@ -40,7 +40,7 @@ export default function ProjDetailPage(){
     } = useSelector((state) => state.proj);
 
     // 간트차트
-    const { ganttTasks = [], loading: ganttLoading, } = useSelector((state) => state.task);
+    const { ganttTasks = [],criticalPathTasks = [], loading: ganttLoading, } = useSelector((state) => state.task);
 
     // 태스크 페이징
     const {
@@ -67,6 +67,7 @@ export default function ProjDetailPage(){
     if (!router.isReady || !proId) return;
 
     dispatch(fetchGanttRequest({ proId }));
+    dispatch(fetchCriticalPathRequest({ proId }));
     }, [router.isReady, proId, dispatch]);
 
     useEffect(() => {
@@ -104,7 +105,12 @@ export default function ProjDetailPage(){
       key: "taskName",
       render: (name, record) => (
         <Link href={{ pathname: "/proj/task_detail", query: { taskId: record.taskId } }}>
-          <span className="sb-table__name" style={{ cursor: "pointer" }}>{name}</span>
+          <span className="sb-table__name" style={{ cursor: "pointer" }}>
+            {name}
+            {criticalPathTasks.some((t) => t.taskId === record.taskId) && (
+              <Tag color="red" style={{ marginLeft: 12 }}>⚠ 병목</Tag>
+            )}
+          </span>
         </Link>
       ),
     },
@@ -153,6 +159,8 @@ export default function ProjDetailPage(){
     const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     ganttWrapperRef.current.appendChild(svgEl);
 
+    const bottleneckIds = new Set(criticalPathTasks.map((t) => String(t.taskId))); // 병목
+
     const tasks = ganttTasks.map((task) => ({
       id: String(task.taskId),
       name:
@@ -186,7 +194,7 @@ export default function ProjDetailPage(){
         ganttWrapperRef.current.innerHTML = "";
       }
     };
-  }, [ganttTasks]);
+  }, [ganttTasks, criticalPathTasks]);
 
   return(
     <main className="sb-content">
@@ -330,12 +338,16 @@ export default function ProjDetailPage(){
         </div>
       </div>
 
-      {/* 태스크 진행 현황-간트차트 */}
+      {/* 태스크 진행 현황-간트차트+병목 */}
       <div className="sb-card mt-3">
         <div className="sb-card__head">
           <h2>{t("detail.ganttTitle")}</h2>
+          {criticalPathTasks.length > 0 && (
+            <Tag color="red" style={{ marginLeft: 8 }}>
+              ⚠ 병목: {criticalPathTasks.map((t) => t.taskName).join(", ")}
+            </Tag>
+          )}
         </div>
-
         <div className="sb-card__body">
           <div id="gantt-wrapper" ref={ganttWrapperRef}></div>
         </div>

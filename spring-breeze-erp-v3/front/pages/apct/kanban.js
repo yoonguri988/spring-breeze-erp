@@ -160,7 +160,8 @@ export default function ApplicantKanbanPage() {
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                       style={{
-                        flex: "0 0 240px",
+                        flex: "1 1 240px",
+                        minWidth: 240,  
                         background: snapshot.isDraggingOver ? "#f5f7fa" : "#fafbfc",
                         border: "1px solid #e6ebe8",
                         borderRadius: 10,
