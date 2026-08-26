@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@ant-design/icons": "^4.3.0",
+    "@hello-pangea/dnd": "^16.6.0",
     "@next/bundle-analyzer": "^12.3.4",
     "@reduxjs/toolkit": "^1.9.7",
     "antd": "^4.8.6",
