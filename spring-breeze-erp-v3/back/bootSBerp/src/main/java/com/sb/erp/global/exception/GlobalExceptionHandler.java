@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 전역 예외 처리.
  */
-@Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
