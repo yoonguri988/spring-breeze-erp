@@ -53,5 +53,29 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	Integer sumOvertimeMinutesByEmpIdAndDateRange(@Param("empId") Long empId,
 			@Param("start") LocalDate start,
 			@Param("end") LocalDate end);
+	
+	
+	// 평가 리포트용 — 기간 내 사원별 근태 통계 집계
+	// 순서: empId, workDays, lateCount, earlyLeaveCount, absentCount,
+	@Query(value =
+	    "SELECT a.emp_id, " +
+	    "  COUNT(CASE WHEN a.att_status IN ('NORMAL','LATE','EARLY_LEAVE') THEN 1 END), " +
+	    "  COUNT(CASE WHEN a.att_status = 'LATE' THEN 1 END), " +
+	    "  COUNT(CASE WHEN a.att_status = 'EARLY_LEAVE' THEN 1 END), " +
+	    "  COUNT(CASE WHEN a.att_status = 'ABSENT' THEN 1 END), " +
+	    "  SUM(CASE WHEN a.att_status = 'ANNUAL' THEN 1 " +
+	    "           WHEN a.att_status IN ('AM_HALF','PM_HALF') THEN 0.5 " +
+	    "           ELSE 0 END), " +
+	    "  COALESCE(SUM(a.work_minutes), 0), " +
+	    "  COALESCE(SUM(a.overtime_minutes), 0) " +
+	    "FROM attendance a " +
+	    "WHERE a.att_date BETWEEN :startDate AND :endDate " +
+	    "  AND a.emp_id IN :empIds " +
+	    "GROUP BY a.emp_id",
+	    nativeQuery = true)
+	List<Object[]> findAttStatsByEmpIdsAndDateRange(
+	    @Param("empIds") List<Long> empIds,
+	    @Param("startDate") LocalDate startDate,
+	    @Param("endDate") LocalDate endDate);
 
 }
