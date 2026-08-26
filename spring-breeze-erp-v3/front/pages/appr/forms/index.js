@@ -9,6 +9,7 @@ import {
 import { SearchOutlined, BankOutlined, PlusOutlined } from "@ant-design/icons";
 import { fetchFormListRequest, deleteFormRequest } from "../../../reducers/appr/apprFormReducer";
 import { searchCompany } from "../../../api/appr/apprFormApi";
+import PageHeader from "../../../components/appr/PageHeader";
 
 const { Option } = Select;
 
@@ -165,22 +166,19 @@ export default function FormListPage() {
 
     return (
         <div className="sb-page">
-            <div className="sb-page-head">
-                <div className="sb-page-head__txt">
-                    <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
-                        <i className="bi bi-chevron-right" />
-                        <span>{t("forms.list.breadcrumbCurrent")}</span>
-                    </div>
-                    <h1>{t("forms.list.title")}</h1>
-                    <p>{t("forms.list.subtitle")}</p>
-                </div>
-                <div className="sb-page-head__actions">
+            <PageHeader
+                breadcrumb={[
+                    { label: t("common.breadcrumbRoot"), href: "/appr/forms" },
+                    { label: t("forms.list.breadcrumbCurrent") },
+                ]}
+                title={t("forms.list.title")}
+                subtitle={t("forms.list.subtitle")}
+                actions={
                     <Button type="primary" icon={<PlusOutlined/>} onClick={() => router.push("/appr/forms/write")}>
                         {t("forms.list.addBtn")}
                     </Button>
-                </div>
-            </div>
+                }
+            />
 
             <Card>
                 <div style={{display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "flex-end"}}>

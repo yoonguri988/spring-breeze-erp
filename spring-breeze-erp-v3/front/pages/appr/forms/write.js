@@ -12,6 +12,7 @@ import { insertFormRequest, resetFormState } from "../../../reducers/appr/apprFo
 import { checkCode, searchCompany, generateAiSchema } from "../../../api/appr/apprFormApi";
 import SchemaFieldEditor, {validateSchemaFields} from "../../../components/appr/SchemaFieldEditor";
 import apprFormTemplates from "../../../constants/apprFormTemplates";
+import PageHeader from "../../../components/appr/PageHeader";
 
 // react-quill은 SSR이 불가하므로 CSR로 로드
 // () => import("react-quill") -> 처음에 로드 하지않고 필요할때 로드
@@ -192,22 +193,16 @@ export default function FormWritePage() {
 
     return (
         <div className="sb-page" style={{maxWidth: 1100, margin: "0 auto"}}>
-            <div className="sb-page-head">
-                <div className="sb-page-head__txt">
-                    <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
-                        <i className="bi bi-chevron-right"/>
-                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>{t("forms.write.breadcrumbForms")}</a>
-                        <i className="bi bi-chevron-right"/>
-                        <span>{t("forms.write.breadcrumbCurrent")}</span>
-                    </div>
-                    <h1>{t("forms.write.title")}</h1>
-                    <p>{t("forms.write.subtitle")}</p>
-                </div>
-                <div className="sb-page-head__actions">
-                    <Button onClick={() => router.push("/appr/forms")}>{t("common.backToListBtn")}</Button>
-                </div>
-            </div>
+            <PageHeader
+                breadcrumb={[
+                    { label: t("common.breadcrumbRoot"), href: "/appr/forms" },
+                    { label: t("forms.write.breadcrumbForms"), href: "/appr/forms" },
+                    { label: t("forms.write.breadcrumbCurrent") },
+                ]}
+                title={t("forms.write.title")}
+                subtitle={t("forms.write.subtitle")}
+                actions={<Button onClick={() => router.push("/appr/forms")}>{t("common.backToListBtn")}</Button>}
+            />
 
             <Form
                 form={form}

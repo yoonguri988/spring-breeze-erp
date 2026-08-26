@@ -19,6 +19,7 @@ import {
     writeDocRequest,
     resetWriteState,
 } from "../../../reducers/appr/apprDocReducer";
+import PageHeader from "../../../components/appr/PageHeader";
 
 // react-quill은 SSR이 불가하므로 CSR로 로드
 // () => import("react-quill") -> 처음에 로드 하지않고 필요할때 로드
@@ -304,22 +305,16 @@ export default function DocWritePage() {
 
     return (
         <div className="sb-page" style={{maxWidth: 900}}>
-            <div className="sb-page-head">
-                <div className="sb-page-head__txt">
-                    <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
-                        <i className="bi bi-chevron-right"/>
-                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>{t("docs.list.breadcrumbCurrent")}</a>
-                        <i className="bi bi-chevron-right"/>
-                        <span>{t("docs.write.breadcrumbCurrent")}</span>
-                    </div>
-                    <h1>{t("docs.write.title")}</h1>
-                    <p>{t("docs.write.subtitle")}</p>
-                </div>
-                <div className="sb-page-head__actions">
-                    <Button onClick={() => router.push("/appr/docs")}>{t("common.backToListBtn")}</Button>
-                </div>
-            </div>
+            <PageHeader
+                breadcrumb={[
+                    { label: t("common.breadcrumbRoot"), href: "/appr/docs" },
+                    { label: t("docs.list.breadcrumbCurrent"), href: "/appr/docs" },
+                    { label: t("docs.write.breadcrumbCurrent") },
+                ]}
+                title={t("docs.write.title")}
+                subtitle={t("docs.write.subtitle")}
+                actions={<Button onClick={() => router.push("/appr/docs")}>{t("common.backToListBtn")}</Button>}
+            />
 
             <Form form={form} layout="vertical" onFinish={handleSubmit}>
                 <Form.Item

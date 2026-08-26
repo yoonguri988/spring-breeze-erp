@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import {
-    message, Descriptions, Button, Card, List, Tag, Spin,
+    message, Descriptions, Button,
     Row, Col, Modal, Form, Input
 } from "antd";
 import {
@@ -14,6 +14,9 @@ import {
 import {
     createDelegReqRequest, resetCreateStats,
 } from "../../../reducers/appr/apprLineDelegationReducer";
+import StatusBadge from "../../../components/appr/StatusBadge";
+import DeptEmpPicker, { SelectedEmployeeSummary } from "../../../components/appr/DeptEmpPicker";
+import PageHeader from "../../../components/appr/PageHeader";
 
 export default function DocDetailPage() {
     const router = useRouter();
@@ -122,6 +125,12 @@ export default function DocDetailPage() {
 
     // 위임요청 모달 관련
 
+    // 현재 로그인한 사용자가 이 문서의 기안자인지
+    const isDrafter = writerInfo?.empId === detailDoc?.empId;
+
+    // 현재 로그인한 사용자가 결재차례 본인인지
+    const isLineOwner = myLine?.empId === writerInfo?.empId;
+
     // 현재 로그인한 사원의 결재 순번 - 대기중(WAI)인 라인이 곧 본인 차례
     // canProcess가 true일 때만 버튼이 보임
     const myLine = detailLines.find((line) => line.linStatus === "WAI");
@@ -161,20 +170,6 @@ export default function DocDetailPage() {
         return <div style={{padding: 24}}>{detailError}</div>
     }
 
-    // 결재선 상태들 출력할것들
-    const statusBadgeMap ={
-        ING: <span className="sb-badge sb-badge--blue"><span className="pip"/>{t("docs.detail.docStatusBadge.ing")}</span>,
-        APP: <span className="sb-badge sb-badge--green"><span className="pip"/>{t("docs.detail.docStatusBadge.app")}</span>,
-        REJ: <span className="sb-badge sb-badge--red"><span className="pip"/>{t("docs.detail.docStatusBadge.rej")}</span>,
-    };
-
-    const lineBadgeMap = {
-        WAI: <span className="sb-badge sb-badge--amber"><span className="pip"/>{t("docs.detail.lineStatusBadge.wai")}</span>,
-        NOT: <span className="sb-badge sb-badge--gray"><span className="pip"/>{t("docs.detail.lineStatusBadge.not")}</span>,
-        APP: <span className="sb-badge sb-badge--green"><span className="pip"/>{t("docs.detail.lineStatusBadge.app")}</span>,
-        REJ: <span className="sb-badge sb-badge--red"><span className="pip"/>{t("docs.detail.lineStatusBadge.rej")}</span>,
-    };
-
     const roleClassMap = {
         APP: "role-app",
         REJ: "role-rej",
@@ -184,19 +179,14 @@ export default function DocDetailPage() {
 
     return (
         <div className="sb-page" style={{maxWidth: 1100}}>
-            <div className="sb-page-head">
-                <div className="sb-page-head__txt">
-                    <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>{t("common.breadcrumbRoot")}</a>
-                        <i className="bi bi-chevron-right"/>
-                        <span>{t("docs.detail.breadcrumbCurrent")}</span>
-                    </div>
-                    <h1>{detailDoc.docTitle}</h1>
-                </div>
-                <div className="sb-page-head__actions">
-                    <Button onClick={() => router.push("/appr/docs")}>{t("common.backToListBtn")}</Button>
-                </div>
-            </div>
+            <PageHeader
+                breadcrumb={[
+                    { label: t("common.breadcrumbRoot"), href: "/appr/docs" },
+                    { label: t("docs.detail.breadcrumbCurrent") },
+                ]}
+                title={detailDoc.docTitle}
+                actions={<Button onClick={() => router.push("/appr/docs")}>{t("common.backToListBtn")}</Button>}
+            />
 
             <Row gutter={16} style={{marginBottom: 16}}>
                 <Col xs={24} md={10}>
@@ -216,7 +206,7 @@ export default function DocDetailPage() {
                             <div>
                                 <label className="sb-form-label text-soft">{t("docs.detail.statusLabel")}</label>
                                 <div style={{display: "flex", alignItems: "center", gap: 12, marginTop: 4}}>
-                                    <div>{statusBadgeMap[detailDoc.docStatus]}</div>
+                                    <div><StatusBadge domain="doc" status={detailDoc.docStatus} /></div>
                                     <div style={{display: "flex", alignItems: "center", gap: 4, fontSize: 13}}>
                                         <span style={{fontWeight: 700}}>{t("docs.detail.stepDraft")}</span>
                                         <i className="bi bi-chevron-right text-black-50"/>
@@ -268,7 +258,7 @@ export default function DocDetailPage() {
                                             )}
                                         </div>
                                         <div className="appr-timeline__status">
-                                            {lineBadgeMap[line.linStatus]}
+                                            <StatusBadge domain="line" status={line.linStatus} />
                                         </div>
                                     </div>
                                 ))}
@@ -310,17 +300,21 @@ export default function DocDetailPage() {
                 </div>
             </div>
 
-            {canProcess && (
+            {(canProcess || ((isDrafter || isLineOwner) && myLine)) && (
                 <div style={{display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 24}}>
-                    <Button onClick={() => setDelegModalOpen(true)}>
-                        위임/대결 요청
-                    </Button>
-                    <Button danger onClick={() => setConfirmAction("reject")}>
-                        반려
-                    </Button>
-                    <Button type="primary" onClick={() => setConfirmAction("approve")}>
-                        승인
-                    </Button>
+                    {(isDrafter || isLineOwner) && myLine && (
+                        <Button onClick={() => setDelegModalOpen(true)}>
+                            위임/대결 요청
+                        </Button>
+                    )}
+                    {canProcess && (<>
+                        <Button danger onClick={() => setConfirmAction("reject")}>
+                            반려
+                        </Button>
+                        <Button type="primary" onClick={() => setConfirmAction("approve")}>
+                            승인
+                        </Button> 
+                    </>)}
                 </div>
             )}
 
@@ -360,95 +354,23 @@ export default function DocDetailPage() {
                 width={700}
             >
                 <Form form={form} layout="vertical">
-                    <Row gutter={16}>
-                        <Col span={10}>
-                            <Card size="small" title="부서 선택" bodyStyle={{padding: 8}}>
-                                <div style={{maxHeight: 240, overflowY: "auto"}}>
-                                    <List
-                                        size="small"
-                                        loading={deptTreeLoading}
-                                        dataSource={deptTree}
-                                        locale={{emptyText: "부서 정보를 불러오는 중입니다."}}
-                                        renderItem={(d) => (
-                                            <List.Item
-                                                style={{
-                                                    cursor: "pointer",
-                                                    background: selectedDeptId === d.deptId ? "#e6f6ff" : "transparent"
-                                                }}
-                                                onClick={() => handleDeptSelect(d.deptId)}
-                                            >
-                                                {d.deptName} <Tag style={{marginLeft: 8}}>{d.empCount}명</Tag>
-                                            </List.Item>
-                                        )}
-                                    />
-                                </div>
-                            </Card>
-                        </Col>
-                        <Col span={14}>
-                            <Card size="small" title="대결자 선택" bodyStyle={{padding: 8}}>
-                                {deptEmpsLoading ? (
-                                    <div style={{textAlign: "center", padding: "20px 0"}}>
-                                        <Spin size="small"/>
-                                    </div>
-                                ) : (
-                                    <div className="appr-emp-box">
-                                        {deptEmps.length === 0 ? (
-                                            <div className="text-muted text-center py-4 small">
-                                                왼쪽에서 부서를 먼저 선택하세요.
-                                            </div>
-                                        ) : (
-                                            deptEmps.map((e) => {
-                                                const isSelected = selectedDelegate?.empId === e.empId;
-                                                return (
-                                                    <div
-                                                        key={e.empId}
-                                                        className={"appr-emp-row" + (isSelected ? " selected" : "")}
-                                                        onClick={() => setSelectedDelegate(isSelected ? null : e)}
-                                                    >
-                                                        <span>
-                                                            {e.empName}
-                                                            {e.empStatus === "휴직" && (
-                                                                <Tag color="orange" style={{marginLeft: 6}}>휴직중</Tag>
-                                                            )}
-                                                        </span>
-                                                        <span className="pos-chip">{e.posName}</span>
-                                                    </div>
-                                                );
-                                            })
-                                        )}
-                                    </div>
-                                )}
-                            </Card>
-                        </Col>
-                    </Row>
+                    <DeptEmpPicker
+                        deptTree={deptTree}
+                        deptTreeLoading={deptTreeLoading}
+                        selectedDeptId={selectedDeptId}
+                        onSelectDept={handleDeptSelect}
+                        deptEmps={deptEmps}
+                        deptEmpsLoading={deptEmpsLoading}
+                        selectedEmployee={selectedDelegate}
+                        onSelectEmployee={setSelectedDelegate}
+                        pickerLabel="대결자 선택"
+                    />
 
-                    {selectedDelegate && (
-                        <div
-                            style={{
-                                marginTop: 12,
-                                marginBottom: 4,
-                                padding: "10px 14px",
-                                borderRadius: 8,
-                                background: "#e6f4ff",
-                                border: "1px solid #91caff",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div style={{display: "flex", alignItems: "center", gap: 8}}>
-                                <span style={{color: "#8a93a3", fontSize: 13}}>선택된 대결자</span>
-                                <span style={{fontWeight: 700, fontSize: 15}}>{selectedDelegate.empName}</span>
-                                <span className="pos-chip">{selectedDelegate.posName}</span>
-                            </div>
-                            <Button
-                                type="text"
-                                size="small"
-                                icon={<i className="bi bi-x-lg" />}
-                                onClick={() => setSelectedDelegate(null)}
-                            />
-                        </div>
-                    )}
+                    <SelectedEmployeeSummary
+                        employee={selectedDelegate}
+                        onClear={() => setSelectedDelegate(null)}
+                        label="선택된 대결자"
+                    />
 
                     <Form.Item name="reqReason" label="사유">
                         <Input.TextArea rows={3} placeholder="위임/대결 사유 (선택)"/>

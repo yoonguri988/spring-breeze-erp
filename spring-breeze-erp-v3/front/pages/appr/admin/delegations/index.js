@@ -14,13 +14,14 @@ import {
     fetchDelegHistoryRequest,
 } from "../../../../reducers/appr/apprLineDelegationReducer";
 import { fetchApprLogRequest } from "../../../../reducers/appr/apprLogReducer";
+import StatusBadge from "../../../../components/appr/StatusBadge";
+import PageHeader from "../../../../components/appr/PageHeader";
+import { useServerTable } from "../../../../components/appr/useServerTable";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
-const PAGE_SIZE = 10;
 
 export default function DelegationAdminPage() {
-    const router = useRouter();
     const dispatch = useDispatch();
     const { t } = useTranslation(["appr", "common"]);
 
@@ -40,13 +41,11 @@ export default function DelegationAdminPage() {
     const [histStatus, setHistStatus] = useState(undefined);
     const [histEmpId, setHistEmpId] = useState(undefined);
     const [histDateRange, setHistDateRange] = useState([null, null]);
-    const [histPage, setHistPage] = useState(1);
 
     // 감사로그 탭 필터/페이지
     const [logDocId, setLogDocId] = useState(undefined);
     const [logEmpId, setLogEmpId] = useState(undefined);
     const [logDateRange, setLogDateRange] = useState([null, null]);
-    const [logPage, setLogPage] = useState(1);
 
     // 대기중 요청 조회
     useEffect(() => {
@@ -56,34 +55,28 @@ export default function DelegationAdminPage() {
     }, [dispatch, tab]);
 
     // 처리이력 조회
-    useEffect(() => {
-        if (tab !== "history") return;
-        dispatch(fetchDelegHistoryRequest({
-            cond: {
-                reqStatus: histStatus,
-                reqEmpId: histEmpId,
-                startDate: histDateRange[0],
-                endDate: histDateRange[1],
-            },
-            page: histPage - 1, // spring 페이징은 0이 기준이래서..
-            size: PAGE_SIZE, 
-        }));
-    }, [dispatch, tab, histStatus, histEmpId, histDateRange, histPage]);
+    const { page: histPage, setPage: setHistPage, pageSize: histPageSize } = useServerTable({
+        active: tab === "history",
+        cond: { reqStatus: histStatus, reqEmpId: histEmpId, startDate: histDateRange[0], endDate: histDateRange[1] },
+        onFetch: (page, size) => dispatch(fetchDelegHistoryRequest({
+            cond: { reqStatus: histStatus, reqEmpId: histEmpId, startDate: histDateRange[0], endDate: histDateRange[1] },
+            page,
+            size,
+        })),
+        deps: [histStatus, histEmpId, histDateRange],
+    });
 
     // 감사로그 조회
-    useEffect(() => {
-        if (tab !== "logs") return;
-        dispatch(fetchApprLogRequest({
-            cond: {
-                docId: logDocId,
-                empId: logEmpId,
-                startDate: logDateRange[0],
-                endDate: logDateRange[1],
-            },
-            page: logPage - 1,
-            size: PAGE_SIZE,
-        }));
-    }, [dispatch, tab, logDocId, logEmpId, logDateRange, logPage]);
+    const { page: logPage, setPage: setLogPage, pageSize: logPageSize } = useServerTable({
+        active: tab === "logs",
+        cond: { docId: logDocId, empId: logEmpId, startDate: logDateRange[0], endDate: logDateRange[1] },
+        onFetch: (page, size) => dispatch(fetchApprLogRequest({
+            cond: { docId: logDocId, empId: logEmpId, startDate: logDateRange[0], endDate: logDateRange[1] },
+            page,
+            size,
+        })),
+        deps: [logDocId, logEmpId, logDateRange],
+    });
 
     // 승인/반려 처리 결과 반영
     useEffect(() => {
@@ -103,15 +96,6 @@ export default function DelegationAdminPage() {
 
     const handleApprove = (reqId) => dispatch(approveDelegReqRequest({reqId}));
     const handleReject = (reqId) => dispatch(rejectDelegReqRequest({reqId}));
-
-    const reqStatusBadge = (status) => {
-        const map = {
-            REQ: <span className="sb-badge sb-badge--amber"><span className="pip"/>요청중</span>,
-            APP: <span className="sb-badge sb-badge--green"><span className="pip"/>승인</span>,
-            REJ: <span className="sb-badge sb-badge--red"><span className="pip"/>반려</span>,
-        }
-        return map[status] || <span className="sb-badge sb-badge--gray"><span className="pip"/>{status}</span>
-    };
 
     // 대기중 요청 탭
     const pendingColumns = [
@@ -155,7 +139,7 @@ export default function DelegationAdminPage() {
         { title: "처리자", dataIndex: "proEmpName", key: "proEmpName", width: 110 },
         {
             title: "상태", dataIndex: "reqStatus", key: "reqStatus", width: 90,
-            render: (status) => reqStatusBadge(status),
+            render: (status) => <StatusBadge domain="delegReq" status={status} />,
         },
         { title: "요청일", dataIndex: "createdAt", key: "createdAt", width: 160 },
         { title: "처리일", dataIndex: "processedAt", key: "processedAt", width: 160 },
@@ -173,19 +157,14 @@ export default function DelegationAdminPage() {
 
     return (
         <div className="sb-page" style={{maxWidth: 1200}}>
-            <div className="sb-page-head">
-                <div className="sb-page-head__txt">
-                    <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/docs")} style={{cursor: "pointer"}}>
-                            {t("common.breadcrumbRoot")}
-                        </a>
-                        <i className="bi bi-chevron-right"/>
-                        <span>결재선 관리</span>
-                    </div>
-                    <h1>결재선 위임/대결 관리</h1>
-                    <p>대결 요청 승인/반려, 처리이력, 감사로그를 확인합니다.</p>
-                </div>
-            </div>
+            <PageHeader
+                breadcrumb={[
+                    { label: t("common.breadcrumbRoot"), href: "/appr/docs" },
+                    { label: "결재선 관리" },
+                ]}
+                title="결재선 위임/대결 관리"
+                subtitle="대결 요청 승인/반려, 처리이력, 감사로그를 확인합니다."
+            />
 
             <Tabs
                 activeKey={tab}
@@ -217,7 +196,7 @@ export default function DelegationAdminPage() {
                         placeholder="처리상태"
                         allowClear
                         style={{width: 120}}
-                        onChange={(v) => {setHistStatus(v); setHistPage(1);}}
+                        onChange={setHistStatus}
                     >
                         <Option value="REQ">요청중</Option>
                         <Option value="APP">승인</Option>
@@ -226,13 +205,12 @@ export default function DelegationAdminPage() {
                     <InputNumber
                         placeholder="요청자 사번"
                         style={{width: 140}}
-                        onChange={(v) => {setHistEmpId(v || undefined); setHistPage(1);}}
+                        onChange={(v) => setHistEmpId(v || undefined)}
                     />
                     <RangePicker
                         format="YYYY-MM-DD"
                         onChange={(dates, dateStrings) => {
-                            setHistDateRange(dates ? dateStrings : [null, null]);
-                            setHistPage(1);
+                            setHistDateRange(dates ? dateStrings : [null, null])
                         }}
                     />
                 </Space>
@@ -243,9 +221,9 @@ export default function DelegationAdminPage() {
                     loading={historyLoading}
                     pagination={{
                         current: histPage,
-                        pageSize: PAGE_SIZE,
+                        pageSize: histPageSize,
                         total: historyTotal,
-                        onChange: (p) => setHistPage(p),
+                        onChange: setHistPage,
                     }}
                 />
                 {historyError && <div style={{color: "red", marginTop: 8}}>{historyError}</div>}
@@ -258,18 +236,17 @@ export default function DelegationAdminPage() {
                         <InputNumber
                             placeholder="문서ID"
                             style={{ width: 140 }}
-                            onChange={(v) => { setLogDocId(v || undefined); setLogPage(1); }}
+                            onChange={(v) => setLogDocId(v || undefined)}
                         />
                         <InputNumber
                             placeholder="사번"
                             style={{ width: 140 }}
-                            onChange={(v) => { setLogEmpId(v || undefined); setLogPage(1); }}
+                            onChange={(v) => setLogEmpId(v || undefined)}
                         />
                         <RangePicker
                             format="YYYY-MM-DD"
                             onChange={(dates, dateStrings) => {
                                 setLogDateRange(dates ? dateStrings : [null, null]);
-                                setLogPage(1);
                             }}
                         />
                     </Space>
@@ -280,9 +257,9 @@ export default function DelegationAdminPage() {
                         loading={logsLoading}
                         pagination={{
                             current: logPage,
-                            pageSize: PAGE_SIZE,
+                            pageSize: logPageSize,
                             total: logsTotal,
-                            onChange: (p) => setLogPage(p),
+                            onChange: setLogPage,
                         }}
                     />
                     {logsError && <div style={{ color: "red", marginTop: 8 }}>{logsError}</div>}

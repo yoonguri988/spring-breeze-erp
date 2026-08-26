@@ -18,6 +18,7 @@ import {
 import { checkCode, searchCompany } from "../../../api/appr/apprFormApi";
 import SchemaFieldEditor, {validateSchemaFields } from "../../../components/appr/SchemaFieldEditor";
 import { BankOutlined } from "@ant-design/icons";
+import PageHeader from "../../../components/appr/PageHeader";
 
 // react-quill은 SSR이 불가하므로 CSR로 로드
 // () => import("react-quill") -> 처음에 로드 하지않고 필요할때 로드
@@ -204,20 +205,15 @@ export default function FormDetailPage() {
 
     return(    
         <div className="sb-page">
-            <div className="sb-page-head">
-                <div className="sb-page-head__txt">
-                    <div className="sb-breadcrumb">
-                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>전자결재</a>
-                        <i className="bi bi-chevron-right"/>
-                        <a onClick={() => router.push("/appr/forms")} style={{cursor: "pointer"}}>양식 관리</a>
-                        <i className="bi bi-chevron-right"/>
-                        <span>양식 상세</span>
-                    </div>
-                    <h1>결재 양식 상세조회</h1>
-                    <p>결재 양식의 상세 정보를 확인합니다.</p>
-                </div>
-
-            </div>
+            <PageHeader
+                breadcrumb={[
+                    { label: "전자결재", href: "/appr/forms" },
+                    { label: "양식 관리", href: "/appr/forms" },
+                    { label: "양식 상세" },
+                ]}
+                title="결재 양식 상세조회"
+                subtitle="결재 양식의 상세 정보를 확인합니다."
+            />
             
             <Row gutter={[24, 16]}>
                 <Col xs={24} md={16}>
