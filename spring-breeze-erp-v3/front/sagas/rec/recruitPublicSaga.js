@@ -13,8 +13,8 @@ import {
 const RECRUIT_PUBLIC_API_BASE = "/api/public/recruit";
 
 // listPublicRecruit  - GET /api/public/recruit?comId&pstartno  공개 공고 목록(OPEN만)
-export const listPublicRecruitApi = ({ comId, pstartno = 1 } = {}) =>
-  apctApi.get(RECRUIT_PUBLIC_API_BASE, { params: { comId, pstartno } });
+export const listPublicRecruitApi = ({ comId, recTitle, pstartno = 1 } = {}) =>
+  apctApi.get(RECRUIT_PUBLIC_API_BASE, { params: { comId, recTitle, pstartno } });
 
 export function* listPublicRecruit(action) {
   try {

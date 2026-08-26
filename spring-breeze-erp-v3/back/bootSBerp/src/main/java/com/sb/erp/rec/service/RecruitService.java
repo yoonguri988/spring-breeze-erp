@@ -46,7 +46,7 @@ public class RecruitService {
     public List<RecruitResponse> selectAll(RecruitSearchRequest search) { 
     	 System.out.println("comId=" + search.getComId() + ", recStatus=[" + search.getRecStatus() + "]");
         Specification<Recruit> spec = RecruitSpecs.search(search.getComId(), search.getRecStatus(), search.getRecTitle());
-        Pageable pageable = PageRequest.of(search.getPageIndex(), search.getOnepagelist());
+        Pageable pageable = PageRequest.of(search.getPageIndex(), search.getOnepagelist(),Sort.by(Sort.Direction.DESC, "recStartDate"));
 
         return recruitRepository.findAll(spec, pageable)
                 .map(this::mapToResponse)
@@ -127,18 +127,18 @@ public class RecruitService {
     }
     
     // 공개용 - 전체 건수
-    public int getOpenCnt(Long comId) {
-        return (int) recruitRepository.count(RecruitSpecs.search(comId, "OPEN",null));
+    public int getOpenCnt(Long comId, String recTitle) {
+        return (int) recruitRepository.count(RecruitSpecs.search(comId, "OPEN", recTitle));
     }
 
     //  공개용 - 특정 회사의 OPEN 공고만 목록 조회 (비회원 지원자용)
-    public List<RecruitResponse> getOpenListAsList(Long comId, int pstartno, int onepagelist) {
+    public List<RecruitResponse> getOpenListAsList(Long comId, String recTitle, int pstartno, int onepagelist) {
         Pageable pageable = PageRequest.of(
                 pstartno - 1 < 0 ? 0 : pstartno - 1,
                 onepagelist,
                 Sort.by(Sort.Direction.DESC, "recStartDate")
         );
-        return recruitRepository.findAll(RecruitSpecs.search(comId, "OPEN",null), pageable)
+        return recruitRepository.findAll(RecruitSpecs.search(comId, "OPEN", recTitle), pageable)
                 .map(this::mapToResponse)
                 .getContent();
     }

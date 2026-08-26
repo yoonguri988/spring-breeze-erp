@@ -72,7 +72,7 @@ export default function CareersApplyPage() {
 
   return (
     <ApplicantLayout>
-      <Link href={recId ? `/careers/${recId}` : "/careers"}>
+      <Link href={{ pathname: "/careers/detail", query: { recId } }} passHref >
         <Button type="text" icon={<ArrowLeftOutlined />} style={{ paddingLeft: 0, marginBottom: 12 }}>
           공고로 돌아가기
         </Button>

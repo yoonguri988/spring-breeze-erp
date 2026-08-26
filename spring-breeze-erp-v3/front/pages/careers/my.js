@@ -1,6 +1,4 @@
 // pages/careers/my.js
-// 채용 공개 사이트 - 내 지원현황 (GET /api/public/applicant/me, DELETE /{apctId})
-// + 지원건별 이력서(PDF) 업로드/재제출 (POST /api/public/resume)
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,16 +10,19 @@ import {
   Skeleton,
   Modal,
   Upload,
+  Form,
+  Input,
   message,
   Popconfirm,
 } from "antd";
-import { InboxOutlined, FilePdfOutlined, DeleteOutlined } from "@ant-design/icons";
+import { InboxOutlined, FilePdfOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import moment from "moment";
 
 import ApplicantLayout from "../../components/ApplicantLayout";
 import {
   fetchMyApplicationsRequest,
   cancelApplicationRequest,
+  updateApplicationRequest,
   resetApplicantPublicState,
 } from "../../reducers/apct/applicantPublicReducer";
 import {
@@ -30,18 +31,18 @@ import {
 } from "../../reducers/rsm/resumePublicReducer";
 
 const STATUS_LABEL = {
-  RECEIVED: { text: "접수", color: "default" },
-  SCREENING: { text: "서류심사", color: "blue" },
-  INTERVIEW: { text: "면접", color: "purple" },
-  HIRED: { text: "합격", color: "green" },
-  REJECTED: { text: "불합격", color: "red" },
+  RECEIVED: { text: "접수", color: "st-default" },
+  SCREENING: { text: "서류심사", color: "st-blue" },
+  INTERVIEW: { text: "면접", color: "st-purple" },
+  HIRED: { text: "합격", color: "st-green" },
+  REJECTED: { text: "불합격", color: "st-red" },
 };
 
 export default function CareersMyPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { apctAccessToken } = useSelector((state) => state.apctAuth);
-  const { myApplications, myApplicationsLoading, cancelLoading, cancelSuccess, cancelError } =
+  const { myApplications, myApplicationsLoading, cancelLoading, cancelSuccess, cancelError, updateLoading, updateSuccess, updateError } =
     useSelector((state) => state.applicantPublic);
   const { uploadLoading, uploadSuccess, uploadError } = useSelector(
     (state) => state.resumePublic,
@@ -50,10 +51,12 @@ export default function CareersMyPage() {
   const [uploadTarget, setUploadTarget] = useState(null); // apctId | null
   const [fileList, setFileList] = useState([]);
 
+  const [editTarget, setEditTarget] = useState(null); // apctId | null
+  const [editForm] = Form.useForm();
+
   useEffect(() => {
     if (!apctAccessToken) return;
     dispatch(fetchMyApplicationsRequest());
-    // 지원 직후(/careers/apply → ?apctId=)로 넘어온 경우 바로 업로드 모달을 띄워준다.
     if (router.query.apctId) {
       setUploadTarget(Number(router.query.apctId));
     }
@@ -73,6 +76,17 @@ export default function CareersMyPage() {
   }, [cancelLoading, cancelSuccess, cancelError]);
 
   useEffect(() => {
+    if (updateLoading) return;
+    if (updateSuccess) {
+      message.success("지원 정보가 수정되었습니다.");
+      closeEditModal();
+    } else if (updateError) {
+      message.error(updateError);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateLoading, updateSuccess, updateError]);
+
+  useEffect(() => {
     if (uploadLoading) return;
     if (uploadSuccess) {
       message.success("이력서가 제출되었습니다. AI 분석 후 담당자에게 전달됩니다.");
@@ -87,6 +101,32 @@ export default function CareersMyPage() {
     setUploadTarget(null);
     setFileList([]);
     dispatch(resetResumePublicState());
+  };
+
+  const openEditModal = (item) => {
+    setEditTarget(item.apctId);
+    editForm.setFieldsValue({
+      apctName: item.apctName,
+      apctEmail: item.apctEmail,
+      apctPhone: item.apctPhone,
+    });
+  };
+
+  const closeEditModal = () => {
+    setEditTarget(null);
+    editForm.resetFields();
+    dispatch(resetApplicantPublicState());
+  };
+
+  const handleEditSubmit = () => {
+    editForm.validateFields().then((values) => {
+      dispatch(
+        updateApplicationRequest({
+          apctId: editTarget,
+          ...values,
+        }),
+      );
+    });
   };
 
   const handleUpload = () => {
@@ -125,10 +165,11 @@ export default function CareersMyPage() {
           itemLayout="horizontal"
           dataSource={myApplications}
           renderItem={(item) => {
-            const meta = STATUS_LABEL[item.apctStatus] || { text: item.apctStatus, color: "default" };
-            const isFinal = item.apctStatus === "HIRED" || item.apctStatus === "REJECTED";
+            const meta = STATUS_LABEL[item.apctStatus] || { text: item.apctStatus, color: "st-default" };
+            const canEdit = item.apctStatus === "RECEIVED";
             return (
               <List.Item
+                className="crc-list-item"
                 style={{
                   background: "#fff",
                   border: "1px solid #e6ebe8",
@@ -137,15 +178,29 @@ export default function CareersMyPage() {
                   marginBottom: 10,
                 }}
                 actions={[
-                  <Button
-                    key="upload"
-                    size="small"
-                    icon={<FilePdfOutlined />}
-                    onClick={() => setUploadTarget(item.apctId)}
-                  >
-                    이력서 제출/재제출
-                  </Button>,
-                  !isFinal ? (
+                  canEdit && (
+                    <Button
+                      key="edit"
+                      size="small"
+                      className="crc-btn"
+                      icon={<EditOutlined />}
+                      onClick={() => openEditModal(item)}
+                    >
+                      지원 정보 수정
+                    </Button>
+                  ),
+                  canEdit && (
+                    <Button
+                      key="upload"
+                      size="small"
+                      className="crc-btn"
+                      icon={<FilePdfOutlined />}
+                      onClick={() => setUploadTarget(item.apctId)}
+                    >
+                      이력서 제출/재제출
+                    </Button>
+                  ),
+                  canEdit && (
                     <Popconfirm
                       key="cancel"
                       title="지원을 취소하시겠습니까?"
@@ -153,17 +208,20 @@ export default function CareersMyPage() {
                       cancelText="닫기"
                       onConfirm={() => handleCancel(item.apctId)}
                     >
-                      <Button size="small" danger icon={<DeleteOutlined />} loading={cancelLoading}>
+                      <Button size="small" danger className="crc-btn-danger" icon={<DeleteOutlined />} loading={cancelLoading}>
                         지원 취소
                       </Button>
                     </Popconfirm>
-                  ) : null,
+                  ),
                 ].filter(Boolean)}
               >
                 <List.Item.Meta
                   title={
                     <span>
-                      {item.recTitle} <Tag color={meta.color}>{meta.text}</Tag>
+                      {item.recTitle}
+                      <Tag className={`crc-status-tag ${meta.color}`} style={{ marginLeft: 10 }}>
+                        {meta.text}
+                      </Tag>
                     </span>
                   }
                   description={
@@ -178,6 +236,7 @@ export default function CareersMyPage() {
         />
       )}
 
+      {/* 이력서 업로드 모달 */}
       <Modal
         title="이력서(PDF) 업로드"
         open={uploadTarget !== null}
@@ -185,7 +244,8 @@ export default function CareersMyPage() {
         onOk={handleUpload}
         okText="제출"
         cancelText="닫기"
-        okButtonProps={{ loading: uploadLoading }}
+        okButtonProps={{ loading: uploadLoading, className: "crc-btn" }}
+        cancelButtonProps={{ className: "crc-btn" }}
         destroyOnClose
       >
         <Upload.Dragger
@@ -202,6 +262,46 @@ export default function CareersMyPage() {
           <p className="ant-upload-text">클릭하거나 파일을 이 영역에 끌어다 놓으세요</p>
           <p className="ant-upload-hint">PDF 파일 1개만 업로드할 수 있습니다. 기존 이력서는 자동으로 교체됩니다.</p>
         </Upload.Dragger>
+      </Modal>
+
+      {/* 지원 정보 수정 모달 */}
+      <Modal
+        title="지원 정보 수정"
+        open={editTarget !== null}
+        onCancel={closeEditModal}
+        onOk={handleEditSubmit}
+        okText="저장"
+        cancelText="닫기"
+        okButtonProps={{ loading: updateLoading, className: "crc-btn" }}
+        cancelButtonProps={{ className: "crc-btn" }}
+        destroyOnClose
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item
+            name="apctName"
+            label="이름"
+            rules={[{ required: true, message: "이름을 입력해 주세요." }]}
+          >
+            <Input placeholder="홍길동" />
+          </Form.Item>
+          <Form.Item
+            name="apctEmail"
+            label="이메일"
+            rules={[
+              { required: true, message: "이메일을 입력해 주세요." },
+              { type: "email", message: "올바른 이메일 형식이 아닙니다." },
+            ]}
+          >
+            <Input placeholder="example@email.com" />
+          </Form.Item>
+          <Form.Item
+            name="apctPhone"
+            label="연락처"
+            rules={[{ required: true, message: "연락처를 입력해 주세요." }]}
+          >
+            <Input placeholder="010-0000-0000" />
+          </Form.Item>
+        </Form>
       </Modal>
     </ApplicantLayout>
   );

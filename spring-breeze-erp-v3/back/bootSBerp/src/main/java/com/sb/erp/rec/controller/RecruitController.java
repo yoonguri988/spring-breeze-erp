@@ -31,12 +31,13 @@ public class RecruitController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> getOpenList(
     		@RequestParam(name = "comId", required = false) Long comId,
+    		@RequestParam(name = "recTitle", required = false) String recTitle,
             @RequestParam(name = "pstartno", defaultValue = "1") int pstartno) {
 
         int onepagelist = 10;
-        int totalCnt = recruitService.getOpenCnt(comId);
+        int totalCnt = recruitService.getOpenCnt(comId, recTitle);
         PagingUtil paging = new PagingUtil(totalCnt, pstartno);
-        List<RecruitResponse> list = recruitService.getOpenListAsList(comId, pstartno, onepagelist);
+        List<RecruitResponse> list = recruitService.getOpenListAsList(comId, recTitle, pstartno, onepagelist);
 
         Map<String, Object> result = new HashMap<>();
         result.put("list", list);
