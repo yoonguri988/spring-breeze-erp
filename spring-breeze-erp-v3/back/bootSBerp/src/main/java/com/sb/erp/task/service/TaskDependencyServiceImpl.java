@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -135,6 +137,54 @@ public class TaskDependencyServiceImpl implements TaskDependencyService{
 	
 	//후속 작업 리스트
 	@Override public List<TaskResponse> selectImpactTasks(Long taskId) {  return dao.selectImpactTasks(taskId); }
+
+	// 핵심 병목(Critical Path) 탐색
+	// 기준: "본인은 지연됐지만 부모는 지연되지 않은" 태스크 = 지연의 시발점(진짜 원인)
+	// - 부모가 이미 늦은 경우의 자식 지연은 캐스케이드로 인한 "결과"일 뿐, 병목(원인)으로 보지 않음
+	// - 지연 여부 판단: actualEndDate가 있으면 그 값, 없으면 오늘 날짜를 taskEndDate(계획)와 비교
+	@Override 
+	public List<TaskResponse> findCriticalPath(Long proId) {
+
+	    List<TaskResponse> allTasks = dao.selectTaskDependencies(proId);
+
+	    Map<Long, TaskResponse> taskMap = allTasks.stream()
+	            .collect(Collectors.toMap(TaskResponse::getTaskId, t -> t));
+
+	    List<TaskResponse> bottlenecks = new ArrayList<>();
+
+	    for (TaskResponse task : allTasks) {
+
+	        // 1) 이 태스크 자체가 지연됐는지 (완료됐으면 실제 종료일, 진행중이면 오늘 날짜로 판단)
+	        LocalDate compareDate = task.getActualEndDate() != null
+	                ? task.getActualEndDate()
+	                : LocalDate.now();
+	        boolean isSelfDelayed = compareDate.isAfter(task.getTaskEndDate());
+
+	        if (!isSelfDelayed) continue; // 안 늦었으면 애초에 병목 후보 아님
+
+	        // 2) 부모가 없거나(최상위), 부모는 "자기 탓 지연"이 아니어야 진짜 원인
+	        TaskResponse parent = task.getParentTaskId() == null 
+	                ? null 
+	                : taskMap.get(task.getParentTaskId());
+
+	        boolean parentDelayed;
+	        if (parent == null) {
+	            parentDelayed = false; // 부모 없음 = 부모 탓일 수 없음
+	        } else {
+	            LocalDate parentCompareDate = parent.getActualEndDate() != null
+	                    ? parent.getActualEndDate()
+	                    : LocalDate.now();
+	            parentDelayed = parentCompareDate.isAfter(parent.getTaskEndDate());
+	        }
+
+	        // 부모가 안 늦었는데 나만 늦었다 = 지연의 시발점(진짜 병목)
+	        if (!parentDelayed) {
+	            bottlenecks.add(task);
+	        }
+	    }
+
+	    return bottlenecks; // 병목 태스크 목록 (여러 개일 수 있음 - 가지가 여러 개면)
+	}
 	
 	
 }
