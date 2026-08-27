@@ -9,6 +9,7 @@ const initialState = {
     myTasksPaging:null,
     myTasksTotalCnt:0,
     ganttTasks:[],
+    criticalPathTasks:[], // 병목
     loading:false,
     error:null,
     success:false,
@@ -157,6 +158,20 @@ const taskReducer = createSlice({
             state.error=action.payload;
         },
 
+        // 핵심 병목(Critical Path) 조회
+        fetchCriticalPathRequest:(state)=>{
+            state.loading=true;
+            state.error=null;
+        },
+        fetchCriticalPathSuccess:(state,action)=>{
+            state.loading=false;
+            state.criticalPathTasks=action.payload;
+        },
+        fetchCriticalPathFailure:(state,action)=>{
+            state.loading=false;
+            state.error=action.payload;
+        },
+
         // 초기화
         resetTaskState:(state)=>{
             state.loading=false;
@@ -175,6 +190,7 @@ export const {
     deleteTaskRequest,deleteTaskSuccess,deleteTaskFailure,
     fetchMyTasksRequest,fetchMyTasksSuccess,fetchMyTasksFailure,
     fetchGanttRequest,fetchGanttSuccess,fetchGanttFailure,
+    fetchCriticalPathRequest,fetchCriticalPathSuccess,fetchCriticalPathFailure,
     resetTaskState
 } = taskReducer.actions;
 

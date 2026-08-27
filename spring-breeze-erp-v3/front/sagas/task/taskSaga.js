@@ -8,6 +8,7 @@ import{     fetchTaskDetailRequest,fetchTaskDetailSuccess,fetchTaskDetailFailure
             deleteTaskRequest,deleteTaskSuccess,deleteTaskFailure,
             fetchMyTasksRequest,fetchMyTasksSuccess,fetchMyTasksFailure,
             fetchGanttRequest,fetchGanttSuccess,fetchGanttFailure,
+            fetchCriticalPathRequest,fetchCriticalPathSuccess,fetchCriticalPathFailure,
             resetTaskState
 }from "../../reducers/task/taskReducer";
 
@@ -95,6 +96,17 @@ const TASK_API_BASE="/api/tasks";
             yield put(fetchGanttFailure(err.response?.data?.message || err.message));
         }
     }
+
+    // 핵심 병목(Critical Path)
+    export const fetchCriticalPathAPI = (params) => api.get(`${TASK_API_BASE}/critical-path`,{params});
+    export function* fetchCriticalPath(action){
+        try{
+            const result = yield call(fetchCriticalPathAPI, action.payload)
+            yield put(fetchCriticalPathSuccess(result.data))
+        }catch(err){
+            yield put(fetchCriticalPathFailure(err.response?.data?.message || err.message));
+        }
+    }
 function* watchFetchTaskDetail(){yield takeLatest(fetchTaskDetailRequest.type,fetchTaskDetail);}
 function* watchCreateTask(){yield takeLatest(createTaskRequest.type,createTask);}
 function* watchCreateTaskContext(){yield takeLatest(createTaskContextRequest.type,createTaskContext);}
@@ -103,6 +115,7 @@ function* watchUpdateTaskContext(){yield takeLatest(updateTaskContextRequest.typ
 function* watchDeleteTask(){yield takeLatest(deleteTaskRequest.type,deleteTask);}
 function* watchFetchMyTasks(){yield takeLatest(fetchMyTasksRequest.type,fetchMyTasks);}
 function* watchFetchGantt(){yield takeLatest(fetchGanttRequest.type,fetchGantt);}
+function* watchFetchCriticalPath(){yield takeLatest(fetchCriticalPathRequest.type,fetchCriticalPath);}
 
 export default function* taskSaga(){
     yield all([
@@ -113,6 +126,7 @@ export default function* taskSaga(){
         call(watchUpdateTaskContext),
         call(watchDeleteTask),
         call(watchFetchMyTasks),
-        call(watchFetchGantt)
+        call(watchFetchGantt),
+        call(watchFetchCriticalPath)
     ]);
 }
