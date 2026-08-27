@@ -1,9 +1,14 @@
 package com.sb.erp.rec.repository;
 
+import java.time.LocalDate;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.sb.erp.rec.entity.Recruit;
@@ -20,5 +25,16 @@ JpaSpecificationExecutor<Recruit> // JpaSpecificationExecutor: Specification(조
 	
 	// 공개용 - 검색결과
 	long countByCompany_ComIdAndRecStatus(Long comId, String recStatus);
+	
+	// 채용공고 상태 자동 Lifecycle 관리
+	@Modifying
+	@Query("UPDATE Recruit r SET r.recStatus = 'CLOSED' " +
+	       "WHERE r.recEndDate < :today AND r.recStatus NOT IN ('CLOSED', 'CANCELLED')")
+	int bulkCloseExpired(@Param("today") LocalDate today);
+
+	@Modifying
+	@Query("UPDATE Recruit r SET r.recStatus = 'OPEN' " +
+	       "WHERE r.recStartDate <= :today AND r.recStatus = 'UPCOMING'")
+	int bulkOpenStarted(@Param("today") LocalDate today);
 
 }

@@ -1,4 +1,4 @@
-// pages/careers/[recId].js
+// pages/careers/detail.js
 // 채용 공개 사이트 - 공고 상세 (GET /api/public/recruit/{recId}, 로그인 필요)
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
