@@ -130,21 +130,26 @@ public class HrAiChatService {
 
             String gptAnswer = answerClient.answer(request.getQuestion(), contextText);
 
-            // 호출 실패(네트워크/쿼터 등)해도 전체 기능을 막지 않고 안전 문구로 대체 (answerClient가 실패 시 null 반환)
-            answer = (gptAnswer != null) ? gptAnswer : NO_EVIDENCE_ANSWER;
+            if (gptAnswer == null || isRefusalAnswer(gptAnswer)) {
+                // GPT 호출 실패이거나, GPT가 "근거 부족"으로 답변을 거절한 경우
+                // → 환각 방지를 위해 grounded를 false로 보정하고 근거 조항도 비운다
+				answer = NO_EVIDENCE_ANSWER;
+				grounded = false;
+				references = List.of();
+			} else {
+				answer = gptAnswer;
 
-            // ── ⑤ 근거 조항 응답 목록 조립 ──
-            references = top.stream()
-                    .map(sc -> HrAiReferenceResponse.builder()
-                            .chunkId(sc.chunk().getChunkId())
-                            .article(sc.chunk().getArticle())
-                            .page(sc.chunk().getPage())
-                            .snippet(snippet(sc.chunk().getChunkText()))
-                            .similarity(Math.round(sc.similarity() * 1000) / 1000.0)
-                            // 유사도를 소수점 셋째자리까지 반올림
-                            .build())
-                    .toList();
-        }
+				// ── ⑤ 근거 조항 응답 목록 조립 ──
+				references = top.stream()
+						.map(sc -> HrAiReferenceResponse.builder().chunkId(sc.chunk().getChunkId())
+								.article(sc.chunk().getArticle()).page(sc.chunk().getPage())
+								.snippet(snippet(sc.chunk().getChunkText()))
+								.similarity(Math.round(sc.similarity() * 1000) / 1000.0)
+								// 유사도를 소수점 셋째자리까지 반올림
+								.build())
+						.toList();
+			}
+		}
 
         // ── ⑥ 대화 이력 저장 (insert-only) ──
         String refChunkIds = references.stream()
@@ -190,6 +195,13 @@ public class HrAiChatService {
                 : trimmed.substring(0, SNIPPET_LENGTH) + "...";
     }
 
+	// GPT가 근거 부족으로 답변을 거절했는지 판별
+	// 시스템 프롬프트에서 거절 시 "제공된 규정에서 근거를 찾을 수 없습니다"를 쓰도록 지시했으므로 이 문구가 포함되어 있으면 거절로 간주
+	private boolean isRefusalAnswer(String answer) {
+		if (answer == null || answer.isBlank()) return true;
+		return answer.contains("근거를 찾을 수 없습니다");
+	}
+
     // 두 벡터 간 코사인 유사도를 계산(0~1, 1에 가까울수록 유사). VectorDB 없이 Java에서 직접 계산하는 방식.
     private double cosineSimilarity(double[] a, double[] b) {
         if (a == null || b == null || a.length != b.length || a.length == 0) {
@@ -205,7 +217,9 @@ public class HrAiChatService {
         return dot / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 
-    // 청크 + 유사도 점수를 묶어서 정렬/필터링에 사용하는 내부 VO.
-    private record ScoredChunk(HrPlcyChunk chunk, double similarity) {}
-    
+	// 청크 + 유사도 점수를 묶어서 정렬/필터링에 사용하는 내부 VO.
+	private record ScoredChunk(HrPlcyChunk chunk, double similarity) {
+	}
+
+	
 }

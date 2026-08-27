@@ -147,6 +147,13 @@ const NAV = [
         href: "/eval/report/my",
         icon: "bi-file-earmark-bar-graph",
       },
+      {
+        page: "hraidocadmin",
+        label: "AI Q&A 규정 문서 관리",
+        href: "/emp/aidoc-admin",
+        icon: "bi-file-earmark-pdf",
+        role: "ROLE_ADMIN",
+      },
     ],
   },
   {

@@ -387,10 +387,10 @@ public class TaskController {
 		}//간트차트
 		
 		// 핵심 병목 탐색
-//		@Operation(summary = "핵심 병목 탐색")
-//		@GetMapping("/critical-path")
-//		public ResponseEntity<List<TaskResponse>> findCriticalPath(@RequestParam("proId") Long proId) {
-//		    return ResponseEntity.ok(dependencyService.findCriticalPath(proId));
-//		}
+		@Operation(summary = "핵심 병목 탐색")
+		@GetMapping("/critical-path")
+		public ResponseEntity<List<TaskResponse>> findCriticalPath(@RequestParam("proId") Long proId) {
+		    return ResponseEntity.ok(dependencyService.findCriticalPath(proId));
+		}
 }
 
