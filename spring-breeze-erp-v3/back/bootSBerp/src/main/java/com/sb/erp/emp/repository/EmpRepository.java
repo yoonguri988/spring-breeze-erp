@@ -20,4 +20,12 @@ public interface EmpRepository extends JpaRepository<Employee, Long> {
 		   "WHERE e.company.comId = :comId AND e.empStatus = 'Y'")
 		List<Long> findActiveEmpIdsByComId(@Param("comId") Long comId);
 	
+	// ── 관리자 대시보드용: 사용자 정보 ──
+	@Query("SELECT e.empName, d.deptName, p.posName " +
+		       "FROM Employee e " +
+		       "JOIN e.department d " +
+		       "JOIN e.position p " +
+		       "WHERE e.empId = :empId")
+		List<Object[]> findEmpProfileById(@Param("empId") Long empId);
+	
 }

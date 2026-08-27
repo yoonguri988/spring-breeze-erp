@@ -24,6 +24,7 @@ import "../styles/css/dashboard.css";
 import "../styles/css/dashboard-admin.css";
 import "../styles/css/dashboard-exec.css";
 import "../styles/css/dashboard-sysadmin.css";
+import "../styles/css/dashboard-admin-home.css";
 import "../styles/css/dept.css";
 import "../styles/css/emp.css";
 import "../styles/css/my.css";
