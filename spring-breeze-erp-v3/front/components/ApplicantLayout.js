@@ -8,14 +8,17 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 import { Button, Dropdown, Menu, Avatar } from "antd";
 import { UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { apctLogout } from "../reducers/apct/apctAuthReducer";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function ApplicantLayout({ children, requireAuth = true }) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("careers");
   const { apctUser, apctAccessToken, initialized } = useSelector(
     (state) => state.apctAuth,
   );
@@ -43,11 +46,11 @@ export default function ApplicantLayout({ children, requireAuth = true }) {
     <Menu>
       <Menu.Item key="my">
         <Link href="/careers/my" passHref>
-          <a>내 지원현황</a>
+          <a>{t("layout.myApplicationsLink")}</a>
         </Link>
       </Menu.Item>
       <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
-        로그아웃
+        {t("layout.logoutMenuItem")}
       </Menu.Item>
     </Menu>
   );
@@ -67,17 +70,18 @@ export default function ApplicantLayout({ children, requireAuth = true }) {
           </Link>
           <nav className="cshell-nav">
             <Link href="/careers" passHref>
-              <a className={router.pathname === "/careers" ? "on" : ""}>채용공고</a>
+              <a className={router.pathname === "/careers" ? "on" : ""}>{t("layout.jobListLink")}</a>
             </Link>
             {apctAccessToken && (
               <Link href="/careers/my" passHref>
                 <a className={router.pathname === "/careers/my" ? "on" : ""}>
-                  내 지원현황
+                  {t("layout.myApplicationsLink")}
                 </a>
               </Link>
             )}
           </nav>
           <div className="cshell-hd-right">
+            <LanguageSwitcher />
             {apctAccessToken && apctUser ? (
               <Dropdown overlay={userMenu} trigger={["click"]}>
                 <button type="button" className="cshell-user">
@@ -94,14 +98,14 @@ export default function ApplicantLayout({ children, requireAuth = true }) {
                 size="small"
                 onClick={() => router.push("/careers/login")}
               >
-                로그인
+                {t("layout.loginBtn")}
               </Button>
             )}
           </div>
         </div>
       </header>
       <main className="cshell-main">{children}</main>
-      <footer className="cshell-ft">© SBerp. 채용 지원자를 위한 공간입니다.</footer>
+      <footer className="cshell-ft">{t("common.footer")}</footer>
     </div>
   );
 }

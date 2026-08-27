@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Select, Input, Button, Empty, List, Tag, Progress, Skeleton } from "antd";
 import { ArrowLeftOutlined, SearchOutlined, RobotOutlined, FolderOpenOutlined } from "@ant-design/icons";
@@ -13,6 +14,7 @@ import { fetchRecruitAdminListRequest } from "../../reducers/rec/recruitReducer"
 export default function ResumeSearchPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("apct");
   const { searchResults, searchLoading, searchError, searchDone } = useSelector(
     (state) => state.resume,
   );
@@ -43,13 +45,13 @@ export default function ResumeSearchPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            홈 <i className="bi bi-chevron-right"></i> 채용관리{" "}
-            <i className="bi bi-chevron-right"></i> 이력서 AI 검색
+            {t("resumeSearch.breadcrumbHome")} <i className="bi bi-chevron-right"></i> {t("resumeSearch.breadcrumbRoot")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("resumeSearch.breadcrumbCurrent")}
           </div>
           <h1>
-            <RobotOutlined /> 이력서 AI 검색
+            <RobotOutlined /> {t("resumeSearch.title")}
           </h1>
-          <p>공고에 제출된 이력서를 의미 기반(RAG)으로 검색합니다. 예: &quot;Spring Batch 대용량 처리 경험&quot;</p>
+          <p>{t("resumeSearch.subtitle")}</p>
         </div>
       </div>
 
@@ -57,7 +59,7 @@ export default function ResumeSearchPage() {
         <div className="sb-toolbar" style={{ flexWrap: "wrap" }}>
           <Select
             style={{ width: 260 }}
-            placeholder="채용공고 선택"
+            placeholder={t("resumeSearch.recruitPlaceholder")}
             showSearch
             optionFilterProp="label"
             value={recId}
@@ -69,7 +71,7 @@ export default function ResumeSearchPage() {
           />
           <Input
             style={{ flex: 1, minWidth: 260 }}
-            placeholder="찾고 싶은 역량/경험을 자연어로 입력하세요"
+            placeholder={t("resumeSearch.queryPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onPressEnter={runSearch}
@@ -78,10 +80,10 @@ export default function ResumeSearchPage() {
             style={{ width: 110 }}
             value={topK}
             onChange={(v) => setTopK(v)}
-            options={[3, 5, 10, 20].map((n) => ({ value: n, label: `상위 ${n}건` }))}
+            options={[3, 5, 10, 20].map((n) => ({ value: n, label: t("resumeSearch.topKOption", { count: n }) }))}
           />
           <Button type="primary" icon={<SearchOutlined />} onClick={runSearch} loading={searchLoading}>
-            검색
+            {t("resumeSearch.searchBtn")}
           </Button>
         </div>
       </div>
@@ -91,7 +93,7 @@ export default function ResumeSearchPage() {
           {!recId && (
             <Empty
               image={<FolderOpenOutlined style={{ fontSize: 32 }} />}
-              description="검색할 채용공고를 먼저 선택해 주세요."
+              description={t("resumeSearch.selectRecruitEmpty")}
             />
           )}
           {recId && searchLoading && (
@@ -106,7 +108,7 @@ export default function ResumeSearchPage() {
           )}
           {recId && !searchLoading && !searchError && searchDone && searchResults.length === 0 && (
             <div style={{ padding: "60px 0" }}>
-              <Empty description="검색 결과가 없습니다. 다른 표현으로 다시 검색해 보세요." />
+              <Empty description={t("resumeSearch.noResults")} />
             </div>
           )}
           {recId && !searchLoading && searchResults.length > 0 && (
@@ -119,7 +121,7 @@ export default function ResumeSearchPage() {
                   key={`${item.apctId}-${item.rsmId}`}
                   actions={[
                     <Link key="detail" href={`/apct/detail?apctId=${item.apctId}`}>
-                      지원자 상세 보기
+                      {t("resumeSearch.detailLink")}
                     </Link>,
                   ]}
                 >
@@ -127,7 +129,7 @@ export default function ResumeSearchPage() {
                     title={
                       <span>
                         <span className="sb-table__name">{item.apctName}</span>{" "}
-                        <Tag color="blue">유사도 {(item.similarity * 100).toFixed(1)}%</Tag>
+                        <Tag color="blue">{t("resumeSearch.similarityTag", { pct: (item.similarity * 100).toFixed(1) })}</Tag>
                       </span>
                     }
                     description={

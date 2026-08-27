@@ -8,14 +8,13 @@ const COLOR_MAP = {
 };
 
 // i18n 키가 아직 없는 도메인용 로컬 라벨맵 (필요시 여기 추가)
-const LOCAL_LABEL_MAP = {
-    delegReq: { REQ: "요청중", APP: "승인", REJ: "반려" },
-};
+const LOCAL_LABEL_MAP = {};
 
 // i18n 키가 있는 도메인의 키 프리픽스
 const I18N_PREFIX = {
     doc: "docs.detail.docStatusBadge",
     line: "docs.detail.lineStatusBadge",
+    delegReq: "admin.delegations.statusBadge",
 };
 
 /**

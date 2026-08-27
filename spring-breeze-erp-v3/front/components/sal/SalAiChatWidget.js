@@ -3,6 +3,7 @@
 // 별도 페이지가 아니라 컴포넌트 하나로 만들어서, AppLayout.js가 /sal/** 경로일 때만 렌더링한다.
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Button, Input, Spin, Collapse, Tag, Empty } from "antd";
 import {
   MessageOutlined,
@@ -18,6 +19,7 @@ const { Panel } = Collapse;
 
 function SalAiChatWidget() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("sal");
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const bodyRef = useRef(null);
@@ -55,16 +57,18 @@ function SalAiChatWidget() {
         size="large"
         icon={open ? <CloseOutlined /> : <MessageOutlined />}
         onClick={() => setOpen((o) => !o)}
-        title="급여 규정 AI 챗봇"
+        title={t("salAiChat.fabTitle")}
       />
 
       {open && (
         <div className="sb-ai-chat-panel">
           <div className="sb-ai-chat-panel__head">
             <div>
-              <div className="sb-ai-chat-panel__title">급여 규정 AI 챗봇</div>
+              <div className="sb-ai-chat-panel__title">
+                {t("salAiChat.panelTitle")}
+              </div>
               <div className="sb-ai-chat-panel__sub">
-                수당·연말정산 등 급여 규정을 물어보세요
+                {t("salAiChat.panelSubtitle")}
               </div>
             </div>
             {messages.length > 0 && (
@@ -73,7 +77,7 @@ function SalAiChatWidget() {
                 size="small"
                 onClick={() => dispatch(clearSalAiChatMessages())}
               >
-                대화 지우기
+                {t("salAiChat.clearBtn")}
               </Button>
             )}
           </div>
@@ -83,9 +87,9 @@ function SalAiChatWidget() {
               <Empty
                 description={
                   <span>
-                    예: &quot;이번 달 수당 왜 줄었죠?&quot;
+                    {t("salAiChat.emptyExampleLine1")}
                     <br />
-                    &quot;연말정산 서류 뭐 내야 하나요?&quot;
+                    {t("salAiChat.emptyExampleLine2")}
                   </span>
                 }
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -103,7 +107,7 @@ function SalAiChatWidget() {
 
                   {!m.pending && m.error && (
                     <span className="sb-ai-chat-error">
-                      답변을 가져오지 못했어요. 잠시 후 다시 시도해 주세요.
+                      {t("salAiChat.errorMsg")}
                     </span>
                   )}
 
@@ -112,15 +116,15 @@ function SalAiChatWidget() {
                       <div>{m.answer}</div>
                       {!m.grounded && (
                         <Tag color="orange" style={{ marginTop: 6 }}>
-                          근거 조항 없음
+                          {t("salAiChat.notGroundedTag")}
                         </Tag>
                       )}
                       {m.references && m.references.length > 0 && (
                         <Collapse ghost size="small" style={{ marginTop: 6 }}>
-                          <Panel header="근거 조항 보기" key="refs">
+                          <Panel header={t("salAiChat.referencesPanelHeader")} key="refs">
                             {m.references.map((r) => (
                               <div key={r.chunkId} className="sb-ai-chat-ref">
-                                <b>{r.article || "(조항 미상)"}</b>
+                                <b>{r.article || t("salAiChat.articleUnknown")}</b>
                                 {r.page ? ` · p.${r.page}` : ""}
                                 <div className="sb-ai-chat-ref__snippet">
                                   {r.snippet}
@@ -140,7 +144,7 @@ function SalAiChatWidget() {
           <div className="sb-ai-chat-panel__input">
             <Input.TextArea
               autoSize={{ minRows: 1, maxRows: 3 }}
-              placeholder="급여 관련 질문을 입력하세요"
+              placeholder={t("salAiChat.inputPlaceholder")}
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={handleKeyDown}

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   List,
   Tag,
@@ -31,17 +32,26 @@ import {
   resetResumePublicState,
 } from "../../reducers/rsm/resumePublicReducer";
 
-const STATUS_LABEL = {
-  RECEIVED: { text: "접수", color: "st-default" },
-  SCREENING: { text: "서류심사", color: "st-blue" },
-  INTERVIEW: { text: "면접", color: "st-purple" },
-  HIRED: { text: "합격", color: "st-green" },
-  REJECTED: { text: "불합격", color: "st-red" },
+const STATUS_COLOR = {
+  RECEIVED: "st-default",
+  SCREENING: "st-blue",
+  INTERVIEW: "st-purple",
+  HIRED: "st-green",
+  REJECTED: "st-red",
+};
+
+const STATUS_LABEL_KEY = {
+  RECEIVED: "received",
+  SCREENING: "screening",
+  INTERVIEW: "interview",
+  HIRED: "hired",
+  REJECTED: "rejected",
 };
 
 export default function CareersMyPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("careers");
   const { apctAccessToken } = useSelector((state) => state.apctAuth);
   const { myApplications, myApplicationsLoading, cancelLoading, cancelSuccess, cancelError, updateLoading, updateSuccess, updateError } =
     useSelector((state) => state.applicantPublic);
@@ -67,7 +77,7 @@ export default function CareersMyPage() {
   useEffect(() => {
     if (cancelLoading) return;
     if (cancelSuccess) {
-      message.success("지원이 취소되었습니다.");
+      message.success(t("my.cancelSuccess"));
       dispatch(resetApplicantPublicState());
     } else if (cancelError) {
       message.error(cancelError);
@@ -79,7 +89,7 @@ export default function CareersMyPage() {
   useEffect(() => {
     if (updateLoading) return;
     if (updateSuccess) {
-      message.success("지원 정보가 수정되었습니다.");
+      message.success(t("my.updateSuccess"));
       closeEditModal();
     } else if (updateError) {
       message.error(updateError);
@@ -90,7 +100,7 @@ export default function CareersMyPage() {
   useEffect(() => {
     if (uploadLoading) return;
     if (uploadSuccess) {
-      message.success("이력서가 제출되었습니다. AI 분석 후 담당자에게 전달됩니다.");
+      message.success(t("my.uploadSuccess"));
       closeUploadModal();
     } else if (uploadError) {
       message.error(uploadError);
@@ -132,7 +142,7 @@ export default function CareersMyPage() {
 
   const handleUpload = () => {
     if (fileList.length === 0) {
-      message.warning("업로드할 이력서(PDF) 파일을 선택해 주세요.");
+      message.warning(t("my.selectFileWarning"));
       return;
     }
     dispatch(
@@ -152,24 +162,24 @@ export default function CareersMyPage() {
       const fileURL = URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
       window.open(fileURL, "_blank");
     } catch (err) {
-      message.error("이력서를 불러오지 못했습니다.");
+      message.error(t("my.previewError"));
     }
   };
   return (
     <ApplicantLayout>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "#14251f", marginBottom: 6 }}>
-          내 지원현황
+          {t("my.title")}
         </h1>
         <p style={{ color: "#778", fontSize: 14 }}>
-          지원한 공고의 진행 상태를 확인하고 이력서를 제출/재제출할 수 있습니다.
+          {t("my.subtitle")}
         </p>
       </div>
 
       {myApplicationsLoading && <Skeleton active paragraph={{ rows: 4 }} />}
 
       {!myApplicationsLoading && myApplications.length === 0 && (
-        <Empty description="아직 지원한 공고가 없습니다." style={{ padding: "60px 0" }} />
+        <Empty description={t("my.emptyDescription")} style={{ padding: "60px 0" }} />
       )}
 
       {!myApplicationsLoading && myApplications.length > 0 && (
@@ -177,7 +187,10 @@ export default function CareersMyPage() {
           itemLayout="horizontal"
           dataSource={myApplications}
           renderItem={(item) => {
-            const meta = STATUS_LABEL[item.apctStatus] || { text: item.apctStatus, color: "st-default" };
+            const statusText = STATUS_LABEL_KEY[item.apctStatus]
+              ? t(`my.statusLabels.${STATUS_LABEL_KEY[item.apctStatus]}`)
+              : item.apctStatus;
+            const statusColor = STATUS_COLOR[item.apctStatus] || "st-default";
             const canEdit = item.apctStatus === "RECEIVED";
             return (
               <List.Item
@@ -198,7 +211,7 @@ export default function CareersMyPage() {
                       icon={<EditOutlined />}
                       onClick={() => openEditModal(item)}
                     >
-                      지원 정보 수정
+                      {t("my.editBtn")}
                     </Button>
                   ),
                   item.resumeFileName && (
@@ -209,7 +222,7 @@ export default function CareersMyPage() {
                       icon={<FilePdfOutlined />}
                       onClick={() => handlePreviewResume(item.apctId)}
                     >
-                      제출한 이력서 확인
+                      {t("my.previewResumeBtn")}
                     </Button>
                   ),
                   canEdit && (
@@ -220,19 +233,19 @@ export default function CareersMyPage() {
                       icon={<FilePdfOutlined />}
                       onClick={() => setUploadTarget(item.apctId)}
                     >
-                      {item.resumeFileName ? "이력서 재제출" : "이력서 제출"}
+                    {t("my.resumeBtn")}
                     </Button>
                   ),
                   canEdit && (
                     <Popconfirm
                       key="cancel"
-                      title="지원을 취소하시겠습니까?"
-                      okText="취소하기"
-                      cancelText="닫기"
+                      title={t("my.cancelConfirmTitle")}
+                      okText={t("my.cancelOkText")}
+                      cancelText={t("my.cancelCancelText")}
                       onConfirm={() => handleCancel(item.apctId)}
                     >
                       <Button size="small" danger className="crc-btn-danger" icon={<DeleteOutlined />} loading={cancelLoading}>
-                        지원 취소
+                        {t("my.cancelBtn")}
                       </Button>
                     </Popconfirm>
                   ),
@@ -242,19 +255,19 @@ export default function CareersMyPage() {
                   title={
                     <span>
                       {item.recTitle}
-                      <Tag className={`crc-status-tag ${meta.color}`} style={{ marginLeft: 10 }}>
-                        {meta.text}
+                      <Tag className={`crc-status-tag ${statusColor}`} style={{ marginLeft: 10 }}>
+                        {statusText}
                       </Tag>
                       {item.resumeFileName && (
                         <Tag color="cyan" style={{ marginLeft: 6 }}>
-                          이력서 제출완료
+                          {t("my.resumeSubmittedTag")}
                         </Tag>
                       )}
                     </span>
                   }
                   description={
                     item.apctDate
-                      ? `지원일 ${moment(item.apctDate).format("YYYY-MM-DD")}`
+                      ? t("my.appliedDate", { date: moment(item.apctDate).format("YYYY-MM-DD") })
                       : undefined
                   }
                 />
@@ -266,12 +279,12 @@ export default function CareersMyPage() {
 
       {/* 이력서 업로드 모달 */}
       <Modal
-        title="이력서(PDF) 업로드"
+        title={t("my.uploadModal.title")}
         open={uploadTarget !== null}
         onCancel={closeUploadModal}
         onOk={handleUpload}
-        okText="제출"
-        cancelText="닫기"
+        okText={t("my.uploadModal.okText")}
+        cancelText={t("my.uploadModal.cancelText")}
         okButtonProps={{ loading: uploadLoading, className: "crc-btn" }}
         cancelButtonProps={{ className: "crc-btn" }}
         destroyOnClose
@@ -287,19 +300,19 @@ export default function CareersMyPage() {
           <p className="ant-upload-drag-icon">
             <InboxOutlined />
           </p>
-          <p className="ant-upload-text">클릭하거나 파일을 이 영역에 끌어다 놓으세요</p>
-          <p className="ant-upload-hint">PDF 파일 1개만 업로드할 수 있습니다. 기존 이력서는 자동으로 교체됩니다.</p>
+          <p className="ant-upload-text">{t("my.uploadModal.dragText")}</p>
+          <p className="ant-upload-hint">{t("my.uploadModal.dragHint")}</p>
         </Upload.Dragger>
       </Modal>
 
       {/* 지원 정보 수정 모달 */}
       <Modal
-        title="지원 정보 수정"
+        title={t("my.editModal.title")}
         open={editTarget !== null}
         onCancel={closeEditModal}
         onOk={handleEditSubmit}
-        okText="저장"
-        cancelText="닫기"
+        okText={t("my.editModal.okText")}
+        cancelText={t("my.editModal.cancelText")}
         okButtonProps={{ loading: updateLoading, className: "crc-btn" }}
         cancelButtonProps={{ className: "crc-btn" }}
         destroyOnClose
@@ -307,27 +320,27 @@ export default function CareersMyPage() {
         <Form form={editForm} layout="vertical">
           <Form.Item
             name="apctName"
-            label="이름"
-            rules={[{ required: true, message: "이름을 입력해 주세요." }]}
+            label={t("my.editModal.nameLabel")}
+            rules={[{ required: true, message: t("my.editModal.nameRequired") }]}
           >
-            <Input placeholder="홍길동" />
+            <Input placeholder={t("my.editModal.namePlaceholder")} />
           </Form.Item>
           <Form.Item
             name="apctEmail"
-            label="이메일"
+            label={t("my.editModal.emailLabel")}
             rules={[
-              { required: true, message: "이메일을 입력해 주세요." },
-              { type: "email", message: "올바른 이메일 형식이 아닙니다." },
+              { required: true, message: t("my.editModal.emailRequired") },
+              { type: "email", message: t("my.editModal.emailInvalid") },
             ]}
           >
-            <Input placeholder="example@email.com" />
+            <Input placeholder={t("my.editModal.emailPlaceholder")} />
           </Form.Item>
           <Form.Item
             name="apctPhone"
-            label="연락처"
-            rules={[{ required: true, message: "연락처를 입력해 주세요." }]}
+            label={t("my.editModal.phoneLabel")}
+            rules={[{ required: true, message: t("my.editModal.phoneRequired") }]}
           >
-            <Input placeholder="010-0000-0000" />
+            <Input placeholder={t("my.editModal.phonePlaceholder")} />
           </Form.Item>
         </Form>
       </Modal>

@@ -2,6 +2,7 @@
 // 내 급여정보 (전 직원 공통) - 급여기준 조회 / 급여명세서 조회 / 급여 수령 계좌 등록·수정
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   Tabs,
@@ -33,15 +34,23 @@ import { formatWon } from "../../utils/currency";
 
 const { TabPane } = Tabs;
 
-const STATUS_LABEL = {
-  PENDING: { text: "대기", color: "gold" },
-  APPROVED: { text: "승인", color: "blue" },
-  PAID: { text: "지급완료", color: "green" },
-  REJECTED: { text: "반려", color: "red" },
+const STATUS_COLOR = {
+  PENDING: "gold",
+  APPROVED: "blue",
+  PAID: "green",
+  REJECTED: "red",
 };
 
 export default function MySalaryPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("sal");
+
+  const STATUS_LABEL = {
+    PENDING: { text: t("pay.status.pending"), color: STATUS_COLOR.PENDING },
+    APPROVED: { text: t("pay.status.approved"), color: STATUS_COLOR.APPROVED },
+    PAID: { text: t("pay.status.paid"), color: STATUS_COLOR.PAID },
+    REJECTED: { text: t("pay.status.rejected"), color: STATUS_COLOR.REJECTED },
+  };
 
   const { myStd, myStdLoading, myStdError } = useSelector(
     (state) => state.salStd,
@@ -76,8 +85,8 @@ export default function MySalaryPage() {
     if (acctSuccess) {
       message.success(
         acctModalMode === "update"
-          ? "계좌 정보가 수정되었습니다."
-          : "계좌가 등록되었습니다.",
+          ? t("my.acctUpdateSuccessMsg")
+          : t("my.acctRegisterSuccessMsg"),
       );
       setAcctModalOpen(false);
       dispatch(resetSalAcctState());
@@ -118,42 +127,42 @@ export default function MySalaryPage() {
 
   const payColumns = [
     {
-      title: "지급월",
+      title: t("my.payColumns.payMonth"),
       dataIndex: "payMonth",
       key: "payMonth",
       width: 100,
       render: (v) => (v ? moment(v).format("YYYY-MM") : "-"),
     },
     {
-      title: "기본급",
+      title: t("my.payColumns.baseSal"),
       dataIndex: "baseSal",
       key: "baseSal",
       align: "right",
       render: formatWon,
     },
     {
-      title: "수당합계",
+      title: t("my.payColumns.allowTotal"),
       dataIndex: "allowTotal",
       key: "allowTotal",
       align: "right",
       render: formatWon,
     },
     {
-      title: "공제합계",
+      title: t("my.payColumns.dedtTotal"),
       dataIndex: "dedtTotal",
       key: "dedtTotal",
       align: "right",
       render: formatWon,
     },
     {
-      title: "실지급액",
+      title: t("my.payColumns.netPay"),
       dataIndex: "netPay",
       key: "netPay",
       align: "right",
       render: (v) => <b>{formatWon(v)}</b>,
     },
     {
-      title: "상태",
+      title: t("my.payColumns.status"),
       dataIndex: "stat",
       key: "stat",
       width: 90,
@@ -183,54 +192,52 @@ export default function MySalaryPage() {
     <div className="sb-page">
       <div className="sb-page-head" style={{ marginBottom: 16 }}>
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">급여관리 &gt; 내 급여정보</div>
-          <h1>내 급여정보</h1>
-          <p>
-            본인의 급여기준, 급여명세서, 급여 수령 계좌를 확인할 수 있습니다.
-          </p>
+          <div className="sb-breadcrumb">{t("my.breadcrumb")}</div>
+          <h1>{t("my.title")}</h1>
+          <p>{t("my.subtitle")}</p>
         </div>
       </div>
 
       <Card>
         <Tabs defaultActiveKey="std">
-          <TabPane tab="급여기준" key="std">
+          <TabPane tab={t("my.tabStd")} key="std">
             {myStdLoading ? (
-              <p>조회 중...</p>
+              <p>{t("my.loadingText")}</p>
             ) : myStdError || !myStd ? (
-              <Empty description="등록된 급여기준이 없습니다." />
+              <Empty description={t("my.stdEmptyText")} />
             ) : (
               <Descriptions column={1} bordered size="small">
-                <Descriptions.Item label="기본급">
+                <Descriptions.Item label={t("my.stdBaseSalLabel")}>
                   {formatWon(myStd.baseSal)}
                 </Descriptions.Item>
-                <Descriptions.Item label="연봉">
+                <Descriptions.Item label={t("my.stdAnnuSalLabel")}>
                   {formatWon(myStd.annuSal)}
                 </Descriptions.Item>
-                <Descriptions.Item label="적용시작일">
+                <Descriptions.Item label={t("my.stdStartDateLabel")}>
                   {myStd.startDate}
                 </Descriptions.Item>
-                <Descriptions.Item label="적용종료일">
+                <Descriptions.Item label={t("my.stdEndDateLabel")}>
                   {myStd.endDate || "-"}
                 </Descriptions.Item>
-                <Descriptions.Item label="상태">
+                <Descriptions.Item label={t("my.stdStatusLabel")}>
                   {myStd.actv ? (
-                    <Tag color="green">적용중</Tag>
+                    <Tag color="green">{t("my.statusActive")}</Tag>
                   ) : (
-                    <Tag>종료</Tag>
+                    <Tag>{t("my.statusEnded")}</Tag>
                   )}
                 </Descriptions.Item>
               </Descriptions>
             )}
           </TabPane>
 
-          <TabPane tab="급여명세서" key="pay">
+          <TabPane tab={t("my.tabPay")} key="pay">
             <Table
               rowKey="payId"
               columns={payColumns}
               dataSource={myPayments}
               loading={myLoading}
               pagination={false}
-              locale={{ emptyText: "급여명세서 내역이 없습니다." }}
+              locale={{ emptyText: t("my.payEmptyText") }}
             />
             {myPaging && myPaging.totalElements > 0 && (
               <div
@@ -252,13 +259,13 @@ export default function MySalaryPage() {
             )}
           </TabPane>
 
-          <TabPane tab="급여 수령 계좌" key="acct">
+          <TabPane tab={t("my.tabAcct")} key="acct">
             {myAcctLoading ? (
-              <p>조회 중...</p>
+              <p>{t("my.loadingText")}</p>
             ) : myAcctError || !myAcct ? (
               <div>
                 <Empty
-                  description="등록된 급여 수령 계좌가 없습니다."
+                  description={t("my.acctEmptyText")}
                   style={{ marginBottom: 16 }}
                 />
                 <div style={{ display: "flex", justifyContent: "center" }}>
@@ -267,7 +274,7 @@ export default function MySalaryPage() {
                     icon={<PlusOutlined />}
                     onClick={openAcctModal}
                   >
-                    계좌 등록
+                    {t("my.acctRegisterBtn")}
                   </Button>
                 </div>
               </div>
@@ -281,17 +288,17 @@ export default function MySalaryPage() {
                   }}
                 >
                   <Button icon={<EditOutlined />} onClick={openAcctModal}>
-                    수정
+                    {t("my.acctEditBtn")}
                   </Button>
                 </div>
                 <Descriptions column={1} bordered size="small">
-                  <Descriptions.Item label="은행">
+                  <Descriptions.Item label={t("my.acctBankLabel")}>
                     {myAcct.bankName}
                   </Descriptions.Item>
-                  <Descriptions.Item label="계좌번호">
+                  <Descriptions.Item label={t("my.acctNoLabel")}>
                     {myAcct.acctNo}
                   </Descriptions.Item>
-                  <Descriptions.Item label="예금주">
+                  <Descriptions.Item label={t("my.acctHldrLabel")}>
                     {myAcct.hldrName}
                   </Descriptions.Item>
                 </Descriptions>
@@ -304,36 +311,36 @@ export default function MySalaryPage() {
       <Modal
         title={
           acctModalMode === "update"
-            ? "급여 수령 계좌 수정"
-            : "급여 수령 계좌 등록"
+            ? t("my.acctModalTitleUpdate")
+            : t("my.acctModalTitleRegister")
         }
         open={acctModalOpen}
         onCancel={() => setAcctModalOpen(false)}
         onOk={handleAcctSubmit}
-        okText={acctModalMode === "update" ? "수정" : "등록"}
+        okText={acctModalMode === "update" ? t("my.okTextUpdate") : t("my.okTextRegister")}
         okButtonProps={{ loading: acctSaving }}
-        cancelText="취소"
+        cancelText={t("my.cancelText")}
         destroyOnClose
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="bankName"
-            label="은행명"
-            rules={[{ required: true, message: "은행명을 입력해 주세요." }]}
+            label={t("my.bankNameFieldLabel")}
+            rules={[{ required: true, message: t("my.bankNameFieldRequired") }]}
           >
-            <Input maxLength={30} placeholder="예: 국민은행" />
+            <Input maxLength={30} placeholder={t("my.bankNamePlaceholder")} />
           </Form.Item>
           <Form.Item
             name="acctNo"
-            label="계좌번호"
-            rules={[{ required: true, message: "계좌번호를 입력해 주세요." }]}
+            label={t("my.acctNoFieldLabel")}
+            rules={[{ required: true, message: t("my.acctNoFieldRequired") }]}
           >
-            <Input maxLength={30} placeholder="'-' 없이 숫자만 입력" />
+            <Input maxLength={30} placeholder={t("my.acctNoPlaceholder")} />
           </Form.Item>
           <Form.Item
             name="hldrName"
-            label="예금주명"
-            rules={[{ required: true, message: "예금주명을 입력해 주세요." }]}
+            label={t("my.hldrNameFieldLabel")}
+            rules={[{ required: true, message: t("my.hldrNameFieldRequired") }]}
           >
             <Input maxLength={30} />
           </Form.Item>
@@ -341,7 +348,7 @@ export default function MySalaryPage() {
       </Modal>
 
       <Drawer
-        title="급여명세서 상세"
+        title={t("my.detailDrawerTitle")}
         open={!!detailTarget}
         onClose={() => setDetailTarget(null)}
         width={480}
@@ -350,32 +357,35 @@ export default function MySalaryPage() {
         {detailTarget && (
           <>
             <Descriptions column={1} size="small" bordered>
-              <Descriptions.Item label="지급월">
-                {moment(detailTarget.payMonth).format("YYYY년 MM월")}
+              <Descriptions.Item label={t("my.detailPayMonthLabel")}>
+                {t("my.payMonthYearFormat", {
+                  year: moment(detailTarget.payMonth).format("YYYY"),
+                  month: moment(detailTarget.payMonth).format("MM"),
+                })}
               </Descriptions.Item>
-              <Descriptions.Item label="상태">
+              <Descriptions.Item label={t("my.detailStatusLabel")}>
                 <Tag color={STATUS_LABEL[detailTarget.stat]?.color}>
                   {STATUS_LABEL[detailTarget.stat]?.text}
                 </Tag>
               </Descriptions.Item>
               {detailTarget.stat === "REJECTED" && (
-                <Descriptions.Item label="반려사유">
+                <Descriptions.Item label={t("my.detailRejRsnLabel")}>
                   {detailTarget.rejRsn || "-"}
                 </Descriptions.Item>
               )}
-              <Descriptions.Item label="기본급">
+              <Descriptions.Item label={t("my.detailBaseSalLabel")}>
                 {formatWon(detailTarget.baseSal)}
               </Descriptions.Item>
-              <Descriptions.Item label="수당합계">
+              <Descriptions.Item label={t("my.detailAllowTotalLabel")}>
                 {formatWon(detailTarget.allowTotal)}
               </Descriptions.Item>
-              <Descriptions.Item label="공제합계">
+              <Descriptions.Item label={t("my.detailDedtTotalLabel")}>
                 {formatWon(detailTarget.dedtTotal)}
               </Descriptions.Item>
-              <Descriptions.Item label="실지급액">
+              <Descriptions.Item label={t("my.detailNetPayLabel")}>
                 <b>{formatWon(detailTarget.netPay)}</b>
               </Descriptions.Item>
-              <Descriptions.Item label="지급일시">
+              <Descriptions.Item label={t("my.detailPaidAtLabel")}>
                 {detailTarget.paidAt
                   ? moment(detailTarget.paidAt).format("YYYY-MM-DD HH:mm")
                   : "-"}
@@ -383,26 +393,26 @@ export default function MySalaryPage() {
             </Descriptions>
 
             <Divider orientation="left" plain>
-              지급 계좌
+              {t("my.detailAcctDivider")}
             </Divider>
             {detailTarget.bankName ? (
               <Descriptions column={1} size="small" bordered>
-                <Descriptions.Item label="은행">
+                <Descriptions.Item label={t("my.detailAcctBankLabel")}>
                   {detailTarget.bankName}
                 </Descriptions.Item>
-                <Descriptions.Item label="계좌번호">
+                <Descriptions.Item label={t("my.detailAcctNoLabel")}>
                   {detailTarget.acctNo}
                 </Descriptions.Item>
-                <Descriptions.Item label="예금주">
+                <Descriptions.Item label={t("my.detailAcctHldrLabel")}>
                   {detailTarget.hldrName}
                 </Descriptions.Item>
               </Descriptions>
             ) : (
-              <p style={{ color: "#999" }}>지급 시점 계좌 정보가 없습니다.</p>
+              <p style={{ color: "#999" }}>{t("my.detailNoAcctText")}</p>
             )}
 
             <Divider orientation="left" plain>
-              수당/공제 항목
+              {t("my.detailItemsDivider")}
             </Divider>
             <Table
               rowKey="itemId"
@@ -411,20 +421,20 @@ export default function MySalaryPage() {
               dataSource={detailTarget.items || []}
               columns={[
                 {
-                  title: "구분",
+                  title: t("my.itemColumns.itemType"),
                   dataIndex: "itemType",
                   key: "itemType",
                   width: 70,
                   render: (v) =>
                     v === "ALLOWANCE" ? (
-                      <Tag color="blue">수당</Tag>
+                      <Tag color="blue">{t("my.itemTypeAllowance")}</Tag>
                     ) : (
-                      <Tag color="volcano">공제</Tag>
+                      <Tag color="volcano">{t("my.itemTypeDeduction")}</Tag>
                     ),
                 },
-                { title: "항목명", dataIndex: "itemName", key: "itemName" },
+                { title: t("my.itemColumns.itemName"), dataIndex: "itemName", key: "itemName" },
                 {
-                  title: "금액",
+                  title: t("my.itemColumns.amt"),
                   dataIndex: "amt",
                   key: "amt",
                   align: "right",

@@ -68,7 +68,21 @@
       "rejectConfirmTitle": "반려 하시겠습니까?",
       "approveConfirmTitle": "승인 하시겠습니까?",
       "rejectBtn": "반려",
-      "approveBtn": "승인"
+      "approveBtn": "승인",
+      "approveModalTitle": "결재 승인",
+      "rejectModalTitle": "결재 반려",
+      "approveModalContent": "이 문서를 승인하시겠습니까?",
+      "rejectModalContent": "이 문서를 반려하시겠습니까?",
+      "delegateRequestBtn": "위임/대결 요청",
+      "delegation": {
+        "modalTitle": "위임/대결 요청",
+        "okText": "요청",
+        "pickerLabel": "대결자 선택",
+        "summaryLabel": "선택된 대결자",
+        "reasonLabel": "사유",
+        "reasonPlaceholder": "위임/대결 사유 (선택)",
+        "successMsg": "위임/대결 요청이 접수되었습니다."
+      }
     },
     "write": {
       "breadcrumbCurrent": "문서 작성",
@@ -227,7 +241,22 @@
       "successMsg": "양식이 등록되었습니다.",
       "schemaFieldsGeneratedLabel": "생성된 필드 구성 (수정 가능)",
       "cancelBtn": "취소",
-      "submitBtn": "작성"
+      "submitBtn": "작성",
+      "basicInfoCardTitle": "기본 정보",
+      "categoryLabel": "양식 카테고리",
+      "categoryExtra": "연차로 지정하면 승인 시 연차가 자동 차감됩니다.",
+      "categoryGeneral": "일반",
+      "categoryLeave": "연차",
+      "contentCardTitleEditor": "양식 본문 편집",
+      "contentCardTitleAi": "AI 스키마 설정",
+      "leaveAutoFieldsHint": "연차 카테고리를 선택하면 필수 필드(휴가종류/시작일/종료일)가 자동으로 채워집니다.<br/>카테고리를 다시 선택해주세요.",
+      "leaveOnlySchemaError": "연차 카테고리 양식은 필드 구성 방식으로만 작성할 수 있습니다.",
+      "leaveMissingFieldsError": "연차 양식에는 다음 필드가 필요합니다: {{fields}}",
+      "leaveFieldLabels": {
+        "leaveType": "휴가 종류",
+        "startDate": "시작일",
+        "endDate": "종료일"
+      }
     }
   },
   "schemaFieldEditor": {
@@ -247,5 +276,58 @@
   },
   "quillTableEditor": {
     "unmergeCells": "셀 병합 해제"
+  },
+  "deptEmpPicker": {
+    "deptCardTitle": "부서 선택",
+    "deptLoadingEmptyText": "부서 정보를 불러오는 중입니다.",
+    "empCountUnit": "명",
+    "empCardTitleDefault": "사원 선택",
+    "selectDeptFirst": "왼쪽에서 부서를 먼저 선택하세요.",
+    "onLeaveTag": "휴직중",
+    "selectedSummaryLabelDefault": "선택된 사원"
+  },
+  "admin": {
+    "delegations": {
+      "breadcrumbCurrent": "결재선 관리",
+      "title": "결재선 위임/대결 관리",
+      "subtitle": "대결 요청 승인/반려, 처리이력, 감사로그를 확인합니다.",
+      "tabs": {
+        "pending": "대기중 요청",
+        "history": "처리이력",
+        "logs": "감사로그"
+      },
+      "columns": {
+        "reqId": "요청ID",
+        "docTitle": "문서",
+        "docId": "문서ID",
+        "oriEmpName": "원결재자",
+        "newEmpName": "대결자",
+        "reqEmpName": "요청자",
+        "reqReason": "사유",
+        "createdAt": "요청일",
+        "action": "처리",
+        "proEmpName": "처리자",
+        "status": "상태",
+        "processedAt": "처리일",
+        "logId": "로그ID",
+        "actEmpName": "실처리자",
+        "perEmpName": "처리자(관리자)",
+        "occurredAt": "발생일"
+      },
+      "approveConfirmTitle": "이 위임/대결 요청을 승인하시겠습니까?",
+      "rejectConfirmTitle": "이 위임/대결 요청을 반려하시겠습니까?",
+      "statusPlaceholder": "처리상태",
+      "statusReq": "요청중",
+      "statusApp": "승인",
+      "statusRej": "반려",
+      "statusBadge": {
+        "req": "요청중",
+        "app": "승인",
+        "rej": "반려"
+      },
+      "reqEmpIdPlaceholder": "요청자 사번",
+      "docIdPlaceholder": "문서ID",
+      "empIdPlaceholder": "사번"
+    }
   }
 }

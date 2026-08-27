@@ -5,6 +5,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Card, Select, Input, Button, Tag, Empty, Skeleton, message } from "antd";
 import { ArrowLeftOutlined, UnorderedListOutlined } from "@ant-design/icons";
@@ -18,19 +19,12 @@ import {
 } from "../../reducers/apct/applicantReducer";
 import { fetchRecruitAdminListRequest } from "../../reducers/rec/recruitReducer";
 
-// list.js/dashboard.js와 동일한 상태 라벨·색상 조합(색각이상 시뮬레이션 검증 완료 팔레트)을 그대로 사용
-const STATUS_META = {
-  RECEIVED: { text: "접수", color: "#8a93a3" },
-  SCREENING: { text: "서류심사", color: "#2563eb" },
-  INTERVIEW: { text: "면접", color: "#d97706" },
-  HIRED: { text: "합격", color: "#16a34a" },
-  REJECTED: { text: "불합격", color: "#dc2626" },
-};
 const STATUS_ORDER = ["RECEIVED", "SCREENING", "INTERVIEW", "HIRED", "REJECTED"];
 
 export default function ApplicantKanbanPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("apct");
 
   const { kanbanList, kanbanLoading, kanbanError, statusError } = useSelector(
     (state) => state.applicant,
@@ -39,6 +33,15 @@ export default function ApplicantKanbanPage() {
 
   const [recId, setRecId] = useState(undefined);
   const [search, setSearch] = useState("");
+
+  // list.js/dashboard.js와 동일한 상태 라벨·색상 조합(색각이상 시뮬레이션 검증 완료 팔레트)을 그대로 사용
+  const STATUS_META = {
+    RECEIVED: { text: t("common.statusLabels.received"), color: "#8a93a3" },
+    SCREENING: { text: t("common.statusLabels.screening"), color: "#2563eb" },
+    INTERVIEW: { text: t("common.statusLabels.interview"), color: "#d97706" },
+    HIRED: { text: t("common.statusLabels.hired"), color: "#16a34a" },
+    REJECTED: { text: t("common.statusLabels.rejected"), color: "#dc2626" },
+  };
 
   useEffect(() => {
     dispatch(fetchRecruitAdminListRequest({ onepagelist: 100, pstartno: 1 }));
@@ -91,12 +94,12 @@ export default function ApplicantKanbanPage() {
         <div className="sb-page-head__txt">
           <Link href={recId ? `/apct/list?recId=${recId}` : "/apct/list"}>
             <Button type="text" className="sb-page-back" icon={<ArrowLeftOutlined />}>
-              지원자 목록으로
+              {t("kanban.backBtn")}
             </Button>
           </Link>
-          <div className="sb-breadcrumb">채용관리 &gt; 지원자 &gt; 칸반보드</div>
-          <h1>지원자 칸반보드</h1>
-          <p>공고를 선택하면 전형 단계별로 지원자를 드래그해서 상태를 변경할 수 있습니다.</p>
+          <div className="sb-breadcrumb">{t("kanban.breadcrumb")}</div>
+          <h1>{t("kanban.title")}</h1>
+          <p>{t("kanban.subtitle")}</p>
         </div>
       </div>
 
@@ -104,7 +107,7 @@ export default function ApplicantKanbanPage() {
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Select
             style={{ width: 280 }}
-            placeholder="채용공고 선택"
+            placeholder={t("kanban.recruitPlaceholder")}
             showSearch
             optionFilterProp="label"
             value={recId}
@@ -116,14 +119,14 @@ export default function ApplicantKanbanPage() {
           />
           <Input.Search
             style={{ width: 240 }}
-            placeholder="지원자 이름 검색"
+            placeholder={t("kanban.searchPlaceholder")}
             allowClear
             disabled={!recId}
             onChange={(e) => setSearch(e.target.value)}
           />
           {recId && (
             <Link href={`/apct/list?recId=${recId}`}>
-              <Button icon={<UnorderedListOutlined />}>목록으로 보기</Button>
+              <Button icon={<UnorderedListOutlined />}>{t("kanban.listViewBtn")}</Button>
             </Link>
           )}
         </div>
@@ -131,7 +134,7 @@ export default function ApplicantKanbanPage() {
 
       {!recId && (
         <Card>
-          <Empty description="공고를 선택하면 칸반보드가 표시됩니다." style={{ padding: "60px 0" }} />
+          <Empty description={t("kanban.selectRecruitEmpty")} style={{ padding: "60px 0" }} />
         </Card>
       )}
 
@@ -161,7 +164,7 @@ export default function ApplicantKanbanPage() {
                       {...provided.droppableProps}
                       style={{
                         flex: "1 1 240px",
-                        minWidth: 240,  
+                        minWidth: 240,
                         background: snapshot.isDraggingOver ? "#f5f7fa" : "#fafbfc",
                         border: "1px solid #e6ebe8",
                         borderRadius: 10,
@@ -180,7 +183,7 @@ export default function ApplicantKanbanPage() {
                         <Tag color={meta.color} style={{ margin: 0 }}>
                           {meta.text}
                         </Tag>
-                        <span style={{ color: "#999", fontSize: 12.5 }}>{items.length}명</span>
+                        <span style={{ color: "#999", fontSize: 12.5 }}>{t("kanban.columnCount", { count: items.length })}</span>
                       </div>
 
                       {items.map((item, index) => (
@@ -228,7 +231,7 @@ export default function ApplicantKanbanPage() {
                                   </span>
                                   {item.resumeCnt > 0 && (
                                     <Tag color="cyan" style={{ margin: 0 }}>
-                                      이력서
+                                      {t("kanban.resumeTag")}
                                     </Tag>
                                   )}
                                 </div>
@@ -248,7 +251,7 @@ export default function ApplicantKanbanPage() {
                             padding: "20px 0",
                           }}
                         >
-                          없음
+                          {t("kanban.emptyColumn")}
                         </div>
                       )}
                     </div>

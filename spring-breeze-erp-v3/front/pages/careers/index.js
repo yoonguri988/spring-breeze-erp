@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Empty, Pagination, Spin, Alert, Tag, Input } from "antd";
 import { SearchOutlined, EnvironmentOutlined, TeamOutlined, ClockCircleOutlined, BankOutlined } from "@ant-design/icons";
 import Link from "next/link";
@@ -15,6 +16,7 @@ import { fetchPublicRecruitListRequest } from "../../reducers/rec/recruitPublicR
 export default function CareersListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("careers");
   const { apctAccessToken } = useSelector((state) => state.apctAuth);
   const { list, paging, listLoading, listError } = useSelector(
     (state) => state.recruitPublic,
@@ -60,15 +62,15 @@ export default function CareersListPage() {
     <ApplicantLayout>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "#14251f", marginBottom: 6 }}>
-          채용공고
+          {t("list.title")}
         </h1>
         <p style={{ color: "#778", fontSize: 14 }}>
-          현재 모집 중인 포지션을 확인하고 지원해 보세요.
+          {t("list.subtitle")}
         </p>
       </div>
 
       <Input.Search
-        placeholder="공고명을 검색해 보세요"
+        placeholder={t("list.searchPlaceholder")}
         allowClear
         enterButton={<SearchOutlined />}
         size="large"
@@ -85,15 +87,15 @@ export default function CareersListPage() {
       )}
 
       {!listLoading && listError && (
-        <Alert type="error" showIcon message="공고를 불러오지 못했습니다" description={listError} />
+        <Alert type="error" showIcon message={t("list.loadError")} description={listError} />
       )}
 
       {!listLoading && !listError && list.length === 0 && (
         <Empty
           description={
             recTitle
-              ? `'${recTitle}'에 대한 검색 결과가 없습니다.`
-              : "현재 진행 중인 채용공고가 없습니다."
+              ? t("list.emptySearch", { keyword: recTitle })
+              : t("list.emptyDefault")
           }
           style={{ padding: "60px 0" }}
         />
@@ -113,14 +115,14 @@ export default function CareersListPage() {
                 </span>
                 <span>{rec.recPosition}</span>
                 <span>
-                  <TeamOutlined /> {rec.recHeadcount}명
+                  <TeamOutlined /> {t("list.headcountUnit", { count: rec.recHeadcount })}
                 </span>
                 <Tag color="blue">{rec.recEmploymentType}</Tag>
                 <span>
                   <ClockCircleOutlined />{" "}
                   {rec.recEndDate
-                    ? `~ ${moment(rec.recEndDate).format("YYYY-MM-DD")} 마감`
-                    : "상시채용"}
+                    ? t("list.closingDate", { date: moment(rec.recEndDate).format("YYYY-MM-DD") })
+                    : t("list.alwaysOpen")}
                 </span>
               </div>
             </a>

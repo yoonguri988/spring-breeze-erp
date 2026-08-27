@@ -4,6 +4,7 @@
 // 새 버전이 청킹+임베딩되어 RAG 검색 대상에 반영된다.
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   Table,
@@ -27,6 +28,7 @@ import {
 
 export default function SalAiDocAdminPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("sal");
   const [form] = Form.useForm();
 
   const {
@@ -50,7 +52,7 @@ export default function SalAiDocAdminPage() {
   useEffect(() => {
     if (!uploadLoading) {
       if (uploadSuccess) {
-        message.success("급여 규정 문서가 등록되었습니다. 새 버전이 즉시 AI 답변에 반영됩니다.");
+        message.success(t("aidocAdmin.uploadSuccessMsg"));
         closeModal();
         dispatch(resetSalAiDocState());
         dispatch(listSalAiDocRequest());
@@ -77,7 +79,7 @@ export default function SalAiDocAdminPage() {
     try {
       const values = await form.validateFields();
       if (fileList.length === 0) {
-        message.warning("업로드할 PDF 파일을 선택해 주세요.");
+        message.warning(t("aidocAdmin.selectFileWarning"));
         return;
       }
       dispatch(
@@ -93,7 +95,7 @@ export default function SalAiDocAdminPage() {
 
   const columns = [
     {
-      title: "버전",
+      title: t("aidocAdmin.columns.version"),
       dataIndex: "docVersion",
       key: "docVersion",
       width: 80,
@@ -101,33 +103,33 @@ export default function SalAiDocAdminPage() {
       render: (v) => <b>v{v}</b>,
     },
     {
-      title: "제목",
+      title: t("aidocAdmin.columns.title"),
       dataIndex: "title",
       key: "title",
     },
     {
-      title: "원본 파일명",
+      title: t("aidocAdmin.columns.srcFileName"),
       dataIndex: "srcFileName",
       key: "srcFileName",
     },
     {
-      title: "조항(청크) 수",
+      title: t("aidocAdmin.columns.chunkCount"),
       dataIndex: "chunkCount",
       key: "chunkCount",
       width: 110,
       align: "center",
     },
     {
-      title: "상태",
+      title: t("aidocAdmin.columns.status"),
       dataIndex: "actv",
       key: "actv",
       width: 100,
       align: "center",
       render: (v) =>
-        v ? <Tag color="green">사용중</Tag> : <Tag>이전 버전</Tag>,
+        v ? <Tag color="green">{t("aidocAdmin.statusActive")}</Tag> : <Tag>{t("aidocAdmin.statusInactive")}</Tag>,
     },
     {
-      title: "등록일시",
+      title: t("aidocAdmin.columns.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       width: 160,
@@ -147,17 +149,16 @@ export default function SalAiDocAdminPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            급여관리 &gt; AI 급여 Q&amp;A &gt; 근거 문서 관리
+            {t("aidocAdmin.breadcrumb")}
           </div>
-          <h1>급여 규정 문서 관리</h1>
+          <h1>{t("aidocAdmin.title")}</h1>
           <p>
-            급여 규정집·수당 기준·연말정산 가이드(PDF)를 등록하면 조항 단위로
-            청킹·임베딩되어 AI 챗봇 답변의 근거로 사용됩니다.
+            {t("aidocAdmin.subtitle")}
           </p>
         </div>
         <div className="sb-page-head__actions">
           <Button type="primary" icon={<PlusOutlined />} onClick={openModal}>
-            문서 등록(개정)
+            {t("aidocAdmin.registerBtn")}
           </Button>
         </div>
       </div>
@@ -166,7 +167,7 @@ export default function SalAiDocAdminPage() {
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
-        message="새 문서를 등록하면 기존 사용중 문서는 자동으로 이전 버전 처리되고, 새 문서가 즉시 AI 답변의 검색 대상이 됩니다."
+        message={t("aidocAdmin.infoAlert")}
       />
 
       <Card>
@@ -176,7 +177,7 @@ export default function SalAiDocAdminPage() {
           dataSource={docList}
           loading={listLoading}
           pagination={false}
-          locale={{ emptyText: "등록된 급여 규정 문서가 없습니다." }}
+          locale={{ emptyText: t("aidocAdmin.emptyText") }}
         />
         {listError && (
           <p style={{ color: "red", marginTop: 12 }}>{listError}</p>
@@ -184,35 +185,35 @@ export default function SalAiDocAdminPage() {
       </Card>
 
       <Modal
-        title="급여 규정 문서 등록(개정)"
+        title={t("aidocAdmin.modalTitle")}
         open={modalOpen}
         onCancel={closeModal}
         onOk={handleUpload}
-        okText="등록"
+        okText={t("aidocAdmin.okText")}
         okButtonProps={{ loading: uploadLoading }}
-        cancelText="취소"
+        cancelText={t("aidocAdmin.cancelText")}
         destroyOnClose
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="title" label="문서 제목(선택)">
-            <Input placeholder="예: 2026년 급여 규정집 (생략 시 원본 파일명 사용)" maxLength={100} />
+          <Form.Item name="title" label={t("aidocAdmin.titleFieldLabel")}>
+            <Input placeholder={t("aidocAdmin.titleFieldPlaceholder")} maxLength={100} />
           </Form.Item>
           <Form.Item
-            label="PDF 파일"
+            label={t("aidocAdmin.fileFieldLabel")}
             required
-            extra="PDF만 업로드 가능하며 최대 5MB까지 등록할 수 있습니다."
+            extra={t("aidocAdmin.fileFieldExtra")}
           >
             <Upload
               accept="application/pdf"
               beforeUpload={(file) => {
                 const isPdf = file.type === "application/pdf";
                 if (!isPdf) {
-                  message.error("PDF 파일만 업로드할 수 있습니다.");
+                  message.error(t("aidocAdmin.pdfOnlyError"));
                   return Upload.LIST_IGNORE;
                 }
                 const isUnder5MB = file.size / 1024 / 1024 < 5;
                 if (!isUnder5MB) {
-                  message.error("파일 크기는 5MB를 넘을 수 없습니다.");
+                  message.error(t("aidocAdmin.fileSizeError"));
                   return Upload.LIST_IGNORE;
                 }
                 return false;
@@ -222,7 +223,7 @@ export default function SalAiDocAdminPage() {
               onRemove={() => setFileList([])}
               maxCount={1}
             >
-              <Button icon={<UploadOutlined />}>파일 선택</Button>
+              <Button icon={<UploadOutlined />}>{t("aidocAdmin.selectFileBtn")}</Button>
             </Upload>
           </Form.Item>
         </Form>

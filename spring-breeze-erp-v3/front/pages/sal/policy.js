@@ -3,6 +3,7 @@
 // 4개 컨트롤러 모두 "등록 + 전체조회"만 있는 단순 정책 카탈로그라서 탭 하나의 화면으로 묶었다.
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   Tabs,
@@ -34,15 +35,17 @@ import { formatWon, wonFormatter, wonParser } from "../../utils/currency";
 const { TabPane } = Tabs;
 
 function EffPeriodCell({ effFrom, effTo }) {
+  const { t } = useTranslation("sal");
   return (
     <span>
-      {effFrom} ~ {effTo || <Tag color="green">적용중</Tag>}
+      {effFrom} ~ {effTo || <Tag color="green">{t("policy.applyingTag")}</Tag>}
     </span>
   );
 }
 
 export default function SalPolicyListPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("sal");
   const { user } = useSelector((state) => state.auth);
   const isRoot = Boolean(user?.roles?.includes("ROOT"));
   const isAdmin = Boolean(user?.roles?.includes("ROLE_ADMIN"));
@@ -81,7 +84,7 @@ export default function SalPolicyListPage() {
   useEffect(() => {
     if (saving) return;
     if (success) {
-      message.success("정책이 등록되었습니다.");
+      message.success(t("policy.registerSuccessMsg"));
       closeModal();
       if (modalType === "rate") dispatch(fetchRatePolicyRequest());
       if (modalType === "tax") dispatch(fetchTaxBracketRequest());
@@ -151,33 +154,33 @@ export default function SalPolicyListPage() {
   };
 
   const rateColumns = [
-    { title: "적용연도", dataIndex: "plcyYear", key: "plcyYear", width: 90 },
+    { title: t("policy.rateColumns.plcyYear"), dataIndex: "plcyYear", key: "plcyYear", width: 90 },
     {
-      title: "국민연금",
+      title: t("policy.rateColumns.pensRate"),
       dataIndex: "pensRate",
       key: "pensRate",
       align: "right",
     },
     {
-      title: "건강보험",
+      title: t("policy.rateColumns.hlthRate"),
       dataIndex: "hlthRate",
       key: "hlthRate",
       align: "right",
     },
     {
-      title: "장기요양보험료",
+      title: t("policy.rateColumns.careRate"),
       dataIndex: "careRate",
       key: "careRate",
       align: "right",
     },
     {
-      title: "고용보험",
+      title: t("policy.rateColumns.emplRate"),
       dataIndex: "emplRate",
       key: "emplRate",
       align: "right",
     },
     {
-      title: "적용기간",
+      title: t("policy.rateColumns.period"),
       key: "period",
       render: (_, r) => <EffPeriodCell {...r} />,
     },
@@ -185,23 +188,23 @@ export default function SalPolicyListPage() {
 
   const taxColumns = [
     {
-      title: "구간하한",
+      title: t("policy.taxColumns.minAmt"),
       dataIndex: "minAmt",
       key: "minAmt",
       align: "right",
       render: formatWon,
     },
     {
-      title: "구간상한",
+      title: t("policy.taxColumns.maxAmt"),
       dataIndex: "maxAmt",
       key: "maxAmt",
       align: "right",
       render: (v) =>
-        v === null || v === undefined ? "상한없음" : formatWon(v),
+        v === null || v === undefined ? t("policy.noUpperLimit") : formatWon(v),
     },
-    { title: "세율", dataIndex: "taxRate", key: "taxRate", align: "right" },
+    { title: t("policy.taxColumns.taxRate"), dataIndex: "taxRate", key: "taxRate", align: "right" },
     {
-      title: "적용기간",
+      title: t("policy.taxColumns.period"),
       key: "period",
       render: (_, r) => <EffPeriodCell {...r} />,
     },
@@ -209,44 +212,44 @@ export default function SalPolicyListPage() {
 
   const mealColumns = [
     {
-      title: "적용범위",
+      title: t("policy.mealColumns.scope"),
       dataIndex: "comId",
       key: "comId",
       width: 120,
-      render: (v) => (v ? `회사 #${v}` : <Tag color="blue">전사공통</Tag>),
+      render: (v) => (v ? t("policy.comIdScope", { comId: v }) : <Tag color="blue">{t("policy.companyWideScope")}</Tag>),
     },
     {
-      title: "식대",
+      title: t("policy.mealColumns.amt"),
       dataIndex: "amt",
       key: "amt",
       align: "right",
       render: formatWon,
     },
     {
-      title: "적용기간",
+      title: t("policy.mealColumns.period"),
       key: "period",
       render: (_, r) => <EffPeriodCell {...r} />,
     },
   ];
 
   const posColumns = [
-    { title: "직급코드", dataIndex: "pos", key: "pos", width: 120 },
+    { title: t("policy.posColumns.pos"), dataIndex: "pos", key: "pos", width: 120 },
     {
-      title: "회사",
+      title: t("policy.posColumns.comId"),
       dataIndex: "comId",
       key: "comId",
       width: 100,
       render: (v) => `#${v}`,
     },
     {
-      title: "지급액",
+      title: t("policy.posColumns.amt"),
       dataIndex: "amt",
       key: "amt",
       align: "right",
       render: formatWon,
     },
     {
-      title: "적용기간",
+      title: t("policy.posColumns.period"),
       key: "period",
       render: (_, r) => <EffPeriodCell {...r} />,
     },
@@ -256,11 +259,10 @@ export default function SalPolicyListPage() {
     <div className="sb-page">
       <div className="sb-page-head" style={{ marginBottom: 16 }}>
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">급여관리 &gt; 계산정책</div>
-          <h1>급여 계산 정책 관리</h1>
+          <div className="sb-breadcrumb">{t("policy.breadcrumb")}</div>
+          <h1>{t("policy.title")}</h1>
           <p>
-            급여 자동 산정에 사용되는 4대보험 요율, 소득세 구간표, 식대·직책수당
-            정책을 관리합니다.
+            {t("policy.subtitle")}
           </p>
         </div>
       </div>
@@ -268,7 +270,7 @@ export default function SalPolicyListPage() {
       <Card>
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           {isRoot && (
-            <TabPane tab="4대보험 요율정책" key="rate">
+            <TabPane tab={t("policy.tabRate")} key="rate">
               <div
                 style={{
                   marginBottom: 12,
@@ -281,7 +283,7 @@ export default function SalPolicyListPage() {
                   icon={<PlusOutlined />}
                   onClick={() => openModal("rate")}
                 >
-                  요율정책 등록
+                  {t("policy.registerRateBtn")}
                 </Button>
               </div>
               <Table
@@ -291,12 +293,12 @@ export default function SalPolicyListPage() {
                 loading={rateLoading}
                 pagination={false}
                 size="small"
-                locale={{ emptyText: "등록된 요율정책이 없습니다." }}
+                locale={{ emptyText: t("policy.rateEmptyText") }}
               />
             </TabPane>
           )}
           {isRoot && (
-            <TabPane tab="소득세 간이구간표" key="tax">
+            <TabPane tab={t("policy.tabTax")} key="tax">
               <div
                 style={{
                   marginBottom: 12,
@@ -309,11 +311,11 @@ export default function SalPolicyListPage() {
                   icon={<PlusOutlined />}
                   onClick={() => openModal("tax")}
                 >
-                  구간 등록
+                  {t("policy.registerTaxBtn")}
                 </Button>
               </div>
               <p style={{ color: "#999", fontSize: 13 }}>
-                부양가족 수 미반영, 기본급 구간별 단순 정률 근사치 구간표입니다.
+                {t("policy.taxNotice")}
               </p>
               <Table
                 rowKey="brktId"
@@ -322,12 +324,12 @@ export default function SalPolicyListPage() {
                 loading={taxBracketLoading}
                 pagination={false}
                 size="small"
-                locale={{ emptyText: "등록된 구간표가 없습니다." }}
+                locale={{ emptyText: t("policy.taxEmptyText") }}
               />
             </TabPane>
           )}
           {isAdmin && (
-            <TabPane tab="식대 정책" key="meal">
+            <TabPane tab={t("policy.tabMeal")} key="meal">
               <div
                 style={{
                   marginBottom: 12,
@@ -340,7 +342,7 @@ export default function SalPolicyListPage() {
                   icon={<PlusOutlined />}
                   onClick={() => openModal("meal")}
                 >
-                  식대정책 등록
+                  {t("policy.registerMealBtn")}
                 </Button>
               </div>
               <Table
@@ -350,12 +352,12 @@ export default function SalPolicyListPage() {
                 loading={mealPolicyLoading}
                 pagination={false}
                 size="small"
-                locale={{ emptyText: "등록된 식대정책이 없습니다." }}
+                locale={{ emptyText: t("policy.mealEmptyText") }}
               />
             </TabPane>
           )}
           {isAdmin && (
-            <TabPane tab="직책수당 정책" key="pos">
+            <TabPane tab={t("policy.tabPos")} key="pos">
               <div
                 style={{
                   marginBottom: 12,
@@ -368,7 +370,7 @@ export default function SalPolicyListPage() {
                   icon={<PlusOutlined />}
                   onClick={() => openModal("pos")}
                 >
-                  직책수당 등록
+                  {t("policy.registerPosBtn")}
                 </Button>
               </div>
               <Table
@@ -378,7 +380,7 @@ export default function SalPolicyListPage() {
                 loading={posAllowanceLoading}
                 pagination={false}
                 size="small"
-                locale={{ emptyText: "등록된 직책수당 정책이 없습니다." }}
+                locale={{ emptyText: t("policy.posEmptyText") }}
               />
             </TabPane>
           )}
@@ -388,19 +390,19 @@ export default function SalPolicyListPage() {
       <Modal
         title={
           modalType === "rate"
-            ? "4대보험 요율정책 등록"
+            ? t("policy.modalTitleRate")
             : modalType === "tax"
-              ? "소득세 구간 등록"
+              ? t("policy.modalTitleTax")
               : modalType === "meal"
-                ? "식대정책 등록"
-                : "직책수당 정책 등록"
+                ? t("policy.modalTitleMeal")
+                : t("policy.modalTitlePos")
         }
         open={!!modalType}
         onCancel={closeModal}
         onOk={handleSubmit}
-        okText="등록"
+        okText={t("policy.okText")}
         okButtonProps={{ loading: saving }}
-        cancelText="취소"
+        cancelText={t("policy.cancelText")}
         destroyOnClose
       >
         <Form form={form} layout="vertical">
@@ -408,23 +410,23 @@ export default function SalPolicyListPage() {
             <>
               <Form.Item
                 name="plcyYear"
-                label="적용연도"
+                label={t("policy.plcyYearFieldLabel")}
                 rules={[
-                  { required: true, message: "적용연도를 입력해 주세요." },
+                  { required: true, message: t("policy.plcyYearFieldRequired") },
                 ]}
               >
                 <InputNumber
                   style={{ width: "100%" }}
                   min={2000}
                   max={2100}
-                  placeholder="예: 2026"
+                  placeholder={t("policy.plcyYearPlaceholder")}
                 />
               </Form.Item>
               <Form.Item
                 name="pensRate"
-                label="국민연금 요율"
-                rules={[{ required: true, message: "요율을 입력해 주세요." }]}
-                extra="소수(예: 4.5% -> 0.045)로 입력"
+                label={t("policy.pensRateFieldLabel")}
+                rules={[{ required: true, message: t("policy.rateFieldRequired") }]}
+                extra={t("policy.rateFieldExtra")}
               >
                 <InputNumber
                   style={{ width: "100%" }}
@@ -435,8 +437,8 @@ export default function SalPolicyListPage() {
               </Form.Item>
               <Form.Item
                 name="hlthRate"
-                label="건강보험 요율"
-                rules={[{ required: true, message: "요율을 입력해 주세요." }]}
+                label={t("policy.hlthRateFieldLabel")}
+                rules={[{ required: true, message: t("policy.rateFieldRequired") }]}
               >
                 <InputNumber
                   style={{ width: "100%" }}
@@ -447,8 +449,8 @@ export default function SalPolicyListPage() {
               </Form.Item>
               <Form.Item
                 name="careRate"
-                label="장기요양보험료율"
-                rules={[{ required: true, message: "요율을 입력해 주세요." }]}
+                label={t("policy.careRateFieldLabel")}
+                rules={[{ required: true, message: t("policy.rateFieldRequired") }]}
               >
                 <InputNumber
                   style={{ width: "100%" }}
@@ -459,8 +461,8 @@ export default function SalPolicyListPage() {
               </Form.Item>
               <Form.Item
                 name="emplRate"
-                label="고용보험 요율"
-                rules={[{ required: true, message: "요율을 입력해 주세요." }]}
+                label={t("policy.emplRateFieldLabel")}
+                rules={[{ required: true, message: t("policy.rateFieldRequired") }]}
               >
                 <InputNumber
                   style={{ width: "100%" }}
@@ -471,9 +473,9 @@ export default function SalPolicyListPage() {
               </Form.Item>
               <Form.Item
                 name="effFrom"
-                label="적용시작일"
+                label={t("policy.effFromFieldLabel")}
                 rules={[
-                  { required: true, message: "적용시작일을 선택해 주세요." },
+                  { required: true, message: t("policy.effFromFieldRequired") },
                 ]}
               >
                 <DatePicker style={{ width: "100%" }} />
@@ -484,9 +486,9 @@ export default function SalPolicyListPage() {
             <>
               <Form.Item
                 name="minAmt"
-                label="구간 하한"
+                label={t("policy.minAmtFieldLabel")}
                 rules={[
-                  { required: true, message: "구간 하한을 입력해 주세요." },
+                  { required: true, message: t("policy.minAmtFieldRequired") },
                 ]}
               >
                 <InputNumber
@@ -494,26 +496,26 @@ export default function SalPolicyListPage() {
                   min={0}
                   formatter={wonFormatter}
                   parser={wonParser}
-                  addonAfter="원"
+                  addonAfter={t("policy.wonSuffix")}
                 />
               </Form.Item>
               <Form.Item
                 name="maxAmt"
-                label="구간 상한 (선택, 비워두면 최고구간)"
+                label={t("policy.maxAmtFieldLabel")}
               >
                 <InputNumber
                   style={{ width: "100%" }}
                   min={0}
                   formatter={wonFormatter}
                   parser={wonParser}
-                  addonAfter="원"
+                  addonAfter={t("policy.wonSuffix")}
                 />
               </Form.Item>
               <Form.Item
                 name="taxRate"
-                label="세율"
-                rules={[{ required: true, message: "세율을 입력해 주세요." }]}
-                extra="소수(예: 6% -> 0.06)로 입력"
+                label={t("policy.taxRateFieldLabel")}
+                rules={[{ required: true, message: t("policy.taxRateFieldRequired") }]}
+                extra={t("policy.taxRateFieldExtra")}
               >
                 <InputNumber
                   style={{ width: "100%" }}
@@ -524,9 +526,9 @@ export default function SalPolicyListPage() {
               </Form.Item>
               <Form.Item
                 name="effFrom"
-                label="적용시작일"
+                label={t("policy.effFromFieldLabel")}
                 rules={[
-                  { required: true, message: "적용시작일을 선택해 주세요." },
+                  { required: true, message: t("policy.effFromFieldRequired") },
                 ]}
               >
                 <DatePicker style={{ width: "100%" }} />
@@ -536,13 +538,13 @@ export default function SalPolicyListPage() {
           {modalType === "meal" && (
             <>
               <p style={{ color: "#999", fontSize: 13 }}>
-                회사 관리자가 등록하면 소속 회사 전용 정책으로 등록됩니다.
+                {t("policy.mealAdminNotice")}
               </p>
               <Form.Item
                 name="amt"
-                label="월 식대"
+                label={t("policy.mealAmtFieldLabel")}
                 rules={[
-                  { required: true, message: "식대 금액을 입력해 주세요." },
+                  { required: true, message: t("policy.mealAmtFieldRequired") },
                 ]}
               >
                 <InputNumber
@@ -550,14 +552,14 @@ export default function SalPolicyListPage() {
                   min={0}
                   formatter={wonFormatter}
                   parser={wonParser}
-                  addonAfter="원"
+                  addonAfter={t("policy.wonSuffix")}
                 />
               </Form.Item>
               <Form.Item
                 name="effFrom"
-                label="적용시작일"
+                label={t("policy.effFromFieldLabel")}
                 rules={[
-                  { required: true, message: "적용시작일을 선택해 주세요." },
+                  { required: true, message: t("policy.effFromFieldRequired") },
                 ]}
               >
                 <DatePicker style={{ width: "100%" }} />
@@ -568,17 +570,17 @@ export default function SalPolicyListPage() {
             <>
               <Form.Item
                 name="pos"
-                label="직급코드"
+                label={t("policy.posFieldLabel")}
                 rules={[
-                  { required: true, message: "직급코드를 입력해 주세요." },
+                  { required: true, message: t("policy.posFieldRequired") },
                 ]}
               >
-                <Input placeholder="예: MANAGER" maxLength={30} />
+                <Input placeholder={t("policy.posPlaceholder")} maxLength={30} />
               </Form.Item>
               <Form.Item
                 name="comId"
-                label="회사 ID"
-                rules={[{ required: true, message: "회사 ID가 필요합니다." }]}
+                label={t("policy.comIdFieldLabel")}
+                rules={[{ required: true, message: t("policy.comIdFieldRequired") }]}
               >
                 <InputNumber
                   style={{ width: "100%" }}
@@ -588,22 +590,22 @@ export default function SalPolicyListPage() {
               </Form.Item>
               <Form.Item
                 name="amt"
-                label="월 지급액"
-                rules={[{ required: true, message: "지급액을 입력해 주세요." }]}
+                label={t("policy.posAmtFieldLabel")}
+                rules={[{ required: true, message: t("policy.posAmtFieldRequired") }]}
               >
                 <InputNumber
                   style={{ width: "100%" }}
                   min={0}
                   formatter={wonFormatter}
                   parser={wonParser}
-                  addonAfter="원"
+                  addonAfter={t("policy.wonSuffix")}
                 />
               </Form.Item>
               <Form.Item
                 name="effFrom"
-                label="적용시작일"
+                label={t("policy.effFromFieldLabel")}
                 rules={[
-                  { required: true, message: "적용시작일을 선택해 주세요." },
+                  { required: true, message: t("policy.effFromFieldRequired") },
                 ]}
               >
                 <DatePicker style={{ width: "100%" }} />

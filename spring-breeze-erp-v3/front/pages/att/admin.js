@@ -68,7 +68,7 @@ export default function AttAdminPage() {
   useEffect(() => {
     if (success) {
       if (lastAction === "create") {
-        message.success(t("att:msg.createSuccess", "근태가 등록되었습니다."));
+        message.success(t("att:msg.createSuccess"));
         setCreateModalVisible(false);
         resetCreateForm();
       } else {
@@ -115,7 +115,7 @@ export default function AttAdminPage() {
   const handleEditSave = () => {
     if (!editingRecord) return;
     if (!editCheckIn) {
-      message.warning("출근 시간을 입력해주세요.");
+      message.warning(t("att:admin.editModal.checkInRequired"));
       return;
     }
 
@@ -154,11 +154,11 @@ export default function AttAdminPage() {
   const handleCreateSave = () => {
     // 유효성 검사
     if (!createEmpNo.trim()) {
-      message.warning("사번을 입력해주세요.");
+      message.warning(t("att:admin.createModal.empNoRequired"));
       return;
     }
     if (!createDate) {
-      message.warning("근무일을 선택해주세요.");
+      message.warning(t("att:admin.createModal.workDateRequired"));
       return;
     }
 
@@ -284,7 +284,7 @@ export default function AttAdminPage() {
           />
           {/* 사원명/사번 검색 필터 */}
           <Input
-            placeholder="사원명 또는 사번"
+            placeholder={t("att:admin.search.keywordPlaceholder")}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onPressEnter={handleSearch}
@@ -304,7 +304,7 @@ export default function AttAdminPage() {
             icon={<PlusOutlined />}
             onClick={openCreateModal}
           >
-            근태 등록
+            {t("att:admin.btnCreate")}
           </Button>
         </Space>
       </Card>
@@ -375,29 +375,29 @@ export default function AttAdminPage() {
       {/*  등록 모달                                     */}
       {/* ══════════════════════════════════════════════ */}
       <Modal
-        title="근태 등록"
+        title={t("att:admin.createModal.title")}
         visible={createModalVisible}
         onCancel={() => setCreateModalVisible(false)}
         onOk={handleCreateSave}
-        okText="등록"
+        okText={t("att:admin.createModal.btnRegister")}
         cancelText={t("att:admin.editModal.btnCancel")}
         confirmLoading={loading}
       >
         <Space direction="vertical" style={{ width: "100%" }} size="middle">
           {/* 사원 ID */}
           <div>
-            <label>사번</label>
+            <label>{t("att:admin.createModal.empNo")}</label>
             <Input
               value={createEmpNo}
               onChange={(e) => setCreateEmpNo(e.target.value)}
-              placeholder="예: EMP-001"
+              placeholder={t("att:admin.createModal.empNoPlaceholder")}
               style={{ width: "100%", marginTop: 4 }}
             />
           </div>
 
           {/* 근무일 */}
           <div>
-            <label>근무일</label>
+            <label>{t("att:admin.createModal.workDate")}</label>
             <DatePicker
               value={createDate}
               onChange={setCreateDate}
