@@ -46,7 +46,7 @@ export default function FormWritePage() {
     const comIdValue = Form.useWatch("comId", form);
 
     // 연차 관련 //
-    const [forCategory, setForCategory] = useState("GENARAL");
+    const [forCategory, setForCategory] = useState("GENERAL");
 
     const LEAVE_REQUIRED_FIELDS = [
         {key: "leaveType", label: "휴가 종류", type: "select", required: true, options: ["ANNUAL", "HALF_AM", "HALF_PM"]},
@@ -366,7 +366,9 @@ export default function FormWritePage() {
                 </Card>
 
                 {/* 2. 본문 / 스키마 */}
-                <Card title={contentMode === "editor" ? "양식 본문 편집" : "AI 스키마 설정"}>
+                <Card title={contentMode === "editor" ? "양식 본문 편집" 
+                            : forCategory === "LEAVE" ? "연차 필드 구성"
+                            : "AI 스키마 설정"}>
                     {contentMode === "editor" ? (
                         <Form.Item label="양식 내용">
                             <Space style={{marginBottom: 8}} wrap>
@@ -384,25 +386,27 @@ export default function FormWritePage() {
                             />
                         </Form.Item>    
                     ) : (<>
-                        <Form.Item label="AI 프롬프트">
-                            <Input.Group compact>
-                                <Input
-                                    style={{width: "calc(100% - 100px)"}}
-                                    placeholder="예: 휴가 신청서"
-                                    value={aiPrompt}
-                                    onChange={(e) => setAiPrompt(e.target.value)}
-                                    onPressEnter={handleGenerateSchema}
-                                />
-                                <Button
-                                    style={{width: 100}}
-                                    loading={aiLoading}
-                                    onClick={handleGenerateSchema}
-                                >
-                                    생성
-                                </Button>
-                            </Input.Group>
-                        </Form.Item>
-                        
+                        {forCategory !== "LEAVE" && (
+                            <Form.Item label="AI 프롬프트">
+                                <Input.Group compact>
+                                    <Input
+                                        style={{width: "calc(100% - 100px)"}}
+                                        placeholder="예: 휴가 신청서"
+                                        value={aiPrompt}
+                                        onChange={(e) => setAiPrompt(e.target.value)}
+                                        onPressEnter={handleGenerateSchema}
+                                    />
+                                    <Button
+                                        style={{width: 100}}
+                                        loading={aiLoading}
+                                        onClick={handleGenerateSchema}
+                                    >
+                                        생성
+                                    </Button>
+                                </Input.Group>
+                            </Form.Item>
+                        )}
+
                         {schemaFields.length > 0 ? (
                             <Form.Item label="생성된 필드 구성 (수정 가능)">
                                 <SchemaFieldEditor
