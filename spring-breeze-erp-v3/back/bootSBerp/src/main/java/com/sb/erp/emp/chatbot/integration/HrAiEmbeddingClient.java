@@ -64,9 +64,7 @@ public class HrAiEmbeddingClient {
      * @throws RuntimeException 파싱 실패 시 (호출부에서 흐름 제어)
      */
     public double[] embed(String text) {
-    	
-    	System.out.println("[HrAiEmbedding] apiKey 앞5자: " + apiKey.substring(0, 5) + "... / 길이: " + apiKey.length());
-    	
+    	   	
         Map<String, Object> body = Map.of(
                 "model", EMBEDDING_MODEL,
                 "input", text

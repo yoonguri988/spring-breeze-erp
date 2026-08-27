@@ -40,12 +40,13 @@ public class HrAiChatService {
 
     // ─── RAG 검색 설정 ───────────────────────────────────
     // TOP_K: 유사도 상위 몇 개 청크를 근거로 사용할지
-    private static final int TOP_K = 3;
+    private static final int TOP_K = 5;
 
     // SIMILARITY_THRESHOLD: 이 값 미만이면 "관련 근거 없음"으로 간주
-    // 값이 너무 높으면 근거를 못 찾는 경우가 많아지고,
-    // 너무 낮으면 관련 없는 조항까지 근거로 잡힘
-    private static final double SIMILARITY_THRESHOLD = 0.3;
+    // private static final double SIMILARITY_THRESHOLD = 0.0;
+    // 0.15~0.3 까지 값을 써봤는데 임베딩 모델이 한국어에서 유사도 값 자체가 너무 낮게 나오는 문제로 답변 필터링이 안됨
+    // 절대 유사도 임계값 대신 상대적인 방법을 사용하는 것으로 변경
+    private static final double MIN_RELEVANT_RATIO = 0.5;     // 1위 대비 50% 이상만 포함
 
     // SNIPPET_LENGTH: 프론트에 내려줄 청크 원문 미리보기 길이
     private static final int SNIPPET_LENGTH = 120;
@@ -81,7 +82,13 @@ public class HrAiChatService {
         if (!candidates.isEmpty()) {
             double[] questionVector = embeddingClient.embed(request.getQuestion());
             // 사용자의 질문을 벡터로 변환하기
-            // 예 : "연차는 언제부터 쓸 수 있나요?" → [0.012, -0.045, 0.033, ...]
+			// 예 : "연차는 언제부터 쓸 수 있나요?" → [0.012, -0.045, 0.033, ...]
+
+			// ★ 디버그: 전체 유사도 출력
+//			candidates.forEach(c -> {
+//				double sim = cosineSimilarity(questionVector, embeddingClient.fromJson(c.getChunkEmbedding()));
+//				System.out.println("[RAG] " + c.getArticle() + " → 유사도: " + String.format("%.4f", sim));
+//			});
 
             top = candidates.stream() // 청크를 하나씩 꺼내어 아래 단계를 통과시킨다
                     .map(c -> new ScoredChunk(c,
@@ -89,12 +96,17 @@ public class HrAiChatService {
                                     embeddingClient.fromJson(c.getChunkEmbedding()))))
                     // 청크에 저장된 벡터(JSON 문자열)를 double[]로 변환, 
                     // 질문 벡터와 코사인 유사도를 계산해서 ScoredChunk(청크, 유사도) 쌍으로 만든다.
-                    .filter(sc -> sc.similarity() >= SIMILARITY_THRESHOLD)
-                    // SIMILARITY_THRESHOLD 0.3 미만인 청크를 탈락시킨다.
                     .sorted(Comparator.comparingDouble(ScoredChunk::similarity).reversed())
                     // 유사도가 높은 순으로 정렬
                     .limit(TOP_K) // 상위 TOP_K개만 남김(현재 3)
-                    .toList(); // 최종 결과를 List<ScoredChunk>로 만듦
+					.toList(); // 최종 결과를 List<ScoredChunk>로 만듦
+
+			// 1위 유사도 대비 50% 미만인 청크는 노이즈로 간주하여 제거
+			if (!top.isEmpty()) {
+				double best = top.get(0).similarity();
+				double cutoff = best * MIN_RELEVANT_RATIO;
+				top = top.stream().filter(sc -> sc.similarity() >= cutoff).toList();
+			}
         }
 
         // ── ③ 근거 유무에 따라 분기 ──

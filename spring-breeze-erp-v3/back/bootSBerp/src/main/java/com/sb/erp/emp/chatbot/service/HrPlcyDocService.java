@@ -121,6 +121,11 @@ public class HrPlcyDocService {
             throw new IllegalStateException(
                     "PDF 텍스트 추출 실패: " + e.getMessage(), e);
         }
+        
+		// PDFBox 추출 텍스트 정리 — 탭·다중 공백·불필요한 줄바꿈 제거
+		pages = pages.stream()
+				.map(p -> new PageSegment(p.page, cleanText(p.text)))
+				.toList();
 
         String fullText = pages.stream()
                 .map(p -> p.text)
@@ -306,4 +311,17 @@ public class HrPlcyDocService {
 
     // Chunking 결과를 임시로 담는 내부 VO. 임베딩 전 단계
     private record ChunkDraft(String article, Integer page, String text) {}
+    
+	// PDFBox 추출 텍스트의 노이즈를 제거
+	private String cleanText(String raw) {
+		if (raw == null) return "";
+		
+		System.out.println("[cleanText] 호출됨, 탭 포함 여부: " + raw.contains("\t"));
+		
+		return raw.replace('\t', ' ') // 탭 → 공백
+				.replaceAll(" {2,}", " ") // 다중 공백 → 단일 공백
+				.replaceAll("\\r\\n|\\r", "\n") // 줄바꿈 통일
+				.replaceAll("(?<=\\S)\\n(?=\\S)", " ") // 단어 중간 줄바꿈 → 공백
+				.trim();
+	}
 }
