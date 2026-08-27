@@ -20,6 +20,7 @@ import {
     fetchFavoriteLinesRequest,
 } from "../../../reducers/appr/apprDocReducer";
 import PageHeader from "../../../components/appr/PageHeader";
+import api from "../../../api/axios";
 
 // react-quill은 SSR이 불가하므로 CSR로 로드
 // () => import("react-quill") -> 처음에 로드 하지않고 필요할때 로드
@@ -53,6 +54,15 @@ export default function DocWritePage() {
     const [approvers, setApprovers] = useState([]);
     const [selectedDeptId, setSelectedDeptId] = useState(null);
     const [isImportant, setIsImportant] = useState(false);
+    const [leaveBalance, setLeaveBalance] = useState(null);
+    const [leaveBalanceLoading, setLeaveBalanceLoading] = useState(false);
+
+    // 사용자 라벨
+    const LEAVE_TYPE_LABELS = {
+        ANNUAL: "연차 (종일)",
+        HALF_AM: "오전 반차",
+        HALF_PM: "오후 반차",
+    };
 
     // 중요문서 결재선인원 조절
     const requiredApproverCount = isImportant ? 3 : 1;
@@ -77,6 +87,9 @@ export default function DocWritePage() {
 
     const isSchemaForm = !!selectedForm?.forSchema;
 
+
+    // 연차 관련 //
+
     // 스키마 방식 필드 파싱
     const schemaFieldDefs = useMemo(() => {
         if (!isSchemaForm) return [];
@@ -86,6 +99,55 @@ export default function DocWritePage() {
             return [];
         }
     }, [isSchemaForm, selectedForm]);
+
+    // 주말 제외 연차 사용일 계산
+    function countBusinessDays(startStr, endStr) {
+        if (!startStr || !endStr) return 0;
+        const start = moment(startStr);
+        const end = moment(endStr);
+        if (!start.isValid() || !end.isValid() || end.isBefore(start)) return 0;
+
+        let count = 0;
+        const cur = start.clone();
+        while (!cur.isAfter(end)) {
+            const dow = cur.day(); // 0 일 , 6 토
+            if (dow !== 0 && dow !== 6) count++;
+            cur.add(1, "day");
+        }
+        return count;
+    }
+
+    // 총 신청 일수 계산
+    const leaveDaysCount = useMemo(() => {
+        if (selectedForm?.forCategory !== "LEAVE") return null;
+
+        const leaveType = schemaValues.leaveType;
+        if (!leaveType) return null;
+
+        if (leaveType === "HALF_AM" || leaveType === "HALF_PM") return 0.5;
+
+        return countBusinessDays(schemaValues.startDate, schemaValues.endDate);
+    }, [selectedForm, schemaValues.leaveType, schemaValues.startDate, schemaValues.endDate]);
+
+    // 잔여 연차 조회
+    useEffect(() => {
+        if (selectedForm?.forCategory !== "LEAVE") {
+            setLeaveBalance(null);
+            return;
+        }
+
+        setLeaveBalanceLoading(true);
+        api.get("/api/att/leave/balance/my")
+            .then((res) => {
+                const currentYear = new Date().getFullYear();
+                const current = (res.data || []).find((b) => b.year === currentYear);
+                setLeaveBalance(current || null);
+            })
+            .catch(() => setLeaveBalance(null))
+            .finally(() => setLeaveBalanceLoading(false));
+    }, [selectedForm]);
+
+    // 연차 관련 //
 
     // 양식이 바뀌면 이전값 초기화
     useEffect(() => {
@@ -109,16 +171,38 @@ export default function DocWritePage() {
                     <DatePicker
                         style={{width: "100%"}}
                         value={value ? moment(value) : null}
-                        onChange={(date, dateString) => onChange(dateString)}
+                        onChange={(date, dateString) => {
+                            onChange(dateString);
+
+                            // 반차는 종료일과 시작일이 동일
+                            const isHalfDay = schemaValues.leaveType === "HALF_AM" || schemaValues.leaveType === "HALF_PM";
+                            if (field.key === "startDate" && isHalfDay) {
+                                updateSchemaValue("endDate", dataString);
+                            }
+                        }}
                     />
                 );
             case "number":
                 return <InputNumber style={{width: "100%"}} value={value} onChange={onChange}/>;
             case "select":
                 return (
-                    <Select value={value} onChange={onChange}>
+                    <Select
+                        value={value}
+                        onChange={(v) => {
+                            onChange(v);
+
+                            // 반차 선택시 시작일/종료일을 오늘날짜로 기본 제안
+                            if (field.key === "leaveType" && (v === "HALF_AM" || v === "HALF_PM")) {
+                                const today = moment().format("YYYY-MM-DD");
+                                updateSchemaValue("startDate", today);
+                                updateSchemaValue("endDate", today);
+                            }
+                        }}
+                    >
                         {(field.options || []).map((opt) => (
-                            <Option key={opt} value={opt}>{opt}</Option>
+                            <Option key={opt} value={opt}>
+                                {field.key === "leaveType" ? (LEAVE_TYPE_LABELS[opt] || opt) : opt}
+                            </Option>
                         ))}
                     </Select>
                 );
@@ -368,7 +452,11 @@ export default function DocWritePage() {
                     isSchemaForm ? (
                         <Form.Item label={t("docs.write.contentLabel")}>
                             <Space direction="vertical" style={{width: "100%"}} size={12}>
-                                {schemaFieldDefs.map((field) => (
+                                {schemaFieldDefs.filter((field) => {
+                                    const isHalfDay = schemaValues.leaveType === "HALF_AM" || schemaValues.leaveType === "HALF_PM";
+                                    return !(isHalfDay && field.key === "endDate");
+                                })
+                                .map((field) => (
                                     <div key={field.key}>
                                         <div style={{marginBottom: 4}}>
                                             {field.label}
@@ -377,6 +465,45 @@ export default function DocWritePage() {
                                         {renderSchemaField(field)}
                                     </div>
                                 ))}
+
+                                {leaveDaysCount !== null && (
+                                    <Space style={{width: "100%"}} wrap>
+                                        <div
+                                            style={{
+                                                padding: "10px 14px",
+                                                borderRadius: 8,
+                                                background: "#e6f4ff",
+                                                border: "1px solid #91caff",
+                                                fontSize: 14,
+                                            }}
+                                        >
+                                            총 신청 연차 : <b>{leaveDaysCount}일</b>
+                                            {leaveDaysCount === 0 && (
+                                                <span style={{marginLeft: 8, color: "#8a93a3", fontSize: 13}}>
+                                                    (기간에 평일이 없습니다. 날짜를 확인해주세요)
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div
+                                            style={{
+                                                padding: "10px 14px",
+                                                borderRadius: 8,
+                                                background: "#f6ffed",
+                                                border: "1px solid #b7eb8f",
+                                                fontSize: 14,
+                                            }}
+                                        >
+                                            {leaveBalanceLoading ? (
+                                                <Spin size="small"/>
+                                            ) : leaveBalance ? (
+                                                <>현재 잔여 연차 : <b>{leaveBalance.remainingDays}일</b></>
+                                            ) : (
+                                                <span style={{color: "#8a93a3"}}>잔여 연차 정보를 불러올 수 없어요</span>
+                                            )}
+                                        </div>
+                                    </Space>
+                                )}
                             </Space>
                         </Form.Item>
                     ) : (
