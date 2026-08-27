@@ -16,6 +16,7 @@ public class MyApplicationResponse {
 	private String apctDate;
     private String apctEmail;
     private String apctPhone;
+    private String resumeFileName;
 
 	public MyApplicationResponse(Applicant applicant, String recTitle) {
 		this.apctId = applicant.getApctId();
@@ -29,7 +30,7 @@ public class MyApplicationResponse {
 	
 	// native query(Object[]) 매핑용 - 추가
 	public MyApplicationResponse(Long apctId, String recTitle, String apctStatus, String apctName, LocalDateTime apctDate,
-			 String apctEmail, String apctPhone) {
+			 String apctEmail, String apctPhone, String resumeFileName) {
 		this.apctId = apctId;
 		this.recTitle = recTitle;
 		this.apctStatus = apctStatus;
@@ -37,5 +38,6 @@ public class MyApplicationResponse {
 		this.apctDate = apctDate != null ? apctDate.toString() : null;
         this.apctEmail = apctEmail;
         this.apctPhone = apctPhone; 
+        this.resumeFileName= resumeFileName;
 	}
 }
