@@ -17,6 +17,7 @@ import {
 } from "antd";
 import { InboxOutlined, FilePdfOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import moment from "moment";
+import apctApi from "../../api/apctAxios";
 
 import ApplicantLayout from "../../components/ApplicantLayout";
 import {
@@ -142,7 +143,18 @@ export default function CareersMyPage() {
   const handleCancel = (apctId) => {
     dispatch(cancelApplicationRequest(apctId));
   };
-
+  // 이력서 미리보기
+  const handlePreviewResume = async (apctId) => {
+    try {
+      const response = await apctApi.get(`/api/public/resume/my/${apctId}/preview`, {
+        responseType: "blob",
+      });
+      const fileURL = URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+      window.open(fileURL, "_blank");
+    } catch (err) {
+      message.error("이력서를 불러오지 못했습니다.");
+    }
+  };
   return (
     <ApplicantLayout>
       <div style={{ marginBottom: 20 }}>
@@ -189,6 +201,17 @@ export default function CareersMyPage() {
                       지원 정보 수정
                     </Button>
                   ),
+                  item.resumeFileName && (
+                    <Button
+                      key="preview"
+                      size="small"
+                      className="crc-btn"
+                      icon={<FilePdfOutlined />}
+                      onClick={() => handlePreviewResume(item.apctId)}
+                    >
+                      제출한 이력서 확인
+                    </Button>
+                  ),
                   canEdit && (
                     <Button
                       key="upload"
@@ -197,7 +220,7 @@ export default function CareersMyPage() {
                       icon={<FilePdfOutlined />}
                       onClick={() => setUploadTarget(item.apctId)}
                     >
-                      이력서 제출/재제출
+                      {item.resumeFileName ? "이력서 재제출" : "이력서 제출"}
                     </Button>
                   ),
                   canEdit && (
@@ -222,6 +245,11 @@ export default function CareersMyPage() {
                       <Tag className={`crc-status-tag ${meta.color}`} style={{ marginLeft: 10 }}>
                         {meta.text}
                       </Tag>
+                      {item.resumeFileName && (
+                        <Tag color="cyan" style={{ marginLeft: 6 }}>
+                          이력서 제출완료
+                        </Tag>
+                      )}
                     </span>
                   }
                   description={
