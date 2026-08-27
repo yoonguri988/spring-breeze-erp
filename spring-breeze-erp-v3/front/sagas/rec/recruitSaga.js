@@ -17,6 +17,9 @@ import {
   deleteRecruitRequest,
   deleteRecruitSuccess,
   deleteRecruitFailure,
+  fetchCloneRecruitRequest,
+  fetchCloneRecruitSuccess,
+  fetchCloneRecruitFailure,
 } from "../../reducers/rec/recruitReducer";
 
 const RECRUIT_ADMIN_API_BASE = "/api/admin/recruit";
@@ -114,6 +117,21 @@ export function* deleteRecruit(action) {
   }
 }
 
+// cloneRecruit  - GET /api/admin/recruit/{recId}/clone 공고 복제(프리필용 데이터 조회)
+export const cloneRecruitApi = (recId) =>
+  api.get(`${RECRUIT_ADMIN_API_BASE}/${recId}/clone`);
+
+export function* cloneRecruit(action) {
+  try {
+    const result = yield call(cloneRecruitApi, action.payload);
+    yield put(fetchCloneRecruitSuccess(result.data));
+  } catch (err) {
+    yield put(
+      fetchCloneRecruitFailure(err.response?.data?.message || err.message),
+    );
+  }
+}
+
 function* watchListRecruitAdmin() {
   yield takeLatest(fetchRecruitAdminListRequest.type, listRecruitAdmin);
 }
@@ -129,6 +147,9 @@ function* watchUpdateRecruit() {
 function* watchDeleteRecruit() {
   yield takeLatest(deleteRecruitRequest.type, deleteRecruit);
 }
+function* watchCloneRecruit() {
+  yield takeLatest(fetchCloneRecruitRequest.type, cloneRecruit);
+}
 
 export default function* recruitSaga() {
   yield all([
@@ -137,5 +158,6 @@ export default function* recruitSaga() {
     call(watchCreateRecruit),
     call(watchDeleteRecruit),
     call(watchUpdateRecruit),
+    call(watchCloneRecruit),
   ]);
 }

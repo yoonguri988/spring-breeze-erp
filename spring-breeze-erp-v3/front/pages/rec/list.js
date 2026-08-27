@@ -13,6 +13,7 @@ import {
   FileSearchOutlined,
   EyeOutlined,
   FolderOpenOutlined,
+  CopyOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 
@@ -22,6 +23,7 @@ import {
   updateRecruitRequest,
   deleteRecruitRequest,
   resetRecruitState,
+  fetchCloneRecruitRequest,
 } from "../../reducers/rec/recruitReducer";
 
 const STATUS_LABEL = {
@@ -40,7 +42,7 @@ export default function RecruitListPage() {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
 
-  const { list, paging, listLoading, loading, success, error } = useSelector(
+  const { list, paging, listLoading, loading, success, error , cloneData} = useSelector(
     (state) => state.recruit,
   );
 
@@ -92,11 +94,30 @@ export default function RecruitListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, success, error, dispatch]);
 
+  // 등록모달
   const openAddModal = () => {
     setFormTarget("add");
     form.resetFields();
     form.setFieldsValue({ recStatus: "OPEN" });
   };
+
+  // 복제
+  useEffect(() => {
+    if (cloneData) {
+      setFormTarget("add");
+      form.setFieldsValue({
+        recTitle: cloneData.recTitle,
+        recDepartment: cloneData.recDepartment,
+        recPosition: cloneData.recPosition,
+        recHeadcount: cloneData.recHeadcount,
+        recEmploymentType: cloneData.recEmploymentType,
+        recDescription: cloneData.recDescription,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cloneData]);
+
+  // 수정 모달
   const openEditModal = (record) => {
     setFormTarget(record);
     form.setFieldsValue({
@@ -150,6 +171,12 @@ export default function RecruitListPage() {
     setDeleting(true);
     dispatch(deleteRecruitRequest(deleteTarget.recId));
   };
+
+  // 채용공고 복제
+  const handleClone = (recId) => {
+    dispatch(fetchCloneRecruitRequest(recId));
+  };
+
 
   const columns = [
     {
@@ -220,6 +247,13 @@ export default function RecruitListPage() {
           <Link href={`/rec/detail?recId=${record.recId}`}>
             <Button type="text" size="small" icon={<EyeOutlined />} title="상세" />
           </Link>
+          <Button
+            type="text"
+            size="small"
+            icon={<CopyOutlined />}
+            title="복제"
+            onClick={() => handleClone(record.recId)}
+          />
           <Button
             type="text"
             size="small"

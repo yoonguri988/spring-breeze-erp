@@ -20,6 +20,10 @@ const initialState = {
   loading: false,
   error: null,
   success: false,
+
+  // 복제
+  cloneLoading: false,
+  cloneData: null,
 };
 
 const recruitReducer = createSlice({
@@ -30,6 +34,7 @@ const recruitReducer = createSlice({
       state.loading = false;
       state.error = null;
       state.success = false;
+      state.cloneData = null;
     },
 
     // --- 관리자 목록 조회 ---
@@ -123,6 +128,18 @@ const recruitReducer = createSlice({
       state.error = action.payload;
       state.success = false;
     },
+
+    // 채용공고 복제
+    fetchCloneRecruitRequest: (state, action) => {
+      state.cloneLoading = true;
+    },
+    fetchCloneRecruitSuccess: (state, action) => {
+      state.cloneLoading = false;
+      state.cloneData = action.payload;
+    },
+    fetchCloneRecruitFailure: (state, action) => {
+      state.cloneLoading = false;
+    },
   },
 });
 
@@ -143,6 +160,9 @@ export const {
   deleteRecruitRequest,
   deleteRecruitSuccess,
   deleteRecruitFailure,
+  fetchCloneRecruitRequest,
+  fetchCloneRecruitSuccess,
+  fetchCloneRecruitFailure,
 } = recruitReducer.actions;
 
 export default recruitReducer.reducer;

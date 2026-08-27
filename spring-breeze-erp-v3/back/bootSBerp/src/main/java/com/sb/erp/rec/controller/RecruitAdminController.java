@@ -128,4 +128,14 @@ public class RecruitAdminController {
         result.put("recId", recId);
         return ResponseEntity.ok(result);
     }
+    
+    // 채용공고 복제
+    @Operation(summary = "채용공고 복제")
+    @GetMapping("/{recId}/clone")
+    public ResponseEntity<RecruitRequest> cloneRecruit(
+            @PathVariable("recId") Long recId,
+            @AuthenticationPrincipal CustomUserPrincipal principal) {
+        Long comId = principal.getComId();
+        return ResponseEntity.ok(recruitService.getCloneData(recId, comId));
+    }
 }

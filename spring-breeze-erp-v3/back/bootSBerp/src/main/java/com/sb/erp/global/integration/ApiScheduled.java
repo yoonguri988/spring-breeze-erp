@@ -1,5 +1,6 @@
 package com.sb.erp.global.integration;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -8,22 +9,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.sb.erp.proj.service.ProjectService;
-import com.sb.erp.week.dto.response.*;
-import com.sb.erp.api.dto.request.ResvAlertRequest;
 import com.sb.erp.api.dto.response.ResvAlertResponse;
+import com.sb.erp.proj.service.ProjectService;
+import com.sb.erp.rec.repository.RecruitRepository;
 import com.sb.erp.resv.repository.ReservationMapper;
+import com.sb.erp.week.dto.response.WeeklyReportResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class ApiScheduled {
-
-	 /*///////CDY///////
     @Autowired private ProjectService projectService;
     @Autowired private ReportApi reportApi;
-	
+    @Autowired private RecruitRepository recruitRepository;
+	 ///////CDY///////
+
+	/*
 	@Scheduled(initialDelay = 10000, fixedDelay = Long.MAX_VALUE) 
 	// initialDelay = 10000, fixedDelay = Long.MAX_VALUE 바로 테스트할거면 이거
 	// cron = "0 0 9 * * MON"  매주 월요일 9시
@@ -50,7 +52,21 @@ public class ApiScheduled {
 
         log.info("주간보고서 자동생성 완료 - 성공:{} 실패:{}", success, fail);
     }
-	///////CDY///////*/
+    */
+    
+    // 채용공고 마감일시 공고가 자동으로 내려가게
+	@Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
+	public void updateRecruitStatus() {
+		LocalDate today = LocalDate.now();
+
+		int closedCount = recruitRepository.bulkCloseExpired(today);
+		int openedCount = recruitRepository.bulkOpenStarted(today);
+
+		if (closedCount > 0 || openedCount > 0) {
+			log.info("공고 상태 갱신 - closed:{} opened:{}", closedCount, openedCount);
+		}
+	}
+	///////CDY///////
 	
 	//// CYJ
 	/*
