@@ -126,8 +126,14 @@ export default function FormListPage() {
             render: (_, __, index) => (page - 1) * (pageSize || 10) + index + 1,
         },
         {title: t("forms.list.table.forCode"), dataIndex: "forCode", key: "forCode"},
-        {title: t("forms.list.table.forTitle"), dataIndex: "forTitle", key: "forTitle"},
-        {title: t("forms.list.table.comName"), dataIndex: "comName", key: "comName"},
+        {title: t("forms.list.table.forTitle"), dataIndex: "forTitle", key: "forTitle", ellipsis: true},
+        {
+            title: t("forms.list.table.comName"),
+            dataIndex: "comName",
+            key: "comName",
+            width: 160,
+            ellipsis: true,
+        },
         {title: t("forms.list.table.forVersion"), dataIndex: "forVersion", key: "forVersion", width: 80},
         {
             title: t("forms.list.table.forStatus"),
@@ -187,7 +193,8 @@ export default function FormListPage() {
                         <Select
                             showSearch
                             placeholder={t("forms.list.companySearchPlaceholder")}
-                            style={{width: 240}}
+                            style={{width: 260}}
+                            optionLabelProp="label"
                             value={comIdDraft}
                             defaultActiveFirstOption={false}
                             filterOption={false} // 서버 검색결과를 그대로 사용
@@ -202,8 +209,22 @@ export default function FormListPage() {
                             allowClear
                         >
                             {companyOptions.map((c) => (
-                                <Option key={c.comId} value={c.comId}>
-                                    {c.comName} ({c.bizNo})
+                                <Option
+                                    key={c.comId}
+                                    value={c.comId}
+                                    label={`${c.comName} (${c.bizNo})`}
+                                >
+                                    <span
+                                        title={`${c.comName} (${c.bizNo})`}
+                                        style={{
+                                            display: "block",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        {c.comName} ({c.bizNo})
+                                    </span>
                                 </Option>
                             ))}
                         </Select>
@@ -268,6 +289,7 @@ export default function FormListPage() {
                         columns={columns}
                         dataSource={list}
                         loading={loading}
+                        scroll={{ x: 1100}}
                         pagination={{
                             current: page || currentPage,
                             pageSize: pageSize || 10,
