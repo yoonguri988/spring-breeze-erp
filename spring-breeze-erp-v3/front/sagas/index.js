@@ -36,6 +36,8 @@ import salAiDocSaga from "./sal/salAiDocSaga";
 // 근태, 연차
 import attSaga from "./att/attSaga";
 import leaveBalanceSaga from "./att/leaveBalanceSaga"
+import hrAiChatSaga from "./emp/hrAiChatSaga";
+import hrAiDocSaga from "./emp/hrAiDocSaga";
 // 채용관리
 import recruitSaga from "./rec/recruitSaga";
 import recruitPublicSaga from "./rec/recruitPublicSaga";
@@ -82,6 +84,8 @@ export default function* rootSaga() {
     // 근태, 연차
     fork(attSaga),
     fork(leaveBalanceSaga),
+    fork(hrAiChatSaga),
+    fork(hrAiDocSaga),
     // 채용관리 관련 사가
     fork(recruitSaga),
     fork(recruitPublicSaga),
