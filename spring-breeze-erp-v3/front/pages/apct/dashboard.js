@@ -5,6 +5,7 @@
 // 그대로 재사용해 다른 대시보드(pages/dashboard/*.html 목업)와 톤을 맞췄다.
 import React, { useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Card, Row, Col, Button, Empty, Skeleton } from "antd";
 import {
@@ -28,25 +29,12 @@ import { fetchApplicantDashboardRequest } from "../../reducers/apct/applicantRed
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-// 이 프로젝트 디자인 토큰(styles/global.css :root)의 실제 hex를 그대로 사용한다 —
-// antd Tag 프리셋 색상과 시각적으로 거의 같지만, 사이트 전체 대시보드(.tone-*)와는
-// 정확히 같은 색이어야 "같은 시스템"으로 읽힌다.
-// dataviz 팔레트 검증 스크립트(validate_palette.js) 통과 조합 — 기존에 SCREENING(파랑)과
-// INTERVIEW(보라)를 나란히 썼더니 색각이상 시뮬레이션에서 거의 구분이 안 돼(ΔE 12.4, 기준 15
-// 미만) INTERVIEW를 amber로 바꿨다. RECEIVED(회색)·HIRED/REJECTED(초록/빨강) 조합은 "상태
-// 팔레트"로 항상 텍스트 라벨과 함께 쓰이므로 예외로 허용(디자인 스킬 가이드 기준).
-const STATUS_META = {
-  RECEIVED: { text: "접수", color: "#8a93a3" },
-  SCREENING: { text: "서류심사", color: "#2563eb" },
-  INTERVIEW: { text: "면접", color: "#d97706" },
-  HIRED: { text: "합격", color: "#16a34a" },
-  REJECTED: { text: "불합격", color: "#dc2626" },
-};
 // 데이터가 없는 상태도 0건으로 항상 노출(전형 파이프라인 순서 고정)
 const STATUS_ORDER = ["RECEIVED", "SCREENING", "INTERVIEW", "HIRED", "REJECTED"];
 
 export default function ApplicantDashboardPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("apct");
   const { dashboard, dashboardLoading, dashboardError } = useSelector(
     (state) => state.applicant,
   );
@@ -54,6 +42,21 @@ export default function ApplicantDashboardPage() {
   useEffect(() => {
     dispatch(fetchApplicantDashboardRequest());
   }, [dispatch]);
+
+  // 이 프로젝트 디자인 토큰(styles/global.css :root)의 실제 hex를 그대로 사용한다 —
+  // antd Tag 프리셋 색상과 시각적으로 거의 같지만, 사이트 전체 대시보드(.tone-*)와는
+  // 정확히 같은 색이어야 "같은 시스템"으로 읽힌다.
+  // dataviz 팔레트 검증 스크립트(validate_palette.js) 통과 조합 — 기존에 SCREENING(파랑)과
+  // INTERVIEW(보라)를 나란히 썼더니 색각이상 시뮬레이션에서 거의 구분이 안 돼(ΔE 12.4, 기준 15
+  // 미만) INTERVIEW를 amber로 바꿨다. RECEIVED(회색)·HIRED/REJECTED(초록/빨강) 조합은 "상태
+  // 팔레트"로 항상 텍스트 라벨과 함께 쓰이므로 예외로 허용(디자인 스킬 가이드 기준).
+  const STATUS_META = {
+    RECEIVED: { text: t("common.statusLabels.received"), color: "#8a93a3" },
+    SCREENING: { text: t("common.statusLabels.screening"), color: "#2563eb" },
+    INTERVIEW: { text: t("common.statusLabels.interview"), color: "#d97706" },
+    HIRED: { text: t("common.statusLabels.hired"), color: "#16a34a" },
+    REJECTED: { text: t("common.statusLabels.rejected"), color: "#dc2626" },
+  };
 
   const countMap = useMemo(() => {
     const map = {};
@@ -98,7 +101,7 @@ export default function ApplicantDashboardPage() {
           label: (ctx) => {
             const v = ctx.raw || 0;
             const pct = total > 0 ? Math.round((v / total) * 1000) / 10 : 0;
-            return ` ${ctx.label}: ${v}명 (${pct}%)`;
+            return t("dashboard.doughnutTooltip", { label: ctx.label, count: v, pct });
           },
         },
       },
@@ -109,7 +112,7 @@ export default function ApplicantDashboardPage() {
     labels,
     datasets: [
       {
-        label: "지원자 수",
+        label: t("dashboard.barDatasetLabel"),
         data: values,
         backgroundColor: colors,
         borderRadius: 4,
@@ -121,7 +124,7 @@ export default function ApplicantDashboardPage() {
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw}명` } },
+      tooltip: { callbacks: { label: (ctx) => t("dashboard.barTooltip", { count: ctx.raw }) } },
     },
     scales: {
       x: { grid: { display: false } },
@@ -139,12 +142,12 @@ export default function ApplicantDashboardPage() {
         <div className="sb-page-head__txt">
           <Link href="/apct/list">
             <Button type="text" className="sb-page-back" icon={<ArrowLeftOutlined />}>
-              지원자 목록으로
+              {t("dashboard.backBtn")}
             </Button>
           </Link>
-          <div className="sb-breadcrumb">채용관리 &gt; 지원자 &gt; 대시보드</div>
-          <h1>지원자 현황 대시보드</h1>
-          <p>우리 회사 채용공고 전체의 전형 단계별 지원자 수를 집계합니다.</p>
+          <div className="sb-breadcrumb">{t("dashboard.breadcrumb")}</div>
+          <h1>{t("dashboard.title")}</h1>
+          <p>{t("dashboard.subtitle")}</p>
         </div>
       </div>
 
@@ -171,11 +174,11 @@ export default function ApplicantDashboardPage() {
                   <span className="sb-stat__ico tone-violet">
                     <TeamOutlined />
                   </span>
-                  <span className="sb-stat__label">전체 지원자</span>
+                  <span className="sb-stat__label">{t("dashboard.stats.total")}</span>
                 </div>
                 <div className="sb-stat__val">
                   {total}
-                  <span style={{ fontSize: 14, fontWeight: 650 }}>명</span>
+                  <span style={{ fontSize: 14, fontWeight: 650 }}>{t("dashboard.unitPerson")}</span>
                 </div>
               </div>
             </Col>
@@ -185,15 +188,18 @@ export default function ApplicantDashboardPage() {
                   <span className="sb-stat__ico tone-blue">
                     <HourglassOutlined />
                   </span>
-                  <span className="sb-stat__label">전형 진행중</span>
+                  <span className="sb-stat__label">{t("dashboard.stats.inProgress")}</span>
                 </div>
                 <div className="sb-stat__val">
                   {inProgressCnt}
-                  <span style={{ fontSize: 14, fontWeight: 650 }}>명</span>
+                  <span style={{ fontSize: 14, fontWeight: 650 }}>{t("dashboard.unitPerson")}</span>
                 </div>
                 <span className="sb-stat__delta flat">
-                  접수 {countMap.RECEIVED || 0} · 서류 {countMap.SCREENING || 0} · 면접{" "}
-                  {countMap.INTERVIEW || 0}
+                  {t("dashboard.inProgressDetail", {
+                    received: countMap.RECEIVED || 0,
+                    screening: countMap.SCREENING || 0,
+                    interview: countMap.INTERVIEW || 0,
+                  })}
                 </span>
               </div>
             </Col>
@@ -203,14 +209,14 @@ export default function ApplicantDashboardPage() {
                   <span className="sb-stat__ico tone-green">
                     <TrophyOutlined />
                   </span>
-                  <span className="sb-stat__label">합격률</span>
+                  <span className="sb-stat__label">{t("dashboard.stats.hireRate")}</span>
                 </div>
                 <div className="sb-stat__val">
                   {hireRate}
                   <span style={{ fontSize: 14, fontWeight: 650 }}>%</span>
                 </div>
                 <span className="sb-stat__delta flat">
-                  합격 {hiredCnt}명 / 전체 {total}명
+                  {t("dashboard.hireRateDetail", { hired: hiredCnt, total })}
                 </span>
               </div>
             </Col>
@@ -218,17 +224,17 @@ export default function ApplicantDashboardPage() {
 
           {total === 0 ? (
             <Card>
-              <Empty description="집계할 지원자 데이터가 아직 없습니다." />
+              <Empty description={t("dashboard.emptyData")} />
             </Card>
           ) : (
             <Row gutter={16}>
               <Col span={10}>
-                <Card title="전형 단계별 분포" bodyStyle={{ height: 300 }}>
+                <Card title={t("dashboard.charts.distribution")} bodyStyle={{ height: 300 }}>
                   <Doughnut data={doughnutData} options={doughnutOptions} />
                 </Card>
               </Col>
               <Col span={14}>
-                <Card title="단계별 지원자 수" bodyStyle={{ height: 300 }}>
+                <Card title={t("dashboard.charts.byStatus")} bodyStyle={{ height: 300 }}>
                   <Bar data={barData} options={barOptions} />
                 </Card>
               </Col>

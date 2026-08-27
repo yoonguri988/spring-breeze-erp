@@ -68,7 +68,21 @@
       "rejectConfirmTitle": "Do you want to reject?",
       "approveConfirmTitle": "Do you want to approve?",
       "rejectBtn": "Reject",
-      "approveBtn": "Approve"
+      "approveBtn": "Approve",
+      "approveModalTitle": "Approve Document",
+      "rejectModalTitle": "Reject Document",
+      "approveModalContent": "Do you want to approve this document?",
+      "rejectModalContent": "Do you want to reject this document?",
+      "delegateRequestBtn": "Delegation Request",
+      "delegation": {
+        "modalTitle": "Delegation Request",
+        "okText": "Request",
+        "pickerLabel": "Select Delegate",
+        "summaryLabel": "Selected Delegate",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Reason for delegation (optional)",
+        "successMsg": "The delegation request has been submitted."
+      }
     },
     "write": {
       "breadcrumbCurrent": "Write Document",
@@ -227,7 +241,22 @@
       "successMsg": "The form has been registered.",
       "schemaFieldsGeneratedLabel": "Generated Field Configuration (editable)",
       "cancelBtn": "Cancel",
-      "submitBtn": "Submit"
+      "submitBtn": "Submit",
+      "basicInfoCardTitle": "Basic Information",
+      "categoryLabel": "Form Category",
+      "categoryExtra": "Setting this to Leave automatically deducts annual leave upon approval.",
+      "categoryGeneral": "General",
+      "categoryLeave": "Leave",
+      "contentCardTitleEditor": "Edit Form Body",
+      "contentCardTitleAi": "AI Schema Settings",
+      "leaveAutoFieldsHint": "Selecting the Leave category automatically fills in the required fields (leave type/start date/end date).<br/>Please select the category again.",
+      "leaveOnlySchemaError": "Leave category forms can only be created using the field configuration method.",
+      "leaveMissingFieldsError": "The leave form requires the following fields: {{fields}}",
+      "leaveFieldLabels": {
+        "leaveType": "Leave Type",
+        "startDate": "Start Date",
+        "endDate": "End Date"
+      }
     }
   },
   "schemaFieldEditor": {
@@ -247,5 +276,58 @@
   },
   "quillTableEditor": {
     "unmergeCells": "Unmerge Cells"
+  },
+  "deptEmpPicker": {
+    "deptCardTitle": "Select Department",
+    "deptLoadingEmptyText": "Loading department information.",
+    "empCountUnit": "",
+    "empCardTitleDefault": "Select Employee",
+    "selectDeptFirst": "Please select a department on the left first.",
+    "onLeaveTag": "On Leave",
+    "selectedSummaryLabelDefault": "Selected Employee"
+  },
+  "admin": {
+    "delegations": {
+      "breadcrumbCurrent": "Approval Line Management",
+      "title": "Delegation & Proxy Approval Management",
+      "subtitle": "Review delegation request approvals/rejections, processing history, and audit logs.",
+      "tabs": {
+        "pending": "Pending Requests",
+        "history": "Processing History",
+        "logs": "Audit Log"
+      },
+      "columns": {
+        "reqId": "Request ID",
+        "docTitle": "Document",
+        "docId": "Document ID",
+        "oriEmpName": "Original Approver",
+        "newEmpName": "Delegate",
+        "reqEmpName": "Requester",
+        "reqReason": "Reason",
+        "createdAt": "Requested At",
+        "action": "Action",
+        "proEmpName": "Processor",
+        "status": "Status",
+        "processedAt": "Processed At",
+        "logId": "Log ID",
+        "actEmpName": "Actual Processor",
+        "perEmpName": "Processor (Admin)",
+        "occurredAt": "Occurred At"
+      },
+      "approveConfirmTitle": "Do you want to approve this delegation request?",
+      "rejectConfirmTitle": "Do you want to reject this delegation request?",
+      "statusPlaceholder": "Processing Status",
+      "statusReq": "Requested",
+      "statusApp": "Approved",
+      "statusRej": "Rejected",
+      "statusBadge": {
+        "req": "Requested",
+        "app": "Approved",
+        "rej": "Rejected"
+      },
+      "reqEmpIdPlaceholder": "Requester Employee No.",
+      "docIdPlaceholder": "Document ID",
+      "empIdPlaceholder": "Employee No."
+    }
   }
 }

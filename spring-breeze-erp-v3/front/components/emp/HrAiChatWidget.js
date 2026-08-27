@@ -4,6 +4,7 @@
 // SalAiChatWidget.js(급여 챗봇)와 동일한 구조, 리듀서/텍스트만 HR용으로 변경.
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Button, Input, Spin, Collapse, Tag, Empty } from "antd";
 import {
   MessageOutlined,
@@ -19,6 +20,7 @@ const { Panel } = Collapse;
 
 function HrAiChatWidget() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("emp");
   const [open, setOpen] = useState(false); // 챗봇 패널 열림/닫힘
   const [question, setQuestion] = useState(""); // 입력 필드 값
   const bodyRef = useRef(null); // 대화 영역 스크롤 제어용
@@ -61,7 +63,7 @@ function HrAiChatWidget() {
         size="large"
         icon={open ? <CloseOutlined /> : <MessageOutlined />}
         onClick={() => setOpen((o) => !o)}
-        title="사내 규정 AI 챗봇"
+        title={t("hrAiChat.fabTitle")}
       />
 
       {/* ── 챗봇 패널: open=true일 때만 렌더링 ── */}
@@ -71,10 +73,10 @@ function HrAiChatWidget() {
           <div className="sb-ai-chat-panel__head">
             <div>
               <div className="sb-ai-chat-panel__title">
-                사내 규정 AI 챗봇
+                {t("hrAiChat.panelTitle")}
               </div>
               <div className="sb-ai-chat-panel__sub">
-                근태·연차·복리후생 등 사내 규정을 물어보세요
+                {t("hrAiChat.panelSubtitle")}
               </div>
             </div>
             {messages.length > 0 && (
@@ -83,7 +85,7 @@ function HrAiChatWidget() {
                 size="small"
                 onClick={() => dispatch(clearHrAiChatMessages())}
               >
-                대화 지우기
+                {t("hrAiChat.clearBtn")}
               </Button>
             )}
           </div>
@@ -95,9 +97,9 @@ function HrAiChatWidget() {
               <Empty
                 description={
                   <span>
-                    예: &quot;연차는 언제부터 쓸 수 있나요?&quot;
+                    {t("hrAiChat.emptyExampleLine1")}
                     <br />
-                    &quot;경조사 휴가 며칠인가요?&quot;
+                    {t("hrAiChat.emptyExampleLine2")}
                   </span>
                 }
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -120,7 +122,7 @@ function HrAiChatWidget() {
                   {/* 에러 발생 시 에러 문구 */}
                   {!m.pending && m.error && (
                     <span className="sb-ai-chat-error">
-                      답변을 가져오지 못했어요. 잠시 후 다시 시도해 주세요.
+                      {t("hrAiChat.errorMsg")}
                     </span>
                   )}
 
@@ -131,17 +133,17 @@ function HrAiChatWidget() {
                       {/* grounded=false이면 근거 없음 태그 표시 */}
                       {!m.grounded && (
                         <Tag color="orange" style={{ marginTop: 6 }}>
-                          근거 조항 없음
+                          {t("hrAiChat.notGroundedTag")}
                         </Tag>
                       )}
                       {/* 근거 조항이 있으면 접을 수 있는 패널로 표시 */}
                       {m.references && m.references.length > 0 && (
                         <Collapse ghost size="small" style={{ marginTop: 6 }}>
-                          <Panel header="근거 조항 보기" key="refs">
+                          <Panel header={t("hrAiChat.referencesPanelHeader")} key="refs">
                             {m.references.map((r) => (
                               <div key={r.chunkId} className="sb-ai-chat-ref">
                                 {/* 조항명: "제6조(연차)" + 페이지 번호 */}
-                                <b>{r.article || "(조항 미상)"}</b>
+                                <b>{r.article || t("hrAiChat.articleUnknown")}</b>
                                 {r.page ? ` · p.${r.page}` : ""}
                                 {/* 청크 원문 미리보기 (120자) */}
                                 <div className="sb-ai-chat-ref__snippet">
@@ -163,7 +165,7 @@ function HrAiChatWidget() {
           <div className="sb-ai-chat-panel__input">
             <Input.TextArea
               autoSize={{ minRows: 1, maxRows: 3 }}
-              placeholder="사내 규정 관련 질문을 입력하세요"
+              placeholder={t("hrAiChat.inputPlaceholder")}
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={handleKeyDown}

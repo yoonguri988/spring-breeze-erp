@@ -195,7 +195,7 @@ export default function FormDetailPage() {
 
     // 로딩중 안내
     if (detailLoading || !detail) {
-        return <div className="sb-page">불러오는 중..</div>;
+        return <div className="sb-page">{t("common.loadingMsg")}</div>;
     }
 
     // 오류 안내
@@ -203,16 +203,16 @@ export default function FormDetailPage() {
         return <div className="sb-page">{detailError}</div>;
     }
 
-    return(    
+    return(
         <div className="sb-page">
             <PageHeader
                 breadcrumb={[
-                    { label: "전자결재", href: "/appr/forms" },
-                    { label: "양식 관리", href: "/appr/forms" },
-                    { label: "양식 상세" },
+                    { label: t("common.breadcrumbRoot"), href: "/appr/forms" },
+                    { label: t("forms.detail.breadcrumbForms"), href: "/appr/forms" },
+                    { label: t("forms.detail.breadcrumbCurrent") },
                 ]}
-                title="결재 양식 상세조회"
-                subtitle="결재 양식의 상세 정보를 확인합니다."
+                title={t("forms.detail.title")}
+                subtitle={t("forms.detail.subtitle")}
             />
             
             <Row gutter={[24, 16]}>

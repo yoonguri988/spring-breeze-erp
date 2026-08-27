@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Card, Table, Select, Button, Tag, Pagination, Empty } from "antd";
 import { ArrowLeftOutlined, TrophyFilled } from "@ant-design/icons";
@@ -15,6 +16,7 @@ const MEDAL_COLOR = ["#d4af37", "#a8a8a8", "#b46a35"];
 export default function ApplicantRankPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("apct");
   const { rankList, rankPaging, rankLoading } = useSelector((state) => state.applicant);
   const { list: recruitOptions } = useSelector((state) => state.recruit);
 
@@ -45,7 +47,7 @@ export default function ApplicantRankPage() {
 
   const columns = [
     {
-      title: "순위",
+      title: t("rank.table.rank"),
       key: "rank",
       width: 70,
       align: "center",
@@ -59,7 +61,7 @@ export default function ApplicantRankPage() {
       },
     },
     {
-      title: "지원자명",
+      title: t("rank.table.name"),
       dataIndex: "apctName",
       key: "apctName",
       render: (v, record) => (
@@ -68,22 +70,22 @@ export default function ApplicantRankPage() {
         </Link>
       ),
     },
-    { title: "이메일", dataIndex: "apctEmail", key: "apctEmail", width: 200 },
+    { title: t("rank.table.email"), dataIndex: "apctEmail", key: "apctEmail", width: 200 },
     {
-      title: "AI 적합도 점수",
+      title: t("rank.table.fitScore"),
       dataIndex: "rsmFitScore",
       key: "rsmFitScore",
       width: 140,
       align: "center",
       render: (v) =>
         v != null ? (
-          <Tag color={v >= 80 ? "green" : v >= 50 ? "orange" : "default"}>{v}점</Tag>
+          <Tag color={v >= 80 ? "green" : v >= 50 ? "orange" : "default"}>{t("rank.fitScoreUnit", { score: v })}</Tag>
         ) : (
-          <Tag>미분석</Tag>
+          <Tag>{t("rank.notAnalyzed")}</Tag>
         ),
     },
     {
-      title: "전형 상태",
+      title: t("rank.table.status"),
       dataIndex: "apctStatus",
       key: "apctStatus",
       width: 110,
@@ -97,12 +99,12 @@ export default function ApplicantRankPage() {
         <div className="sb-page-head__txt">
           <Link href="/apct/list">
             <Button type="text" className="sb-page-back" icon={<ArrowLeftOutlined />}>
-              지원자 목록으로
+              {t("rank.backBtn")}
             </Button>
           </Link>
-          <div className="sb-breadcrumb">채용관리 &gt; 지원자 &gt; 적합도 순위</div>
-          <h1>AI 적합도(fit_score) 순위</h1>
-          <p>이력서 AI 분석 결과를 기준으로 공고별 지원자 순위를 확인합니다.</p>
+          <div className="sb-breadcrumb">{t("rank.breadcrumb")}</div>
+          <h1>{t("rank.title")}</h1>
+          <p>{t("rank.subtitle")}</p>
         </div>
       </div>
 
@@ -110,7 +112,7 @@ export default function ApplicantRankPage() {
         <div style={{ marginBottom: 16 }}>
           <Select
             style={{ width: 300 }}
-            placeholder="채용공고 선택"
+            placeholder={t("rank.recruitPlaceholder")}
             showSearch
             optionFilterProp="label"
             value={recId}
@@ -122,7 +124,7 @@ export default function ApplicantRankPage() {
           />
         </div>
 
-        {!recId && <Empty description="순위를 확인할 채용공고를 선택해 주세요." />}
+        {!recId && <Empty description={t("rank.selectRecruitEmpty")} />}
 
         {recId && (
           <>
@@ -132,7 +134,7 @@ export default function ApplicantRankPage() {
               dataSource={rankList}
               loading={rankLoading}
               pagination={false}
-              locale={{ emptyText: "분석된 지원자가 없습니다." }}
+              locale={{ emptyText: t("rank.emptyTable") }}
             />
             {rankPaging && rankPaging.totalElements > 0 && (
               <div
@@ -144,7 +146,7 @@ export default function ApplicantRankPage() {
                 }}
               >
                 <span style={{ color: "#999", fontSize: 12.5 }}>
-                  총 <b>{rankPaging.totalElements}</b>명
+                  {t("rank.totalCountPrefix")}<b>{rankPaging.totalElements}</b>{t("rank.totalCountSuffix")}
                 </span>
                 <Pagination
                   size="small"

@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Form, Input, Button, Alert, Card, Result } from "antd";
 import { SendOutlined, ArrowLeftOutlined } from "@ant-design/icons";
@@ -18,6 +19,7 @@ export default function CareersApplyPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const { t } = useTranslation("careers");
   const { recId } = router.query;
 
   const { apctUser, apctAccessToken } = useSelector((state) => state.apctAuth);
@@ -50,18 +52,18 @@ export default function CareersApplyPage() {
         <Card>
           <Result
             status="success"
-            title="지원이 완료되었습니다"
+            title={t("apply.successTitle")}
             subTitle={
               detail
-                ? `"${detail.recTitle}" 공고에 지원서가 정상적으로 접수되었습니다.`
-                : "지원서가 정상적으로 접수되었습니다."
+                ? t("apply.successSubtitleWithTitle", { title: detail.recTitle })
+                : t("apply.successSubtitleDefault")
             }
             extra={[
               <Link key="upload" href={`/careers/my?apctId=${appliedApplicant?.apctId || ""}`}>
-                <Button type="primary">이력서(PDF) 업로드하러 가기</Button>
+                <Button type="primary">{t("apply.uploadResumeBtn")}</Button>
               </Link>,
               <Link key="my" href="/careers/my">
-                <Button>내 지원현황 보기</Button>
+                <Button>{t("apply.viewMyApplicationsBtn")}</Button>
               </Link>,
             ]}
           />
@@ -74,44 +76,44 @@ export default function CareersApplyPage() {
     <ApplicantLayout>
       <Link href={{ pathname: "/careers/detail", query: { recId } }} passHref >
         <Button type="text" icon={<ArrowLeftOutlined />} style={{ paddingLeft: 0, marginBottom: 12 }}>
-          공고로 돌아가기
+          {t("apply.backToDetailBtn")}
         </Button>
       </Link>
 
       <Card style={{ maxWidth: 480 }}>
-        <h1 style={{ fontSize: 19, fontWeight: 700, marginBottom: 4 }}>지원서 작성</h1>
+        <h1 style={{ fontSize: 19, fontWeight: 700, marginBottom: 4 }}>{t("apply.formTitle")}</h1>
         <p style={{ color: "#778", fontSize: 13.5, marginBottom: 20 }}>
-          {detail ? `"${detail.recTitle}" 공고에 지원합니다.` : "선택한 공고에 지원합니다."}
+          {detail ? t("apply.formSubtitleWithTitle", { title: detail.recTitle }) : t("apply.formSubtitleDefault")}
         </p>
 
         <Form layout="vertical" form={form} onFinish={onFinish} requiredMark={false}>
           <Form.Item
             name="apctName"
-            label="이름"
-            rules={[{ required: true, message: "이름을 입력해 주세요." }]}
+            label={t("apply.nameLabel")}
+            rules={[{ required: true, message: t("apply.nameRequired") }]}
           >
-            <Input placeholder="홍길동" />
+            <Input placeholder={t("apply.namePlaceholder")} />
           </Form.Item>
           <Form.Item
             name="apctEmail"
-            label="이메일"
-            rules={[{ type: "email", message: "올바른 이메일 형식이 아닙니다." }]}
+            label={t("apply.emailLabel")}
+            rules={[{ type: "email", message: t("apply.emailInvalid") }]}
           >
-            <Input placeholder="입력하지 않으면 소셜 계정 이메일이 사용됩니다." />
+            <Input placeholder={t("apply.emailPlaceholder")} />
           </Form.Item>
           <Form.Item
             name="apctPhone"
-            label="연락처"
-            rules={[{ required: true, message: "연락처를 입력해 주세요." }]}
+            label={t("apply.phoneLabel")}
+            rules={[{ required: true, message: t("apply.phoneRequired") }]}
           >
-            <Input placeholder="010-1234-5678" />
+            <Input placeholder={t("apply.phonePlaceholder")} />
           </Form.Item>
 
           {applyError && (
             <Alert
               type="error"
               showIcon
-              message={typeof applyError === "string" ? applyError : "지원서 제출에 실패했습니다."}
+              message={typeof applyError === "string" ? applyError : t("apply.submitErrorDefault")}
               style={{ marginBottom: 16 }}
             />
           )}
@@ -123,7 +125,7 @@ export default function CareersApplyPage() {
             loading={applyLoading}
             block
           >
-            지원서 제출
+            {t("apply.submitBtn")}
           </Button>
         </Form>
       </Card>

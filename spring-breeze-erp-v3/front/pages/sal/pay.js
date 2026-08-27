@@ -2,6 +2,7 @@
 // 급여지급 관리 (ROLE_ADMIN) - /api/salpay 전체 CRUD + 상태변경 + 항목조정
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   Card, Table, Button, Tag, Modal, Form, Input, InputNumber, DatePicker,
   Select, Pagination, message, Drawer, Descriptions, Divider,
@@ -20,11 +21,11 @@ import {
 import EmployeePicker from "../../components/sal/EmployeePicker";
 import { formatWon, wonFormatter, wonParser } from "../../utils/currency";
 
-const STATUS_LABEL = {
-  PENDING: { text: "대기", color: "gold" },
-  APPROVED: { text: "승인", color: "blue" },
-  PAID: { text: "지급완료", color: "green" },
-  REJECTED: { text: "반려", color: "red" },
+const STATUS_COLOR = {
+  PENDING: "gold",
+  APPROVED: "blue",
+  PAID: "green",
+  REJECTED: "red",
 };
 
 const NEXT_STATUS = {
@@ -34,17 +35,25 @@ const NEXT_STATUS = {
   REJECTED: [],
 };
 
-function StatusTag({ stat }) {
-  const info = STATUS_LABEL[stat] || { text: stat, color: "default" };
-  return <Tag color={info.color}>{info.text}</Tag>;
-}
-
 export default function SalPayListPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("sal");
   const [regForm] = Form.useForm();
   const [statusForm] = Form.useForm();
   const [recalcForm] = Form.useForm();
   const [adjustForm] = Form.useForm();
+
+  const STATUS_LABEL = {
+    PENDING: { text: t("pay.status.pending"), color: STATUS_COLOR.PENDING },
+    APPROVED: { text: t("pay.status.approved"), color: STATUS_COLOR.APPROVED },
+    PAID: { text: t("pay.status.paid"), color: STATUS_COLOR.PAID },
+    REJECTED: { text: t("pay.status.rejected"), color: STATUS_COLOR.REJECTED },
+  };
+
+  function StatusTag({ stat }) {
+    const info = STATUS_LABEL[stat] || { text: stat, color: "default" };
+    return <Tag color={info.color}>{info.text}</Tag>;
+  }
 
   const { payList, paging, current, loading, success, error } = useSelector((state) => state.salPay);
 
@@ -94,31 +103,31 @@ export default function SalPayListPage() {
     if (!(registering || changingStatus || recalculating || adjusting || deleting) || loading) return;
     if (success) {
       if (registering) {
-        message.success("급여가 산정되어 등록되었습니다.");
+        message.success(t("pay.registerSuccessMsg"));
         setRegOpen(false);
         regForm.resetFields();
         setRegistering(false);
       }
       if (changingStatus) {
-        message.success("급여 지급 상태가 변경되었습니다.");
+        message.success(t("pay.statusChangeSuccessMsg"));
         setStatusTarget(null);
         setChangingStatus(false);
         if (current) setDetailTarget(current);
       }
       if (recalculating) {
-        message.success("급여가 재산정되었습니다.");
+        message.success(t("pay.recalcSuccessMsg"));
         setRecalcTarget(null);
         setRecalculating(false);
         if (current) setDetailTarget(current);
       }
       if (adjusting) {
-        message.success("항목 금액이 조정되었습니다.");
+        message.success(t("pay.adjustSuccessMsg"));
         setAdjustTarget(null);
         setAdjusting(false);
         if (current) setDetailTarget(current);
       }
       if (deleting) {
-        message.success("급여 지급 내역이 삭제(취소)되었습니다.");
+        message.success(t("pay.deleteSuccessMsg"));
         setDeleteTarget(null);
         setDeleting(false);
         setDetailTarget(null);
@@ -142,7 +151,7 @@ export default function SalPayListPage() {
     try {
       const values = await regForm.validateFields();
       if (!values.empId) {
-        message.warning("사원을 선택해 주세요.");
+        message.warning(t("pay.empSelectWarning"));
         return;
       }
       setRegistering(true);
@@ -209,32 +218,32 @@ export default function SalPayListPage() {
   };
 
   const columns = [
-    { title: "사원명", dataIndex: "empName", key: "empName", width: 120, render: (v) => <b>{v}</b> },
-    { title: "지급월", dataIndex: "payMonth", key: "payMonth", width: 100,
+    { title: t("pay.columns.empName"), dataIndex: "empName", key: "empName", width: 120, render: (v) => <b>{v}</b> },
+    { title: t("pay.columns.payMonth"), dataIndex: "payMonth", key: "payMonth", width: 100,
       render: (v) => (v ? moment(v).format("YYYY-MM") : "-") },
-    { title: "기본급", dataIndex: "baseSal", key: "baseSal", width: 120, align: "right", render: formatWon },
-    { title: "수당합계", dataIndex: "allowTotal", key: "allowTotal", width: 120, align: "right", render: formatWon },
-    { title: "공제합계", dataIndex: "dedtTotal", key: "dedtTotal", width: 120, align: "right", render: formatWon },
-    { title: "실지급액", dataIndex: "netPay", key: "netPay", width: 130, align: "right",
+    { title: t("pay.columns.baseSal"), dataIndex: "baseSal", key: "baseSal", width: 120, align: "right", render: formatWon },
+    { title: t("pay.columns.allowTotal"), dataIndex: "allowTotal", key: "allowTotal", width: 120, align: "right", render: formatWon },
+    { title: t("pay.columns.dedtTotal"), dataIndex: "dedtTotal", key: "dedtTotal", width: 120, align: "right", render: formatWon },
+    { title: t("pay.columns.netPay"), dataIndex: "netPay", key: "netPay", width: 130, align: "right",
       render: (v) => <b>{formatWon(v)}</b> },
-    { title: "상태", dataIndex: "stat", key: "stat", width: 90, align: "center",
+    { title: t("pay.columns.status"), dataIndex: "stat", key: "stat", width: 90, align: "center",
       render: (v) => <StatusTag stat={v} /> },
     {
-      title: "관리", key: "actions", width: 190, align: "center",
+      title: t("pay.columns.actions"), key: "actions", width: 190, align: "center",
       render: (_, record) => (
         <div style={{ display: "flex", justifyContent: "center", gap: 4 }}>
-          <Button type="text" size="small" icon={<EyeOutlined />} title="상세"
+          <Button type="text" size="small" icon={<EyeOutlined />} title={t("pay.detailTitle")}
             onClick={() => setDetailTarget(record)} />
           {record.stat === "PENDING" && (
-            <Button type="text" size="small" icon={<SyncOutlined />} title="재산정"
+            <Button type="text" size="small" icon={<SyncOutlined />} title={t("pay.recalcTitle")}
               onClick={() => openRecalcModal(record)} />
           )}
           {NEXT_STATUS[record.stat]?.length > 0 && (
-            <Button type="text" size="small" icon={<SwapOutlined />} title="상태변경"
+            <Button type="text" size="small" icon={<SwapOutlined />} title={t("pay.changeStatusTitle")}
               onClick={() => openStatusModal(record)} />
           )}
           {record.stat !== "PAID" && (
-            <Button type="text" size="small" danger icon={<DeleteOutlined />} title="삭제(취소)"
+            <Button type="text" size="small" danger icon={<DeleteOutlined />} title={t("pay.deleteTitle")}
               onClick={() => setDeleteTarget(record)} />
           )}
         </div>
@@ -243,15 +252,15 @@ export default function SalPayListPage() {
   ];
 
   const itemColumns = [
-    { title: "구분", dataIndex: "itemType", key: "itemType", width: 70,
-      render: (v) => (v === "ALLOWANCE" ? <Tag color="blue">수당</Tag> : <Tag color="volcano">공제</Tag>) },
-    { title: "항목명", dataIndex: "itemName", key: "itemName" },
-    { title: "금액", dataIndex: "amt", key: "amt", align: "right", render: formatWon },
+    { title: t("pay.itemColumns.itemType"), dataIndex: "itemType", key: "itemType", width: 70,
+      render: (v) => (v === "ALLOWANCE" ? <Tag color="blue">{t("pay.itemTypeAllowance")}</Tag> : <Tag color="volcano">{t("pay.itemTypeDeduction")}</Tag>) },
+    { title: t("pay.itemColumns.itemName"), dataIndex: "itemName", key: "itemName" },
+    { title: t("pay.itemColumns.amt"), dataIndex: "amt", key: "amt", align: "right", render: formatWon },
     detailTarget?.stat === "PENDING"
       ? {
           title: "", key: "adjust", width: 70, align: "center",
           render: (_, item) => (
-            <Button type="text" size="small" icon={<EditOutlined />} title="조정"
+            <Button type="text" size="small" icon={<EditOutlined />} title={t("pay.itemColumns.adjustAction")}
               onClick={() => openAdjustModal(detailTarget.payId, item)} />
           ),
         }
@@ -261,19 +270,20 @@ export default function SalPayListPage() {
   const nextStatusOptions = useMemo(() => {
     if (!statusTarget) return [];
     return (NEXT_STATUS[statusTarget.stat] || []).map((s) => ({ value: s, label: STATUS_LABEL[s].text }));
-  }, [statusTarget]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusTarget, t]);
 
   return (
     <div className="sb-page">
       <div className="sb-page-head" style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">급여관리 &gt; 급여지급 &gt; 목록</div>
-          <h1>급여지급 관리</h1>
-          <p>급여를 산정·등록하고, 승인/지급/반려 상태를 관리합니다.</p>
+          <div className="sb-breadcrumb">{t("pay.breadcrumb")}</div>
+          <h1>{t("pay.title")}</h1>
+          <p>{t("pay.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setRegOpen(true)}>
-            급여 산정(등록)
+            {t("pay.registerBtn")}
           </Button>
         </div>
       </div>
@@ -282,21 +292,21 @@ export default function SalPayListPage() {
         <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
           <Input
             style={{ width: 160 }}
-            placeholder="사원 이름"
+            placeholder={t("pay.searchEmpNamePlaceholder")}
             value={filters.empName}
             onChange={(e) => setFilters((f) => ({ ...f, empName: e.target.value }))}
             onPressEnter={() => runSearch(1)}
           />
           <Input
             style={{ width: 140 }}
-            placeholder="부서명"
+            placeholder={t("pay.searchDeptPlaceholder")}
             value={filters.department}
             onChange={(e) => setFilters((f) => ({ ...f, department: e.target.value }))}
             onPressEnter={() => runSearch(1)}
           />
           <DatePicker
             picker="month"
-            placeholder="지급월"
+            placeholder={t("pay.searchPayMonthPlaceholder")}
             value={filters.paymentMonth}
             onChange={(v) => setFilters((f) => ({ ...f, paymentMonth: v }))}
           />
@@ -305,14 +315,14 @@ export default function SalPayListPage() {
             value={filters.status}
             onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
             options={[
-              { value: "", label: "전체 상태" },
-              { value: "PENDING", label: "대기" },
-              { value: "APPROVED", label: "승인" },
-              { value: "PAID", label: "지급완료" },
-              { value: "REJECTED", label: "반려" },
+              { value: "", label: t("pay.statusAllOption") },
+              { value: "PENDING", label: t("pay.status.pending") },
+              { value: "APPROVED", label: t("pay.status.approved") },
+              { value: "PAID", label: t("pay.status.paid") },
+              { value: "REJECTED", label: t("pay.status.rejected") },
             ]}
           />
-          <Button icon={<SearchOutlined />} onClick={() => runSearch(1)}>검색</Button>
+          <Button icon={<SearchOutlined />} onClick={() => runSearch(1)}>{t("pay.searchBtn")}</Button>
         </div>
 
         <Table
@@ -321,12 +331,12 @@ export default function SalPayListPage() {
           dataSource={payList}
           loading={loading && !registering && !changingStatus && !recalculating && !adjusting && !deleting}
           pagination={false}
-          locale={{ emptyText: "등록된 급여 지급 내역이 없습니다." }}
+          locale={{ emptyText: t("pay.emptyText") }}
         />
 
         {paging && paging.totalElements > 0 && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12 }}>
-            <span style={{ color: "#999", fontSize: 12.5 }}>총 <b>{paging.totalElements}</b>건</span>
+            <span style={{ color: "#999", fontSize: 12.5 }}>{t("pay.totalCount", { count: paging.totalElements })}</span>
             <Pagination
               size="small"
               current={page}
@@ -341,23 +351,23 @@ export default function SalPayListPage() {
 
       {/* 등록(산정) 모달 */}
       <Modal
-        title="급여 산정(등록)"
+        title={t("pay.registerModalTitle")}
         open={regOpen}
         onCancel={() => { setRegOpen(false); regForm.resetFields(); }}
         onOk={handleRegister}
-        okText="산정"
+        okText={t("pay.okTextRegister")}
         okButtonProps={{ loading: registering }}
-        cancelText="취소"
+        cancelText={t("pay.cancelText")}
         destroyOnClose
       >
         <p style={{ color: "#999", fontSize: 13, marginBottom: 16 }}>
-          기본급/수당/공제는 급여기준·직책수당·4대보험 요율 등 등록된 정책을 기준으로 자동 산정됩니다.
+          {t("pay.registerModalNotice")}
         </p>
         <Form form={regForm} layout="vertical">
-          <Form.Item name="empId" label="사원" rules={[{ required: true, message: "사원을 선택해 주세요." }]}>
+          <Form.Item name="empId" label={t("pay.empFieldLabel")} rules={[{ required: true, message: t("pay.empFieldRequired") }]}>
             <EmployeePicker />
           </Form.Item>
-          <Form.Item name="payMonth" label="지급월" rules={[{ required: true, message: "지급월을 선택해 주세요." }]}>
+          <Form.Item name="payMonth" label={t("pay.payMonthFieldLabel")} rules={[{ required: true, message: t("pay.payMonthFieldRequired") }]}>
             <DatePicker picker="month" style={{ width: "100%" }} />
           </Form.Item>
         </Form>
@@ -365,27 +375,27 @@ export default function SalPayListPage() {
 
       {/* 상태변경 모달 */}
       <Modal
-        title="급여 지급 상태 변경"
+        title={t("pay.statusModalTitle")}
         open={!!statusTarget}
         onCancel={() => setStatusTarget(null)}
         onOk={handleChangeStatus}
-        okText="변경"
+        okText={t("pay.okTextChangeStatus")}
         okButtonProps={{ loading: changingStatus }}
-        cancelText="취소"
+        cancelText={t("pay.cancelText")}
         destroyOnClose
       >
         <Form form={statusForm} layout="vertical">
-          <Form.Item label="현재 상태">
+          <Form.Item label={t("pay.currentStatusFieldLabel")}>
             <StatusTag stat={statusTarget?.stat} />
           </Form.Item>
-          <Form.Item name="stat" label="변경할 상태" rules={[{ required: true, message: "변경할 상태를 선택해 주세요." }]}>
-            <Select options={nextStatusOptions} placeholder="상태 선택" />
+          <Form.Item name="stat" label={t("pay.nextStatusFieldLabel")} rules={[{ required: true, message: t("pay.nextStatusFieldRequired") }]}>
+            <Select options={nextStatusOptions} placeholder={t("pay.nextStatusPlaceholder")} />
           </Form.Item>
           <Form.Item noStyle shouldUpdate={(prev, cur) => prev.stat !== cur.stat}>
             {({ getFieldValue }) =>
               getFieldValue("stat") === "REJECTED" && (
-                <Form.Item name="rejRsn" label="반려 사유" rules={[{ required: true, message: "반려 사유를 입력해 주세요." }]}>
-                  <Input.TextArea rows={3} placeholder="반려 사유를 입력하세요" />
+                <Form.Item name="rejRsn" label={t("pay.rejRsnFieldLabel")} rules={[{ required: true, message: t("pay.rejRsnFieldRequired") }]}>
+                  <Input.TextArea rows={3} placeholder={t("pay.rejRsnPlaceholder")} />
                 </Form.Item>
               )
             }
@@ -395,72 +405,75 @@ export default function SalPayListPage() {
 
       {/* 재산정 모달 */}
       <Modal
-        title="급여 재산정"
+        title={t("pay.recalcModalTitle")}
         open={!!recalcTarget}
         onCancel={() => setRecalcTarget(null)}
         onOk={handleRecalc}
-        okText="재산정"
+        okText={t("pay.okTextRecalc")}
         okButtonProps={{ loading: recalculating }}
-        cancelText="취소"
+        cancelText={t("pay.cancelText")}
         destroyOnClose
       >
         <p style={{ color: "#999", fontSize: 13 }}>
-          급여기준이 산정 이후 변경된 경우, 계산 엔진을 다시 호출해 최신 기준으로 재산정합니다. (대기 상태 건만 가능)
+          {t("pay.recalcModalNotice")}
         </p>
         <Form form={recalcForm} layout="vertical">
-          <Form.Item name="reason" label="재산정 사유 (선택)">
-            <Input.TextArea rows={2} placeholder="예: 급여기준 변경 반영" />
+          <Form.Item name="reason" label={t("pay.recalcReasonFieldLabel")}>
+            <Input.TextArea rows={2} placeholder={t("pay.recalcReasonPlaceholder")} />
           </Form.Item>
         </Form>
       </Modal>
 
       {/* 항목 조정 모달 */}
       <Modal
-        title={`항목 조정 - ${adjustTarget?.itemName || ""}`}
+        title={t("pay.adjustModalTitle", { itemName: adjustTarget?.itemName || "" })}
         open={!!adjustTarget}
         onCancel={() => setAdjustTarget(null)}
         onOk={handleAdjust}
-        okText="조정"
+        okText={t("pay.okTextAdjust")}
         okButtonProps={{ loading: adjusting }}
-        cancelText="취소"
+        cancelText={t("pay.cancelText")}
         destroyOnClose
       >
         <Form form={adjustForm} layout="vertical">
-          <Form.Item name="amt" label="조정 금액" rules={[{ required: true, message: "금액을 입력해 주세요." }]}>
+          <Form.Item name="amt" label={t("pay.adjustAmtFieldLabel")} rules={[{ required: true, message: t("pay.adjustAmtFieldRequired") }]}>
             <InputNumber
               style={{ width: "100%" }}
               min={0}
               formatter={wonFormatter}
               parser={wonParser}
-              addonAfter="원"
+              addonAfter={t("pay.wonSuffix")}
             />
           </Form.Item>
-          <Form.Item name="reason" label="조정 사유" rules={[{ required: true, message: "조정 사유를 입력해 주세요." }]}>
-            <Input.TextArea rows={2} placeholder="조정 사유를 입력하세요" />
+          <Form.Item name="reason" label={t("pay.adjustReasonFieldLabel")} rules={[{ required: true, message: t("pay.adjustReasonFieldRequired") }]}>
+            <Input.TextArea rows={2} placeholder={t("pay.adjustReasonPlaceholder")} />
           </Form.Item>
         </Form>
       </Modal>
 
       {/* 삭제 확인 모달 */}
       <Modal
-        title="급여 지급 내역 삭제(취소)"
+        title={t("pay.deleteModalTitle")}
         open={!!deleteTarget}
         onCancel={() => setDeleteTarget(null)}
         onOk={confirmDelete}
-        okText="삭제"
+        okText={t("pay.okTextDelete")}
         okButtonProps={{ danger: true, loading: deleting }}
-        cancelText="취소"
+        cancelText={t("pay.cancelText")}
         destroyOnClose
       >
         <p>
-          <b>{deleteTarget?.empName}</b>님의 {deleteTarget?.payMonth ? moment(deleteTarget.payMonth).format("YYYY년 MM월") : ""} 급여 지급 내역을 삭제(취소)하시겠습니까?
+          {t("pay.deleteConfirmText", {
+            empName: deleteTarget?.empName,
+            payMonth: deleteTarget?.payMonth ? moment(deleteTarget.payMonth).format("YYYY-MM") : "",
+          })}
         </p>
-        <p style={{ color: "#999", fontSize: 13 }}>지급완료(PAID) 건은 삭제할 수 없습니다.</p>
+        <p style={{ color: "#999", fontSize: 13 }}>{t("pay.deleteWarningText")}</p>
       </Modal>
 
       {/* 상세 드로어 */}
       <Drawer
-        title="급여 지급 상세"
+        title={t("pay.detailDrawerTitle")}
         open={!!detailTarget}
         onClose={() => setDetailTarget(null)}
         width={520}
@@ -469,34 +482,40 @@ export default function SalPayListPage() {
         {detailTarget && (
           <>
             <Descriptions column={1} size="small" bordered>
-              <Descriptions.Item label="사원">{detailTarget.empName}</Descriptions.Item>
-              <Descriptions.Item label="지급월">{moment(detailTarget.payMonth).format("YYYY년 MM월")}</Descriptions.Item>
-              <Descriptions.Item label="상태"><StatusTag stat={detailTarget.stat} /></Descriptions.Item>
+              <Descriptions.Item label={t("pay.detailEmpLabel")}>{detailTarget.empName}</Descriptions.Item>
+              <Descriptions.Item label={t("pay.detailPayMonthLabel")}>
+                {t("pay.payMonthYearFormat", {
+                  year: moment(detailTarget.payMonth).format("YYYY"),
+                  month: moment(detailTarget.payMonth).format("MM"),
+                })}
+              </Descriptions.Item>
+              <Descriptions.Item label={t("pay.detailStatusLabel")}><StatusTag stat={detailTarget.stat} /></Descriptions.Item>
               {detailTarget.stat === "REJECTED" && (
-                <Descriptions.Item label="반려사유">{detailTarget.rejRsn || "-"}</Descriptions.Item>
+                <Descriptions.Item label={t("pay.detailRejRsnLabel")}>{detailTarget.rejRsn || "-"}</Descriptions.Item>
               )}
-              <Descriptions.Item label="기본급">{formatWon(detailTarget.baseSal)}</Descriptions.Item>
-              <Descriptions.Item label="수당합계">{formatWon(detailTarget.allowTotal)}</Descriptions.Item>
-              <Descriptions.Item label="공제합계">{formatWon(detailTarget.dedtTotal)}</Descriptions.Item>
-              <Descriptions.Item label="실지급액"><b>{formatWon(detailTarget.netPay)}</b></Descriptions.Item>
-              <Descriptions.Item label="지급일시">
+              <Descriptions.Item label={t("pay.detailBaseSalLabel")}>{formatWon(detailTarget.baseSal)}</Descriptions.Item>
+              <Descriptions.Item label={t("pay.detailAllowTotalLabel")}>{formatWon(detailTarget.allowTotal)}</Descriptions.Item>
+              <Descriptions.Item label={t("pay.detailDedtTotalLabel")}>{formatWon(detailTarget.dedtTotal)}</Descriptions.Item>
+              <Descriptions.Item label={t("pay.detailNetPayLabel")}><b>{formatWon(detailTarget.netPay)}</b></Descriptions.Item>
+              <Descriptions.Item label={t("pay.detailPaidAtLabel")}>
                 {detailTarget.paidAt ? moment(detailTarget.paidAt).format("YYYY-MM-DD HH:mm") : "-"}
               </Descriptions.Item>
             </Descriptions>
 
-            <Divider orientation="left" plain>지급 계좌</Divider>
+            <Divider orientation="left" plain>{t("pay.detailAcctDivider")}</Divider>
             {detailTarget.bankName ? (
               <Descriptions column={1} size="small" bordered>
-                <Descriptions.Item label="은행">{detailTarget.bankName}</Descriptions.Item>
-                <Descriptions.Item label="계좌번호">{detailTarget.acctNo}</Descriptions.Item>
-                <Descriptions.Item label="예금주">{detailTarget.hldrName}</Descriptions.Item>
+                <Descriptions.Item label={t("pay.detailAcctBankLabel")}>{detailTarget.bankName}</Descriptions.Item>
+                <Descriptions.Item label={t("pay.detailAcctNoLabel")}>{detailTarget.acctNo}</Descriptions.Item>
+                <Descriptions.Item label={t("pay.detailAcctHldrLabel")}>{detailTarget.hldrName}</Descriptions.Item>
               </Descriptions>
             ) : (
-              <p style={{ color: "#999" }}>지급 시점 계좌 정보가 없습니다.</p>
+              <p style={{ color: "#999" }}>{t("pay.detailNoAcctText")}</p>
             )}
 
             <Divider orientation="left" plain>
-              수당/공제 항목{detailTarget.stat === "PENDING" ? " (대기 상태에서만 조정 가능)" : ""}
+              {t("pay.detailItemsDivider")}
+              {detailTarget.stat === "PENDING" ? t("pay.detailItemsDividerAdjustHint") : ""}
             </Divider>
             <Table
               rowKey="itemId"

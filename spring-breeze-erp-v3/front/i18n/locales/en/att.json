@@ -12,7 +12,14 @@
       "remainingDays": "Remaining",
       "unit": "days"
     },
-    "emptyMsg": "No leave data available."
+    "emptyMsg": "No leave data available.",
+    "historyCardTitle": "Leave Usage History",
+    "historyTable": {
+      "grantDays": "Days",
+      "grantType": "Type",
+      "grantedAt": "Date",
+      "reason": "Reason"
+    }
   },
 
   "myHistory": {
@@ -57,7 +64,8 @@
     "search": {
       "startDate": "Start Date",
       "endDate": "End Date",
-      "btnSearch": "Search"
+      "btnSearch": "Search",
+      "keywordPlaceholder": "Employee name or number"
     },
     "table": {
       "empNo": "Emp No",
@@ -70,6 +78,7 @@
       "action": "Action"
     },
     "btnEdit": "Edit",
+    "btnCreate": "Add Attendance",
     "emptyMsg": "No attendance records match the search criteria.",
     "editModal": {
       "title": "Edit Attendance",
@@ -77,7 +86,17 @@
       "checkOut": "Check-out Time",
       "status": "Status",
       "btnSave": "Save",
-      "btnCancel": "Cancel"
+      "btnCancel": "Cancel",
+      "checkInRequired": "Please enter the check-in time."
+    },
+    "createModal": {
+      "title": "Add Attendance",
+      "btnRegister": "Register",
+      "empNo": "Emp No",
+      "empNoPlaceholder": "e.g. EMP-001",
+      "empNoRequired": "Please enter an employee number.",
+      "workDate": "Work Date",
+      "workDateRequired": "Please select a work date."
     }
   },
 
@@ -106,6 +125,8 @@
       "fullDay": "Full Day (1 day)",
       "halfAM": "AM Half",
       "halfPM": "PM Half",
+      "leaveDate": "Leave Date",
+      "leaveDateRequired": "Please select the leave date.",
       "reason": "Reason",
       "btnDeduct": "Deduct"
     },
@@ -145,6 +166,7 @@
   },
 
   "msg": {
+    "createSuccess": "Attendance registered.",
     "checkInSuccess": "Clocked in successfully.",
     "checkOutSuccess": "Clocked out successfully.",
     "editSuccess": "Attendance updated.",

@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Descriptions, Tag, Button, Skeleton, Empty, Space } from "antd";
 import {
@@ -17,15 +18,10 @@ import moment from "moment";
 
 import { fetchRecruitDetailRequest } from "../../reducers/rec/recruitReducer";
 
-const STATUS_LABEL = {
-  OPEN: { text: "모집중", color: "green" },
-  CLOSED: { text: "마감", color: "default" },
-  CANCELLED: { text: "취소됨", color: "red" },
-};
-
 export default function RecruitDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("rec");
   const { recId } = router.query;
 
   const { detail, detailLoading, detailError } = useSelector(
@@ -37,6 +33,12 @@ export default function RecruitDetailPage() {
     dispatch(fetchRecruitDetailRequest(Number(recId)));
   }, [router.isReady, recId, dispatch]);
 
+  const STATUS_LABEL = {
+    OPEN: { text: t("common.statusLabels.open"), color: "green" },
+    CLOSED: { text: t("common.statusLabels.closed"), color: "default" },
+    CANCELLED: { text: t("common.statusLabels.cancelled"), color: "red" },
+  };
+
   const statusMeta = detail
     ? STATUS_LABEL[detail.recStatus] || { text: detail.recStatus, color: "default" }
     : null;
@@ -46,20 +48,20 @@ export default function RecruitDetailPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <i className="bi bi-chevron-right"></i> 채용관리{" "}
+            <Link href="/">{t("common.breadcrumbHome")}</Link> <i className="bi bi-chevron-right"></i> {t("common.breadcrumbRoot")}{" "}
             <i className="bi bi-chevron-right"></i>{" "}
-            <Link href="/rec/list">채용공고</Link>{" "}
-            <i className="bi bi-chevron-right"></i> 상세
+            <Link href="/rec/list">{t("detail.breadcrumbList")}</Link>{" "}
+            <i className="bi bi-chevron-right"></i> {t("detail.breadcrumbCurrent")}
           </div>
-          <h1>채용공고 상세</h1>
-          <p>등록된 채용공고 정보와 지원자 현황을 확인합니다.</p>
+          <h1>{t("detail.title")}</h1>
+          <p>{t("detail.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/rec/list">
-            <Button size="small" icon={<ArrowLeftOutlined />}>목록으로</Button>
+            <Button size="small" icon={<ArrowLeftOutlined />}>{t("detail.backToListBtn")}</Button>
           </Link>
           <Link href="/rec/list">
-            <Button size="small" className="btn-sb" icon={<EditOutlined />}>목록에서 수정</Button>
+            <Button size="small" className="btn-sb" icon={<EditOutlined />}>{t("detail.editFromListBtn")}</Button>
           </Link>
         </div>
       </div>
@@ -91,25 +93,25 @@ export default function RecruitDetailPage() {
             </div>
             <div className="sb-card__body">
               <Descriptions bordered column={2} size="middle">
-                <Descriptions.Item label="모집 부서">{detail.recDepartment}</Descriptions.Item>
-                <Descriptions.Item label="모집 직무">{detail.recPosition}</Descriptions.Item>
-                <Descriptions.Item label="모집 인원">{detail.recHeadcount}명</Descriptions.Item>
-                <Descriptions.Item label="고용 형태">{detail.recEmploymentType}</Descriptions.Item>
-                <Descriptions.Item label="담당자">{detail.empName || "-"}</Descriptions.Item>
-                <Descriptions.Item label="지원자 수">{detail.applicantCnt ?? 0}명</Descriptions.Item>
-                <Descriptions.Item label="접수 시작일">
+                <Descriptions.Item label={t("detail.labels.department")}>{detail.recDepartment}</Descriptions.Item>
+                <Descriptions.Item label={t("detail.labels.position")}>{detail.recPosition}</Descriptions.Item>
+                <Descriptions.Item label={t("detail.labels.headcount")}>{t("detail.headcountUnit", { count: detail.recHeadcount })}</Descriptions.Item>
+                <Descriptions.Item label={t("detail.labels.employmentType")}>{detail.recEmploymentType}</Descriptions.Item>
+                <Descriptions.Item label={t("detail.labels.manager")}>{detail.empName || "-"}</Descriptions.Item>
+                <Descriptions.Item label={t("detail.labels.applicantCount")}>{t("detail.headcountUnit", { count: detail.applicantCnt ?? 0 })}</Descriptions.Item>
+                <Descriptions.Item label={t("detail.labels.startDate")}>
                   {detail.recStartDate ? moment(detail.recStartDate).format("YYYY-MM-DD HH:mm") : "-"}
                 </Descriptions.Item>
-                <Descriptions.Item label="접수 종료일">
-                  {detail.recEndDate ? moment(detail.recEndDate).format("YYYY-MM-DD HH:mm") : "상시채용"}
+                <Descriptions.Item label={t("detail.labels.endDate")}>
+                  {detail.recEndDate ? moment(detail.recEndDate).format("YYYY-MM-DD HH:mm") : t("detail.alwaysOpen")}
                 </Descriptions.Item>
-                <Descriptions.Item label="등록일시">
+                <Descriptions.Item label={t("detail.labels.createdAt")}>
                   {detail.createdAt ? moment(detail.createdAt).format("YYYY-MM-DD HH:mm") : "-"}
                 </Descriptions.Item>
-                <Descriptions.Item label="최종 수정일시">
+                <Descriptions.Item label={t("detail.labels.updatedAt")}>
                   {detail.updatedAt ? moment(detail.updatedAt).format("YYYY-MM-DD HH:mm") : "-"}
                 </Descriptions.Item>
-                <Descriptions.Item label="상세 내용" span={2}>
+                <Descriptions.Item label={t("detail.labels.description")} span={2}>
                   <div style={{ whiteSpace: "pre-wrap" }}>{detail.recDescription || "-"}</div>
                 </Descriptions.Item>
               </Descriptions>
@@ -118,21 +120,21 @@ export default function RecruitDetailPage() {
 
           <div className="sb-card">
             <div className="sb-card__head">
-              <h2>바로가기</h2>
+              <h2>{t("detail.shortcuts.title")}</h2>
             </div>
             <div className="sb-card__body">
               <Space wrap size={12}>
                 <Link href={`/apct/list?recId=${detail.recId}`}>
-                  <Button icon={<TeamOutlined />}>지원자 목록</Button>
+                  <Button icon={<TeamOutlined />}>{t("detail.shortcuts.applicantList")}</Button>
                 </Link>
                 <Link href={`/apct/kanban?recId=${detail.recId}`}>
-                  <Button icon={<AppstoreOutlined />}>칸반보드</Button>
+                  <Button icon={<AppstoreOutlined />}>{t("detail.shortcuts.kanban")}</Button>
                 </Link>
                 <Link href={`/apct/rank?recId=${detail.recId}`}>
-                  <Button icon={<TrophyOutlined />}>적합도(fit_score) 순위</Button>
+                  <Button icon={<TrophyOutlined />}>{t("detail.shortcuts.rank")}</Button>
                 </Link>
                 <Link href={`/apct/resume-search?recId=${detail.recId}`}>
-                  <Button icon={<FileSearchOutlined />}>이력서 AI 검색</Button>
+                  <Button icon={<FileSearchOutlined />}>{t("detail.shortcuts.resumeSearch")}</Button>
                 </Link>
               </Space>
             </div>

@@ -33,6 +33,10 @@ import permKo from "./locales/ko/perm.json";
 import evalKo from "./locales/ko/eval.json";
 import apprKo from "./locales/ko/appr.json";
 import attKo from "./locales/ko/att.json";
+import careersKo from "./locales/ko/careers.json";
+import salKo from "./locales/ko/sal.json";
+import recKo from "./locales/ko/rec.json";
+import apctKo from "./locales/ko/apct.json";
 
 import commonEn from "./locales/en/common.json";
 import headerEn from "./locales/en/header.json";
@@ -53,6 +57,10 @@ import permEn from "./locales/en/perm.json";
 import evalEn from "./locales/en/eval.json";
 import apprEn from "./locales/en/appr.json";
 import attEn from "./locales/en/att.json";
+import careersEn from "./locales/en/careers.json";
+import salEn from "./locales/en/sal.json";
+import recEn from "./locales/en/rec.json";
+import apctEn from "./locales/en/apct.json";
 
 
 export const SUPPORTED_LANGUAGES = ["ko", "en"];
@@ -81,6 +89,10 @@ const resources = {
     eval: evalKo,
     appr: apprKo,
     att: attKo,
+    careers: careersKo,
+    sal: salKo,
+    rec: recKo,
+    apct: apctKo,
   },
   en: {
     common: commonEn,
@@ -102,6 +114,10 @@ const resources = {
     eval: evalEn,
     appr: apprEn,
     att: attEn,
+    careers: careersEn,
+    sal: salEn,
+    rec: recEn,
+    apct: apctEn,
   },
 };
 

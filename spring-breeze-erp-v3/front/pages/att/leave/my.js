@@ -94,12 +94,12 @@ export default function LeaveMyPage() {
       </Card>
 
       {/* 연차 사용 이력 */}
-      <Card style={{ marginTop: 16 }} title="연차 사용 이력">
+      <Card style={{ marginTop: 16 }} title={t("att:leaveMy.historyCardTitle")}>
         <Table
           rowKey="grantId"
           columns={[
             {
-              title: "일수",
+              title: t("att:leaveMy.historyTable.grantDays"),
               dataIndex: "grantDays",
               key: "grantDays",
               width: 80,
@@ -110,25 +110,24 @@ export default function LeaveMyPage() {
               },
             },
             {
-              title: "유형",
+              title: t("att:leaveMy.historyTable.grantType"),
               dataIndex: "grantType",
               key: "grantType",
               width: 100,
               render: (v) => {
                 const colors = { REG: "blue", CAR: "cyan", ADJ: "orange", USE: "red" };
-                const labels = { REG: "정기 발생", CAR: "이월", ADJ: "수동 조정", USE: "사용" };
-                return <Tag color={colors[v] || "default"}>{labels[v] || v}</Tag>;
+                return <Tag color={colors[v] || "default"}>{t(`att:leaveAdmin.historyModal.grantType.${v}`, v)}</Tag>;
               },
             },
             {
-              title: "일시",
+              title: t("att:leaveMy.historyTable.grantedAt"),
               dataIndex: "grantedAt",
               key: "grantedAt",
               width: 160,
               render: (v) => (v ? moment(v).format("YYYY-MM-DD HH:mm") : "—"),
             },
             {
-              title: "사유",
+              title: t("att:leaveMy.historyTable.reason"),
               dataIndex: "reason",
               key: "reason",
               render: (v) => v || "—",
@@ -137,7 +136,7 @@ export default function LeaveMyPage() {
           dataSource={grantHistory}
           loading={loading}
           pagination={{ defaultPageSize: 10 }}
-          locale={{ emptyText: "이력이 없습니다." }}
+          locale={{ emptyText: t("att:leaveAdmin.historyModal.emptyMsg") }}
         />
       </Card>
     </div>

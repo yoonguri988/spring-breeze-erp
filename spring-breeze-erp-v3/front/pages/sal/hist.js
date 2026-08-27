@@ -2,6 +2,7 @@
 // 급여 변경이력 조회 (ROLE_ADMIN, 조회 전용) - GET /api/salhist
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Card, Table, Button, Tag, Select, DatePicker, Pagination, Empty } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import moment from "moment";
@@ -11,18 +12,18 @@ import EmployeePicker from "../../components/sal/EmployeePicker";
 
 const { RangePicker } = DatePicker;
 
-const DOM_LABEL = {
-  SALARY_STANDARD: { text: "급여기준", color: "geekblue" },
-  SALARY_PAYMENT: { text: "급여지급", color: "purple" },
-  SALARY_ACCOUNT: { text: "수령계좌", color: "cyan" },
+const DOM_COLOR = {
+  SALARY_STANDARD: "geekblue",
+  SALARY_PAYMENT: "purple",
+  SALARY_ACCOUNT: "cyan",
 };
 
-const CHG_LABEL = {
-  CREATE: { text: "등록", color: "green" },
-  UPDATE: { text: "수정", color: "blue" },
-  DELETE: { text: "삭제", color: "red" },
-  STATUS_CHANGE: { text: "상태변경", color: "gold" },
-  MANUAL_ADJUST: { text: "수동조정", color: "volcano" },
+const CHG_COLOR = {
+  CREATE: "green",
+  UPDATE: "blue",
+  DELETE: "red",
+  STATUS_CHANGE: "gold",
+  MANUAL_ADJUST: "volcano",
 };
 
 function prettyJson(value) {
@@ -36,7 +37,22 @@ function prettyJson(value) {
 
 export default function SalHistListPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("sal");
   const { histList, paging, loading } = useSelector((state) => state.salHist);
+
+  const DOM_LABEL = {
+    SALARY_STANDARD: { text: t("hist.domain.salaryStandard"), color: DOM_COLOR.SALARY_STANDARD },
+    SALARY_PAYMENT: { text: t("hist.domain.salaryPayment"), color: DOM_COLOR.SALARY_PAYMENT },
+    SALARY_ACCOUNT: { text: t("hist.domain.salaryAccount"), color: DOM_COLOR.SALARY_ACCOUNT },
+  };
+
+  const CHG_LABEL = {
+    CREATE: { text: t("hist.changeType.create"), color: CHG_COLOR.CREATE },
+    UPDATE: { text: t("hist.changeType.update"), color: CHG_COLOR.UPDATE },
+    DELETE: { text: t("hist.changeType.delete"), color: CHG_COLOR.DELETE },
+    STATUS_CHANGE: { text: t("hist.changeType.statusChange"), color: CHG_COLOR.STATUS_CHANGE },
+    MANUAL_ADJUST: { text: t("hist.changeType.manualAdjust"), color: CHG_COLOR.MANUAL_ADJUST },
+  };
 
   const [actorEmpId, setActorEmpId] = useState(undefined);
   const [changeType, setChangeType] = useState("");
@@ -62,31 +78,31 @@ export default function SalHistListPage() {
   }, [dispatch]);
 
   const columns = [
-    { title: "처리일시", dataIndex: "createdAt", key: "createdAt", width: 150,
+    { title: t("hist.columns.createdAt"), dataIndex: "createdAt", key: "createdAt", width: 150,
       render: (v) => (v ? moment(v).format("YYYY-MM-DD HH:mm:ss") : "-") },
-    { title: "처리자", dataIndex: "actorName", key: "actorName", width: 100 },
-    { title: "대상직원ID", dataIndex: "trgtEmpId", key: "trgtEmpId", width: 100, align: "center",
+    { title: t("hist.columns.actorName"), dataIndex: "actorName", key: "actorName", width: 100 },
+    { title: t("hist.columns.trgtEmpId"), dataIndex: "trgtEmpId", key: "trgtEmpId", width: 100, align: "center",
       render: (v) => v ?? "-" },
-    { title: "도메인", dataIndex: "domType", key: "domType", width: 100, align: "center",
+    { title: t("hist.columns.domType"), dataIndex: "domType", key: "domType", width: 100, align: "center",
       render: (v) => {
         const info = DOM_LABEL[v] || { text: v, color: "default" };
         return <Tag color={info.color}>{info.text}</Tag>;
       } },
-    { title: "처리유형", dataIndex: "chgType", key: "chgType", width: 100, align: "center",
+    { title: t("hist.columns.chgType"), dataIndex: "chgType", key: "chgType", width: 100, align: "center",
       render: (v) => {
         const info = CHG_LABEL[v] || { text: v, color: "default" };
         return <Tag color={info.color}>{info.text}</Tag>;
       } },
-    { title: "설명", dataIndex: "descr", key: "descr", ellipsis: true, render: (v) => v || "-" },
+    { title: t("hist.columns.descr"), dataIndex: "descr", key: "descr", ellipsis: true, render: (v) => v || "-" },
   ];
 
   return (
     <div className="sb-page">
       <div className="sb-page-head" style={{ marginBottom: 16 }}>
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">급여관리 &gt; 변경이력 &gt; 조회</div>
-          <h1>급여 변경이력 조회</h1>
-          <p>급여기준/급여지급/수령계좌의 등록·수정·삭제·상태변경 이력을 조회합니다. (조회 전용)</p>
+          <div className="sb-breadcrumb">{t("hist.breadcrumb")}</div>
+          <h1>{t("hist.title")}</h1>
+          <p>{t("hist.subtitle")}</p>
         </div>
       </div>
 
@@ -95,7 +111,7 @@ export default function SalHistListPage() {
           <EmployeePicker
             value={actorEmpId}
             onChange={setActorEmpId}
-            placeholder="처리자 검색"
+            placeholder={t("hist.actorSearchPlaceholder")}
             style={{ width: 220 }}
           />
           <Select
@@ -103,16 +119,16 @@ export default function SalHistListPage() {
             value={changeType}
             onChange={setChangeType}
             options={[
-              { value: "", label: "전체 처리유형" },
-              { value: "CREATE", label: "등록" },
-              { value: "UPDATE", label: "수정" },
-              { value: "DELETE", label: "삭제" },
-              { value: "STATUS_CHANGE", label: "상태변경" },
-              { value: "MANUAL_ADJUST", label: "수동조정" },
+              { value: "", label: t("hist.changeTypeAllOption") },
+              { value: "CREATE", label: t("hist.changeType.create") },
+              { value: "UPDATE", label: t("hist.changeType.update") },
+              { value: "DELETE", label: t("hist.changeType.delete") },
+              { value: "STATUS_CHANGE", label: t("hist.changeType.statusChange") },
+              { value: "MANUAL_ADJUST", label: t("hist.changeType.manualAdjust") },
             ]}
           />
           <RangePicker value={range} onChange={setRange} />
-          <Button icon={<SearchOutlined />} onClick={() => runSearch(1)}>검색</Button>
+          <Button icon={<SearchOutlined />} onClick={() => runSearch(1)}>{t("hist.searchBtn")}</Button>
         </div>
 
         <Table
@@ -121,16 +137,16 @@ export default function SalHistListPage() {
           dataSource={histList}
           loading={loading}
           pagination={false}
-          locale={{ emptyText: "조회된 변경이력이 없습니다." }}
+          locale={{ emptyText: t("hist.emptyText") }}
           expandable={{
             expandedRowRender: (record) => (
               <div style={{ display: "flex", gap: 16 }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, marginBottom: 4 }}>변경 전</div>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>{t("hist.beforeChangeLabel")}</div>
                   <pre className="sb-code-block">{prettyJson(record.bfrVal)}</pre>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, marginBottom: 4 }}>변경 후</div>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>{t("hist.afterChangeLabel")}</div>
                   <pre className="sb-code-block">{prettyJson(record.aftVal)}</pre>
                 </div>
               </div>
@@ -140,7 +156,7 @@ export default function SalHistListPage() {
 
         {paging && paging.totalElements > 0 ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12 }}>
-            <span style={{ color: "#999", fontSize: 12.5 }}>총 <b>{paging.totalElements}</b>건</span>
+            <span style={{ color: "#999", fontSize: 12.5 }}>{t("hist.totalCount", { count: paging.totalElements })}</span>
             <Pagination
               size="small"
               current={page}
@@ -151,7 +167,7 @@ export default function SalHistListPage() {
             />
           </div>
         ) : (
-          !loading && histList.length === 0 && <Empty description="이력이 없습니다" style={{ marginTop: 16 }} />
+          !loading && histList.length === 0 && <Empty description={t("hist.emptyDescription")} style={{ marginTop: 16 }} />
         )}
       </Card>
 

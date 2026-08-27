@@ -5,6 +5,7 @@
 // sal/aidoc-admin.js(급여 규정 문서 관리)와 동일한 구조.
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Card, Table, Button, Tag, Modal, Form,
   Input, Upload, message, Alert, } from "antd";
 import { UploadOutlined, PlusOutlined } from "@ant-design/icons";
@@ -16,6 +17,7 @@ import {
 
 export default function HrAiDocAdminPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("emp");
   const [form] = Form.useForm();
 
   // ── Redux 스토어에서 HR 문서 관리 상태 구독 ──
@@ -44,9 +46,7 @@ export default function HrAiDocAdminPage() {
   useEffect(() => {
     if (!uploadLoading) {
       if (uploadSuccess) {
-        message.success(
-          "HR 규정 문서가 등록되었습니다. 새 버전이 즉시 AI 답변에 반영됩니다.",
-        );
+        message.success(t("aidocAdmin.uploadSuccessMsg"));
         closeModal();
         dispatch(resetHrAiDocState());
         dispatch(listHrAiDocRequest()); // 목록 갱신
@@ -75,7 +75,7 @@ export default function HrAiDocAdminPage() {
     try {
       const values = await form.validateFields();
       if (fileList.length === 0) {
-        message.warning("업로드할 PDF 파일을 선택해 주세요.");
+        message.warning(t("aidocAdmin.selectFileWarning"));
         return;
       }
       dispatch(
@@ -92,7 +92,7 @@ export default function HrAiDocAdminPage() {
   // ── 테이블 컬럼 정의 ──
   const columns = [
     {
-      title: "버전",
+      title: t("aidocAdmin.columns.version"),
       dataIndex: "docVersion",
       key: "docVersion",
       width: 80,
@@ -100,33 +100,33 @@ export default function HrAiDocAdminPage() {
       render: (v) => <b>v{v}</b>,
     },
     {
-      title: "제목",
+      title: t("aidocAdmin.columns.title"),
       dataIndex: "title",
       key: "title",
     },
     {
-      title: "원본 파일명",
+      title: t("aidocAdmin.columns.srcFileName"),
       dataIndex: "srcFileName",
       key: "srcFileName",
     },
     {
-      title: "조항(청크) 수",
+      title: t("aidocAdmin.columns.chunkCount"),
       dataIndex: "chunkCount",
       key: "chunkCount",
       width: 110,
       align: "center",
     },
     {
-      title: "상태",
+      title: t("aidocAdmin.columns.status"),
       dataIndex: "actv",
       key: "actv",
       width: 100,
       align: "center",
       render: (v) =>
-        v ? <Tag color="green">사용중</Tag> : <Tag>이전 버전</Tag>,
+        v ? <Tag color="green">{t("aidocAdmin.statusActive")}</Tag> : <Tag>{t("aidocAdmin.statusInactive")}</Tag>,
     },
     {
-      title: "등록일시",
+      title: t("aidocAdmin.columns.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       width: 160,
@@ -147,17 +147,16 @@ export default function HrAiDocAdminPage() {
       >
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            인사관리 &gt; AI 사내 규정 Q&amp;A &gt; 규정 문서 관리
+            {t("aidocAdmin.breadcrumb")}
           </div>
-          <h1>사내 규정 문서 관리</h1>
+          <h1>{t("aidocAdmin.title")}</h1>
           <p>
-            사내 규정집(근태·연차·복리후생 등 PDF)을 등록하면 조항 단위로
-            청킹·임베딩되어 AI 챗봇 답변의 근거로 사용됩니다.
+            {t("aidocAdmin.subtitle")}
           </p>
         </div>
         <div className="sb-page-head__actions">
           <Button type="primary" icon={<PlusOutlined />} onClick={openModal}>
-            문서 등록(개정)
+            {t("aidocAdmin.registerBtn")}
           </Button>
         </div>
       </div>
@@ -167,7 +166,7 @@ export default function HrAiDocAdminPage() {
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
-        message="새 문서를 등록하면 기존 사용중 문서는 자동으로 이전 버전 처리되고, 새 문서가 즉시 AI 답변의 검색 대상이 됩니다."
+        message={t("aidocAdmin.infoAlert")}
       />
 
       {/* ── 문서 목록 테이블 ── */}
@@ -178,7 +177,7 @@ export default function HrAiDocAdminPage() {
           dataSource={docList}
           loading={listLoading}
           pagination={false}
-          locale={{ emptyText: "등록된 사내 규정 문서가 없습니다." }}
+          locale={{ emptyText: t("aidocAdmin.emptyText") }}
         />
         {listError && (
           <p style={{ color: "red", marginTop: 12 }}>{listError}</p>
@@ -187,26 +186,26 @@ export default function HrAiDocAdminPage() {
 
       {/* ── 문서 등록(개정) 모달 ── */}
       <Modal
-        title="사내 규정 문서 등록(개정)"
+        title={t("aidocAdmin.modalTitle")}
         open={modalOpen}
         onCancel={closeModal}
         onOk={handleUpload}
-        okText="등록"
+        okText={t("aidocAdmin.okText")}
         okButtonProps={{ loading: uploadLoading }}
-        cancelText="취소"
+        cancelText={t("aidocAdmin.cancelText")}
         destroyOnClose
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="title" label="문서 제목(선택)">
+          <Form.Item name="title" label={t("aidocAdmin.titleFieldLabel")}>
             <Input
-              placeholder="예: 2026년 사내 규정집 (생략 시 원본 파일명 사용)"
+              placeholder={t("aidocAdmin.titleFieldPlaceholder")}
               maxLength={100}
             />
           </Form.Item>
           <Form.Item
-            label="PDF 파일"
+            label={t("aidocAdmin.fileFieldLabel")}
             required
-            extra="PDF만 업로드 가능하며 최대 5MB까지 등록할 수 있습니다."
+            extra={t("aidocAdmin.fileFieldExtra")}
           >
             <Upload
               accept="application/pdf"
@@ -214,13 +213,13 @@ export default function HrAiDocAdminPage() {
                 // PDF 타입 검증
                 const isPdf = file.type === "application/pdf";
                 if (!isPdf) {
-                  message.error("PDF 파일만 업로드할 수 있습니다.");
+                  message.error(t("aidocAdmin.pdfOnlyError"));
                   return Upload.LIST_IGNORE; // 목록에 추가하지 않음
                 }
                 // 파일 크기 검증 (5MB)
                 const isUnder5MB = file.size / 1024 / 1024 < 5;
                 if (!isUnder5MB) {
-                  message.error("파일 크기는 5MB를 넘을 수 없습니다.");
+                  message.error(t("aidocAdmin.fileSizeError"));
                   return Upload.LIST_IGNORE;
                 }
                 return false; // 자동 업로드 방지 — 폼 제출 시 수동 전송
@@ -230,7 +229,7 @@ export default function HrAiDocAdminPage() {
               onRemove={() => setFileList([])}
               maxCount={1}
             >
-              <Button icon={<UploadOutlined />}>파일 선택</Button>
+              <Button icon={<UploadOutlined />}>{t("aidocAdmin.selectFileBtn")}</Button>
             </Upload>
           </Form.Item>
         </Form>

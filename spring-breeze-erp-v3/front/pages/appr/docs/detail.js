@@ -137,7 +137,7 @@ export default function DocDetailPage() {
 
     useEffect(() => {
         if (createSuccess) {
-            message.success("위임/대결 요청이 접수되었습니다.")
+            message.success(t("docs.detail.delegation.successMsg"))
             setDelegModalOpen(false);
             setSelectedDelegate(null);
             setSelectedDeptId(null);
@@ -304,42 +304,42 @@ export default function DocDetailPage() {
                 <div style={{display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 24}}>
                     {(isDrafter || isLineOwner) && myLine && (
                         <Button onClick={() => setDelegModalOpen(true)}>
-                            위임/대결 요청
+                            {t("docs.detail.delegateRequestBtn")}
                         </Button>
                     )}
                     {canProcess && (<>
                         <Button danger onClick={() => setConfirmAction("reject")}>
-                            반려
+                            {t("docs.detail.rejectBtn")}
                         </Button>
                         <Button type="primary" onClick={() => setConfirmAction("approve")}>
-                            승인
-                        </Button> 
+                            {t("docs.detail.approveBtn")}
+                        </Button>
                     </>)}
                 </div>
             )}
 
             {/* 승인/반려 확인 모달 */}
             <Modal
-                title={confirmAction === "approve" ? "결재 승인" : "결재 반려"}
+                title={confirmAction === "approve" ? t("docs.detail.approveModalTitle") : t("docs.detail.rejectModalTitle")}
                 open={confirmAction !== null}
                 onCancel={() => setConfirmAction(null)}
                 onOk={confirmAction === "approve" ? handleApprove : handleReject}
                 confirmLoading={processSubmitting}
-                okText={confirmAction === "approve" ? "승인" : "반려"}
-                cancelText="취소"
+                okText={confirmAction === "approve" ? t("docs.detail.approveBtn") : t("docs.detail.rejectBtn")}
+                cancelText={t("docs.write.cancelBtn")}
                 okButtonProps={{danger: confirmAction === "reject"}}
             >
                 <p>
                    {confirmAction === "approve"
-                    ? "이 문서를 승인하시겠습니까?"
-                    : "이 문서를 반려하시겠습니까?"
-                   } 
+                    ? t("docs.detail.approveModalContent")
+                    : t("docs.detail.rejectModalContent")
+                   }
                 </p>
             </Modal>
 
             {/* 위임/대결 요청 모달 */}
             <Modal
-                title="위임/대결 요청"
+                title={t("docs.detail.delegation.modalTitle")}
                 open={delegModalOpen}
                 onCancel={() => {
                     setDelegModalOpen(false);
@@ -348,8 +348,8 @@ export default function DocDetailPage() {
                 }}
                 onOk={handleDelegSubmit}
                 confirmLoading={createSubmitting}
-                okText="요청"
-                cancelText="취소"
+                okText={t("docs.detail.delegation.okText")}
+                cancelText={t("docs.write.cancelBtn")}
                 okButtonProps={{disabled: !selectedDelegate}}
                 width={700}
             >
@@ -363,17 +363,17 @@ export default function DocDetailPage() {
                         deptEmpsLoading={deptEmpsLoading}
                         selectedEmployee={selectedDelegate}
                         onSelectEmployee={setSelectedDelegate}
-                        pickerLabel="대결자 선택"
+                        pickerLabel={t("docs.detail.delegation.pickerLabel")}
                     />
 
                     <SelectedEmployeeSummary
                         employee={selectedDelegate}
                         onClear={() => setSelectedDelegate(null)}
-                        label="선택된 대결자"
+                        label={t("docs.detail.delegation.summaryLabel")}
                     />
 
-                    <Form.Item name="reqReason" label="사유">
-                        <Input.TextArea rows={3} placeholder="위임/대결 사유 (선택)"/>
+                    <Form.Item name="reqReason" label={t("docs.detail.delegation.reasonLabel")}>
+                        <Input.TextArea rows={3} placeholder={t("docs.detail.delegation.reasonPlaceholder")}/>
                     </Form.Item>
                 </Form>
             </Modal>
