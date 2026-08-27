@@ -177,7 +177,7 @@ export default function DocWritePage() {
                             // 반차는 종료일과 시작일이 동일
                             const isHalfDay = schemaValues.leaveType === "HALF_AM" || schemaValues.leaveType === "HALF_PM";
                             if (field.key === "startDate" && isHalfDay) {
-                                updateSchemaValue("endDate", dataString);
+                                updateSchemaValue("endDate", dateString);
                             }
                         }}
                     />
@@ -385,7 +385,7 @@ export default function DocWritePage() {
     }
 
     return (
-        <div className="sb-page" style={{maxWidth: 900}}>
+        <div className="sb-page">
             <PageHeader
                 breadcrumb={[
                     { label: t("common.breadcrumbRoot"), href: "/appr/docs" },
@@ -398,296 +398,333 @@ export default function DocWritePage() {
             />
 
             <Form form={form} layout="vertical" onFinish={handleSubmit}>
-                <Form.Item
-                    name="formKey"
-                    label={t("docs.write.formSelectLabel")}
-                    rules={[{required: true, message: t("docs.write.formSelectRequired")}]}
-                >
-                    <Select
-                        placeholder={t("docs.write.formSelectPlaceholder")}
-                        loading={writableFormsLoading}
-                    >
-                        {writableForms.map((f) => (
-                            <Option
-                                key={`${f.forId}-${f.forVersion}`}
-                                value={`${f.forId}-${f.forVersion}`}
-                            >
-                                {f.forTitle} (v{f.forVersion})
-                            </Option>
-                        ))}
-                    </Select>
-                </Form.Item>
+                {/* 문서 정보 */}
+                <div className="sb-card" style={{marginBottom: 16}}>
+                    <div className="sb-card__head">
+                        <h2>문서 정보</h2>
+                    </div>
+                    <div className="sb-card__body">
+                        <Row gutter={16}>
+                            <Col xs={24} md={12}>
+                                <Form.Item
+                                    name="formKey"
+                                    label={t("docs.write.formSelectLabel")}
+                                    rules={[{required: true, message: t("docs.write.formSelectRequired")}]}
+                                >
+                                    <Select
+                                        placeholder={t("docs.write.formSelectPlaceholder")}
+                                        loading={writableFormsLoading}
+                                    >
+                                        {writableForms.map((f) => (
+                                            <Option
+                                                key={`${f.forId}-${f.forVersion}`}
+                                                value={`${f.forId}-${f.forVersion}`}
+                                            >
+                                                {f.forTitle} (v{f.forVersion})
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
 
+                            <Col xs={24} md={12}>
+                                <Form.Item
+                                    name="docTitle"
+                                    label={t("docs.write.docTitleLabel")}
+                                    rules={[{required: true, message: t("docs.write.docTitleRequired")}]}
+                                >
+                                    <Input/>
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
-                <Form.Item
-                    name="docTitle"
-                    label={t("docs.write.docTitleLabel")}
-                    rules={[{required: true, message: t("docs.write.docTitleRequired")}]}
-                >
-                    <Input/>
-                </Form.Item>
-
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "12px 16px",
-                        border: "1px solid #f0f0f0",
-                        borderRadius: 6,
-                        marginBottom: 24
-                    }}
-                >
-                    <div>
-                        <div style={{fontWeight: 600}}>{t("docs.write.importantTitle")}</div>
-                        <div style={{fontSize: 13, color: "rgba(0,0,0,0.45)"}}>
-                            {t("docs.write.importantDesc")}
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                padding: "12px 16px",
+                                border: "1px solid #f0f0f0",
+                                borderRadius: 6,
+                                marginBottom: 24
+                            }}
+                        >
+                            <div>
+                                <div style={{fontWeight: 600}}>{t("docs.write.importantTitle")}</div>
+                                <div style={{fontSize: 13, color: "rgba(0,0,0,0.45)"}}>
+                                    {t("docs.write.importantDesc")}
+                                </div>
+                            </div>
+                            <Switch checked={isImportant} onChange={handleImportantChange}/>
                         </div>
                     </div>
-                    <Switch checked={isImportant} onChange={handleImportantChange}/>
                 </div>
 
-                {/* 선택한 양식에 따라 동적으로 분기 */}
+                {/* 문서 내용 - 선택한 양식에 따라 동적으로 분기 */}
                 {formKey && (
-                    isSchemaForm ? (
-                        <Form.Item label={t("docs.write.contentLabel")}>
-                            <Space direction="vertical" style={{width: "100%"}} size={12}>
-                                {schemaFieldDefs.filter((field) => {
-                                    const isHalfDay = schemaValues.leaveType === "HALF_AM" || schemaValues.leaveType === "HALF_PM";
-                                    return !(isHalfDay && field.key === "endDate");
-                                })
-                                .map((field) => (
-                                    <div key={field.key}>
-                                        <div style={{marginBottom: 4}}>
-                                            {field.label}
-                                            {field.required && <span style={{color: "red"}}> *</span>}
+                    <div className="sb-card" style={{marginBottom: 16}}>
+                        <div className="sb-card__head">
+                            <h2>{t("docs.write.contentLabel")}</h2>
+                        </div>
+                        <div className="sb-card__body">
+                            {isSchemaForm ? (
+                                <Space direction="vertical" style={{width: "100%"}} size={12}>
+                                    {schemaFieldDefs.filter((field) => {
+                                        const isHalfDay = schemaValues.leaveType === "HALF_AM" || schemaValues.leaveType === "HALF_PM";
+                                        return !(isHalfDay && field.key === "endDate");
+                                    })
+                                    .map((field) => (
+                                        <div key={field.key}>
+                                            <div style={{marginBottom: 4}}>
+                                                {field.label}
+                                                {field.required && <span style={{color: "red"}}> *</span>}
+                                            </div>
+                                            {renderSchemaField(field)}
                                         </div>
-                                        {renderSchemaField(field)}
-                                    </div>
-                                ))}
+                                    ))}
 
-                                {leaveDaysCount !== null && (
-                                    <Space style={{width: "100%"}} wrap>
-                                        <div
-                                            style={{
-                                                padding: "10px 14px",
-                                                borderRadius: 8,
-                                                background: "#e6f4ff",
-                                                border: "1px solid #91caff",
-                                                fontSize: 14,
-                                            }}
-                                        >
-                                            총 신청 연차 : <b>{leaveDaysCount}일</b>
-                                            {leaveDaysCount === 0 && (
-                                                <span style={{marginLeft: 8, color: "#8a93a3", fontSize: 13}}>
-                                                    (기간에 평일이 없습니다. 날짜를 확인해주세요)
-                                                </span>
-                                            )}
-                                        </div>
+                                    {leaveDaysCount !== null && (
+                                        <Space style={{width: "100%"}} wrap>
+                                            <div
+                                                style={{
+                                                    padding: "10px 14px",
+                                                    borderRadius: 8,
+                                                    background: "#e6f4ff",
+                                                    border: "1px solid #91caff",
+                                                    fontSize: 14,
+                                                }}
+                                            >
+                                                총 신청 연차 : <b>{leaveDaysCount}일</b>
+                                                {leaveDaysCount === 0 && (
+                                                    <span style={{marginLeft: 8, color: "#8a93a3", fontSize: 13}}>
+                                                        (기간에 평일이 없습니다. 날짜를 확인해주세요)
+                                                    </span>
+                                                )}
+                                            </div>
 
-                                        <div
-                                            style={{
-                                                padding: "10px 14px",
-                                                borderRadius: 8,
-                                                background: "#f6ffed",
-                                                border: "1px solid #b7eb8f",
-                                                fontSize: 14,
-                                            }}
-                                        >
-                                            {leaveBalanceLoading ? (
-                                                <Spin size="small"/>
-                                            ) : leaveBalance ? (
-                                                <>현재 잔여 연차 : <b>{leaveBalance.remainingDays}일</b></>
-                                            ) : (
-                                                <span style={{color: "#8a93a3"}}>잔여 연차 정보를 불러올 수 없어요</span>
-                                            )}
-                                        </div>
-                                    </Space>
-                                )}
-                            </Space>
-                        </Form.Item>
-                    ) : (
-                        <Form.Item label={t("docs.write.contentLabel")}>
-                            <ReactQuill
-                                theme="snow"
-                                value={docContent}
-                                onChange={setDocContent}
-                            />
-                        </Form.Item>
-                    )
-                )}
-
-                <Divider>{t("docs.write.lineDivider")}</Divider>
-
-                {noApproversAvailable ? (
-                    <div
-                        style={{
-                            textAlign: "center",
-                            padding: "40px 20px",
-                            color: "var(--sb-ink-faint)",
-                            border: "1px solid var(--sb-border)",
-                            borderRadius: "var(--sb-radius)",
-                            background: "var(--sb-surface)",
-                        }}
-                    >
-                        <i className="bi bi-info-circle" style={{fontSize: 20, display: "block", marginBottom: 8}}/>
-                        {t("docs.write.noApproversLine1")}<br/>
-                        {t("docs.write.noApproversLine2")}
-                    </div>
-                ) : (<>
-
-                <Text type="secondary" style={{display: "block", marginBottom: 12}}>
-                    {isImportant ? t("docs.write.importantHint") : t("docs.write.normalHint")}
-                </Text>
-
-                {favoriteLinesLoading ? (
-                    <Spin size="small" />
-                ) : favoriteLines.length > 0 && (
-                    <Space direction="vertical" style={{width: "100%", marginBottom: 16}}>
-                        <Text type="secondary" style={{fontSize: 13}}>자주 쓰는 결재선</Text>
-                        <Space wrap>
-                            {favoriteLines.map((fav) => (
-                                <Button
-                                    key={fav.favId}
-                                    size="small"
-                                    onClick={() => applyFavoriteLine(fav)}
-                                >
-                                    {fav.approvers.map((a) => a.empName).join(" → ")}
-                                    <span style={{marginLeft: 6, color: "#8a93a3"}}>({fav.useCount}회)</span>
-                                </Button>
-                            ))}
-                        </Space>
-                    </Space>
-                )}
-
-                <Row gutter={16} style={{marginBottom: 16}}>
-                    {/* 부서 트리 */}
-                    <Col xs={24} md={6}>
-                        <Card size="small" title={t("docs.write.deptCardTitle")} bodyStyle={{padding: 8}}>
-                            <div style={{maxHeight: 320, overflowY: "auto"}}>
-                                <List
-                                    size="small"
-                                    loading={deptTreeLoading}
-                                    dataSource={deptTree}
-                                    locale={{ emptyText: t("docs.write.deptLoadingMsg")}}
-                                    renderItem={(d) => (
-                                        <List.Item
-                                            style={{
-                                                cursor: "pointer",
-                                                background: selectedDeptId === d.deptId ? "#e6f6ff" : "transparent"
-                                            }}
-                                            onClick={() => handleDeptSelect(d.deptId)}
-                                        >
-                                            {d.deptName} <Tag style={{marginLeft: 8}}>{t("docs.write.empCountSuffix", { count: d.empCount })}</Tag>
-                                        </List.Item>
+                                            <div
+                                                style={{
+                                                    padding: "10px 14px",
+                                                    borderRadius: 8,
+                                                    background: "#f6ffed",
+                                                    border: "1px solid #b7eb8f",
+                                                    fontSize: 14,
+                                                }}
+                                            >
+                                                {leaveBalanceLoading ? (
+                                                    <Spin size="small"/>
+                                                ) : leaveBalance ? (
+                                                    <>현재 잔여 연차 : <b>{leaveBalance.remainingDays}일</b></>
+                                                ) : (
+                                                    <span style={{color: "#8a93a3"}}>잔여 연차 정보를 불러올 수 없어요</span>
+                                                )}
+                                            </div>
+                                        </Space>
                                     )}
-                                />
-                            </div>
-                        </Card>
-                    </Col>
-                    {/* 선택한 부서의 사원 목록 */}
-                    <Col xs={24} md={9}>
-                        <Card size="small" title={t("docs.write.empCardTitle")} bodyStyle={{padding: 8}}>
-                            {deptEmpsLoading ? (
-                                <div style={{textAlign: "center", padding: "20px 0"}}>
-                                    <Spin size="small"/>
-                                </div>
+                                </Space>
                             ) : (
-                                <div className="appr-emp-box">
-                                    {deptEmps.length === 0 ? (
-                                        <div className="text-muted text-center py-4 small">
-                                            {t("docs.write.selectDeptFirstMsg")}
+                                <Form.Item label={t("docs.write.contentLabel")}>
+                                    <ReactQuill
+                                        theme="snow"
+                                        value={docContent}
+                                        onChange={setDocContent}
+                                    />
+                                </Form.Item>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* 결재선 지정 */}
+                {noApproversAvailable ? (
+                    <div className="sb-card" style={{marginBottom: 16}}>
+                        <div className="sb-card__body">
+                            <div
+                                style={{
+                                    textAlign: "center",
+                                    padding: "40px 20px",
+                                    color: "var(--sb-ink-faint)",
+                                }}
+                            >
+                                <i className="bi bi-info-circle" style={{fontSize: 20, display: "block", marginBottom: 8}}/>
+                                {t("docs.write.noApproversLine1")}<br/>
+                                {t("docs.write.noApproversLine2")}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="sb-card" style={{marginBottom: 16}}>
+                        <div className="sb-card__head">
+                            <h2>{t("docs.write.lineDivider")}</h2>
+                        </div>
+                        <div className="sb-card__body">
+                            <Text type="secondary" style={{display: "block", marginBottom: 12}}>
+                                {isImportant ? t("docs.write.importantHint") : t("docs.write.normalHint")}
+                            </Text>
+
+                        {favoriteLinesLoading ? (
+                            <Spin size="small" />
+                        ) : favoriteLines.length > 0 && (
+                            <Space direction="vertical" style={{width: "100%", marginBottom: 16}}>
+                                <Text type="secondary" style={{fontSize: 13}}>자주 쓰는 결재선</Text>
+                                <Space wrap>
+                                    {favoriteLines.map((fav) => (
+                                        <Button
+                                            key={fav.favId}
+                                            size="small"
+                                            onClick={() => applyFavoriteLine(fav)}
+                                        >
+                                            {fav.approvers.map((a) => a.empName).join(" → ")}
+                                            <span style={{marginLeft: 6, color: "#8a93a3"}}>({fav.useCount}회)</span>
+                                        </Button>
+                                    ))}
+                                </Space>
+                            </Space>
+                        )}
+
+                        <Row gutter={16}>
+                            {/* 부서 트리 */}
+                            <Col xs={24} md={6}>
+                                <Card
+                                    size="small"
+                                    title={t("docs.write.deptCardTitle")}
+                                    bodyStyle={{padding: 8}}
+                                    className="equal-height-card"
+                                >
+                                    <div style={{maxHeight: 320, overflowY: "auto"}}>
+                                        <List
+                                            size="small"
+                                            loading={deptTreeLoading}
+                                            dataSource={deptTree}
+                                            locale={{ emptyText: t("docs.write.deptLoadingMsg")}}
+                                            renderItem={(d) => (
+                                                <List.Item
+                                                    style={{
+                                                        cursor: "pointer",
+                                                        background: selectedDeptId === d.deptId ? "#e6f6ff" : "transparent"
+                                                    }}
+                                                    onClick={() => handleDeptSelect(d.deptId)}
+                                                >
+                                                    {d.deptName} <Tag style={{marginLeft: 8}}>{t("docs.write.empCountSuffix", { count: d.empCount })}</Tag>
+                                                </List.Item>
+                                            )}
+                                        />
+                                    </div>
+                                </Card>
+                            </Col>
+
+                            {/* 선택한 부서의 사원 목록 */}
+                            <Col xs={24} md={9}>
+                                <Card
+                                    size="small"
+                                    title={t("docs.write.empCardTitle")}
+                                    bodyStyle={{padding: 8}}
+                                    className="equal-height-card"
+                                >
+                                    {deptEmpsLoading ? (
+                                        <div style={{textAlign: "center", padding: "20px 0"}}>
+                                            <Spin size="small"/>
                                         </div>
                                     ) : (
-                                        deptEmps.map((e) => {
-                                            const already = approverIdSet.has(e.empId);
-                                            return (
-                                                <div
-                                                    key={e.empId}
-                                                    className={"appr-emp-row" + (already ? " disabled" : "")}
-                                                    onClick={() => {if (!already) handleAddApprover(e);}}
-                                                >
-                                                    <span>
-                                                        {e.empName}
-                                                        {e.empStatus === "휴직" && (
-                                                            <Tag color="orange" style={{marginLeft: 6}}>{t("docs.write.onLeaveTag")}</Tag>
-                                                        )}
-                                                    </span>
-                                                    <span className="pos-chip">{e.posName}</span>
+                                        <div className="appr-emp-box">
+                                            {deptEmps.length === 0 ? (
+                                                <div className="text-muted text-center py-4 small">
+                                                    {t("docs.write.selectDeptFirstMsg")}
                                                 </div>
-                                            );
-                                        })
-                                    )}
-                                </div>
-                            )}
-                        </Card>
-                    </Col>
-                    {/* 선택된 결재선 */}
-                    <Col xs={24} md={9}>
-                        <Card size="small" title={t("docs.write.lineOrderCardTitle")} bodyStyle={{padding: 8}}>
-                            <div className="appr-slots">
-                               {approverSlots.map((slot) => {
-                                    const { slotIndex: index, approver: a} = slot;
-                                    const order = index + 1;
-                                    return (
-                                        <div
-                                            key={index}
-                                            className={"appr-slot" + (a ? " filled" : "")}
-                                        >
-                                            <span className="appr-slot__badge">{order}</span>
-                                            {a ? (<>
-                                                <span
-                                                    className="appr-slot__body"
-                                                    style={{cursor: "pointer"}}
-                                                    onClick={() => removeApprover(a.empId)}
-                                                >
-                                                    {a.empName}
-                                                    <span className="appr-slot__pos">{a.posName}</span>
-                                                </span>
-                                                <Space size={0}>
-                                                    <Button
-                                                        type="text"
-                                                        size="small"
-                                                        icon={<ArrowUpOutlined/>}
-                                                        disabled={index === 0}
-                                                        onClick={(e) => {e.stopPropagation(); moveApprover(index, -1);}}
-                                                    />
-                                                    <Button
-                                                        type="text"
-                                                        size="small"
-                                                        icon={<ArrowDownOutlined/>}
-                                                        disabled={index === approvers.length - 1}
-                                                        onClick={(e) => {e.stopPropagation(); moveApprover(index, 1);}}
-                                                    />
-                                                </Space>
-                                            </>) : (
-                                                <span className="appr-slot__body appr-slot__empty">
-                                                    {t("docs.write.emptySlotPlaceholder", { order })}
-                                                </span>
+                                            ) : (
+                                                deptEmps.map((e) => {
+                                                    const already = approverIdSet.has(e.empId);
+                                                    return (
+                                                        <div
+                                                            key={e.empId}
+                                                            className={"appr-emp-row" + (already ? " disabled" : "")}
+                                                            onClick={() => {if (!already) handleAddApprover(e);}}
+                                                        >
+                                                            <span>
+                                                                {e.empName}
+                                                                {e.empStatus === "휴직" && (
+                                                                    <Tag color="orange" style={{marginLeft: 6}}>{t("docs.write.onLeaveTag")}</Tag>
+                                                                )}
+                                                            </span>
+                                                            <span className="pos-chip">{e.posName}</span>
+                                                        </div>
+                                                    );
+                                                })
                                             )}
                                         </div>
-                                    );
-                               })}
-                            </div>
-                        </Card>
-                    </Col>
-                </Row>
-                </>
+                                    )}
+                                </Card>
+                            </Col>
+                            {/* 선택된 결재선 */}
+                            <Col xs={24} md={9}>
+                                <Card
+                                    size="small"
+                                    title={t("docs.write.lineOrderCardTitle")}
+                                    bodyStyle={{padding: 8}}
+                                    className="equal-height-card"
+                                >
+                                    <div className="appr-slots">
+                                    {approverSlots.map((slot) => {
+                                            const { slotIndex: index, approver: a} = slot;
+                                            const order = index + 1;
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className={"appr-slot" + (a ? " filled" : "")}
+                                                >
+                                                    <span className="appr-slot__badge">{order}</span>
+                                                    {a ? (<>
+                                                        <span
+                                                            className="appr-slot__body"
+                                                            style={{cursor: "pointer"}}
+                                                            onClick={() => removeApprover(a.empId)}
+                                                        >
+                                                            {a.empName}
+                                                            <span className="appr-slot__pos">{a.posName}</span>
+                                                        </span>
+                                                        <Space size={0}>
+                                                            <Button
+                                                                type="text"
+                                                                size="small"
+                                                                icon={<ArrowUpOutlined/>}
+                                                                disabled={index === 0}
+                                                                onClick={(e) => {e.stopPropagation(); moveApprover(index, -1);}}
+                                                            />
+                                                            <Button
+                                                                type="text"
+                                                                size="small"
+                                                                icon={<ArrowDownOutlined/>}
+                                                                disabled={index === approvers.length - 1}
+                                                                onClick={(e) => {e.stopPropagation(); moveApprover(index, 1);}}
+                                                            />
+                                                        </Space>
+                                                    </>) : (
+                                                        <span className="appr-slot__body appr-slot__empty">
+                                                            {t("docs.write.emptySlotPlaceholder", { order })}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                    })}
+                                    </div>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </div>
+                </div>
                 )}
 
-                <Form.Item>
-                    <div style={{display: "flex", justifyContent: "flex-end", gap: 8}}>
-                        <Button onClick={() => router.push("/appr/docs")}>{t("docs.write.cancelBtn")}</Button>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            loading={writeSubmitting}
-                            disabled={writeSubmitting || noApproversAvailable}
-                        >
-                            {t("docs.write.submitBtn")}
-                        </Button>
-                    </div>
-                </Form.Item>
+                <div style={{display: "flex", justifyContent: "flex-end", gap: 8}}>
+                    <Button onClick={() => router.push("/appr/docs")}>{t("docs.write.cancelBtn")}</Button>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        loading={writeSubmitting}
+                        disabled={writeSubmitting || noApproversAvailable}
+                    >
+                        {t("docs.write.submitBtn")}
+                    </Button>
+                </div>
             </Form>
         </div>
     );

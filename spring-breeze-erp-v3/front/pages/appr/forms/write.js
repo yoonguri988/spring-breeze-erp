@@ -231,7 +231,7 @@ export default function FormWritePage() {
     }
 
     return (
-        <div className="sb-page" style={{maxWidth: 1100, margin: "0 auto"}}>
+        <div className="sb-page">
             <PageHeader
                 breadcrumb={[
                     { label: t("common.breadcrumbRoot"), href: "/appr/forms" },
@@ -248,7 +248,6 @@ export default function FormWritePage() {
                 layout="vertical"
                 onFinish={handleSubmit}
                 initialValues={{forStatus: true}}
-                style={{maxWidth: 760}}
             >
                 {/* 1. 기본정보 */}
                 <Card title="기본 정보" style={{marginBottom: 24}}>

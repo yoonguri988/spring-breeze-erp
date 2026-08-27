@@ -280,7 +280,7 @@ export default function DocDetailPage() {
     }
 
     return (
-        <div className="sb-page" style={{maxWidth: 1100}}>
+        <div className="sb-page">
             <PageHeader
                 breadcrumb={[
                     { label: t("common.breadcrumbRoot"), href: "/appr/docs" },
