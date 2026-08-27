@@ -187,6 +187,7 @@ export default function DocWritePage() {
             case "select":
                 return (
                     <Select
+                        style={{width: "100%"}}
                         value={value}
                         onChange={(v) => {
                             onChange(v);

@@ -60,6 +60,12 @@ export default function DocDetailPage() {
     const [editSchemaValues, setEditSchemaValues] = useState({});
     const [editDocContent, setEditDocContent] = useState("");
 
+    const LEAVE_TYPE_LABELS = {
+        ANNUAL: "연차 (종일)",
+        HALF_AM: "오전 반차",
+        HALF_PM: "오후 반차",
+    };
+
     // docId가 준비 되면 상세 조회
     useEffect(() => {
         if (!docId) return;
@@ -89,6 +95,7 @@ export default function DocDetailPage() {
     useEffect(() => {
         if (processSuccess) {
             message.success(t("docs.detail.processedMsg"));
+            setConfirmAction(null);
             dispatch(fetchDocDetailRequest({docId}));
             dispatch(resetProcessState());
         }
@@ -222,7 +229,9 @@ export default function DocDetailPage() {
                 return (
                     <Select value={value} onChange={onChange}>
                         {(field.options || []).map((opt) => (
-                            <Option key={opt} value={opt}>{opt}</Option>
+                            <Option key={opt} value={opt}>
+                                {field.key === "leaveType" ? (LEAVE_TYPE_LABELS[opt] || opt) : opt}
+                            </Option>
                         ))}
                     </Select>
                 );
@@ -421,7 +430,9 @@ export default function DocDetailPage() {
                         <Descriptions bordered column={1} size="small">
                             {schemaFieldDefs.map((field) => (
                                 <Descriptions.Item key={field.key} label={field.label}>
-                                    {schemaValues[field.key] ?? "-"}
+                                    {field.key === "leaveType"
+                                        ? (LEAVE_TYPE_LABELS[schemaValues[field.key]] || schemaValues[field.key] || "-")
+                                        : (schemaValues[field.key] ?? "-")}
                                 </Descriptions.Item>
                             ))}
                         </Descriptions>

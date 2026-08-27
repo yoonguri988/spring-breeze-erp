@@ -54,6 +54,11 @@ public class ApprLineDelegationServiceImpl implements ApprLineDelegationService{
 			throw new IllegalArgumentException("대기중인 결재선만 위임 요청할 수 있습니다.");
 		}
 		
+		// 이미 이 결재선에 처리 대기중인 요청이 있으면 생성 차단
+		if (reqDao.existsByApprLine_LinIdAndReqStatus(req.getLinId(), "REQ")) {
+			throw new IllegalStateException("이미 처리 대기중인 위임/대결 요청이 있습니다.");
+		}
+		
 		Employee newEmp = em.getReference(Employee.class, req.getNewEmpId());
 		Employee reqEmp = em.getReference(Employee.class, reqEmpId);
 		

@@ -169,7 +169,7 @@ export default function DocListPage() {
                     <StatCard
                         icon={CloseCircleOutlined}
                         label={t("docs.list.stat.rej")}
-                        value={docCnts?.INGCNT ?? 0}
+                        value={docCnts?.REJCNT ?? 0}
                         bg="#fff1f0"
                         color="#f5222d"
                     />

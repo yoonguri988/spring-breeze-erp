@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import {
     Table, Select, Button, Space, Tabs,
-    DatePicker, InputNumber, Popconfirm, message,
+    DatePicker, InputNumber, Modal, message,
 } from "antd";
 import {
     fetchPendingDelegReqRequest,
@@ -17,6 +17,7 @@ import { fetchApprLogRequest } from "../../../../reducers/appr/apprLogReducer";
 import StatusBadge from "../../../../components/appr/StatusBadge";
 import PageHeader from "../../../../components/appr/PageHeader";
 import { useServerTable } from "../../../../components/appr/useServerTable";
+import moment from "moment";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -35,7 +36,9 @@ export default function DelegationAdminPage() {
         logs, logsTotal, logsLoading, logsError,
     } = useSelector((state) => state.apprLog);
 
+    // 승/반
     const [tab, setTab] = useState("pending");
+    const [confirmAction, setConfirmAction] = useState(null);
 
     // 처리이력 탭 필터/페이지
     const [histStatus, setHistStatus] = useState(undefined);
@@ -46,6 +49,9 @@ export default function DelegationAdminPage() {
     const [logDocId, setLogDocId] = useState(undefined);
     const [logEmpId, setLogEmpId] = useState(undefined);
     const [logDateRange, setLogDateRange] = useState([null, null]);
+
+    // 날짜 문자열 포맷
+    const formatDateTime = (value) => (value ? moment(value).format("YYYY-MM-DD HH:mm") : "-");
 
     // 대기중 요청 조회
     useEffect(() => {
@@ -82,6 +88,7 @@ export default function DelegationAdminPage() {
     useEffect(() => {
         if (processSuccess) {
             message.success("처리되었습니다.");
+            setConfirmAction(null);
             dispatch(fetchPendingDelegReqRequest());
             dispatch(resetProcessState());
         }
@@ -94,8 +101,12 @@ export default function DelegationAdminPage() {
         }
     }, [processError]);
 
-    const handleApprove = (reqId) => dispatch(approveDelegReqRequest({reqId}));
-    const handleReject = (reqId) => dispatch(rejectDelegReqRequest({reqId}));
+    const handleApprove = (reqId) => {
+        dispatch(approveDelegReqRequest({reqId: confirmAction.reqId}));
+    };
+    const handleReject = (reqId) => {
+        dispatch(rejectDelegReqRequest({reqId: confirmAction.reqId}));
+    };
 
     // 대기중 요청 탭
     const pendingColumns = [
@@ -105,25 +116,27 @@ export default function DelegationAdminPage() {
         { title: "대결자", dataIndex: "newEmpName", key: "newEmpName", width: 110 },
         { title: "요청자", dataIndex: "reqEmpName", key: "reqEmpName", width: 110 },
         { title: "사유", dataIndex: "reqReason", key: "reqReason", ellipsis: true },
-        { title: "요청일", dataIndex: "createdAt", key: "createdAt", width: 160 },
+        { title: "요청일", dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime},
         {
             title: "처리",
             key: "action",
             width: 170,
             render: (_, record) => (
                 <Space>
-                    <Popconfirm
-                        title="이 위임/대결 요청을 승인하시겠습니까?"
-                        onConfirm={() => handleApprove(record.reqId)}
+                    <Button
+                        size="small"
+                        type="primary"
+                        onClick={() => setConfirmAction({type: "approve", reqId: record.reqId})}
                     >
-                        <Button size="small" type="primary" loading={processSubmitting}>승인</Button>
-                    </Popconfirm>
-                    <Popconfirm
-                        title="이 위임/대결 요청을 반려하시겠습니까?"
-                        onConfirm={() => handleReject(record.reqId)}
+                        승인
+                    </Button>
+                    <Button
+                        size="small"
+                        danger
+                        onClick={() => setConfirmAction({type: "reject", reqId: record.reqId})}
                     >
-                        <Button size="small" danger loading={processSubmitting}>반려</Button>
-                    </Popconfirm>
+                        반려
+                    </Button>
                 </Space>
             ),
         },
@@ -141,8 +154,8 @@ export default function DelegationAdminPage() {
             title: "상태", dataIndex: "reqStatus", key: "reqStatus", width: 90,
             render: (status) => <StatusBadge domain="delegReq" status={status} />,
         },
-        { title: "요청일", dataIndex: "createdAt", key: "createdAt", width: 160 },
-        { title: "처리일", dataIndex: "processedAt", key: "processedAt", width: 160 },
+        { title: "요청일", dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime},
+        { title: "처리일", dataIndex: "processedAt", key: "processedAt", width: 160, render: formatDateTime},
     ];
 
     // 감사로그 탭
@@ -152,11 +165,11 @@ export default function DelegationAdminPage() {
         { title: "원결재자", dataIndex: "oriEmpName", key: "oriEmpName", width: 110 },
         { title: "실처리자", dataIndex: "actEmpName", key: "actEmpName", width: 110 },
         { title: "처리자(관리자)", dataIndex: "perEmpName", key: "perEmpName", width: 130 },
-        { title: "발생일", dataIndex: "createdAt", key: "createdAt", width: 160 },
+        { title: "발생일", dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime},
     ];
 
     return (
-        <div className="sb-page" style={{maxWidth: 1200}}>
+        <div className="sb-page">
             <PageHeader
                 breadcrumb={[
                     { label: t("common.breadcrumbRoot"), href: "/appr/docs" },
@@ -265,6 +278,22 @@ export default function DelegationAdminPage() {
                     {logsError && <div style={{ color: "red", marginTop: 8 }}>{logsError}</div>}
                 </>
             )}
+            <Modal
+                title={confirmAction?.type === "approve" ? "위임/대결 요청 승인" : "위임/대결 요청 반려"}
+                open={confirmAction !== null}
+                onCancel={() => setConfirmAction(null)}
+                onOk={confirmAction?.type === "approve" ? handleApprove : handleReject}
+                confirmLoading={processSubmitting}
+                okText={confirmAction?.type === "approve" ? "승인" : "반려"}
+                cancelText="취소"
+                okButtonProps={{danger: confirmAction?.type === "reject"}}
+            >
+                <p>
+                    {confirmAction?.type === "approve"
+                        ? "이 위임/대결 요청을 승인하시겠습니까?"
+                        : "이 위임/대결 요청을 반려하시겠습니까?"}
+                </p>
+            </Modal>
         </div>
     );
 }
