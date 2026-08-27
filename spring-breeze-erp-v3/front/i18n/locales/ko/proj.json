@@ -72,6 +72,8 @@
     "taskEmptyMsg": "등록된 태스크가 없습니다.",
     "taskTotalPrefix": "총 ",
     "taskTotalSuffix": "개 태스크",
+    "bottleneckTag": "⚠ 병목",
+    "bottleneckListLabel": "⚠ 병목: {{names}}",
     "taskTable": {
       "no": "번호",
       "name": "업무명",

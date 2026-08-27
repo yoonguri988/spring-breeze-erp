@@ -72,6 +72,8 @@
     "taskEmptyMsg": "There are no registered tasks.",
     "taskTotalPrefix": "Total ",
     "taskTotalSuffix": " tasks",
+    "bottleneckTag": "⚠ Bottleneck",
+    "bottleneckListLabel": "⚠ Bottleneck: {{names}}",
     "taskTable": {
       "no": "No.",
       "name": "Task Name",
