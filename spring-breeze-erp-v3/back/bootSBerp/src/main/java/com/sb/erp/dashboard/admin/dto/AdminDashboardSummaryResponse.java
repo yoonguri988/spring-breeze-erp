@@ -2,6 +2,7 @@ package com.sb.erp.dashboard.admin.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -23,17 +24,25 @@ public class AdminDashboardSummaryResponse {
     private BigDecimal leaveRemainingDays;
 
     // B 영역 — 전사 출퇴근 통계
-    private int totalEmployees;
-    private int presentCount;
-    private int lateCount;
-    private int absentCount;
-    private int leaveCount;
+    private int totalEmployees;	// 총 사원수
+    private int presentCount;	// 정상 출근
+    private int lateCount;		// 지각
+    private int absentCount;	// 결근
+    private int leaveCount;		// 휴가
 
     // C 영역 — 주간 근태 추이
     private List<DailyAttStatDto> weeklyStats;
 
-    // D 영역 — 결재 대기 건수
-    private int pendingApprovalCount;
+    // D 영역 — 결재 관련 카운트
+    private int pendingApprovalCount;   // 내가 결재해야 할 대기 건수
+    private int myDraftingCount;         // 내가 기안한 진행 중 문서 수
+    
+    // F 영역 — 프로젝트
+    // 각 항목은 Map (proId, proName, proStatus, endDate, empName) 형태
+    // 회사 전체 진행 중 프로젝트 (마감 임박순)
+    private List<Map<String, Object>> companyProjects;
+    // 내가 참여한 진행 중 프로젝트
+    private List<Map<String, Object>> myProjects;
 
     @Getter @Builder
     public static class TodayAttDto {

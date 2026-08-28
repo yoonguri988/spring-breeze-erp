@@ -18,24 +18,20 @@ import {
 import {
   LoginOutlined, LogoutOutlined, TeamOutlined, ClockCircleOutlined,
   FileTextOutlined, CalendarOutlined, BellOutlined, RobotOutlined,
-  CheckCircleOutlined, ExclamationCircleOutlined, UserOutlined, ProjectOutlined,
-  RightOutlined,
+  CheckCircleOutlined, ExclamationCircleOutlined, ProjectOutlined, RightOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 
 import {
-  Chart as ChartJS,
-  ArcElement, Tooltip, Legend,
-  CategoryScale, LinearScale, BarElement,
+  Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement,
 } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
 
 import {
-  adminDashboardRequest, resetAdminDashboard, updateAdminTodayAtt,
+  adminDashboardRequest, resetAdminDashboard, updateAdminTodayAtt, adminRecentNoticesRequest,
 } from "../../reducers/dashboard/adminDashboardReducer";
-import {
-  checkInRequest, checkOutRequest, resetAttState,
-} from "../../reducers/att/attReducer";
+
+import { checkInRequest, checkOutRequest, resetAttState, } from "../../reducers/att/attReducer";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
@@ -55,8 +51,61 @@ const QUICK_LINKS = [
   { key: "appr",   icon: <FileTextOutlined />,     label: "전자결재",  path: "/appr/docs" },
   { key: "leave",  icon: <CalendarOutlined />,     label: "연차관리",  path: "/att/leave/admin" },
   { key: "notice", icon: <BellOutlined />,         label: "공지사항",  path: "/notice/list" },
-  { key: "aichat", icon: <RobotOutlined />,        label: "AI 챗봇",   path: "/emp/aidoc-admin" },
+  { key: "aichat", icon: <RobotOutlined />,        label: "규정관리",   path: "/emp/aidoc-admin" },
 ];
+
+// ─────────────────────────────────────────────
+//  프로젝트 리스트 서브 컴포넌트
+//  회사/내 프로젝트 카드에서 공통으로 사용
+//  각 row: 프로젝트명 + 상태 뱃지 + D-day
+// ─────────────────────────────────────────────
+const PROJECT_STATUS_TAG = {
+  TODO:  { color: "default", label: "대기" },
+  DOING: { color: "blue",    label: "진행" },
+};
+
+function ProjectList({ projects, onClickItem }) {
+  if (!projects || projects.length === 0) {
+    return (
+      <div style={{ padding: "16px 0" }}>
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="진행 중인 프로젝트가 없습니다" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="adh-proj-list">
+      {projects.map((p) => {
+        // D-day 계산 (마감일 - 오늘)
+        const end = moment(p.endDate);
+        const today = moment().startOf("day");
+        const dday = end.diff(today, "days");
+        const ddayLabel = dday === 0 ? "D-Day" : dday > 0 ? `D-${dday}` : `D+${-dday}`;
+        const ddayColor = dday <= 3 ? "var(--sb-red)" : dday <= 7 ? "var(--sb-amber)" : "var(--sb-ink-faint)";
+
+        const statusInfo = PROJECT_STATUS_TAG[p.proStatus] || { color: "default", label: p.proStatus };
+
+        return (
+          <div
+            key={p.proId}
+            className="adh-proj-row"
+            onClick={() => onClickItem(p.proId)}
+          >
+            <div className="adh-proj-main">
+              <Tag color={statusInfo.color} style={{ marginRight: 4, fontSize: 10, padding: "0 4px", lineHeight: "16px" }}>
+                {statusInfo.label}
+              </Tag>
+              <span className="adh-proj-name">{p.proName}</span>
+            </div>
+            <span className="adh-proj-dday" style={{ color: ddayColor }}>
+              {ddayLabel}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -75,6 +124,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     dispatch(adminDashboardRequest());
+    dispatch(adminRecentNoticesRequest());
     return () => { dispatch(resetAdminDashboard()); };
   }, [dispatch]);
 
@@ -171,66 +221,60 @@ export default function AdminDashboardPage() {
   return (
     <div className="adh-wrap">
 
-      {/* ═══ Row 1: A+H — 사용자(좌) + 퀵 링크(우) ═══ */}
+      {/* ═══ 인사말 (페이지 제목) ═══ */}
+      <h1 className="adh-greeting">
+        안녕하세요, {db.empName || user?.empName || "사용자"} {db.posName || user?.posName || ""}님.
+      </h1>
+
+      {/* ═══ Row 1: 출퇴근 + 잔여연차 + 퀵링크 (3분할) ═══ */}
       <div className="adh-top-band">
 
-        <div className="adh-user-bar sb-card">
-          {/* 좌: 프로필 */}
-          <div className="adh-section adh-user-profile">
-            <div className="adh-user-avatar">
-              <UserOutlined style={{ fontSize: 22, color: "var(--sb-accent)" }} />
-            </div>
-            <div className="adh-user-info">
-              <div className="adh-user-name">
-                {db.empName || user?.empName || "사용자"} <span className="adh-user-suffix">님</span>
+        {/* 출퇴근 */}
+        <div className="adh-clock-card sb-card">
+          <div className="adh-today-date">{now.format("YYYY.MM.DD (ddd)")}</div>
+          <div className="adh-clock-time">{now.format("HH:mm:ss")}</div>
+          <div className="adh-clock-btns">
+            {!isCheckedIn ? (
+              <Button type="primary" size="large" icon={<LoginOutlined />} onClick={handleCheckIn} loading={att.loading}>
+                출근하기
+              </Button>
+            ) : !isCheckedOut ? (
+              <>
+                <Tag color={statusInfo.color} style={{ fontSize: 12, padding: "2px 8px" }}>
+                  {statusInfo.label}
+                </Tag>
+                <Button size="small" icon={<LogoutOutlined />} onClick={handleCheckOut} loading={att.loading}>
+                  퇴근하기
+                </Button>
+              </>
+            ) : (
+              <div className="adh-done-row">
+                <Tag color="default" style={{ fontSize: 13, padding: "4px 10px" }}>
+                  <CheckCircleOutlined /> {todayAtt.checkIn} ~ {todayAtt.checkOut}
+                </Tag>
+                <button className="adh-link-btn" onClick={() => router.push("/att/dashboard")}>
+                  근태 현황 <RightOutlined style={{ fontSize: 10 }} />
+                </button>
               </div>
-              <div className="adh-user-meta">{db.deptName || ""} · {db.posName || user?.posName || ""}</div>
-            </div>
-          </div>
-
-          <div className="adh-divider" />
-
-          {/* 중: 출퇴근 */}
-          <div className="adh-section adh-clock-area">
-            <div className="adh-today-date">{now.format("YYYY.MM.DD (ddd)")}</div>
-            <div className="adh-clock-time">{now.format("HH:mm:ss")}</div>
-            <div className="adh-clock-btns">
-              {!isCheckedIn ? (
-                <Button type="primary" icon={<LoginOutlined />} onClick={handleCheckIn} loading={att.loading} size="small">출근</Button>
-              ) : !isCheckedOut ? (
-                <>
-                  <Tag color={statusInfo.color}>{statusInfo.label} {todayAtt.checkIn}</Tag>
-                  <Button icon={<LogoutOutlined />} onClick={handleCheckOut} loading={att.loading} size="small">퇴근</Button>
-                </>
-              ) : (
-                <div className="adh-done-row">
-                  <Tag color="default"><CheckCircleOutlined /> {todayAtt.checkIn} ~ {todayAtt.checkOut}</Tag>
-                  <button className="adh-link-btn" onClick={() => router.push("/att/dashboard")}>
-                    근태 현황 <RightOutlined style={{ fontSize: 10 }} />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="adh-divider" />
-
-          {/* 우: 연차 */}
-          <div className="adh-section adh-leave-area">
-            <div className="adh-leave-label">잔여 연차</div>
-            <div className="adh-leave-nums">
-              <span className="adh-leave-remaining">{leaveRemaining}</span>
-              <span className="adh-leave-sep">/</span>
-              <span className="adh-leave-total">{leaveTotal}</span>
-            </div>
-            <Progress percent={leavePercent} size="small" showInfo={false} strokeColor="var(--sb-accent)" style={{ width: 100 }} />
-            <br />
-            <button className="adh-link-btn" style={{ marginTop: 4 }} onClick={() => router.push("/appr/docs/write")}>
-              휴가 신청 <RightOutlined style={{ fontSize: 10 }} />
-            </button>
+            )}
           </div>
         </div>
 
+        {/* 잔여 연차 */}
+        <div className="adh-leave-card sb-card">
+          <div className="adh-leave-label">잔여 연차</div>
+          <div className="adh-leave-nums">
+            <span className="adh-leave-remaining">{leaveRemaining}</span>
+            <span className="adh-leave-sep">/</span>
+            <span className="adh-leave-total">{leaveTotal}</span>
+          </div>
+          <Progress percent={leavePercent} size="small" showInfo={false} strokeColor="var(--sb-accent)" />
+          <button className="adh-link-btn" style={{ marginTop: 8 }} onClick={() => router.push("/appr/docs/write")}>
+            휴가 신청 <RightOutlined style={{ fontSize: 10 }} />
+          </button>
+        </div>
+
+        {/* 퀵 링크 (3×2) */}
         <div className="adh-quick-card sb-card">
           <div className="adh-quick-grid">
             {QUICK_LINKS.map((link) => (
@@ -270,33 +314,78 @@ export default function AdminDashboardPage() {
             <button className="adh-link-btn" onClick={() => router.push("/notice/list")}>전체보기 <RightOutlined style={{ fontSize: 10 }} /></button>
           </div>
           <div className="adh-notice-list">
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="공지 연동 예정" />
+            {db.recentNotices.length === 0 ? (
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="공지사항이 없습니다" />
+            ) : (
+              db.recentNotices.map((n) => (
+                <div
+                  key={n.bno}
+                  className="adh-notice-row"
+                  onClick={() => router.push(`/notice/detail?bno=${n.bno}`)}
+                >
+                  {/* 긴급 뱃지: bcontent에 "긴급" 포함 시 */}
+                  {n.bcontent && n.bcontent.includes("긴급") && (
+                    <Tag color="red" style={{ marginRight: 0, fontSize: 10, padding: "0 4px", lineHeight: "16px" }}>긴급</Tag>
+                  )}
+                  <span className="adh-notice-title">{n.btitle}</span>
+                  <span className="adh-notice-date">
+                    {n.createdAt ? moment(n.createdAt).format("MM/DD") : ""}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
 
-      {/* ═══ Row 3: D+F ═══ */}
+      {/* ═══ Row 3: D + F(회사) + F(내) — 3분할 ═══ */}
       <div className="adh-work-band">
+
+        {/* D: 처리 필요 (1칸) */}
         <div className="adh-pending-card sb-card db-card">
           <div className="sb-card__head">
             <h2><ExclamationCircleOutlined /> 처리 필요</h2>
             <button className="adh-link-btn" onClick={() => router.push("/appr/docs?tab=todo")}>결재함 <RightOutlined style={{ fontSize: 10 }} /></button>
           </div>
           <div className="sb-card__body--flush">
-            <div className="adh-pending-row">
+            <div
+              className="adh-pending-row"
+              style={{ cursor: "pointer" }}
+              onClick={() => router.push("/appr/docs?tab=todo")}
+            >
               <span className="adh-pending-label"><FileTextOutlined /> 결재 대기</span>
               <span className="adh-pending-count">{db.pendingApprovalCount}건</span>
+            </div>
+            <div
+              className="adh-pending-row"
+              style={{ cursor: "pointer" }}
+              onClick={() => router.push("/appr/docs?tab=history&status=ING")}
+            >
+              <span className="adh-pending-label"><FileTextOutlined /> 내 기안 진행 중</span>
+              <span className="adh-pending-count">{db.myDraftingCount}건</span>
             </div>
           </div>
         </div>
 
+        {/* F-1: 회사 전체 프로젝트 (마감 임박순) */}
         <div className="adh-project-card sb-card db-card">
           <div className="sb-card__head">
-            <h2><ProjectOutlined /> 내 프로젝트</h2>
+            <h2><ProjectOutlined /> 회사 프로젝트</h2>
             <button className="adh-link-btn" onClick={() => router.push("/proj/proj_list")}>전체보기 <RightOutlined style={{ fontSize: 10 }} /></button>
           </div>
           <div className="sb-card__body--flush">
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="프로젝트 연동 예정" />
+            <ProjectList projects={db.companyProjects} onClickItem={(id) => router.push(`/proj/proj_detail?proId=${id}`)} />
+          </div>
+        </div>
+
+        {/* F-2: 내 프로젝트 (내가 리더이거나 멤버) */}
+        <div className="adh-project-card sb-card db-card">
+          <div className="sb-card__head">
+            <h2><ProjectOutlined /> 내 프로젝트</h2>
+            <button className="adh-link-btn" onClick={() => router.push("/proj/task_list")}>전체보기 <RightOutlined style={{ fontSize: 10 }} /></button>
+          </div>
+          <div className="sb-card__body--flush">
+            <ProjectList projects={db.myProjects} onClickItem={(id) => router.push(`/proj/proj_detail?proId=${id}`)} />
           </div>
         </div>
       </div>

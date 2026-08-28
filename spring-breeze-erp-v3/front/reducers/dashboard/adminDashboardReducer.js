@@ -27,6 +27,15 @@ const initialState = {
 
   // D 영역: 결재 대기 건수
   pendingApprovalCount: 0,
+  myDraftingCount: 0,
+
+  // E 영역: 최근 공지사항 (별도 API 호출)
+  recentNotices: [],
+  noticesLoading: false,
+
+  // F 영역: 프로젝트
+  companyProjects: [],
+  myProjects: [],
 
   // 공통
   loading: false,
@@ -38,8 +47,10 @@ const adminDashboardSlice = createSlice({
   initialState,
   reducers: {
 
+    // 상태 리셋(새 상태)
     resetAdminDashboard: () => initialState,
 
+    // 대시보드 정보 불러오기
     adminDashboardRequest: (state) => {
       state.loading = true;
       state.error = null;
@@ -66,6 +77,10 @@ const adminDashboardSlice = createSlice({
       state.weeklyStats = p.weeklyStats || [];
 
       state.pendingApprovalCount = p.pendingApprovalCount;
+      state.myDraftingCount      = p.myDraftingCount;
+
+      state.companyProjects = p.companyProjects || [];
+      state.myProjects      = p.myProjects || [];
     },
 
     adminDashboardFailure: (state, action) => {
@@ -73,8 +88,25 @@ const adminDashboardSlice = createSlice({
       state.error = action.payload;
     },
 
+    // 금일 본인의 근태 현황(출퇴근) 업데이트
     updateAdminTodayAtt: (state, action) => {
       state.todayAtt = action.payload;
+    },
+
+    // ── 최근 공지사항 조회 ──
+    // /api/notice 를 별도로 호출하여 대시보드 위젯에만 표시
+    // (notice 도메인 state와 완전히 분리하여 다른 페이지 영향 없음)
+    adminRecentNoticesRequest: (state) => {
+      state.noticesLoading = true;
+    },
+    adminRecentNoticesSuccess: (state, action) => {
+      state.noticesLoading = false;
+      // action.payload = NoticeResponse[] (배열)
+      state.recentNotices = action.payload || [];
+    },
+    adminRecentNoticesFailure: (state) => {
+      state.noticesLoading = false;
+      state.recentNotices = [];
     },
   },
 });
@@ -83,6 +115,7 @@ export const {
   resetAdminDashboard,
   adminDashboardRequest, adminDashboardSuccess, adminDashboardFailure,
   updateAdminTodayAtt,
+  adminRecentNoticesRequest, adminRecentNoticesSuccess, adminRecentNoticesFailure,
 } = adminDashboardSlice.actions;
 
 export default adminDashboardSlice.reducer;

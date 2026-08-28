@@ -17,7 +17,7 @@ public interface EmpRepository extends JpaRepository<Employee, Long> {
 	
 	// ── 관리자 대시보드용: 회사별 재직 사원 ID 목록 ──
 	@Query("SELECT e.empId FROM Employee e " +
-		   "WHERE e.company.comId = :comId AND e.empStatus = 'Y'")
+		   "WHERE e.company.comId = :comId AND e.empStatus = '재직'")
 		List<Long> findActiveEmpIdsByComId(@Param("comId") Long comId);
 	
 	// ── 관리자 대시보드용: 사용자 정보 ──

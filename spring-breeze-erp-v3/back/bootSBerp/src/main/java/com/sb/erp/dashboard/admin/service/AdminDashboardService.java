@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sb.erp.appr.service.ApprDocService;
 import com.sb.erp.att.entity.Attendance;
 import com.sb.erp.att.entity.LeaveBalance;
 import com.sb.erp.att.repository.AttendanceRepository;
@@ -21,6 +22,7 @@ import com.sb.erp.att.repository.LeaveBalanceRepository;
 import com.sb.erp.dashboard.admin.dto.AdminDashboardSummaryResponse;
 import com.sb.erp.dashboard.admin.dto.AdminDashboardSummaryResponse.DailyAttStatDto;
 import com.sb.erp.dashboard.admin.dto.AdminDashboardSummaryResponse.TodayAttDto;
+import com.sb.erp.dashboard.admin.repository.AdminDashboardMapper;
 import com.sb.erp.emp.repository.EmpRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,8 @@ public class AdminDashboardService {
     private final AttendanceRepository attendanceRepository;
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final EmpRepository empRepository;
+    private final ApprDocService apprDocService;
+    private final AdminDashboardMapper adminDashboardMapper;
 
     private static final DateTimeFormatter TIME_FMT =
             DateTimeFormatter.ofPattern("HH:mm");
@@ -43,12 +47,14 @@ public class AdminDashboardService {
         int currentYear = today.getYear();
 
         // 0) 사원 프로필 — JOIN 프로젝션으로 필요한 필드만 조회
-        //    Employee → Company 로딩 시 @Lob comLogo 컬럼이 Oracle VARCHAR2와 충돌하므로
-        //    findById() 대신 JPQL 프로젝션을 사용하여 Company 엔티티 로딩을 회피
+        // Employee → Company 로딩 시 @Lob comLogo 컬럼이 Oracle VARCHAR2와 충돌하므로
+        // findById() 대신 JPQL 프로젝션을 사용하여 Company 엔티티 로딩을 회피
         String empName = "";
         String deptName = "";
         String posName = "";
+        
         List<Object[]> profile = empRepository.findEmpProfileById(empId);
+        
         if (!profile.isEmpty()) {
             Object[] row = profile.get(0);
             empName  = (String) row[0];
@@ -85,15 +91,29 @@ public class AdminDashboardService {
         int recordedCount = presentCount + lateCount + earlyLeaveCount + leaveCount;
         int absentCount = Math.max(0, totalEmployees - recordedCount);
 
-        // 4) 주간 통계
-        List<DailyAttStatDto> weeklyStats =
-                buildWeeklyStats(activeEmpIds, today, totalEmployees);
+		// 4) 주간 통계
+		List<DailyAttStatDto> weeklyStats = buildWeeklyStats(activeEmpIds, today, totalEmployees);
 
-        // 5) 결재 대기 건수 — 추후 ApprDoc 연동
-        int pendingApprovalCount = 0;
+		// 5) 결재 관련 카운트
+		// ApprDocService.selectDocCnt() 는 아래 키를 담은 Map 반환:
+		// - MYCNT : 내가 결재해야 할 대기 건수 (남이 기안, 내가 승인 대기)
+		// - MYDRAFTINGCNT : 내가 기안했고 아직 진행 중인 문서 수 (내 문서, 상대 처리 대기)
+		// - TOTALCNT/APPCNT/REJCNT/INGCNT : 참고 통계
+		Map<String, Object> apprCnts = apprDocService.selectDocCnt(empId);
+		int pendingApprovalCount = toInt(apprCnts.get("MYCNT")); // 결재 대기
+		int myDraftingCount = toInt(apprCnts.get("MYDRAFTINGCNT")); // 내 기안 진행 중
+		
+		// 6) 프로젝트 — 회사 전체 / 내가 참여중인 프로젝트를 각각 5개씩 조회
+        // 마감 임박순, 진행 중(TODO/DOING)만
+        final int PROJECT_LIMIT = 5;
+        List<Map<String, Object>> companyProjects =
+                adminDashboardMapper.selectCompanyOngoingProjects(comId, PROJECT_LIMIT);
+        
+        List<Map<String, Object>> myProjects =
+                adminDashboardMapper.selectMyOngoingProjects(empId, comId, PROJECT_LIMIT);
 
-        return AdminDashboardSummaryResponse.builder()
-                .empName(empName)
+		return AdminDashboardSummaryResponse.builder()
+				.empName(empName)
                 .deptName(deptName)
                 .posName(posName)
                 .todayAtt(todayAtt)
@@ -107,9 +127,19 @@ public class AdminDashboardService {
                 .leaveCount(leaveCount)
                 .weeklyStats(weeklyStats)
                 .pendingApprovalCount(pendingApprovalCount)
+                .myDraftingCount(myDraftingCount)
+                .companyProjects(companyProjects)
+                .myProjects(myProjects)
                 .build();
+	}
+    
+    // MyBatis 가 count(...) 결과를 Oracle에서 BigDecimal 또는 Long 으로 반환할 수 있으므로 int로 변환
+    private int toInt(Object value) {
+        if (value == null) return 0;
+        if (value instanceof Number) return ((Number) value).intValue();
+        return Integer.parseInt(value.toString());
     }
-
+    
     private TodayAttDto buildTodayAtt(Long empId, LocalDate today) {
         return attendanceRepository.findByEmployee_EmpIdAndAttDate(empId, today)
                 .map(att -> TodayAttDto.builder()
@@ -122,7 +152,8 @@ public class AdminDashboardService {
                         .build())
                 .orElse(null);
     }
-
+    
+    
     private Map<String, Integer> countAttStatusByDate(
             List<Long> activeEmpIds, LocalDate date) {
 
@@ -138,7 +169,8 @@ public class AdminDashboardService {
         }
         return result;
     }
-
+    
+    // 최근 5일의 근태 현황을 불러오는 과정에서 주말 제외하기
     private List<DailyAttStatDto> buildWeeklyStats(
             List<Long> activeEmpIds, LocalDate today, int totalEmployees) {
 
@@ -168,7 +200,7 @@ public class AdminDashboardService {
             }
             cursor = cursor.minusDays(1);
         }
-
+        // 역순으로 집계한 일자를 다시 정렬함
         Collections.reverse(stats);
         return stats;
     }

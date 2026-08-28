@@ -23,18 +23,14 @@ export default function Home() {
     // 역할에 따라 대시보드 분기(지금은 관리자/일반 사원만)
     const roles = user.roles || [];
 
-    if (roles.includes("ROOT")) {
-      // 시스템 관리자 → 추후 root 대시보드 생성 시 경로 변경
-      router.replace("/dashboard/admin");
-
-    } else if (roles.includes("ROLE_ADMIN")) {
+    if (roles.includes("ROLE_ADMIN")) {
       // 회사 관리자 → admin용 대시보드
       router.replace("/dashboard/admin");
 
     } else {
       // 일반 사원 → 추후 사원용 대시보드 생성 시 경로 변경
       // 아직 없으므로 임시로 admin과 동일하게
-      router.replace("/dashboard/admin");
+      router.replace("/dashboard/member");
     }
   }, [user, initialized, router]);
 
