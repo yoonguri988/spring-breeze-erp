@@ -155,4 +155,27 @@
 	select pro_id from project where pro_status IN ('TODO','DOING')
 	</select>
 	
+	<!-- 대시보드용 - 내가 참여중인 진행중 프로젝트 (최근 5개, 진행률 포함) -->
+	<select id="selectMyProjects" resultType="DashboardProjResponse" parameterType="long">
+		select
+			p.pro_id as proId,
+			p.pro_name as proName,
+			p.pro_status as proStatus,
+			p.end_date as endDate,
+			nvl(round(
+				(select count(*) from task t where t.pro_id = p.pro_id and t.task_status = 'DONE')
+				/ nullif((select count(*) from task t2 where t2.pro_id = p.pro_id), 0) * 100
+			), 0) as progressRate
+		from
+			project p
+		join
+			project_member pm on pm.project_pro_id = p.pro_id
+		where
+			pm.emp_id = #{empId}
+			and p.pro_status in ('TODO', 'DOING')
+		order by
+			p.pro_id desc
+		fetch first 5 rows only
+	</select>
+	
 </mapper>
