@@ -2,11 +2,11 @@ import { all, call, put, takeLatest } from "redux-saga/effects";
 import api from "../../api/axios";
 import {
     fetchSummaryRequest, fetchSummarySuccess, fetchSummaryFailure,
-} from "../../reducers/dashboard/userDashboardReducer";
+} from "../../reducers/dashboard/memberDashboardReducer";
 
 // 대시보드 요약 조회
-// get /api/dashboard/user
-export const fetchSummaryApi = () => api.get("/api/dashboard/user");
+// get /api/dashboard/member
+export const fetchSummaryApi = () => api.get("/api/dashboard/member");
 
 export function* fetchSummary() {
     try {
@@ -21,7 +21,7 @@ function* watchFetchSummary() {
     yield takeLatest(fetchSummaryRequest.type, fetchSummary);
 }
 
-export default function* userDashboardSaga() {
+export default function* memberDashboardSaga() {
     yield all([
         call(watchFetchSummary),
     ]);

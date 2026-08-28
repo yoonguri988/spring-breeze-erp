@@ -47,7 +47,7 @@ import resumeReducer from "./rsm/resumeReducer";
 import resumePublicReducer from "./rsm/resumePublicReducer";
 // 메인화면 - 대시보드
 import adminDashboardReducer from "./dashboard/adminDashboardReducer";
-import userDashboardReducer from "./dashboard/userDashboardReducer";
+import memberDashboardReducer from "./dashboard/memberDashboardReducer";
 
 const rootReducer = combineReducers({
   auth: authReducer, // state.auth
@@ -97,7 +97,7 @@ const rootReducer = combineReducers({
   resumePublic: resumePublicReducer, // state.resumePublic
   // 메인화면 - 대시보드
   adminDashboard: adminDashboardReducer, // state.adminDashboard
-  userDashboard: userDashboardReducer, // state.userDashboard
+  memberDashboard: memberDashboardReducer, // state.memberDashboard
 
 });
 

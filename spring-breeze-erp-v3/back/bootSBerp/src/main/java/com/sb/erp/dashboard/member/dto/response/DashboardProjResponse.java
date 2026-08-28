@@ -1,4 +1,4 @@
-package com.sb.erp.dashboard.user.dto.response;
+package com.sb.erp.dashboard.member.dto.response;
 
 import java.time.LocalDate;
 

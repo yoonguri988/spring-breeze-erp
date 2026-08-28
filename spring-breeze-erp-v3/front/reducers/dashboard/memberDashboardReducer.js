@@ -6,7 +6,7 @@ const initialState = {
     summaryError: null,
 };
 
-const userDashboardReducer = createSlice({
+const memberDashboardReducer = createSlice({
     name: "dashboard",
     initialState,
     reducers: {
@@ -27,6 +27,6 @@ const userDashboardReducer = createSlice({
 
 export const {
     fetchSummaryRequest, fetchSummarySuccess, fetchSummaryFailure,
-} = userDashboardReducer.actions;
+} = memberDashboardReducer.actions;
 
-export default userDashboardReducer.reducer;
+export default memberDashboardReducer.reducer;

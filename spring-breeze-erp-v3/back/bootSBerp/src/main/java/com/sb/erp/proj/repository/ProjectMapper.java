@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
-import com.sb.erp.dashboard.user.dto.response.DashboardProjResponse;
+import com.sb.erp.dashboard.member.dto.response.DashboardProjResponse;
 import com.sb.erp.proj.dto.request.ProjRequest;
 import com.sb.erp.proj.dto.request.ProjectSearchRequest;
 import com.sb.erp.proj.dto.response.ProjResponse;

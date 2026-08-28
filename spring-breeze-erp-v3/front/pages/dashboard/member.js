@@ -6,7 +6,7 @@ import moment from "moment";
 import { Row, Col, Table, Button, Spin, Empty} from "antd";
 import { loadUserRequest } from "../../reducers/auth/authReducer";
 import { fetchWriterInfoRequest } from "../../reducers/appr/apprDocReducer";
-import { fetchSummaryRequest } from "../../reducers/dashboard/userDashboardReducer";
+import { fetchSummaryRequest } from "../../reducers/dashboard/memberDashboardReducer";
 import StatusBadge from "../../components/appr/StatusBadge";
 
 // 대시보드 통계 카드
@@ -31,7 +31,7 @@ export default function Home() {
 
     const { user, accessToken } = useSelector((state) => state.auth);
     const { writerInfo } = useSelector((state) => state.apprDoc);
-    const { summary, summaryLoading, summaryError} = useSelector((state) => state.userDashboard);
+    const { summary, summaryLoading, summaryError} = useSelector((state) => state.memberDashboard);
 
     // 로그인 정보 로드
     useEffect(() => {

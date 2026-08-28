@@ -1,4 +1,4 @@
-package com.sb.erp.dashboard.user.service;
+package com.sb.erp.dashboard.member.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,8 +15,8 @@ import com.sb.erp.att.dto.response.AttendanceResponse;
 import com.sb.erp.att.dto.response.LeaveBalanceResponse;
 import com.sb.erp.att.service.AttendanceService;
 import com.sb.erp.att.service.LeaveBalanceService;
-import com.sb.erp.dashboard.user.dto.response.DashboardProjResponse;
-import com.sb.erp.dashboard.user.dto.response.DashboardSummaryResponse;
+import com.sb.erp.dashboard.member.dto.response.DashboardProjResponse;
+import com.sb.erp.dashboard.member.dto.response.DashboardSummaryResponse;
 import com.sb.erp.eval.dto.request.PeriodSearchRequest;
 import com.sb.erp.eval.dto.response.EvalResponse;
 import com.sb.erp.eval.dto.response.PeriodResponse;

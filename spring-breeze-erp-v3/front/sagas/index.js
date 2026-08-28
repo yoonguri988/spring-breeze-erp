@@ -49,7 +49,7 @@ import resumePublicSaga from "./rsm/resumePublicSaga";
 
 // 메인 화면 - 대시보드
 import adminDashboardSaga from "./dashboard/adminDashboardSaga";
-import userDashboardSaga from "./dashboard/userDashboardSaga";
+import memberDashboardSaga from "./dashboard/memberDashboardSaga";
 
 export default function* rootSaga() {
   yield all([
@@ -100,6 +100,6 @@ export default function* rootSaga() {
     fork(resumePublicSaga),
     // 메인 화면 - 대시보드
     fork(adminDashboardSaga),
-    fork(userDashboardSaga),
+    fork(memberDashboardSaga),
   ]);
 }
