@@ -27,7 +27,10 @@ import {
   fetchDeptEmpListRequest,
   resetDeptState,
 } from "../../reducers/dept/deptReducer";
-import { fetchCompanyDetailRequest, resetCompanyState } from "../../reducers/com/companyReducer";
+import {
+  fetchCompanyDetailRequest,
+  resetCompanyState,
+} from "../../reducers/com/companyReducer";
 import DeptDeleteModal from "../../components/DeptDeleteModal";
 import { empStatusLabel } from "../../utils/empStatus";
 
@@ -249,7 +252,7 @@ export default function DeptEditPage() {
           comId,
           deptName: values.deptName,
           deptCode: (values.deptCode || "").toUpperCase(),
-          parentId: parentId && parentId !== "0" ? parentId : null,
+          parentId: parentId && parentId !== "0" ? parentId : 0,
           depth,
           sortOrder: values.sortOrder,
           empId: values.empId || null,
@@ -290,9 +293,7 @@ export default function DeptEditPage() {
             <ExclamationCircleOutlined style={{ fontSize: 34, opacity: 0.5 }} />
             <p>{t("edit.notFoundMsg")}</p>
             <Link href="/dept/list">
-              <Button className="mt-2">
-                {t("edit.backToListBtn")}
-              </Button>
+              <Button className="mt-2">{t("edit.backToListBtn")}</Button>
             </Link>
           </div>
         </div>
@@ -311,7 +312,11 @@ export default function DeptEditPage() {
             <RightOutlined /> {t("edit.breadcrumbEdit")}{" "}
             <span className="admin-tag ms-2">{t("edit.adminBadge")}</span>
           </div>
-          <h1>{dept ? t("edit.titleWithName", { deptName: dept.deptName }) : t("edit.title")}</h1>
+          <h1>
+            {dept
+              ? t("edit.titleWithName", { deptName: dept.deptName })
+              : t("edit.title")}
+          </h1>
           <p>
             {dept &&
               t("edit.subtitleWithId", {
@@ -321,9 +326,7 @@ export default function DeptEditPage() {
         </div>
         <div className="sb-page-head__actions">
           <Link href={backUrl}>
-            <Button icon={<ArrowLeftOutlined />}>
-              {t("edit.backBtn")}
-            </Button>
+            <Button icon={<ArrowLeftOutlined />}>{t("edit.backBtn")}</Button>
           </Link>
         </div>
       </div>
@@ -358,7 +361,10 @@ export default function DeptEditPage() {
                     label={t("edit.basicInfo.deptNameLabel")}
                     name="deptName"
                     rules={[
-                      { required: true, message: t("edit.basicInfo.deptNameRequired") },
+                      {
+                        required: true,
+                        message: t("edit.basicInfo.deptNameRequired"),
+                      },
                     ]}
                   >
                     <Input maxLength={100} />
@@ -369,7 +375,10 @@ export default function DeptEditPage() {
                     label={t("edit.basicInfo.deptCodeLabel")}
                     name="deptCode"
                     rules={[
-                      { required: true, message: t("edit.basicInfo.deptCodeRequired") },
+                      {
+                        required: true,
+                        message: t("edit.basicInfo.deptCodeRequired"),
+                      },
                     ]}
                     validateStatus={
                       deptCodeCheck?.checked && deptCodeCheck?.duplicate
@@ -409,7 +418,9 @@ export default function DeptEditPage() {
             <div className="sb-card__body">
               <div className="row g-3">
                 <div className="col-md-6">
-                  <label className="sb-form-label">{t("edit.hierarchy.comLabel")}</label>
+                  <label className="sb-form-label">
+                    {t("edit.hierarchy.comLabel")}
+                  </label>
                   <Input
                     value={com?.comName || ""}
                     readOnly
@@ -424,7 +435,10 @@ export default function DeptEditPage() {
                 </div>
 
                 <div className="col-md-6">
-                  <Form.Item label={t("edit.hierarchy.parentLabel")} name="parentId">
+                  <Form.Item
+                    label={t("edit.hierarchy.parentLabel")}
+                    name="parentId"
+                  >
                     <Select
                       options={parentOptions}
                       onChange={handleParentChange}
@@ -437,25 +451,30 @@ export default function DeptEditPage() {
                 </div>
 
                 <div className="col-md-4">
-                  <label className="sb-form-label">{t("edit.hierarchy.depthLabel")}</label>
+                  <label className="sb-form-label">
+                    {t("edit.hierarchy.depthLabel")}
+                  </label>
                   <div className="depth-info-box">
                     <BlockOutlined className="text-faint" />
                     <span>depth</span>
                     <span className="depth-val">{depth}</span>
-                    <span className="text-faint">
-                      · {depthLabel}
-                    </span>
+                    <span className="text-faint">· {depthLabel}</span>
                   </div>
                 </div>
 
                 <div className="col-md-4">
-                  <Form.Item label={t("edit.hierarchy.sortOrderLabel")} name="sortOrder">
+                  <Form.Item
+                    label={t("edit.hierarchy.sortOrderLabel")}
+                    name="sortOrder"
+                  >
                     <InputNumber min={1} max={999} style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
 
                 <div className="col-12">
-                  <label className="sb-form-label">{t("edit.hierarchy.previewLabel")}</label>
+                  <label className="sb-form-label">
+                    {t("edit.hierarchy.previewLabel")}
+                  </label>
                   <div className="hier-preview">
                     {hierNodes.map((n, i) => (
                       <React.Fragment key={i}>
@@ -537,11 +556,19 @@ export default function DeptEditPage() {
                 <table className="sb-table">
                   <thead>
                     <tr>
-                      <th style={{ width: 80 }}>{t("edit.empStatus.table.empNo")}</th>
+                      <th style={{ width: 80 }}>
+                        {t("edit.empStatus.table.empNo")}
+                      </th>
                       <th>{t("edit.empStatus.table.empName")}</th>
-                      <th style={{ width: 100 }}>{t("edit.empStatus.table.position")}</th>
-                      <th style={{ width: 160 }}>{t("edit.empStatus.table.email")}</th>
-                      <th style={{ width: 90 }}>{t("edit.empStatus.table.status")}</th>
+                      <th style={{ width: 100 }}>
+                        {t("edit.empStatus.table.position")}
+                      </th>
+                      <th style={{ width: 160 }}>
+                        {t("edit.empStatus.table.email")}
+                      </th>
+                      <th style={{ width: 90 }}>
+                        {t("edit.empStatus.table.status")}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
