@@ -54,6 +54,24 @@ public class ApprLineDelegationServiceImpl implements ApprLineDelegationService{
 			throw new IllegalArgumentException("대기중인 결재선만 위임 요청할 수 있습니다.");
 		}
 		
+		// 본인을 요청시 차단
+		if (line.getEmployee().getEmpId().equals(req.getNewEmpId())) {
+			throw new IllegalArgumentException("본인을 대결자로 지정할 수 없습니다.");
+		}
+		
+		boolean alreadyInLine = lineDao.findByApprDoc_DocIdAndEmployee_EmpId (
+				line.getApprDoc().getDocId(), req.getNewEmpId()
+		).isPresent();
+		
+		if(alreadyInLine) {
+			throw new IllegalArgumentException("이미 같은 문서의 결재선에 포함된 사람은 대결자로 지정할수 없습니다.");
+		}
+		
+		// 이미 이 결재선에 처리 대기중인 요청이 있으면 생성 차단
+		if (reqDao.existsByApprLine_LinIdAndReqStatus(req.getLinId(), "REQ")) {
+			throw new IllegalStateException("이미 처리 대기중인 위임/대결 요청이 있습니다.");
+		}
+		
 		Employee newEmp = em.getReference(Employee.class, req.getNewEmpId());
 		Employee reqEmp = em.getReference(Employee.class, reqEmpId);
 		

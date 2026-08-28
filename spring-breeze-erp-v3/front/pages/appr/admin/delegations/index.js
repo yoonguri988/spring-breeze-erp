@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import {
     Table, Select, Button, Space, Tabs,
-    DatePicker, InputNumber, Popconfirm, message,
+    DatePicker, InputNumber, Modal, message,
 } from "antd";
 import {
     fetchPendingDelegReqRequest,
@@ -17,6 +17,7 @@ import { fetchApprLogRequest } from "../../../../reducers/appr/apprLogReducer";
 import StatusBadge from "../../../../components/appr/StatusBadge";
 import PageHeader from "../../../../components/appr/PageHeader";
 import { useServerTable } from "../../../../components/appr/useServerTable";
+import moment from "moment";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -35,7 +36,9 @@ export default function DelegationAdminPage() {
         logs, logsTotal, logsLoading, logsError,
     } = useSelector((state) => state.apprLog);
 
+    // 승/반
     const [tab, setTab] = useState("pending");
+    const [confirmAction, setConfirmAction] = useState(null);
 
     // 처리이력 탭 필터/페이지
     const [histStatus, setHistStatus] = useState(undefined);
@@ -46,6 +49,9 @@ export default function DelegationAdminPage() {
     const [logDocId, setLogDocId] = useState(undefined);
     const [logEmpId, setLogEmpId] = useState(undefined);
     const [logDateRange, setLogDateRange] = useState([null, null]);
+
+    // 날짜 문자열 포맷
+    const formatDateTime = (value) => (value ? moment(value).format("YYYY-MM-DD HH:mm") : "-");
 
     // 대기중 요청 조회
     useEffect(() => {
@@ -82,6 +88,7 @@ export default function DelegationAdminPage() {
     useEffect(() => {
         if (processSuccess) {
             message.success(t("docs.detail.processedMsg"));
+            setConfirmAction(null);
             dispatch(fetchPendingDelegReqRequest());
             dispatch(resetProcessState());
         }
@@ -94,8 +101,12 @@ export default function DelegationAdminPage() {
         }
     }, [processError]);
 
-    const handleApprove = (reqId) => dispatch(approveDelegReqRequest({reqId}));
-    const handleReject = (reqId) => dispatch(rejectDelegReqRequest({reqId}));
+    const handleApprove = (reqId) => {
+        dispatch(approveDelegReqRequest({reqId: confirmAction.reqId}));
+    };
+    const handleReject = (reqId) => {
+        dispatch(rejectDelegReqRequest({reqId: confirmAction.reqId}));
+    };
 
     // 대기중 요청 탭
     const pendingColumns = [
@@ -105,25 +116,27 @@ export default function DelegationAdminPage() {
         { title: t("admin.delegations.columns.newEmpName"), dataIndex: "newEmpName", key: "newEmpName", width: 110 },
         { title: t("admin.delegations.columns.reqEmpName"), dataIndex: "reqEmpName", key: "reqEmpName", width: 110 },
         { title: t("admin.delegations.columns.reqReason"), dataIndex: "reqReason", key: "reqReason", ellipsis: true },
-        { title: t("admin.delegations.columns.createdAt"), dataIndex: "createdAt", key: "createdAt", width: 160 },
+        { title: t("admin.delegations.columns.createdAt"), dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime },
         {
             title: t("admin.delegations.columns.action"),
             key: "action",
             width: 170,
             render: (_, record) => (
                 <Space>
-                    <Popconfirm
-                        title={t("admin.delegations.approveConfirmTitle")}
-                        onConfirm={() => handleApprove(record.reqId)}
+                    <Button
+                        size="small"
+                        type="primary"
+                        onClick={() => setConfirmAction({type: "approve", reqId: record.reqId})}
                     >
-                        <Button size="small" type="primary" loading={processSubmitting}>{t("docs.detail.approveBtn")}</Button>
-                    </Popconfirm>
-                    <Popconfirm
-                        title={t("admin.delegations.rejectConfirmTitle")}
-                        onConfirm={() => handleReject(record.reqId)}
+                        {t("docs.detail.approveBtn")}
+                    </Button>
+                    <Button
+                        size="small"
+                        danger
+                        onClick={() => setConfirmAction({type: "reject", reqId: record.reqId})}
                     >
-                        <Button size="small" danger loading={processSubmitting}>{t("docs.detail.rejectBtn")}</Button>
-                    </Popconfirm>
+                        {t("docs.detail.rejectBtn")}
+                    </Button>
                 </Space>
             ),
         },
@@ -141,8 +154,8 @@ export default function DelegationAdminPage() {
             title: t("admin.delegations.columns.status"), dataIndex: "reqStatus", key: "reqStatus", width: 90,
             render: (status) => <StatusBadge domain="delegReq" status={status} />,
         },
-        { title: t("admin.delegations.columns.createdAt"), dataIndex: "createdAt", key: "createdAt", width: 160 },
-        { title: t("admin.delegations.columns.processedAt"), dataIndex: "processedAt", key: "processedAt", width: 160 },
+        { title: t("admin.delegations.columns.createdAt"), dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime },
+        { title: t("admin.delegations.columns.processedAt"), dataIndex: "processedAt", key: "processedAt", width: 160, render: formatDateTime },
     ];
 
     // 감사로그 탭
@@ -152,11 +165,11 @@ export default function DelegationAdminPage() {
         { title: t("admin.delegations.columns.oriEmpName"), dataIndex: "oriEmpName", key: "oriEmpName", width: 110 },
         { title: t("admin.delegations.columns.actEmpName"), dataIndex: "actEmpName", key: "actEmpName", width: 110 },
         { title: t("admin.delegations.columns.perEmpName"), dataIndex: "perEmpName", key: "perEmpName", width: 130 },
-        { title: t("admin.delegations.columns.occurredAt"), dataIndex: "createdAt", key: "createdAt", width: 160 },
+        { title: t("admin.delegations.columns.occurredAt"), dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime },
     ];
 
     return (
-        <div className="sb-page" style={{maxWidth: 1200}}>
+        <div className="sb-page">
             <PageHeader
                 breadcrumb={[
                     { label: t("common.breadcrumbRoot"), href: "/appr/docs" },
@@ -184,6 +197,7 @@ export default function DelegationAdminPage() {
                     dataSource={pendingRequests}
                     loading={pendingLoading}
                     pagination={false}
+                    scroll={{x: 1200}}
                 />
                 {pendingError && <div style={{color: "red", marginTop: 8}}>{pendingError}</div>}
                 </>
@@ -225,6 +239,7 @@ export default function DelegationAdminPage() {
                         total: historyTotal,
                         onChange: setHistPage,
                     }}
+                    scroll={{x: 1250}}
                 />
                 {historyError && <div style={{color: "red", marginTop: 8}}>{historyError}</div>}
                 </>
@@ -261,10 +276,27 @@ export default function DelegationAdminPage() {
                             total: logsTotal,
                             onChange: setLogPage,
                         }}
+                        scroll={{x: 800}}
                     />
                     {logsError && <div style={{ color: "red", marginTop: 8 }}>{logsError}</div>}
                 </>
             )}
+            <Modal
+                title={confirmAction?.type === "approve" ? t("docs.detail.approveBtn") : t("docs.detail.rejectBtn")}
+                open={confirmAction !== null}
+                onCancel={() => setConfirmAction(null)}
+                onOk={confirmAction?.type === "approve" ? handleApprove : handleReject}
+                confirmLoading={processSubmitting}
+                okText={confirmAction?.type === "approve" ? t("docs.detail.approveBtn") : t("docs.detail.rejectBtn")}
+                cancelText={t("docs.write.cancelBtn")}
+                okButtonProps={{danger: confirmAction?.type === "reject"}}
+            >
+                <p>
+                    {confirmAction?.type === "approve"
+                        ? t("admin.delegations.approveConfirmTitle")
+                        : t("admin.delegations.rejectConfirmTitle")}
+                </p>
+            </Modal>
         </div>
     );
 }

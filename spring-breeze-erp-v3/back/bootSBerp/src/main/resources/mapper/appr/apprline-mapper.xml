@@ -30,6 +30,7 @@
 		where
 			doc_id = #{docId}
 			and emp_id = #{empId}
+			and lin_status = 'WAI'
 	</update>
 	
 	<!-- 결재선 조회 -->

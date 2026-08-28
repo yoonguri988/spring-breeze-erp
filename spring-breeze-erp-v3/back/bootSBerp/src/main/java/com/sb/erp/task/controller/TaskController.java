@@ -47,7 +47,7 @@ public class TaskController {
 	private final TaskDependencyService dependencyService; 
 	private final ProjectService projectService;
 	
-	// 태스크 등록에 필요한 참고 데이터(멤버 목록, 선행작업 후보 목록) 조회
+	// 태스크 등록에 필요한 참고 데이터 — 같은 회사(ROOT 포함)
 	@Operation(summary = "태스크 등록 참고 데이터", description = "등록 폼에 필요한 프로젝트 멤버/선행작업 후보 목록을 조회합니다.")
 	@GetMapping("/create-context")
 	public ResponseEntity<Map<String, Object>> getCreateContext(
@@ -58,9 +58,20 @@ public class TaskController {
 			return ResponseEntity.notFound().build();
 		}
 
-		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+		if (!project.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		
+		boolean isRoot = principal.getRoles().contains("ROOT");
+		boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
+		boolean isCreator = project.getEmpId().equals(principal.getEmpId());
+
+		boolean isMember = memberservice.select(projectProId).stream()
+		        .anyMatch(m -> m.getEmpId().equals(principal.getEmpId()));
+
+		if (!isAdmin && !isCreator && !isMember) {
+		    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+		            .body(Map.of("message", "태스크 등록 권한이 없습니다."));
 		}
 
 		Map<String, Object> result = new HashMap<>();
@@ -69,8 +80,7 @@ public class TaskController {
 		return ResponseEntity.ok(result);
 	}
 	
-	// 태스크 등록
-	// ★Authentication 
+	// 태스크 등록 — 같은 회사(ROOT 포함) + (관리자 or 생성자 or 참여멤버)
 	@Operation(summary = "태스크 등록", description = "신규 태스크를 등록합니다.")
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createTask(
@@ -86,7 +96,7 @@ public class TaskController {
 			return ResponseEntity.notFound().build();
 		}
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+		if (!project.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
@@ -128,8 +138,7 @@ public class TaskController {
 		}
 	}
 	
-	// 태스크 상세조회
-	// ★Authentication 
+	// 태스크 상세조회 — 같은 회사(ROOT 포함) + (관리자 or 생성자 or 참여멤버)
 	@Operation(summary = "태스크 상세조회", description = "태스크 상세 정보 + 선행작업 + 영향받는 후속작업을 조회합니다.")
 	@GetMapping("/{taskId}")
 	public ResponseEntity<Map<String, Object>> getTask(
@@ -147,7 +156,7 @@ public class TaskController {
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+		if (!project.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
@@ -166,15 +175,12 @@ public class TaskController {
 		result.put("task", dto);
 		result.put("proId", dto.getProId());
 		
-		// 선행 작업이 있으면 그 태스크 정보도 함께
 		if (dto.getParentTaskId() != null) {
 			result.put("parentTask", service.select(dto.getParentTaskId()));
 		}
 
-		// 이 태스크를 수정하면 영향을 받는 후속 작업들
 		result.put("impactTasks", dependencyService.selectImpactTasks(taskId));
 
-		// 지연 여부 판단 (완료 안 됐는데 마감일이 지남)
 		boolean isDelayed = !"DONE".equals(dto.getTaskStatus())
 				&& dto.getTaskEndDate().isBefore(LocalDate.now());
 		result.put("isDelayed", isDelayed);
@@ -182,7 +188,7 @@ public class TaskController {
 		return ResponseEntity.ok(result);
 	  }
 	 	  
-	 // 태스크 수정에 필요한 참고 데이터 
+	 // 태스크 수정에 필요한 참고 데이터 — 같은 회사(ROOT 포함) + (관리자 or 생성자 or 담당자)
 	@Operation(summary = "태스크 수정 참고 데이터", description = "수정 폼에 필요한 태스크 정보 + 멤버/선행작업 후보 목록을 조회합니다.")
 	@GetMapping("/{taskId}/edit-context")
 	public ResponseEntity<Map<String, Object>> getEditContext(
@@ -202,7 +208,7 @@ public class TaskController {
 		ProjmemResponse assignee = memberservice.selectOne(task.getPmId());
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+		if (!project.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
@@ -224,8 +230,7 @@ public class TaskController {
 	}
 		  
 	  
-	// 태스크 수정
-	// ★Authentication 
+	// 태스크 수정 — 같은 회사(ROOT 포함) + (관리자 or 생성자 or 담당자)
 	@Operation(summary = "태스크 수정", description = "태스크 일정/상태 등을 수정합니다.")
 	@PutMapping("/{taskId}")
 	public ResponseEntity<Map<String, Object>> updateTask(
@@ -249,7 +254,7 @@ public class TaskController {
 		ProjmemResponse assignee = memberservice.selectOne(original.getPmId());
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+		if (!project.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
@@ -276,17 +281,13 @@ public class TaskController {
 			return ResponseEntity.internalServerError().body(result);
 
 		} catch (IllegalArgumentException | IllegalStateException e) {
-			// 멀티캐치: 순환참조(IllegalArgumentException), 완료된 프로젝트/동시수정 락 타임아웃(IllegalStateException)
-			// 예상된 예외만 여기서 잡아서 사용자에게 메시지로 안내.
-			// Exception으로 넓게 잡지 않는 이유: 의도치 않은 버그(NPE 등)까지 숨겨버리면 디버깅이 어려워지기 때문
 			result.put("success", false);
 			result.put("message", e.getMessage());
 			return ResponseEntity.badRequest().body(result);
 		}
 	  }
 	  
-	// 태스크 삭제
-	// ★Authentication
+	// 태스크 삭제 — 같은 회사(ROOT 포함) + (관리자 or 생성자)
 	@Operation(summary = "태스크 삭제", description = "태스크를 삭제합니다.")
 	@DeleteMapping("/{taskId}")
 	public ResponseEntity<Map<String, Object>> deleteTask(
@@ -302,12 +303,11 @@ public class TaskController {
 		}
 		  
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+		if (!project.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
 
-		// 삭제는 담당자 제외, 생성자/관리자만 가능
 		boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
 		boolean isCreator = project.getEmpId().equals(principal.getEmpId());
 		if (!isAdmin && !isCreator) {
@@ -329,7 +329,6 @@ public class TaskController {
 	  }
 	    	
 	// 내 태스크 목록
-	// ★Authentication
 	@Operation(summary = "내 태스크 목록 조회", description = "로그인한 사용자가 담당자로 지정된 태스크 목록을 조회합니다.")
 	@GetMapping("/mine")
 	public ResponseEntity<Map<String, Object>> getMyTasks(
@@ -358,7 +357,7 @@ public class TaskController {
 		return ResponseEntity.ok(result);
 	}
 		
-	    //간트 차트
+	    //간트 차트 — 같은 회사(ROOT 포함) + (관리자 or 생성자 or 참여멤버)
 		@Operation(summary = "간트차트 조회", description = "프로젝트의 태스크 의존관계를 간트차트용으로 조회합니다.")
 		@GetMapping("/gantt")
 		public ResponseEntity<List<TaskResponse>> gantt(
@@ -371,7 +370,7 @@ public class TaskController {
 			}
 
 			boolean isRoot = principal.getRoles().contains("ROOT");
-			if (!isRoot && !project.getComId().equals(principal.getComId())) {
+			if (!project.getComId().equals(principal.getComId())) {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 			}
 
@@ -386,11 +385,32 @@ public class TaskController {
 			return ResponseEntity.ok(dependencyService.selectTaskDependencies(proId));
 		}//간트차트
 		
-		// 핵심 병목 탐색
+		// 핵심 병목 탐색 — 같은 회사(ROOT 포함) + (관리자 or 생성자 or 참여멤버)
 		@Operation(summary = "핵심 병목 탐색")
 		@GetMapping("/critical-path")
-		public ResponseEntity<List<TaskResponse>> findCriticalPath(@RequestParam("proId") Long proId) {
+		public ResponseEntity<List<TaskResponse>> findCriticalPath(
+				@RequestParam("proId") Long proId,
+				@AuthenticationPrincipal CustomUserPrincipal principal) {
+
+			ProjResponse project = projectService.select(proId);
+			if (project == null) {
+				return ResponseEntity.notFound().build();
+			}
+
+			boolean isRoot = principal.getRoles().contains("ROOT");
+			if (!project.getComId().equals(principal.getComId())) {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			}
+
+			boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
+			boolean isCreator = project.getEmpId().equals(principal.getEmpId());
+			boolean isMember = memberservice.select(proId).stream()
+					.anyMatch(m -> m.getEmpId().equals(principal.getEmpId()));
+
+			if (!isAdmin && !isCreator && !isMember) {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			}
+
 		    return ResponseEntity.ok(dependencyService.findCriticalPath(proId));
 		}
 }
-

@@ -46,7 +46,7 @@ export default function FormWritePage() {
     const comIdValue = Form.useWatch("comId", form);
 
     // 연차 관련 //
-    const [forCategory, setForCategory] = useState("GENARAL");
+    const [forCategory, setForCategory] = useState("GENERAL");
 
     const LEAVE_REQUIRED_FIELDS = [
         {key: "leaveType", label: t("forms.write.leaveFieldLabels.leaveType"), type: "select", required: true, options: ["ANNUAL", "HALF_AM", "HALF_PM"]},
@@ -231,7 +231,7 @@ export default function FormWritePage() {
     }
 
     return (
-        <div className="sb-page" style={{maxWidth: 1100, margin: "0 auto"}}>
+        <div className="sb-page">
             <PageHeader
                 breadcrumb={[
                     { label: t("common.breadcrumbRoot"), href: "/appr/forms" },
@@ -248,7 +248,6 @@ export default function FormWritePage() {
                 layout="vertical"
                 onFinish={handleSubmit}
                 initialValues={{forStatus: true}}
-                style={{maxWidth: 760}}
             >
                 {/* 1. 기본정보 */}
                 <Card title={t("forms.write.basicInfoCardTitle")} style={{marginBottom: 24}}>
@@ -366,7 +365,9 @@ export default function FormWritePage() {
                 </Card>
 
                 {/* 2. 본문 / 스키마 */}
-                <Card title={contentMode === "editor" ? t("forms.write.contentCardTitleEditor") : t("forms.write.contentCardTitleAi")}>
+                <Card title={contentMode === "editor" ? t("forms.write.contentCardTitleEditor") 
+                            : forCategory === "LEAVE" ? t("forms.write.contentCardTitleAi")
+                            : "AI 스키마 설정"}>
                     {contentMode === "editor" ? (
                         <Form.Item label={t("forms.write.contentLabel")}>
                             <Space style={{marginBottom: 8}} wrap>
@@ -384,24 +385,26 @@ export default function FormWritePage() {
                             />
                         </Form.Item>
                     ) : (<>
-                        <Form.Item label={t("forms.write.aiPromptLabel")}>
-                            <Input.Group compact>
-                                <Input
-                                    style={{width: "calc(100% - 100px)"}}
-                                    placeholder={t("forms.write.aiPromptPlaceholder")}
-                                    value={aiPrompt}
-                                    onChange={(e) => setAiPrompt(e.target.value)}
-                                    onPressEnter={handleGenerateSchema}
-                                />
-                                <Button
-                                    style={{width: 100}}
-                                    loading={aiLoading}
-                                    onClick={handleGenerateSchema}
-                                >
-                                    {t("forms.write.aiGenerateBtn")}
-                                </Button>
-                            </Input.Group>
-                        </Form.Item>
+                        {forCategory !== "LEAVE" && (
+                            <Form.Item label={t("forms.write.aiPromptLabel")}>
+                                <Input.Group compact>
+                                    <Input
+                                        style={{width: "calc(100% - 100px)"}}
+                                        placeholder={t("forms.write.aiPromptPlaceholder")}
+                                        value={aiPrompt}
+                                        onChange={(e) => setAiPrompt(e.target.value)}
+                                        onPressEnter={handleGenerateSchema}
+                                    />
+                                    <Button
+                                        style={{width: 100}}
+                                        loading={aiLoading}
+                                        onClick={handleGenerateSchema}
+                                    >
+                                        {t("forms.write.aiGenerateBtn")}
+                                    </Button>
+                                </Input.Group>
+                            </Form.Item>
+                        )}
 
                         {schemaFields.length > 0 ? (
                             <Form.Item label={t("forms.write.schemaFieldsGeneratedLabel")}>

@@ -96,3 +96,8 @@
     color:#999;
     margin:8px 0;
 }
+
+.sb-table__name--disabled {
+  color: #bbb;
+  cursor: not-allowed;
+}

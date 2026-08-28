@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sb.erp.appr.dto.request.ApprDocRequest;
 import com.sb.erp.appr.dto.request.ApprDocSearchCondition;
+import com.sb.erp.appr.dto.request.ApprDocUpdateRequest;
 import com.sb.erp.appr.dto.response.ApprDocInitResponse;
 import com.sb.erp.appr.dto.response.ApprDocResponse;
 import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
@@ -19,6 +20,7 @@ public interface ApprDocService {
 	public List<ApprFormResponse> findForm(Long comId);
 	public ApprDocInitResponse initResponse(Long empId);
 	public Long insertDocAndLine(ApprDocRequest req, Long empId, Long comId);
+	public void updateDoc(Long docId, ApprDocUpdateRequest req, Long empId);
 	
 	// ======== 문서 조회 파트 =========
 	

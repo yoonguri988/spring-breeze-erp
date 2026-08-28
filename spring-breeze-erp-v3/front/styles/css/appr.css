@@ -96,11 +96,16 @@
 	background: var(--sb-red-soft);
 }
 
-.appr-slot.filled:hover .appr-slot__body::after {
+.appr-slot.filled .appr-slot__body::after {
 	content: " (클릭 시 제외) ";
 	font-size: 11.5px;
 	font-weight: 500;
 	color: var(--sb-red);
+	transition: color .12s;
+}
+
+.appr-slot.filled:hover .appr-slot__body::after {
+    color: var(--sb-red);
 }
 
 /* 부서 소속 사원 목록 */

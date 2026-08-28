@@ -21,6 +21,9 @@ public interface ApprLineRequestRepository extends JpaRepository<ApprLineRequest
 	// 사용자용 - 본인이 신청한 요청 목록
 	public List<ApprLineRequest> findByReqEmp_EmpIdOrderByCreatedAtDesc(Long empId);
 	
+	// 관리자용 - 대기중인 요청이 있는지 검증
+	public boolean existsByApprLine_LinIdAndReqStatus(Long linId, String reqStatus);
+	
 	// 관리자 콘솔 - 상태/요청자/기간 필터 조회 (전부 선택적, 전체이력용)
 	@Query("""
 		select

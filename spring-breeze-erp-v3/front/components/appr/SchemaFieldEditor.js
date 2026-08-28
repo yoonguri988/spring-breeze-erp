@@ -99,6 +99,7 @@ export default function SchemaFieldEditor({ fields, onChange, readOnly = false }
                                     value={field.options || []}
                                     onChange={(options) => updateField(index, {options})}
                                     tokenSeparators={[","]}
+                                    disabled={readOnly}
                                 />
                             </div>
                         )}   

@@ -57,6 +57,11 @@ export default function ProjListPage() {
     error,
   } = useSelector((state) => state.proj);
 
+  // 로그인 사용자 정보 — ROOT 계정의 타 회사 프로젝트 클릭 제한에 사용
+  const { user } = useSelector((state) => state.auth);
+  const isRoot = user?.roles?.includes("ROOT");
+  const myComId = user?.comId;
+
   // 검색창/필터 입력값을 화면에 표시하기 위한 로컬 state
   // (실제 조회는 URL 쿼리스트링을 기준으로 동작함)
   const [keyword, setKeyword] = useState("");
@@ -144,18 +149,30 @@ export default function ProjListPage() {
       title: t("list.table.name"),
       dataIndex: "proName",
       key: "proName",
-      render: (name, record) => (
-        <Link
-          href={{
-            pathname: "/proj/proj_detail",
-            query: { proId: record.proId },
-          }}
-        >
-          <span className="sb-table__name" style={{ cursor: "pointer" }}>
-            {name}
-          </span>
-        </Link>
-      ),
+      render: (name, record) => {
+        const isOtherCompany = isRoot && record.comId !== myComId;
+
+        if (isOtherCompany) {
+          return (
+            <span className="sb-table__name sb-table__name--disabled">
+              {name}
+            </span>
+          );
+        }
+
+        return (
+          <Link
+            href={{
+              pathname: "/proj/proj_detail",
+              query: { proId: record.proId },
+            }}
+          >
+            <span className="sb-table__name" style={{ cursor: "pointer" }}>
+              {name}
+            </span>
+          </Link>
+        );
+      },
     },
     {
       title: t("list.table.desc"),
@@ -177,18 +194,31 @@ export default function ProjListPage() {
       key: "memberCnt",
       width: 110,
       align: "center",
-      render: (_, record) => (
-        <Link
-          href={{
-            pathname: "/proj/proj_member",
-            query: { proId: record.proId },
-          }}
-        >
-          <Button type="text" size="small" icon={<TeamOutlined />}>
-            {record.memberCnt ?? 0}{t("list.table.memberCntSuffix")}
-          </Button>
-        </Link>
-      ),
+      render: (_, record) => {
+        const isOtherCompany = isRoot && record.comId !== myComId;
+        const countLabel = `${record.memberCnt ?? 0}${t("list.table.memberCntSuffix")}`;
+
+        if (isOtherCompany) {
+          return (
+            <Button type="text" size="small" icon={<TeamOutlined />} disabled>
+              {countLabel}
+            </Button>
+          );
+        }
+
+        return (
+          <Link
+            href={{
+              pathname: "/proj/proj_member",
+              query: { proId: record.proId },
+            }}
+          >
+            <Button type="text" size="small" icon={<TeamOutlined />}>
+              {countLabel}
+            </Button>
+          </Link>
+        );
+      },
     },
     {
       title: t("list.table.status"),
