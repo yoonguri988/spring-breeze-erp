@@ -7,7 +7,7 @@ import Link from "next/link";
 
 import { Button, Input, Select, DatePicker, message } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
-import dayjs from "dayjs";
+import moment from "moment";
 import { useTranslation } from "react-i18next";
 
 import { fetchProjDetailRequest, updateProjRequest, } from "../../reducers/proj/projReducer";
@@ -96,7 +96,7 @@ export default function ProjEditPage() {
     if (!form.proStatus) { message.warning(t("edit.statusRequired")); return; }
     if (!form.startDate) { message.warning(t("edit.startDateRequired")); return; }
     if (!form.endDate) { message.warning(t("edit.endDateRequired")); return; }
-    if (dayjs(form.startDate).isAfter(dayjs(form.endDate))) { message.warning(t("edit.dateOrderError")); return; }
+    if (moment(form.startDate).isAfter(moment(form.endDate))) { message.warning(t("edit.dateOrderError")); return; }
 
     dispatch(
       updateProjRequest({
@@ -210,7 +210,7 @@ export default function ProjEditPage() {
               <DatePicker
                 value={
                   form.startDate
-                    ? dayjs(form.startDate)
+                    ? moment(form.startDate)
                     : null
                 }
                 onChange={(date) =>
@@ -230,7 +230,7 @@ export default function ProjEditPage() {
               <DatePicker
                 value={
                   form.endDate
-                    ? dayjs(form.endDate)
+                    ? moment(form.endDate)
                     : null
                 }
                 onChange={(date) =>
@@ -249,7 +249,7 @@ export default function ProjEditPage() {
           <div className="mb-4">
             <label className="sb-form-label"> {t("edit.updatedAtLabel")} </label>
             <Input
-              value={ dto.updatedAt ? dayjs(dto.updatedAt).format( "YYYY-MM-DD HH:mm:ss" ) : "-" }
+              value={ dto.updatedAt ? moment(dto.updatedAt).format( "YYYY-MM-DD HH:mm:ss" ) : "-" }
               readOnly
               style={{
                 maxWidth: 250,
