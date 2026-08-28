@@ -106,7 +106,10 @@ public class SecurityConfig {
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"error\":\"FORBIDDEN\"}");
+                    //response.getWriter().write("{\"error\":\"FORBIDDEN\"}");
+                    response.getWriter().write(
+                            "{\"error\":\"FORBIDDEN\",\"message\":\"접근 권한이 없습니다.\"}"
+                        );
                 })
             )
             .oauth2Login(oauth2 -> oauth2

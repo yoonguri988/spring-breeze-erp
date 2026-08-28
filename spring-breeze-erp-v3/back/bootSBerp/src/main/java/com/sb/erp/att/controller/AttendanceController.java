@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,17 +35,12 @@ public class AttendanceController {
 	private final AttendanceService attendanceService;
 	private final AuthUserJwtService authUserJwtService;
 	
-	// 관리자 판별: getCurrentRoles()에 ROLE_ADMIN 또는 ROOT가 있는지 확인
-	private boolean isAdmin(Authentication auth) {
-		List<String> roles = authUserJwtService.getCurrentRoles(auth);
-		return roles != null && (roles.contains("ROLE_ADMIN") || roles.contains("ROOT"));
-	}
-
+	
 	//GET /api/att getAllAttendances @RequestParam (startDate, endDate, start, end)
 	@Operation(summary = "근태 목록 조회", description = "검색 조건과 페이징을 적용한 근태 목록")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping
 	public ResponseEntity<List<AttendanceResponse>> list(
-			Authentication auth,
 			@RequestParam("startDate") LocalDate startDate,
 			@RequestParam("endDate") LocalDate endDate,
 			@RequestParam(name="keyword", required=false) String keyword,
@@ -56,6 +52,7 @@ public class AttendanceController {
 
 		return ResponseEntity.ok(list);
 	}
+	
 	
 	//GET	/api/attendance/my	getAttendanceByEmpId	JWT에서 empId
 	@Operation(summary = "근태 상세 조회", description = "자신의 근태 목록 조회")
@@ -87,16 +84,9 @@ public class AttendanceController {
 	
 	//POST
 	@Operation(summary = "관리자 근태 등록")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/admin")
-	public ResponseEntity<?> create(
-			Authentication auth,
-			@RequestBody AttendanceRequest request){
-		
-		if(!isAdmin(auth)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-					.body(Map.of("message", "등록 권한이 없습니다."));
-		}
-		
+	public ResponseEntity<?> create(@RequestBody AttendanceRequest request){
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(attendanceService.createAtt(request));
 	}
@@ -104,21 +94,13 @@ public class AttendanceController {
 	
 	//PUT	/api/attendance/{attId}	editAtt	@PathVariable + @RequestBody
 	@Operation(summary = "기록된 근태 내용 수정")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{attId}")
 	public ResponseEntity<?> edit(
-			Authentication auth,
 			@PathVariable("attId") Long attId,
 			@RequestBody AttendanceRequest request) {
-
-		boolean isAdmin = isAdmin(auth);
-		
-		if (!isAdmin) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-					.body(Map.of("message", "수정 권한이 없습니다."));
-		}
 		
 		AttendanceResponse updated = attendanceService.editAtt(attId, request);
 		return ResponseEntity.ok(updated);
 	}
-	
 }

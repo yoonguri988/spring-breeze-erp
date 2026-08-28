@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/perm")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')") // 전체가 관리자용이므로 클래스 선언 위에 하나만
 @Tag(name = "권한 관리", description = "권한 CRUD, 사원-권한 부여/회수 API")
 public class PermController {
 
