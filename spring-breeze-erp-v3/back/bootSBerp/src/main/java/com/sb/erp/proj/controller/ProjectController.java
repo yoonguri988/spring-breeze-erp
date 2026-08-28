@@ -100,7 +100,7 @@ public class ProjectController {
 		return ResponseEntity.internalServerError().body(result);
 	}
 	
-	// 프로젝트 상세조회 — 같은 회사 + (관리자 or 생성자 or 참여멤버)
+	// 프로젝트 상세조회 — 같은 회사(ROOT 포함) + (관리자 or 생성자 or 참여멤버)
 	@Operation(summary = "프로젝트 상세조회", description = "프로젝트 상세 + 태스크 목록 + 멤버 목록 조회")
 	@GetMapping("/{proId}")
 	public ResponseEntity<Map<String, Object>> getProjectDetail(
@@ -114,20 +114,20 @@ public class ProjectController {
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !dto.getComId().equals(principal.getComId())) {
+		if (!dto.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
 
-		boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
-		boolean isCreator = dto.getEmpId().equals(principal.getEmpId());
-		boolean isMember = memberService.select(proId).stream()
-				.anyMatch(m -> m.getEmpId().equals(principal.getEmpId()));
-
-		if (!isAdmin && !isCreator && !isMember) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-					.body(Map.of("message", "접근 권한이 없습니다."));
-		}
+//		boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
+//		boolean isCreator = dto.getEmpId().equals(principal.getEmpId());
+//		boolean isMember = memberService.select(proId).stream()
+//				.anyMatch(m -> m.getEmpId().equals(principal.getEmpId()));
+//
+//		if (!isAdmin && !isCreator && !isMember) {
+//			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//					.body(Map.of("message", "접근 권한이 없습니다."));
+//		}
 
 		 // 태스크 페이징 처리
 	    int taskTotalCnt = taskService.selectCnt(proId);
@@ -145,7 +145,7 @@ public class ProjectController {
 	    return ResponseEntity.ok(result);
 	}
 	
-	// 프로젝트 수정 — 같은 회사 + (관리자 or 생성자)
+	// 프로젝트 수정 — 같은 회사(ROOT 포함) + (관리자 or 생성자)
 	@Operation(summary = "프로젝트 수정", description = "프로젝트 정보를 수정")
 	@PutMapping("/{proId}")
 	public ResponseEntity<Map<String, Object>> updateProject(
@@ -159,7 +159,7 @@ public class ProjectController {
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !original.getComId().equals(principal.getComId())) {
+		if (!original.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
@@ -187,7 +187,7 @@ public class ProjectController {
 		return ResponseEntity.notFound().build();
 	}
 
-	// 프로젝트 삭제 — 같은 회사 + (관리자 or 생성자)
+	// 프로젝트 삭제 — 같은 회사(ROOT 포함) + (관리자 or 생성자)
 	@Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제")
 	@DeleteMapping("/{proId}")
 	public ResponseEntity<Map<String, Object>> deleteProject(
@@ -200,7 +200,7 @@ public class ProjectController {
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !original.getComId().equals(principal.getComId())) {
+		if (!original.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
@@ -226,7 +226,7 @@ public class ProjectController {
 	    return ResponseEntity.notFound().build();
 	}
 	
-	// AI 프로젝트 분석 결과 — 같은 회사 + (관리자 or 생성자 or 참여멤버)
+	// AI 프로젝트 분석 결과 — 같은 회사(ROOT 포함) + (관리자 or 생성자 or 참여멤버)
 	@Operation(summary = "AI 프로젝트 분석", description = "프로젝트 리스크 분석 결과를 반환")
 	@GetMapping("/{proId}/analysis")
 	public ResponseEntity<?> analyzeProject(
@@ -239,7 +239,7 @@ public class ProjectController {
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+		if (!project.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}

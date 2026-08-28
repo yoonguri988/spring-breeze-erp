@@ -46,7 +46,9 @@ import applicantPublicSaga from "./apct/applicantPublicSaga";
 import apctAuthSaga from "./apct/apctAuthSaga";
 import resumeSaga from "./rsm/resumeSaga";
 import resumePublicSaga from "./rsm/resumePublicSaga";
-// 대시보드
+
+// 메인 화면 - 대시보드
+import adminDashboardSaga from "./dashboard/adminDashboardSaga";
 import userDashboardSaga from "./dashboard/userDashboardSaga";
 
 export default function* rootSaga() {
@@ -96,7 +98,8 @@ export default function* rootSaga() {
     fork(apctAuthSaga),
     fork(resumeSaga),
     fork(resumePublicSaga),
-    // 대시보드
+    // 메인 화면 - 대시보드
+    fork(adminDashboardSaga),
     fork(userDashboardSaga),
   ]);
 }

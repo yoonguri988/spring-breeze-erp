@@ -19,6 +19,7 @@ const STATUS_TAG_COLOR = { TODO: "default", DOING: "processing", DONE: "success"
 const RISK_TAG_COLOR = { HIGH: "red", MEDIUM: "blue", LOW: "green" };
 
 export default function ProjDetailPage(){
+  
     const router = useRouter();
     const dispatch = useDispatch();
     const { t } = useTranslation("proj");
@@ -49,6 +50,10 @@ export default function ProjDetailPage(){
       taskPaging,
       memberList = []
     } = currentProject;
+
+const isCreator = String(detail?.empId) === String(user?.empId);
+const isProjectMember = memberList.some( (member) => String(member.empId) === String(user?.empId) );
+const canCreateTask = isAdmin || isCreator || isProjectMember;
 
     const [taskPage, setTaskPage] = useState(1);
     const taskPageSize = 10;
@@ -195,7 +200,6 @@ export default function ProjDetailPage(){
       }
     };
   }, [ganttTasks, criticalPathTasks]);
-
   return(
     <main className="sb-content">
       {/* 페이지 헤더 */}
@@ -256,9 +260,17 @@ export default function ProjDetailPage(){
             <div className="sb-card__head">
               <h2>{t("detail.taskListTitle")}</h2>
               <div className="right">
+              {canCreateTask && (
                 <Link href={{ pathname: "/proj/task_create", query: { proId } }}>
-                  <Button size="small" className="btn-sb" icon={<CheckSquareOutlined />}>{t("detail.addTaskBtn")}</Button>
+                  <Button
+                    size="small"
+                    className="btn-sb"
+                    icon={<CheckSquareOutlined />}
+                  >
+                    {t("detail.addTaskBtn")}
+                  </Button>
                 </Link>
+              )}
               </div>
             </div>
             <div className="sb-card__body--flush">

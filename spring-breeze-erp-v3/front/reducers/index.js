@@ -45,7 +45,8 @@ import applicantPublicReducer from "./apct/applicantPublicReducer";
 import apctAuthReducer from "./apct/apctAuthReducer";
 import resumeReducer from "./rsm/resumeReducer";
 import resumePublicReducer from "./rsm/resumePublicReducer";
-// 대시보드 관련 리듀서
+// 메인화면 - 대시보드
+import adminDashboardReducer from "./dashboard/adminDashboardReducer";
 import userDashboardReducer from "./dashboard/userDashboardReducer";
 
 const rootReducer = combineReducers({
@@ -94,8 +95,10 @@ const rootReducer = combineReducers({
   apctAuth: apctAuthReducer, // state.apctAuth
   resume: resumeReducer, // state.resume
   resumePublic: resumePublicReducer, // state.resumePublic
-  // 대시보드 관련 리듀서
+  // 메인화면 - 대시보드
+  adminDashboard: adminDashboardReducer, // state.adminDashboard
   userDashboard: userDashboardReducer, // state.userDashboard
+
 });
 
 export default rootReducer;
