@@ -77,5 +77,16 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	    @Param("empIds") List<Long> empIds,
 	    @Param("startDate") LocalDate startDate,
 	    @Param("endDate") LocalDate endDate);
+	
+	
+	// 관리자 대시보드용 — 특정 날짜 + 사원 ID 목록으로 근태 레코드 조회
+	/* 
+		IN 절에 사원 수가 1,000명을 넘으면 Oracle에서 ORA-01795: 
+		maximum number of expressions in a list is 1000 에러가 발생할 수 있다. 
+	 	현재 ERP 프로젝트 규모(수십~수백 명)에서는 문제없지만, 
+	 	대규모 확장 시에는 IN 절을 500개 단위로 분할하는 처리가 필요
+	*/
+	List<Attendance> findByAttDateAndEmployee_EmpIdIn(
+	    LocalDate attDate, List<Long> empIds);
 
 }
