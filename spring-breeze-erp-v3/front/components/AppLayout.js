@@ -8,6 +8,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import useIdleLogout from "../utils/useIdleLogout";
 import SalAiChatWidget from "./sal/SalAiChatWidget";
+import HrAiChatWidget from "./emp/HrAiChatWidget";
 
 const { Sider, Content } = Layout;
 const LS_LAYOUT_KEY = "sberp.layout"; // "standard" | "rail"
@@ -45,6 +46,10 @@ function AppLayout({ children }) {
   // AI 급여 Q&A 챗봇 위젯: /sal/** 경로(급여관리 화면)를 보고 있을 때만 띄운다.
   const showSalAiChat = router.pathname.startsWith("/sal");
 
+  // HR 근무규정 Q&A 챗봇 위젯이 나타나는 경로들(사원, 근태/연차 관리파트)
+  const hrAiChatPaths = ["/emp", "/att"];
+  const showHrAiChat = hrAiChatPaths.some((p) => router.pathname.startsWith(p));  
+
   // 아직 loadUser(쿠키 → accessToken 복원)가 끝나지 않았거나(initialized===false),
   // 끝났는데도 accessToken이 없는 경우(리다이렉트 대상) 모두 레이아웃을 그리지 않는다.
   if (!initialized || !accessToken) {
@@ -75,6 +80,7 @@ function AppLayout({ children }) {
         <Footer />
       </Layout>
       {showSalAiChat && <SalAiChatWidget />}
+      {showHrAiChat && <HrAiChatWidget />}
     </Layout>
   );
 }

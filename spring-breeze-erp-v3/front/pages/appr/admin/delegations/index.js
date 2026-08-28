@@ -87,7 +87,7 @@ export default function DelegationAdminPage() {
     // 승인/반려 처리 결과 반영
     useEffect(() => {
         if (processSuccess) {
-            message.success("처리되었습니다.");
+            message.success(t("docs.detail.processedMsg"));
             setConfirmAction(null);
             dispatch(fetchPendingDelegReqRequest());
             dispatch(resetProcessState());
@@ -110,15 +110,15 @@ export default function DelegationAdminPage() {
 
     // 대기중 요청 탭
     const pendingColumns = [
-        { title: "요청ID", dataIndex: "reqId", key: "reqId", width: 80 },
-        { title: "문서", dataIndex: "docTitle", key: "docTitle" },
-        { title: "원결재자", dataIndex: "oriEmpName", key: "oriEmpName", width: 110 },
-        { title: "대결자", dataIndex: "newEmpName", key: "newEmpName", width: 110 },
-        { title: "요청자", dataIndex: "reqEmpName", key: "reqEmpName", width: 110 },
-        { title: "사유", dataIndex: "reqReason", key: "reqReason", ellipsis: true },
-        { title: "요청일", dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime},
+        { title: t("admin.delegations.columns.reqId"), dataIndex: "reqId", key: "reqId", width: 80 },
+        { title: t("admin.delegations.columns.docTitle"), dataIndex: "docTitle", key: "docTitle" },
+        { title: t("admin.delegations.columns.oriEmpName"), dataIndex: "oriEmpName", key: "oriEmpName", width: 110 },
+        { title: t("admin.delegations.columns.newEmpName"), dataIndex: "newEmpName", key: "newEmpName", width: 110 },
+        { title: t("admin.delegations.columns.reqEmpName"), dataIndex: "reqEmpName", key: "reqEmpName", width: 110 },
+        { title: t("admin.delegations.columns.reqReason"), dataIndex: "reqReason", key: "reqReason", ellipsis: true },
+        { title: t("admin.delegations.columns.createdAt"), dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime },
         {
-            title: "처리",
+            title: t("admin.delegations.columns.action"),
             key: "action",
             width: 170,
             render: (_, record) => (
@@ -128,14 +128,14 @@ export default function DelegationAdminPage() {
                         type="primary"
                         onClick={() => setConfirmAction({type: "approve", reqId: record.reqId})}
                     >
-                        승인
+                        {t("docs.detail.approveBtn")}
                     </Button>
                     <Button
                         size="small"
                         danger
                         onClick={() => setConfirmAction({type: "reject", reqId: record.reqId})}
                     >
-                        반려
+                        {t("docs.detail.rejectBtn")}
                     </Button>
                 </Space>
             ),
@@ -144,28 +144,28 @@ export default function DelegationAdminPage() {
 
     // 처리이력 탭
     const historyColumns = [
-        { title: "요청ID", dataIndex: "reqId", key: "reqId", width: 80 },
-        { title: "문서", dataIndex: "docTitle", key: "docTitle" },
-        { title: "원결재자", dataIndex: "oriEmpName", key: "oriEmpName", width: 110 },
-        { title: "대결자", dataIndex: "newEmpName", key: "newEmpName", width: 110 },
-        { title: "요청자", dataIndex: "reqEmpName", key: "reqEmpName", width: 110 },
-        { title: "처리자", dataIndex: "proEmpName", key: "proEmpName", width: 110 },
+        { title: t("admin.delegations.columns.reqId"), dataIndex: "reqId", key: "reqId", width: 80 },
+        { title: t("admin.delegations.columns.docTitle"), dataIndex: "docTitle", key: "docTitle" },
+        { title: t("admin.delegations.columns.oriEmpName"), dataIndex: "oriEmpName", key: "oriEmpName", width: 110 },
+        { title: t("admin.delegations.columns.newEmpName"), dataIndex: "newEmpName", key: "newEmpName", width: 110 },
+        { title: t("admin.delegations.columns.reqEmpName"), dataIndex: "reqEmpName", key: "reqEmpName", width: 110 },
+        { title: t("admin.delegations.columns.proEmpName"), dataIndex: "proEmpName", key: "proEmpName", width: 110 },
         {
-            title: "상태", dataIndex: "reqStatus", key: "reqStatus", width: 90,
+            title: t("admin.delegations.columns.status"), dataIndex: "reqStatus", key: "reqStatus", width: 90,
             render: (status) => <StatusBadge domain="delegReq" status={status} />,
         },
-        { title: "요청일", dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime},
-        { title: "처리일", dataIndex: "processedAt", key: "processedAt", width: 160, render: formatDateTime},
+        { title: t("admin.delegations.columns.createdAt"), dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime },
+        { title: t("admin.delegations.columns.processedAt"), dataIndex: "processedAt", key: "processedAt", width: 160, render: formatDateTime },
     ];
 
     // 감사로그 탭
     const logColumns = [
-        { title: "로그ID", dataIndex: "logId", key: "logId", width: 80 },
-        { title: "문서ID", dataIndex: "docId", key: "docId", width: 90 },
-        { title: "원결재자", dataIndex: "oriEmpName", key: "oriEmpName", width: 110 },
-        { title: "실처리자", dataIndex: "actEmpName", key: "actEmpName", width: 110 },
-        { title: "처리자(관리자)", dataIndex: "perEmpName", key: "perEmpName", width: 130 },
-        { title: "발생일", dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime},
+        { title: t("admin.delegations.columns.logId"), dataIndex: "logId", key: "logId", width: 80 },
+        { title: t("admin.delegations.columns.docId"), dataIndex: "docId", key: "docId", width: 90 },
+        { title: t("admin.delegations.columns.oriEmpName"), dataIndex: "oriEmpName", key: "oriEmpName", width: 110 },
+        { title: t("admin.delegations.columns.actEmpName"), dataIndex: "actEmpName", key: "actEmpName", width: 110 },
+        { title: t("admin.delegations.columns.perEmpName"), dataIndex: "perEmpName", key: "perEmpName", width: 130 },
+        { title: t("admin.delegations.columns.occurredAt"), dataIndex: "createdAt", key: "createdAt", width: 160, render: formatDateTime },
     ];
 
     return (
@@ -173,19 +173,19 @@ export default function DelegationAdminPage() {
             <PageHeader
                 breadcrumb={[
                     { label: t("common.breadcrumbRoot"), href: "/appr/docs" },
-                    { label: "결재선 관리" },
+                    { label: t("admin.delegations.breadcrumbCurrent") },
                 ]}
-                title="결재선 위임/대결 관리"
-                subtitle="대결 요청 승인/반려, 처리이력, 감사로그를 확인합니다."
+                title={t("admin.delegations.title")}
+                subtitle={t("admin.delegations.subtitle")}
             />
 
             <Tabs
                 activeKey={tab}
                 onChange={setTab}
                 items={[
-                    {key: "pending", label: `대기중 요청${pendingRequests?.length ? `(${pendingRequests.length})` : ""} `},
-                    {key: "history", label: "처리이력"},
-                    {key: "logs", label: "감사로그"},
+                    {key: "pending", label: `${t("admin.delegations.tabs.pending")}${pendingRequests?.length ? `(${pendingRequests.length})` : ""} `},
+                    {key: "history", label: t("admin.delegations.tabs.history")},
+                    {key: "logs", label: t("admin.delegations.tabs.logs")},
                 ]}
             />
 
@@ -206,17 +206,17 @@ export default function DelegationAdminPage() {
                 <>
                 <Space style={{marginBottom: 16}} wrap>
                     <Select
-                        placeholder="처리상태"
+                        placeholder={t("admin.delegations.statusPlaceholder")}
                         allowClear
                         style={{width: 120}}
                         onChange={setHistStatus}
                     >
-                        <Option value="REQ">요청중</Option>
-                        <Option value="APP">승인</Option>
-                        <Option value="REJ">반려</Option>
+                        <Option value="REQ">{t("admin.delegations.statusReq")}</Option>
+                        <Option value="APP">{t("admin.delegations.statusApp")}</Option>
+                        <Option value="REJ">{t("admin.delegations.statusRej")}</Option>
                     </Select>
                     <InputNumber
-                        placeholder="요청자 사번"
+                        placeholder={t("admin.delegations.reqEmpIdPlaceholder")}
                         style={{width: 140}}
                         onChange={(v) => setHistEmpId(v || undefined)}
                     />
@@ -247,12 +247,12 @@ export default function DelegationAdminPage() {
                  <>
                     <Space style={{ marginBottom: 16 }} wrap>
                         <InputNumber
-                            placeholder="문서ID"
+                            placeholder={t("admin.delegations.docIdPlaceholder")}
                             style={{ width: 140 }}
                             onChange={(v) => setLogDocId(v || undefined)}
                         />
                         <InputNumber
-                            placeholder="사번"
+                            placeholder={t("admin.delegations.empIdPlaceholder")}
                             style={{ width: 140 }}
                             onChange={(v) => setLogEmpId(v || undefined)}
                         />
@@ -279,19 +279,19 @@ export default function DelegationAdminPage() {
                 </>
             )}
             <Modal
-                title={confirmAction?.type === "approve" ? "위임/대결 요청 승인" : "위임/대결 요청 반려"}
+                title={confirmAction?.type === "approve" ? t("docs.detail.approveBtn") : t("docs.detail.rejectBtn")}
                 open={confirmAction !== null}
                 onCancel={() => setConfirmAction(null)}
                 onOk={confirmAction?.type === "approve" ? handleApprove : handleReject}
                 confirmLoading={processSubmitting}
-                okText={confirmAction?.type === "approve" ? "승인" : "반려"}
-                cancelText="취소"
+                okText={confirmAction?.type === "approve" ? t("docs.detail.approveBtn") : t("docs.detail.rejectBtn")}
+                cancelText={t("docs.write.cancelBtn")}
                 okButtonProps={{danger: confirmAction?.type === "reject"}}
             >
                 <p>
                     {confirmAction?.type === "approve"
-                        ? "이 위임/대결 요청을 승인하시겠습니까?"
-                        : "이 위임/대결 요청을 반려하시겠습니까?"}
+                        ? t("admin.delegations.approveConfirmTitle")
+                        : t("admin.delegations.rejectConfirmTitle")}
                 </p>
             </Modal>
         </div>

@@ -33,7 +33,10 @@ import salPolicyReducer from "./sal/salPolicyReducer";
 import salAiChatReducer from "./sal/salAiChatReducer";
 import salAiDocReducer from "./sal/salAiDocReducer";
 import attReducer from "./att/attReducer";
+// 근태/연차 관련 리듀서
 import leaveBalanceReducer from "./att/leaveBalanceReducer";
+import hrAiChatReducer from "./emp/hrAiChatReducer";
+import hrAiDocReducer from "./emp/hrAiDocReducer";
 // 채용관리 관련 리듀서
 import recruitReducer from "./rec/recruitReducer";
 import recruitPublicReducer from "./rec/recruitPublicReducer";
@@ -79,6 +82,8 @@ const rootReducer = combineReducers({
   // 근태/연차
   att: attReducer, // state.att
   leave : leaveBalanceReducer, //state.leave
+  hrAiChat: hrAiChatReducer, // state.hrAiChat
+  hrAiDoc: hrAiDocReducer, // state.hrAiDoc
   // 채용관리 관련 리듀서
   recruit: recruitReducer, // state.recruit
   recruitPublic: recruitPublicReducer, // state.recruitPublic

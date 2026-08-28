@@ -1,8 +1,9 @@
-// pages/careers/[recId].js
+// pages/careers/detail.js
 // 채용 공개 사이트 - 공고 상세 (GET /api/public/recruit/{recId}, 로그인 필요)
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Button, Tag, Skeleton, Alert, Space,Descriptions } from "antd";
 import {
@@ -20,6 +21,7 @@ import { fetchPublicRecruitDetailRequest } from "../../reducers/rec/recruitPubli
 export default function CareersDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("careers");
   const { recId } = router.query;
   const { apctAccessToken } = useSelector((state) => state.apctAuth);
   const { detail, detailLoading, detailError } = useSelector(
@@ -37,14 +39,14 @@ export default function CareersDetailPage() {
     <ApplicantLayout>
       <Link href="/careers">
         <Button type="text" icon={<ArrowLeftOutlined />} style={{ paddingLeft: 0, marginBottom: 12 }}>
-          목록으로
+          {t("detail.backToListBtn")}
         </Button>
       </Link>
 
       {detailLoading && <Skeleton active paragraph={{ rows: 8 }} />}
 
       {!detailLoading && detailError && (
-        <Alert type="error" showIcon message="공고를 불러오지 못했습니다" description={detailError} />
+        <Alert type="error" showIcon message={t("detail.loadError")} description={detailError} />
       )}
 
       {!detailLoading && detail && (
@@ -54,7 +56,7 @@ export default function CareersDetailPage() {
               {detail.recTitle}
             </h1>
             <Tag color={isOpen ? "green" : "default"}>
-              {isOpen ? "모집중" : detail.recStatus === "CLOSED" ? "마감" : "취소됨"}
+              {isOpen ? t("detail.statusOpen") : detail.recStatus === "CLOSED" ? t("detail.statusClosed") : t("detail.statusCancelled")}
             </Tag>
           </div>
 
@@ -63,16 +65,17 @@ export default function CareersDetailPage() {
               <EnvironmentOutlined /> {detail.recDepartment} · {detail.recPosition}
             </span>
             <span>
-              <TeamOutlined /> {detail.recHeadcount}명
+              <TeamOutlined /> {t("detail.headcountUnit", { count: detail.recHeadcount })}
             </span>
             <Tag color="blue">{detail.recEmploymentType}</Tag>
             <span>
               <ClockCircleOutlined />{" "}
               {detail.recEndDate
-                ? `${moment(detail.recStartDate).format("YYYY-MM-DD")} ~ ${moment(
-                    detail.recEndDate,
-                  ).format("YYYY-MM-DD")}`
-                : `${moment(detail.recStartDate).format("YYYY-MM-DD")} ~ 상시채용`}
+                ? t("detail.dateRange", {
+                    start: moment(detail.recStartDate).format("YYYY-MM-DD"),
+                    end: moment(detail.recEndDate).format("YYYY-MM-DD"),
+                  })
+                : t("detail.dateRangeOpen", { start: moment(detail.recStartDate).format("YYYY-MM-DD") })}
             </span>
           </Space>
 
@@ -87,25 +90,25 @@ export default function CareersDetailPage() {
             }}
           >
             <Descriptions bordered column={2} size="middle">
-              <Descriptions.Item label="모집 부서">{detail.recDepartment}</Descriptions.Item>
-              <Descriptions.Item label="모집 직무">{detail.recPosition}</Descriptions.Item>
-              <Descriptions.Item label="모집 인원">{detail.recHeadcount}명</Descriptions.Item>
-              <Descriptions.Item label="고용 형태">{detail.recEmploymentType}</Descriptions.Item>
-              <Descriptions.Item label="담당자">{detail.empName || "-"}</Descriptions.Item>
-              <Descriptions.Item label="지원자 수">{detail.applicantCnt ?? 0}명</Descriptions.Item>
-              <Descriptions.Item label="접수 시작일">
+              <Descriptions.Item label={t("detail.labels.department")}>{detail.recDepartment}</Descriptions.Item>
+              <Descriptions.Item label={t("detail.labels.position")}>{detail.recPosition}</Descriptions.Item>
+              <Descriptions.Item label={t("detail.labels.headcount")}>{t("detail.headcountUnit", { count: detail.recHeadcount })}</Descriptions.Item>
+              <Descriptions.Item label={t("detail.labels.employmentType")}>{detail.recEmploymentType}</Descriptions.Item>
+              <Descriptions.Item label={t("detail.labels.manager")}>{detail.empName || "-"}</Descriptions.Item>
+              <Descriptions.Item label={t("detail.labels.applicantCount")}>{t("detail.headcountUnit", { count: detail.applicantCnt ?? 0 })}</Descriptions.Item>
+              <Descriptions.Item label={t("detail.labels.startDate")}>
                 {detail.recStartDate ? moment(detail.recStartDate).format("YYYY-MM-DD HH:mm") : "-"}
               </Descriptions.Item>
-              <Descriptions.Item label="접수 종료일">
-                {detail.recEndDate ? moment(detail.recEndDate).format("YYYY-MM-DD HH:mm") : "상시채용"}
+              <Descriptions.Item label={t("detail.labels.endDate")}>
+                {detail.recEndDate ? moment(detail.recEndDate).format("YYYY-MM-DD HH:mm") : t("detail.alwaysOpen")}
               </Descriptions.Item>
-              <Descriptions.Item label="등록일시">
+              <Descriptions.Item label={t("detail.labels.createdAt")}>
                 {detail.createdAt ? moment(detail.createdAt).format("YYYY-MM-DD HH:mm") : "-"}
               </Descriptions.Item>
-              <Descriptions.Item label="최종 수정일시">
+              <Descriptions.Item label={t("detail.labels.updatedAt")}>
                 {detail.updatedAt ? moment(detail.updatedAt).format("YYYY-MM-DD HH:mm") : "-"}
               </Descriptions.Item>
-              <Descriptions.Item label="상세 내용" span={2}>
+              <Descriptions.Item label={t("detail.labels.description")} span={2}>
                 <div style={{ whiteSpace: "pre-wrap" }}>{detail.recDescription || "-"}</div>
               </Descriptions.Item>
             </Descriptions>
@@ -115,12 +118,12 @@ export default function CareersDetailPage() {
             {isOpen ? (
               <Link href={`/careers/apply?recId=${detail.recId}`}>
                 <Button type="primary" size="large" icon={<SendOutlined />}>
-                  이 공고에 지원하기
+                  {t("detail.applyBtn")}
                 </Button>
               </Link>
             ) : (
               <Button size="large" disabled>
-                현재 지원할 수 없는 공고입니다
+                {t("detail.cannotApplyBtn")}
               </Button>
             )}
           </div>

@@ -43,6 +43,21 @@ public class ResumeService {
     private static final int CHUNK_SIZE = 800;
     private static final int CHUNK_OVERLAP = 100;
     
+    // 이력서 내 것 조회 (지원자 본인만, 미리보기용)
+    public Resume getMyResume(Long apctId, Authentication authentication) {
+        Applicant applicant = applicantRepository.findById(apctId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지원자입니다."));
+
+        ApplicantPrincipal principal = (ApplicantPrincipal) authentication.getPrincipal();
+        if (!applicant.getProvider().equals(principal.getProvider())
+                || !applicant.getProviderId().equals(principal.getProviderId())) {
+            throw new IllegalArgumentException("본인 지원 건의 이력서만 조회할 수 있습니다.");
+        }
+
+        return resumeRepository.findByApplicant_ApctId(apctId)
+                .orElseThrow(() -> new IllegalArgumentException("제출된 이력서가 없습니다."));
+    }
+    
     // 이력서 업로드
     @Transactional
     public ResumeResponse upload(ResumeRequest req, MultipartFile file, Authentication authentication) {

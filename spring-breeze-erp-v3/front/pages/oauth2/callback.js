@@ -8,6 +8,7 @@
 import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Spin, Alert, Button } from "antd";
 import {
   applyApctTokenRequest,
@@ -19,6 +20,7 @@ const NEXT_KEY = "sberp.careers.postLoginNext";
 export default function OAuth2CallbackPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("careers");
   const { apctAccessToken, error, loading } = useSelector(
     (state) => state.apctAuth,
   );
@@ -67,7 +69,7 @@ export default function OAuth2CallbackPage() {
         <>
           <Spin size="large" />
           <p style={{ color: "#667", fontSize: 14 }}>
-            로그인 처리 중입니다...
+            {t("oauth2.processing")}
           </p>
         </>
       )}
@@ -76,14 +78,14 @@ export default function OAuth2CallbackPage() {
           <Alert
             type="error"
             showIcon
-            message="로그인에 실패했습니다"
+            message={t("oauth2.loginFailedTitle")}
             description={
-              typeof error === "string" ? error : "다시 시도해 주세요."
+              typeof error === "string" ? error : t("oauth2.retryDefaultDescription")
             }
             style={{ marginBottom: 16 }}
           />
           <Button type="primary" block onClick={retry}>
-            로그인 화면으로 돌아가기
+            {t("oauth2.backToLoginBtn")}
           </Button>
         </div>
       )}

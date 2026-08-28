@@ -344,8 +344,7 @@ export default function ProjDetailPage(){
           <h2>{t("detail.ganttTitle")}</h2>
           {criticalPathTasks.length > 0 && (
             <Tag color="red" style={{ marginLeft: 8 }}>
-              ⚠ 병목: {criticalPathTasks.map((t) => t.taskName).join(", ")}
-            </Tag>
+              {t("detail.bottleneckListLabel", { names: criticalPathTasks.map((t) => t.taskName).join(", ") })}            </Tag>
           )}
         </div>
         <div className="sb-card__body">

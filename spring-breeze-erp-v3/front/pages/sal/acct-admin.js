@@ -2,6 +2,7 @@
 // 직원 급여 수령 계좌 조회/수정 (ROLE_ADMIN) - GET/PUT /api/salacct/{empId}
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   Descriptions,
@@ -25,6 +26,7 @@ import EmployeePicker from "../../components/sal/EmployeePicker";
 
 export default function SalAcctAdminPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("sal");
   const [form] = Form.useForm();
 
   const {
@@ -50,7 +52,7 @@ export default function SalAcctAdminPage() {
   useEffect(() => {
     if (!saving || loading) return;
     if (success) {
-      message.success("계좌 정보가 수정되었습니다.");
+      message.success(t("acctAdmin.updateSuccessMsg"));
       setEditing(false);
       setSaving(false);
       dispatch(resetSalAcctState());
@@ -86,11 +88,10 @@ export default function SalAcctAdminPage() {
     <div className="sb-page">
       <div className="sb-page-head" style={{ marginBottom: 16 }}>
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">급여관리 &gt; 수령계좌 조회</div>
-          <h1>직원 급여 수령 계좌 조회/수정</h1>
+          <div className="sb-breadcrumb">{t("acctAdmin.breadcrumb")}</div>
+          <h1>{t("acctAdmin.title")}</h1>
           <p>
-            사원을 검색하면 등록된 급여 수령 계좌 정보를 조회하고 수정할 수
-            있습니다.
+            {t("acctAdmin.subtitle")}
           </p>
         </div>
       </div>
@@ -100,16 +101,16 @@ export default function SalAcctAdminPage() {
           <EmployeePicker
             value={empId}
             onChange={setEmpId}
-            placeholder="사원 이름으로 검색"
+            placeholder={t("acctAdmin.empSearchPlaceholder")}
           />
         </div>
 
-        {!empId && <Empty description="조회할 사원을 선택해 주세요." />}
+        {!empId && <Empty description={t("acctAdmin.selectEmpPrompt")} />}
 
-        {empId && adminAcctLoading && <p>조회 중...</p>}
+        {empId && adminAcctLoading && <p>{t("acctAdmin.loadingText")}</p>}
 
         {empId && !adminAcctLoading && adminAcctError && (
-          <Empty description="등록된 급여 수령 계좌가 없습니다." />
+          <Empty description={t("acctAdmin.noAcctText")} />
         )}
 
         {empId && !adminAcctLoading && adminAcct && (
@@ -122,28 +123,28 @@ export default function SalAcctAdminPage() {
               }}
             >
               <Button icon={<EditOutlined />} onClick={openEdit}>
-                수정
+                {t("acctAdmin.editBtn")}
               </Button>
             </div>
             <Descriptions column={1} bordered size="small">
-              <Descriptions.Item label="사원">
+              <Descriptions.Item label={t("acctAdmin.empLabel")}>
                 {adminAcct.empName}
               </Descriptions.Item>
-              <Descriptions.Item label="은행">
+              <Descriptions.Item label={t("acctAdmin.bankLabel")}>
                 {adminAcct.bankName}
               </Descriptions.Item>
-              <Descriptions.Item label="계좌번호">
+              <Descriptions.Item label={t("acctAdmin.acctNoLabel")}>
                 {adminAcct.acctNo}
               </Descriptions.Item>
-              <Descriptions.Item label="예금주">
+              <Descriptions.Item label={t("acctAdmin.hldrLabel")}>
                 {adminAcct.hldrName}
               </Descriptions.Item>
-              <Descriptions.Item label="등록일시">
+              <Descriptions.Item label={t("acctAdmin.createdAtLabel")}>
                 {adminAcct.createdAt
                   ? moment(adminAcct.createdAt).format("YYYY-MM-DD HH:mm")
                   : "-"}
               </Descriptions.Item>
-              <Descriptions.Item label="최종수정일시">
+              <Descriptions.Item label={t("acctAdmin.updatedAtLabel")}>
                 {adminAcct.updatedAt
                   ? moment(adminAcct.updatedAt).format("YYYY-MM-DD HH:mm")
                   : "-"}
@@ -154,34 +155,34 @@ export default function SalAcctAdminPage() {
       </Card>
 
       <Modal
-        title="급여 수령 계좌 수정"
+        title={t("acctAdmin.modalTitle")}
         open={editing}
         onCancel={() => setEditing(false)}
         onOk={handleSubmit}
-        okText="수정"
+        okText={t("acctAdmin.okText")}
         okButtonProps={{ loading: saving }}
-        cancelText="취소"
+        cancelText={t("acctAdmin.cancelText")}
         destroyOnClose
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="bankName"
-            label="은행명"
-            rules={[{ required: true, message: "은행명을 입력해 주세요." }]}
+            label={t("acctAdmin.bankNameFieldLabel")}
+            rules={[{ required: true, message: t("acctAdmin.bankNameFieldRequired") }]}
           >
             <Input maxLength={30} />
           </Form.Item>
           <Form.Item
             name="acctNo"
-            label="계좌번호"
-            rules={[{ required: true, message: "계좌번호를 입력해 주세요." }]}
+            label={t("acctAdmin.acctNoFieldLabel")}
+            rules={[{ required: true, message: t("acctAdmin.acctNoFieldRequired") }]}
           >
             <Input maxLength={30} />
           </Form.Item>
           <Form.Item
             name="hldrName"
-            label="예금주명"
-            rules={[{ required: true, message: "예금주명을 입력해 주세요." }]}
+            label={t("acctAdmin.hldrNameFieldLabel")}
+            rules={[{ required: true, message: t("acctAdmin.hldrNameFieldRequired") }]}
           >
             <Input maxLength={30} />
           </Form.Item>

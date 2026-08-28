@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
   Button,
@@ -23,28 +24,30 @@ import {
 } from "../../reducers/apct/applicantReducer";
 import { fetchAdminResumeRequest } from "../../reducers/rsm/resumeReducer";
 
-// apct/dashboard.js 차트 색상과 맞춰 SCREENING(파랑)·INTERVIEW(주황) 조합을 사용한다 —
-// 원래 INTERVIEW를 보라로 뒀더니 색각이상 시뮬레이션에서 파랑과 잘 구분되지 않아 교체함.
-const STATUS_LABEL = {
-  RECEIVED: { text: "접수", color: "default" },
-  SCREENING: { text: "서류심사", color: "blue" },
-  INTERVIEW: { text: "면접", color: "orange" },
-  HIRED: { text: "합격", color: "green" },
-  REJECTED: { text: "불합격", color: "red" },
-};
-const STATUS_OPTIONS = Object.entries(STATUS_LABEL).map(([value, { text }]) => ({
-  value,
-  label: text,
-}));
 const API_ORIGIN = "http://localhost:8080";
 export default function ApplicantDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useTranslation("apct");
   const { apctId } = router.query;
 
   const { detail, detailLoading, detailError, statusLoading, statusSuccess, statusError } =
     useSelector((state) => state.applicant);
   const { adminResume, adminResumeLoading } = useSelector((state) => state.resume);
+
+  // apct/dashboard.js 차트 색상과 맞춰 SCREENING(파랑)·INTERVIEW(주황) 조합을 사용한다 —
+  // 원래 INTERVIEW를 보라로 뒀더니 색각이상 시뮬레이션에서 파랑과 잘 구분되지 않아 교체함.
+  const STATUS_LABEL = {
+    RECEIVED: { text: t("common.statusLabels.received"), color: "default" },
+    SCREENING: { text: t("common.statusLabels.screening"), color: "blue" },
+    INTERVIEW: { text: t("common.statusLabels.interview"), color: "orange" },
+    HIRED: { text: t("common.statusLabels.hired"), color: "green" },
+    REJECTED: { text: t("common.statusLabels.rejected"), color: "red" },
+  };
+  const STATUS_OPTIONS = Object.entries(STATUS_LABEL).map(([value, { text }]) => ({
+    value,
+    label: text,
+  }));
 
   useEffect(() => {
     if (!router.isReady || !apctId) return;
@@ -60,7 +63,7 @@ export default function ApplicantDetailPage() {
   useEffect(() => {
     if (statusLoading) return;
     if (statusSuccess) {
-      message.success("지원자 상태가 변경되었습니다.");
+      message.success(t("detail.messages.statusChangeSuccess"));
       dispatch(resetApplicantState());
     } else if (statusError) {
       message.error(statusError);
@@ -78,20 +81,20 @@ export default function ApplicantDetailPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            <Link href="/">홈</Link> <i className="bi bi-chevron-right"></i> 지원자 관리{" "}
+            <Link href="/">{t("detail.breadcrumbHome")}</Link> <i className="bi bi-chevron-right"></i> {t("detail.breadcrumbRoot")}{" "}
             <i className="bi bi-chevron-right"></i>{" "}
-            <Link href="/apct/list">지원자</Link>{" "}
-            <i className="bi bi-chevron-right"></i> 상세
+            <Link href="/apct/list">{t("detail.breadcrumbList")}</Link>{" "}
+            <i className="bi bi-chevron-right"></i> {t("detail.breadcrumbCurrent")}
           </div>
-          <h1>지원자 상세</h1>
-          <p>지원자 정보를 확인합니다.</p>
+          <h1>{t("detail.title")}</h1>
+          <p>{t("detail.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Link href="/apct/list">
-            <Button size="small" icon={<ArrowLeftOutlined />}>목록으로</Button>
+            <Button size="small" icon={<ArrowLeftOutlined />}>{t("detail.backToListBtn")}</Button>
           </Link>
           <Link href="/apct/list">
-            <Button size="small" className="btn-sb" icon={<EditOutlined />}>목록에서 수정</Button>
+            <Button size="small" className="btn-sb" icon={<EditOutlined />}>{t("detail.editFromListBtn")}</Button>
           </Link>
         </div>
       </div>
@@ -133,16 +136,16 @@ export default function ApplicantDetailPage() {
             </div>
             <div className="sb-card__body">
               <Descriptions bordered column={2} size="middle">
-                <Descriptions.Item label="지원 공고">{detail.recTitle || "-"}</Descriptions.Item>
-                <Descriptions.Item label="이메일">{detail.apctEmail}</Descriptions.Item>
-                <Descriptions.Item label="연락처">{detail.apctPhone}</Descriptions.Item>
-                <Descriptions.Item label="지원일시">
+                <Descriptions.Item label={t("detail.labels.recTitle")}>{detail.recTitle || "-"}</Descriptions.Item>
+                <Descriptions.Item label={t("detail.labels.email")}>{detail.apctEmail}</Descriptions.Item>
+                <Descriptions.Item label={t("detail.labels.phone")}>{detail.apctPhone}</Descriptions.Item>
+                <Descriptions.Item label={t("detail.labels.appliedAt")}>
                   {detail.apctDate ? moment(detail.apctDate).format("YYYY-MM-DD HH:mm") : "-"}
                 </Descriptions.Item>
-                <Descriptions.Item label="등록일시">
+                <Descriptions.Item label={t("detail.labels.createdAt")}>
                   {detail.createdAt ? moment(detail.createdAt).format("YYYY-MM-DD HH:mm") : "-"}
                 </Descriptions.Item>
-                <Descriptions.Item label="최종 수정일시">
+                <Descriptions.Item label={t("detail.labels.updatedAt")}>
                   {detail.updatedAt ? moment(detail.updatedAt).format("YYYY-MM-DD HH:mm") : "-"}
                 </Descriptions.Item>
               </Descriptions>
@@ -151,16 +154,16 @@ export default function ApplicantDetailPage() {
 
           <div className="sb-card">
             <div className="sb-card__head">
-              <h2>이력서 정보</h2>
+              <h2>{t("detail.resumeCardTitle")}</h2>
             </div>
             <div className="sb-card__body">
               {adminResumeLoading && <Skeleton active paragraph={{ rows: 3 }} />}
               {!adminResumeLoading && !adminResume && (
-                <Empty description="제출된 이력서가 없습니다." />
+                <Empty description={t("detail.resumeEmpty")} />
               )}
               {!adminResumeLoading && adminResume && (
                 <Descriptions bordered column={2} size="middle">
-                  <Descriptions.Item label="파일명" span={2}>
+                  <Descriptions.Item label={t("detail.resumeLabels.fileName")} span={2}>
                     {adminResume.rsmFileUrl ? (
                       <a href={`${API_ORIGIN}${adminResume.rsmFileUrl}`} target="_blank" rel="noreferrer">
                         <FilePdfOutlined /> {adminResume.rsmFileName}
@@ -169,7 +172,7 @@ export default function ApplicantDetailPage() {
                       adminResume.rsmFileName || "-"
                     )}
                   </Descriptions.Item>
-                  <Descriptions.Item label="분석 상태">
+                  <Descriptions.Item label={t("detail.resumeLabels.analysisStatus")}>
                     <Tag
                       color={
                         adminResume.rsmStatus === "COMPLETED"
@@ -182,20 +185,20 @@ export default function ApplicantDetailPage() {
                       {adminResume.rsmStatus}
                     </Tag>
                   </Descriptions.Item>
-                  <Descriptions.Item label="AI 적합도 점수">
+                  <Descriptions.Item label={t("detail.resumeLabels.fitScore")}>
                     {adminResume.rsmFitScore ?? "-"}
                   </Descriptions.Item>
-                  <Descriptions.Item label="업로드 일시">
+                  <Descriptions.Item label={t("detail.resumeLabels.uploadedAt")}>
                     {adminResume.rsmUploadedAt
                       ? moment(adminResume.rsmUploadedAt).format("YYYY-MM-DD HH:mm")
                       : "-"}
                   </Descriptions.Item>
-                  <Descriptions.Item label="분석 완료 일시">
+                  <Descriptions.Item label={t("detail.resumeLabels.analyzedAt")}>
                     {adminResume.rsmAnalyzedAt
                       ? moment(adminResume.rsmAnalyzedAt).format("YYYY-MM-DD HH:mm")
                       : "-"}
                   </Descriptions.Item>
-                  <Descriptions.Item label="AI 요약" span={2}>
+                  <Descriptions.Item label={t("detail.resumeLabels.aiSummary")} span={2}>
                     <div style={{ whiteSpace: "pre-wrap" }}>
                       {adminResume.rsmAiSummary || "-"}
                     </div>

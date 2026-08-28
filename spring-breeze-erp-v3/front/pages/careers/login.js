@@ -5,20 +5,22 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import ApplicantAuthLayout from "../../components/ApplicantAuthLayout";
 
 const NEXT_KEY = "sberp.careers.postLoginNext";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
-const PROVIDERS = [
-  { key: "kakao", label: "카카오로 시작하기", className: "kakao" },
-  { key: "naver", label: "네이버로 시작하기", className: "naver" },
-  { key: "google", label: "Google로 시작하기", className: "google" },
+const PROVIDER_KEYS = [
+  { key: "kakao", className: "kakao" },
+  { key: "naver", className: "naver" },
+  { key: "google", className: "google" },
 ];
 
 export default function ApplicantLoginPage() {
   const router = useRouter();
+  const { t } = useTranslation("careers");
   const { apctAccessToken, initialized } = useSelector(
     (state) => state.apctAuth,
   );
@@ -45,32 +47,26 @@ export default function ApplicantLoginPage() {
   return (
     <ApplicantAuthLayout>
       <div className="asec on">
-        <h1 className="a-h">지원자 로그인</h1>
-        <p className="a-sub">
-          채용공고 열람과 지원서 제출은 소셜 계정 로그인 후 이용할 수 있습니다.
-          <br />
-          아래 계정 중 하나로 간편하게 시작하세요.
-        </p>
+        <h1 className="a-h">{t("login.heading")}</h1>
+        <p className="a-sub" dangerouslySetInnerHTML={{ __html: t("login.subtitle") }} />
 
         <div style={{ marginTop: 28 }}>
-          {PROVIDERS.map((p) => (
+          {PROVIDER_KEYS.map((p) => (
             <button
               key={p.key}
               type="button"
               className={`csoc-btn ${p.className}`}
               onClick={() => handleSocialLogin(p.key)}
             >
-              {p.label}
+              {t(`login.providers.${p.key}`)}
             </button>
           ))}
         </div>
 
         <p style={{ marginTop: 20, fontSize: 12, color: "#99a", lineHeight: 1.6 }}>
-          로그인 시 이름·이메일 정보가 지원서 작성에 활용될 수 있습니다.
-          <br />
-          채용 담당자이신가요?{" "}
+          <span dangerouslySetInnerHTML={{ __html: t("login.noteLine") }} />
           <a href="/auth/login" style={{ color: "#047857" }}>
-            관리자 로그인으로 이동
+            {t("login.adminLoginLink")}
           </a>
         </p>
       </div>

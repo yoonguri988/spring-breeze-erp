@@ -2,6 +2,7 @@
 // 채용공고 관리 (ROLE_ADMIN) - GET/POST/PUT/DELETE /api/admin/recruit
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Table, Button, Tag, Modal, Form, Input, InputNumber, Select, DatePicker, Pagination, Empty, message, } from "antd";
 import {
@@ -13,6 +14,7 @@ import {
   FileSearchOutlined,
   EyeOutlined,
   FolderOpenOutlined,
+  CopyOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 
@@ -22,13 +24,8 @@ import {
   updateRecruitRequest,
   deleteRecruitRequest,
   resetRecruitState,
+  fetchCloneRecruitRequest,
 } from "../../reducers/rec/recruitReducer";
-
-const STATUS_LABEL = {
-  OPEN: { text: "모집중", color: "green" },
-  CLOSED: { text: "마감", color: "default" },
-  CANCELLED: { text: "취소됨", color: "red" },
-};
 
 const STATUS_TAG_COLOR = {
   OPEN: "success",
@@ -38,9 +35,10 @@ const STATUS_TAG_COLOR = {
 
 export default function RecruitListPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("rec");
   const [form] = Form.useForm();
 
-  const { list, paging, listLoading, loading, success, error } = useSelector(
+  const { list, paging, listLoading, loading, success, error , cloneData} = useSelector(
     (state) => state.recruit,
   );
 
@@ -52,7 +50,12 @@ export default function RecruitListPage() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  
+
+  const STATUS_LABEL = {
+    OPEN: { text: t("common.statusLabels.open"), color: "green" },
+    CLOSED: { text: t("common.statusLabels.closed"), color: "default" },
+    CANCELLED: { text: t("common.statusLabels.cancelled"), color: "red" },
+  };
 
   const runSearch = (nextPage = 1) => {
     setPage(nextPage);
@@ -72,12 +75,12 @@ export default function RecruitListPage() {
     if (success) {
       if (saving) {
         message.success(
-          formTarget === "add" ? "채용공고가 등록되었습니다." : "채용공고가 수정되었습니다.",
+          formTarget === "add" ? t("list.messages.createSuccess") : t("list.messages.updateSuccess"),
         );
         closeFormModal();
       }
       if (deleting) {
-        message.success("채용공고가 삭제되었습니다.");
+        message.success(t("list.messages.deleteSuccess"));
         setDeleteTarget(null);
         setDeleting(false);
       }
@@ -92,11 +95,30 @@ export default function RecruitListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, success, error, dispatch]);
 
+  // 등록모달
   const openAddModal = () => {
     setFormTarget("add");
     form.resetFields();
     form.setFieldsValue({ recStatus: "OPEN" });
   };
+
+  // 복제
+  useEffect(() => {
+    if (cloneData) {
+      setFormTarget("add");
+      form.setFieldsValue({
+        recTitle: cloneData.recTitle,
+        recDepartment: cloneData.recDepartment,
+        recPosition: cloneData.recPosition,
+        recHeadcount: cloneData.recHeadcount,
+        recEmploymentType: cloneData.recEmploymentType,
+        recDescription: cloneData.recDescription,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cloneData]);
+
+  // 수정 모달
   const openEditModal = (record) => {
     setFormTarget(record);
     form.setFieldsValue({
@@ -151,9 +173,15 @@ export default function RecruitListPage() {
     dispatch(deleteRecruitRequest(deleteTarget.recId));
   };
 
+  // 채용공고 복제
+  const handleClone = (recId) => {
+    dispatch(fetchCloneRecruitRequest(recId));
+  };
+
+
   const columns = [
     {
-      title: "공고명",
+      title: t("list.table.title"),
       dataIndex: "recTitle",
       key: "recTitle",
       render: (v, record) => (
@@ -164,43 +192,43 @@ export default function RecruitListPage() {
         </Link>
       ),
     },
-    { title: "부서", dataIndex: "recDepartment", key: "recDepartment", width: 130 },
-    { title: "직무", dataIndex: "recPosition", key: "recPosition", width: 130 },
+    { title: t("list.table.department"), dataIndex: "recDepartment", key: "recDepartment", width: 130 },
+    { title: t("list.table.position"), dataIndex: "recPosition", key: "recPosition", width: 130 },
     {
-      title: "인원",
+      title: t("list.table.headcount"),
       dataIndex: "recHeadcount",
       key: "recHeadcount",
       width: 70,
       align: "center",
     },
     {
-      title: "고용형태",
+      title: t("list.table.employmentType"),
       dataIndex: "recEmploymentType",
       key: "recEmploymentType",
       width: 100,
     },
     {
-      title: "담당자",
+      title: t("list.table.manager"),
       dataIndex: "empName",
       key: "empName",
       width: 100,
       render: (v) => v || "-",
     },
     {
-      title: "지원자",
+      title: t("list.table.applicantCnt"),
       key: "applicantCnt",
       width: 110,
       align: "center",
       render: (_, record) => (
         <Link href={`/apct/list?recId=${record.recId}`}>
           <Button type="text" size="small" icon={<TeamOutlined />}>
-            {record.applicantCnt ?? 0}명
+            {t("list.applicantCountUnit", { count: record.applicantCnt ?? 0 })}
           </Button>
         </Link>
       ),
     },
     {
-      title: "상태",
+      title: t("list.table.status"),
       dataIndex: "recStatus",
       key: "recStatus",
       width: 90,
@@ -208,23 +236,30 @@ export default function RecruitListPage() {
       render: (v) => <Tag color={STATUS_TAG_COLOR[v] || "default"}>{STATUS_LABEL[v]?.text || v}</Tag>,
     },
     {
-      title: "관리",
+      title: t("list.table.actions"),
       key: "actions",
       width: 170,
       align: "center",
       render: (_, record) => (
         <div style={{ display: "flex", justifyContent: "center", gap: 2 }}>
           <Link href={`/apct/resume-search?recId=${record.recId}`}>
-            <Button type="text" size="small" icon={<FileSearchOutlined />} title="이력서 검색" />
+            <Button type="text" size="small" icon={<FileSearchOutlined />} title={t("list.actionTooltips.resumeSearch")} />
           </Link>
           <Link href={`/rec/detail?recId=${record.recId}`}>
-            <Button type="text" size="small" icon={<EyeOutlined />} title="상세" />
+            <Button type="text" size="small" icon={<EyeOutlined />} title={t("list.actionTooltips.detail")} />
           </Link>
           <Button
             type="text"
             size="small"
+            icon={<CopyOutlined />}
+            title={t("list.actionTooltips.clone")}
+            onClick={() => handleClone(record.recId)}
+          />
+          <Button
+            type="text"
+            size="small"
             icon={<EditOutlined />}
-            title="수정"
+            title={t("list.actionTooltips.edit")}
             onClick={() => openEditModal(record)}
           />
           <Button
@@ -232,7 +267,7 @@ export default function RecruitListPage() {
             size="small"
             danger
             icon={<DeleteOutlined />}
-            title="삭제"
+            title={t("list.actionTooltips.delete")}
             onClick={() => setDeleteTarget(record)}
           />
         </div>
@@ -249,16 +284,16 @@ export default function RecruitListPage() {
       <div className="sb-page-head">
         <div className="sb-page-head__txt">
           <div className="sb-breadcrumb">
-            홈 <i className="bi bi-chevron-right"></i> 채용관리{" "}
-            <i className="bi bi-chevron-right"></i> 채용공고
+            {t("common.breadcrumbHome")} <i className="bi bi-chevron-right"></i> {t("common.breadcrumbRoot")}{" "}
+            <i className="bi bi-chevron-right"></i> {t("list.breadcrumbCurrent")}
           </div>
-          <h1>채용공고 관리</h1>
-          <p>채용공고를 등록하고 지원자 현황과 이력서를 연결해 관리합니다.</p>
+          <h1>{t("list.title")}</h1>
+          <p>{t("list.subtitle")}</p>
         </div>
 
         <div className="sb-page-head__actions my-3">
           <Button type="primary" icon={<PlusOutlined />} onClick={openAddModal}>
-            채용공고 등록
+            {t("list.addBtn")}
           </Button>
         </div>
       </div>
@@ -269,13 +304,13 @@ export default function RecruitListPage() {
           style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}
         >
           <div style={{ display: "flex", alignItems: "center" }}>
-            <strong style={{ fontSize: 14 }}>채용공고 목록</strong>
+            <strong style={{ fontSize: 14 }}>{t("list.cardTitle")}</strong>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Input
               style={{ width: 240 }}
-              placeholder="채용공고명 검색"
+              placeholder={t("list.searchPlaceholder")}
               prefix={<SearchOutlined />}
               value={recTitle}
               onChange={(e) => setRecTitle(e.target.value)}
@@ -285,19 +320,19 @@ export default function RecruitListPage() {
 
             <Select
               style={{ width: 160 }}
-              placeholder="공고 상태"
+              placeholder={t("list.statusPlaceholder")}
               allowClear
               value={recStatus}
               onChange={(v) => setRecStatus(v)}
               options={[
-                { value: "OPEN", label: "모집중" },
-                { value: "CLOSED", label: "마감" },
-                { value: "CANCELLED", label: "취소됨" },
+                { value: "OPEN", label: t("common.statusLabels.open") },
+                { value: "CLOSED", label: t("common.statusLabels.closed") },
+                { value: "CANCELLED", label: t("common.statusLabels.cancelled") },
               ]}
             />
 
             <Button icon={<SearchOutlined />} onClick={() => runSearch(1)}>
-              검색
+              {t("list.searchBtn")}
             </Button>
           </div>
         </div>
@@ -317,7 +352,7 @@ export default function RecruitListPage() {
               emptyText: (
                 <Empty
                   image={<FolderOpenOutlined style={{ fontSize: 32 }} />}
-                  description="등록된 채용공고가 없습니다."
+                  description={t("list.emptyDescription")}
                 />
               ),
             }}
@@ -334,7 +369,7 @@ export default function RecruitListPage() {
           }}
         >
           <span style={{ color: "#999", fontSize: 12.5 }}>
-            총 <b>{totalCnt}</b>건
+            {t("list.totalCountPrefix")}<b>{totalCnt}</b>{t("list.totalCountSuffix")}
           </span>
           {totalCnt > pageSize && (
             <Pagination
@@ -351,72 +386,72 @@ export default function RecruitListPage() {
 
       {/* 등록/수정 모달 */}
       <Modal
-        title={isEditMode ? "채용공고 수정" : "채용공고 등록"}
+        title={isEditMode ? t("list.formModal.titleEdit") : t("list.formModal.titleAdd")}
         open={formTarget !== null}
         onCancel={closeFormModal}
         onOk={handleSubmit}
-        okText={isEditMode ? "수정" : "등록"}
+        okText={isEditMode ? t("list.formModal.okEdit") : t("list.formModal.okAdd")}
         okButtonProps={{ loading: saving }}
-        cancelText="취소"
+        cancelText={t("list.formModal.cancelBtn")}
         destroyOnClose
         width={640}
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="recTitle"
-            label="공고 제목"
-            rules={[{ required: true, message: "공고 제목을 입력해 주세요." }]}
+            label={t("list.formModal.titleLabel")}
+            rules={[{ required: true, message: t("list.formModal.titleRequired") }]}
           >
-            <Input placeholder="예: 2026 상반기 백엔드 개발자 채용" />
+            <Input placeholder={t("list.formModal.titlePlaceholder")} />
           </Form.Item>
           <div style={{ display: "flex", gap: 12 }}>
             <Form.Item
               name="recDepartment"
-              label="모집 부서"
+              label={t("list.formModal.departmentLabel")}
               style={{ flex: 1 }}
-              rules={[{ required: true, message: "모집 부서를 입력해 주세요." }]}
+              rules={[{ required: true, message: t("list.formModal.departmentRequired") }]}
             >
-              <Input placeholder="예: 개발팀" />
+              <Input placeholder={t("list.formModal.departmentPlaceholder")} />
             </Form.Item>
             <Form.Item
               name="recPosition"
-              label="모집 직무"
+              label={t("list.formModal.positionLabel")}
               style={{ flex: 1 }}
-              rules={[{ required: true, message: "모집 직무를 입력해 주세요." }]}
+              rules={[{ required: true, message: t("list.formModal.positionRequired") }]}
             >
-              <Input placeholder="예: 백엔드 개발자" />
+              <Input placeholder={t("list.formModal.positionPlaceholder")} />
             </Form.Item>
           </div>
           <div style={{ display: "flex", gap: 12 }}>
             <Form.Item
               name="recHeadcount"
-              label="모집 인원"
+              label={t("list.formModal.headcountLabel")}
               style={{ flex: 1 }}
-              rules={[{ required: true, message: "모집 인원을 입력해 주세요." }]}
+              rules={[{ required: true, message: t("list.formModal.headcountRequired") }]}
             >
-              <InputNumber style={{ width: "100%" }} min={1} placeholder="예: 2" />
+              <InputNumber style={{ width: "100%" }} min={1} placeholder={t("list.formModal.headcountPlaceholder")} />
             </Form.Item>
             <Form.Item
               name="recEmploymentType"
-              label="고용 형태"
+              label={t("list.formModal.employmentTypeLabel")}
               style={{ flex: 1 }}
-              rules={[{ required: true, message: "고용 형태를 입력해 주세요." }]}
+              rules={[{ required: true, message: t("list.formModal.employmentTypeRequired") }]}
             >
               <Select
-                placeholder="선택"
+                placeholder={t("list.formModal.employmentTypePlaceholder")}
                 options={[
-                  { value: "정규직", label: "정규직" },
-                  { value: "계약직", label: "계약직" },
-                  { value: "인턴", label: "인턴" },
-                  { value: "파견직", label: "파견직" },
+                  { value: "정규직", label: t("list.formModal.employmentTypeOptions.fulltime") },
+                  { value: "계약직", label: t("list.formModal.employmentTypeOptions.contract") },
+                  { value: "인턴", label: t("list.formModal.employmentTypeOptions.intern") },
+                  { value: "파견직", label: t("list.formModal.employmentTypeOptions.dispatch") },
                 ]}
               />
             </Form.Item>
           </div>
           <Form.Item
             name="recDateRange"
-            label="접수 기간 (종료일 미지정 시 상시채용)"
-            rules={[{ required: true, message: "접수 시작일은 필수입니다." }]}
+            label={t("list.formModal.dateRangeLabel")}
+            rules={[{ required: true, message: t("list.formModal.dateRangeRequired") }]}
           >
             <DatePicker.RangePicker
               style={{ width: "100%" }}
@@ -427,39 +462,39 @@ export default function RecruitListPage() {
           </Form.Item>
           <Form.Item
             name="recStatus"
-            label="공고 상태"
-            rules={[{ required: true, message: "공고 상태를 선택해 주세요." }]}
+            label={t("list.formModal.statusLabel")}
+            rules={[{ required: true, message: t("list.formModal.statusRequired") }]}
           >
             <Select
               options={[
-                { value: "OPEN", label: "모집중" },
-                { value: "CLOSED", label: "마감" },
-                { value: "CANCELLED", label: "취소됨" },
+                { value: "OPEN", label: t("common.statusLabels.open") },
+                { value: "CLOSED", label: t("common.statusLabels.closed") },
+                { value: "CANCELLED", label: t("common.statusLabels.cancelled") },
               ]}
             />
           </Form.Item>
-          <Form.Item name="recDescription" label="상세 내용">
-            <Input.TextArea rows={5} placeholder="담당 업무, 자격요건, 우대사항 등" />
+          <Form.Item name="recDescription" label={t("list.formModal.descriptionLabel")}>
+            <Input.TextArea rows={5} placeholder={t("list.formModal.descriptionPlaceholder")} />
           </Form.Item>
         </Form>
       </Modal>
 
       {/* 삭제 확인 모달 */}
       <Modal
-        title="채용공고 삭제"
+        title={t("list.deleteModal.title")}
         open={!!deleteTarget}
         onCancel={() => setDeleteTarget(null)}
         onOk={confirmDelete}
-        okText="삭제"
+        okText={t("list.deleteModal.okText")}
         okButtonProps={{ danger: true, loading: deleting }}
-        cancelText="취소"
+        cancelText={t("list.deleteModal.cancelText")}
         destroyOnClose
       >
         <p>
-          <b>{deleteTarget?.recTitle}</b> 공고를 삭제하시겠습니까?
+          <b>{deleteTarget?.recTitle}</b> {t("list.deleteModal.confirmSuffix")}
         </p>
         <p style={{ color: "#999", fontSize: 13 }}>
-          지원자가 이미 있는 공고는 백엔드 정책에 따라 삭제가 제한될 수 있습니다.
+          {t("list.deleteModal.hint")}
         </p>
       </Modal>
     </main>

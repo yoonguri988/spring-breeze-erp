@@ -142,4 +142,25 @@ public class RecruitService {
                 .map(this::mapToResponse)
                 .getContent();
     }
+    
+    // 공고 복제 - 기존 공고 데이터를 RecruitRequest로 반환 (title만 [복사본] 접미사, 날짜/상태는 비워서 재입력 유도)
+    public RecruitRequest getCloneData(Long recId, Long comId) {
+        Recruit recruit = recruitRepository.findById(recId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 공고입니다."));
+
+        if (!recruit.getCompany().getComId().equals(comId)) {
+            throw new IllegalArgumentException("접근 권한이 없습니다.");
+        }
+
+        RecruitRequest cloneReq = new RecruitRequest();
+        cloneReq.setRecTitle(recruit.getRecTitle() + " [복사본]");
+        cloneReq.setRecDepartment(recruit.getRecDepartment());
+        cloneReq.setRecPosition(recruit.getRecPosition());
+        cloneReq.setRecHeadcount(recruit.getRecHeadcount());
+        cloneReq.setRecEmploymentType(recruit.getRecEmploymentType());
+        cloneReq.setRecDescription(recruit.getRecDescription());
+        // 시작일/종료일/상태는 새로 입력받아야 하니 세팅 안 함 (null)
+
+        return cloneReq;
+    }
 }

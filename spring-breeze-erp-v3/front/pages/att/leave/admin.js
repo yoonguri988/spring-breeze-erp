@@ -110,7 +110,7 @@ export default function LeaveAdminPage() {
   const handleDeduct = () => {
     if (!deductTarget) return;
     if (!deductDate) {
-      message.warning("휴가 사용일을 선택해주세요.");
+      message.warning(t("att:leaveAdmin.deductModal.leaveDateRequired"));
       return;
     }
     dispatch(deductRequest({
@@ -318,7 +318,7 @@ export default function LeaveAdminPage() {
             ))}
           </Select>
           <Input
-            placeholder="사원명 또는 사번"
+            placeholder={t("att:admin.search.keywordPlaceholder")}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onPressEnter={loadBalances}
@@ -374,7 +374,7 @@ export default function LeaveAdminPage() {
               </Select>
             </div>
             <div>
-              <label>휴가 사용일</label>
+              <label>{t("att:leaveAdmin.deductModal.leaveDate")}</label>
               <DatePicker
                 value={deductDate}
                 onChange={setDeductDate}

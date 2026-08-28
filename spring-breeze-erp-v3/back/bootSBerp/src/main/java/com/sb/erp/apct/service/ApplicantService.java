@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -70,11 +72,15 @@ public class ApplicantService {
         return applicantRepository.findMyApplications(applicant.getProvider(), applicant.getProviderId());
     }
 
-    // 관리자용 - 지원자 목록 (상태 선택 필터 + 페이징)
-    public Page<ApplicantResponse> getAdminList( Long comId, Long recId, String apctStatus, Pageable pageable) {
-
-        return applicantRepository .findAll( ApplicantSpecs.search(comId, recId, apctStatus), pageable ) .map(this::mapToResponse); 
-        
+    // 관리자용 - 지원자 목록 (상태 선택 필터 + 페이징, 최신 지원순 정렬)
+    public Page<ApplicantResponse> getAdminList(Long comId, Long recId, String apctStatus, Pageable pageable) {
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "apctDate")
+        );
+        return applicantRepository.findAll(ApplicantSpecs.search(comId, recId, apctStatus), sortedPageable)
+                .map(this::mapToResponse);
     }
 
     // 관리자용 - 지원자 상세 (이력서 수 포함)

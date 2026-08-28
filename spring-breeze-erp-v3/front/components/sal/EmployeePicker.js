@@ -4,17 +4,19 @@
 // emp API는 페이지당 10건 고정이라, 이름을 입력할 때마다(디바운스) 재조회해서 옵션을 채운다.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Select, Spin } from "antd";
 import { listEmpRequest } from "../../reducers/emp/empReducer";
 
 export default function EmployeePicker({
   value,
   onChange,
-  placeholder = "사원 이름으로 검색",
+  placeholder,
   style,
   disabled,
 }) {
   const dispatch = useDispatch();
+  const { t } = useTranslation("sal");
   const { empList, loading } = useSelector((state) => state.emp);
   const timerRef = useRef(null);
 
@@ -38,9 +40,14 @@ export default function EmployeePicker({
     () =>
       (empList || []).map((e) => ({
         value: e.empId,
-        label: `${e.empName} · ${e.deptName || "-"} · ${e.posName || "-"} (${e.empNo})`,
+        label: t("employeePicker.optionLabel", {
+          empName: e.empName,
+          deptName: e.deptName || "-",
+          posName: e.posName || "-",
+          empNo: e.empNo,
+        }),
       })),
-    [empList],
+    [empList, t],
   );
 
   return (
@@ -50,9 +57,11 @@ export default function EmployeePicker({
       value={value ?? undefined}
       onChange={onChange}
       onSearch={handleSearch}
-      placeholder={placeholder}
+      placeholder={placeholder || t("employeePicker.placeholder")}
       filterOption={false}
-      notFoundContent={loading ? <Spin size="small" /> : "검색 결과가 없습니다"}
+      notFoundContent={
+        loading ? <Spin size="small" /> : t("employeePicker.notFoundContent")
+      }
       style={style || { width: "100%" }}
       disabled={disabled}
       options={options}

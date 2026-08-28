@@ -49,9 +49,9 @@ export default function FormWritePage() {
     const [forCategory, setForCategory] = useState("GENERAL");
 
     const LEAVE_REQUIRED_FIELDS = [
-        {key: "leaveType", label: "휴가 종류", type: "select", required: true, options: ["ANNUAL", "HALF_AM", "HALF_PM"]},
-        {key: "startDate", label: "시작일", type: "date", required: true, options: []},
-        {key: "endDate", label: "종료일", type: "date", required: true, options: []},
+        {key: "leaveType", label: t("forms.write.leaveFieldLabels.leaveType"), type: "select", required: true, options: ["ANNUAL", "HALF_AM", "HALF_PM"]},
+        {key: "startDate", label: t("forms.write.leaveFieldLabels.startDate"), type: "date", required: true, options: []},
+        {key: "endDate", label: t("forms.write.leaveFieldLabels.endDate"), type: "date", required: true, options: []},
     ]
 
     const handleCategoryChange = (value) => {
@@ -189,13 +189,13 @@ export default function FormWritePage() {
         // 연차 카테고리는 스키마 방식만 허용 + 필수 필드 체크
         if (forCategory === "LEAVE") {
             if (contentMode !== "ai") {
-                message.error("연차 카테고리 양식은 필드 구성 방식으로만 작성할 수 있습니다.")
+                message.error(t("forms.write.leaveOnlySchemaError"))
                 return;
             }
             const schemaKeys = schemaFields.map((f) => f.key);
             const missing = LEAVE_REQUIRED_FIELDS.filter((f) => !schemaKeys.includes(f.key));
             if (missing.length > 0) {
-                message.error(`연차 양식에는 다음 필드가 필요합니다: ${missing.map((f) => f.key).join(", ")}`);
+                message.error(t("forms.write.leaveMissingFieldsError", { fields: missing.map((f) => f.key).join(", ") }));
                 return;
             }
         }
@@ -250,17 +250,17 @@ export default function FormWritePage() {
                 initialValues={{forStatus: true}}
             >
                 {/* 1. 기본정보 */}
-                <Card title="기본 정보" style={{marginBottom: 24}}>
+                <Card title={t("forms.write.basicInfoCardTitle")} style={{marginBottom: 24}}>
                     <Row gutter={16}>
                         <Col xs={24} md={12}>
                             <Form.Item
                                 name="comId"
-                                label="양식을 추가할 회사"
-                                rules={[{ required: true, message: "회사를 선택해주세요."}]}
+                                label={t("forms.write.companyLabel")}
+                                rules={[{ required: true, message: t("forms.write.companyRequired")}]}
                             >
                                 <Select
                                     showSearch
-                                    placeholder="회사명을 검색하세요."
+                                    placeholder={t("forms.write.companySearchPlaceholder")}
                                     filterOption={false}
                                     suffixIcon={<BankOutlined/>}
                                     onSearch={handleCompanySearch}
@@ -270,16 +270,16 @@ export default function FormWritePage() {
                         </Col>
 
                         <Col xs={24} md={12}>
-                            <Form.Item label="양식 코드" required>
+                            <Form.Item label={t("forms.write.codeLabel")} required>
                                 <Input.Group compact style={{display: "flex"}}>
                                     <Form.Item
                                         name="forCode"
                                         noStyle
-                                        rules={[{required: true, message: "양식 코드를 입력해주세요."}]}
+                                        rules={[{required: true, message: t("forms.write.codeRequired")}]}
                                     >
                                         <Input
                                             style={{flex: 1}}
-                                            placeholder="ex) TEST-01"
+                                            placeholder={t("forms.write.codePlaceholder")}
                                             status={codeStatus === "duplicate" ? "error" : undefined}
                                             suffix={
                                                 codeStatus === "available" ? (
@@ -291,7 +291,7 @@ export default function FormWritePage() {
                                         />
                                     </Form.Item>
                                     <Button style={{width: 100}} onClick={handleCodeCheck}>
-                                        중복확인
+                                        {t("forms.write.codeCheckBtn")}
                                     </Button>
                                 </Input.Group>
                                 {codeStatus === "available" && (
@@ -299,7 +299,7 @@ export default function FormWritePage() {
                                         type="success"
                                         style={{display: "block", marginTop: 4, fontSize: 13}}
                                     >
-                                        사용 가능한 양식코드입니다.
+                                        {t("forms.write.codeAvailableText")}
                                     </Text>
                                 )}
                                 {codeStatus === "duplicate" && (
@@ -307,7 +307,7 @@ export default function FormWritePage() {
                                         type="danger"
                                         style={{display: "block", marginTop: 4, fontSize: 13}}
                                     >
-                                        중복된 양식코드입니다.
+                                        {t("forms.write.codeDuplicateText")}
                                     </Text>
                                 )}
                             </Form.Item>
@@ -316,37 +316,37 @@ export default function FormWritePage() {
                         <Col xs={24}>
                             <Form.Item
                                 name="forTitle"
-                                label="양식 제목"
-                                rules={[{required: true, message: "양식 제목을 입력해주세요."}]}
+                                label={t("forms.write.titleLabel")}
+                                rules={[{required: true, message: t("forms.write.titleRequired")}]}
                             >
-                                <Input placeholder="ex) 병가신청서" />
+                                <Input placeholder={t("forms.write.titlePlaceholder")} />
                             </Form.Item>
                         </Col>
 
                         <Col xs={24} md={12}>
-                            <Form.Item label="작성 방식">
+                            <Form.Item label={t("forms.write.modeLabel")}>
                                 <Radio.Group
                                     value={contentMode}
                                     onChange={(e) => setContentMode(e.target.value)}
                                     optionType="button"
                                     buttonStyle="solid"
                                 >
-                                    <Radio.Button value="editor" disabled={forCategory === "LEAVE"}>직접 작성</Radio.Button>
-                                    <Radio.Button value="ai">AI 생성</Radio.Button>
+                                    <Radio.Button value="editor" disabled={forCategory === "LEAVE"}>{t("forms.write.modeEditor")}</Radio.Button>
+                                    <Radio.Button value="ai">{t("forms.write.modeAi")}</Radio.Button>
                                 </Radio.Group>
                             </Form.Item>
                         </Col>
 
                         <Col xs={24} md={12}>
-                            <Form.Item label="양식 카테고리" extra="연차로 지정하면 승인 시 연차가 자동 차감됩니다.">
+                            <Form.Item label={t("forms.write.categoryLabel")} extra={t("forms.write.categoryExtra")}>
                                 <Radio.Group
                                     value={forCategory}
                                     onChange={(e) => handleCategoryChange(e.target.value)}
                                     optionType="button"
                                     buttonStyle="solid"
                                 >
-                                    <Radio.Button value="GENERAL">일반</Radio.Button>
-                                    <Radio.Button value="LEAVE">연차</Radio.Button>
+                                    <Radio.Button value="GENERAL">{t("forms.write.categoryGeneral")}</Radio.Button>
+                                    <Radio.Button value="LEAVE">{t("forms.write.categoryLeave")}</Radio.Button>
                                 </Radio.Group>
                             </Form.Item>
                         </Col>
@@ -354,9 +354,9 @@ export default function FormWritePage() {
                         <Col xs={24} md={12}>
                             <Form.Item
                                 name="forStatus"
-                                label="활성화 여부"
+                                label={t("forms.write.activeLabel")}
                                 valuePropName="checked"
-                                extra="활성화된 양식만 문서 작성 시 선택 목록에 나타납니다."
+                                extra={t("forms.write.activeExtra")}
                             >
                                 <Switch />
                             </Form.Item>
@@ -365,16 +365,16 @@ export default function FormWritePage() {
                 </Card>
 
                 {/* 2. 본문 / 스키마 */}
-                <Card title={contentMode === "editor" ? "양식 본문 편집" 
-                            : forCategory === "LEAVE" ? "연차 필드 구성"
+                <Card title={contentMode === "editor" ? t("forms.write.contentCardTitleEditor") 
+                            : forCategory === "LEAVE" ? t("forms.write.contentCardTitleAi")
                             : "AI 스키마 설정"}>
                     {contentMode === "editor" ? (
-                        <Form.Item label="양식 내용">
+                        <Form.Item label={t("forms.write.contentLabel")}>
                             <Space style={{marginBottom: 8}} wrap>
-                                <Text type="secondary" style={{fontSize: 13}}>기본 양식 프레임 주입</Text>
-                                <Button size="small" onClick={() => handleInjectTemplate("leave")}>휴가 신청서</Button>
-                                <Button size="small" onClick={() => handleInjectTemplate("expense")}>지출 결의서</Button>
-                                <Button size="small" onClick={() => handleInjectTemplate("biz")}>일반 기안서</Button>
+                                <Text type="secondary" style={{fontSize: 13}}>{t("forms.write.templateInjectLabel")}</Text>
+                                <Button size="small" onClick={() => handleInjectTemplate("leave")}>{t("forms.write.templateLeaveBtn")}</Button>
+                                <Button size="small" onClick={() => handleInjectTemplate("expense")}>{t("forms.write.templateExpenseBtn")}</Button>
+                                <Button size="small" onClick={() => handleInjectTemplate("biz")}>{t("forms.write.templateBizBtn")}</Button>
                             </Space>
                             <ReactQuill
                                 theme="snow"
@@ -383,14 +383,14 @@ export default function FormWritePage() {
                                 // 핸들 영역 겹치는것 방지
                                 style={{height: 320, marginBottom: 48}}
                             />
-                        </Form.Item>    
+                        </Form.Item>
                     ) : (<>
                         {forCategory !== "LEAVE" && (
-                            <Form.Item label="AI 프롬프트">
+                            <Form.Item label={t("forms.write.aiPromptLabel")}>
                                 <Input.Group compact>
                                     <Input
                                         style={{width: "calc(100% - 100px)"}}
-                                        placeholder="예: 휴가 신청서"
+                                        placeholder={t("forms.write.aiPromptPlaceholder")}
                                         value={aiPrompt}
                                         onChange={(e) => setAiPrompt(e.target.value)}
                                         onPressEnter={handleGenerateSchema}
@@ -400,14 +400,14 @@ export default function FormWritePage() {
                                         loading={aiLoading}
                                         onClick={handleGenerateSchema}
                                     >
-                                        생성
+                                        {t("forms.write.aiGenerateBtn")}
                                     </Button>
                                 </Input.Group>
                             </Form.Item>
                         )}
 
                         {schemaFields.length > 0 ? (
-                            <Form.Item label="생성된 필드 구성 (수정 가능)">
+                            <Form.Item label={t("forms.write.schemaFieldsGeneratedLabel")}>
                                 <SchemaFieldEditor
                                     fields={schemaFields}
                                     onChange={setSchemaFields}
@@ -415,21 +415,21 @@ export default function FormWritePage() {
                             </Form.Item>
                         ) : forCategory === "LEAVE" ? (
                             <Text type="secondary" style={{fontSize: 13}}>
-                                연차 카테고리를 선택하면 필수 필드(휴가종류/시작일/종료일)가 자동으로 채워집니다.<br/>카테고리를 다시 선택해주세요.
+                                <span dangerouslySetInnerHTML={{__html: t("forms.write.leaveAutoFieldsHint")}} />
                             </Text>
                         ) : null}
 
                     </>
                     )}
-                    
+
                     <div style={{display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 24}}>
-                        <Button onClick={() => router.push("/appr/forms")}>취소</Button>
+                        <Button onClick={() => router.push("/appr/forms")}>{t("forms.write.cancelBtn")}</Button>
                         <Button
                             type="primary"
                             htmlType="submit"
                             loading={submitting}
                         >
-                            작성
+                            {t("forms.write.submitBtn")}
                         </Button>
                     </div>
                 </Card>

@@ -12,7 +12,14 @@
       "remainingDays": "잔여",
       "unit": "일"
     },
-    "emptyMsg": "연차 데이터가 없습니다."
+    "emptyMsg": "연차 데이터가 없습니다.",
+    "historyCardTitle": "연차 사용 이력",
+    "historyTable": {
+      "grantDays": "일수",
+      "grantType": "유형",
+      "grantedAt": "일시",
+      "reason": "사유"
+    }
   },
 
   "myHistory": {
@@ -57,7 +64,8 @@
     "search": {
       "startDate": "시작일",
       "endDate": "종료일",
-      "btnSearch": "검색"
+      "btnSearch": "검색",
+      "keywordPlaceholder": "사원명 또는 사번"
     },
     "table": {
       "empNo": "사번",
@@ -70,6 +78,7 @@
       "action": "관리"
     },
     "btnEdit": "수정",
+    "btnCreate": "근태 등록",
     "emptyMsg": "검색 조건에 해당하는 근태 기록이 없습니다.",
     "editModal": {
       "title": "근태 수정",
@@ -77,7 +86,17 @@
       "checkOut": "퇴근 시간",
       "status": "상태",
       "btnSave": "저장",
-      "btnCancel": "취소"
+      "btnCancel": "취소",
+      "checkInRequired": "출근 시간을 입력해주세요."
+    },
+    "createModal": {
+      "title": "근태 등록",
+      "btnRegister": "등록",
+      "empNo": "사번",
+      "empNoPlaceholder": "예: EMP-001",
+      "empNoRequired": "사번을 입력해주세요.",
+      "workDate": "근무일",
+      "workDateRequired": "근무일을 선택해주세요."
     }
   },
 
@@ -106,6 +125,8 @@
       "fullDay": "연차 (1일)",
       "halfAM": "오전 반차",
       "halfPM": "오후 반차",
+      "leaveDate": "휴가 사용일",
+      "leaveDateRequired": "휴가 사용일을 선택해주세요.",
       "reason": "사유",
       "btnDeduct": "차감"
     },
@@ -145,6 +166,7 @@
   },
 
   "msg": {
+    "createSuccess": "근태가 등록되었습니다.",
     "checkInSuccess": "출근 처리되었습니다.",
     "checkOutSuccess": "퇴근 처리되었습니다.",
     "editSuccess": "근태가 수정되었습니다.",

@@ -2,6 +2,7 @@
 // 급여기준 관리 (ROLE_ADMIN) - GET/POST/PUT/DELETE /api/salstd
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   Table,
@@ -36,6 +37,7 @@ import { formatWon, wonFormatter, wonParser } from "../../utils/currency";
 
 export default function SalStdListPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("sal");
   const [form] = Form.useForm();
 
   const { stdList, paging, loading, success, error } = useSelector(
@@ -71,13 +73,13 @@ export default function SalStdListPage() {
       if (saving) {
         message.success(
           formTarget === "add"
-            ? "급여기준이 등록되었습니다."
-            : "급여기준이 수정되었습니다.",
+            ? t("std.createSuccessMsg")
+            : t("std.updateSuccessMsg"),
         );
         closeFormModal();
       }
       if (deleting) {
-        message.success("급여기준이 삭제되었습니다.");
+        message.success(t("std.deleteSuccessMsg"));
         setDeleteTarget(null);
         setDeleting(false);
       }
@@ -121,7 +123,7 @@ export default function SalStdListPage() {
           : null,
       };
       if (!isEditMode && !payload.empId) {
-        message.warning("사원을 선택해 주세요.");
+        message.warning(t("std.empSelectWarning"));
         return;
       }
       setSaving(true);
@@ -142,14 +144,14 @@ export default function SalStdListPage() {
 
   const columns = [
     {
-      title: "사원명",
+      title: t("std.columns.empName"),
       dataIndex: "empName",
       key: "empName",
       width: 140,
       render: (v) => <b>{v}</b>,
     },
     {
-      title: "기본급",
+      title: t("std.columns.baseSal"),
       dataIndex: "baseSal",
       key: "baseSal",
       width: 140,
@@ -157,7 +159,7 @@ export default function SalStdListPage() {
       render: (v) => formatWon(v),
     },
     {
-      title: "연봉",
+      title: t("std.columns.annuSal"),
       dataIndex: "annuSal",
       key: "annuSal",
       width: 140,
@@ -165,28 +167,28 @@ export default function SalStdListPage() {
       render: (v) => formatWon(v),
     },
     {
-      title: "적용시작일",
+      title: t("std.columns.startDate"),
       dataIndex: "startDate",
       key: "startDate",
       width: 120,
     },
     {
-      title: "적용종료일",
+      title: t("std.columns.endDate"),
       dataIndex: "endDate",
       key: "endDate",
       width: 120,
       render: (v) => v || "-",
     },
     {
-      title: "상태",
+      title: t("std.columns.status"),
       dataIndex: "actv",
       key: "actv",
       width: 90,
       align: "center",
-      render: (v) => (v ? <Tag color="green">적용중</Tag> : <Tag>종료</Tag>),
+      render: (v) => (v ? <Tag color="green">{t("std.statusActive")}</Tag> : <Tag>{t("std.statusEnded")}</Tag>),
     },
     {
-      title: "관리",
+      title: t("std.columns.actions"),
       key: "actions",
       width: 110,
       align: "center",
@@ -196,7 +198,7 @@ export default function SalStdListPage() {
             type="text"
             size="small"
             icon={<EditOutlined />}
-            title="수정"
+            title={t("std.editTitle")}
             onClick={() => openEditModal(record)}
           />
           <Button
@@ -204,7 +206,7 @@ export default function SalStdListPage() {
             size="small"
             danger
             icon={<DeleteOutlined />}
-            title="삭제"
+            title={t("std.deleteTitle")}
             onClick={() => setDeleteTarget(record)}
           />
         </div>
@@ -223,13 +225,13 @@ export default function SalStdListPage() {
         }}
       >
         <div className="sb-page-head__txt">
-          <div className="sb-breadcrumb">급여관리 &gt; 급여기준 &gt; 목록</div>
-          <h1>급여기준 관리</h1>
-          <p>직원별 기본급/연봉계약 및 적용기간을 등록·관리합니다.</p>
+          <div className="sb-breadcrumb">{t("std.breadcrumb")}</div>
+          <h1>{t("std.title")}</h1>
+          <p>{t("std.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions">
           <Button type="primary" icon={<PlusOutlined />} onClick={openAddModal}>
-            급여기준 등록
+            {t("std.registerBtn")}
           </Button>
         </div>
       </div>
@@ -245,7 +247,7 @@ export default function SalStdListPage() {
         >
           <Input
             style={{ width: 180 }}
-            placeholder="사원 이름"
+            placeholder={t("std.searchEmpNamePlaceholder")}
             value={filters.empName}
             onChange={(e) =>
               setFilters((f) => ({ ...f, empName: e.target.value }))
@@ -254,7 +256,7 @@ export default function SalStdListPage() {
           />
           <Input
             style={{ width: 160 }}
-            placeholder="부서명"
+            placeholder={t("std.searchDeptPlaceholder")}
             value={filters.department}
             onChange={(e) =>
               setFilters((f) => ({ ...f, department: e.target.value }))
@@ -263,7 +265,7 @@ export default function SalStdListPage() {
           />
           <Input
             style={{ width: 140 }}
-            placeholder="직급명"
+            placeholder={t("std.searchPosPlaceholder")}
             value={filters.position}
             onChange={(e) =>
               setFilters((f) => ({ ...f, position: e.target.value }))
@@ -271,7 +273,7 @@ export default function SalStdListPage() {
             onPressEnter={() => runSearch(1)}
           />
           <Button icon={<SearchOutlined />} onClick={() => runSearch(1)}>
-            검색
+            {t("std.searchBtn")}
           </Button>
         </div>
 
@@ -281,7 +283,7 @@ export default function SalStdListPage() {
           dataSource={stdList}
           loading={loading && !saving && !deleting}
           pagination={false}
-          locale={{ emptyText: "등록된 급여기준이 없습니다." }}
+          locale={{ emptyText: t("std.emptyText") }}
         />
 
         {paging && paging.totalElements > 0 && (
@@ -294,7 +296,7 @@ export default function SalStdListPage() {
             }}
           >
             <span style={{ color: "#999", fontSize: 12.5 }}>
-              총 <b>{paging.totalElements}</b>건
+              {t("std.totalCount", { count: paging.totalElements })}
             </span>
             <Pagination
               size="small"
@@ -310,21 +312,21 @@ export default function SalStdListPage() {
 
       {/* 등록/수정 모달 */}
       <Modal
-        title={isEditMode ? "급여기준 수정" : "급여기준 등록"}
+        title={isEditMode ? t("std.modalEditTitle") : t("std.modalAddTitle")}
         open={formTarget !== null}
         onCancel={closeFormModal}
         onOk={handleSubmit}
-        okText={isEditMode ? "수정" : "등록"}
+        okText={isEditMode ? t("std.okTextEdit") : t("std.okTextAdd")}
         okButtonProps={{ loading: saving }}
-        cancelText="취소"
+        cancelText={t("std.cancelText")}
         destroyOnClose
       >
         <Form form={form} layout="vertical">
           {!isEditMode && (
             <Form.Item
               name="empId"
-              label="사원"
-              rules={[{ required: true, message: "사원을 선택해 주세요." }]}
+              label={t("std.empFieldLabel")}
+              rules={[{ required: true, message: t("std.empFieldRequired") }]}
             >
               <EmployeePicker />
             </Form.Item>
@@ -336,15 +338,15 @@ export default function SalStdListPage() {
               bordered
               style={{ marginBottom: 16 }}
             >
-              <Descriptions.Item label="사원">
+              <Descriptions.Item label={t("std.empFieldLabel")}>
                 {formTarget.empName}
               </Descriptions.Item>
             </Descriptions>
           )}
           <Form.Item
             name="baseSal"
-            label="기본급"
-            rules={[{ required: true, message: "기본급을 입력해 주세요." }]}
+            label={t("std.baseSalFieldLabel")}
+            rules={[{ required: true, message: t("std.baseSalFieldRequired") }]}
           >
             <InputNumber
               style={{ width: "100%" }}
@@ -352,25 +354,25 @@ export default function SalStdListPage() {
               step={10000}
               formatter={wonFormatter}
               parser={wonParser}
-              placeholder="예: 3000000"
-              addonAfter="원"
+              placeholder={t("std.baseSalPlaceholder")}
+              addonAfter={t("std.wonSuffix")}
             />
           </Form.Item>
-          <Form.Item name="annuSal" label="연봉 (선택)">
+          <Form.Item name="annuSal" label={t("std.annuSalFieldLabel")}>
             <InputNumber
               style={{ width: "100%" }}
               min={0}
               step={100000}
               formatter={wonFormatter}
               parser={wonParser}
-              placeholder="연봉계약이 있는 경우 입력"
-              addonAfter="원"
+              placeholder={t("std.annuSalPlaceholder")}
+              addonAfter={t("std.wonSuffix")}
             />
           </Form.Item>
           <Form.Item
             name="startDate"
-            label="적용시작일"
-            rules={[{ required: true, message: "적용시작일을 선택해 주세요." }]}
+            label={t("std.startDateFieldLabel")}
+            rules={[{ required: true, message: t("std.startDateFieldRequired") }]}
           >
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
@@ -379,20 +381,20 @@ export default function SalStdListPage() {
 
       {/* 삭제 확인 모달 */}
       <Modal
-        title="급여기준 삭제"
+        title={t("std.deleteModalTitle")}
         open={!!deleteTarget}
         onCancel={() => setDeleteTarget(null)}
         onOk={confirmDelete}
-        okText="삭제"
+        okText={t("std.okTextDelete")}
         okButtonProps={{ danger: true, loading: deleting }}
-        cancelText="취소"
+        cancelText={t("std.cancelText")}
         destroyOnClose
       >
         <p>
-          <b>{deleteTarget?.empName}</b>님의 급여기준을 삭제하시겠습니까?
+          {t("std.deleteConfirmText", { empName: deleteTarget?.empName })}
         </p>
         <p style={{ color: "#999", fontSize: 13 }}>
-          삭제된 급여기준은 복구할 수 없습니다.
+          {t("std.deleteWarningText")}
         </p>
       </Modal>
     </div>
