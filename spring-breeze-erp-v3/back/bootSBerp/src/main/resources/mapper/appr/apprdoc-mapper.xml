@@ -104,18 +104,19 @@
 
 	<!-- 대시보드용 통계 -->
 	<select id="selectDocCnt" resultType="map">
-		select
-			count(distinct case when d.emp_id = #{empId} or l.emp_id = #{empId} then d.doc_id end) as "TOTALCNT",
-			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'APP' then d.doc_id end) as "APPCNT",
-			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'REJ' then d.doc_id end) as "REJCNT",
-			count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'ING' then d.doc_id end) as "INGCNT",
-			count(distinct case when l.emp_id = #{empId} and d.doc_status = 'ING' and l.lin_status = 'WAI' then d.doc_id end) as "MYCNT"
-		from
-			appr_doc d
-		left join
-			appr_line l on d.doc_id = l.doc_id
-		where
-			d.emp_id = #{empId} or l.emp_id = #{empId}
+	    select
+	        count(distinct case when d.emp_id = #{empId} or l.emp_id = #{empId} then d.doc_id end) as "TOTALCNT",
+	        count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'APP' then d.doc_id end) as "APPCNT",
+	        count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'REJ' then d.doc_id end) as "REJCNT",
+	        count(distinct case when (d.emp_id = #{empId} or l.emp_id = #{empId}) and d.doc_status = 'ING' then d.doc_id end) as "INGCNT",
+	        count(distinct case when l.emp_id = #{empId} and d.doc_status = 'ING' and l.lin_status = 'WAI' then d.doc_id end) as "MYCNT",
+	        count(distinct case when d.emp_id = #{empId} and d.doc_status = 'ING' then d.doc_id end) as "MYDRAFTINGCNT"
+	    from
+	        appr_doc d
+	    left join
+	        appr_line l on d.doc_id = l.doc_id
+	    where
+	        d.emp_id = #{empId} or l.emp_id = #{empId}
 	</select>
 	
 	<!-- 모든 문서 조회 -->
