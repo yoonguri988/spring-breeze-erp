@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,39 +35,30 @@ public class ProjectMemberController {
 	private final ProjectMemberService service;
 	private final ProjectService projectService;
 	
-	// 프로젝트 참여 멤버 조회
-	// ★Authentication 
-	@Operation(summary = "프로젝트 참여 멤버 조회",description = "특정 프로젝트에 참여 중인 멤버 목록을 조회")
+	// 프로젝트 참여 멤버 조회 — 같은 회사(ROOT 포함) + (관리자 or 생성자 or 참여멤버)
+	// 프로젝트 참여 멤버 조회 — 같은 회사(ROOT 포함)면 조회 가능
+	@Operation( summary = "프로젝트 참여 멤버 조회", description = "특정 프로젝트에 참여 중인 멤버 목록을 조회" )
 	@GetMapping
-	public ResponseEntity<List<ProjmemResponse>>getMembers(
-			@RequestParam("proId") Long proId,
-			@AuthenticationPrincipal CustomUserPrincipal principal) {
-		
-		ProjResponse project = projectService.select(proId);
-		if (project == null) {
-			return ResponseEntity.notFound().build();
-		}
+	public ResponseEntity<List<ProjmemResponse>> getMembers(
+	        @RequestParam("proId") Long proId,
+	        @AuthenticationPrincipal CustomUserPrincipal principal) {
 
-		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-		}
+	    ProjResponse project = projectService.select(proId);
 
-		List<ProjmemResponse> members = service.select(proId);
+	    if (project == null) {
+	        return ResponseEntity.notFound().build();
+	    }
 
-		boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
-		boolean isCreator = project.getEmpId().equals(principal.getEmpId());
-		boolean isMember = members.stream()
-				.anyMatch(m -> m.getEmpId().equals(principal.getEmpId()));
+	    // 다른 회사 프로젝트는 접근 불가
+	    if (!project.getComId().equals(principal.getComId())) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	    }
 
-		if (!isAdmin && !isCreator && !isMember) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-		}
-		
-		return ResponseEntity.ok(service.select(proId));} 
+	    // 같은 회사 직원이면 프로젝트 멤버가 아니어도 조회 가능
+	    return ResponseEntity.ok(service.select(proId));
+	}
 	
-	// 프로젝트 참여 멤버 등록
-	// ★Authentication 
+	// 프로젝트 참여 멤버 등록 — 같은 회사(ROOT 포함) + (관리자 or 생성자)
 	@Operation(summary = "프로젝트 참여 멤버 등록",description = "특정 프로젝트에 참여 멤버 등록")
 	@PostMapping("/proj_member_create") 
 	public ResponseEntity<Map<String,Object>>addMember(
@@ -82,7 +72,7 @@ public class ProjectMemberController {
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+		if (!project.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
@@ -113,8 +103,7 @@ public class ProjectMemberController {
 			    	return ResponseEntity.badRequest().body(result);}
 			}
 
-	// 프로젝트 참여 멤버 삭제
-	// ★Authentication
+	// 프로젝트 참여 멤버 삭제 — 같은 회사(ROOT 포함) + (관리자 or 생성자)
 	@Operation(summary = "프로젝트 참여 멤버 삭제",description = "특정 프로젝트에 참여 멤버 삭제")
 	@DeleteMapping("/{pmId}") 
 	public ResponseEntity<Map<String,Object>>deleteProjectMember(
@@ -131,7 +120,7 @@ public class ProjectMemberController {
 		}
 
 		boolean isRoot = principal.getRoles().contains("ROOT");
-		if (!isRoot && !project.getComId().equals(principal.getComId())) {
+		if (!project.getComId().equals(principal.getComId())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "접근 권한이 없습니다."));
 		}
