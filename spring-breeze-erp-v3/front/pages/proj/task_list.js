@@ -138,7 +138,21 @@ export default function TaskListPage() {
       title: t("task.list.table.projName"),
       dataIndex: "proName",
       key: "proName",
-      render: (name) => name || "-",
+      render: (name, record) => (
+        <Link
+          href={{
+            pathname: "/proj/proj_detail",
+            query: { proId: record.proId },
+          }}
+        >
+          <span
+            className="sb-table__name"
+            style={{ cursor: "pointer" }}
+          >
+            {name || "-"}
+          </span>
+        </Link>
+      ),
     },
     {
       title: t("task.list.table.taskName"),
