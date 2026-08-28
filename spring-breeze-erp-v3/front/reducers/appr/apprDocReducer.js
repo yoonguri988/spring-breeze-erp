@@ -29,6 +29,7 @@ const initialState = {
     detailDoc: null,    // 문서 본문
     detailLines: [],    // 결재선 목록
     canProcess: false,  // 현재 사용자가 결재 처리 가능한지
+    canEdit: false,     // 기안자 본인 + 결재선 전부 미처리 상태
     detailLoading: false,
     detailError: null,
 
@@ -45,6 +46,15 @@ const initialState = {
     deptEmps: [], // 특정 부서 소속 사원 목록
     deptEmpsLoading: false,
 
+    // 결재선 추천
+    favoriteLines: [],
+    favoriteLinesLoading: false,
+    favoriteLinesError: null,
+
+    // 문서 수정 파트
+    updateSubmitting: false,
+    updateError: null,
+    updateSuccess: false,
 }
 
 const apprDocReducer = createSlice({
@@ -133,6 +143,7 @@ const apprDocReducer = createSlice({
             state.detailDoc = action.payload.doc;
             state.detailLines = action.payload.lines;
             state.canProcess = action.payload.canProcess;
+            state.canEdit = action.payload.canEdit;
         },
         fetchDocDetailFailure: (state, action) => {
             state.detailLoading = false;
@@ -167,6 +178,27 @@ const apprDocReducer = createSlice({
         rejectDocFailure: (state, action) => {
             state.processSubmitting = false;
             state.processError = action.payload;
+        },
+
+        // 문서 수정 (제목/내용)
+        updateDocRequest: (state) => {
+            state.updateSubmitting = true;
+            state.updateError = null;
+            state.updateSuccess = false;
+        },
+        updateDocSuccess: (state) => {
+            state.updateSubmitting = false;
+            state.updateSuccess = true;
+        },
+        updateDocFailure: (state, action) => {
+            state.updateSubmitting = false;
+            state.updateError = action.payload;
+        },
+
+        resetUpdateState: (state) => {
+            state.updateSubmitting = false;
+            state.updateSuccess = false;
+            state.updateError = null;
         },
 
         // 결재 승/반 처리후 초기화
@@ -211,6 +243,21 @@ const apprDocReducer = createSlice({
         fetchDeptEmpsFailure: (state) => {
             state.deptEmpsLoading = false;
         },
+
+        // 결재선 추천
+        fetchFavoriteLinesRequest: (state) => {
+            state.favoriteLinesLoading = true;
+            state.favoriteLinesError = null;
+        },
+        fetchFavoriteLinesSuccess: (state, action) => {
+            state.favoriteLinesLoading = false;
+            state.favoriteLines = action.payload;
+        },
+        fetchFavoriteLinesFailure: (state, action) => {
+            state.favoriteLinesLoading = false;
+            state.favoriteLinesError = action.payload;
+        }
+
     }
 });
 
@@ -226,6 +273,9 @@ export const {
     fetchDeptTreeRequest, fetchDeptTreeSuccess, fetchDeptTreeFailure,
     fetchDeptEmpsRequest, fetchDeptEmpsSuccess, fetchDeptEmpsFailure,
     resetProcessState, resetWriteState,
+    fetchFavoriteLinesRequest, fetchFavoriteLinesSuccess, fetchFavoriteLinesFailure,
+    resetUpdateState,
+    updateDocRequest, updateDocSuccess, updateDocFailure,
 
 } = apprDocReducer.actions;
 

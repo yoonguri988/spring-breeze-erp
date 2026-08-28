@@ -14,6 +14,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sb.erp.appr.dto.request.ApprDocRequest;
 import com.sb.erp.appr.dto.request.ApprDocSearchCondition;
+import com.sb.erp.appr.dto.request.ApprDocUpdateRequest;
+import com.sb.erp.appr.dto.request.ApprLineFavoriteRequest;
 import com.sb.erp.appr.dto.response.ApprDocInitResponse;
 import com.sb.erp.appr.dto.response.ApprDocResponse;
 import com.sb.erp.appr.dto.response.ApprDocSummaryResponse;
@@ -32,6 +34,7 @@ import com.sb.erp.att.service.LeaveBalanceService;
 import com.sb.erp.dept.dto.response.DeptResponse;
 import com.sb.erp.dept.service.DeptService;
 import com.sb.erp.emp.entity.Employee;
+
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
@@ -44,6 +47,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 	private final ApprLineMapper lineDao;
 	private final DeptService deptService;
 	private final ApprAutoDelegationTriggerService autoTrigger;
+	private final ApprLineFavoriteService favService;
 	
 	// 연차 연동
 	private final ApprFormRepository formDao;
@@ -84,6 +88,14 @@ public class ApprDocServiceImpl implements ApprDocService{
 				String status = (linOrder == 1) ? "WAI" : "NOT";
 				lineDao.insertLine(docId, approverEmpIds.get(i), linOrder, status);
 			}
+			
+			// 결재선 조합 사용횟수 반영
+			Long deptId = dao.initResponse(empId).getDeptId();
+			ApprLineFavoriteRequest favReq = new ApprLineFavoriteRequest();
+			favReq.setDeptId(deptId);
+			favReq.setForId(req.getForId());
+			favReq.setEmpIds(approverEmpIds);
+			favService.saveOrIncrement(favReq);
 		}
 		
 		// 연차 신청서면 기안시점에 LeaveRequest 생성
@@ -347,6 +359,36 @@ public class ApprDocServiceImpl implements ApprDocService{
 				
 				leaveBalService.deductLeave(doc.getEmpId(), request);
 			}
+		}
+	}
+	
+	// 문서 수정
+	@Override
+	@Transactional
+	public void updateDoc(Long docId, ApprDocUpdateRequest req, Long empId) {
+		
+		ApprDocResponse doc = dao.selectDocDetail(docId);
+		if (doc == null) {
+			throw new IllegalArgumentException("존재하지 않는 문서입니다.");
+		}
+		
+		// 기안자 본인만 수정 가능
+		if (!doc.getEmpId().equals(empId)) {
+			throw new IllegalArgumentException("본인이 기안한 문서만 수정할 수 있습니다.");
+		}
+		
+		// 결재선중 하나라도 이미 처리됐으면 수정 불가
+		List<ApprLineResponse> lines = lineDao.selectLinesByDocId(docId);
+		boolean anyProcessed = lines.stream()
+				.anyMatch(l -> "APP".equals(l.getLinStatus()) || "REJ".equals(l.getLinStatus()));
+		if (anyProcessed) {
+			throw new IllegalStateException("이미 결재가 진행된 문서는 수정할 수 없습니다.");
+		}
+		
+		// 낙관적 락 체크
+		int updated = dao.updateDoc(docId, req);
+		if (updated == 0) {
+			throw new IllegalArgumentException("문서가 이미 변경 또는 처리되었습니다. 새로고침후 다시 시도해주세요.");
 		}
 	}
 }

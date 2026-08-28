@@ -248,7 +248,13 @@
 	
 	<!-- 문서 상태 갱신 -->
 	<update id="updateDocStatus">
-		update appr_doc set doc_status = #{docStatus} where doc_id = #{docId}
+		update 
+			appr_doc
+		set
+			doc_status = #{docStatus},
+			doc_revision = doc_revision + 1
+		where
+			doc_id = #{docId}
 	</update>
 	
 	<!-- 결재선 지정 상사 조회 -->
@@ -306,7 +312,9 @@
 			d.doc_content,
 			d.doc_status,
 			d.is_important,
+			d.doc_revision,
 			d.created_at,
+			d.updated_at,
 			d.emp_id,
 			f.for_id,
 			f.for_version,
@@ -325,5 +333,18 @@
 		where
 			doc_id = #{docId}
 	</select>
+	
+	<!-- 문서 수정 (기안자 본인, 미처리 상태에서만) -->
+	<update id="updateDoc">
+		update
+			appr_doc
+		set
+			doc_title = #{req.docTitle},
+			doc_content = #{req.docContent},
+			doc_revision = doc_revision + 1
+		where
+			doc_id = #{docId}
+			and doc_revision = #{req.docRevision}
+	</update>
 	
 </mapper>
