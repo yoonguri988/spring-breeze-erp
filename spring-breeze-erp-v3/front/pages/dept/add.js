@@ -150,7 +150,7 @@ export default function DeptAddPage() {
         comId,
         deptName: values.deptName,
         deptCode: (values.deptCode || "").toUpperCase(),
-        parentId: parentId && parentId !== "0" ? parentId : null,
+        parentId: parentId && parentId !== "0" ? parentId : 0,
         depth,
         sortOrder: values.sortOrder,
         returnUrl: returnUrl || undefined,
