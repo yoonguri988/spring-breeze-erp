@@ -33612,6 +33612,21 @@ Insert into SBERP.RECRUIT (REC_ID,COM_ID,EMP_ID,REC_TITLE,REC_DEPARTMENT,REC_POS
 
 
 --------------------------------------------------------------
+-- [MERGED 1/4-B] SEQ_RECRUIT 채번 동기화
+-- 위에서 REC_ID 를 1~22 로 직접 지정해서 넣었기 때문에, START WITH 1 인 SEQ_RECRUIT 를
+-- 그대로 두면 애플리케이션이 다음 채용공고 등록 시 NEXTVAL=1 을 반환해 REC_ID=1 과
+-- PK 충돌(ORA-00001)이 납니다. MAX(REC_ID)+1 기준으로 재생성합니다.
+--------------------------------------------------------------
+DECLARE
+    v_next NUMBER;
+BEGIN
+    SELECT NVL(MAX(REC_ID),0)+1 INTO v_next FROM SBERP.RECRUIT;
+    EXECUTE IMMEDIATE 'DROP SEQUENCE SBERP.SEQ_RECRUIT';
+    EXECUTE IMMEDIATE 'CREATE SEQUENCE SBERP.SEQ_RECRUIT START WITH ' || v_next || ' INCREMENT BY 1 NOCACHE NOCYCLE';
+END;
+/
+
+--------------------------------------------------------------
 -- [MERGED 2/4] recruit_insert.sql 이 전제로 하는 APPLICANT 기초 19건
 -- (APCT_PROVIDER/APCT_PROVIDER_ID 는 NULL로 두고, 아래 recruit_insert.sql 패치의
 --  UPDATE 문에서 채워지도록 합니다 - 원본 스크립트 의도와 동일)
