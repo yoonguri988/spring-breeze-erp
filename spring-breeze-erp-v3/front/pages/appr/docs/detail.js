@@ -514,7 +514,9 @@ export default function DocDetailPage() {
                         deptTreeLoading={deptTreeLoading}
                         selectedDeptId={selectedDeptId}
                         onSelectDept={handleDeptSelect}
-                        deptEmps={deptEmps}
+                        deptEmps={deptEmps.filter(
+                            (e) => !detailLines.some((line) => line.empId === e.empId)
+                        )}
                         deptEmpsLoading={deptEmpsLoading}
                         selectedEmployee={selectedDelegate}
                         onSelectEmployee={setSelectedDelegate}

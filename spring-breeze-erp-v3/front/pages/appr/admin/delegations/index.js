@@ -197,6 +197,7 @@ export default function DelegationAdminPage() {
                     dataSource={pendingRequests}
                     loading={pendingLoading}
                     pagination={false}
+                    scroll={{x: 1200}}
                 />
                 {pendingError && <div style={{color: "red", marginTop: 8}}>{pendingError}</div>}
                 </>
@@ -238,6 +239,7 @@ export default function DelegationAdminPage() {
                         total: historyTotal,
                         onChange: setHistPage,
                     }}
+                    scroll={{x: 1250}}
                 />
                 {historyError && <div style={{color: "red", marginTop: 8}}>{historyError}</div>}
                 </>
@@ -274,6 +276,7 @@ export default function DelegationAdminPage() {
                             total: logsTotal,
                             onChange: setLogPage,
                         }}
+                        scroll={{x: 800}}
                     />
                     {logsError && <div style={{ color: "red", marginTop: 8 }}>{logsError}</div>}
                 </>
