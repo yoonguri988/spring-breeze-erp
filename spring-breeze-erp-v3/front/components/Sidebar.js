@@ -184,7 +184,7 @@ const NAV = [
         page: "apprlistform",
         href: "/appr/forms",
         icon: "bi-sliders",
-        role: "ROOT",
+        role: "ROLE_ADMIN",
       },
       {
         page: "apprlistdoc",

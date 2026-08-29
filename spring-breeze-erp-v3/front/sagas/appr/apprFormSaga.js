@@ -13,7 +13,7 @@ import {
 const APPR_FORM_API_BASE = "/appr";
 
 // 양식 목록 조회
-// GET /api/appr/forms
+// GET /appr
 export const fetchFormListApi = (params) => api.get(APPR_FORM_API_BASE, {params});
 
 export function* fetchFormList(action) {

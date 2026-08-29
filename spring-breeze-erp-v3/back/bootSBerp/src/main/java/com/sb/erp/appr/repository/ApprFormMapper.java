@@ -29,7 +29,8 @@ public interface ApprFormMapper {
 						  @Param("forVersion") Long forVersion,
 						  @Param("req") ApprFormRequest req);
 	public int deleteForm(@Param("forId") Long forId,
-						  @Param("forVersion") Long forVersion);
+						  @Param("forVersion") Long forVersion,
+						  @Param("comId") Long comId);
 	public int updateFormNewVersion(@Param("forId") Long forId,
 								    @Param("req") ApprFormRequest req);
 	public List<ApprFormResponse> selectFormList(ApprFormSearchCondition condition);
