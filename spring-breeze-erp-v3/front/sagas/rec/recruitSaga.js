@@ -48,7 +48,7 @@ export function* listRecruitAdmin(action) {
   } catch (err) {
     yield put(
       fetchRecruitAdminListFailure(
-        err.response?.data?.message || err.message,
+        err.response?.data?.error || err.response?.data?.message || err.message,
       ),
     );
   }
@@ -64,7 +64,9 @@ export function* getRecruitDetail(action) {
     yield put(fetchRecruitDetailSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchRecruitDetailFailure(err.response?.data?.message || err.message),
+      fetchRecruitDetailFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -79,7 +81,9 @@ export function* createRecruit(action) {
     yield put(createRecruitSuccess(result.data));
   } catch (err) {
     yield put(
-      createRecruitFailure(err.response?.data?.message || err.message),
+      createRecruitFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -97,7 +101,9 @@ export function* updateRecruit(action) {
     yield put(updateRecruitSuccess(detailResult.data));
   } catch (err) {
     yield put(
-      updateRecruitFailure(err.response?.data?.message || err.message),
+      updateRecruitFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -112,7 +118,9 @@ export function* deleteRecruit(action) {
     yield put(deleteRecruitSuccess(action.payload));
   } catch (err) {
     yield put(
-      deleteRecruitFailure(err.response?.data?.message || err.message),
+      deleteRecruitFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -127,7 +135,9 @@ export function* cloneRecruit(action) {
     yield put(fetchCloneRecruitSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchCloneRecruitFailure(err.response?.data?.message || err.message),
+      fetchCloneRecruitFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
