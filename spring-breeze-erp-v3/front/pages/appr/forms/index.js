@@ -1,14 +1,13 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState} from "react";
 import { useDispatch, useSelector} from "react-redux";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import {
-    Table, Input, Select, Button, Space, Tag, message,
-    Badge, Spin, Card
+    Table, Input, Select, Button, Space,
+    Badge, Card, Popconfirm
 } from "antd";
-import { SearchOutlined, BankOutlined, PlusOutlined } from "@ant-design/icons";
+import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { fetchFormListRequest, deleteFormRequest } from "../../../reducers/appr/apprFormReducer";
-import { searchCompany } from "../../../api/appr/apprFormApi";
 import PageHeader from "../../../components/appr/PageHeader";
 
 const { Option } = Select;
@@ -21,62 +20,24 @@ export default function FormListPage() {
     const { list, loading, totalCount, page, pageSize } = useSelector((state) => state.apprForm);
 
     // 서버로 나가는 조회 조건 - 검색 버튼 눌러야 반영
-    const [appliedFilters, setAppliedFilters] = useState({comId: undefined, keyword: "", forStatus: undefined});
+    const [appliedFilters, setAppliedFilters] = useState({keyword: "", forStatus: undefined});
     const [currentPage, setCurrentPage] = useState(1);
 
     // 입력중인 값들 - 검색 누르기 전까진 여기까지 바뀜
     const [keywordDraft, setKeywordDraft] = useState("");
     const [statusDraft, setStatusDraft] = useState(undefined);
-    const [comIdDraft, setComIdDraft] = useState(undefined);
-    const [comNameDraft, setComNameDraft] = useState(undefined);
-    
-
-    // 회사검색
-    const [companyOptions, setCompanyOptions] = useState([]);
-    const [companySearching, setCompanySearching] = useState(false);
-    const debounceRef = useRef(null);
-
-    const handleCompanySearch = (value) => {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-
-        if (!value) {
-            setCompanyOptions([]);
-            return;
-        }
-
-        // 타이핑 마다 호출 막기
-        debounceRef.current = setTimeout(async () => {
-            setCompanySearching(true);
-            try {
-                const data = await searchCompany(value);
-                setCompanyOptions(data);
-            } catch (err) {
-                setCompanyOptions([]);
-            } finally {
-                setCompanySearching(false);
-            }
-        }, 300);
-    };
-
-    const handleCompanySelect = (value, option) => {
-        setComIdDraft(value);
-        setComNameDraft(option.children);
-    };
 
     const handleSearch = () => {
         setCurrentPage(1);
         setAppliedFilters({
-            comId: comIdDraft,
             keyword: keywordDraft,
             forStatus: statusDraft,
         });
     };
 
+    // 테스트 해보고 처음에 바로 조회 되게할지 아닐지 조정
+    // 회사별로 보면 데이터 터질정도로 많지않을거라 판단함
     useEffect(() => {
-
-        // 많은 데이터 조회 방지 (회사 선택 전엔 조회하지않음)
-        if (!appliedFilters.comId) return;
-
         dispatch(fetchFormListRequest({
             ...appliedFilters,
             page: currentPage,
@@ -158,13 +119,14 @@ export default function FormListPage() {
                     >
                         {t("forms.list.detailBtn")}
                     </Button>
-                    <Button
-                        size="small"
-                        danger
-                        onClick={() => handleDelete(record.forId, record.forVersion)}
+                    <Popconfirm
+                        title={t("forms.detail.deleteConfirmTitle")}
+                        onConfirm={() => handleDelete(record.forId, record.forVersion)}
                     >
-                        {t("forms.list.deleteBtn")}
-                    </Button>
+                        <Button size="small" danger>
+                            {t("forms.list.deleteBtn")}
+                        </Button>
+                    </Popconfirm>
                 </Space>
             ),
         },
@@ -188,48 +150,6 @@ export default function FormListPage() {
 
             <Card>
                 <div style={{display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "flex-end"}}>
-                    <div>
-                        <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>{t("forms.list.companyLabel")}</div>
-                        <Select
-                            showSearch
-                            placeholder={t("forms.list.companySearchPlaceholder")}
-                            style={{width: 260}}
-                            optionLabelProp="label"
-                            value={comIdDraft}
-                            defaultActiveFirstOption={false}
-                            filterOption={false} // 서버 검색결과를 그대로 사용
-                            suffixIcon={<BankOutlined/>}
-                            notFoundContent={companySearching ? <Spin size="small" /> : t("forms.list.companySearchEmpty")}
-                            onSearch={handleCompanySearch}
-                            onChange={handleCompanySelect}
-                            onClear={() => {
-                                setComIdDraft(undefined);
-                                setComNameDraft(undefined);
-                            }}
-                            allowClear
-                        >
-                            {companyOptions.map((c) => (
-                                <Option
-                                    key={c.comId}
-                                    value={c.comId}
-                                    label={`${c.comName} (${c.bizNo})`}
-                                >
-                                    <span
-                                        title={`${c.comName} (${c.bizNo})`}
-                                        style={{
-                                            display: "block",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap",
-                                        }}
-                                    >
-                                        {c.comName} ({c.bizNo})
-                                    </span>
-                                </Option>
-                            ))}
-                        </Select>
-                    </div>
-
                     <div>
                         <div style={{marginBottom: 6, fontSize: 13, color: "#666"}}>{t("forms.list.keywordLabel")}</div>
                         <Input
@@ -260,7 +180,6 @@ export default function FormListPage() {
                         type="primary"
                         icon={<SearchOutlined />}
                         onClick={handleSearch}
-                        disabled={!comIdDraft}
                     >
                         {t("forms.list.searchBtn")}
                     </Button>
@@ -279,25 +198,19 @@ export default function FormListPage() {
                     onChange -> 사용자가 페이지 번호/다음 버튼을 클릭했을때 호출
                         클릭한 페이지 번호를 받아서 setCurrentPage(p)로 로컬 상태를 갱신
                 */}
-                {!appliedFilters.comId ? (
-                    <div style={{padding: "80px 0", textAlign: "center", color: "#999"}}>
-                        {t("forms.list.selectCompanyMsg")}
-                    </div>
-                ) : (
-                    <Table
-                        rowKey={(record) => `${record.forId}-${record.forVersion}`}
-                        columns={columns}
-                        dataSource={list}
-                        loading={loading}
-                        scroll={{ x: 1100}}
-                        pagination={{
-                            current: page || currentPage,
-                            pageSize: pageSize || 10,
-                            total: totalCount,
-                            onChange: (p) => setCurrentPage(p),
-                        }}
-                    />
-                )}
+                <Table
+                    rowKey={(record) => `${record.forId}-${record.forVersion}`}
+                    columns={columns}
+                    dataSource={list}
+                    loading={loading}
+                    scroll={{ x: 1100}}
+                    pagination={{
+                        current: page || currentPage,
+                        pageSize: pageSize || 10,
+                        total: totalCount,
+                        onChange: (p) => setCurrentPage(p),
+                    }}
+                />
             </Card>
         </div>
     );

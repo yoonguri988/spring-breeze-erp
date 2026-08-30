@@ -27,7 +27,7 @@ public interface ApprFormService {
 	public void updateForm(Long forId, Long forVersion, ApprFormRequest req);
 	
 	// 양식 삭제 ( 소프트 딜리트 )
-	public void deleteForm(Long forId, Long forVersion);
+	public void deleteForm(Long forId, Long forVersion, Long comId);
 	
 	// 양식 코드 중복 체크
 	public CodeCheckResponse checkCode(String forCode, Long comId, Long forId);

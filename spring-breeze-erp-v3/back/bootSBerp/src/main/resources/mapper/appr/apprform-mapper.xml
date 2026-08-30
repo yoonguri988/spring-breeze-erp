@@ -102,6 +102,7 @@
 		where
 			for_id = #{forId}
 			and for_version = #{forVersion}
+			and com_id = #{comId}
 	</update>
 	
 	<!-- 양식 버전 -->

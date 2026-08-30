@@ -91,6 +91,18 @@ public class ApprFormServiceImpl implements ApprFormService {
 		return value == null ? "" : value.replaceAll("\\s+", "");
 	}
 	
+	// 본인 회사 소속 양식이 맞는지 검증
+	private ApprFormResponse getOwnedFormOrThrow(Long forId, Long forVersion, Long comId) {
+		ApprFormResponse original = formMapper.selectFormAll(forId, forVersion);
+		if (original == null) {
+			throw new IllegalArgumentException("존재하지 않는 양식입니다.");
+		}
+		if (!original.getComId().equals(comId)) {
+			throw new IllegalStateException("본인 소속 회사의 양식만 관리할 수 있습니다.");
+		}
+		return original;
+	}
+	
 	@Override
 	public ApprFormListResponse listForms(ApprFormSearchCondition condition) {
 		
@@ -152,10 +164,7 @@ public class ApprFormServiceImpl implements ApprFormService {
 		validateContentXor(req);
 		
 		// 원본 데이터 조회 ( 변경 여부 비교 )
-		ApprFormResponse original = formMapper.selectFormAll(forId, forVersion);
-		if(original == null) {
-			throw new IllegalArgumentException("존재하지 않는 양식입니다.");
-		}
+		ApprFormResponse original = getOwnedFormOrThrow(forId, forVersion, req.getComId());
 		
 		// 공백을 제외한 순수 텍스트 비교
 		// 제목/내용/스키마 중 하나라도 바뀌었는지 확인
@@ -181,9 +190,12 @@ public class ApprFormServiceImpl implements ApprFormService {
 
 	@Override
 	@Transactional
-	public void deleteForm(Long forId, Long forVersion) {
+	public void deleteForm(Long forId, Long forVersion, Long comId) {
 		
-		int result = formMapper.deleteForm(forId, forVersion);
+		// 본인 회사 소속양식인지 검증
+		getOwnedFormOrThrow(forId, forVersion, comId);
+		
+		int result = formMapper.deleteForm(forId, forVersion, comId);
 		
 		// 대상이 없어서 0건 갱신됐다면 예외처리
 		if (result == 0) {

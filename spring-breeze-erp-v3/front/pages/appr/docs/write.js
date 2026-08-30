@@ -64,8 +64,20 @@ export default function DocWritePage() {
         HALF_PM: "오후 반차",
     };
 
-    // 중요문서 결재선인원 조절
-    const requiredApproverCount = isImportant ? 3 : 1;
+    // 부서트리 전체에서 결재 가능한 상급자 총원
+    const totalAvaApprovers = useMemo(
+        () => deptTree.reduce((sum, d) => sum + (d.empCount || 0), 0),
+        [deptTree]
+    );
+
+    // 중요문서 결재선인원 조절 
+    // 일반 문서는 1명 고정, 중요문서는 원칙상 3명이지만 3명 미만일때
+    // 가용 인원만큼만 요구
+    const requiredApproverCount = useMemo(() => {
+        if (!isImportant) return 1;
+        if (deptTree.length === 0) return 3;
+        return Math.max(1, Math.min(3, totalAvaApprovers));
+    }, [isImportant, deptTree, totalAvaApprovers])
 
     // 결재선 순서 패널에 보여줄 고정 슬롯
     const approverSlots = useMemo(
@@ -310,7 +322,9 @@ export default function DocWritePage() {
     // 중요문서 여부 토글 / 초과분 잘라내기
     const handleImportantChange = (checked) => {
         setIsImportant(checked);
-        const newRequired = checked ? 3 : 1;
+        const newRequired = checked
+            ? Math.max(1, Math.min(3, totalAvaApprovers || 3))
+            : 1;
         setApprovers((prev) => {
             if (prev.length <= newRequired) return prev;
             message.info(t("docs.write.approverAdjustedMsg", { count: newRequired }));
@@ -562,6 +576,11 @@ export default function DocWritePage() {
                             <Text type="secondary" style={{display: "block", marginBottom: 12}}>
                                 {isImportant ? t("docs.write.importantHint") : t("docs.write.normalHint")}
                             </Text>
+                            {isImportant && requiredApproverCount < 3 && (
+                                <Text type="warning" style={{display: "block", marginBottom: 12, fontSize: 13}}>
+                                    조직상 배치 가능한 결재자가 {requiredApproverCount}명 뿐이라,<br/> 결재선이 {requiredApproverCount}명으로 조정 됩니다.
+                                </Text>
+                            )}
 
                         {favoriteLinesLoading ? (
                             <Spin size="small" />
