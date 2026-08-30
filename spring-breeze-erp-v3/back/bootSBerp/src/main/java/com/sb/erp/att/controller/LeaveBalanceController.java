@@ -116,8 +116,13 @@ public class LeaveBalanceController {
             @Parameter(description = "발생 연도 (예: 2026)")
             @RequestParam("year") Integer year) {
 
-        LeaveBalanceResponse result = leaveBalanceService.calculateAnnual(empId, year);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    	try {
+            LeaveBalanceResponse result = leaveBalanceService.calculateAnnual(empId, year);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
+        }
     }
 
     @Operation(summary = "연차 사용 차감", description = "연차 또는 반차 사용 시 잔여 차감 처리")

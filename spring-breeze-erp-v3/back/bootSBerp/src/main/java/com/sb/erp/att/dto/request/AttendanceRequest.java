@@ -10,11 +10,9 @@ import lombok.Setter;
 @Setter @Getter 
 public class AttendanceRequest {
 	
-	@NotNull
+
 	private LocalDateTime checkIn; // 출근
-	
 	private LocalDateTime checkOut; // 퇴근
-	
 	private String attStatus; // 상태
 	
 	private Long empId; 

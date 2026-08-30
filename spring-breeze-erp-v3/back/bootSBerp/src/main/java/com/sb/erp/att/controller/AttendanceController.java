@@ -2,7 +2,6 @@ package com.sb.erp.att.controller;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +33,6 @@ public class AttendanceController {
 
 	private final AttendanceService attendanceService;
 	private final AuthUserJwtService authUserJwtService;
-	
 	
 	//GET /api/att getAllAttendances @RequestParam (startDate, endDate, start, end)
 	@Operation(summary = "근태 목록 조회", description = "검색 조건과 페이징을 적용한 근태 목록")
@@ -99,7 +97,6 @@ public class AttendanceController {
 	public ResponseEntity<?> edit(
 			@PathVariable("attId") Long attId,
 			@RequestBody AttendanceRequest request) {
-		
 		AttendanceResponse updated = attendanceService.editAtt(attId, request);
 		return ResponseEntity.ok(updated);
 	}

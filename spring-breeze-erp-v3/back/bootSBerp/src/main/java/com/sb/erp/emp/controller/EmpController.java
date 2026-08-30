@@ -136,6 +136,7 @@ public class EmpController {
 
 	// ─── 사원 정보 수정 ───────────────────────────────
 	@Operation(summary = "사원 정보 수정")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{empId}")
 	public ResponseEntity<?> edit(
 			Authentication auth,

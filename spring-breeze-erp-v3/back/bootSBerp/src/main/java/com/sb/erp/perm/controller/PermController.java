@@ -100,10 +100,17 @@ public class PermController {
 	public ResponseEntity<Map<String, String>> delete(
 			Authentication auth,
 			@PathVariable("autId") long autId) {
+		
 		Long comId = authUserJwtService.getCurrentComId(auth);
+		
 		int result = permService.delete(autId, comId);
-		if (result > 0) return ResponseEntity.ok(Map.of("message", "삭제되었습니다."));
-		return ResponseEntity.notFound().build();
+
+		if (result == -1) {
+		    return ResponseEntity.status(HttpStatus.CONFLICT)
+		            .body(Map.of("message", "사용 중인 사원이 있어 삭제할 수 없습니다."));
+		}
+		if (result == 0) return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(Map.of("message", "삭제되었습니다."));
 	}
 
 

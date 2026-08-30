@@ -72,11 +72,15 @@ public class PermServiceImpl implements PermService {
 
 	@Override
 	public int delete(long autId, Long comId) {
-		// Mapper의 delete는 PermRequest를 parameterType으로 받으므로 DTO에 담아 전달
-		PermRequest dto = new PermRequest();
-		dto.setAutId(autId);
-		dto.setComId(comId);
-		return permMapper.delete(dto);
+		
+		// 사용 중인 사원이 있으면 FK 제약 예외 대신 -1 반환
+	    int usingCount = permMapper.countEmpUsing(autId);
+	    if (usingCount > 0) return -1;
+
+	    PermRequest dto = new PermRequest();
+	    dto.setAutId(autId);
+	    dto.setComId(comId);
+	    return permMapper.delete(dto);
 	}
 
 

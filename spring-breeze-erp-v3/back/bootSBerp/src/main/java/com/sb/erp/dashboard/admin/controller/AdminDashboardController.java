@@ -31,7 +31,6 @@ public class AdminDashboardController {
     @GetMapping("/summary")
     public ResponseEntity<?> getSummary(
             @AuthenticationPrincipal CustomUserPrincipal principal) {
-
         Long empId = principal.getEmpId();
         Long comId = principal.getComId();
 
