@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,6 @@ public class PosController {
 	private final PosService posService;
 	private final AuthUserJwtService authUserJwtService;
 
-
 	@Operation(summary = "직급 목록 조회")
 	@GetMapping
 	public ResponseEntity<List<PosResponse>> list(Authentication auth) {
@@ -36,6 +36,7 @@ public class PosController {
 
 
 	@Operation(summary = "직급 상세 조회")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/{posId}")
 	public ResponseEntity<PosResponse> detail(
 			Authentication auth,
@@ -49,6 +50,7 @@ public class PosController {
 
 
 	@Operation(summary = "직급 등록")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping
 	public ResponseEntity<?> add(
 			Authentication auth,
@@ -66,6 +68,7 @@ public class PosController {
 
 
 	@Operation(summary = "직급 수정")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{posId}")
 	public ResponseEntity<?> edit(
 			Authentication auth,
@@ -84,6 +87,7 @@ public class PosController {
 
 
 	@Operation(summary = "직급 삭제")
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{posId}")
 	public ResponseEntity<Map<String, String>> delete(
 			Authentication auth,
@@ -105,6 +109,7 @@ public class PosController {
 
 
 	@Operation(summary = "직급코드 중복 확인")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/check-code")
 	public ResponseEntity<Map<String, Boolean>> checkCode(
 			Authentication auth,

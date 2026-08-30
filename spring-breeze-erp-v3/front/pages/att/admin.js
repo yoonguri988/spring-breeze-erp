@@ -112,9 +112,11 @@ export default function AttAdminPage() {
     setEditStatus(record.attStatus);
   };
 
+  const NO_TIME_STATUSES = ["ABSENT", "ANNUAL_LEAVE", "HALF_DAY_AM", "HALF_DAY_PM"];
+
   const handleEditSave = () => {
     if (!editingRecord) return;
-    if (!editCheckIn) {
+    if (!NO_TIME_STATUSES.includes(editStatus) && !editCheckIn) {
       message.warning(t("att:admin.editModal.checkInRequired"));
       return;
     }

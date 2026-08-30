@@ -4,34 +4,19 @@ import { all, call, put, takeLatest } from "redux-saga/effects";
 import api from "../../api/axios";
 
 import {
-  fetchMyBalancesRequest,
-  fetchMyBalancesSuccess,
-  fetchMyBalancesFailure,
-  fetchMyGrantsRequest,
-  fetchMyGrantsSuccess,
-  fetchMyGrantsFailure,
-  fetchAllBalancesRequest,
-  fetchAllBalancesSuccess,
-  fetchAllBalancesFailure,
-  fetchBalanceRequest,
-  fetchBalanceSuccess,
-  fetchBalanceFailure,
-  fetchGrantHistoryRequest,
-  fetchGrantHistorySuccess,
-  fetchGrantHistoryFailure,
-  calculateRequest,
-  calculateSuccess,
-  calculateFailure,
-  deductRequest,
-  deductSuccess,
-  deductFailure,
-  adjustRequest,
-  adjustSuccess,
-  adjustFailure,
+  fetchMyBalancesRequest, fetchMyBalancesSuccess, fetchMyBalancesFailure,
+  fetchMyGrantsRequest, fetchMyGrantsSuccess, fetchMyGrantsFailure,
+  fetchAllBalancesRequest, fetchAllBalancesSuccess, fetchAllBalancesFailure,
+  fetchBalanceRequest, fetchBalanceSuccess, fetchBalanceFailure,
+  fetchGrantHistoryRequest, fetchGrantHistorySuccess, fetchGrantHistoryFailure,
+  calculateRequest, calculateSuccess, calculateFailure,
+  deductRequest, deductSuccess, deductFailure,
+  adjustRequest, adjustSuccess, adjustFailure,
 } from "../../reducers/att/leaveBalanceReducer";
 
 // ── API base 경로 ──
 const LEAVE_API_BASE = "/api/att/leave";
+
 
 //////////////////////////////////////////////////////////////////////////////
 // fetchMyBalances  - GET /api/att/leave/balance/my 내 연차 현황 조회  ---

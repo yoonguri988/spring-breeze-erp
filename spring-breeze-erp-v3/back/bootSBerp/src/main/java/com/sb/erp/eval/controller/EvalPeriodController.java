@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,6 +69,7 @@ public class EvalPeriodController {
 
 	// ─── 등록 ────────────────────────────────────
 	@Operation(summary = "회차 등록")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping
 	public ResponseEntity<?> add(
 			Authentication auth,
@@ -92,6 +94,7 @@ public class EvalPeriodController {
 
 	// ─── 수정 ────────────────────────────────────
 	@Operation(summary = "회차 수정")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{periodId}")
 	public ResponseEntity<?> edit(
 			Authentication auth,
@@ -120,6 +123,7 @@ public class EvalPeriodController {
 
 	// ─── 상태 전환 ───────────────────────────────
 	@Operation(summary = "회차 열기 (READY -> OPEN)")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/{periodId}/open")
 	public ResponseEntity<Map<String, String>> open(
 			Authentication auth,
@@ -132,6 +136,7 @@ public class EvalPeriodController {
 	}
 
 	@Operation(summary = "회차 마감 (OPEN -> CLOSED)")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/{periodId}/close")
 	public ResponseEntity<Map<String, String>> close(
 			Authentication auth,
@@ -145,6 +150,7 @@ public class EvalPeriodController {
 	}
 
 	@Operation(summary = "AI 분석 시작 (CLOSED -> REPORTING)")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/{periodId}/report")
 	public ResponseEntity<Map<String, String>> report(
 			Authentication auth,
@@ -159,6 +165,7 @@ public class EvalPeriodController {
 
 	// ─── 리포트 진행률 (폴링용) ───────────────────
 	@Operation(summary = "리포트 생성 진행률 조회")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/{periodId}/status")
 	public ResponseEntity<ReportProgressDto> getReportProgress(
 			Authentication auth,
@@ -178,6 +185,7 @@ public class EvalPeriodController {
 
 	// ─── 중복 확인 ───────────────────────────────
 	@Operation(summary = "회차 중복 확인")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/check-duplicate")
 	public ResponseEntity<Map<String, Boolean>> checkDuplicate(
 			Authentication auth,

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,7 +47,6 @@ public class EmpController {
 		List<String> roles = authUserJwtService.getCurrentRoles(auth);
 		return roles != null && (roles.contains("ROLE_ADMIN") || roles.contains("ROOT"));
 	}
-
 
 	// ─── 목록 조회 (검색 + 페이징) ────────────────────────
 	@Operation(summary = "사원 목록 조회", description = "검색 조건과 페이징을 적용한 사원 목록")
@@ -116,6 +116,7 @@ public class EmpController {
 
 	// ─── 사원 등록 ────────────────────────────────────
 	@Operation(summary = "사원 등록")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping
 	public ResponseEntity<?> add(
 			Authentication auth,
@@ -135,6 +136,7 @@ public class EmpController {
 
 	// ─── 사원 정보 수정 ───────────────────────────────
 	@Operation(summary = "사원 정보 수정")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{empId}")
 	public ResponseEntity<?> edit(
 			Authentication auth,
@@ -204,15 +206,11 @@ public class EmpController {
 
 	// ─── 비밀번호 초기화 (관리자) ─────────────────────
 	@Operation(summary = "비밀번호 초기화 (관리자)")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{empId}/reset-password")
 	public ResponseEntity<Map<String, String>> resetPassword(
 			Authentication auth,
 			@PathVariable("empId") long empId) {
-
-		if (!isAdmin(auth)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-					.body(Map.of("message", "관리자만 초기화할 수 있습니다."));
-		}
 
 		Long comId = authUserJwtService.getCurrentComId(auth);
 		int result = empService.resetPassByEmpNo(empId, comId);
@@ -243,6 +241,7 @@ public class EmpController {
 	}
 
 	@Operation(summary = "사번 중복 검사")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/check-empno")
 	public ResponseEntity<Map<String, Boolean>> checkEmpNo(
 			Authentication auth,

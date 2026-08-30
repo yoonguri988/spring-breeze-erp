@@ -1,10 +1,7 @@
 package com.sb.erp.dashboard.admin.controller;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin/dashboard")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')") // 관리자 전용
 @Tag(name = "관리자 대시보드", description = "관리자 대시보드 요약 API")
 public class AdminDashboardController {
 
@@ -33,17 +31,6 @@ public class AdminDashboardController {
     @GetMapping("/summary")
     public ResponseEntity<?> getSummary(
             @AuthenticationPrincipal CustomUserPrincipal principal) {
-    	
-    	// ── 권한 체크: ROLE_ADMIN 또는 ROOT만 접근 가능 ──
-        List<String> roles = principal.getRoles();
-        boolean isAdmin = roles != null
-                && (roles.contains("ROLE_ADMIN") || roles.contains("ROOT"));
-
-        if (!isAdmin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "관리자만 접근할 수 있습니다."));
-        }
-
         Long empId = principal.getEmpId();
         Long comId = principal.getComId();
 
