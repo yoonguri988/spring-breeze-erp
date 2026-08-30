@@ -27,7 +27,10 @@ export function* getAdminResume(action) {
     } else {
       yield put(
         fetchAdminResumeFailure({
-          message: err.response?.data?.message || err.message,
+          message:
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            err.message,
         }),
       );
     }
@@ -44,7 +47,9 @@ export function* searchResume(action) {
     yield put(searchResumeSuccess(result.data));
   } catch (err) {
     yield put(
-      searchResumeFailure(err.response?.data?.message || err.message),
+      searchResumeFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }

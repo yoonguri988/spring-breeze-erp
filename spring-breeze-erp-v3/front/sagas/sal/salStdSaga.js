@@ -45,7 +45,11 @@ export function* listSalStd(action) {
     const result = yield call(listSalStdApi, action.payload);
     yield put(listSalStdSuccess(result.data));
   } catch (err) {
-    yield put(listSalStdFailure(err.response?.data?.message || err.message));
+    yield put(
+      listSalStdFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
+    );
   }
 }
 
@@ -57,7 +61,11 @@ export function* fetchMySalStd() {
     const result = yield call(fetchMySalStdApi);
     yield put(fetchMySalStdSuccess(result.data));
   } catch (err) {
-    yield put(fetchMySalStdFailure(err.response?.data?.message || err.message));
+    yield put(
+      fetchMySalStdFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
+    );
   }
 }
 
@@ -70,7 +78,11 @@ export function* createSalStd(action) {
     const result = yield call(createSalStdApi, action.payload);
     yield put(createSalStdSuccess(result.data));
   } catch (err) {
-    yield put(createSalStdFailure(err.response?.data?.message || err.message));
+    yield put(
+      createSalStdFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
+    );
   }
 }
 
@@ -83,7 +95,11 @@ export function* updateSalStd(action) {
     const result = yield call(updateSalStdApi, action.payload);
     yield put(updateSalStdSuccess(result.data));
   } catch (err) {
-    yield put(updateSalStdFailure(err.response?.data?.message || err.message));
+    yield put(
+      updateSalStdFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
+    );
   }
 }
 
@@ -96,7 +112,11 @@ export function* deleteSalStd(action) {
     yield call(deleteSalStdApi, action.payload);
     yield put(deleteSalStdSuccess(action.payload));
   } catch (err) {
-    yield put(deleteSalStdFailure(err.response?.data?.message || err.message));
+    yield put(
+      deleteSalStdFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
+    );
   }
 }
 

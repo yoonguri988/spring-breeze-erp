@@ -41,7 +41,9 @@ export function* fetchRatePolicy() {
     yield put(fetchRatePolicySuccess(result.data));
   } catch (err) {
     yield put(
-      fetchRatePolicyFailure(err.response?.data?.message || err.message),
+      fetchRatePolicyFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -53,7 +55,9 @@ export function* createRatePolicy(action) {
     yield put(createRatePolicySuccess());
   } catch (err) {
     yield put(
-      createRatePolicyFailure(err.response?.data?.message || err.message),
+      createRatePolicyFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -66,7 +70,9 @@ export function* fetchTaxBracket() {
     yield put(fetchTaxBracketSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchTaxBracketFailure(err.response?.data?.message || err.message),
+      fetchTaxBracketFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -79,7 +85,9 @@ export function* createTaxBracket(action) {
     yield put(createTaxBracketSuccess());
   } catch (err) {
     yield put(
-      createTaxBracketFailure(err.response?.data?.message || err.message),
+      createTaxBracketFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -92,7 +100,9 @@ export function* fetchMealPolicy() {
     yield put(fetchMealPolicySuccess(result.data));
   } catch (err) {
     yield put(
-      fetchMealPolicyFailure(err.response?.data?.message || err.message),
+      fetchMealPolicyFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -105,7 +115,9 @@ export function* createMealPolicy(action) {
     yield put(createMealPolicySuccess());
   } catch (err) {
     yield put(
-      createMealPolicyFailure(err.response?.data?.message || err.message),
+      createMealPolicyFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -118,7 +130,9 @@ export function* fetchPosAllowance() {
     yield put(fetchPosAllowanceSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchPosAllowanceFailure(err.response?.data?.message || err.message),
+      fetchPosAllowanceFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -131,7 +145,9 @@ export function* createPosAllowance(action) {
     yield put(createPosAllowanceSuccess());
   } catch (err) {
     yield put(
-      createPosAllowanceFailure(err.response?.data?.message || err.message),
+      createPosAllowanceFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }

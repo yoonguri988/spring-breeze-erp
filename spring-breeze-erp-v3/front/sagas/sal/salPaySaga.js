@@ -55,7 +55,7 @@ export function* listSalPay(action) {
     const result = yield call(listSalPayApi, action.payload);
     yield put(listSalPaySuccess(result.data));
   } catch (err) {
-    yield put(listSalPayFailure(err.response?.data?.message || err.message));
+    yield put(listSalPayFailure(err.response?.data?.error || err.response?.data?.message || err.message));
   }
 }
 
@@ -69,7 +69,7 @@ export function* fetchMyPayments(action) {
     yield put(fetchMyPaymentsSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchMyPaymentsFailure(err.response?.data?.message || err.message),
+      fetchMyPaymentsFailure(err.response?.data?.error || err.response?.data?.message || err.message),
     );
   }
 }
@@ -82,7 +82,7 @@ export function* fetchItemCodes() {
     yield put(fetchItemCodesSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchItemCodesFailure(err.response?.data?.message || err.message),
+      fetchItemCodesFailure(err.response?.data?.error || err.response?.data?.message || err.message),
     );
   }
 }
@@ -95,7 +95,7 @@ export function* createSalPay(action) {
     const result = yield call(createSalPayApi, action.payload);
     yield put(createSalPaySuccess(result.data));
   } catch (err) {
-    yield put(createSalPayFailure(err.response?.data?.message || err.message));
+    yield put(createSalPayFailure(err.response?.data?.error || err.response?.data?.message || err.message));
   }
 }
 
@@ -108,7 +108,7 @@ export function* recalcSalPay(action) {
     const result = yield call(recalcSalPayApi, action.payload);
     yield put(recalcSalPaySuccess(result.data));
   } catch (err) {
-    yield put(recalcSalPayFailure(err.response?.data?.message || err.message));
+    yield put(recalcSalPayFailure(err.response?.data?.error || err.response?.data?.message || err.message));
   }
 }
 
@@ -122,7 +122,7 @@ export function* adjustSalPayItem(action) {
     yield put(adjustSalPayItemSuccess(result.data));
   } catch (err) {
     yield put(
-      adjustSalPayItemFailure(err.response?.data?.message || err.message),
+      adjustSalPayItemFailure(err.response?.data?.error || err.response?.data?.message || err.message),
     );
   }
 }
@@ -138,7 +138,7 @@ export function* changeSalPayStatus(action) {
     yield put(changeSalPayStatusSuccess(result.data));
   } catch (err) {
     yield put(
-      changeSalPayStatusFailure(err.response?.data?.message || err.message),
+      changeSalPayStatusFailure(err.response?.data?.error || err.response?.data?.message || err.message),
     );
   }
 }
@@ -151,7 +151,7 @@ export function* deleteSalPay(action) {
     yield call(deleteSalPayApi, action.payload);
     yield put(deleteSalPaySuccess(action.payload));
   } catch (err) {
-    yield put(deleteSalPayFailure(err.response?.data?.message || err.message));
+    yield put(deleteSalPayFailure(err.response?.data?.error || err.response?.data?.message || err.message));
   }
 }
 
