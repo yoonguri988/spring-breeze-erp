@@ -3,11 +3,13 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Card, Row, Col, Table, Tag, Button, Progress } from "antd";
+import { Card, Row, Col, Table, Tag, Button, Progress, message } from "antd";
 import { CalendarOutlined, EditOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
-import { dashboardEvalRequest, clearEvalDetail, } from "../../reducers/eval/evalReducer";
+import { 
+  dashboardEvalRequest, clearEvalDetail, resetEvalState, 
+} from "../../reducers/eval/evalReducer";
 
 export default function EvalDashboardPage() {
   const router = useRouter();
@@ -20,9 +22,9 @@ export default function EvalDashboardPage() {
     SUBMITTED: { color: "green", label: t("common.evalStatus.submitted") },
   };
 
-  const {
+ const {
     openPeriods, currentPeriod, targets,
-    submittedCount, totalCount, loading,
+    submittedCount, totalCount, loading, error,
   } = useSelector((state) => state.eval);
 
   const { user } = useSelector((state) => state.auth);
@@ -32,6 +34,10 @@ export default function EvalDashboardPage() {
     dispatch(dashboardEvalRequest(periodId ? Number(periodId) : null));
     return () => dispatch(clearEvalDetail());
   }, [dispatch, periodId]);
+
+  useEffect(() => {
+    if (error) { message.error(error); dispatch(resetEvalState()); }
+  }, [error]);  
 
   // 평가 대상 테이블 컬럼
   const columns = [

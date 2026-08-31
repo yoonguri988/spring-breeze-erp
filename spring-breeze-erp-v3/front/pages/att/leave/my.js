@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Card, Table, Tag } from "antd";
+import { Card, Table, Tag, message } from "antd";
 import { useTranslation } from "react-i18next";
 import moment from "moment";
 
@@ -18,7 +18,7 @@ export default function LeaveMyPage() {
   const { t } = useTranslation(["att", "common"]);
 
   // ── useSelector: Redux store에서 필요한 상태를 꺼내오기 ──
-  const { myBalances, grantHistory, loading } = useSelector((state) => state.leave);
+  const { myBalances, grantHistory, loading, error } = useSelector((state) => state.leave);
 
   useEffect(() => {
     dispatch(fetchMyBalancesRequest());
@@ -28,6 +28,10 @@ export default function LeaveMyPage() {
         dispatch(clearLeaveDetail());
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (error) { message.error(error); dispatch(resetLeaveState()); }
+  }, [error]);
 
   const columns = [
     {

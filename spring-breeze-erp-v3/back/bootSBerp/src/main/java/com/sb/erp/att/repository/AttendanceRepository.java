@@ -24,6 +24,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 		            "JOIN employee e ON a.EMP_ID = e.EMP_ID " +
 		            "JOIN department d ON e.DEPT_ID = d.DEPT_ID " +
 		            "WHERE a.ATT_DATE BETWEEN :startDate AND :endDate " +
+		            "AND e.COM_ID = :comId " +
 		            "AND (:keyword IS NULL OR e.EMP_NAME LIKE '%' || :keyword || '%' " +
 		            "     OR e.EMP_NO LIKE '%' || :keyword || '%') " +
 		            "ORDER BY a.ATT_DATE DESC) sub ) " +
@@ -32,6 +33,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 		List<Attendance> findAttendanceWithSearch(
 		    @Param("startDate") LocalDate startDate,
 		    @Param("endDate") LocalDate endDate,
+		    @Param("comId") Long comId,
 		    @Param("keyword") String keyword,
 		    @Param("start") int start,
 		    @Param("end") int end);

@@ -31,9 +31,9 @@ public class AttendanceService {
 	
 	//	목록 조회	읽기
 	public List<AttendanceResponse> getAllAttendances(
-			LocalDate startDate, LocalDate endDate, String keyword, 
-			int start, int end){
-		return attendanceRepository.findAttendanceWithSearch(startDate, endDate, keyword, start, end)
+	        LocalDate startDate, LocalDate endDate, Long comId, String keyword,
+	        int start, int end) {
+	    return attendanceRepository.findAttendanceWithSearch(startDate, endDate, comId, keyword, start, end)
 				.stream()
 				.map(AttendanceResponse::from)
 				.collect(Collectors.toList());

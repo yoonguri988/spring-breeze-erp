@@ -30,12 +30,14 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, Long
     // ──────────────────────────────────────────────
     @Query("SELECT lb FROM LeaveBalance lb JOIN lb.employee e " +
     	       "WHERE lb.year = :year " +
+    	       "AND e.company.comId = :comId " +
     	       "AND (:keyword IS NULL " +
     	       "OR e.empName LIKE CONCAT('%', :keyword, '%') " +
     	       "OR e.empNo LIKE CONCAT('%', :keyword, '%')) " +
     	       "ORDER BY e.empId ASC")
     	List<LeaveBalance> findByYearAndKeyword(
     	    @Param("year") Integer year,
+    	    @Param("comId") Long comId,
     	    @Param("keyword") String keyword);
 
 }

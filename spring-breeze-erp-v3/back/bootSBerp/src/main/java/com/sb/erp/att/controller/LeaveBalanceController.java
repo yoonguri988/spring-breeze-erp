@@ -73,11 +73,12 @@ public class LeaveBalanceController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/balance")
     public ResponseEntity<?> allBalances(
-            @Parameter(description = "조회 연도 (예: 2026)")
+            Authentication auth,
             @RequestParam("year") Integer year,
             @RequestParam(name = "keyword", required = false) String keyword) {
 
-        List<LeaveBalanceResponse> list = leaveBalanceService.getAllBalances(year, keyword);
+        Long comId = authUserJwtService.getCurrentComId(auth);
+        List<LeaveBalanceResponse> list = leaveBalanceService.getAllBalances(comId, year, keyword);
         return ResponseEntity.ok(list);
     }
 
@@ -123,6 +124,21 @@ public class LeaveBalanceController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("message", e.getMessage()));
         }
+    }
+    
+    // 
+    @Operation(summary = "전체 사원 연차 일괄 발생")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/calculate-all")
+    public ResponseEntity<?> calculateAll(
+            Authentication auth,
+            @RequestParam("year") Integer year) {
+        Long comId = authUserJwtService.getCurrentComId(auth);  // ← 추가
+        int count = leaveBalanceService.calculateAllForYear(comId, year);
+        return ResponseEntity.ok(Map.of(
+            "message", year + "년 연차 일괄 발생 완료",
+            "count", count
+        ));
     }
 
     @Operation(summary = "연차 사용 차감", description = "연차 또는 반차 사용 시 잔여 차감 처리")

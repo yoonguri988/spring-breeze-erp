@@ -1,24 +1,12 @@
 // pages/att/my.js
-//
-// ┌────────────────────────────────────────────────────────────────┐
-// │  이 페이지는 leave/my.js와 거의 같은 "읽기 전용 목록" 패턴이다. │
-// │  차이점:                                                       │
-// │    - 다른 reducer(attReducer)에서 데이터를 가져온다              │
-// │      state.att.myAttList  vs  state.leave.myBalances            │
-// │    - 날짜/시간 포맷팅이 필요하다 (moment 사용)                   │
-// │    - 근무 상태를 Tag 색상으로 구분한다                           │
-// └────────────────────────────────────────────────────────────────┘
 
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Card, Table, Tag } from "antd";
+import { Card, Table, Tag, message } from "antd";
 import { useTranslation } from "react-i18next";
 import moment from "moment";
 
-import {
-  myAttRequest,
-  resetAttState,
-} from "../../reducers/att/attReducer";
+import { myAttRequest, resetAttState, } from "../../reducers/att/attReducer";
 
 // ── 근무 상태별 Tag 색상 매핑 ──
 // 컴포넌트 바깥에 선언하는 이유:
@@ -29,9 +17,9 @@ const STATUS_COLOR = {
   LATE: "orange",
   EARLY_LEAVE: "gold",
   ABSENT: "red",
-  HALF_DAY_AM: "cyan",
-  HALF_DAY_PM: "blue",
-  ANNUAL_LEAVE: "purple",
+  AM_HALF: "cyan",
+  PM_HALF: "blue",
+  ANNUAL: "purple",
 };
 
 export default function AttMyPage() {
@@ -39,10 +27,7 @@ export default function AttMyPage() {
   const { t } = useTranslation(["att", "common"]);
 
   // ── state.att에서 데이터 가져오기 ──
-  // attReducer의 initialState에 선언된 myAttList, loading을 꺼낸다.
-  // leave/my.js에서는 state.leave를 썼고, 여기서는 state.att를 쓴다.
-  // → rootReducer의 키가 다르기 때문
-  const { myAttList, loading } = useSelector((state) => state.att);
+  const { myAttList, loading, error } = useSelector((state) => state.att);
 
   useEffect(() => {
     dispatch(myAttRequest());
@@ -52,6 +37,10 @@ export default function AttMyPage() {
       dispatch(resetAttState());
     };
   }, [dispatch]);
+
+  useEffect(() => {
+  if (error) { message.error(error); dispatch(resetAttState()); }
+  }, [error]);
 
   const columns = [
     {
