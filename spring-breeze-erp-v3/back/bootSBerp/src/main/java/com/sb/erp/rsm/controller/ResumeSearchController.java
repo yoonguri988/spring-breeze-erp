@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/resume")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN') or hasAuthority('ROOT')")
 public class ResumeSearchController {
 
 	private final ApplicantRepository applicantRepository;
@@ -45,30 +47,19 @@ public class ResumeSearchController {
             @RequestParam(value = "topK", defaultValue = "5") int topK,
             @AuthenticationPrincipal CustomUserPrincipal principal) {
 
-        Recruit recruit = recruitRepository.findById(recId) .orElse(null);
+        Recruit recruit = recruitRepository.findById(recId).orElse(null);
         if (recruit == null) { return ResponseEntity.notFound().build(); }
 
-        // ROOT는 전체 접근 허용
+        // ROOT는 전체 접근 허용, 나머지는 같은 회사인지 확인
         boolean isRoot = principal.getRoles().contains("ROOT");
-
-        // 같은 회사인지 확인
         if (!isRoot && !recruit.getCompany().getComId().equals(principal.getComId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // 관리자 여부
-        boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
-
-        // 해당 공고 생성자 여부
-        boolean isCreator = recruit.getEmployee().getEmpId().equals(principal.getEmpId());
-
-        // 관리자 또는 공고 생성자만 이력서 검색 가능
-        if (!isAdmin && !isCreator) { return ResponseEntity.status(HttpStatus.FORBIDDEN) .body(List.of()); }
-
         List<ResumeSearchResponse> response = resumeChunkService.search(recId, query, topK);
         return ResponseEntity.ok(response);
     }
-    
+
     @Operation(summary = "지원자 이력서 상세 조회")
     @GetMapping("/applicants/{apctId}")
     public ResponseEntity<ResumeResponse> getResume(
@@ -76,28 +67,20 @@ public class ResumeSearchController {
             @RequestParam("recId") Long recId,
             @AuthenticationPrincipal CustomUserPrincipal principal) {
 
-        Recruit recruit = recruitRepository.findById(recId) .orElse(null);
-
+        Recruit recruit = recruitRepository.findById(recId).orElse(null);
         if (recruit == null) { return ResponseEntity.notFound().build(); }
 
         boolean isRoot = principal.getRoles().contains("ROOT");
+        if (!isRoot && !recruit.getCompany().getComId().equals(principal.getComId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-        if (!isRoot && !recruit.getCompany().getComId().equals(principal.getComId())) { 
-        	return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); 
-        	}
-
-        boolean isAdmin = isRoot || principal.getRoles().contains("ROLE_ADMIN");
-        boolean isCreator = recruit.getEmployee().getEmpId().equals(principal.getEmpId());
-
-        if (!isAdmin && !isCreator) { return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); }
-
-        // 해당 지원자가 해당 공고의 지원자인지 확인
         Applicant applicant = applicantRepository
                 .findByApctIdAndRecruit_RecId(apctId, recId)
                 .orElse(null);
-
         if (applicant == null) { return ResponseEntity.notFound().build(); }
-        Resume resume = resumeRepository .findByApplicant_ApctId(apctId) .orElse(null);
+
+        Resume resume = resumeRepository.findByApplicant_ApctId(apctId).orElse(null);
         if (resume == null) { return ResponseEntity.notFound().build(); }
 
         return ResponseEntity.ok(new ResumeResponse(resume));
