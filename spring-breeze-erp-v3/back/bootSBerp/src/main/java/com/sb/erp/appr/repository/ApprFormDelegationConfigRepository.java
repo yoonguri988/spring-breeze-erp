@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import com.sb.erp.appr.entity.ApprFormDelegationConfig;
 
+//[스코프 제외] 위임전결 자동화 미배포 - 상세: ApprFormDelegationConfig.java 참고
 @Repository
 public interface ApprFormDelegationConfigRepository extends JpaRepository<ApprFormDelegationConfig, Long>{
 	

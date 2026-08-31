@@ -64,6 +64,11 @@ export default function FormWritePage() {
                 return missing.length > 0 ? [...prev, ...missing] : prev;
             });
         }
+        else { 
+            // 일반으로 되돌릴 때 필드 제거
+            const leaveKeys = new Set(LEAVE_REQUIRED_FIELDS.map((f) => f.key));
+            setSchemaFields((prev) => prev.filter((f) => !leaveKeys.has(f.key)));
+        }
     }
 
     useEffect(() => {

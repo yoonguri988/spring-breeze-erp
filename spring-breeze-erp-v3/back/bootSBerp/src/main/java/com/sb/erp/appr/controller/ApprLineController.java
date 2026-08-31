@@ -65,42 +65,45 @@ public class ApprLineController {
 	}
 	
 	@Operation(summary = "위임 요청 승인 대기 목록 (관리자)", description = "승인 대기중인 요청 확인")
-	@PreAuthorize("hasAuthority('ROOT')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/requests/pending")
-	public ResponseEntity<List<ApprLineDelegationResponse>> pendingRequests() {
-		return ResponseEntity.ok(delService.pendingRequests());
+	public ResponseEntity<List<ApprLineDelegationResponse>> pendingRequests(
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	) {
+		return ResponseEntity.ok(delService.pendingRequests(principal.getComId()));
 	}
 	
 	@Operation(summary = "위임 요청 승인 (관리자)", description = "결재선 emp_id 교체 + 감사로그 기록")
-	@PreAuthorize("hasAuthority('ROOT')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/requests/{reqId}/app")
 	public ResponseEntity<Void> approveRequest(
 			@PathVariable("reqId") Long reqId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
-		delService.approve(reqId, principal.getEmpId());
+		delService.approve(reqId, principal.getEmpId(), principal.getComId());
 		return ResponseEntity.noContent().build();
 	}
 	
 	@Operation(summary = "위임 요청 반려 (관리자)", description = "위임 요청을 반려")
-	@PreAuthorize("hasAuthority('ROOT')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/requests/{reqId}/rej")
 	public ResponseEntity<Void> rejectRequest(
 			@PathVariable("reqId") Long reqId,
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
-		delService.reject(reqId, principal.getEmpId());
+		delService.reject(reqId, principal.getEmpId(), principal.getComId());
 		return ResponseEntity.noContent().build();
 	}
 	
 	@Operation(summary = "위임요청 처리 이력 조회 (관리자)", description = "상태/요청자/기간 필터로 전체 위임")
-	@PreAuthorize("hasAuthority('ROOT')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/requests/history")
 	public ResponseEntity<Page<ApprLineDelegationResponse>> searchRequestHistory(
 			ApprLineRequestSearchCondition cond,
-			@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+			@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
-		return ResponseEntity.ok(delService.searchHistory(cond, pageable));
+		return ResponseEntity.ok(delService.searchHistory(cond, pageable, principal.getComId()));
 	}
 	
 	

@@ -98,8 +98,8 @@ public class ApprLineDelegationServiceImpl implements ApprLineDelegationService{
 
 	// 관리자용 - 승인 대기중인 요청
 	@Override
-	public List<ApprLineDelegationResponse> pendingRequests() {
-		return reqDao.findByReqStatusOrderByCreatedAtDesc("REQ").stream()
+	public List<ApprLineDelegationResponse> pendingRequests(Long comId) {
+		return reqDao.findByReqStatusAndApprDoc_Company_ComIdOrderByCreatedAtDesc("REQ", comId).stream()
 				.map(ApprLineDelegationResponse::new)
 				.collect(Collectors.toList());
 	}
@@ -107,10 +107,14 @@ public class ApprLineDelegationServiceImpl implements ApprLineDelegationService{
 	// 승인 처리 - 결재선 emp_id 교체 + 감사로그 기록
 	@Override
 	@Transactional
-	public void approve(Long reqId, Long adminEmpId) {
+	public void approve(Long reqId, Long adminEmpId, Long comId) {
 		
 		ApprLineRequest reqEntity = reqDao.findById(reqId)
 				.orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 요청입니다."));
+		
+		if (!reqEntity.getApprDoc().getCompany().getComId().equals(comId)) {
+			throw new IllegalStateException("본인 소속 회사의 요청만 처리할 수 있습니다.");
+		}
 		
 		if (!"REQ".equals(reqEntity.getReqStatus())) {
 			throw new IllegalStateException("이미 처리된 요청입니다.");
@@ -120,7 +124,7 @@ public class ApprLineDelegationServiceImpl implements ApprLineDelegationService{
 		ApprLine line = reqEntity.getApprLine();
 		Employee oriEmp = line.getEmployee();
 		
-		// 1. 결재선 emp_id 교체 / 더티체킹인지뭔지 그거
+		// 1. 결재선 emp_id 교체 / 더티체킹
 		line.setEmployee(reqEntity.getNewEmp());
 		
 		// 2. 요청 상태 갱신
@@ -142,10 +146,14 @@ public class ApprLineDelegationServiceImpl implements ApprLineDelegationService{
 	// 반려처리
 	@Override
 	@Transactional
-	public void reject(Long reqId, Long adminEmpId) {
+	public void reject(Long reqId, Long adminEmpId, Long comId) {
 		
 		ApprLineRequest reqEntity = reqDao.findById(reqId)
 				.orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 요청입니다."));
+		
+		if (!reqEntity.getApprDoc().getCompany().getComId().equals(comId)) {
+			throw new IllegalStateException("본인 소속 회사의 요청만 처리할 수 있습니다.");
+		}
 		
 		if (!"REQ".equals(reqEntity.getReqStatus())) {
 			throw new IllegalStateException("이미 처리된 요청입니다.");
@@ -158,12 +166,12 @@ public class ApprLineDelegationServiceImpl implements ApprLineDelegationService{
 	}
 
 	@Override
-	public Page<ApprLineDelegationResponse> searchHistory(ApprLineRequestSearchCondition cond, Pageable pageable) {
+	public Page<ApprLineDelegationResponse> searchHistory(ApprLineRequestSearchCondition cond, Pageable pageable, Long comId) {
 		
 		LocalDateTime start = cond.getStartDate() != null ? cond.getStartDate().atStartOfDay() : null;
 		LocalDateTime end = cond.getEndDate() != null ? cond.getEndDate().plusDays(1).atStartOfDay() : null;
 		
-		return reqDao.search(cond.getReqStatus(), cond.getReqEmpId(), start, end, pageable)
+		return reqDao.search(comId, cond.getReqStatus(), cond.getReqEmpId(), start, end, pageable)
 				.map(ApprLineDelegationResponse::new);
 	}
 

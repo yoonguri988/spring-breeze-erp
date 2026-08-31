@@ -64,17 +64,21 @@ public class ApprFormController {
 	@GetMapping("/{forId}/{forVersion}")
 	public ResponseEntity<ApprFormResponse> getForm(
 			@PathVariable("forId") Long forId,
-			@PathVariable("forVersion") Long forVersion
+			@PathVariable("forVersion") Long forVersion,
+			@AuthenticationPrincipal CustomUserPrincipal principal
 	){
-		return ResponseEntity.ok(appr.getForm(forId, forVersion));
+		return ResponseEntity.ok(appr.getForm(forId, forVersion, principal.getComId()));
 	}
 	
 	// 특정 양식의 버전 전체 이력 조회
 	@Operation(summary = "양식 버전 이력 조회", description = "특정 forId에 해당하는 모든 버전 목록을 조회")
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/{forId}/versions")
-	public ResponseEntity<List<ApprFormResponse>> getFormVersions(@PathVariable("forId") Long forId){
-		return ResponseEntity.ok(appr.getFormVersions(forId));
+	public ResponseEntity<List<ApprFormResponse>> getFormVersions(
+			@PathVariable("forId") Long forId,
+			@AuthenticationPrincipal CustomUserPrincipal principal
+	){
+		return ResponseEntity.ok(appr.getFormVersions(forId, principal.getComId()));
 	}
 	
 	// 양식 등록
@@ -163,6 +167,7 @@ public class ApprFormController {
 		}
 	}
 	
+	// [스코프 제외] 위임전결 설정 - ApprFormDelegationConfig.java 참고 (comId 소유권 검증 없음, 미배포)
 	// 위임전결 설정 조회
 	@Operation(summary = "위임전결 설정 조회", description = "양식 버전별 위임 전결 트리거 설정 조회")
 	@PreAuthorize("hasRole('ADMIN')")
@@ -175,6 +180,7 @@ public class ApprFormController {
 		return res != null ? ResponseEntity.ok(res) : ResponseEntity.noContent().build();
 	}
 	
+	// [스코프 제외] 위임전결 설정 - ApprFormDelegationConfig.java 참고 (comId 소유권 검증 없음, 미배포)
 	// 위임전결 설정 저장 (없으면 생성, 있으면 수정)
 	@Operation(summary = "위임전결 설정 저장", description = "양식 버전별 위임전결 트리거 설정 저장")
 	@PreAuthorize("hasRole('ADMIN')")

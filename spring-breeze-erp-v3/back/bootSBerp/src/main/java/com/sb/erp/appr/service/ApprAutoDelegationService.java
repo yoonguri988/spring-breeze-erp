@@ -5,6 +5,7 @@ import java.util.List;
 import com.sb.erp.appr.dto.request.ApprAutoDelegationCancelRequest;
 import com.sb.erp.appr.dto.response.ApprAutoDelegationResponse;
 
+//[스코프 제외] 위임전결 자동화 미배포 - 상세: ApprAutoDelegation.java 참고
 public interface ApprAutoDelegationService {
 	
 	public List<ApprAutoDelegationResponse> myDelegation(Long empId);

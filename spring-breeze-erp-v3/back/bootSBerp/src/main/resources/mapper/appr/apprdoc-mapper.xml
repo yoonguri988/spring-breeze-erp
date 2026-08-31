@@ -309,6 +309,7 @@
 	<select id="selectDocDetail" resultMap="apprDocDetailMap">
 		select
 			d.doc_id,
+			d.com_id,
 			d.doc_title,
 			d.doc_content,
 			d.doc_status,

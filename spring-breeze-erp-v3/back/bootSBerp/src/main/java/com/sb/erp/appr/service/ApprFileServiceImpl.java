@@ -20,6 +20,12 @@ import com.sb.erp.util.dto.FileUploadUtil;
 
 import lombok.RequiredArgsConstructor;
 
+
+/**
+ * 스코프 보류 - 첨부파일 기능은 백엔드(업로드/조회/삭제) 구현 완료 상태지만
+ * 프론트엔드(write.js, detail.js)에서 아직 연결 안 됨. 위험한 코드는 아니라
+ * 실행 경로는 막지 않고 상태만 표시. 재개 시 프론트 연결만 하면 됨.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

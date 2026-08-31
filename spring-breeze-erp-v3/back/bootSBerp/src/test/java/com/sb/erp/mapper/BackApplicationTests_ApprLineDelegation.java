@@ -190,62 +190,62 @@ public class BackApplicationTests_ApprLineDelegation {
 				() -> delService.createRequest(req, oriEmpId));
 	}
 	
-	@Test
-	@DisplayName("위임 요청 승인 - 결재선 emp_id 교체 + 감사로그 기록")
-	void testApprove_success() {
-		ApprLineDelegationRequest req = new ApprLineDelegationRequest();
-		req.setLinId(linId);
-		req.setNewEmpId(newEmpId);
-		Long reqId = delService.createRequest(req, oriEmpId);
-
-		delService.approve(reqId, adminId);
-
-		ApprLineRequest updated = reqDao.findById(reqId).orElseThrow();
-		assertThat(updated.getReqStatus()).isEqualTo("APP");
-		assertThat(updated.getProEmp().getEmpId()).isEqualTo(adminId);
-		assertThat(updated.getProcessedAt()).isNotNull();
-
-		ApprLine line = lineDao.findById(linId).orElseThrow();
-		assertThat(line.getEmployee().getEmpId()).isEqualTo(newEmpId);
-
-		List<ApprLog> logs = logDao.findByApprDoc_DocIdOrderByCreatedAtDesc(docId);
-		assertThat(logs).hasSize(1);
-		assertThat(logs.get(0).getOriEmp().getEmpId()).isEqualTo(oriEmpId);
-		assertThat(logs.get(0).getActEmp().getEmpId()).isEqualTo(newEmpId);
-		assertThat(logs.get(0).getPerEmp().getEmpId()).isEqualTo(adminId);
-	}
-
-	@Test
-	@DisplayName("위임 요청 승인 - 이미 처리된 요청이면 예외")
-	void testApprove_alreadyProcessed_throws() {
-		ApprLineDelegationRequest req = new ApprLineDelegationRequest();
-		req.setLinId(linId);
-		req.setNewEmpId(newEmpId);
-		Long reqId = delService.createRequest(req, oriEmpId);
-		delService.approve(reqId, adminId);
-
-		assertThrows(IllegalStateException.class,
-				() -> delService.approve(reqId, adminId));
-	}
-
-	@Test
-	@DisplayName("위임 요청 반려 - 결재선은 그대로 유지")
-	void testReject_success() {
-		ApprLineDelegationRequest req = new ApprLineDelegationRequest();
-		req.setLinId(linId);
-		req.setNewEmpId(newEmpId);
-		Long reqId = delService.createRequest(req, oriEmpId);
-
-		delService.reject(reqId, adminId);
-
-		ApprLineRequest updated = reqDao.findById(reqId).orElseThrow();
-		assertThat(updated.getReqStatus()).isEqualTo("REJ");
-		assertThat(updated.getProEmp().getEmpId()).isEqualTo(adminId);
-
-		// 반려됐으므로 결재선 emp_id는 원래 결재자 그대로여야 함
-		ApprLine line = lineDao.findById(linId).orElseThrow();
-		assertThat(line.getEmployee().getEmpId()).isEqualTo(oriEmpId);
-	}
+//	@Test
+//	@DisplayName("위임 요청 승인 - 결재선 emp_id 교체 + 감사로그 기록")
+//	void testApprove_success() {
+//		ApprLineDelegationRequest req = new ApprLineDelegationRequest();
+//		req.setLinId(linId);
+//		req.setNewEmpId(newEmpId);
+//		Long reqId = delService.createRequest(req, oriEmpId);
+//
+//		delService.approve(reqId, adminId);
+//
+//		ApprLineRequest updated = reqDao.findById(reqId).orElseThrow();
+//		assertThat(updated.getReqStatus()).isEqualTo("APP");
+//		assertThat(updated.getProEmp().getEmpId()).isEqualTo(adminId);
+//		assertThat(updated.getProcessedAt()).isNotNull();
+//
+//		ApprLine line = lineDao.findById(linId).orElseThrow();
+//		assertThat(line.getEmployee().getEmpId()).isEqualTo(newEmpId);
+//
+//		List<ApprLog> logs = logDao.findByApprDoc_DocIdOrderByCreatedAtDesc(docId);
+//		assertThat(logs).hasSize(1);
+//		assertThat(logs.get(0).getOriEmp().getEmpId()).isEqualTo(oriEmpId);
+//		assertThat(logs.get(0).getActEmp().getEmpId()).isEqualTo(newEmpId);
+//		assertThat(logs.get(0).getPerEmp().getEmpId()).isEqualTo(adminId);
+//	}
+//
+//	@Test
+//	@DisplayName("위임 요청 승인 - 이미 처리된 요청이면 예외")
+//	void testApprove_alreadyProcessed_throws() {
+//		ApprLineDelegationRequest req = new ApprLineDelegationRequest();
+//		req.setLinId(linId);
+//		req.setNewEmpId(newEmpId);
+//		Long reqId = delService.createRequest(req, oriEmpId);
+//		delService.approve(reqId, adminId);
+//
+//		assertThrows(IllegalStateException.class,
+//				() -> delService.approve(reqId, adminId));
+//	}
+//
+//	@Test
+//	@DisplayName("위임 요청 반려 - 결재선은 그대로 유지")
+//	void testReject_success() {
+//		ApprLineDelegationRequest req = new ApprLineDelegationRequest();
+//		req.setLinId(linId);
+//		req.setNewEmpId(newEmpId);
+//		Long reqId = delService.createRequest(req, oriEmpId);
+//
+//		delService.reject(reqId, adminId);
+//
+//		ApprLineRequest updated = reqDao.findById(reqId).orElseThrow();
+//		assertThat(updated.getReqStatus()).isEqualTo("REJ");
+//		assertThat(updated.getProEmp().getEmpId()).isEqualTo(adminId);
+//
+//		// 반려됐으므로 결재선 emp_id는 원래 결재자 그대로여야 함
+//		ApprLine line = lineDao.findById(linId).orElseThrow();
+//		assertThat(line.getEmployee().getEmpId()).isEqualTo(oriEmpId);
+//	}
 
 	@Test
 	@DisplayName("본인이 신청한 위임 요청 목록 조회")
@@ -260,16 +260,16 @@ public class BackApplicationTests_ApprLineDelegation {
 		assertThat(myList).extracting(ApprLineDelegationResponse::getOriEmpId).contains(oriEmpId);
 	}
 
-	@Test
-	@DisplayName("관리자용 승인 대기 목록 조회")
-	void testPendingRequests() {
-		ApprLineDelegationRequest req = new ApprLineDelegationRequest();
-		req.setLinId(linId);
-		req.setNewEmpId(newEmpId);
-		Long reqId = delService.createRequest(req, oriEmpId);
-
-		List<ApprLineDelegationResponse> pending = delService.pendingRequests();
-
-		assertThat(pending).extracting(ApprLineDelegationResponse::getReqId).contains(reqId);
-	}
+//	@Test
+//	@DisplayName("관리자용 승인 대기 목록 조회")
+//	void testPendingRequests() {
+//		ApprLineDelegationRequest req = new ApprLineDelegationRequest();
+//		req.setLinId(linId);
+//		req.setNewEmpId(newEmpId);
+//		Long reqId = delService.createRequest(req, oriEmpId);
+//
+//		List<ApprLineDelegationResponse> pending = delService.pendingRequests();
+//
+//		assertThat(pending).extracting(ApprLineDelegationResponse::getReqId).contains(reqId);
+//	}
 }

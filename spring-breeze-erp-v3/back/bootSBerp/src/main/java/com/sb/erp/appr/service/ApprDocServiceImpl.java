@@ -130,10 +130,13 @@ public class ApprDocServiceImpl implements ApprDocService{
 
 	// 상세 페이지 docId로 데이터 가져오기
 	@Override
-	public ApprDocResponse selectDocDetail(Long docId) {
+	public ApprDocResponse selectDocDetail(Long docId, Long comId) {
 		ApprDocResponse detail = dao.selectDocDetail(docId);
 		if (detail == null) {
 			throw new IllegalArgumentException("존재하지 않는 문서입니다");
+		}
+		if (!detail.getComId().equals(comId)) {
+			throw new IllegalArgumentException("본인 소속 회사의 문서만 조회할 수 있습니다.");
 		}
 		return detail;
 	}
@@ -193,15 +196,17 @@ public class ApprDocServiceImpl implements ApprDocService{
 		// 다음 순서 있는지 검증
 		if (next != null) {
 			// 있는경우
-			lineDao.updateLineStatus(docId, next.getEmpId(), "WAI");
+			lineDao.activeNextLine(docId, next.getEmpId());
 		}
 		else {
 			// 없는경우
 			dao.updateDocStatus(docId, "APP");
 			
-			// 위임전결 자동발동 트리거
+			// [스코프 제외] 위임전결 자동화 트리거 - ApprAutoDelegation.java 참고
+			// comId 검증 없이 delegation-config를 다른 회사 양식에도 설정할 수 있는 IDOR가 있고,
+			// 발동 시 실제 결재선(ApprLine)을 수정하는 코드라 리스크 차단을 위해 호출 자체를 막음.
+			// autoTrigger.tryTrigger(docId, doc.getForId(), doc.getForVersion(), doc.getEmpId(), doc.getDocContent());
 			ApprDocResponse doc = dao.selectDocDetail(docId);
-			autoTrigger.tryTrigger(docId, doc.getForId(), doc.getForVersion(), doc.getEmpId(), doc.getDocContent());
 			
 			// 연차 신청서면 최종 승인시 잔여 연차 차감 + LeaveRequest 상태 갱신
 			processLeaveApprovalIfNeeded(docId, doc);
