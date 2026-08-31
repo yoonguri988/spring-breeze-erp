@@ -119,8 +119,20 @@
       "onLeaveTag": "휴직중",
       "lineOrderCardTitle": "결재선 순서",
       "emptySlotPlaceholder": "{{order}}차 결재자를 선택해주세요",
+      "reducedApproverWarning": "조직상 배치 가능한 결재자가 {{count}}명 뿐이라,<br/> 결재선이 {{count}}명으로 조정 됩니다.",
       "cancelBtn": "취소",
-      "submitBtn": "제출"
+      "submitBtn": "제출",
+      "leaveTypeLabels": {
+        "annual": "연차 (종일)",
+        "halfAm": "오전 반차",
+        "halfPm": "오후 반차"
+      },
+      "leaveDaysCountLabel": "총 신청 연차 : <b>{{count}}일</b>",
+      "leaveNoWeekdaysHint": "(기간에 평일이 없습니다. 날짜를 확인해주세요)",
+      "leaveBalanceLabel": "현재 잔여 연차 : <b>{{count}}일</b>",
+      "leaveBalanceUnavailable": "잔여 연차 정보를 불러올 수 없어요",
+      "favoriteLinesLabel": "자주 쓰는 결재선",
+      "favoriteUseCountSuffix": "({{count}}회)"
     }
   },
   "forms": {

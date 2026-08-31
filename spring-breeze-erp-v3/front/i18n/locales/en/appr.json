@@ -119,8 +119,20 @@
       "onLeaveTag": "On Leave",
       "lineOrderCardTitle": "Approval Line Order",
       "emptySlotPlaceholder": "Please select the {{order}} approver",
+      "reducedApproverWarning": "Only {{count}} approver(s) are available in the organization,<br/> so the approval line is adjusted to {{count}}.",
       "cancelBtn": "Cancel",
-      "submitBtn": "Submit"
+      "submitBtn": "Submit",
+      "leaveTypeLabels": {
+        "annual": "Annual Leave (Full Day)",
+        "halfAm": "AM Half Day",
+        "halfPm": "PM Half Day"
+      },
+      "leaveDaysCountLabel": "Total leave requested: <b>{{count}} day(s)</b>",
+      "leaveNoWeekdaysHint": "(No weekdays in this period. Please check the dates.)",
+      "leaveBalanceLabel": "Current remaining leave: <b>{{count}} day(s)</b>",
+      "leaveBalanceUnavailable": "Unable to load remaining leave information",
+      "favoriteLinesLabel": "Frequently Used Approval Lines",
+      "favoriteUseCountSuffix": "({{count}} times)"
     }
   },
   "forms": {

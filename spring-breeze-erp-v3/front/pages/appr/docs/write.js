@@ -58,10 +58,10 @@ export default function DocWritePage() {
     const [leaveBalanceLoading, setLeaveBalanceLoading] = useState(false);
 
     // 사용자 라벨
-    const LEAVE_TYPE_LABELS = {
-        ANNUAL: "연차 (종일)",
-        HALF_AM: "오전 반차",
-        HALF_PM: "오후 반차",
+    const LEAVE_TYPE_LABEL_KEYS = {
+        ANNUAL: "annual",
+        HALF_AM: "halfAm",
+        HALF_PM: "halfPm",
     };
 
     // 부서트리 전체에서 결재 가능한 상급자 총원
@@ -215,7 +215,7 @@ export default function DocWritePage() {
                     >
                         {(field.options || []).map((opt) => (
                             <Option key={opt} value={opt}>
-                                {field.key === "leaveType" ? (LEAVE_TYPE_LABELS[opt] || opt) : opt}
+                                {field.key === "leaveType" ? t(`docs.write.leaveTypeLabels.${LEAVE_TYPE_LABEL_KEYS[opt] || opt}`, { defaultValue: opt }) : opt}
                             </Option>
                         ))}
                     </Select>
@@ -423,7 +423,7 @@ export default function DocWritePage() {
                 {/* 문서 정보 */}
                 <div className="sb-card" style={{marginBottom: 16}}>
                     <div className="sb-card__head">
-                        <h2>문서 정보</h2>
+                        <h2>{t("docs.detail.infoCardTitle")}</h2>
                     </div>
                     <div className="sb-card__body">
                         <Row gutter={16}>
@@ -516,10 +516,10 @@ export default function DocWritePage() {
                                                     fontSize: 14,
                                                 }}
                                             >
-                                                총 신청 연차 : <b>{leaveDaysCount}일</b>
+                                                <span dangerouslySetInnerHTML={{ __html: t("docs.write.leaveDaysCountLabel", { count: leaveDaysCount }) }} />
                                                 {leaveDaysCount === 0 && (
                                                     <span style={{marginLeft: 8, color: "#8a93a3", fontSize: 13}}>
-                                                        (기간에 평일이 없습니다. 날짜를 확인해주세요)
+                                                        {t("docs.write.leaveNoWeekdaysHint")}
                                                     </span>
                                                 )}
                                             </div>
@@ -536,9 +536,9 @@ export default function DocWritePage() {
                                                 {leaveBalanceLoading ? (
                                                     <Spin size="small"/>
                                                 ) : leaveBalance ? (
-                                                    <>현재 잔여 연차 : <b>{leaveBalance.remainingDays}일</b></>
+                                                    <span dangerouslySetInnerHTML={{ __html: t("docs.write.leaveBalanceLabel", { count: leaveBalance.remainingDays }) }} />
                                                 ) : (
-                                                    <span style={{color: "#8a93a3"}}>잔여 연차 정보를 불러올 수 없어요</span>
+                                                    <span style={{color: "#8a93a3"}}>{t("docs.write.leaveBalanceUnavailable")}</span>
                                                 )}
                                             </div>
                                         </Space>
@@ -584,16 +584,19 @@ export default function DocWritePage() {
                                 {isImportant ? t("docs.write.importantHint") : t("docs.write.normalHint")}
                             </Text>
                             {isImportant && requiredApproverCount < 3 && (
-                                <Text type="warning" style={{display: "block", marginBottom: 12, fontSize: 13}}>
-                                    조직상 배치 가능한 결재자가 {requiredApproverCount}명 뿐이라,<br/> 결재선이 {requiredApproverCount}명으로 조정 됩니다.
-                                </Text>
+                                <Text
+                                    type="warning"
+                                    style={{display: "block", marginBottom: 12, fontSize: 13}}
+                                    dangerouslySetInnerHTML={{
+                                        __html: t("docs.write.reducedApproverWarning", { count: requiredApproverCount }),
+                                    }}
+                                />
                             )}
-
                         {favoriteLinesLoading ? (
                             <Spin size="small" />
                         ) : filteredFavoriteLines.length > 0 && (
                             <Space direction="vertical" style={{width: "100%", marginBottom: 16}}>
-                                <Text type="secondary" style={{fontSize: 13}}>자주 쓰는 결재선</Text>
+                                <Text type="secondary" style={{fontSize: 13}}>{t("docs.write.favoriteLinesLabel")}</Text>
                                 <Space wrap>
                                     {filteredFavoriteLines.map((fav) => (
                                         <Button
@@ -602,7 +605,7 @@ export default function DocWritePage() {
                                             onClick={() => applyFavoriteLine(fav)}
                                         >
                                             {fav.approvers.map((a) => a.empName).join(" → ")}
-                                            <span style={{marginLeft: 6, color: "#8a93a3"}}>({fav.useCount}회)</span>
+                                            <span style={{marginLeft: 6, color: "#8a93a3"}}>{t("docs.write.favoriteUseCountSuffix", { count: fav.useCount })}</span>
                                         </Button>
                                     ))}
                                 </Space>
