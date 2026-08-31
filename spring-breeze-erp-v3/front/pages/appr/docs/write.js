@@ -584,9 +584,8 @@ export default function DocWritePage() {
                                 {isImportant ? t("docs.write.importantHint") : t("docs.write.normalHint")}
                             </Text>
                             {isImportant && requiredApproverCount < 3 && (
-                                <Text
-                                    type="warning"
-                                    style={{display: "block", marginBottom: 12, fontSize: 13}}
+                                <span
+                                    style={{display: "block", marginBottom: 12, fontSize: 13, color: "#faad14"}}
                                     dangerouslySetInnerHTML={{
                                         __html: t("docs.write.reducedApproverWarning", { count: requiredApproverCount }),
                                     }}
