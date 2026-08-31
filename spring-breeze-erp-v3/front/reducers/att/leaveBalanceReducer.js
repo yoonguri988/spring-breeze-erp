@@ -123,6 +123,19 @@ const leaveBalanceSlice = createSlice({
             state.error = action.payload;
         },
 
+        // ── 관리자: 연차 일괄 계산  ──
+        calculateAllRequest: (state) => { 
+            state.loading = true; 
+            state.error = null; 
+        },
+        calculateAllSuccess: (state) => { 
+            state.loading = false; 
+            state.success = true; 
+        },
+        calculateAllFailure: (state, action) => { 
+            state.loading = false; 
+            state.error = action.payload; 
+        },
 
         // ================================================================
         //  쓰기
@@ -185,6 +198,7 @@ export const {
     calculateRequest, calculateSuccess, calculateFailure,
     deductRequest, deductSuccess, deductFailure,
     adjustRequest, adjustSuccess, adjustFailure,
+    calculateAllRequest, calculateAllSuccess, calculateAllFailure,
 } = leaveBalanceSlice.actions;
 
 // ============================================================

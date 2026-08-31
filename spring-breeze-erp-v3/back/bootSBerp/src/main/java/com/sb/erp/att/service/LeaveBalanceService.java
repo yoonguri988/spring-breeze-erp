@@ -24,7 +24,9 @@ import com.sb.erp.emp.entity.Employee;
 import com.sb.erp.emp.repository.EmpRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -156,6 +158,38 @@ public class LeaveBalanceService {
         leaveBalanceRepository.save(balance);
 
         return LeaveBalanceResponse.from(balance);
+    }
+    
+    
+	// 재직 사원 연차 일괄 발생. 이미 부여된 사원은 건너뛴다.
+    public int calculateAllForYear(Long comId, int year) {
+        List<Long> empIds = empRepository.findActiveEmpIdsByComId(comId);
+        int count = 0;
+        for (Long empId : empIds) {
+            try {
+                calculateAnnual(empId, year);
+                count++;
+            } catch (IllegalArgumentException e) {
+                log.debug("[연차일괄] empId={} 건너뜀: {}", empId, e.getMessage());
+            }
+        }
+        log.info("[연차일괄] comId={}, 대상={}명, 처리={}명", comId, empIds.size(), count);
+        return count;
+    }
+    
+    // 스케줄러용
+    public int calculateAllForYear(int year) {
+        List<Long> empIds = empRepository.findAllActiveEmpIds();
+        int count = 0;
+        for (Long empId : empIds) {
+            try {
+                calculateAnnual(empId, year);
+                count++;
+            } catch (IllegalArgumentException e) {
+                // 이미 부여된 사원 건너뜀
+            }
+        }
+        return count;
     }
 
 
