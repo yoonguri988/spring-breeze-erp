@@ -14,12 +14,10 @@
         <setting name="defaultFetchSize" value="100"/> 
     		<!-- timeout -->
         <setting name="defaultStatementTimeout" value="30"/>
+        <setting name="jdbcTypeForNull" value="VARCHAR"/>
     </settings>
     
  	<!--<typeAliases>
  		<typeAlias alias="DeptUser"  type="com.thejoa703.domain.DeptUser" />
  	</typeAliases>-->
 </configuration>
-
-
-

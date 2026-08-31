@@ -78,8 +78,9 @@ export default function EmpDetailPage() {
       dispatch(
         updatePasswordRequest({
           empId: Number(empId),
-          currentPassword: values.currentPassword,
-          newPassword: values.newPassword,
+          currentPass: values.currentPassword,
+          newPass: values.newPassword,
+          checkPass: values.confirmPassword,
         })
       );
     } catch (e) {}
