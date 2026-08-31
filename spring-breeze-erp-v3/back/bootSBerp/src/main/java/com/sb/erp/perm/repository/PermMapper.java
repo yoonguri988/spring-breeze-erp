@@ -31,6 +31,9 @@ public interface PermMapper {
 
 	// 권한 수정
 	int update(PermRequest dto);
+	
+	// 사용중인 사원 확인
+	int countEmpUsing(long autId);
 
 	// 권한 삭제
 	int delete(PermRequest dto);
@@ -48,6 +51,7 @@ public interface PermMapper {
 
 	// 권한 회수
 	int revokeAuth(EmpAuthRequest dto);
+
 
 }
 

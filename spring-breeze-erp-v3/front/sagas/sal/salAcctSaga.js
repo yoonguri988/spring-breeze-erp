@@ -28,7 +28,7 @@ export function* fetchMyAcct() {
     const result = yield call(fetchMyAcctApi);
     yield put(fetchMyAcctSuccess(result.data));
   } catch (err) {
-    yield put(fetchMyAcctFailure(err.response?.data?.message || err.message));
+    yield put(fetchMyAcctFailure(err.response?.data?.error || err.response?.data?.message || err.message));
   }
 }
 
@@ -41,7 +41,7 @@ export function* registerMyAcct(action) {
     yield put(registerMyAcctSuccess(result.data));
   } catch (err) {
     yield put(
-      registerMyAcctFailure(err.response?.data?.message || err.message),
+      registerMyAcctFailure(err.response?.data?.error || err.response?.data?.message || err.message),
     );
   }
 }
@@ -54,7 +54,7 @@ export function* updateMyAcct(action) {
     const result = yield call(updateMyAcctApi, action.payload);
     yield put(updateMyAcctSuccess(result.data));
   } catch (err) {
-    yield put(updateMyAcctFailure(err.response?.data?.message || err.message));
+    yield put(updateMyAcctFailure(err.response?.data?.error || err.response?.data?.message || err.message));
   }
 }
 
@@ -68,7 +68,7 @@ export function* fetchAcctByEmpId(action) {
     yield put(fetchAcctByEmpIdSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchAcctByEmpIdFailure(err.response?.data?.message || err.message),
+      fetchAcctByEmpIdFailure(err.response?.data?.error || err.response?.data?.message || err.message),
     );
   }
 }
@@ -84,7 +84,7 @@ export function* updateAcctByAdmin(action) {
     yield put(updateAcctByAdminSuccess(result.data));
   } catch (err) {
     yield put(
-      updateAcctByAdminFailure(err.response?.data?.message || err.message),
+      updateAcctByAdminFailure(err.response?.data?.error || err.response?.data?.message || err.message),
     );
   }
 }

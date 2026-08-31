@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -69,17 +70,12 @@ public class LeaveBalanceController {
 
     // 관리자 — 특정 연도 전체 사원 연차 현황
     @Operation(summary = "전체 사원 연차 현황", description = "특정 연도 전체 사원의 연차 잔여 현황")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/balance")
     public ResponseEntity<?> allBalances(
-            Authentication auth,
             @Parameter(description = "조회 연도 (예: 2026)")
             @RequestParam("year") Integer year,
             @RequestParam(name = "keyword", required = false) String keyword) {
-
-        if (!isAdmin(auth)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "조회 권한이 없습니다."));
-        }
 
         List<LeaveBalanceResponse> list = leaveBalanceService.getAllBalances(year, keyword);
         return ResponseEntity.ok(list);
@@ -87,18 +83,12 @@ public class LeaveBalanceController {
 
     // 관리자 — 특정 사원의 특정 연도 연차 단건 조회
     @Operation(summary = "사원 연차 단건 조회", description = "특정 사원의 특정 연도 연차 잔여 현황")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/balance/{empId}")
     public ResponseEntity<?> balance(
-            Authentication auth,
             @PathVariable("empId") Long empId,
             @Parameter(description = "조회 연도 (예: 2026)")
             @RequestParam("year") Integer year) {
-
-        if (!isAdmin(auth)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "조회 권한이 없습니다."));
-        }
-
         LeaveBalanceResponse result = leaveBalanceService.getBalance(empId, year);
         return ResponseEntity.ok(result);
     }
@@ -106,16 +96,9 @@ public class LeaveBalanceController {
 
     // 관리자 — 특정 사원의 부여/차감 이력
     @Operation(summary = "연차 부여/차감 이력 조회", description = "특정 사원의 연차 부여 및 사용 이력")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/grant/{empId}")
-    public ResponseEntity<?> grantHistory(
-            Authentication auth,
-            @PathVariable("empId") Long empId) {
-
-        if (!isAdmin(auth)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "조회 권한이 없습니다."));
-        }
-
+    public ResponseEntity<?> grantHistory(@PathVariable("empId") Long empId) {
         List<LeaveGrantResponse> list = leaveBalanceService.getGrantHistory(empId);
         return ResponseEntity.ok(list);
     }
@@ -126,20 +109,20 @@ public class LeaveBalanceController {
     // ================================================================
 
     @Operation(summary = "연차 발생", description = "입사일 기준 근로기준법에 따른 연차 자동 계산 및 부여")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/calculate/{empId}")
     public ResponseEntity<?> calculate(
-            Authentication auth,
             @PathVariable("empId") Long empId,
             @Parameter(description = "발생 연도 (예: 2026)")
             @RequestParam("year") Integer year) {
 
-        if (!isAdmin(auth)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "연차 발생 권한이 없습니다."));
+    	try {
+            LeaveBalanceResponse result = leaveBalanceService.calculateAnnual(empId, year);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
         }
-
-        LeaveBalanceResponse result = leaveBalanceService.calculateAnnual(empId, year);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @Operation(summary = "연차 사용 차감", description = "연차 또는 반차 사용 시 잔여 차감 처리")
@@ -162,16 +145,9 @@ public class LeaveBalanceController {
     }
 
     @Operation(summary = "연차 수동 조정", description = "관리자가 수동으로 연차를 부여하거나 차감")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/adjust")
-    public ResponseEntity<?> adjust(
-            Authentication auth,
-            @Valid @RequestBody LeaveGrantRequest request) {
-
-        if (!isAdmin(auth)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "조정 권한이 없습니다."));
-        }
-
+    public ResponseEntity<?> adjust(@Valid @RequestBody LeaveGrantRequest request) {
         LeaveGrantResponse result = leaveBalanceService.adjustLeave(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }

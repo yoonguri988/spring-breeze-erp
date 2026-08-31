@@ -61,6 +61,15 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // 로그인 여부와 무관하게 호출되는 공개 auth 엔드포인트의 401은
+    // "세션 만료"가 아니다(로그인 실패, 재설정 토큰 만료 등) — refreshToken
+    // 쿠키가 애초에 없는 게 정상 상태이므로 refresh를 시도하면 안 된다.
+    // 각 saga의 catch(예: loginFailure/updatePassFailure)로 그대로 흘려보낸다.
+    const PUBLIC_AUTH_PATHS = ["/auth/login", "/auth/updatePass"];
+    if (PUBLIC_AUTH_PATHS.some((path) => original?.url?.includes(path))) {
+      return Promise.reject(error);
+    }
+
     // 401 발생 Refresh Token 재발급
     if (status === 401 && !original._retry) {
       // 이미 refresh 진행 중이면 큐에 대기했다가 새 토큰으로 재시도

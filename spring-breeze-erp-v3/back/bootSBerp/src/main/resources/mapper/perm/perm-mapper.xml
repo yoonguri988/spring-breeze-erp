@@ -57,6 +57,13 @@
 		where aut_id = #{autId}
 		and com_id = #{comId}
 	</update>
+	
+	<!-- 사용중인 사원 확인 -->
+	<select id="countEmpUsing" resultType="int">
+	    SELECT COUNT(*)
+	    FROM emp_auth
+	    WHERE aut_id = #{autId}
+	</select>
 
 	<!-- 권한 삭제 -->
 	<delete id="delete" parameterType="com.sb.erp.perm.dto.request.PermRequest">

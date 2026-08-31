@@ -29,7 +29,7 @@ export default function LeaveAdminPage() {
   const dispatch = useDispatch();
   const { t } = useTranslation(["att", "common"]);
 
-  const { allBalances, grantHistory, loading, success } =
+  const { allBalances, grantHistory, loading, success, error } =
     useSelector((state) => state.leave);
 
   // ── 로컬 상태: 검색 조건 ──
@@ -77,6 +77,14 @@ export default function LeaveAdminPage() {
     }
   }, [success]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── 에러 감시 ──
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+      dispatch(resetLeaveState());
+    }
+  }, [error]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const loadBalances = () => {
     // payload 형태: { year: 2026 }
     // → leaveBalanceSaga의 fetchAllBalances에서
@@ -113,12 +121,13 @@ export default function LeaveAdminPage() {
       message.warning(t("att:leaveAdmin.deductModal.leaveDateRequired"));
       return;
     }
+    const deductAmount = deductHalfType ? 0.5 : 1;
     dispatch(deductRequest({
       empId: deductTarget.empId,
-      amount: deductHalfType ? 0.5 : 1,
+      grantDays: -deductAmount,
+      grantType: "USE",
       halfType: deductHalfType,
       reason: deductReason,
-      year: selectedYear,
       leaveDate: deductDate.format("YYYY-MM-DD"),
     }));
   };
@@ -135,11 +144,12 @@ export default function LeaveAdminPage() {
     if (!adjustTarget || adjustAmount === 0) return;
     dispatch(adjustRequest({
       empId: adjustTarget.empId,
-      amount: adjustAmount,
+      grantDays: adjustAmount,
+      grantType: "ADJ",
       reason: adjustReason,
-      year: selectedYear,
+      leaveDate: moment().format("YYYY-MM-DD"),  // ← 추가 (오늘 날짜)
     }));
-  };
+};
 
   // ── 이력 모달 열기 ──
   //

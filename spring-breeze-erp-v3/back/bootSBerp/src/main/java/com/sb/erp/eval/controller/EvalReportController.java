@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,9 +37,9 @@ public class EvalReportController {
 		return roles != null && (roles.contains("ROLE_ADMIN") || roles.contains("ROOT"));
 	}
 
-
 	// ─── 회차별 리포트 목록 (검색 + 페이징) ─────────
 	@Operation(summary = "회차별 리포트 목록", description = "periodId 필수. 검색, 부서필터, 페이징 지원")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping
 	public ResponseEntity<?> list(
 			Authentication auth,
@@ -110,6 +111,7 @@ public class EvalReportController {
 
 	// ─── 회차 전체 리포트 생성/재생성 ────────────────
 	@Operation(summary = "회차 전체 리포트 생성", description = "AI 배치 생성 시작")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/generate")
 	public ResponseEntity<Map<String, String>> generate(
 			Authentication auth,
@@ -125,6 +127,7 @@ public class EvalReportController {
 
 	// ─── 특정 사원 리포트 개별 재생성 ────────────────
 	@Operation(summary = "특정 사원 리포트 재생성")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/regenerate")
 	public ResponseEntity<Map<String, String>> regenerate(
 			Authentication auth,

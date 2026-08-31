@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/perm")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')") // 전체가 관리자용이므로 클래스 선언 위에 하나만
 @Tag(name = "권한 관리", description = "권한 CRUD, 사원-권한 부여/회수 API")
 public class PermController {
 
@@ -98,10 +100,17 @@ public class PermController {
 	public ResponseEntity<Map<String, String>> delete(
 			Authentication auth,
 			@PathVariable("autId") long autId) {
+		
 		Long comId = authUserJwtService.getCurrentComId(auth);
+		
 		int result = permService.delete(autId, comId);
-		if (result > 0) return ResponseEntity.ok(Map.of("message", "삭제되었습니다."));
-		return ResponseEntity.notFound().build();
+
+		if (result == -1) {
+		    return ResponseEntity.status(HttpStatus.CONFLICT)
+		            .body(Map.of("message", "사용 중인 사원이 있어 삭제할 수 없습니다."));
+		}
+		if (result == 0) return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(Map.of("message", "삭제되었습니다."));
 	}
 
 

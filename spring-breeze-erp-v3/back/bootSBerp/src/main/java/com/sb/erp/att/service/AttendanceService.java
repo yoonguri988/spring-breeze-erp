@@ -110,8 +110,19 @@ public class AttendanceService {
 		// 퇴근 시각 세팅
 		attendance.setCheckOut(LocalDateTime.now());
 
-		// ★ 근로시간 산출
+		// 근로시간 산출
 		calculateWorkMinutes(attendance);
+		
+		// ★ 사원 본인 퇴근 시에만 상태 자동 판별
+	    LocalDateTime standardStart = LocalDate.now().atTime(9, 0);
+	    LocalDateTime standardEnd = LocalDate.now().atTime(18, 0);
+	    if (attendance.getCheckIn().isAfter(standardStart)) {
+	        attendance.setAttStatus("LATE");
+	    }
+	    if (attendance.getCheckOut().isBefore(standardEnd)
+	            && !"LATE".equals(attendance.getAttStatus())) {
+	        attendance.setAttStatus("EARLY_LEAVE");
+	    }
 
 		return AttendanceResponse.from(attendance);
 
@@ -143,8 +154,8 @@ public class AttendanceService {
 				.build();
 		
 		// 출/퇴근 모두 입력했으면 근무시간 계산
-		if(request.getCheckOut() != null) {
-			calculateWorkMinutes(att);
+		if(request.getCheckIn() != null && request.getCheckOut() != null) {
+		    calculateWorkMinutes(att);
 		}
 		
 		attendanceRepository.save(att);
@@ -164,14 +175,22 @@ public class AttendanceService {
 		// request 시간으로 덮어쓰기
 		attendance.setCheckIn(request.getCheckIn());
 		attendance.setCheckOut(request.getCheckOut());
-
-		// 상태가 지정되면 그 값을 사용하고
-		if (request.getAttStatus() != null) { attendance.setAttStatus(request.getAttStatus()); }
 		
-		// 근무시간 계산
-		if (request.getCheckOut() != null) { calculateWorkMinutes(attendance); }
+		if (request.getAttStatus() != null) {
+	        attendance.setAttStatus(request.getAttStatus());
+	    }
 
-		return AttendanceResponse.from(attendance);
+		// 출/퇴근 시간이 모두 있을 때만 근무시간 계산
+	    if (request.getCheckIn() != null && request.getCheckOut() != null) {
+	        calculateWorkMinutes(attendance);
+	    } else {
+	        // 시간 없는 상태(결근, 연차 등)는 근무시간 0으로 초기화
+	        attendance.setWorkMinutes(0);
+	        attendance.setOvertimeMinutes(0);
+	        attendance.setNightMinutes(0);
+	    }
+
+	    return AttendanceResponse.from(attendance);
 	}
 	
 	
@@ -182,7 +201,7 @@ public class AttendanceService {
 	    LocalDateTime checkOut = att.getCheckOut();
 	    
 	    LocalDateTime standardStart = att.getAttDate().atTime(9, 0);
-	    LocalDateTime standardEnd = att.getAttDate().atTime(18, 0);
+	    // LocalDateTime standardEnd = att.getAttDate().atTime(18, 0);
 	    
 	    // 1-1. 근로 시작 전 출근 기록은 남기되 근무 시작은 09:00으로 보정해야함(근무시간 480분 준수)
 	    if(checkIn.isBefore(standardStart)) { checkIn = standardStart; }
@@ -213,19 +232,7 @@ public class AttendanceService {
 
 	    long nightMinutes = Math.max(0, Duration.between(nightOverlapStart, nightOverlapEnd).toMinutes());
 	    
-	    // 6. att_status 보정 (18:00 전 퇴근이면 EARLY_LEAVE)
-	    // 관리자가 시각 수정시 지각/조퇴 여부 다시 확인하기
-	    if(checkIn.isAfter(standardStart)) {
-	    	att.setAttStatus("LATE");
-	    } else {
-	    	att.setAttStatus("NORMAL");
-	    }
-	    	    
-	    if(checkOut.isBefore(standardEnd) && !"LATE".equals(att.getAttStatus())) {
-	    	att.setAttStatus("EARLY_LEAVE");
-	    }
-	    	    
-	    // 7. Entity에 세팅 / long → int 캐스팅
+	    // 6. Entity에 세팅 / long → int 캐스팅
 	    att.setWorkMinutes((int)workMinutes);
 	    att.setOvertimeMinutes((int)overtimeMinutes);
 	    att.setNightMinutes((int)nightMinutes);

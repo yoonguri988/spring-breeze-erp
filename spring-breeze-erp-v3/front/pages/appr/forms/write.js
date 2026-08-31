@@ -1,15 +1,15 @@
 import dynamic from "next/dynamic";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import {
-    message, Radio, Form, Input, Select, Switch, Button,
+    message, Radio, Form, Input, Switch, Button,
     Space, Row, Col, Typography, Card
 } from "antd";
-import { BankOutlined, CheckCircleFilled, CloseCircleFilled } from "@ant-design/icons";
+import { CheckCircleFilled, CloseCircleFilled } from "@ant-design/icons";
 import { insertFormRequest, resetFormState } from "../../../reducers/appr/apprFormReducer";
-import { checkCode, searchCompany, generateAiSchema } from "../../../api/appr/apprFormApi";
+import { checkCode, generateAiSchema } from "../../../api/appr/apprFormApi";
 import SchemaFieldEditor, {validateSchemaFields} from "../../../components/appr/SchemaFieldEditor";
 import apprFormTemplates from "../../../constants/apprFormTemplates";
 import PageHeader from "../../../components/appr/PageHeader";
@@ -37,13 +37,10 @@ export default function FormWritePage() {
     const [aiPrompt, setAiPrompt] = useState("");
     const [schemaFields, setSchemaFields] = useState([]);
     const [aiLoading, setAiLoading] = useState(false);
-    const [companyOptions, setCompanyOptions] = useState([]);
-    const debounceRef = useRef(null);
 
     // 양식코드 중복확인 상태
     const [codeStatus, setCodeStatus] = useState(null);
     const forCodeValue = Form.useWatch("forCode", form);
-    const comIdValue = Form.useWatch("comId", form);
 
     // 연차 관련 //
     const [forCategory, setForCategory] = useState("GENERAL");
@@ -71,7 +68,7 @@ export default function FormWritePage() {
 
     useEffect(() => {
         setCodeStatus(null);
-    }, [forCodeValue, comIdValue]);
+    }, [forCodeValue]);
 
     // 등록 성공하면 목록으로 이동, 실패하면 에러 메세지 표시
     useEffect(() => {
@@ -93,25 +90,6 @@ export default function FormWritePage() {
             dispatch(resetFormState());
         };
     }, [dispatch]);
-
-    const handleCompanySearch = async (keyword) => {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        if (!keyword) {
-            setCompanyOptions([]);
-            return;
-        }
-        debounceRef.current = setTimeout(async () => {
-            try {
-                const companies = await searchCompany(keyword);
-                setCompanyOptions(companies.map((c) => ({
-                    label: `${c.comName} (${c.bizNo})`,
-                    value: c.comId
-                })));
-            } catch (e) {
-                message.error(t("forms.write.companySearchFailedMsg"));
-            }
-        }, 300);
-    };
 
     const handleGenerateSchema = async () => {
         if (!aiPrompt.trim()) {
@@ -147,14 +125,13 @@ export default function FormWritePage() {
 
     const handleCodeCheck = async () => {
         const forCode = form.getFieldValue("forCode");
-        const comId = form.getFieldValue("comId");
-        if (!forCode || !comId){
+        if (!forCode){
             message.warning(t("forms.write.codeCheckRequiredMsg"));
             return;
         }
 
         try {
-            const res = await checkCode(forCode, comId, null);
+            const res = await checkCode(forCode, null);
             setCodeStatus(res.available ? "available" : "duplicate");
             if (res.available) {
                 message.success(t("forms.write.codeAvailableMsg"))
@@ -252,22 +229,6 @@ export default function FormWritePage() {
                 {/* 1. 기본정보 */}
                 <Card title={t("forms.write.basicInfoCardTitle")} style={{marginBottom: 24}}>
                     <Row gutter={16}>
-                        <Col xs={24} md={12}>
-                            <Form.Item
-                                name="comId"
-                                label={t("forms.write.companyLabel")}
-                                rules={[{ required: true, message: t("forms.write.companyRequired")}]}
-                            >
-                                <Select
-                                    showSearch
-                                    placeholder={t("forms.write.companySearchPlaceholder")}
-                                    filterOption={false}
-                                    suffixIcon={<BankOutlined/>}
-                                    onSearch={handleCompanySearch}
-                                    options={companyOptions}
-                                />
-                            </Form.Item>
-                        </Col>
 
                         <Col xs={24} md={12}>
                             <Form.Item label={t("forms.write.codeLabel")} required>

@@ -35,7 +35,7 @@ export function* searchSalHist(action) {
     const result = yield call(searchSalHistApi, action.payload);
     yield put(searchSalHistSuccess(result.data));
   } catch (err) {
-    yield put(searchSalHistFailure(err.response?.data?.message || err.message));
+    yield put(searchSalHistFailure(err.response?.data?.error || err.response?.data?.message || err.message));
   }
 }
 

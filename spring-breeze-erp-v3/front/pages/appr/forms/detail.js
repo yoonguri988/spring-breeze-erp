@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import {
-    message, Form, Input, Select, Switch,
+    message, Form, Input, Switch,
     Button, Descriptions, Tag, Space,
     Popconfirm, Row, Col
  } from "antd";
@@ -15,9 +15,8 @@ import {
     deleteFormRequest,
     resetFormState,
 } from "../../../reducers/appr/apprFormReducer";
-import { checkCode, searchCompany } from "../../../api/appr/apprFormApi";
+import { checkCode } from "../../../api/appr/apprFormApi";
 import SchemaFieldEditor, {validateSchemaFields } from "../../../components/appr/SchemaFieldEditor";
-import { BankOutlined } from "@ant-design/icons";
 import PageHeader from "../../../components/appr/PageHeader";
 
 // react-quill은 SSR이 불가하므로 CSR로 로드
@@ -43,7 +42,6 @@ export default function FormDetailPage() {
     const [editMode, setEditMode] = useState(false);
     const [content, setContent] = useState("");
     const [schemaFields, setSchemaFields] = useState([]);
-    const [companyOptions, setCompanyOptions] = useState([]);
 
     // forId/forVersion이 준비되면 상세,버전이력 조회
     useEffect( () => {
@@ -56,12 +54,10 @@ export default function FormDetailPage() {
     useEffect( () => {
         if (detail) {
             form.setFieldsValue({
-                comId: detail.comId,
                 forCode: detail.forCode,
                 forTitle: detail.forTitle,
                 forStatus: detail.forStatus
             });
-            setCompanyOptions(detail.comName? [{label: detail.comName, value: detail.comId}] : []);
 
             if (detail.forSchema) {
                 // schema 파싱
@@ -100,29 +96,17 @@ export default function FormDetailPage() {
         };
     }, [dispatch])
 
-    // 회사 검색
-    const handleCompanySearch = async (keyword) => {
-        if (!keyword) return;
-        try {
-            const companies = await searchCompany(keyword);
-            setCompanyOptions(companies.map( (c) => ({label: c.comName, value: c.comId})));
-        } catch (err) {
-            message.error(t("forms.detail.companySearchFailedMsg"));
-        }
-    };
-
     // 양식코드 중복 체크
     const handleCodeCheck = async () => {
         const forCode = form.getFieldValue("forCode");
-        const comId = form.getFieldValue("comId");
-        if (!forCode || !comId) {
+        if (!forCode) {
             message.warning(t("forms.detail.codeCheckRequiredMsg"));
             return;
         }
 
         // 본인 forId 는 제외하고 검사
         try {
-            const res = await checkCode(forCode, comId, forId);
+            const res = await checkCode(forCode, forId);
             if (res.available) {
                 message.success(t("forms.detail.codeAvailableMsg"));
             }
@@ -171,8 +155,7 @@ export default function FormDetailPage() {
 
     const handleCancelEdit = () => {
         // 편집중 바꾼 값 되돌리기
-        form.setFieldValue({
-            comId: detail.comId,
+        form.setFieldsValue({
             forCode: detail.forCode,
             forTitle: detail.forTitle,
             forStatus: detail.forStatus,
@@ -229,20 +212,8 @@ export default function FormDetailPage() {
                         onFinish={handleUpdate}
                         
                     >
-                        <Form.Item
-                            name="comId"
-                            label={t("forms.detail.companyLabel")}
-                            rules={[{required: true, message: t("forms.detail.companyRequired")}]}
-                        >
-                            <Select
-                                showSearch
-                                placeholder={t("forms.detail.companySearchPlaceholder")}
-                                filterOption={false}
-                                suffixIcon={<BankOutlined/>}
-                                onSearch={handleCompanySearch}
-                                options={companyOptions}
-                                disabled={!editMode}
-                            />
+                        <Form.Item label={t("forms.detail.companyLabel")}>
+                            <Input value={detail.comName} disabled/>
                         </Form.Item>
 
                         <Form.Item label={t("forms.detail.codeLabel")} required>

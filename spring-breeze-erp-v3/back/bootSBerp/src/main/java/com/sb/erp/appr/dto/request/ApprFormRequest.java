@@ -1,7 +1,6 @@
 package com.sb.erp.appr.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class ApprFormRequest {
 	
-	@NotNull(message = "회사를 선택해주세요.")
+	//@NotNull(message = "회사를 선택해주세요.")
 	private Long comId;
 	
 	@NotBlank(message = "양식 코드를 입력해주세요.")

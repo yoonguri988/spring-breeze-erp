@@ -25,7 +25,12 @@ import {
 const APPLICANT_ADMIN_API_BASE = "/api/admin/applicant";
 
 // listApplicantAdmin  - GET /api/admin/applicant  (recId?, apctStatus?, page(0-base), size)
-export const listApplicantAdminApi = ({ recId, apctStatus, page = 0, size = 10 } = {}) =>
+export const listApplicantAdminApi = ({
+  recId,
+  apctStatus,
+  page = 0,
+  size = 10,
+} = {}) =>
   api.get(APPLICANT_ADMIN_API_BASE, {
     params: {
       ...(recId ? { recId } : {}),
@@ -41,7 +46,9 @@ export function* listApplicantAdmin(action) {
     yield put(fetchApplicantAdminListSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchApplicantAdminListFailure(err.response?.data?.message || err.message),
+      fetchApplicantAdminListFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -56,7 +63,9 @@ export function* getApplicantDetail(action) {
     yield put(fetchApplicantDetailSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchApplicantDetailFailure(err.response?.data?.message || err.message),
+      fetchApplicantDetailFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -71,14 +80,18 @@ export function* getApplicantDashboard() {
     yield put(fetchApplicantDashboardSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchApplicantDashboardFailure(err.response?.data?.message || err.message),
+      fetchApplicantDashboardFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
 
 // getApplicantRank  - GET /api/admin/applicant/rank  (recId, page(0-base), size)
 export const getApplicantRankApi = ({ recId, page = 0, size = 10 }) =>
-  api.get(`${APPLICANT_ADMIN_API_BASE}/rank`, { params: { recId, page, size } });
+  api.get(`${APPLICANT_ADMIN_API_BASE}/rank`, {
+    params: { recId, page, size },
+  });
 
 export function* getApplicantRank(action) {
   try {
@@ -86,7 +99,9 @@ export function* getApplicantRank(action) {
     yield put(fetchApplicantRankSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchApplicantRankFailure(err.response?.data?.message || err.message),
+      fetchApplicantRankFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -101,7 +116,9 @@ export function* getApplicantKanban(action) {
     yield put(fetchApplicantKanbanSuccess(result.data));
   } catch (err) {
     yield put(
-      fetchApplicantKanbanFailure(err.response?.data?.message || err.message),
+      fetchApplicantKanbanFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
@@ -119,7 +136,9 @@ export function* updateApplicantStatus(action) {
     yield put(updateApplicantStatusSuccess({ apctId, status: newStatus }));
   } catch (err) {
     yield put(
-      updateApplicantStatusFailure(err.response?.data?.message || err.message),
+      updateApplicantStatusFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
     );
   }
 }
