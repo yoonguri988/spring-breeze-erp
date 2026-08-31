@@ -19,7 +19,12 @@ import {
 import moment from "moment";
 import { useTranslation } from "react-i18next";
 
-import { fetchResvDetailRequest, updateResvRequest, resetResvState } from "../../reducers/resv/resvReducer";
+import {
+  fetchResvDetailRequest,
+  updateResvRequest,
+  fetchAvailableQtyRequest,
+  resetResvState,
+} from "../../reducers/resv/resvReducer";
 
 const STATUS_MAP = {
   AVAILABLE: { tone: "green" },
@@ -41,7 +46,7 @@ export default function ResvEditPage() {
   const { t } = useTranslation(["resv", "common"]);
   const [form] = Form.useForm();
 
-  const { detail: resv, loading, error, success } = useSelector((state) => state.resv);
+  const { detail: resv, availableQty, loading, error, success } = useSelector((state) => state.resv);
 
   const revId = router.query.revId ? String(router.query.revId) : "";
 
@@ -68,6 +73,23 @@ export default function ResvEditPage() {
     setEndDt(resv.endDt || null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resv]);
+
+  // 자원 + 시작일시 + 종료일시가 모두 채워지면 실제 잔여수량을 다시 조회한다
+  // (insert.js와 동일한 방식. 단, 수정 중인 예약 자신은 잔여수량 계산에서 제외해야 하므로
+  // excludeRevId를 함께 넘긴다).
+  useEffect(() => {
+    if (resv?.resId && startDt && endDt) {
+      dispatch(
+        fetchAvailableQtyRequest({
+          resId: resv.resId,
+          startDt,
+          endDt,
+          excludeRevId: revId,
+        }),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, resv?.resId, startDt, endDt]);
 
   useEffect(() => {
     if (!submitting) return;
@@ -99,14 +121,26 @@ export default function ResvEditPage() {
   if (!resv) return null;
 
   const editable = resv.status === "WAI";
-  const quantityMax = resv.resQuantity ?? null;
-  const infoStatus = STATUS_MAP[resv.resStatus] || null;
+
+  // 1차 상한: 예약 상세 조회 시점의 자원 총 보유수량(서버 조회 전 임시값).
+  // availableQty가 조회되면(현재 예약 자신은 제외한) 실제 잔여수량으로 좁힌다.
+  const quantityMax =
+    availableQty && String(availableQty.resId ?? resv.resId) === String(resv.resId)
+      ? availableQty.availableQty
+      : (resv.resQuantity ?? null);
+
+  const infoStatus =
+    availableQty && availableQty.availableQty <= 0
+      ? STATUS_MAP.DISABLED
+      : STATUS_MAP[resv.resStatus] || null;
   const infoStatusText =
-    {
-      AVAILABLE: t("resStatus.available"),
-      MAINTENANCE: t("resStatus.maintenance"),
-      DISABLED: t("resStatus.disabled"),
-    }[resv.resStatus] || "-";
+    availableQty && availableQty.availableQty <= 0
+      ? t("resStatus.disabled")
+      : {
+          AVAILABLE: t("resStatus.available"),
+          MAINTENANCE: t("resStatus.maintenance"),
+          DISABLED: t("resStatus.disabled"),
+        }[resv.resStatus] || "-";
 
   const handleStartChange = (d) => {
     const v = d ? d.format("YYYY-MM-DDTHH:mm") : null;
@@ -121,6 +155,12 @@ export default function ResvEditPage() {
   const onFinish = (values) => {
     if (moment(endDt).isBefore(moment(startDt))) {
       form.setFields([{ name: "endDt", errors: [t("edit.endBeforeStart")] }]);
+      return;
+    }
+    if (availableQty && availableQty.availableQty <= 0) {
+      form.setFields([
+        { name: "quantity", errors: [t("edit.noAvailableQuantity")] },
+      ]);
       return;
     }
     setSubmitting(true);
@@ -201,7 +241,12 @@ export default function ResvEditPage() {
                     <b>{resv.capacity ? t("edit.capacityValue", { capacity: resv.capacity }) : "-"}</b>
                   </span>
                   <span>
-                    <InboxOutlined className="text-faint" /> {t("edit.ownedQuantity")} <b>{quantityMax ?? "-"}</b>
+                    <InboxOutlined className="text-faint" /> {t("edit.ownedQuantity")}{" "}
+                    <b>
+                      {availableQty
+                        ? `${availableQty.availableQty} / ${availableQty.totalQuantity}`
+                        : (quantityMax ?? "-")}
+                    </b>
                   </span>
                   <span>
                     <span className={`sb-badge sb-badge--${infoStatus?.tone || "gray"}`}>{infoStatusText}</span>
