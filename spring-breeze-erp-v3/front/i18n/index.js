@@ -20,7 +20,7 @@ import sidebarKo from "./locales/ko/sidebar.json";
 import footerKo from "./locales/ko/footer.json";
 import authKo from "./locales/ko/auth.json";
 import comKo from "./locales/ko/com.json";
-// import dashboardKo from "./locales/ko/dashboard.json";
+import dashboardKo from "./locales/ko/dashboard.json";
 import deptKo from "./locales/ko/dept.json";
 import resvKo from "./locales/ko/resv.json";
 import resKo from "./locales/ko/res.json";
@@ -44,7 +44,7 @@ import sidebarEn from "./locales/en/sidebar.json";
 import footerEn from "./locales/en/footer.json";
 import authEn from "./locales/en/auth.json";
 import comEn from "./locales/en/com.json";
-// import dashboardEn from "./locales/en/dashboard.json";
+import dashboardEn from "./locales/en/dashboard.json";
 import deptEn from "./locales/en/dept.json";
 import resvEn from "./locales/en/resv.json";
 import resEn from "./locales/en/res.json";
@@ -76,7 +76,7 @@ const resources = {
     footer: footerKo,
     auth: authKo,
     com: comKo,
-    // dashboard: dashboardKo,
+    dashboard: dashboardKo,
     dept: deptKo,
     resv: resvKo,
     res: resKo,
@@ -101,7 +101,7 @@ const resources = {
     footer: footerEn,
     auth: authEn,
     com: comEn,
-    // dashboard: dashboardEn,
+    dashboard: dashboardEn,
     dept: deptEn,
     resv: resvEn,
     res: resEn,

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card, Form, Input, InputNumber, Select, DatePicker, Button, message } from "antd";
 import { ArrowLeftOutlined, CheckOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import dayjs from "dayjs";
+import moment from "moment";
 
 import {
   detailPeriodRequest, createPeriodRequest, updatePeriodRequest,
@@ -23,12 +23,9 @@ export default function EvalPeriodFormPage() {
 
   // 평가 구분 옵션 (값은 백엔드와 동일한 한글 원본 유지, 라벨만 번역)
   const TERM_OPTIONS = [
-    { value: "상반기", label: t("period.form.termOptions.h1") },
-    { value: "하반기", label: t("period.form.termOptions.h2") },
-    { value: "1분기", label: t("period.form.termOptions.q1") },
-    { value: "2분기", label: t("period.form.termOptions.q2") },
-    { value: "3분기", label: t("period.form.termOptions.q3") },
-    { value: "4분기", label: t("period.form.termOptions.q4") },
+    { value: "H1", label: t("period.form.termOptions.h1") },
+    { value: "H2", label: t("period.form.termOptions.h2") },
+    { value: "ANNUAL", label: t("period.form.termOptions.annual") },
   ];
 
   const { currentPeriod, checkDuplicate, loading, success, error } =
@@ -48,8 +45,8 @@ export default function EvalPeriodFormPage() {
       evalYear: currentPeriod.evalYear,
       evalTerm: currentPeriod.evalTerm,
       title: currentPeriod.title,
-      startDate: currentPeriod.startDate ? dayjs(currentPeriod.startDate) : null,
-      endDate: currentPeriod.endDate ? dayjs(currentPeriod.endDate) : null,
+      startDate: currentPeriod.startDate ? moment(currentPeriod.startDate) : null,
+      endDate: currentPeriod.endDate ? moment(currentPeriod.endDate) : null,
     });
   }, [currentPeriod, isEdit, form]);
 

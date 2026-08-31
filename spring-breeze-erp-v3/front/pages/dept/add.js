@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Input, InputNumber, Select, message } from "antd";
-import { ApartmentOutlined, ArrowLeftOutlined, BlockOutlined, CheckOutlined, RightOutlined } from "@ant-design/icons";
+import { ApartmentOutlined, ArrowLeftOutlined, BlockOutlined, CheckOutlined, ExclamationCircleOutlined, RightOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -32,6 +32,9 @@ export default function DeptAddPage() {
     success,
   } = useSelector((state) => state.dept);
   const { user } = useSelector((state) => state.auth);
+  const isAdmin = Boolean(
+    user?.roles?.includes("ROLE_ADMIN") || user?.roles?.includes("ROOT"),
+  );
 
   const defaultComId = user?.comId ? String(user.comId) : "";
   const comId = router.query.comId ? String(router.query.comId) : defaultComId;
@@ -157,6 +160,34 @@ export default function DeptAddPage() {
       }),
     );
   };
+
+  // 부서 등록은 관리자(ROLE_ADMIN/ROOT)만 가능하도록 프론트에서도 접근을 막는다.
+  // (실제 권한 검증은 백엔드에서 최종적으로 수행됨)
+  if (!isAdmin) {
+    return (
+      <div className="sb-content">
+        <div className="sb-page-head">
+          <div className="sb-page-head__txt">
+            <div className="sb-breadcrumb">
+              <Link href="/">{t("add.breadcrumbHome")}</Link> <RightOutlined />{" "}
+              <Link href={backUrl}>{t("add.breadcrumbList")}</Link>{" "}
+              <RightOutlined /> {t("add.breadcrumbAdd")}
+            </div>
+            <h1>{t("add.title")}</h1>
+          </div>
+        </div>
+        <div className="sb-card">
+          <div className="sb-empty">
+            <ExclamationCircleOutlined style={{ fontSize: 34, opacity: 0.5 }} />
+            <p>{t("add.accessDenied.message")}</p>
+            <Link href={backUrl}>
+              <Button className="mt-2">{t("add.accessDenied.backBtn")}</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sb-content">
