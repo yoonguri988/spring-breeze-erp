@@ -73,17 +73,18 @@
 	</select>
 
 	<!-- jsj : 사원 등록, emp_id는 트리거가 시퀀스로 자동 등록(제외) -->
+	<!-- cyj: 최초 비밀번호는 항상 사번(EmpServiceImpl.insert)이므로 must_change_pwd='Y'로 등록 -->
 	<insert id="insert" parameterType="com.sb.erp.emp.dto.request.EmpRequest">
 		insert into employee
 		(emp_no, emp_pass, emp_name,
 		dept_id, pos_id, com_id,
-		emp_email, emp_mobile, emp_status, hire_date)
+		emp_email, emp_mobile, emp_status, hire_date, must_change_pwd)
 		values
 		(#{empNo}, #{empPass},
 		#{empName},
 		#{deptId}, #{posId}, #{comId},
 		#{empEmail}, #{empMobile}, #{empStatus},
-		to_date(#{hireDate}, 'YYYY-MM-DD'))
+		to_date(#{hireDate}, 'YYYY-MM-DD'), 'Y')
 		<selectKey keyProperty="empId" resultType="long" order="AFTER">
 			select seq_employee.currval from dual
 		</selectKey>
@@ -144,10 +145,11 @@
 		  and emp_mobile = #{empMobile} 
 	</select>
 	
-	<!-- cyj: 비밀번호 재설정 -->
+	<!-- cyj: 비밀번호 재설정 (관리자 초기화 → must_change_pwd='Y' / 본인 변경 → 'N', 호출부(EmpServiceImpl)에서 세팅) -->
 	<update id="updatePassByEmpId" parameterType="com.sb.erp.emp.dto.request.EmpRequest">
 		update employee
-		   set emp_pass = #{empPass}
+		   set emp_pass = #{empPass},
+		       must_change_pwd = #{mustChangePwd}
 		 where emp_id = #{empId} and com_id = #{comId}
 	</update>
 	
@@ -195,9 +197,11 @@
 	</select>
 	
 	<!-- cyj: 비밀번호 분실시 본인 확인 - EMP_ID로만 조회해서 업데이트 -->
+	<!-- 본인이 직접 새 비밀번호를 설정하는 경로(비밀번호 찾기 / 로그인 상태 변경)이므로 must_change_pwd='N'으로 해제 -->
 	<update id="updatePassByEmpIdOnly" parameterType="com.sb.erp.emp.dto.request.EmpRequest">
 		update employee
-		   set emp_pass = #{empPass}
+		   set emp_pass = #{empPass},
+		       must_change_pwd = 'N'
 		 where emp_id = #{empId}
 	</update>
 </mapper>

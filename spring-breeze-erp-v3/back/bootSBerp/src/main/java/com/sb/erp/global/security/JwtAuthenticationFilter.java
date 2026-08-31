@@ -80,13 +80,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Long empId = Long.parseLong(claims.getSubject());
                 Long comId = claims.get("comId", Long.class);
                 String empEmail = claims.get("empEmail", String.class);
-                
+
                 // 로그인 시 발급한 토큰의 "roles"는 복수(리스트) 클레임 - "role" 단수 아님에 주의
                 @SuppressWarnings("unchecked")
                 List<String> roles = claims.get("roles", List.class);
-                
+
+                // 비밀번호가 아직 사번(임시 비밀번호) 상태인지 여부(로그인/refresh에서 발급한 클레임)
+                Boolean pwdChangeRequired = claims.get("pwdChangeRequired", Boolean.class);
+
 	            //CustomUserPincipal
-                CustomUserPrincipal userPrincipal = new CustomUserPrincipal(empId, comId, empEmail, roles);
+                CustomUserPrincipal userPrincipal = new CustomUserPrincipal(
+                        empId, comId, empEmail, roles, Boolean.TRUE.equals(pwdChangeRequired));
 
                  UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
@@ -94,8 +98,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                  );
 
                  SecurityContextHolder.getContext().setAuthentication(auth);
- 
+
                  logger.debug("[Filter] SecurityContext에 인증 정보 저장 완료 (empId=" + empId + ")");
+
+                 // 비밀번호 변경이 강제된 사용자는 /auth/** (비밀번호 변경/재발급/로그아웃) 외의
+                 // API는 호출하지 못하게 막는다. 프론트가 화면 이동을 놓치거나 사용자가 API를
+                 // 직접 호출해도 우회할 수 없도록 하는 서버측 방어선.
+                 if (userPrincipal.isPwdChangeRequired() && !request.getRequestURI().startsWith("/auth/")) {
+                     SecurityContextHolder.clearContext();
+                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                     response.setContentType("application/json;charset=UTF-8");
+                     response.getWriter().write(
+                             "{\"error\":\"PWD_CHANGE_REQUIRED\",\"message\":\"비밀번호를 변경해야 이용할 수 있습니다.\"}");
+                     return;
+                 }
                 }
             } catch (ExpiredJwtException e) {
             	// 정상적으로 발생할 수 있는 상황(accessToken 만료) → 스택트레이스 없이 debug 로그만

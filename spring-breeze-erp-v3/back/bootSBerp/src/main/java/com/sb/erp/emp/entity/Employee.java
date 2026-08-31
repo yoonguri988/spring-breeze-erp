@@ -46,6 +46,13 @@ public class Employee {
     @Column(name = "emp_status", length = 10, nullable = false)
     private String empStatus;
 
+    // 최초 가입/관리자 초기화 등으로 비밀번호가 "사번"으로 세팅된 상태인지 여부.
+    // 'Y'면 로그인 시 즉시 정상 로그인을 허용하지 않고 비밀번호 변경 화면으로 강제 이동시킨다.
+    // 본인이 새 비밀번호로 변경(EmpService.changePassword / updatePassByEmpIdOnly)하면 'N'으로 갱신.
+    // 기존 데이터 호환을 위해 nullable 허용 — null은 'N'(변경 불필요)과 동일하게 취급한다.
+    @Column(name = "must_change_pwd", length = 1)
+    private String mustChangePwd;
+
     @Column(name = "hire_date")
     private LocalDate hireDate;
 

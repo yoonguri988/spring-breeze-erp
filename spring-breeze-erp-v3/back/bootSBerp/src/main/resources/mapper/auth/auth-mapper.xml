@@ -14,6 +14,7 @@
 		<result property="empId" column="emp_id" />
 		<result property="deptId" column="dept_id" />
 		<result property="posId" column="pos_id" />
+		<result property="mustChangePwd" column="must_change_pwd" />
 		<collection property="authList" resultMap="authMap" />
 	</resultMap>
 
@@ -23,7 +24,7 @@
 
 	<select id="readAuth" resultMap="authListMap" parameterType="string">
 		select e.emp_email, e.emp_no, e.emp_name, e.emp_pass, a.aut_name,
-			   ep.pos_name, c.com_name, e.com_id, e.emp_id, e.dept_id, e.pos_id
+			   ep.pos_name, c.com_name, e.com_id, e.emp_id, e.dept_id, e.pos_id, e.must_change_pwd
 		from emp_auth ea
 		join employee e  	 on e.emp_id = ea.emp_id
 		join authority a 	 on a.aut_id = ea.aut_id
@@ -46,7 +47,7 @@
 	     그대로 다시 채우기 위한 조회. readAuth와 동일한 컬럼셋을 emp_id 기준으로 조회한다. -->
 	<select id="readAuthByEmpId" resultMap="authListMap" parameterType="long">
 		select e.emp_email, e.emp_no, e.emp_name, e.emp_pass, a.aut_name,
-			   ep.pos_name, c.com_name, e.com_id, e.emp_id, e.dept_id, e.pos_id
+			   ep.pos_name, c.com_name, e.com_id, e.emp_id, e.dept_id, e.pos_id, e.must_change_pwd
 		from emp_auth ea
 		join employee e  	 on e.emp_id = ea.emp_id
 		join authority a 	 on a.aut_id = ea.aut_id

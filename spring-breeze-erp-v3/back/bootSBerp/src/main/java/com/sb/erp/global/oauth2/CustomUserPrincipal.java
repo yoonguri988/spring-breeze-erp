@@ -15,17 +15,25 @@ public class CustomUserPrincipal implements UserDetails {
 	private final Long comId;
 	private final String empEmail;
 	private final List<String> roles; // JWT의 "roles" 클레임(복수) 그대로 대응
+	// true면 비밀번호가 아직 사번(임시 비밀번호) 상태 - JwtAuthenticationFilter가
+	// /auth/** 이외의 요청을 막는 데 사용. isCredentialsNonExpired()로도 노출한다.
+	private final boolean pwdChangeRequired;
 
 	// JWT 사용자
 	public CustomUserPrincipal(Long empId, Long comId, String empEmail, List<String> roles) {
+		this(empId, comId, empEmail, roles, false);
+	}
+
+	public CustomUserPrincipal(Long empId, Long comId, String empEmail, List<String> roles, boolean pwdChangeRequired) {
 		this.empId = empId;
 		this.comId = comId;
 		this.empEmail = empEmail;
 		this.roles = (roles == null || roles.isEmpty())
 				? Collections.emptyList()
 				: roles;
+		this.pwdChangeRequired = pwdChangeRequired;
 	}
-	
+
 	@Override public String getPassword() { return "N/A"; }
 	@Override public String getUsername() { return empEmail != null ? empEmail : String.valueOf(empId); }
 	@Override
@@ -37,7 +45,9 @@ public class CustomUserPrincipal implements UserDetails {
 
 	@Override public boolean isAccountNonExpired() { return true; }
 	@Override public boolean isAccountNonLocked() { return true; }
-	@Override public boolean isCredentialsNonExpired() { return true; }
+	// 비밀번호 변경이 강제된 상태(pwdChangeRequired=true)라는 것을 Spring Security의
+	// 표준 UserDetails 개념(자격증명 만료)으로도 함께 표현한다.
+	@Override public boolean isCredentialsNonExpired() { return !pwdChangeRequired; }
 	@Override public boolean isEnabled() { return true; }
 
 
@@ -47,4 +57,5 @@ public class CustomUserPrincipal implements UserDetails {
 	public List<String> getRoles() { return roles; }
 	// 단일 대표 권한이 필요한 곳(로그 등)을 위한 헬퍼 - 없으면 null
 	public String getRole() { return roles.isEmpty() ? null : roles.get(0); }
+	public boolean isPwdChangeRequired() { return pwdChangeRequired; }
 }

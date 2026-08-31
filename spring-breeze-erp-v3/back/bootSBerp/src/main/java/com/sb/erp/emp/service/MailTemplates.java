@@ -24,7 +24,7 @@ public class MailTemplates {
             + "<div style='background:#f5f9ff;padding:15px;border-radius:6px;margin:20px 0;font-size:14px;'>"
             + "  💡 <b>첫 로그인 안내</b><br>"
             + "  - ID: 등록시 사용한 이메일<br>"
-            + "  - 초기 비밀번호: 사번과 동일 (로그인 후 즉시 변경 권장)"
+            + "  - 초기 비밀번호: 사번과 동일 (최초 로그인 시 비밀번호 변경 화면으로 자동 이동합니다)"
             + "</div>"
             + "<p>궁금한 점이 있으면 언제든 인사팀 또는 부서장에게 문의해주세요.</p>");
     }

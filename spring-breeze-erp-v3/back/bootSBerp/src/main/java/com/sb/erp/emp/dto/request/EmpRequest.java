@@ -32,6 +32,9 @@ public class EmpRequest {
 	// 등록 시 서비스에서 "재직" 기본값 세팅
 	private String empStatus;
 
+	// 비밀번호 변경 API에서만 서비스가 세팅("Y"/"N"). 사용자 입력 검증 대상 아님.
+	private String mustChangePwd;
+
 	// 선택 입력. 관리자가 수정 시 지정
 	private String hireDate;
 

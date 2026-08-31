@@ -107,15 +107,18 @@ public class AuthController {
 			"posName", user.getPosName(),
 			"comName", user.getComName(),
 			"empEmail", user.getEmpEmail(),
-			"roles", user.getAuthList().stream().map(AuthResponse::getAutName).toList())
+			"roles", user.getAuthList().stream().map(AuthResponse::getAutName).toList(),
+			// 비밀번호가 아직 사번(임시 비밀번호)인 상태 → 프론트가 비밀번호 변경 화면으로 보내야 함.
+			// JwtAuthenticationFilter도 이 클레임을 보고 /auth/** 외 API 접근을 막는다.
+			"pwdChangeRequired", user.isMustChangePwd())
 	);
-	
+
 	String refresh = jwtProvider.createRefreshToken(String.valueOf(user.getEmpId()));
 	tokenStore.saveRefreshToken(
 			String.valueOf(user.getEmpId()), refresh,
 			(long) props.getRefreshTokenExpSeconds()
 	);
-	
+
 	 response.addHeader(HttpHeaders.SET_COOKIE,
              buildRefreshCookie(refresh, props.getRefreshTokenExpSeconds()).toString());
 
@@ -124,7 +127,9 @@ public class AuthController {
 	return ResponseEntity.ok(Map.of(
 			"accessToken", access,
 			"empId", user.getEmpId(),
-			"comId", user.getComId()
+			"comId", user.getComId(),
+			// 프론트가 JWT를 디코딩하지 않고도 바로 분기할 수 있도록 응답 바디에도 노출
+			"pwdChangeRequired", user.isMustChangePwd()
 		));
 	}
 	
@@ -165,10 +170,14 @@ public class AuthController {
                         "posName", user.getPosName(),
                         "comName", user.getComName(),
                         "empEmail", user.getEmpEmail(),
-                        "roles", user.getAuthList().stream().map(AuthResponse::getAutName).toList())
+                        "roles", user.getAuthList().stream().map(AuthResponse::getAutName).toList(),
+                        "pwdChangeRequired", user.isMustChangePwd())
         );
 
-        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+        return ResponseEntity.ok(Map.of(
+                "accessToken", newAccessToken,
+                "pwdChangeRequired", user.isMustChangePwd()
+        ));
     }
 	
 	
