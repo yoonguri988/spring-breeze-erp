@@ -7,7 +7,7 @@ import Link from "next/link";
 
 import { Button, Input, Select, DatePicker, message } from "antd";
 import { useTranslation } from "react-i18next";
-import { createTaskRequest, createTaskContextRequest } from "../../reducers/task/taskReducer";
+import { createTaskRequest, createTaskContextRequest,resetTaskState } from "../../reducers/task/taskReducer";
 
 import moment from "moment";
 
@@ -36,6 +36,11 @@ export default function TaskCreatePage() {
     const [taskStartDate, setTaskStartDate] = useState("");
     const [taskEndDate, setTaskEndDate] = useState("");
 
+    useEffect(() => {
+    return () => {
+      dispatch(resetTaskState());
+    };
+    }, [dispatch]);
 
     useEffect(() => {
     if (!router.isReady || !proId) return;

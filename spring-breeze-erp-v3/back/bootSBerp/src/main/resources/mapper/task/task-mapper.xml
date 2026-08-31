@@ -27,7 +27,7 @@
 	select t.task_id, t.task_name, t.task_status, t.created_at
 	from task t
 	where t.pro_id = #{proId}
-	order by t.task_id desc
+	order by t.task_id asc
 	OFFSET #{pstartno} ROWS FETCH NEXT #{onepagelist} ROWS ONLY
 </select>
 
