@@ -14,6 +14,16 @@ import com.sb.erp.global.exception.ResourceNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
+
+/**
+ * 스코프 제외 - 위임전결 자동화
+ * 미구현으로 배포 대상에서 제외됨. 인가 모델(ROOT → comId 스코프 ADMIN) 마이그레이션도
+ * 적용 안 된 상태로 코드만 보존. 재개 시 ApprFormController와 동일한 패턴으로 맞출 것.
+ *
+ * ApprFormController의 delegation-config 엔드포인트를 통해 여전히 호출 가능하지만,
+ * 저장된 설정을 실제로 소비하는 ApprAutoDelegationTriggerService 쪽이 스코프 제외 상태라
+ * 저장/조회는 되어도 실질적인 자동 위임 발동으로는 이어지지 않음.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

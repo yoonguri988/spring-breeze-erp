@@ -15,10 +15,10 @@ public interface ApprFormService {
 	public ApprFormListResponse listForms(ApprFormSearchCondition condition);
 	
 	// 단건 조회 ( Id + Version )
-	public ApprFormResponse getForm(Long forId, Long forVersion);
+	public ApprFormResponse getForm(Long forId, Long forVersion, Long comId);
 	
 	// 특정 양식의 전체 버전 조회 ( 이력 )
-	public List<ApprFormResponse> getFormVersions(Long forId);
+	public List<ApprFormResponse> getFormVersions(Long forId, Long comId);
 	
 	// 양식 등록 ( 생성된 forId 반환 )
 	public Long insertForm(ApprFormRequest req);

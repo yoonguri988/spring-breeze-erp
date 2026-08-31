@@ -21,6 +21,11 @@ import com.sb.erp.global.exception.ResourceNotFoundException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 스코프 제외 - 위임전결 자동화
+ * 미구현으로 배포 대상에서 제외됨. 인가 모델(ROOT → comId 스코프 ADMIN) 마이그레이션도
+ * 적용 안 된 상태로 코드만 보존. 재개 시 ApprFormController와 동일한 패턴으로 맞출 것.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

@@ -34,7 +34,8 @@ public interface ApprFormMapper {
 	public int updateFormNewVersion(@Param("forId") Long forId,
 								    @Param("req") ApprFormRequest req);
 	public List<ApprFormResponse> selectFormList(ApprFormSearchCondition condition);
-	public List<ApprFormResponse> selectFormVersions(@Param("forId") Long forId);
+	public List<ApprFormResponse> selectFormVersions(@Param("forId") Long forId,
+													 @Param("comId") Long comId);
 	
 	// insert로 채번된 시퀀스값
 	public Long selectCurrentFormSeq();

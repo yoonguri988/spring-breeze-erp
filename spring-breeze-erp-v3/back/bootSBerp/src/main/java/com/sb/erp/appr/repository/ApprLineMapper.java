@@ -17,6 +17,8 @@ public interface ApprLineMapper {
 	public int updateLineStatus(@Param("docId") Long docId,
 								@Param("empId") Long empId,
 								@Param("linStatus") String linStatus);
+	public int activeNextLine(@Param("docId") Long docId,
+							  @Param("empId") Long empId);
 	public ApprLineResponse selectLineByOrder(@Param("docId") Long docId,
 											  @Param("linOrder") Integer linOrder);
 	

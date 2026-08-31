@@ -165,6 +165,7 @@ export default function DocWritePage() {
     useEffect(() => {
         setSchemaValues({});
         setDocContent(selectedForm?.forContent ?? "");
+        setApprovers([]);
     }, [formKey]);
 
     const updateSchemaValue = (key, value) => {
@@ -399,6 +400,12 @@ export default function DocWritePage() {
         })));
     }
 
+    // 현재 문서에 필요한 결재자 수와 다른 추천은 제외
+    const filteredFavoriteLines = useMemo(
+        () => favoriteLines.filter((fav) => fav.approvers.length === requiredApproverCount),
+        [favoriteLines, requiredApproverCount]
+    );
+
     return (
         <div className="sb-page">
             <PageHeader
@@ -584,11 +591,11 @@ export default function DocWritePage() {
 
                         {favoriteLinesLoading ? (
                             <Spin size="small" />
-                        ) : favoriteLines.length > 0 && (
+                        ) : filteredFavoriteLines.length > 0 && (
                             <Space direction="vertical" style={{width: "100%", marginBottom: 16}}>
                                 <Text type="secondary" style={{fontSize: 13}}>자주 쓰는 결재선</Text>
                                 <Space wrap>
-                                    {favoriteLines.map((fav) => (
+                                    {filteredFavoriteLines.map((fav) => (
                                         <Button
                                             key={fav.favId}
                                             size="small"

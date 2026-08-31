@@ -7,5 +7,5 @@ import com.sb.erp.appr.dto.request.ApprLogSearchCondition;
 import com.sb.erp.appr.dto.response.ApprLogResponse;
 
 public interface ApprLogService {
-	public Page<ApprLogResponse> searchLog(ApprLogSearchCondition cond, Pageable pageable);
+	public Page<ApprLogResponse> searchLog(ApprLogSearchCondition cond, Pageable pageable, Long comId);
 }

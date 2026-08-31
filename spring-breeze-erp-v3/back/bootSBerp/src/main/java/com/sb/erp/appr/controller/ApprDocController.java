@@ -163,7 +163,7 @@ public class ApprDocController {
 			@AuthenticationPrincipal CustomUserPrincipal principal
 	) {
 
-		ApprDocResponse doc = service.selectDocDetail(docId);
+		ApprDocResponse doc = service.selectDocDetail(docId, principal.getComId());
 		List<ApprLineResponse> lines = service.selectLinesByDocId(docId);
 
 		// 전체 결재선 목록에 결재상태가 'WAI'인 데이터가 있나 검증
@@ -242,6 +242,7 @@ public class ApprDocController {
 	//////////////////////////// 결재선 파트 ///////////////////////////////
 	
 	//////////////////////////// 파일 첨부 ///////////////////////////////
+	// [스코프 보류] 첨부파일 기능 - 백엔드 완료, 프론트 미연결. 상세: ApprFile.java 참고
 	
 	@Operation(summary = "첨부파일 업로드", description = "문서에 첨부파일 등록 (최대 5개)")
 	@PostMapping("/{docId}/files")
