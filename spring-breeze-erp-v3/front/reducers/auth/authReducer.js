@@ -49,6 +49,8 @@ const authReducer = createSlice({
     refreshTokenSuccess: (state, action) => {
       state.loading = false;
       state.accessToken = action.payload?.accessToken || null;
+      // 새로 발급된 토큰의 클레임(예: pwdChangeRequired)이 최신 상태이므로 user도 함께 갱신
+      state.user = action.payload?.user || state.user;
     },
     refreshTokenFailure: (state, action) => {
       state.loading = false;
