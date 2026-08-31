@@ -12,9 +12,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import {
-  Tag, Button, Progress, Spin, Modal, message, Empty,
-} from "antd";
+import {  Tag, Button, Progress, Spin, Modal, message, Empty, } from "antd";
 import {
   LoginOutlined, LogoutOutlined, TeamOutlined, ClockCircleOutlined,
   FileTextOutlined, CalendarOutlined, BellOutlined, RobotOutlined,
@@ -152,6 +150,10 @@ export default function AdminDashboardPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [att.success, att.todayAtt, dispatch]);
+
+  useEffect(() => {
+    if (db.error) { message.error(db.error); }
+  }, [db.error]);
 
   const handleCheckIn = () => {
     Modal.confirm({

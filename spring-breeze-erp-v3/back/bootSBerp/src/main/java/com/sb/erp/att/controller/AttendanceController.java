@@ -39,16 +39,18 @@ public class AttendanceController {
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping
 	public ResponseEntity<List<AttendanceResponse>> list(
-			@RequestParam("startDate") LocalDate startDate,
-			@RequestParam("endDate") LocalDate endDate,
-			@RequestParam(name="keyword", required=false) String keyword,
-			@RequestParam("start") int start,
-			@RequestParam("end") int end) {
-		
-		List<AttendanceResponse> list = attendanceService
-				.getAllAttendances(startDate, endDate, keyword, start, end);
+	        Authentication auth,
+	        @RequestParam("startDate") LocalDate startDate,
+	        @RequestParam("endDate") LocalDate endDate,
+	        @RequestParam(name="keyword", required=false) String keyword,
+	        @RequestParam("start") int start,
+	        @RequestParam("end") int end) {
 
-		return ResponseEntity.ok(list);
+	    Long comId = authUserJwtService.getCurrentComId(auth);
+	    List<AttendanceResponse> list = attendanceService
+	            .getAllAttendances(startDate, endDate, comId, keyword, start, end);
+
+	    return ResponseEntity.ok(list);
 	}
 	
 	

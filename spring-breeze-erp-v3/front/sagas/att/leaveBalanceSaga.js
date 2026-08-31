@@ -12,6 +12,7 @@ import {
   calculateRequest, calculateSuccess, calculateFailure,
   deductRequest, deductSuccess, deductFailure,
   adjustRequest, adjustSuccess, adjustFailure,
+  calculateAllRequest, calculateAllSuccess, calculateAllFailure,
 } from "../../reducers/att/leaveBalanceReducer";
 
 // ── API base 경로 ──
@@ -181,6 +182,26 @@ export function* adjust(action) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// calculate-all  - POST /api/att/leave/calculate-all 연차 일괄 계산
+//////////////////////////////////////////////////////////////////////////////
+
+export const calculateAllApi = ({ year }) =>
+  api.post(`${LEAVE_API_BASE}/calculate-all`, null, { params: { year } });
+
+export function* calculateAll(action) {
+  try {
+    const result = yield call(calculateAllApi, action.payload);
+    yield put(calculateAllSuccess(result.data));
+  } catch (err) {
+    yield put(
+      calculateAllFailure(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      ),
+    );
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
 //  watcher
 //////////////////////////////////////////////////////////////////////////////
 
@@ -208,6 +229,9 @@ function* watchDeduct() {
 function* watchAdjust() {
   yield takeLatest(adjustRequest.type, adjust);
 }
+function* watchCalculateAll() {
+  yield takeLatest(calculateAllRequest.type, calculateAll);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //  루트 saga export
@@ -223,5 +247,6 @@ export default function* leaveBalanceSaga() {
     call(watchDeduct),
     call(watchAdjust),
     call(watchFetchMyGrants),
+    call(watchCalculateAll),
   ]);
 }

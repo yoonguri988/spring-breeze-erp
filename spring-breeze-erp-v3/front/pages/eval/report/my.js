@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Link from "next/link";
-import { Card, Table, Tag, Button } from "antd";
+import { Card, Table, Tag, Button, message } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
@@ -13,7 +13,7 @@ const GRADE_COLOR = { S: "#eb2f96", A: "#52c41a", B: "#1890ff", C: "#fa8c16", D:
 export default function MyReportPage() {
   const dispatch = useDispatch();
   const { t } = useTranslation(["eval", "common"]);
-  const { myReports, loading } = useSelector((state) => state.report);
+  const { myReports, loading, error } = useSelector((state) => state.report);
 
   const SENTIMENT = {
     POSITIVE: { color: "green", label: t("common.sentiment.positive") },
@@ -26,6 +26,10 @@ export default function MyReportPage() {
 
     return () => { dispatch(resetReportState()); }
   }, [dispatch]);
+
+  useEffect(() => {
+   if (error) { message.error(error); dispatch(resetReportState()); }
+  }, [error]);
 
   const columns = [
     {

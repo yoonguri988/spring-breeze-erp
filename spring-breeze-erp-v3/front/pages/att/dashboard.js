@@ -14,16 +14,16 @@ const STATUS_COLOR = {
   LATE: "orange",
   EARLY_LEAVE: "gold",
   ABSENT: "red",
-  HALF_DAY_AM: "cyan",
-  HALF_DAY_PM: "blue",
-  ANNUAL_LEAVE: "purple",
+  AM_HALF: "cyan",
+  PM_HALF: "blue",
+  ANNUAL: "purple",
 };
 
 export default function AttDashboardPage() {
   const dispatch = useDispatch();
   const { t } = useTranslation(["att", "common"]);
 
-  const { myAttList, todayAtt, loading, success } = useSelector((state) => state.att);
+  const { myAttList, todayAtt, loading, success, error } = useSelector((state) => state.att);
 
   const today = moment().format("YYYY-MM-DD");
   const effectiveTodayAtt = todayAtt || (myAttList && myAttList.find(
@@ -48,6 +48,10 @@ export default function AttDashboardPage() {
       dispatch(resetAttState());
     }
   }, [success, effectiveTodayAtt, dispatch, t]);
+
+  useEffect(() => {
+  if (error) { message.error(error); dispatch(resetAttState()); }
+  }, [error]);
 
   // ── 출근 버튼 핸들러 ──
   const handleCheckIn = () => {

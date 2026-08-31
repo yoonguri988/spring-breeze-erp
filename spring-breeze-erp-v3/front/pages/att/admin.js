@@ -17,9 +17,9 @@ const STATUS_COLOR = {
   LATE: "orange",
   EARLY_LEAVE: "gold",
   ABSENT: "red",
-  HALF_DAY_AM: "cyan",
-  HALF_DAY_PM: "blue",
-  ANNUAL_LEAVE: "purple",
+  AM_HALF: "cyan",
+  PM_HALF: "blue",
+  ANNUAL: "purple",
 };
 
 const STATUS_OPTIONS = [
@@ -112,7 +112,7 @@ export default function AttAdminPage() {
     setEditStatus(record.attStatus);
   };
 
-  const NO_TIME_STATUSES = ["ABSENT", "ANNUAL_LEAVE", "HALF_DAY_AM", "HALF_DAY_PM"];
+  const NO_TIME_STATUSES = ["ABSENT", "ANNUAL", "AM_HALF", "PM_HALF"];
 
   const handleEditSave = () => {
     if (!editingRecord) return;

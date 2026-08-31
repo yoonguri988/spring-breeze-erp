@@ -14,7 +14,7 @@ import moment from "moment";
 import {
   fetchAllBalancesRequest, fetchGrantHistoryRequest, calculateRequest,
   deductRequest, adjustRequest, resetLeaveState,
-  clearLeaveDetail,
+  clearLeaveDetail, calculateAllRequest,
 } from "../../../reducers/att/leaveBalanceReducer";
 
 // ── 부여 유형별 Tag 색상 ──
@@ -314,32 +314,47 @@ export default function LeaveAdminPage() {
 
       {/* ── 연도 선택 + 검색 ── */}
       <Card style={{ marginBottom: 16 }}>
-        <Space>
-          <span>{t("att:leaveAdmin.yearSelect")}:</span>
-          <Select
-            value={selectedYear}
-            onChange={(v) => setSelectedYear(v)}
-            style={{ width: 120 }}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Space>
+            <span>{t("att:leaveAdmin.yearSelect")}:</span>
+            <Select
+              value={selectedYear}
+              onChange={(v) => setSelectedYear(v)}
+              style={{ width: 120 }}
+            >
+              {yearOptions.map((y) => (
+                <Select.Option key={y} value={y}>
+                  {y}
+                </Select.Option>
+              ))}
+            </Select>
+            <Input
+              placeholder={t("att:admin.search.keywordPlaceholder")}
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onPressEnter={loadBalances}
+              style={{ width: 180 }}
+              allowClear
+            />
+            <Button type="primary" onClick={loadBalances} loading={loading}>
+              {t("att:admin.search.btnSearch")}
+            </Button>
+          </Space>
+          <Button
+            onClick={() => {
+              Modal.confirm({
+                title: `${selectedYear}년 전체 사원 연차를 일괄 발생하시겠습니까?`,
+                onOk: () => { dispatch(calculateAllRequest({ year: selectedYear })); },
+              });
+            }}
+            loading={loading}
           >
-            {yearOptions.map((y) => (
-              <Select.Option key={y} value={y}>
-                {y}
-              </Select.Option>
-            ))}
-          </Select>
-          <Input
-            placeholder={t("att:admin.search.keywordPlaceholder")}
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onPressEnter={loadBalances}
-            style={{ width: 180 }}
-            allowClear
-          />
-          <Button type="primary" onClick={loadBalances} loading={loading}>
-            {t("att:admin.search.btnSearch")}
+            전체 일괄 발생
           </Button>
-        </Space>
+        </div>
       </Card>
+
+      
 
       {/* ── 메인 테이블 ── */}
       <Card>
@@ -353,9 +368,9 @@ export default function LeaveAdminPage() {
         />
       </Card>
 
-      {/* ═══════════════════════════════════════════════════════ */}
+      {/* ═════════════════════════════════════════════════════ */}
       {/*  차감 모달                                              */}
-      {/* ═══════════════════════════════════════════════════════ */}
+      {/* ═════════════════════════════════════════════════════ */}
       <Modal
         title={t("att:leaveAdmin.deductModal.title")}
         visible={!!deductTarget}

@@ -3,11 +3,11 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Card, Descriptions, Tag, Button, Row, Col } from "antd";
+import { Card, Descriptions, Tag, Button, Row, Col, message } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
-import { detailReportRequest, clearReportDetail, } from "../../../reducers/eval/evalReportReducer";
+import { detailReportRequest, clearReportDetail, resetReportState, } from "../../../reducers/eval/evalReportReducer";
 
 const GRADE_COLOR = { S: "#eb2f96", A: "#52c41a", B: "#1890ff", C: "#fa8c16", D: "#ff4d4f" };
 
@@ -23,7 +23,7 @@ export default function EvalReportDetailPage() {
     NEGATIVE: { color: "red", label: t("common.sentiment.negative") },
   };
 
-  const { currentReport, loading } = useSelector((state) => state.report);
+  const { currentReport, loading, error } = useSelector((state) => state.report);
 
   useEffect(() => {
     if (!reportId) return;
@@ -31,6 +31,10 @@ export default function EvalReportDetailPage() {
 
     return () => { dispatch(clearReportDetail()); };
   }, [dispatch, reportId]);
+
+  useEffect(() => {
+    if (error) { message.error(error); dispatch(resetReportState()); }
+  }, [error]);
 
   const r = currentReport;
   const sent = SENTIMENT[r?.sentimentLabel];
