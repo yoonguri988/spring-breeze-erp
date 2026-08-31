@@ -24,7 +24,7 @@ const STATUS_COLOR = {
 
 const STATUS_OPTIONS = [
   "NORMAL", "LATE", "EARLY_LEAVE", "ABSENT",
-  "HALF_DAY_AM", "HALF_DAY_PM", "ANNUAL_LEAVE",
+  "AM_HALF", "PM_HALF", "ANNUAL",
 ];
 
 export default function AttAdminPage() {
