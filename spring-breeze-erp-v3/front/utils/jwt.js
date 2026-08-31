@@ -9,7 +9,7 @@ export function decodeUser(accessToken) {
   try {
     const claims = jwtDecode(accessToken); // { sub, comId, empNo, empName, posName, comName, empEmail, roles, pwdChangeRequired, exp, iat ... }
     return {
-      empId: claims.sub,
+      empId: Number(claims.sub),
       comId: claims.comId,
       empNo: claims.empNo,
       empName: claims.empName,
