@@ -49,6 +49,11 @@ export default function SalPolicyListPage() {
   const { user } = useSelector((state) => state.auth);
   const isRoot = Boolean(user?.roles?.includes("ROOT"));
   const isAdmin = Boolean(user?.roles?.includes("ROLE_ADMIN"));
+  // 4대보험요율/소득세구간표는 등록(POST)만 ROOT 전용이고, 조회(GET)는
+  // 백엔드가 hasAnyAuthority('ROOT','ROLE_ADMIN')로 ADMIN에게도 허용한다.
+  // 탭 노출 조건을 isRoot 단독으로 걸면 ADMIN 계정에서 두 탭이 통째로
+  // 사라지므로, 조회 권한 기준(canViewRateTax)으로 맞춘다.
+  const canViewRateTax = isRoot || isAdmin;
 
   const {
     rateList,
@@ -69,7 +74,7 @@ export default function SalPolicyListPage() {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (isRoot) {
+    if (canViewRateTax) {
       dispatch(fetchRatePolicyRequest());
       dispatch(fetchTaxBracketRequest());
     }
@@ -77,9 +82,9 @@ export default function SalPolicyListPage() {
       dispatch(fetchMealPolicyRequest());
       dispatch(fetchPosAllowanceRequest());
     }
-    if (!activeTab) setActiveTab(isRoot ? "rate" : "meal");
+    if (!activeTab) setActiveTab(canViewRateTax ? "rate" : "meal");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, isRoot, isAdmin]);
+  }, [dispatch, isRoot, isAdmin, canViewRateTax]);
 
   useEffect(() => {
     if (saving) return;
@@ -269,23 +274,25 @@ export default function SalPolicyListPage() {
 
       <Card>
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          {isRoot && (
+          {canViewRateTax && (
             <TabPane tab={t("policy.tabRate")} key="rate">
-              <div
-                style={{
-                  marginBottom: 12,
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => openModal("rate")}
+              {isRoot && (
+                <div
+                  style={{
+                    marginBottom: 12,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                  }}
                 >
-                  {t("policy.registerRateBtn")}
-                </Button>
-              </div>
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => openModal("rate")}
+                  >
+                    {t("policy.registerRateBtn")}
+                  </Button>
+                </div>
+              )}
               <Table
                 rowKey="rateId"
                 columns={rateColumns}
@@ -297,23 +304,25 @@ export default function SalPolicyListPage() {
               />
             </TabPane>
           )}
-          {isRoot && (
+          {canViewRateTax && (
             <TabPane tab={t("policy.tabTax")} key="tax">
-              <div
-                style={{
-                  marginBottom: 12,
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => openModal("tax")}
+              {isRoot && (
+                <div
+                  style={{
+                    marginBottom: 12,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                  }}
                 >
-                  {t("policy.registerTaxBtn")}
-                </Button>
-              </div>
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => openModal("tax")}
+                  >
+                    {t("policy.registerTaxBtn")}
+                  </Button>
+                </div>
+              )}
               <p style={{ color: "#999", fontSize: 13 }}>
                 {t("policy.taxNotice")}
               </p>
