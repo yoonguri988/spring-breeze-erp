@@ -24,6 +24,7 @@ public class ComResponse {
 	private String bizNo;
 	private String comTel;
 	private String comLogo;
+	private String comStatus; // ACTIVE / INACTIVE
 	private String createdAt;
 	private String updatedAt;
 
@@ -38,6 +39,7 @@ public class ComResponse {
 		this.bizNo = company.getBizNo();
 		this.comTel = company.getComTel();
 		this.comLogo = company.getComLogo();
+		this.comStatus = company.getComStatus();
 		this.createdAt = company.getCreatedAt() != null ? company.getCreatedAt().format(DATETIME_FORMATTER) : null;
 		this.updatedAt = company.getUpdatedAt() != null ? company.getUpdatedAt().format(DATETIME_FORMATTER) : null;
 	}

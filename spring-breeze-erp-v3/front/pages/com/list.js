@@ -26,6 +26,7 @@ import {
   EditOutlined,
   ApartmentOutlined,
   DeleteOutlined,
+  RedoOutlined,
   BankOutlined,
   TeamOutlined,
   AppstoreOutlined,
@@ -39,6 +40,7 @@ import {
   suggestCompanyRequest,
   clearSuggestList,
   deleteCompanyRequest,
+  restoreCompanyRequest,
   resetCompanyState,
 } from "../../reducers/com/companyReducer";
 
@@ -89,6 +91,9 @@ export default function ComListPage() {
   const [deleting, setDeleting] = useState(false); // 삭제 요청 진행중 플래그
   const [deleteError, setDeleteError] = useState("");
 
+  // 재활성화(복구) — 비밀번호 확인이 필요 없어 별도 모달 없이 confirm으로 처리
+  const [restoring, setRestoring] = useState(false); // 재활성화 요청 진행중 플래그(어떤 delete/restore 결과인지 구분용)
+
   // 통계는 최초 1회만 조회
   useEffect(() => {
     dispatch(fetchCompanyStatsRequest());
@@ -134,6 +139,36 @@ export default function ComListPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, success, error, deleting]);
+
+  // 재활성화 요청 결과 처리 (restoring 플래그로 구분)
+  useEffect(() => {
+    if (!restoring || loading) return;
+
+    if (success) {
+      message.success(companyMessage || t("edit.messages.restoreSuccess"));
+      setRestoring(false);
+      dispatch(resetCompanyState());
+      dispatch(fetchCompanyStatsRequest());
+    } else if (error) {
+      message.error(error);
+      setRestoring(false);
+      dispatch(resetCompanyState());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, success, error, restoring]);
+
+  const handleRestore = (record) => {
+    Modal.confirm({
+      title: t("list.restore.modalTitleWithName", { name: record.comName }),
+      content: t("list.restore.confirmContent", { name: record.comName }),
+      okText: t("list.restore.okText"),
+      cancelText: t("list.restore.cancelText"),
+      onOk: () => {
+        setRestoring(true);
+        dispatch(restoreCompanyRequest(record.comId));
+      },
+    });
+  };
 
   const pushQuery = (next) => {
     router.push({ pathname: "/com/list", query: { ...router.query, ...next } });
@@ -260,9 +295,22 @@ export default function ComListPage() {
       align: "right",
     },
     {
+      title: t("list.columns.status"),
+      dataIndex: "comStatus",
+      key: "comStatus",
+      width: 90,
+      align: "center",
+      render: (status) =>
+        status === "INACTIVE" ? (
+          <Tag color="default">{t("list.status.inactive")}</Tag>
+        ) : (
+          <Tag color="green">{t("list.status.active")}</Tag>
+        ),
+    },
+    {
       title: t("list.columns.actions"),
       key: "actions",
-      width: 170,
+      width: 190,
       align: "center",
       render: (_, record) => (
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 4 }}>
@@ -296,14 +344,24 @@ export default function ComListPage() {
               title={t("list.actionTitles.org")}
             />
           </Link>
-          <Button
-            type="text"
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            title={t("list.actionTitles.delete")}
-            onClick={() => openDelete(record)}
-          />
+          {record.comStatus === "INACTIVE" ? (
+            <Button
+              type="text"
+              size="small"
+              icon={<RedoOutlined />}
+              title={t("list.actionTitles.restore")}
+              onClick={() => handleRestore(record)}
+            />
+          ) : (
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              title={t("list.actionTitles.delete")}
+              onClick={() => openDelete(record)}
+            />
+          )}
         </div>
       ),
     },
@@ -435,7 +493,7 @@ export default function ComListPage() {
           rowKey="comId"
           columns={columns}
           dataSource={list}
-          loading={loading && !deleting}
+          loading={loading && !deleting && !restoring}
           pagination={false}
           locale={{ emptyText: t("list.emptyText") }}
         />

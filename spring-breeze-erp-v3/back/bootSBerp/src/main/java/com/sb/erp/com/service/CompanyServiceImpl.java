@@ -11,7 +11,6 @@ import com.sb.erp.com.dto.request.CompanySearchRequest;
 import com.sb.erp.com.dto.response.ComResponse;
 import com.sb.erp.com.dto.response.StatsComResponse;
 import com.sb.erp.com.repository.CompanyMapper;
-import com.sb.erp.dept.repository.DeptMapper;
 import com.sb.erp.global.exception.ResourceNotFoundException;
 import com.sb.erp.util.dto.FileUploadDto;
 import com.sb.erp.util.dto.FileUploadType;
@@ -20,7 +19,6 @@ import com.sb.erp.util.dto.FileUploadUtil;
 @Service
 public class CompanyServiceImpl implements CompanyService {
 	@Autowired CompanyMapper dao;
-	@Autowired DeptMapper deptDao;
 
 	@Override
 	public List<ComResponse> list(CompanySearchRequest dto) {
@@ -79,11 +77,23 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public int delete(long comId) {
-		if(deptDao.countActiveDepts(comId) > 0) {
-			throw new IllegalArgumentException("하위 부서가 존재하는 경우, 회사 삭제 불가능");
+	public boolean delete(long comId) {
+		// 부서/직원/전자결재 등 하위 데이터가 하나도 없으면 완전 삭제, 하나라도 있으면 비활성화로 대체.
+		if (dao.countRelatedData(comId) > 0) {
+			dao.softDelete(comId);
+			return true; // 비활성화됨(soft delete)
 		}
-		return dao.delete(comId);
+		dao.delete(comId);
+		return false; // 완전 삭제됨
+	}
+
+	@Override
+	public void restore(long comId) {
+		ComResponse before = dao.selectOneById(comId);
+		if (before == null) {
+			throw new ResourceNotFoundException("존재하지 않는 회사입니다. comId=" + comId);
+		}
+		dao.reactivate(comId);
 	}
 
 	@Override

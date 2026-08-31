@@ -23,6 +23,10 @@ import {
   deleteCompanySuccess,
   deleteCompanyFailure,
 
+  restoreCompanyRequest,
+  restoreCompanySuccess,
+  restoreCompanyFailure,
+
   checkBizNoRequest,
   checkBizNoSuccess,
   checkBizNoFailure,
@@ -150,6 +154,23 @@ export function* deleteCompany(action) {
 }
 
 // =========================================================
+// 5-1) 회사 재활성화 PUT /api/com/{comId}/restore
+// action.payload: comId
+// =========================================================
+export const restoreCompanyApi = (comId) => api.put(`${COMPANY_API_BASE}/${comId}/restore`);
+
+export function* restoreCompany(action) {
+  try {
+    const comId = action.payload;
+    const res = yield call(restoreCompanyApi, comId);
+
+    yield put(restoreCompanySuccess({ ...res.data, comId }));
+  } catch (err) {
+    yield put(restoreCompanyFailure(err.response?.data?.message || "회사 재활성화에 실패하였습니다."));
+  }
+}
+
+// =========================================================
 // 6) 사업자번호 중복확인 GET /api/com/check-bizno
 // action.payload: bizNo
 // =========================================================
@@ -223,6 +244,7 @@ function* watchFetchCompanyList() { yield takeLatest(fetchCompanyListRequest.typ
 function* watchFetchCompanyDetail() { yield takeLatest(fetchCompanyDetailRequest.type, fetchCompanyDetail); }
 function* watchUpdateCompany() { yield takeLatest(updateCompanyRequest.type, updateCompany); }
 function* watchDeleteCompany() { yield takeLatest(deleteCompanyRequest.type, deleteCompany); }
+function* watchRestoreCompany() { yield takeLatest(restoreCompanyRequest.type, restoreCompany); }
 function* watchCheckBizNo() { yield takeLatest(checkBizNoRequest.type, checkBizNo); }
 function* watchSuggestCompany() { yield debounce(300, suggestCompanyRequest.type, suggestCompany); }
 function* watchFetchCompanyStats() { yield takeLatest(fetchCompanyStatsRequest.type, fetchCompanyStats); }
@@ -235,6 +257,7 @@ export default function* companySaga() {
     call(watchFetchCompanyDetail),
     call(watchUpdateCompany),
     call(watchDeleteCompany),
+    call(watchRestoreCompany),
     call(watchCheckBizNo),
     call(watchSuggestCompany),
     call(watchFetchCompanyStats),

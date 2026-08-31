@@ -54,8 +54,8 @@
   	<selectKey keyProperty="comId" resultType="long" order="BEFORE">
       SELECT seq_company.NEXTVAL FROM dual
     </selectKey>
-  insert into company (com_id, com_name, industry_code, industry_grp_code, com_ceo, biz_no, com_tel, com_logo)
-  values (#{comId}, #{comName}, #{industryCode}, #{industryGrpCode}, #{comCeo}, #{bizNo}, #{comTel, jdbcType=VARCHAR}, #{comLogo, jdbcType=VARCHAR})
+  insert into company (com_id, com_name, industry_code, industry_grp_code, com_ceo, biz_no, com_tel, com_logo, com_status)
+  values (#{comId}, #{comName}, #{industryCode}, #{industryGrpCode}, #{comCeo}, #{bizNo}, #{comTel, jdbcType=VARCHAR}, #{comLogo, jdbcType=VARCHAR}, 'ACTIVE')
   </insert>
   <select id="selectByBizNo" parameterType="string" resultType="ComResponse">
   select * from company
@@ -79,11 +79,49 @@
     </set>
     where com_id = #{comId}
   </update>
-  <!-- 회사 삭제 -->
+  <!-- 회사 삭제 (연관 데이터가 전혀 없을 때만 호출됨) -->
   <delete id="delete" parameterType="long">
   delete from company
   where com_id = #{comId}
   </delete>
+  <!--
+    회사를 FK(com_id)로 직접 참조하는 테이블에 남아있는 행 수를 전부 더한 값.
+    0보다 크면 delete()는 FK 위반(ORA-02292 등)으로 실패하므로 대신 softDelete()를 쓴다.
+    새로운 모듈/테이블에 company FK가 추가되면 이 목록에도 함께 추가해야 한다.
+  -->
+  <select id="countRelatedData" parameterType="long" resultType="long">
+    SELECT
+        (SELECT COUNT(*) FROM department WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM employee WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM emp_position WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM authority WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM evaluation_period WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM notice WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM project WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM recruit WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM applicant WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM com_resource WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM reservation WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM task WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM dept_transfer_log WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM appr_form WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM appr_doc WHERE com_id = #{comId})
+      + (SELECT COUNT(*) FROM sal_plcy_doc WHERE com_id = #{comId})
+    AS cnt
+    FROM dual
+  </select>
+  <!-- 하위 데이터가 남아있어 완전 삭제 대신 비활성화 처리 -->
+  <update id="softDelete" parameterType="long">
+    update company
+    set com_status = 'INACTIVE'
+    where com_id = #{comId}
+  </update>
+  <!-- 비활성화된 회사를 다시 활성화 -->
+  <update id="reactivate" parameterType="long">
+    update company
+    set com_status = 'ACTIVE'
+    where com_id = #{comId}
+  </update>
   <!-- 회사 통계 -->
   <select id="selectStats" resultType="StatsComResponse">
 	SELECT 

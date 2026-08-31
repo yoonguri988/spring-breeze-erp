@@ -96,7 +96,8 @@
     "messages": {
       "updateSuccess": "회사 정보가 수정되었습니다.",
       "deleteSuccess": "회사가 삭제되었습니다.",
-      "deletePasswordInvalid": "비밀번호가 올바르지 않습니다."
+      "deletePasswordInvalid": "비밀번호가 올바르지 않습니다.",
+      "restoreSuccess": "회사를 다시 활성화했습니다."
     },
     "delete": {
       "modalTitle": "회사 삭제",
@@ -186,13 +187,19 @@
       "bizNo": "사업자번호",
       "industry": "업종",
       "empCount": "임직원 수",
+      "status": "상태",
       "actions": "관리"
+    },
+    "status": {
+      "active": "활성",
+      "inactive": "비활성"
     },
     "actionTitles": {
       "detail": "상세보기",
       "edit": "수정",
       "org": "조직도 보기",
-      "delete": "삭제"
+      "delete": "삭제",
+      "restore": "재활성화"
     },
     "emptyText": "등록된 회사가 없습니다.",
     "totalCountPrefix": "총",
@@ -201,10 +208,16 @@
       "modalTitle": "회사 삭제",
       "modalTitleWithName": "회사 삭제 — {{name}}",
       "confirmPrefix": "정말로 ",
-      "confirmSuffix": " 회사를 삭제하시겠습니까? 본인 확인을 위해 비밀번호를 입력해주세요.",
+      "confirmSuffix": " 회사를 삭제하시겠습니까? 연관된 데이터가 남아있으면 완전히 삭제하는 대신 비활성화 처리됩니다. 본인 확인을 위해 비밀번호를 입력해주세요.",
       "passwordLabel": "비밀번호",
       "passwordRequired": "비밀번호를 입력해주세요.",
       "okText": "삭제",
+      "cancelText": "취소"
+    },
+    "restore": {
+      "modalTitleWithName": "회사 재활성화 — {{name}}",
+      "confirmContent": "{{name}} 회사를 다시 활성 상태로 되돌리시겠습니까?",
+      "okText": "재활성화",
       "cancelText": "취소"
     }
   }

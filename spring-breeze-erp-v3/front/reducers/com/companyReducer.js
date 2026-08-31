@@ -7,6 +7,8 @@ import { createSlice } from "@reduxjs/toolkit";
 //  - GET    /api/com              : 회사 목록 조회 (list, paging)
 //  - PUT    /api/com/{comId}      : 회사 수정 (update)
 //  - DELETE /api/com/{comId}      : 회사 삭제 (delete, 비밀번호 확인)
+//                                    연관 데이터가 없으면 완전 삭제, 있으면 비활성화(soft delete)
+//  - PUT    /api/com/{comId}/restore : 비활성화된 회사 재활성화 (restore)
 //  - GET    /api/com/check-bizno  : 사업자번호 중복확인
 //  - GET    /api/com/suggest      : 회사명 자동완성
 //  - GET    /api/com/stats        : 회사 통계 조회
@@ -139,12 +141,50 @@ const companyReducer = createSlice({
       state.loading = false;
       state.success = true;
       state.message = action.payload?.message ?? "회사가 삭제되었습니다.";
-      // 목록에서 즉시 제거 (선택)
+      // 완전 삭제된 경우에만 목록에서 제거하고, 비활성화(softDeleted)된 경우엔
+      // 회사가 그대로 남아있으므로 목록의 상태값만 INACTIVE로 갱신한다.
       if (action.payload?.comId) {
-        state.list = state.list.filter((c) => c.comId !== action.payload.comId);
+        if (action.payload?.softDeleted) {
+          state.list = state.list.map((c) =>
+            c.comId === action.payload.comId
+              ? { ...c, comStatus: "INACTIVE" }
+              : c,
+          );
+        } else {
+          state.list = state.list.filter(
+            (c) => c.comId !== action.payload.comId,
+          );
+        }
       }
     },
     deleteCompanyFailure(state, action) {
+      state.loading = false;
+      state.success = false;
+      state.error = action.payload;
+    },
+
+    // ---------------------------------------------------
+    // 5-1) 회사 재활성화 PUT /api/com/{comId}/restore
+    // payload: comId
+    // ---------------------------------------------------
+    restoreCompanyRequest(state) {
+      state.loading = true;
+      state.error = null;
+      state.success = false;
+    },
+    restoreCompanySuccess(state, action) {
+      state.loading = false;
+      state.success = true;
+      state.message = action.payload?.message ?? "회사를 다시 활성화했습니다.";
+      if (action.payload?.comId) {
+        state.list = state.list.map((c) =>
+          c.comId === action.payload.comId
+            ? { ...c, comStatus: "ACTIVE" }
+            : c,
+        );
+      }
+    },
+    restoreCompanyFailure(state, action) {
       state.loading = false;
       state.success = false;
       state.error = action.payload;
@@ -256,6 +296,10 @@ export const {
   deleteCompanyRequest,
   deleteCompanySuccess,
   deleteCompanyFailure,
+
+  restoreCompanyRequest,
+  restoreCompanySuccess,
+  restoreCompanyFailure,
 
   checkBizNoRequest,
   checkBizNoSuccess,

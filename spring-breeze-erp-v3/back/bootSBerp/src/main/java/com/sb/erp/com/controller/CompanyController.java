@@ -142,31 +142,46 @@ public class CompanyController {
 	}
 
 	// 회사 삭제 DELETE /api/com/{comId}
-	@Operation(summary = "회사 삭제", description = "회사를 삭제합니다. 요청자 본인의 비밀번호 확인이 필요하며, ROOT 권한만 가능합니다.")
+	@Operation(summary = "회사 삭제", description = "회사를 삭제합니다. 요청자 본인의 비밀번호 확인이 필요하며, ROOT 권한만 가능합니다. "
+			+ "부서/직원/전자결재 등 연관 데이터가 전혀 없으면 완전히 삭제되고, 하나라도 남아있으면 비활성화(soft delete) 처리됩니다.")
 	@PreAuthorize("hasAuthority('ROOT')")
 	@DeleteMapping("/{comId}")
 	public ResponseEntity<?> delete(
 			@Parameter(description = "삭제할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId,
 			@Valid @RequestBody DeleteCompanyRequest request,
 			@Parameter(hidden = true) Authentication authentication) {
- 
+
 		Long empId = authUserJwtService.getCurrentEmpId(authentication);
 		EmpRequest dto = new EmpRequest();
 		dto.setEmpId(empId);
 		dto.setEmpPass(request.getPassword());
- 
+
 		boolean matched = empService.matchPassword(dto);
 		if (!matched) {
 			return ResponseEntity.badRequest().body(Map.of("message", "비밀번호가 올바르지 않습니다."));
 		}
- 
+
 		try {
-			service.delete(comId);
-			return ResponseEntity.ok(Map.of("message", "회사가 삭제되었습니다."));
+			boolean softDeleted = service.delete(comId);
+			if (softDeleted) {
+				return ResponseEntity.ok(Map.of(
+						"message", "연관된 데이터가 남아있어 회사를 완전히 삭제하는 대신 비활성화 처리했습니다.",
+						"softDeleted", true));
+			}
+			return ResponseEntity.ok(Map.of("message", "회사가 삭제되었습니다.", "softDeleted", false));
 		} catch (IllegalArgumentException e) {
-			// 하위 부서 존재 등 비즈니스 로직 검증 실패
 			return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
 		}
+	}
+
+	// 회사 재활성화(복구) PUT /api/com/{comId}/restore
+	@Operation(summary = "회사 재활성화", description = "비활성화(soft delete)된 회사를 다시 활성 상태로 되돌립니다. ROOT 권한만 가능합니다.")
+	@PreAuthorize("hasAuthority('ROOT')")
+	@PutMapping("/{comId}/restore")
+	public ResponseEntity<?> restore(
+			@Parameter(description = "재활성화할 회사 ID", example = "1", required = true) @PathVariable("comId") long comId) {
+		service.restore(comId);
+		return ResponseEntity.ok(Map.of("message", "회사를 다시 활성화했습니다."));
 	}
 
 	// 사업자 중복 체크 GET /api/com/check-bizno

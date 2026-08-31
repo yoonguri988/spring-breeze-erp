@@ -20,7 +20,12 @@ public interface CompanyService {
 
 	int update(long comId, ComRequest dto, MultipartFile logoFile);
 
-	public int delete(long comId);
+	// 연관 데이터가 없으면 완전 삭제(true 반환은 없음), 남아있으면 비활성화 처리 후 true 반환.
+	// 반환값: true = 비활성화(soft delete)됨 / false = 완전 삭제됨
+	public boolean delete(long comId);
+
+	// 비활성화된 회사를 다시 활성화
+	public void restore(long comId);
 
 	public List<ComResponse> getSuggest(String keyword);
 
