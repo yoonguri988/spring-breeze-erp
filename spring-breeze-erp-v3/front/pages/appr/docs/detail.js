@@ -454,7 +454,7 @@ export default function DocDetailPage() {
             {(canEdit && !isEditing) || canProcess || ((isDrafter || isLineOwner) && myLine) ? (
                 <div style={{display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 24}}>
                     {canEdit && !isEditing && (                
-                            <Button onClick={startEdit}>수정</Button>
+                            <Button onClick={startEdit}>{t("docs.detail.editBtn")}</Button>
                         )}
                     {(isDrafter || isLineOwner) && myLine && (
                         <Button onClick={() => setDelegModalOpen(true)}>
