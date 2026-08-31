@@ -92,5 +92,10 @@
       "title": "오류가 발생했습니다 ({{code}})",
       "desc": "요청을 처리하는 중 문제가 발생했습니다."
     }
+  },
+  "employeePicker": {
+    "placeholder": "사원 이름으로 검색",
+    "notFoundContent": "검색 결과가 없습니다",
+    "optionLabel": "{{empName}} · {{deptName}} · {{posName}} ({{empNo}})"
   }
 }

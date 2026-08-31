@@ -92,5 +92,10 @@
       "title": "An error occurred ({{code}})",
       "desc": "Something went wrong while processing your request."
     }
+  },
+  "employeePicker": {
+    "placeholder": "Search by employee name",
+    "notFoundContent": "No results found",
+    "optionLabel": "{{empName}} · {{deptName}} · {{posName}} ({{empNo}})"
   }
 }

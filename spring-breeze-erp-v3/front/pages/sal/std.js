@@ -32,7 +32,7 @@ import {
   deleteSalStdRequest,
   resetSalStdState,
 } from "../../reducers/sal/salStdReducer";
-import EmployeePicker from "../../components/sal/EmployeePicker";
+import EmployeePicker from "../../components/EmployeePicker";
 import { formatWon, wonFormatter, wonParser } from "../../utils/currency";
 
 export default function SalStdListPage() {

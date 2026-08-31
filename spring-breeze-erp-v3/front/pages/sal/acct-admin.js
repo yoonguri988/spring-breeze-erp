@@ -22,7 +22,7 @@ import {
   resetSalAcctState,
   clearAdminAcct,
 } from "../../reducers/sal/salAcctReducer";
-import EmployeePicker from "../../components/sal/EmployeePicker";
+import EmployeePicker from "../../components/EmployeePicker";
 
 export default function SalAcctAdminPage() {
   const dispatch = useDispatch();
