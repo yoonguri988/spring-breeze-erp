@@ -1,6 +1,7 @@
 {
   "appName": "SBerp 통합 ERP 시스템",
   "brand": "SBerp",
+  "breadcrumbRoot": "홈",
   "dashboardComingSoon": "대시보드 화면은 준비 중입니다.",
   "button": {
     "save": "저장",

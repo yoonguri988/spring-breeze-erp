@@ -53,6 +53,10 @@ export default function DeptEditPage() {
     success,
     pendingTransfer,
   } = useSelector((state) => state.dept);
+  const { user } = useSelector((state) => state.auth);
+  const isAdmin = Boolean(
+    user?.roles?.includes("ROLE_ADMIN") || user?.roles?.includes("ROOT"),
+  );
 
   const deptId = router.query.deptId ? String(router.query.deptId) : "";
   const comId = router.query.comId
@@ -274,6 +278,34 @@ export default function DeptEditPage() {
     if (status === "퇴직") return "sb-badge sb-badge--cyan";
     return "sb-badge sb-badge--gray";
   };
+
+  // 부서 수정/삭제는 관리자(ROLE_ADMIN/ROOT)만 가능하도록 프론트에서도 접근을 막는다.
+  // (실제 권한 검증은 백엔드에서 최종적으로 수행됨)
+  if (router.isReady && !isAdmin) {
+    return (
+      <div className="sb-content">
+        <div className="sb-page-head">
+          <div className="sb-page-head__txt">
+            <div className="sb-breadcrumb">
+              <Link href="/">{t("edit.breadcrumbHome")}</Link> <RightOutlined />{" "}
+              <Link href="/dept/list">{t("edit.breadcrumbList")}</Link>{" "}
+              <RightOutlined /> {t("edit.breadcrumbEdit")}
+            </div>
+            <h1>{t("edit.title")}</h1>
+          </div>
+        </div>
+        <div className="sb-card">
+          <div className="sb-empty">
+            <ExclamationCircleOutlined style={{ fontSize: 34, opacity: 0.5 }} />
+            <p>{t("edit.accessDenied.message")}</p>
+            <Link href="/dept/list">
+              <Button className="mt-2">{t("edit.accessDenied.backBtn")}</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (router.isReady && !dept && !loading) {
     return (

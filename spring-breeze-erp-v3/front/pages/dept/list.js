@@ -35,6 +35,9 @@ export default function DeptListPage() {
   const { t } = useTranslation(["dept", "common"]);
 
   const { user } = useSelector((state) => state.auth);
+  const isAdmin = Boolean(
+    user?.roles?.includes("ROLE_ADMIN") || user?.roles?.includes("ROOT"),
+  );
   const { list: companies } = useSelector((state) => state.company);
   const {
     flatList: depts,
@@ -257,11 +260,13 @@ export default function DeptListPage() {
             {t("list.resultCount", { count: filteredRows.length })}
           </span>
 
-          <Link href={{ pathname: "/dept/add", query: comId ? { comId } : {} }}>
-            <Button type="primary" icon={<PlusOutlined />}>
-              {t("list.addBtn")}
-            </Button>
-          </Link>
+          {isAdmin && (
+            <Link href={{ pathname: "/dept/add", query: comId ? { comId } : {} }}>
+              <Button type="primary" icon={<PlusOutlined />}>
+                {t("list.addBtn")}
+              </Button>
+            </Link>
+          )}
         </div>
 
         <div className="sb-card__body--flush">
@@ -363,29 +368,33 @@ export default function DeptListPage() {
                             <BookOutlined />
                           </button>
                         </Link>
-                        <Link
-                          href={{
-                            pathname: "/dept/edit",
-                            query: { deptId: d.deptId, comId },
-                          }}
-                        >
+                        {isAdmin && (
+                          <Link
+                            href={{
+                              pathname: "/dept/edit",
+                              query: { deptId: d.deptId, comId },
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className="sb-iconbtn"
+                              title={t("list.editTooltip")}
+                            >
+                              <EditOutlined />
+                            </button>
+                          </Link>
+                        )}
+                        {isAdmin && (
                           <button
                             type="button"
                             className="sb-iconbtn"
-                            title={t("list.editTooltip")}
+                            style={{ color: "var(--sb-red)" }}
+                            title={t("list.deleteTooltip")}
+                            onClick={() => openDelete(d)}
                           >
-                            <EditOutlined />
+                            <DeleteOutlined />
                           </button>
-                        </Link>
-                        <button
-                          type="button"
-                          className="sb-iconbtn"
-                          style={{ color: "var(--sb-red)" }}
-                          title={t("list.deleteTooltip")}
-                          onClick={() => openDelete(d)}
-                        >
-                          <DeleteOutlined />
-                        </button>
+                        )}
                       </div>
                     </td>
                   </tr>

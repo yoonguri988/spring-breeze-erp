@@ -1,6 +1,7 @@
 {
   "appName": "SBerp Integrated ERP System",
   "brand": "SBerp",
+  "breadcrumbRoot": "Home",
   "dashboardComingSoon": "The dashboard screen is under construction.",
   "button": {
     "save": "Save",

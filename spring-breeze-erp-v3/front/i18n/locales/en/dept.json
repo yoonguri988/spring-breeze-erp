@@ -39,6 +39,7 @@
     "detailTooltip": "View Details",
     "editTooltip": "Edit",
     "deleteTooltip": "Delete",
+    "noPermissionTooltip": "Administrators only.",
     "footerSummary": "A total of {{count}} departments are shown, structured as a tree based on",
     "footerHierLabel": "Parent Department",
     "footerNote": ".",
@@ -77,7 +78,12 @@
     "leaderHint": "The department head can be assigned on the Edit Department screen after registration.",
     "submitBtn": "Register",
     "successMsg": "The department has been registered.",
-    "noComError": "No company information found. Please re-enter from the list screen."
+    "noComError": "No company information found. Please re-enter from the list screen.",
+    "accessDenied": {
+      "title": "Access Denied",
+      "message": "Only administrators can register departments.",
+      "backBtn": "Back to List"
+    }
   },
   "edit": {
     "breadcrumbHome": "Home",
@@ -133,7 +139,12 @@
     "saveBtn": "Save Changes",
     "saveSuccessMsg": "Your changes have been saved.",
     "deleteSuccessMsg": "The department has been deleted.",
-    "transferRequiredMsg": "Employees must be transferred to another department."
+    "transferRequiredMsg": "Employees must be transferred to another department.",
+    "accessDenied": {
+      "title": "Access Denied",
+      "message": "Only administrators can edit or delete departments.",
+      "backBtn": "Back to List"
+    }
   },
   "detail": {
     "breadcrumbHome": "Home",
