@@ -141,7 +141,8 @@ public class ReservationController {
 
     // 자원 예약 수정 PUT /api/resv/{revId}
     // 본인 예약만 수정 가능 (관리자라도 타인 예약 내용을 대신 수정하지 않음)
-    @Operation(summary = "자원 예약 수정", description = "본인 예약의 수량/기간 등을 수정합니다.")
+    // 예약 가능 수량 검증은 ReservationServiceImpl.update()에서 처리 (자기 자신은 제외하고 계산)
+    @Operation(summary = "자원 예약 수정", description = "본인 예약의 수량/기간 등을 수정합니다. 자원 상태와 기간별 예약 가능 수량을 검증합니다.")
     @PutMapping("/{revId}")
     public ResponseEntity<Map<String, Object>> update(
             @Parameter(description = "수정할 예약 ID", example = "1", required = true) @PathVariable("revId") long revId,
@@ -160,17 +161,31 @@ public class ReservationController {
         resvDto.setRevId(revId);
         resvDto.setEmpId(myEmpId);
         resvDto.setComId(existing.getComId());
+        resvDto.setResId(existing.getResId()); // 예약 자원은 수정 화면에서 변경 불가 - 클라이언트 값 대신 기존 값을 신뢰
 
-        int updated = service.update(resvDto);
-        if (updated > 0) {
-            result.put("success", true);
-            result.put("message", "예약 수정 성공");
-            return ResponseEntity.ok(result);
+        try {
+            int updated = service.update(resvDto);
+            if (updated > 0) {
+                result.put("success", true);
+                result.put("message", "예약 수정 성공");
+                return ResponseEntity.ok(result);
+            }
+
+            result.put("success", false);
+            result.put("message", "예약 수정 실패");
+            return ResponseEntity.internalServerError().body(result);
+        } catch (IllegalStateException e) {
+            // 예: "해당 기간에 예약 가능한 수량이 부족합니다. (남은 수량: 2개)"
+            result.put("success", false);
+            result.put("reason", "notEnoughQuantity");
+            result.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(result);
+        } catch (IllegalArgumentException e) {
+            result.put("success", false);
+            result.put("reason", "invalidResource");
+            result.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(result);
         }
-
-        result.put("success", false);
-        result.put("message", "예약 수정 실패");
-        return ResponseEntity.internalServerError().body(result);
     }
 
     // 자원 예약 취소 DELETE /api/resv/{revId}

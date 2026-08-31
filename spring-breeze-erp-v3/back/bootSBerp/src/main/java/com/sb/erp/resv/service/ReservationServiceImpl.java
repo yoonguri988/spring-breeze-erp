@@ -64,8 +64,30 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public int update(ResvRequest ResvDto) {
-    	return dao.update(ResvDto);
+    public int update(ResvRequest dto) {
+        ResResponse res = resDao.selectResourceDetail(dto.getResId());
+        if (res == null || !res.getComId().equals(dto.getComId())) {
+            throw new IllegalArgumentException("본인 회사의 자원만 예약할 수 있습니다.");
+        }
+
+        ResvSearchRequest search = new ResvSearchRequest();
+        search.setResId(dto.getResId());
+        search.setStartDt(dto.getStartDt());
+        search.setEndDt(dto.getEndDt());
+        // 수정 대상 예약 자신은 잔여수량 계산에서 제외해야, 기존 수량을 유지/축소하는
+        // 정상적인 수정까지 "수량 부족"으로 막히지 않는다.
+        search.setExcludeRevId(dto.getRevId());
+
+        // 같은 기간에 이미 예약된(자기 자신 제외) 수량 합계 조회
+        long reservedQty = dao.selectReservedQuantity(search);
+        long available = res.getQuantity() - reservedQty;
+
+        if (dto.getQuantity() > available) {
+            throw new IllegalStateException(
+                "해당 기간에 예약 가능한 수량이 부족합니다. (남은 수량: " + available + "개)");
+        }
+
+        return dao.update(dto);
     }
 
     @Override

@@ -57,6 +57,7 @@
     "remarkLabel": "신청 사유",
     "remarkPlaceholder": "사용 목적이나 요청 사항을 입력하세요",
     "endBeforeStart": "종료 일시는 시작 일시 이후여야 합니다.",
+    "noAvailableQuantity": "해당 기간에는 예약 가능한 수량이 없습니다.",
     "saveButton": "수정 저장",
     "updateSuccess": "예약이 수정되었습니다."
   },

@@ -57,6 +57,7 @@
     "remarkLabel": "Reason for Request",
     "remarkPlaceholder": "Enter the purpose of use or any requests",
     "endBeforeStart": "The end date/time must be after the start date/time.",
+    "noAvailableQuantity": "There is no available quantity for that period.",
     "saveButton": "Save Changes",
     "updateSuccess": "The reservation has been updated."
   },

@@ -70,7 +70,8 @@
     <select id="selectById" parameterType="long" resultType="ResvResponse">
         SELECT
             rv.*,
-            r.res_name, r.res_code, r.res_type, r.location, 
+            r.res_name, r.res_code, r.res_type, r.location,
+            r.quantity AS resQuantity, r.capacity, r.res_status AS resStatus,
             e.emp_name, d.dept_name, ap.emp_name AS approvedEmpName
         FROM reservation rv
         JOIN com_resource r ON rv.res_id = r.res_id
@@ -212,12 +213,17 @@
 	</update>
 	<!-- 자동 미반납 처리 -->
 	<update id="updateEquipmentNoReturn">
-        UPDATE reservation
-           SET status     = 'NORET',
-               updated_at = SYSDATE
-         WHERE status = 'APP'
-           AND return_dt IS NULL
-           AND end_dt <![CDATA[<]]> SYSTIMESTAMP
+        UPDATE reservation r
+           SET r.status     = 'NORET',
+               r.updated_at = SYSDATE
+         WHERE r.status = 'APP'
+           AND r.return_dt IS NULL
+           AND r.end_dt <![CDATA[<]]> SYSTIMESTAMP
+           AND EXISTS (
+		       SELECT 1 FROM com_resource res
+		        WHERE res.res_id = r.res_id
+		          AND res.res_type IN ('VEHICLE','EQUIPMENT')
+		   )
     </update>
     <!-- 반려(REJ) 예약 이력 정리 -->
     <delete id="deleteRejectedByResourceId" parameterType="long">

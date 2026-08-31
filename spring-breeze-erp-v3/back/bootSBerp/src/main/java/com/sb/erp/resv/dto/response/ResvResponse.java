@@ -37,6 +37,9 @@ public class ResvResponse {
 	private String resCode;
 	private String resType;
 	private String location;
+	private Long resQuantity;
+	private Long capacity;
+	private String resStatus;
 
 	private String empName;
 	private String deptName;
@@ -63,6 +66,9 @@ public class ResvResponse {
 		this.resCode = reservation.getResource().getResCode();
 		this.resType = reservation.getResource().getResType();
 		this.location = reservation.getResource().getLocation();
+		this.resQuantity = reservation.getResource().getQuantity();
+		this.capacity = reservation.getResource().getCapacity();
+		this.resStatus = reservation.getResource().getResStatus();
 
 		this.empName = reservation.getEmployee().getEmpName();
 		this.deptName = reservation.getEmployee().getDepartment() != null

@@ -52,7 +52,9 @@ const NAV = [
         page: "salpolicylist",
         href: "/sal/policy",
         icon: "bi-sliders2",
-        role: "ROLE_ADMIN",
+        // 4대보험요율/소득세구간표 등록은 ROOT 전용이라, ROLE_ADMIN만 걸어두면
+        // ROOT 단독 계정은 이 메뉴 자체를 볼 수 없어 등록 화면에 진입할 방법이 없다.
+        role: ["ROOT", "ROLE_ADMIN"],
       },
       {
         page: "salaidocadmin",
@@ -277,11 +279,14 @@ function hasRole(user, role) {
   return Boolean(user?.roles?.includes(role));
 }
 
+// role은 문자열(단일 권한) 또는 배열(OR 조건, 백엔드 hasAnyAuthority에 대응)을 받는다.
+// 예: 급여정책 화면은 백엔드가 조회를 hasAnyAuthority('ROOT','ROLE_ADMIN')로 열어두므로
+// 메뉴 노출도 role: ["ROOT", "ROLE_ADMIN"]처럼 배열로 지정해야 ROOT 단독 계정도
+// 진입 메뉴를 볼 수 있다. 단일 role만 넣으면 그 권한을 정확히 가진 계정만 통과한다.
 function canShow(role, user) {
   if (!role) return true;
-  if (role === "ROOT") return hasRole(user, "ROOT");
-  if (role === "ROLE_ADMIN") return hasRole(user, "ROLE_ADMIN");
-  return true;
+  const roles = Array.isArray(role) ? role : [role];
+  return roles.some((r) => hasRole(user, r));
 }
 
 export default function Sidebar() {

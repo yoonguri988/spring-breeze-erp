@@ -98,15 +98,18 @@ public class ApiScheduled {
 		int updated = resDao.updateEquipmentNoReturn();
 		if (updated > 0) {
 			log.info("장비 예약 자동 미반납 처리 완료 - {}건 NORET 전환", updated);
+		} else {
+			log.info("장비 예약 자동 미반납 처리 건수 미존재");			
 		}
 	}
 	
 	// 운영 시 트래픽/AI 호출 비용을 고려해 주기 조정 가능 (여기서는 1분마다)
-	//@Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
+	@Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
 	public void noShowAutoAlert() {
 		List<ResvAlertResponse> targets = resDao.selectNoShowTargets();
  
 		if (targets.isEmpty()) {
+			log.info("노쇼/반납지연 알림대상 미존재");
 			return;
 		}
  
