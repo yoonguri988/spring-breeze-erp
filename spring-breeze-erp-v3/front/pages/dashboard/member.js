@@ -27,7 +27,7 @@ function StatCard({ icon, label, value}) {
 export default function Home() {
     const router = useRouter();
     const dispatch = useDispatch();
-    const { t } = useTranslation(["common", "appr"]);
+    const { t, i18n } = useTranslation(["dashboard", "common", "appr"]);
 
     const { user, accessToken } = useSelector((state) => state.auth);
     const { writerInfo } = useSelector((state) => state.apprDoc);
@@ -75,24 +75,24 @@ export default function Home() {
     } = summary;
 
     const attStatusText = !todayAttendance
-        ? "미출근"
+        ? t("member.attStatus.absent")
         : todayAttendance.checkOut
-            ? "퇴근 완료"
-            : "출근중";
+            ? t("member.attStatus.done")
+            : t("member.attStatus.working");
 
     const todoDocColumns = [
-        { title: "문서번호", dataIndex: "docId", key: "docId", width: 90 },
-        { title: "제목", dataIndex: "docTitle", key: "docTitle", width: 180, ellipsis: true },
-        { title: "기안자", dataIndex: "empName", key: "empName", width: 100 },
+        { title: t("member.todoDoc.docId"), dataIndex: "docId", key: "docId", width: 90 },
+        { title: t("member.todoDoc.docTitle"), dataIndex: "docTitle", key: "docTitle", width: 180, ellipsis: true },
+        { title: t("member.todoDoc.empName"), dataIndex: "empName", key: "empName", width: 100 },
         {
-            title: "상태", dataIndex: "docStatus", key: "docStatus", width: 90,
+            title: t("member.todoDoc.docStatus"), dataIndex: "docStatus", key: "docStatus", width: 90,
             render: (status) => <StatusBadge domain="doc" status={status} />,
         },
         {
             title: "", key: "action", width: 90,
             render: (_, record) => (
                 <Button size="small" onClick={() => router.push(`/appr/docs/detail?docId=${record.docId}`)}>
-                    결재하기
+                    {t("member.todoDoc.approveBtn")}
                 </Button>
             ),
         },
@@ -103,13 +103,13 @@ export default function Home() {
             {/* 인사말 헤더 */}
             <div className="sb-page-head">
                 <div className="sb-page-head__txt">
-                    <h1>안녕하세요, <b>{user?.empName}</b>님</h1>
+                    <h1>{t("member.greeting", { empName: user?.empName })}</h1>
                     <p>{writerInfo?.deptName} · {user?.posName} · {user?.comName}</p>
                 </div>
                 <div className="sb-page-head__actions">
                     <span className="sb-badge sb-badge--blue">
                         <i className="bi bi-calendar3"/>
-                        {moment().format("YYYY년 MM월 DD일 (ddd)")}
+                        {moment().format(i18n.language === "en" ? "MMM D, YYYY (ddd)" : "YYYY년 MM월 DD일 (ddd)")}
                     </span>
                 </div>
             </div>
@@ -132,15 +132,18 @@ export default function Home() {
                         <i className="bi bi-clipboard-data" style={{fontSize: 22}}/>
                         <div>
                             <div style={{fontWeight: 700}}>
-                                {evalProgress.periodName} 정기평가 <span className="sb-badge" style={{marginLeft: 6}}>진행중</span>
+                                {evalProgress.periodName} {t("member.evalOpen.titleSuffix")} <span className="sb-badge" style={{marginLeft: 6}}>{t("member.evalOpen.inProgressBadge")}</span>
                             </div>
                             <div style={{fontSize: 13, opacity: 0.85}}>
-                                평가 진행률 {evalProgress.submittedCount} / {evalProgress.totalCount}건 제출
+                                {t("member.evalOpen.progressText", {
+                                    submittedCount: evalProgress.submittedCount,
+                                    totalCount: evalProgress.totalCount,
+                                })}
                             </div>
                         </div>
                     </div>
                     <Button onClick={() => router.push(`/eval/period/${evalProgress.periodId}`)}>
-                        평가하러 가기
+                        {t("member.evalOpen.goToEvalBtn")}
                     </Button>
                 </div>
             )}
@@ -149,29 +152,29 @@ export default function Home() {
                 <Col xs={24} sm={12} md={6}>
                     <StatCard
                         icon="bi-file-earmark-text"
-                        label="결재 대기"
-                        value={`${todoDocCnt}건`}
+                        label={t("member.stats.pendingApproval")}
+                        value={t("member.stats.unitCase", { count: todoDocCnt })}
                     />
                 </Col>
                 <Col xs={24} sm={12} md={6}>
                     <StatCard
                         icon="bi-calendar-check"
-                        label="잔여 연차"
-                        value={leaveBalance ? `${leaveBalance.remainingDays}일`: "-"}
+                        label={t("member.stats.leaveRemaining")}
+                        value={leaveBalance ? t("member.stats.unitDay", { count: leaveBalance.remainingDays }) : t("member.stats.noData")}
                     />
                 </Col>
                 <Col xs={24} sm={12} md={6}>
                     <StatCard
                         icon="bi-clock"
-                        label="오늘 근태"
+                        label={t("member.stats.todayAtt")}
                         value={attStatusText}
                     />
                 </Col>
                 <Col xs={24} sm={12} md={6}>
                     <StatCard
                         icon="bi-kanban"
-                        label="진행중 프로젝트"
-                        value={`${myProjects?.length ?? 0}건`}
+                        label={t("member.stats.myProjects")}
+                        value={t("member.stats.unitCase", { count: myProjects?.length ?? 0 })}
                     />
                 </Col>
             </Row>
@@ -181,12 +184,12 @@ export default function Home() {
                 <Col xs={24} md={12}>
                     <div className="sb-card equal-height-card">
                         <div className="sb-card__head">
-                            <h2>결재 대기함</h2>
+                            <h2>{t("member.pendingBoxHead")}</h2>
                             <Button
                                 size="small"
                                 onClick={() => router.push("/appr/docs?tab=todo")}
                             >
-                                전체보기
+                                {t("member.viewAll")}
                             </Button>
                         </div>
                         <div className="sb-card__body">
@@ -197,7 +200,7 @@ export default function Home() {
                                 pagination={false}
                                 size="small"
                                 scroll={{ y: 240 }}
-                                locale={{emptyText: "결재 대기중인 문서가 없습니다."}}
+                                locale={{emptyText: t("member.pendingEmptyMsg")}}
                             />
                         </div>
                     </div>
@@ -206,17 +209,17 @@ export default function Home() {
                 <Col xs={24} md={12}>
                     <div className="sb-card equal-height-card">
                         <div className="sb-card__head">
-                            <h2>공지사항</h2>
+                            <h2>{t("member.noticeHead")}</h2>
                             <Button
                                 size="small"
                                 onClick={() => router.push("/notice/list")}
                             >
-                                더보기
+                                {t("member.moreBtn")}
                             </Button>
                         </div>
                         <div className="sb-card__body scrollable-timeline">
                             {(!recentNotices || recentNotices.length === 0) ? (
-                                <Empty description="등록된 공지가 없습니다."/>
+                                <Empty description={t("member.noticeEmptyMsg")}/>
                             ) : (
                                 recentNotices.map((n) => (
                                     <div
@@ -238,21 +241,21 @@ export default function Home() {
                             )}
                         </div>
                     </div>
-                </Col>  
+                </Col>
             </Row>
 
             <Row gutter={16}>
                 <Col xs={24} md={12}>
                     <div className="sb-card equal-height-card">
                         <div className="sb-card__head">
-                            <h2>내 프로젝트</h2>
+                            <h2>{t("member.myProjectHead")}</h2>
                             <Button size="small" onClick={() => router.push("/proj/proj_list")}>
-                                전체보기
+                                {t("member.viewAll")}
                             </Button>
                         </div>
                         <div className="sb-card__body scrollable-timeline">
                             {(!myProjects || myProjects.length === 0) ? (
-                                <Empty description="참여중인 프로젝트가 없습니다."/>
+                                <Empty description={t("member.myProjectEmptyMsg")}/>
                             ) : (
                                 myProjects.map((p) => (
                                     <div key={p.proId} style={{marginBottom: 16}}>
@@ -286,17 +289,17 @@ export default function Home() {
                 <Col xs={24} md={12}>
                     <div className="sb-card equal-height-card">
                         <div className="sb-card__head">
-                            <h2>내 자원예약</h2>
+                            <h2>{t("member.myReservationHead")}</h2>
                             <Button
                                 size="small"
                                 onClick={() => router.push("/resv/my")}
                             >
-                                더보기
+                                {t("member.moreBtn")}
                             </Button>
                         </div>
                         <div className="sb-card__body scrollable-timeline">
                             {(!myReservations || myReservations.length === 0) ? (
-                                <Empty description="최근 신청한 예약이 없습니다."/>
+                                <Empty description={t("member.reservationEmptyMsg")}/>
                             ) : (
                                 myReservations.map((r) => (
                                     <div
@@ -318,9 +321,9 @@ export default function Home() {
                                         <span className={`sb-badge ${r.status === "APP"
                                             ? "sb-badge--green" : r.status === "WAI"
                                             ? "sb-badge--amber" : "sb-badge--gray"}`}>
-                                                {r.status === "APP" ? "승인" : r.status === "WAI" ? "대기" : r.status}
+                                                {r.status === "APP" ? t("member.resvStatus.APP") : r.status === "WAI" ? t("member.resvStatus.WAI") : r.status}
                                         </span>
-                                    </div> 
+                                    </div>
                                 ))
                             )}
                         </div>
@@ -329,4 +332,4 @@ export default function Home() {
             </Row>
         </div>
     );
-}   
+}
