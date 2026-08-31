@@ -26,7 +26,7 @@ export default function LoginPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { t } = useTranslation("auth");
-  const { loading, error, success, accessToken } = useSelector(
+  const { loading, error, success, accessToken, user } = useSelector(
     (state) => state.auth,
   );
 
@@ -63,7 +63,13 @@ export default function LoginPage() {
   useEffect(() => {
     if (prevLoading.current && !loading && !error) {
       if (section === "login" && accessToken) {
-        router.replace("/");
+        // 임시 비밀번호(사번)로 로그인한 첫 로그인 상태라면 바로 메인으로 보내지 않고
+        // 비밀번호 변경 화면으로 강제 이동시킨다(백엔드 JwtAuthenticationFilter도 동일하게 가드).
+        if (user?.pwdChangeRequired) {
+          router.replace("/auth/changePass");
+        } else {
+          router.replace("/");
+        }
       } else if (section === "forgot" && success) {
         setEmailSent(true);
       }

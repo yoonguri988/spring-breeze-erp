@@ -31,8 +31,12 @@ function AppLayout({ children }) {
     if (!initialized) return;
     if (!accessToken) {
       router.replace("/auth/login");
+    } else if (user?.pwdChangeRequired) {
+      // 임시 비밀번호(사번) 상태로는 어떤 화면도 볼 수 없고 비밀번호 변경 화면으로만 이동 가능.
+      // (새로고침/URL 직접 이동으로 이 가드를 우회해도 백엔드 JwtAuthenticationFilter가 API 호출을 막는다.)
+      router.replace("/auth/changePass");
     }
-  }, [initialized, accessToken, router]);
+  }, [initialized, accessToken, user, router]);
 
   const toggleLayout = () => {
     setLayoutMode((cur) => {
@@ -51,8 +55,9 @@ function AppLayout({ children }) {
   const showHrAiChat = hrAiChatPaths.some((p) => router.pathname.startsWith(p));  
 
   // 아직 loadUser(쿠키 → accessToken 복원)가 끝나지 않았거나(initialized===false),
-  // 끝났는데도 accessToken이 없는 경우(리다이렉트 대상) 모두 레이아웃을 그리지 않는다.
-  if (!initialized || !accessToken) {
+  // 끝났는데도 accessToken이 없거나(리다이렉트 대상) 비밀번호 변경이 강제된 상태라면
+  // 모두 레이아웃을 그리지 않는다(화면이 잠깐이라도 보이는 것을 방지).
+  if (!initialized || !accessToken || user?.pwdChangeRequired) {
     return null;
   }
 

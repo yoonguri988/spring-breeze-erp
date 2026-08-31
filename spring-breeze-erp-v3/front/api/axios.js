@@ -52,6 +52,19 @@ api.interceptors.response.use(
     const original = error.config; // 원래 요청 정보
     const status = error.response?.status; // 응답 상태 코드
 
+    // 비밀번호가 아직 사번(임시 비밀번호) 상태 → JwtAuthenticationFilter가 /auth/** 외 모든
+    // API를 403(PWD_CHANGE_REQUIRED)으로 막는다. 새로고침/직접 URL 이동 등으로
+    // AppLayout의 가드를 놓친 화면에서도 여기서 한 번 더 강제 이동시킨다.
+    if (
+      status === 403 &&
+      error.response?.data?.error === "PWD_CHANGE_REQUIRED" &&
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/auth/changePass"
+    ) {
+      window.location.href = "/auth/changePass";
+      return Promise.reject(error);
+    }
+
     // refresh 요청 자체가 실패한 경우 → 재귀 방지, 즉시 로그아웃 처리
     if (original?.url?.includes("/auth/refresh")) {
       if (typeof window !== "undefined") {
