@@ -7,6 +7,7 @@ import { Row, Col, Card, Button, Tag, Avatar, message } from "antd";
 import { PlusOutlined, CloseOutlined, ArrowLeftOutlined, SafetyCertificateOutlined, } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
+import { detailEmpRequest } from "../../reducers/emp/empReducer";
 import {
   listPermRequest, empAuthListRequest, grantPermRequest,
   revokePermRequest, clearEmpAuth, resetPermState,
@@ -35,6 +36,7 @@ export default function EmpAuthPage() {
   // ─── 데이터 로드 ───
   useEffect(() => {
     if (!empId) return;
+    dispatch(detailEmpRequest(Number(empId)));
     dispatch(listPermRequest()); // 전체 권한 목록 (부여 가능 목록용)
     dispatch(empAuthListRequest(Number(empId))); // 사원의 현재 권한
 

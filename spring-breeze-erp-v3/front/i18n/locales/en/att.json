@@ -160,9 +160,9 @@
     "LATE": "Late",
     "EARLY_LEAVE": "Early Leave",
     "ABSENT": "Absent",
-    "HALF_DAY_AM": "AM Half Day",
-    "HALF_DAY_PM": "PM Half Day",
-    "ANNUAL_LEAVE": "Annual Leave"
+    "AM_HALF": "AM Half Day",
+    "PM_HALF": "PM Half Day",
+    "ANNUAL": "Annual Leave"
   },
 
   "msg": {

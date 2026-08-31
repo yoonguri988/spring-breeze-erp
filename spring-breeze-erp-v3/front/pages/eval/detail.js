@@ -3,11 +3,13 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Card, Descriptions, Tag, Button } from "antd";
+import { Card, Descriptions, Tag, Button, message } from "antd";
 import { ArrowLeftOutlined, EditOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
-import { detailEvalRequest, clearEvalDetail, } from "../../reducers/eval/evalReducer";
+import { 
+  detailEvalRequest, clearEvalDetail, resetEvalState, 
+} from "../../reducers/eval/evalReducer";
 
 export default function EvalDetailPage() {
   const router = useRouter();
@@ -27,7 +29,7 @@ export default function EvalDetailPage() {
     scoreGrowth: t("common.scoreLabel.growth"),
   };
 
-  const { currentEval, loading } = useSelector((state) => state.eval);
+  const { currentEval, loading, error } = useSelector((state) => state.eval);
 
   useEffect(() => {
     if (!evalId) return;
@@ -35,6 +37,10 @@ export default function EvalDetailPage() {
 
     return () => { dispatch(clearEvalDetail()); }
   }, [dispatch, evalId]);
+
+  useEffect(() => {
+    if (error) { message.error(error); dispatch(resetEvalState()); }
+  }, [error]);
 
   const e = currentEval;
   const st = STATUS_TAG[e?.evalStatus] || { color: "default", label: e?.evalStatus };

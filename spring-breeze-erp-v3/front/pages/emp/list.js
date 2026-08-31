@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Card, Table, Select, Input, Button, Tag, Avatar, Pagination, } from "antd";
+import { Card, Table, Select, Input, Button, Tag, Avatar, Pagination, message, } from "antd";
 import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
@@ -30,7 +30,7 @@ export default function EmpListPage() {
     { value: "퇴직", label: t("common:empStatus.retired") },
   ];
 
-  const { empList, paging, loading } = useSelector((state) => state.emp);
+  const { empList, paging, loading, error } = useSelector((state) => state.emp);
   const { posList } = useSelector((state) => state.pos);
 
   // 로그인 사용자 정보 (관리자 여부, 본인 ID)
@@ -50,6 +50,10 @@ export default function EmpListPage() {
     dispatch(listPosRequest());
     return () => { dispatch(resetEmpState()); }
   }, [dispatch]);
+
+  useEffect(() => {
+    if (error) { message.error(error); dispatch(resetEmpState()); }
+  }, [error]);
 
   // URL 쿼리 → 필터 동기화 → 목록 조회
   useEffect(() => {

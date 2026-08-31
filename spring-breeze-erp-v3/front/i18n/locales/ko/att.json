@@ -160,9 +160,9 @@
     "LATE": "지각",
     "EARLY_LEAVE": "조퇴",
     "ABSENT": "결근",
-    "HALF_DAY_AM": "오전 반차",
-    "HALF_DAY_PM": "오후 반차",
-    "ANNUAL_LEAVE": "연차"
+    "AM_HALF": "오전 반차",
+    "PM_HALF": "오후 반차",
+    "ANNUAL": "연차"
   },
 
   "msg": {

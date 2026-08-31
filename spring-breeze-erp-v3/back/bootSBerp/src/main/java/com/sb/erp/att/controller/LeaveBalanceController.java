@@ -73,11 +73,12 @@ public class LeaveBalanceController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/balance")
     public ResponseEntity<?> allBalances(
-            @Parameter(description = "조회 연도 (예: 2026)")
+            Authentication auth,
             @RequestParam("year") Integer year,
             @RequestParam(name = "keyword", required = false) String keyword) {
 
-        List<LeaveBalanceResponse> list = leaveBalanceService.getAllBalances(year, keyword);
+        Long comId = authUserJwtService.getCurrentComId(auth);
+        List<LeaveBalanceResponse> list = leaveBalanceService.getAllBalances(comId, year, keyword);
         return ResponseEntity.ok(list);
     }
 
