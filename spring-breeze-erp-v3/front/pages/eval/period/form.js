@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card, Form, Input, InputNumber, Select, DatePicker, Button, message } from "antd";
 import { ArrowLeftOutlined, CheckOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import dayjs from "dayjs";
+import moment from "moment";
 
 import {
   detailPeriodRequest, createPeriodRequest, updatePeriodRequest,
@@ -45,8 +45,8 @@ export default function EvalPeriodFormPage() {
       evalYear: currentPeriod.evalYear,
       evalTerm: currentPeriod.evalTerm,
       title: currentPeriod.title,
-      startDate: currentPeriod.startDate ? dayjs(currentPeriod.startDate) : null,
-      endDate: currentPeriod.endDate ? dayjs(currentPeriod.endDate) : null,
+      startDate: currentPeriod.startDate ? moment(currentPeriod.startDate) : null,
+      endDate: currentPeriod.endDate ? moment(currentPeriod.endDate) : null,
     });
   }, [currentPeriod, isEdit, form]);
 
