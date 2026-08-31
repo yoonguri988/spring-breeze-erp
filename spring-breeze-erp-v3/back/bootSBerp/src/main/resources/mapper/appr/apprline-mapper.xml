@@ -33,6 +33,16 @@
 			and lin_status = 'WAI'
 	</update>
 	
+	<!-- 다음 결재자 활성화 -->
+	<update id="activeNextLine">
+		update appr_line
+		set lin_status = 'WAI'
+		where
+			doc_id = #{docId}
+			and emp_id = #{empId}
+			and lin_status = 'NOT'
+	</update>
+	
 	<!-- 결재선 조회 -->
 	<select id="selectLineByOrder" resultType="ApprLineResponse">
 		select

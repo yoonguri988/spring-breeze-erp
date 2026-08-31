@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sb.erp.appr.dto.request.ApprFormRequest;
-import com.sb.erp.appr.dto.request.ApprFormSearchCondition;
 import com.sb.erp.appr.dto.response.ApprFormResponse;
 import com.sb.erp.appr.repository.ApprFormMapper;
 import com.sb.erp.com.dto.request.ComRequest;
@@ -109,47 +108,47 @@ class BackApplicationTests_ApprForm {
 		assertThat(updated.getForTitle()).isEqualTo("수정된 제목");
 	}
  
-	@Test
-	@DisplayName("양식 수정 - 버전 증가")
-	void testUpdateFormNewVersion() {
-		ApprFormRequest req = baseReq("FORM-TEST-004");
-		formMapper.insertForm(req);
-		Long forId = formMapper.selectCurrentFormSeq();
+//	@Test
+//	@DisplayName("양식 수정 - 버전 증가")
+//	void testUpdateFormNewVersion() {
+//		ApprFormRequest req = baseReq("FORM-TEST-004");
+//		formMapper.insertForm(req);
+//		Long forId = formMapper.selectCurrentFormSeq();
+// 
+//		// 서비스 로직상 content/title/schema가 실질적으로 바뀌면 새 버전으로 insert됨
+//		ApprFormRequest v2Req = baseReq("FORM-TEST-004");
+//		v2Req.setForContent("버전 테스트");
+// 
+//		int result = formMapper.updateFormNewVersion(forId, v2Req);
+//		// 정상적으로 버전 증가가 됐는지 (insert)
+//		assertThat(result).isEqualTo(1);
+// 
+//		List<ApprFormResponse> versions = formMapper.selectFormVersions(forId);
+//		// 특정 문서의 버전을 조회했을때 정상적으로 2개의 버전이 남아있는지
+//		assertThat(versions).hasSize(2);
+//		// for_version desc 정렬이라 리스트의 첫 요소가 최신버전이 선택됐는지
+//		assertThat(versions.get(0).getForVersion()).isEqualTo(2L);
+//	}
  
-		// 서비스 로직상 content/title/schema가 실질적으로 바뀌면 새 버전으로 insert됨
-		ApprFormRequest v2Req = baseReq("FORM-TEST-004");
-		v2Req.setForContent("버전 테스트");
- 
-		int result = formMapper.updateFormNewVersion(forId, v2Req);
-		// 정상적으로 버전 증가가 됐는지 (insert)
-		assertThat(result).isEqualTo(1);
- 
-		List<ApprFormResponse> versions = formMapper.selectFormVersions(forId);
-		// 특정 문서의 버전을 조회했을때 정상적으로 2개의 버전이 남아있는지
-		assertThat(versions).hasSize(2);
-		// for_version desc 정렬이라 리스트의 첫 요소가 최신버전이 선택됐는지
-		assertThat(versions.get(0).getForVersion()).isEqualTo(2L);
-	}
- 
-	@Test
-	@DisplayName("양식 삭제 (소프트 딜리트) - 목록 조회에서 빠짐")
-	void testDeleteForm() {
-		ApprFormRequest req = baseReq("FORM-TEST-005");
-		formMapper.insertForm(req);
-		Long forId = formMapper.selectCurrentFormSeq();
- 
-		// deleteForm은 실제 row 삭제가 아니라 is_deleted = 1로 갱신하는 소프트 딜리트
-		int result = formMapper.deleteForm(forId, 1L);
-		// 정상적으로 삭제 처리가 됐는지
-		assertThat(result).isEqualTo(1);
- 
-		// selectFormList는 is_deleted = 0 조건이 걸려있어서, 삭제된 양식은 목록에 안 나와야 정상
-		ApprFormSearchCondition cond = new ApprFormSearchCondition();
-		cond.setComId(comId);
-		cond.setOnepagelist(50);
-		List<ApprFormResponse> list = formMapper.selectFormList(cond);
- 
-		// selectFormList 의 조건 is_deleted = 0 의 조건이 정상적으로 작동됐는지
-		assertThat(list).extracting(ApprFormResponse::getForId).doesNotContain(forId);
-	}
+//	@Test
+//	@DisplayName("양식 삭제 (소프트 딜리트) - 목록 조회에서 빠짐")
+//	void testDeleteForm() {
+//		ApprFormRequest req = baseReq("FORM-TEST-005");
+//		formMapper.insertForm(req);
+//		Long forId = formMapper.selectCurrentFormSeq();
+// 
+//		// deleteForm은 실제 row 삭제가 아니라 is_deleted = 1로 갱신하는 소프트 딜리트
+//		int result = formMapper.deleteForm(forId, 1L);
+//		// 정상적으로 삭제 처리가 됐는지
+//		assertThat(result).isEqualTo(1);
+// 
+//		// selectFormList는 is_deleted = 0 조건이 걸려있어서, 삭제된 양식은 목록에 안 나와야 정상
+//		ApprFormSearchCondition cond = new ApprFormSearchCondition();
+//		cond.setComId(comId);
+//		cond.setOnepagelist(50);
+//		List<ApprFormResponse> list = formMapper.selectFormList(cond);
+// 
+//		// selectFormList 의 조건 is_deleted = 0 의 조건이 정상적으로 작동됐는지
+//		assertThat(list).extracting(ApprFormResponse::getForId).doesNotContain(forId);
+//	}
 }

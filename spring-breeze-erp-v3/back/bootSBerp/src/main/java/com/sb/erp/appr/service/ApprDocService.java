@@ -27,7 +27,7 @@ public interface ApprDocService {
 	public Map<String, Object> selectDocCnt(Long empId);
 	public List<ApprDocSummaryResponse> selectMyHistoryDocs(ApprDocSearchCondition condition);
 	public List<ApprDocSummaryResponse> selectMyTodoDocs(ApprDocSearchCondition condition);
-	public ApprDocResponse selectDocDetail(Long docId);
+	public ApprDocResponse selectDocDetail(Long docId, Long comId);
 	
 	// ======== 결재선 관련 파트 ===========
 	 

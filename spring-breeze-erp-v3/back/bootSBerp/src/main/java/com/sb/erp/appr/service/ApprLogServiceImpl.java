@@ -21,13 +21,13 @@ public class ApprLogServiceImpl implements ApprLogService{
 	private final ApprLogRepository logDao;
 
 	@Override
-	public Page<ApprLogResponse> searchLog(ApprLogSearchCondition cond, Pageable pageable) {
+	public Page<ApprLogResponse> searchLog(ApprLogSearchCondition cond, Pageable pageable, Long comId) {
 		
 		// 종료일은 그날 끝까지 포함되도록 다음발 00:00 미만으로 변환
 		LocalDateTime start = cond.getStartDate() != null ? cond.getStartDate().atStartOfDay() : null;
 		LocalDateTime end = cond.getEndDate() != null ? cond.getEndDate().plusDays(1).atStartOfDay() : null;
 		
- 		return logDao.search(cond.getDocId(), cond.getEmpId(), start, end, pageable)
+ 		return logDao.search(comId, cond.getDocId(), cond.getEmpId(), start, end, pageable)
  				.map(ApprLogResponse::new);
 	}
 

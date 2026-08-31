@@ -126,7 +126,8 @@
 		left outer join
 			company c on f.com_id = c.com_id
 		where
-			for_id = #{forId}
+			f.for_id = #{forId}
+			and f.com_id = #{comId}
 		order by
 			for_version desc
 	</select>

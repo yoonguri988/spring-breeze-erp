@@ -195,7 +195,7 @@ const NAV = [
         page: "apprDelegadmin",
         href: "/appr/admin/delegations",
         icon: "bi-arrow-left-right",
-        role: "ROOT",
+        role: "ROLE_ADMIN",
       },
       {
         page: "projects",

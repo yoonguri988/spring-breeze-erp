@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.sb.erp.appr.entity.ApprAutoDelegation;
 
 
-
+//[스코프 제외] 위임전결 자동화 미배포 - 상세: ApprAutoDelegation.java 참고
 @Repository
 public interface ApprAutoDelegationRepository extends JpaRepository<ApprAutoDelegation, Long>{
 	

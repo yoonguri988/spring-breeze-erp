@@ -15,8 +15,8 @@ import com.sb.erp.appr.entity.ApprLineRequest;
 @Repository
 public interface ApprLineRequestRepository extends JpaRepository<ApprLineRequest, Long>{
 	
-	// 관리자용 - 승인 대기중인 요청
-	public List<ApprLineRequest> findByReqStatusOrderByCreatedAtDesc(String reqStatus);
+	// 관리자용 - 승인 대기중인 요청 ( 본인 회사 소속만 )
+	public List<ApprLineRequest> findByReqStatusAndApprDoc_Company_ComIdOrderByCreatedAtDesc(String reqStatus, Long comId);
 	
 	// 사용자용 - 본인이 신청한 요청 목록
 	public List<ApprLineRequest> findByReqEmp_EmpIdOrderByCreatedAtDesc(Long empId);
@@ -31,7 +31,8 @@ public interface ApprLineRequestRepository extends JpaRepository<ApprLineRequest
 		from
 			ApprLineRequest r
 		where
-			(:reqStatus is null or r.reqStatus = :reqStatus)
+			r.apprDoc.company.comId = :comId
+			and (:reqStatus is null or r.reqStatus = :reqStatus)
 			and (:reqEmpId is null or r.reqEmp.empId = :reqEmpId)
 			and (:startDate is null or r.createdAt >= :startDate)
 			and (:endDate is null or r.createdAt < :endDate)
@@ -39,6 +40,7 @@ public interface ApprLineRequestRepository extends JpaRepository<ApprLineRequest
 			r.createdAt desc
 	""")
 	public Page<ApprLineRequest> search(
+			@Param("comId") Long comId,
 			@Param("reqStatus") String reqStatus,
 			@Param("reqEmpId") Long reqEmpId,
 			@Param("startDate") LocalDateTime startDate,

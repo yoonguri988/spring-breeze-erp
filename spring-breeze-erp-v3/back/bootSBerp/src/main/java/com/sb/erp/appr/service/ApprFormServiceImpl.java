@@ -121,20 +121,16 @@ public class ApprFormServiceImpl implements ApprFormService {
 	}
 
 	@Override
-	public ApprFormResponse getForm(Long forId, Long forVersion) {
-		ApprFormResponse form = formMapper.selectFormAll(forId, forVersion);
+	public ApprFormResponse getForm(Long forId, Long forVersion, Long comId) {
 		
-		// 없는 양식을 조회할때 예외 처리
-		if (form == null) {
-			throw new IllegalArgumentException("존재하지 않는 양식입니다.");
-		}
-		return form;
+		// 본인 회사 소속 양식인지 검증
+		return getOwnedFormOrThrow(forId, forVersion, comId);
 	}
 
 	@Override
-	public List<ApprFormResponse> getFormVersions(Long forId) {
+	public List<ApprFormResponse> getFormVersions(Long forId, Long comId) {
 		// 특정 Id의 모든 버전을 조회
-		return formMapper.selectFormVersions(forId);
+		return formMapper.selectFormVersions(forId, comId);
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+//[스코프 보류] 첨부파일 기능 - 백엔드 완료, 프론트 미연결. 상세: ApprFile.java 참고
 @Getter
 @Setter
 @NoArgsConstructor

@@ -27,7 +27,8 @@ public interface ApprLogRepository  extends JpaRepository<ApprLog, Long>{
 		from
 			ApprLog l
 		where
-			(:docId is null or l.apprDoc.docId = :docId)
+			l.apprDoc.company.comId = :comId
+			and (:docId is null or l.apprDoc.docId = :docId)
 			and (:empId is null or l.oriEmp.empId = :empId or l.actEmp.empId = :empId)
 			and (:startDate is null or l.createdAt >= :startDate)
 			and (:endDate is null or l.createdAt < :endDate)
@@ -35,6 +36,7 @@ public interface ApprLogRepository  extends JpaRepository<ApprLog, Long>{
 			l.createdAt desc
 	""")
 	public Page<ApprLog> search(
+			@Param("comId") Long comId,
 			@Param("docId") Long docId,
 			@Param("empId") Long empId,
 			@Param("startDate") LocalDateTime startDate,
