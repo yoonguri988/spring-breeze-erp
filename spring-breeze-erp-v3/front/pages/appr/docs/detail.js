@@ -383,14 +383,14 @@ export default function DocDetailPage() {
                 <div className="sb-card__head">
                     <h2>{t("docs.detail.contentCardTitle")}</h2>
                     {canEdit && !isEditing && (
-                        <Button size="small" onClick={startEdit}>수정</Button>
+                        <Button size="small" onClick={startEdit}>{t("docs.detail.editBtn")}</Button>
                     )}
                 </div>
                 <div className="sb-card__body">
                     {isEditing ? (
                         <Space direction="vertical" style={{width: "100%"}} size={16}>
                             <div>
-                                <label className="sb-form-label text-soft">문서 제목</label>
+                                <label className="sb-form-label text-soft">{t("docs.write.docTitleLabel")}</label>
                                 <Input
                                     value={editTitle}
                                     onChange={(e) => setEditTitle(e.target.value)}
@@ -418,7 +418,7 @@ export default function DocDetailPage() {
                     )}
 
                     <div style={{display: "flex", justifyContent: "flex-end", gap: 8}}>
-                        <Button onClick={cancelEdit}>취소</Button>
+                        <Button onClick={cancelEdit}>{t("docs.write.cancelBtn")}</Button>
                         <Button type="primary" loading={updateSubmitting} onClick={handleSaveEdit}>
                             저장
                         </Button>
