@@ -96,7 +96,8 @@
     "messages": {
       "updateSuccess": "The company information was updated.",
       "deleteSuccess": "The company was deleted.",
-      "deletePasswordInvalid": "The password is incorrect."
+      "deletePasswordInvalid": "The password is incorrect.",
+      "restoreSuccess": "The company has been reactivated."
     },
     "delete": {
       "modalTitle": "Delete Company",
@@ -186,13 +187,19 @@
       "bizNo": "Business No.",
       "industry": "Industry",
       "empCount": "Employees",
+      "status": "Status",
       "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
     },
     "actionTitles": {
       "detail": "View Details",
       "edit": "Edit",
       "org": "View Org Chart",
-      "delete": "Delete"
+      "delete": "Delete",
+      "restore": "Reactivate"
     },
     "emptyText": "No companies registered.",
     "totalCountPrefix": "Total",
@@ -201,10 +208,16 @@
       "modalTitle": "Delete Company",
       "modalTitleWithName": "Delete Company — {{name}}",
       "confirmPrefix": "Are you sure you want to delete ",
-      "confirmSuffix": "? Please enter your password to confirm your identity.",
+      "confirmSuffix": "? If related data still exists, the company will be deactivated instead of being permanently deleted. Please enter your password to confirm your identity.",
       "passwordLabel": "Password",
       "passwordRequired": "Please enter your password.",
       "okText": "Delete",
+      "cancelText": "Cancel"
+    },
+    "restore": {
+      "modalTitleWithName": "Reactivate Company — {{name}}",
+      "confirmContent": "Reactivate {{name}} and set it back to active?",
+      "okText": "Reactivate",
       "cancelText": "Cancel"
     }
   }

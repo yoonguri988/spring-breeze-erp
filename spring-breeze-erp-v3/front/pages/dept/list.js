@@ -222,10 +222,13 @@ export default function DeptListPage() {
                 placeholder={t("list.comSelectPlaceholder")}
                 value={comId || undefined}
                 onChange={handleComChange}
-                options={(companies || []).map((c) => ({
-                  value: c.comId,
-                  label: c.comName,
-                }))}
+                options={(companies || [])
+                  // 비활성화(soft delete)된 회사는 부서 신규 등록 대상에서 제외
+                  .filter((c) => c.comStatus !== "INACTIVE")
+                  .map((c) => ({
+                    value: c.comId,
+                    label: c.comName,
+                  }))}
                 allowClear
               />
             </div>

@@ -56,18 +56,27 @@ public class Company {
 	
 	@Column(length = 100)
 	private String comTel;
-	@Lob // 대용량 처리 - 이미지 
+	@Lob // 대용량 처리 - 이미지
 	private String comLogo;
-		
+
+	// 회사 삭제 요청 시, 연관된 하위 데이터(부서/직원/전자결재 등)가 하나도 없으면 진짜 DELETE,
+	// 하나라도 남아있으면 이 값을 INACTIVE로 바꾸는 비활성화(soft delete)로 대신 처리한다.
+	// ACTIVE / INACTIVE 두 값만 사용.
+	@Column(name = "COM_STATUS", length = 20)
+	private String comStatus;
+
 	@Column(name="CREATED_AT", nullable=false)
 	private LocalDateTime createdAt;
 	@Column(name="UPDATED_AT", nullable=false)
 	private LocalDateTime updatedAt;
-	
+
 	@PrePersist
 	void onCreate() {
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
+		if (this.comStatus == null) {
+			this.comStatus = "ACTIVE";
+		}
 	}
 	@PreUpdate
 	void onUpdate() {
@@ -147,8 +156,9 @@ public class Company {
  * COM_NAME          NOT NULL VARCHAR2(100) 
  * COM_CEO           NOT NULL VARCHAR2(100) 
  * BIZ_NO            NOT NULL VARCHAR2(45)  
- * COM_TEL                    VARCHAR2(100) 
- * COM_LOGO                   VARCHAR2(500) 
- * CREATED_AT        NOT NULL DATE          
- * UPDATED_AT        NOT NULL DATE    
+ * COM_TEL                    VARCHAR2(100)
+ * COM_LOGO                   VARCHAR2(500)
+ * COM_STATUS                 VARCHAR2(20)   -- ACTIVE / INACTIVE (신규)
+ * CREATED_AT        NOT NULL DATE
+ * UPDATED_AT        NOT NULL DATE
  */
