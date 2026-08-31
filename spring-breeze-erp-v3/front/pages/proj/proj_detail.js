@@ -102,7 +102,7 @@ const canCreateTask = isAdmin || isCreator || isProjectMember;
       key: "no",
       width: 56,
       align: "center",
-      render: (_, __, idx) => (taskPaging?.listtotal ?? 0) - (taskPage - 1) * taskPageSize - idx,
+      render: (_, __, idx) => (taskPage - 1) * taskPageSize + idx + 1,
     },
     {
       title: t("detail.taskTable.name"),
@@ -221,10 +221,12 @@ const canCreateTask = isAdmin || isCreator || isProjectMember;
           <Link href="/proj/proj_list">
             <Button size="small" icon={<UnorderedListOutlined />}>{t("common.listBtn")}</Button>
           </Link>
-          <Link href={{ pathname: "/proj/proj_edit", query: { proId } }}>
-            <Button size="small" icon={<EditOutlined />}>{t("detail.editBtn")}</Button>
-          </Link>
-          {(isAdmin || detail?.empId === user?.empId) && (
+          {(isAdmin || isCreator) && (
+            <Link href={{ pathname: "/proj/proj_edit", query: { proId } }}>
+              <Button size="small" icon={<EditOutlined />}>{t("detail.editBtn")}</Button>
+            </Link>
+          )}
+          {(isAdmin || isCreator) && (
             <Button size="small" danger icon={<DeleteOutlined />} onClick={() => setDeleteModalOpen(true)}>
               {t("detail.deleteBtn")}
             </Button>
