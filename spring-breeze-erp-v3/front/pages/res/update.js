@@ -12,7 +12,7 @@ import {
   updateResourceRequest,
   resetResourceState,
 } from "../../reducers/res/resourceReducer";
-import { listEmpRequest, resetEmpState } from "../../reducers/emp/empReducer";
+import EmployeePicker from "../../components/EmployeePicker";
 
 // label 은 i18n/locales/{ko,en}/res.json 의 enum.resStatus 키와 매핑됩니다.
 const RES_STATUS_VALUES = ["AVAILABLE", "MAINTENANCE", "DISABLED"];
@@ -34,16 +34,10 @@ export default function ResourceUpdatePage() {
     error,
     success,
   } = useSelector((state) => state.resource);
-  const { empList } = useSelector((state) => state.emp);
 
   const resId = router.query.resId ? String(router.query.resId) : "";
 
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    dispatch(listEmpRequest());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
 
   useEffect(() => {
     if (!router.isReady || !resId) return;
@@ -59,9 +53,7 @@ export default function ResourceUpdatePage() {
       capacity: resource.capacity,
       resStatus: resource.resStatus,
       remark: resource.remark,
-      managerEmpId: resource.managerEmpId
-        ? String(resource.managerEmpId)
-        : undefined,
+      managerEmpId: resource.managerEmpId ?? undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resource]);
@@ -84,7 +76,6 @@ export default function ResourceUpdatePage() {
   useEffect(() => {
     return () => {
       dispatch(resetResourceState());
-      dispatch(resetEmpState());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -230,14 +221,7 @@ export default function ResourceUpdatePage() {
 
               <div className="col-12">
                 <Form.Item label={t("field.manager")} name="managerEmpId">
-                  <Select
-                    allowClear
-                    placeholder={t("shared.managerPlaceholder")}
-                    options={(empList?.list || []).map((e) => ({
-                      value: String(e.empId),
-                      label: `${e.empName} (${e.posName})`,
-                    }))}
-                  />
+                  <EmployeePicker placeholder={t("shared.managerPlaceholder")} />
                 </Form.Item>
               </div>
             </div>

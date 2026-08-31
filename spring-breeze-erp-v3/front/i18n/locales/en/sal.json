@@ -387,11 +387,6 @@
     "uploadSuccessMsg": "Salary policy document registered. The new version is reflected in AI answers immediately.",
     "selectFileWarning": "Please select a PDF file to upload."
   },
-  "employeePicker": {
-    "placeholder": "Search by employee name",
-    "notFoundContent": "No results found",
-    "optionLabel": "{{empName}} · {{deptName}} · {{posName}} ({{empNo}})"
-  },
   "salAiChat": {
     "fabTitle": "Salary Policy AI Chatbot",
     "panelTitle": "Salary Policy AI Chatbot",

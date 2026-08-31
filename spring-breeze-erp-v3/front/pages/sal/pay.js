@@ -18,7 +18,7 @@ import {
   adjustSalPayItemRequest, changeSalPayStatusRequest, deleteSalPayRequest,
   resetSalPayState, clearCurrentSalPay,
 } from "../../reducers/sal/salPayReducer";
-import EmployeePicker from "../../components/sal/EmployeePicker";
+import EmployeePicker from "../../components/EmployeePicker";
 import { formatWon, wonFormatter, wonParser } from "../../utils/currency";
 
 const STATUS_COLOR = {
