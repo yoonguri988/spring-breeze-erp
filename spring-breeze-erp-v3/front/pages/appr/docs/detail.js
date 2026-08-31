@@ -382,9 +382,6 @@ export default function DocDetailPage() {
             <div className="sb-card" style={{marginBottom: 16}}>
                 <div className="sb-card__head">
                     <h2>{t("docs.detail.contentCardTitle")}</h2>
-                    {canEdit && !isEditing && (
-                        <Button size="small" onClick={startEdit}>{t("docs.detail.editBtn")}</Button>
-                    )}
                 </div>
                 <div className="sb-card__body">
                     {isEditing ? (
@@ -454,9 +451,11 @@ export default function DocDetailPage() {
             )}
         </div>
     </div>
-
-            {(canProcess || ((isDrafter || isLineOwner) && myLine)) && (
+            {(canEdit && !isEditing) || canProcess || ((isDrafter || isLineOwner) && myLine) ? (
                 <div style={{display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 24}}>
+                    {canEdit && !isEditing && (                
+                            <Button onClick={startEdit}>{t("docs.detail.editBtn")}</Button>
+                        )}
                     {(isDrafter || isLineOwner) && myLine && (
                         <Button onClick={() => setDelegModalOpen(true)}>
                             {t("docs.detail.delegateRequestBtn")}
@@ -471,7 +470,7 @@ export default function DocDetailPage() {
                         </Button>
                     </>)}
                 </div>
-            )}
+            ) : null}
 
             {/* 승인/반려 확인 모달 */}
             <Modal
