@@ -95,7 +95,10 @@ export function* refreshToken() {
       Cookies.set("accessToken", accessToken);
     }
 
-    yield put(refreshTokenSuccess({ accessToken }));
+    // 새 토큰의 클레임(pwdChangeRequired 등)을 반영하도록 user도 함께 갱신
+    const user = decodeUser(accessToken);
+
+    yield put(refreshTokenSuccess({ accessToken, user }));
   } catch (err) {
     yield put(refreshTokenFailure(err.response?.data?.error || "재발급 실패"));
   }

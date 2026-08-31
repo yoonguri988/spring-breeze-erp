@@ -12,7 +12,7 @@ import {
   checkResCodeRequest,
   resetResourceState,
 } from "../../reducers/res/resourceReducer";
-import { listEmpRequest, resetEmpState } from "../../reducers/emp/empReducer";
+import EmployeePicker from "../../components/EmployeePicker";
 
 // label 은 i18n/locales/{ko,en}/res.json 의 enum.resType / enum.resStatus 키와 매핑됩니다.
 const RES_TYPE_VALUES = ["ROOM", "EQUIPMENT", "VEHICLE"];
@@ -36,18 +36,12 @@ export default function ResourceInsertPage() {
   const { resCodeCheck, loading, error, success } = useSelector(
     (state) => state.resource,
   );
-  const { empList } = useSelector((state) => state.emp);
 
   const returnUrl = router.query.returnUrl || "";
   const backUrl = returnUrl || "/res/list";
 
   const [resType, setResType] = useState("ROOM");
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    dispatch(listEmpRequest());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
 
   useEffect(() => {
     if (!submitting) return;
@@ -67,7 +61,6 @@ export default function ResourceInsertPage() {
   useEffect(() => {
     return () => {
       dispatch(resetResourceState());
-      dispatch(resetEmpState());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -255,14 +248,7 @@ export default function ResourceInsertPage() {
 
               <div className="col-12">
                 <Form.Item label={t("field.manager")} name="managerEmpId">
-                  <Select
-                    allowClear
-                    placeholder={t("shared.managerPlaceholder")}
-                    options={(empList?.list || []).map((e) => ({
-                      value: String(e.empId),
-                      label: `${e.empName} (${e.posName})`,
-                    }))}
-                  />
+                  <EmployeePicker placeholder={t("shared.managerPlaceholder")} />
                 </Form.Item>
               </div>
             </div>

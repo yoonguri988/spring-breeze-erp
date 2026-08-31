@@ -8,7 +8,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import moment from "moment";
 
 import { searchSalHistRequest, resetSalHistState } from "../../reducers/sal/salHistReducer";
-import EmployeePicker from "../../components/sal/EmployeePicker";
+import EmployeePicker from "../../components/EmployeePicker";
 
 const { RangePicker } = DatePicker;
 

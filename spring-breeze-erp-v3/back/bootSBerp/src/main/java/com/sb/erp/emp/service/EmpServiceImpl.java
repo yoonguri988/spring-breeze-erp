@@ -148,6 +148,8 @@ public class EmpServiceImpl implements EmpService {
 		dto.setEmpId(empId);
 		dto.setComId(comId);
 		dto.setEmpPass(passEncoder.encode(emp.getEmpNo()));
+		// 사번으로 초기화 = 임시 비밀번호 상태이므로 다음 로그인 시 비밀번호 변경을 강제한다.
+		dto.setMustChangePwd("Y");
 		return empMapper.updatePassByEmpId(dto);
 	}
 
@@ -165,6 +167,8 @@ public class EmpServiceImpl implements EmpService {
 		dto.setEmpId(empId);
 		dto.setComId(comId);
 		dto.setEmpPass(passEncoder.encode(newPass));
+		// 본인이 직접 새 비밀번호를 설정했으므로 강제 변경 상태를 해제한다.
+		dto.setMustChangePwd("N");
 		return empMapper.updatePassByEmpId(dto);
 	}
 

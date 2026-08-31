@@ -1,12 +1,12 @@
-// components/sal/EmployeePicker.js
-// 급여 화면(급여기준/급여지급 등록, 계좌 조회)에서 공통으로 쓰는 사원 검색 Select.
+// components/EmployeePicker.js
+// 여러 화면(급여 등록, 자원등록 담당자 지정 등)에서 공통으로 쓰는 사원 검색 Select.
 // 사원 목록은 emp 모듈(기존 empReducer/empSaga, GET /api/emp)을 그대로 재사용한다.
 // emp API는 페이지당 10건 고정이라, 이름을 입력할 때마다(디바운스) 재조회해서 옵션을 채운다.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { Select, Spin } from "antd";
-import { listEmpRequest } from "../../reducers/emp/empReducer";
+import { listEmpRequest } from "../reducers/emp/empReducer";
 
 export default function EmployeePicker({
   value,
@@ -14,9 +14,10 @@ export default function EmployeePicker({
   placeholder,
   style,
   disabled,
+  allowClear = true,
 }) {
   const dispatch = useDispatch();
-  const { t } = useTranslation("sal");
+  const { t } = useTranslation("common");
   const { empList, loading } = useSelector((state) => state.emp);
   const timerRef = useRef(null);
 
@@ -53,7 +54,7 @@ export default function EmployeePicker({
   return (
     <Select
       showSearch
-      allowClear
+      allowClear={allowClear}
       value={value ?? undefined}
       onChange={onChange}
       onSearch={handleSearch}

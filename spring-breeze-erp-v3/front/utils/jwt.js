@@ -7,7 +7,7 @@ import { jwtDecode } from "jwt-decode";
 export function decodeUser(accessToken) {
   if (!accessToken) return null;
   try {
-    const claims = jwtDecode(accessToken); // { sub, comId, empNo, empName, posName, comName, empEmail, roles, exp, iat ... }
+    const claims = jwtDecode(accessToken); // { sub, comId, empNo, empName, posName, comName, empEmail, roles, pwdChangeRequired, exp, iat ... }
     return {
       empId: Number(claims.sub),
       comId: claims.comId,
@@ -17,6 +17,8 @@ export function decodeUser(accessToken) {
       comName: claims.comName,
       empEmail: claims.empEmail,
       roles: claims.roles || [],
+      // 비밀번호가 아직 사번(임시 비밀번호) 상태 → 비밀번호 변경 화면으로 강제 이동 필요
+      pwdChangeRequired: Boolean(claims.pwdChangeRequired),
     };
   } catch (e) {
     return null;
