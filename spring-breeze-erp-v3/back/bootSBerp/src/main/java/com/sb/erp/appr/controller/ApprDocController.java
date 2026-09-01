@@ -40,7 +40,7 @@ import lombok.RequiredArgsConstructor;
 
 @Tag(name = "결재 문서", description = "전자 결재 문서 작성/조회/승인 API")
 @RestController
-@RequestMapping("/appr")
+@RequestMapping("/api/appr")
 @RequiredArgsConstructor
 public class ApprDocController {
 

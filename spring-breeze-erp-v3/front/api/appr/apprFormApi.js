@@ -1,6 +1,6 @@
 import api from "../axios"
 
-const BASE = "/appr";
+const BASE = "/api/appr";
 
 // 양식 코드 중복 확인
 export const checkCode = (forCode, comId, forId) => {
