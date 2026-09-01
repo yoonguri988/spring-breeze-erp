@@ -73,6 +73,32 @@ function returnCell(r, t) {
   return <span className="view-val-empty">{t("returnStatus.notApplicable")}</span>;
 }
 
+// 노쇼/미반납 알림이 나간 건에 한해 계산되는 이력 기반 위험도(0~1) 뱃지.
+// riskScore는 학습된 확률이 아니라 규칙 기반 가중합 값이라 "예측"이 아닌 "위험도"로 표기한다.
+function riskBadge(r, t) {
+  if (!r.noshowAlertAt || r.riskScore === null || r.riskScore === undefined) {
+    return <span className="view-val-empty">{t("returnStatus.notApplicable")}</span>;
+  }
+  const pct = Math.round(r.riskScore * 100);
+  if (r.riskScore >= 0.66)
+    return (
+      <span className="sb-badge sb-badge--red" title={t("risk.highDesc")}>
+        {t("risk.high")} {pct}%
+      </span>
+    );
+  if (r.riskScore >= 0.33)
+    return (
+      <span className="sb-badge sb-badge--amber" title={t("risk.mediumDesc")}>
+        {t("risk.medium")} {pct}%
+      </span>
+    );
+  return (
+    <span className="sb-badge sb-badge--gray" title={t("risk.lowDesc")}>
+      {t("risk.low")} {pct}%
+    </span>
+  );
+}
+
 export default function AdminResvListPage() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -368,6 +394,7 @@ export default function AdminResvListPage() {
                   <th style={{ width: 120 }}>{t("adminList.tableStartDt")}</th>
                   <th style={{ width: 120 }}>{t("adminList.tableEndDt")}</th>
                   <th style={{ width: 90 }}>{t("adminList.tableReturnDt")}</th>
+                  <th style={{ width: 100 }}>{t("adminList.tableRisk")}</th>
                   <th style={{ width: 50 }}>{t("adminList.tableStatus")}</th>
                   <th style={{ width: 100, textAlign: "center" }}>{t("adminList.tableManage")}</th>
                 </tr>
@@ -390,6 +417,7 @@ export default function AdminResvListPage() {
                     <td>{moment(r.startDt).format("YYYY-MM-DD HH:mm:ss")}</td>
                     <td>{moment(r.endDt).format("YYYY-MM-DD HH:mm:ss")}</td>
                     <td>{returnCell(r, t)}</td>
+                    <td>{riskBadge(r, t)}</td>
                     <td>{statusBadge(r.status, t)}</td>
                     <td>
                       <div className="d-flex justify-content-end gap-1">

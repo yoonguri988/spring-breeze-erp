@@ -19,6 +19,14 @@
     "notReturned": "Not Returned",
     "notApplicable": "N/A"
   },
+  "risk": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "lowDesc": "Low history-based risk (little history / short elapsed time)",
+    "mediumDesc": "Medium history-based risk",
+    "highDesc": "High history-based risk (repeat history or long elapsed time)"
+  },
   "detail": {
     "breadcrumbHome": "Home",
     "breadcrumbMyResv": "My Resource Requests",
@@ -165,6 +173,7 @@
     "tableStartDt": "Start Date",
     "tableEndDt": "End Date",
     "tableReturnDt": "Return",
+    "tableRisk": "Risk",
     "tableStatus": "Status",
     "tableManage": "Actions",
     "detailButtonTitle": "View Details",

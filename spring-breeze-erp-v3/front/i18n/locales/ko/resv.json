@@ -19,6 +19,14 @@
     "notReturned": "미반납",
     "notApplicable": "해당 없음"
   },
+  "risk": {
+    "low": "낮음",
+    "medium": "보통",
+    "high": "높음",
+    "lowDesc": "이력 기반 위험도 낮음 (과거 이력 적음/경과시간 짧음)",
+    "mediumDesc": "이력 기반 위험도 보통",
+    "highDesc": "이력 기반 위험도 높음 (과거 반복 이력 또는 장시간 경과)"
+  },
   "detail": {
     "breadcrumbHome": "홈",
     "breadcrumbMyResv": "내 자원 요청 관리",
@@ -165,6 +173,7 @@
     "tableStartDt": "시작일",
     "tableEndDt": "종료일",
     "tableReturnDt": "반납",
+    "tableRisk": "위험도",
     "tableStatus": "상태",
     "tableManage": "관리",
     "detailButtonTitle": "상세보기",
