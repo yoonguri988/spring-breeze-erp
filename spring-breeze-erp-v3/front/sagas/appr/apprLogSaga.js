@@ -4,7 +4,7 @@ import {
     fetchApprLogRequest, fetchApprLogSuccess, fetchApprLogFailure,
 } from "../../reducers/appr/apprLogReducer";
 
-const APPR_LOG_API_BASE = "/appr/logs";
+const APPR_LOG_API_BASE = "/api/appr/logs";
 
 // 관리자 - 결재선 감사로그 조회
 // get /appr/logs

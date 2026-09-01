@@ -39,7 +39,7 @@ import lombok.RequiredArgsConstructor;
 
 @Tag(name = "결재 양식", description = "전자결재 양식 관리 API")
 @RestController
-@RequestMapping("/appr")
+@RequestMapping("/api/appr")
 @RequiredArgsConstructor
 public class ApprFormController {
 

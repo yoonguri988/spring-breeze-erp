@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Tag(name = "결재선 감사로그", description = "결재선 위임/대결 처리 감사로그 조회 API")
 @RestController
-@RequestMapping("/appr/logs")
+@RequestMapping("/api/appr/logs")
 @RequiredArgsConstructor
 public class ApprLogController {
 	

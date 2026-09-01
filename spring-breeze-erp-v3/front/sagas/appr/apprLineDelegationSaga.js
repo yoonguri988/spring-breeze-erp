@@ -11,7 +11,7 @@ import {
     fetchDelegHistoryRequest, fetchDelegHistorySuccess, fetchDelegHistoryFailure,
 } from "../../reducers/appr/apprLineDelegationReducer";
 
-const APPR_API_BASE = "/appr/lines";
+const APPR_API_BASE = "/api/appr/lines";
 
 // 위임/대결 요청 생성 (토큰 empId)
 // post /appr/lines/requests

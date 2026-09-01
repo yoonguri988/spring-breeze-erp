@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Tag(name = "위임전결", description = "휴가/출장 연동 위임전결 조회 및 취소 API / 스코프 제외")
 @RestController
-@RequestMapping("/appr/delegations")
+@RequestMapping("/api/appr/delegations")
 @RequiredArgsConstructor
 public class ApprAutoDelegationController {
 	

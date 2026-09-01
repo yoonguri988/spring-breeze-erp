@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 
 @Tag(name = "결재선 위임/즐겨찾기", description = "결재선 위임/대결 요청 및 즐겨찾기 관리 API")
 @RestController
-@RequestMapping("/appr/lines")
+@RequestMapping("/api/appr/lines")
 @RequiredArgsConstructor
 public class ApprLineController {
 	

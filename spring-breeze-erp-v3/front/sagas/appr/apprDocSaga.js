@@ -16,7 +16,7 @@ import {
     updateDocRequest, updateDocSuccess, updateDocFailure,
 } from "../../reducers/appr/apprDocReducer";
 
-const APPR_API_BASE = "/appr";
+const APPR_API_BASE = "/api/appr";
 
 // 작성 가능한 양식 목록 (토큰 comId)
 // GET /appr/getFormList
@@ -232,7 +232,7 @@ function* watchFetchDeptEmps() {
 // 결재선 즐겨찾기 추천 조회
 // get /appr/lines/favorites?deptId=&forId=
 export const fetchFavoriteLinesApi = ({deptId, forId}) =>
-    api.get(`/appr/lines/favorites`, {params: {deptId, forId}});
+    api.get(`/api/appr/lines/favorites`, {params: {deptId, forId}});
 
 export function* fetchFavoriteLines(action) {
     try {
