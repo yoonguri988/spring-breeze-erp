@@ -22,9 +22,11 @@ import com.sb.erp.global.integration.openAi.ChatMessage;
 import com.sb.erp.global.integration.openAi.ReportContent;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EvalReportServiceImpl implements EvalReportService {
 
 	private final EvalReportMapper evalReportMapper;
@@ -55,7 +57,7 @@ public class EvalReportServiceImpl implements EvalReportService {
 		BigDecimal sum = r.sentimentPositive().add(r.sentimentNeutral()).add(r.sentimentNegative());
 		BigDecimal diff = sum.subtract(new BigDecimal("100.0")).abs();
 		if (diff.compareTo(new BigDecimal("0.01")) >= 0) {
-			System.err.println("[EvalReport] GPT 감성 합계 이상: " + sum);
+			log.error("[EvalReport] GPT 감성 합계 이상: " + sum);
 			return false;
 		}
 		return true;
@@ -114,14 +116,14 @@ public class EvalReportServiceImpl implements EvalReportService {
 		// 평가 회차 확인
 		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, comId);
 		if (period == null) {
-			System.err.println("[EvalReport] 실패(-1): 회차 없음 periodId=" + periodId);
+			log.error("[EvalReport] 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
 		}
 		
 		// 회차 상태 확인
 		String status = period.getPeriodStatus();
 		if (!"REPORTING".equals(status) && !"REPORTED".equals(status)) {
-			System.err.println("[EvalReport] 실패(-2): 허용되지 않은 상태 status=" + status
+			log.error("[EvalReport] 실패(-2): 허용되지 않은 상태 status=" + status
 					+ " (REPORTING/REPORTED만 가능) periodId=" + periodId);
 			return -2;
 		}
@@ -129,7 +131,7 @@ public class EvalReportServiceImpl implements EvalReportService {
 		// 사원 평가 내용 있는지 확인
 		List<Map<String, Object>> aggregates = evalReportMapper.selectAggregatesByPeriod(periodId);
 		if (aggregates == null || aggregates.isEmpty()) {
-			System.err.println("[EvalReport] 실패(-3): 집계 대상 없음 (SUBMITTED 상태 평가 부재) periodId=" + periodId);
+			log.error("[EvalReport] 실패(-3): 집계 대상 없음 (SUBMITTED 상태 평가 부재) periodId=" + periodId);
 			return -3;
 		}
 		
@@ -153,9 +155,9 @@ public class EvalReportServiceImpl implements EvalReportService {
 				.collect(Collectors.toMap(AttStatDto::getEmpId, s -> s));
 		
 		// ★ 디버그
-		System.out.println("[EvalReport] 영업일 수: " + businessDays + " (기간: " + startDate + " ~ " + endDate + ")");
-		System.out.println("[EvalReport] 근태 조회 결과: " + attStatMap.size() + "명 / 대상: " + empIds.size() + "명");
-		attStatMap.forEach((id, stat) -> System.out.println("  empId=" + id
+		log.info("[EvalReport] 영업일 수: " + businessDays + " (기간: " + startDate + " ~ " + endDate + ")");
+		log.info("[EvalReport] 근태 조회 결과: " + attStatMap.size() + "명 / 대상: " + empIds.size() + "명");
+		attStatMap.forEach((id, stat) -> log.info("  empId=" + id
 		        + " workDays=" + stat.getWorkDays() + " late=" + stat.getLateCount()));
 
 		// 사원별 리포트 생성 (기존 존재 시 update)
@@ -178,14 +180,14 @@ public class EvalReportServiceImpl implements EvalReportService {
 		// 재생성할 회차 확인
 		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, comId);
 		if (period == null) {
-			System.err.println("[EvalReport] 재생성 실패(-1): 회차 없음 periodId=" + periodId);
+			log.error("[EvalReport] 재생성 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
 		}
 		
 		// 회차 상태 확인, 재생성은 REPORTED만 허용
 		String status = period.getPeriodStatus();
 		if (!"REPORTED".equals(status)) {
-			System.err.println("[EvalReport] 재생성 실패(-2): 허용되지 않은 상태 status=" + status
+			log.error("[EvalReport] 재생성 실패(-2): 허용되지 않은 상태 status=" + status
 					+ " (REPORTED만 가능) periodId=" + periodId);
 			return -2;
 		}
@@ -219,7 +221,7 @@ public class EvalReportServiceImpl implements EvalReportService {
 			}
 		}
 
-		System.err.println("[EvalReport] 재생성 실패(-3): 해당 사원의 평가가 없음 periodId=" + periodId
+		log.error("[EvalReport] 재생성 실패(-3): 해당 사원의 평가가 없음 periodId=" + periodId
 				+ " empId=" + empId);
 		return -3;
 	}
@@ -307,7 +309,7 @@ public class EvalReportServiceImpl implements EvalReportService {
 			dto.setSentimentNeutral(gptResult.sentimentNeutral());
 			dto.setSentimentNegative(gptResult.sentimentNegative());
 			dto.setModelName(REAL_MODEL_NAME);
-			System.out.println("[EvalReport] GPT 성공 empId=" + dto.getEmpId());
+			log.info("[EvalReport] GPT 성공 empId=" + dto.getEmpId());
 		} else {
 			// ⚠️ GPT 실패 → Mock fallback
 			BigDecimal[] sentiment = mockSentiment(overall);
@@ -316,7 +318,7 @@ public class EvalReportServiceImpl implements EvalReportService {
 			dto.setSentimentNegative(sentiment[2]);
 			dto.setAiSummary(mockSummary(empName, overall, dto.getGrade(), strengths, improvements, evalCount, attStat, dto.getAttRate()));
 			dto.setModelName(MOCK_MODEL_NAME);
-			System.err.println("[EvalReport] GPT 실패 → Mock 사용 empId=" + dto.getEmpId());
+			log.error("[EvalReport] GPT 실패 → Mock 사용 empId=" + dto.getEmpId());
 		}
 
 		// 5) sentimentLabel은 자바가 판단 (감성 3개 중 최대값 기반)

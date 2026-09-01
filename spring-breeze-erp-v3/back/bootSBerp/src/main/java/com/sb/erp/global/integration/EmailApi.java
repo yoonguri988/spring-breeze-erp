@@ -12,8 +12,10 @@ import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class EmailApi {
 
 	// 1. 보내는 쪽
@@ -47,9 +49,9 @@ public class EmailApi {
 			message.setSubject(subject);
 			message.setContent(content, "text/html; charset=UTF-8");
 			Transport.send(message);
-			System.out.println("....... successfully .......");
+			log.info("....... successfully .......");
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("메일 발송 실패", e);
 			throw new RuntimeException("메일 발송 실패: " + e.getMessage(), e);
 		}
 	}

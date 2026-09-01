@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.sb.erp.week.dto.response.MyWeeklyReportResponse;
 import com.sb.erp.week.dto.response.WeeklyReportResponse;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class ReportApi {
 	@Autowired private OpenAiGpt openAiGpt;
 	@Autowired private GoogleDocsApi googleDocsApi;
@@ -94,7 +96,7 @@ public class ReportApi {
 	            try{
 	                googleDocsApi.deleteDoc(accessToken,newDocId);
 	            }catch(Exception e){
-	                e.printStackTrace();
+	                log.error("보고서 사본 문서 삭제 실패", e);
 	            }
 	        });
 

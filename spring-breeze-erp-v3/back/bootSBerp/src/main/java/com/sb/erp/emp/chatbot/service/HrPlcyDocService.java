@@ -27,6 +27,7 @@ import com.sb.erp.util.dto.FileUploadType;
 import com.sb.erp.util.dto.FileUploadUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /*
 	회사별 HR 규정 문서(hr_plcy_doc) 관리 — RAG "Ingestion" 단계.
@@ -41,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class HrPlcyDocService {
 
     // ─── 조항 분할(Chunking) 설정 ─────────────────────────
@@ -316,7 +318,7 @@ public class HrPlcyDocService {
 	private String cleanText(String raw) {
 		if (raw == null) return "";
 		
-		System.out.println("[cleanText] 호출됨, 탭 포함 여부: " + raw.contains("\t"));
+		log.info("[cleanText] 호출됨, 탭 포함 여부: " + raw.contains("\t"));
 		
 		return raw.replace('\t', ' ') // 탭 → 공백
 				.replaceAll(" {2,}", " ") // 다중 공백 → 단일 공백
