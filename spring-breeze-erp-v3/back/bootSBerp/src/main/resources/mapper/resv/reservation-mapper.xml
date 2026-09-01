@@ -194,10 +194,33 @@
               )
         ORDER BY r.end_dt ASC
     </select>
- 	<!-- 알림 발송 완료 처리 (중복 발송 방지 플래그 세팅) -->
+
+    <!-- 이력 기반 위험도 스코어링 변수1: 해당 사원의 과거 노쇼/미반납 알림 이력 횟수(현재 건 제외) -->
+    <select id="selectEmpNoShowHistoryCount" resultType="int">
+        SELECT COUNT(*)
+        FROM reservation
+        WHERE emp_id = #{empId}
+          AND rev_id <![CDATA[<>]]> #{revId}
+          AND noshow_alert_at IS NOT NULL
+    </select>
+
+    <!-- 이력 기반 위험도 스코어링 변수2: 자원 유형별 과거 노쇼율 (승인 이후 종결 건 기준, 이력 없으면 0) -->
+    <select id="selectResTypeNoShowRate" resultType="double">
+        SELECT
+            CASE WHEN COUNT(*) = 0 THEN 0
+                 ELSE ROUND(SUM(CASE WHEN r.noshow_alert_at IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*), 4)
+            END
+        FROM reservation r
+        JOIN com_resource res ON res.res_id = r.res_id
+        WHERE res.res_type = #{resType}
+          AND r.status IN ('APP', 'NORET')
+    </select>
+
+ 	<!-- 알림 발송 완료 처리 (중복 발송 방지 플래그 세팅) + 계산된 위험도 스코어 기록 -->
     <update id="updateAlertSent">
         UPDATE reservation
-           SET noshow_alert_at = SYSTIMESTAMP
+           SET noshow_alert_at = SYSTIMESTAMP,
+               risk_score      = #{riskScore}
          WHERE rev_id = #{revId}
     </update>
     <!-- 반납 처리 -->

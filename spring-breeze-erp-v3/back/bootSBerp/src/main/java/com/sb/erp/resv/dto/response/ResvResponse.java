@@ -47,6 +47,9 @@ public class ResvResponse {
 	
 	private LocalDateTime noshowAlertAt;
 
+	// 이력 기반 위험도 스코어(0~1). 알림이 발송된 건만 값이 채워진다. NoShowRiskScorer 참고.
+	private Double riskScore;
+
 	public ResvResponse(Reservation reservation) {
 		this.revId = reservation.getRevId();
 		this.resId = reservation.getResource().getResId();
@@ -81,5 +84,7 @@ public class ResvResponse {
 			this.approvedEmpName = reservation.getApprEmployee().getEmpName();
 		}
 		this.approvedAt = reservation.getApprovedAt();
+		this.noshowAlertAt = reservation.getNoshowAlertAt();
+		this.riskScore = reservation.getRiskScore();
 	}
 }

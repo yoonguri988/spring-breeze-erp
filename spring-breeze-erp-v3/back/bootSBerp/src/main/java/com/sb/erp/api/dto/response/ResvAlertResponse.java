@@ -21,4 +21,8 @@ public class ResvAlertResponse {
     private LocalDateTime startDt;
     private LocalDateTime endDt;
     private LocalDateTime returnDt;
+
+    // 스케줄러가 조회 직후 NoShowRiskScorer로 계산해서 채워넣는 값들(DB 컬럼 아님).
+    private Double riskScore;   // 0~1
+    private String riskLevel;  // LOW / MEDIUM / HIGH
 }
