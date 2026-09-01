@@ -34,6 +34,7 @@ import com.sb.erp.emp.service.EmpService;
 import com.sb.erp.global.oauth2.CustomUserPrincipal;
 import com.sb.erp.global.security.JwtProperties;
 import com.sb.erp.global.security.JwtProvider;
+import com.sb.erp.global.security.LoginLockoutProperties;
 import com.sb.erp.global.security.PasswordPolicy;
 import com.sb.erp.global.security.TokenStore;
 
@@ -64,6 +65,7 @@ public class AuthController {
 	private final TokenStore tokenStore;	// JMT 저장소
 	private final PasswordEncoder passEncoder;
 	private final LoginHistoryService loginHistoryService; // 로그인 성공/실패 이력 기록
+	private final LoginLockoutProperties lockoutProps;      // 로그인 시도 제한(계정 잠금) 설정
 	
 	@Autowired AuthService service;
 	@Autowired EmpService empService;
@@ -78,6 +80,16 @@ public class AuthController {
 
 	String clientIp = extractClientIp(request);
 	String userAgent = request.getHeader("User-Agent");
+
+	// 로그인 시도 제한(계정 잠금): 최근 N분 내 이 이메일로 M회 이상 실패했으면
+	// 비밀번호 검증 자체를 시도하지 않고 즉시 차단한다 (무차별 대입 공격 방어).
+	// 이 차단 시도 자체는 LoginHistory에 남기지 않는다 - 이미 쌓인 실패 이력으로 판단하는 것이라
+	// 여기서 추가로 남기면 잠금이 계속 연장되는 효과가 생겨 정상 사용자가 더 오래 묶일 수 있다.
+	long recentFailures = loginHistoryService.countRecentFailures(dto.getEmpEmail(), lockoutProps.getWindowMinutes());
+	if (recentFailures >= lockoutProps.getMaxAttempts()) {
+		return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+		.body(Map.of("error", "로그인 시도가 너무 많습니다. " + lockoutProps.getWindowMinutes() + "분 후 다시 시도해주세요."));
+	}
 
 	// readAuth는 사원이 없으면 예외를 던진다(IllegalArgumentException).
 	// 로그인 이력을 성공/실패 구분 없이 항상 남기고, 존재 여부와 무관하게 동일한

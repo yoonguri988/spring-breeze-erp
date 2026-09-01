@@ -20,10 +20,12 @@ import com.sb.erp.auth.entity.LoginHistory;
 import com.sb.erp.auth.repository.LoginHistoryRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true) // 조회가 대부분이므로 기본은 읽기 전용, 저장 메서드에서만 @Transactional로 오버라이드
+@Slf4j
 public class LoginHistoryService {
 
 	private final LoginHistoryRepository loginHistoryRepo;
@@ -48,7 +50,7 @@ public class LoginHistoryService {
 					.build();
 			loginHistoryRepo.save(history);
 		} catch (Exception e) {
-			System.err.println("[LoginHistoryService] 로그인 성공 이력 저장 실패: empEmail=" + empEmail + " err=" + e.getMessage());
+			log.error("[LoginHistoryService] 로그인 성공 이력 저장 실패: empEmail=" + empEmail, e);
 		}
 	}
 
@@ -66,8 +68,15 @@ public class LoginHistoryService {
 					.build();
 			loginHistoryRepo.save(history);
 		} catch (Exception e) {
-			System.err.println("[LoginHistoryService] 로그인 실패 이력 저장 실패: empEmail=" + empEmail + " err=" + e.getMessage());
+			log.error("[LoginHistoryService] 로그인 실패 이력 저장 실패: empEmail=" + empEmail, e);
 		}
+	}
+
+	// 로그인 시도 제한(계정 잠금)용 - 최근 windowMinutes분 내 해당 이메일의 실패 횟수
+	// AuthController#login에서 비밀번호 검증 전에 호출해 무차별 대입 공격을 차단하는 데 사용한다.
+	public long countRecentFailures(String empEmail, int windowMinutes) {
+		LocalDateTime after = LocalDateTime.now().minusMinutes(windowMinutes);
+		return loginHistoryRepo.countByEmpEmailAndStatusAndLoginAtAfter(empEmail, LoginHistory.STATUS_FAIL, after);
 	}
 
 	// 관리자용 로그인 이력 조회 (이메일/성공-실패/기간 검색 + 최신순 페이징)
