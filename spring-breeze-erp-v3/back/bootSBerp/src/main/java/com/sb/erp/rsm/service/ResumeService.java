@@ -30,9 +30,11 @@ import com.sb.erp.util.dto.FileUploadType;
 import com.sb.erp.util.dto.FileUploadUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ResumeService {
 	
     private final ResumeRepository resumeRepository;
@@ -118,7 +120,7 @@ public class ResumeService {
 
         } catch (IOException e) {
 
-            e.printStackTrace();
+            log.error("PDF 텍스트 추출 실패", e);
 
             FileUploadUtil.delete(uploadResult.getSavedPath());
 

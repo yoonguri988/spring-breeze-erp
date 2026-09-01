@@ -22,9 +22,11 @@ import com.sb.erp.rec.repository.spec.RecruitSpecs;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RecruitService {
 
     private final RecruitRepository recruitRepository;
@@ -44,7 +46,7 @@ public class RecruitService {
 
     // 관리자용 - 목록 (List로 딱 받기)
     public List<RecruitResponse> selectAll(RecruitSearchRequest search) { 
-    	 System.out.println("comId=" + search.getComId() + ", recStatus=[" + search.getRecStatus() + "]");
+    	 log.info("comId=" + search.getComId() + ", recStatus=[" + search.getRecStatus() + "]");
         Specification<Recruit> spec = RecruitSpecs.search(search.getComId(), search.getRecStatus(), search.getRecTitle());
         Pageable pageable = PageRequest.of(search.getPageIndex(), search.getOnepagelist(),Sort.by(Sort.Direction.DESC, "recStartDate"));
 

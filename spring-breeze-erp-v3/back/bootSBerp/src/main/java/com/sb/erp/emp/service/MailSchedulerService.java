@@ -11,9 +11,11 @@ import com.sb.erp.emp.dto.request.EmpRequest;
 import com.sb.erp.emp.repository.EmailSendLogMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MailSchedulerService {
 
     private final EmailSendLogMapper logMapper;
@@ -27,25 +29,25 @@ public class MailSchedulerService {
     @Scheduled(cron = "0 0 9 * * MON-FRI", zone = "Asia/Seoul")
     public void sendFollowup3DayEmails() {
         if (!followup3DayRunning.compareAndSet(false, true)) {
-            System.out.println("[MailScheduler] 3일 메일 배치 이미 실행 중 - 스킵");
+            log.info("[MailScheduler] 3일 메일 배치 이미 실행 중 - 스킵");
             return;
         }
         try {
-            System.out.println("[MailScheduler] === 3일 차 안부 메일 배치 시작 ===");
+            log.info("[MailScheduler] === 3일 차 안부 메일 배치 시작 ===");
             List<WelcomeMailTargetDto> targets = logMapper.selectFollowup3DayTargets();
 
             if (targets == null || targets.isEmpty()) {
-                System.out.println("[MailScheduler] 3일 메일 대상자 없음");
+                log.info("[MailScheduler] 3일 메일 대상자 없음");
                 return;
             }
 
-            System.out.println("[MailScheduler] 3일 메일 대상자 " + targets.size() + "명");
+            log.info("[MailScheduler] 3일 메일 대상자 " + targets.size() + "명");
             for (WelcomeMailTargetDto target : targets) {
                 // 개별 발송은 EmailService @Async로 위임 → 스레드 풀에서 병렬 처리
                 emailService.sendFollowup3DayMailAsync(target);
             }
 
-            System.out.println("[MailScheduler] === 3일 차 안부 메일 배치 종료 (예약 완료) ===");
+            log.info("[MailScheduler] === 3일 차 안부 메일 배치 종료 (예약 완료) ===");
         } finally {
             followup3DayRunning.set(false);
         }
@@ -61,19 +63,19 @@ public class MailSchedulerService {
     @Scheduled(cron = "0 30 1 * * ?", zone = "Asia/Seoul")
     public void sendWelcomeOrphans() {
         if (!welcomeOrphanRunning.compareAndSet(false, true)) {
-            System.out.println("[MailScheduler] 환영 메일 안전망 배치 이미 실행 중 - 스킵");
+            log.info("[MailScheduler] 환영 메일 안전망 배치 이미 실행 중 - 스킵");
             return;
         }
         try {
-            System.out.println("[MailScheduler] === 환영 메일 안전망 배치 시작 ===");
+            log.info("[MailScheduler] === 환영 메일 안전망 배치 시작 ===");
             List<WelcomeMailTargetDto> orphans = logMapper.selectWelcomeOrphans();
 
             if (orphans == null || orphans.isEmpty()) {
-                System.out.println("[MailScheduler] 환영 메일 누락자 없음");
+                log.info("[MailScheduler] 환영 메일 누락자 없음");
                 return;
             }
 
-            System.out.println("[MailScheduler] 환영 메일 누락자 " + orphans.size() + "명");
+            log.info("[MailScheduler] 환영 메일 누락자 " + orphans.size() + "명");
             for (WelcomeMailTargetDto orphan : orphans) {
                 // 안전망 배치: WelcomeMailTargetDto를 EmpRequest로 변환 후 위임
                 EmpRequest emp = new EmpRequest();
@@ -83,7 +85,7 @@ public class MailSchedulerService {
                 emailService.sendWelcomeMailAsync(emp);
             }
 
-            System.out.println("[MailScheduler] === 환영 메일 안전망 배치 종료 (예약 완료) ===");
+            log.info("[MailScheduler] === 환영 메일 안전망 배치 종료 (예약 완료) ===");
         } finally {
             welcomeOrphanRunning.set(false);
         }

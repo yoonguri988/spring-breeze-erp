@@ -15,9 +15,11 @@ import com.sb.erp.eval.repository.EvalMapper;
 import com.sb.erp.eval.repository.EvalPeriodMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EvalPeriodServiceImpl implements EvalPeriodService {
 
 	private final EvalPeriodMapper evalPeriodMapper;
@@ -60,12 +62,12 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 	public int openPeriod(long periodId, Long comId) {
 		PeriodResponse period = selectByPeriodId(periodId, comId);
 		if (period == null) {
-			System.err.println("[EvalPeriod] 개시 실패(-1): 회차 없음 periodId=" + periodId);
+			log.error("[EvalPeriod] 개시 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
 		}
 
 		if (!"READY".equals(period.getPeriodStatus())) {
-			System.err.println("[EvalPeriod] 개시 실패(-2): 허용되지 않은 상태 status="
+			log.error("[EvalPeriod] 개시 실패(-2): 허용되지 않은 상태 status="
 					+ period.getPeriodStatus() + " (READY만 가능) periodId=" + periodId);
 			return -2;
 		}
@@ -77,19 +79,19 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 	public int closePeriod(long periodId, Long comId) {
 		PeriodResponse period = selectByPeriodId(periodId, comId);
 		if (period == null) {
-			System.err.println("[EvalPeriod] 마감 실패(-1): 회차 없음 periodId=" + periodId);
+			log.error("[EvalPeriod] 마감 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
 		}
 
 		if (!"OPEN".equals(period.getPeriodStatus())) {
-			System.err.println("[EvalPeriod] 마감 실패(-2): 허용되지 않은 상태 status="
+			log.error("[EvalPeriod] 마감 실패(-2): 허용되지 않은 상태 status="
 					+ period.getPeriodStatus() + " (OPEN만 가능) periodId=" + periodId);
 			return -2;
 		}
 
 		int unsubmitted = evalMapper.countUnsubmittedByPeriod(periodId);
 		if (unsubmitted > 0) {
-			System.err.println("[EvalPeriod] 마감 실패(-3): 미제출 평가 " + unsubmitted
+			log.error("[EvalPeriod] 마감 실패(-3): 미제출 평가 " + unsubmitted
 					+ "건 존재 periodId=" + periodId);
 			return -3;
 		}
@@ -102,7 +104,7 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 	public int reportPeriod(long periodId, Long comId) {
 		PeriodResponse period = selectByPeriodId(periodId, comId);
 		if (period == null) {
-			System.err.println("[EvalPeriod] 리포트 개시 실패(-1): 회차 없음 periodId=" + periodId);
+			log.error("[EvalPeriod] 리포트 개시 실패(-1): 회차 없음 periodId=" + periodId);
 			return -1;
 		}
 
@@ -115,7 +117,7 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 		if (!"CLOSED".equals(status)
 				&& !"REPORTING_FAILED".equals(status)
 				&& !"REPORTED".equals(status)) {
-			System.err.println("[EvalPeriod] 리포트 개시 실패(-2): 허용되지 않은 상태 status=" + status
+			log.error("[EvalPeriod] 리포트 개시 실패(-2): 허용되지 않은 상태 status=" + status
 					+ " periodId=" + periodId);
 			return -2;
 		}

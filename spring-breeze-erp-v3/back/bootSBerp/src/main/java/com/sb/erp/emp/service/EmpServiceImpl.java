@@ -18,9 +18,11 @@ import com.sb.erp.emp.repository.EmpMapper;
 import com.sb.erp.perm.dto.response.EmpAuthResponse;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmpServiceImpl implements EmpService {
 
 	private final EmpMapper empMapper;
@@ -100,7 +102,7 @@ public class EmpServiceImpl implements EmpService {
 					} catch (Exception e) {
 						// 커밋 이후이므로 등록 자체는 이미 확정됨. 로그만.
 						// 만약 이 예외로 메일이 못 나가도 다음날 01:30 스케줄러가 복구.
-						System.err.println("[EmpService] 환영 메일 예약 실패: " + e.getMessage());
+						log.error("[EmpService] 환영 메일 예약 실패", e);
 					}
 				}
 			});

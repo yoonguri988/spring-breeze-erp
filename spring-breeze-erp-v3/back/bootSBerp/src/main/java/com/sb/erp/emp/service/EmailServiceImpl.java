@@ -13,6 +13,7 @@ import com.sb.erp.global.integration.EmailApi;
 import com.sb.erp.global.integration.NaverEmailApi;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 온보딩 이메일 발송 구현체.
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class EmailServiceImpl implements EmailService {
 
     private final EmailApi emailApi;
@@ -52,7 +54,7 @@ public class EmailServiceImpl implements EmailService {
         String comName  = DEFAULT_COM_NAME;
 
         if (empEmail == null || empEmail.isBlank()) {
-            System.err.println("[EmailService] 환영 메일 스킵: empId=" + empId + " 이메일 없음");
+            log.warn("[EmailService] 환영 메일 스킵: empId=" + empId + " 이메일 없음");
             return;
         }
 
@@ -65,16 +67,16 @@ public class EmailServiceImpl implements EmailService {
             emailApi.sendMail(subject, body, empEmail);
 
             logMapper.updateSuccess(empId, EmailSendLogDto.TYPE_WELCOME);
-            System.out.println("[EmailService] 환영 메일 성공 empId=" + empId);
+            log.info("[EmailService] 환영 메일 성공 empId=" + empId);
 
         } catch (Exception e) {
             String msg = truncate(e.getMessage(), 500);
             try {
                 logMapper.updateFail(empId, EmailSendLogDto.TYPE_WELCOME, msg);
             } catch (Exception logEx) {
-                System.err.println("[EmailService] 로그 업데이트 실패: " + logEx.getMessage());
+                log.error("[EmailService] 로그 업데이트 실패", logEx);
             }
-            System.err.println("[EmailService] 환영 메일 실패 empId=" + empId + " err=" + msg);
+            log.error("[EmailService] 환영 메일 실패 empId=" + empId, e);
         }
     }
 
@@ -90,7 +92,7 @@ public class EmailServiceImpl implements EmailService {
         String comName  = (target.getComName() != null) ? target.getComName() : DEFAULT_COM_NAME;
 
         if (empEmail == null || empEmail.isBlank()) {
-            System.err.println("[EmailService] 3일 메일 스킵: empId=" + empId + " 이메일 없음");
+            log.warn("[EmailService] 3일 메일 스킵: empId=" + empId + " 이메일 없음");
             return;
         }
 
@@ -103,16 +105,16 @@ public class EmailServiceImpl implements EmailService {
             emailApi.sendMail(subject, body, empEmail);
 
             logMapper.updateSuccess(empId, EmailSendLogDto.TYPE_FOLLOWUP_3DAY);
-            System.out.println("[EmailService] 3일 메일 성공 empId=" + empId);
+            log.info("[EmailService] 3일 메일 성공 empId=" + empId);
 
         } catch (Exception e) {
             String msg = truncate(e.getMessage(), 500);
             try {
                 logMapper.updateFail(empId, EmailSendLogDto.TYPE_FOLLOWUP_3DAY, msg);
             } catch (Exception logEx) {
-                System.err.println("[EmailService] 로그 업데이트 실패: " + logEx.getMessage());
+                log.error("[EmailService] 로그 업데이트 실패", logEx);
             }
-            System.err.println("[EmailService] 3일 메일 실패 empId=" + empId + " err=" + msg);
+            log.error("[EmailService] 3일 메일 실패 empId=" + empId, e);
         }
     }
     
@@ -124,7 +126,7 @@ public class EmailServiceImpl implements EmailService {
     @Async("mailExecutor")
     public void sendPasswordResetMailAsync(EmpResponse emp, String resetLink) {
         if (emp == null || emp.getEmpEmail() == null || emp.getEmpEmail().isBlank()) {
-            System.err.println("[EmailService] 비밀번호 재설정 메일 스킵: 이메일 없음");
+            log.warn("[EmailService] 비밀번호 재설정 메일 스킵: 이메일 없음");
             return;
         }
         try {
@@ -133,10 +135,9 @@ public class EmailServiceImpl implements EmailService {
             String body = MailTemplates.passwordResetBody(comName, emp.getEmpName(), resetLink);
 
             naverEmailApi.sendMail(subject, body, emp.getEmpEmail());
-            System.out.println("[EmailService] 비밀번호 재설정 메일 성공 empId=" + emp.getEmpId());
+            log.info("[EmailService] 비밀번호 재설정 메일 성공 empId=" + emp.getEmpId());
         } catch (Exception e) {
-            System.err.println("[EmailService] 비밀번호 재설정 메일 실패 empId=" + emp.getEmpId()
-                    + " err=" + e.getMessage());
+            log.error("[EmailService] 비밀번호 재설정 메일 실패 empId=" + emp.getEmpId(), e);
         }
     }
 

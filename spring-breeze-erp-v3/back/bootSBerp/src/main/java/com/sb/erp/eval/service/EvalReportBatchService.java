@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.sb.erp.eval.repository.EvalPeriodMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * AI 리포트 배치 오케스트레이터.
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EvalReportBatchService {
 
 	private final EvalReportService evalReportService;
@@ -34,30 +36,29 @@ public class EvalReportBatchService {
 	 */
 	@Async("reportExecutor")
 	public void runInBackground(long periodId, long comId) {
-		System.out.println("[ReportBatch] 시작 periodId=" + periodId);
+		log.info("[ReportBatch] 시작 periodId=" + periodId);
 
 		try {
 			int result = evalReportService.generateReports(periodId, comId);
 
 			if (result == 1) {
 				evalPeriodMapper.updateStatus(periodId, "REPORTED", comId);
-				System.out.println("[ReportBatch] 완료 periodId=" + periodId);
+				log.info("[ReportBatch] 완료 periodId=" + periodId);
 			} else {
 				evalPeriodMapper.updateStatus(periodId, "REPORTING_FAILED", comId);
-				System.err.println("[ReportBatch] 실패 코드 " + result + " ("
+				log.error("[ReportBatch] 실패 코드 " + result + " ("
 						+ describeGenerateResult(result) + ") periodId=" + periodId);
 			}
 
 		} catch (Exception e) {
 			// 예상 못한 예외 (네트워크, DB, OpenAI API 등) → REPORTING_FAILED
-			System.err.println("[ReportBatch] 예외 발생 periodId=" + periodId + " err=" + e.getMessage());
-			e.printStackTrace();
+			log.error("[ReportBatch] 예외 발생 periodId=" + periodId, e);
 			try {
 				evalPeriodMapper.updateStatus(periodId, "REPORTING_FAILED", comId);
 			} catch (Exception statusEx) {
 				// 상태 업데이트마저 실패 → DB 이상. 로그만 남기고 종료
 				// 회차는 REPORTING 상태에 방치됨. 수동 개입 필요
-				System.err.println("[ReportBatch] 상태 업데이트도 실패: " + statusEx.getMessage());
+				log.error("[ReportBatch] 상태 업데이트도 실패", statusEx);
 			}
 		}
 	}

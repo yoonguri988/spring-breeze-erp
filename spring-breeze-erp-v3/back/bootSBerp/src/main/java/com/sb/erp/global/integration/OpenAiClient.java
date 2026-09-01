@@ -13,8 +13,10 @@ import com.sb.erp.global.integration.openAi.ChatMessage;
 import com.sb.erp.global.integration.openAi.ChatRequest;
 import com.sb.erp.global.integration.openAi.ChatResponse;
 import com.sb.erp.global.integration.openAi.ReportContent;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class OpenAiClient {
 
     @Value("${jsj.openai.api.model}") private String model;
@@ -31,7 +33,7 @@ public class OpenAiClient {
     }
 
     public ReportContent generateReport(List<ChatMessage> messages) {
-    	System.out.println("[OpenAiClient] model=[" + model + "] length=" + model.length());
+    	log.info("[OpenAiClient] model=[" + model + "] length=" + model.length());
         try {
             ChatRequest request = new ChatRequest(
                 model,
@@ -41,7 +43,7 @@ public class OpenAiClient {
             );
             
          // ★ 디버그: 실제 전송 JSON 확인
-            System.out.println("[OpenAiClient] request JSON: " + objectMapper.writeValueAsString(request));
+            log.info("[OpenAiClient] request JSON: " + objectMapper.writeValueAsString(request));
 
             ChatResponse response = openAiRestClient.post()
                 .uri("/chat/completions")
@@ -51,14 +53,14 @@ public class OpenAiClient {
 
             String contentJson = (response == null) ? null : response.firstContent();
             if (contentJson == null || contentJson.isBlank()) {
-                System.err.println("[OpenAiClient] 응답 content가 비어있음");
+                log.error("[OpenAiClient] 응답 content가 비어있음");
                 return null;
             }
 
             return objectMapper.readValue(contentJson, ReportContent.class);
 
         } catch (Exception e) {
-            System.err.println("[OpenAiClient] GPT 호출 실패: " + e.getMessage());
+            log.error("[OpenAiClient] GPT 호출 실패", e);
             return null;
         }
     }
