@@ -85,6 +85,11 @@ public class Reservation {
 	
 	@Column(name="NOSHOW_ALERT_AT")
 	private LocalDateTime noshowAlertAt;
+
+	// 노쇼/미반납 알림 발송 시점에 함께 계산해서 남겨두는 "이력 기반 위험도" 스코어(0~1).
+	// 학습된 확률 모델의 출력이 아니라 규칙 기반 가중합 결과다. NoShowRiskScorer 참고.
+	@Column(name="RISK_SCORE")
+	private Double riskScore;
 }
 /*
 REV_ID          NOT NULL NUMBER        
@@ -101,6 +106,7 @@ APPROVED_AT              DATE
 REJECT_REASON            VARCHAR2(500) 
 REMARK                   VARCHAR2(255) 
 CREATED_AT      NOT NULL DATE          
-UPDATED_AT               DATE   
+UPDATED_AT               DATE
 noshow_alert_at          DATE
+risk_score               NUMBER(5,4)
 */

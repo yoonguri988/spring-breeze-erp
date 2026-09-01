@@ -13,6 +13,7 @@ import com.sb.erp.api.dto.response.ResvAlertResponse;
 import com.sb.erp.proj.service.ProjectService;
 import com.sb.erp.rec.repository.RecruitRepository;
 import com.sb.erp.resv.repository.ReservationMapper;
+import com.sb.erp.resv.service.NoShowRiskScorer;
 import com.sb.erp.week.dto.response.WeeklyReportResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -75,12 +76,21 @@ public class ApiScheduled {
 	 * ///////////////////////////////////////////////////////////
 	 * - end_dt가 지났는데 return_dt가 비어있는 차량/장비 예약 (반납 지연)
 	 * - start_dt는 지났지만 이용 흔적이 없는 회의실 예약 (노쇼 의심)
-	 * 위 두 케이스를 스케줄러가 주기적으로 조회 -> ChatGPT로 맞춤 문구 생성 -> CoolSMS 발송
+	 * 위 두 케이스를 스케줄러가 주기적으로 조회(룰 기반 트리거)
+	 *   -> NoShowRiskScorer로 이력 기반 위험도(0~1, 규칙 기반 가중합) 계산
+	 *   -> ChatGPT로 위험도에 맞는 어조의 맞춤 문구 생성 -> CoolSMS 발송
+	 *
+	 * 참고: "AI가 노쇼 확률을 예측한다"는 표현은 정확하지 않다. 실제로는
+	 *  (1) 알림 발송 여부 자체는 확정된 시간 경과를 보는 룰 기반 트리거이고,
+	 *  (2) 그 안에서의 상대적 위험도는 학습모델이 아닌 이력 기반 가중합 스코어이며,
+	 *  (3) GPT는 그 결과를 자연어 문구로 표현하는 역할만 한다.
+	 * 자세한 배경은 claude/no-show-risk-scoring-design.md 참고.
 	 */
-	
+
 	@Autowired private ReservationMapper resDao;
 	@Autowired private OpenAiReturnMsg apiReturnMsg;
 	@Autowired private ApiCoolSms apiCoolSms;
+	@Autowired private NoShowRiskScorer riskScorer;
 	
 	private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
  
@@ -119,9 +129,15 @@ public class ApiScheduled {
  
 		for (ResvAlertResponse dto : targets) {
 			try {
-				String message = buildAlertMessage(dto);
+				NoShowRiskScorer.RiskScoreResult risk = riskScorer.score(dto);
+				dto.setRiskScore(risk.score());
+				dto.setRiskLevel(risk.level());
+
+				String message = buildAlertMessage(dto, risk);
 				apiCoolSms.sendMessage(dto.getEmpMobile(), message);
-				resDao.updateAlertSent(dto.getRevId());
+				resDao.updateAlertSent(dto.getRevId(), risk.score());
+				log.info("노쇼 알림 발송 성공 - revId:{} riskLevel:{} riskScore:{}",
+						dto.getRevId(), risk.level(), risk.score());
 				success++;
 			} catch (Exception e) {
 				log.error("노쇼 알림 발송 실패 - revId: {}", dto.getRevId(), e);
@@ -138,15 +154,22 @@ public class ApiScheduled {
  
 	/**
 	 * ChatGPT에게 넘길 프롬프트를 구성하고, 실패 시를 대비한 fallback 문구도 함께 만든다.
+	 * risk(이력 기반 위험도)에 따라 문구의 어조(긴급도)만 살짝 조절한다 — 발송 여부 자체는
+	 * 이미 룰 기반 트리거로 확정된 뒤이므로 risk는 톤 조절 용도로만 쓰인다.
 	 */
-	private String buildAlertMessage(ResvAlertResponse dto) {
+	private String buildAlertMessage(ResvAlertResponse dto, NoShowRiskScorer.RiskScoreResult risk) {
 		boolean isRoom = "ROOM".equals(dto.getResType());
- 
+
+		String urgencyHint = "HIGH".equals(risk.level())
+				? "이 사원은 과거 이력상 위험도가 높은 편이니, 조금 더 단호하고 즉각 조치를 요청하는 어조로 작성해줘. "
+				: "";
+
 		String systemPrompt =
 				"너는 사내 ERP 시스템의 자원예약 담당 알림 봇이다. "
 				+ "정중하지만 아주 간결한 한국어 알림 메시지를 한 문장으로 작성한다. "
 				+ "문자메시지(SMS) 한 건 분량인 한글 40자 이내로 반드시 맞춘다. "
-				+ "이모지, 인사말, 불필요한 수식어는 쓰지 않는다.";
+				+ "이모지, 인사말, 불필요한 수식어는 쓰지 않는다. "
+				+ urgencyHint;
  
 		String userPrompt;
 		String fallback;
