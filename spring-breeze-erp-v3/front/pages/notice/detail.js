@@ -23,6 +23,9 @@ export default function NoticeDetailPage() {
   const { currentNotice: notice, loading, error, deleteSuccess } = useSelector(
     (state) => state.notice
   );
+  const user = useSelector((state) => state.auth.user);
+
+  const isAdmin = user?.roles?.includes("ROOT") || user?.roles?.includes("ROLE_ADMIN");
 
   const [fileObjUrl, setFileObjUrl] = useState(null);
 
@@ -177,14 +180,18 @@ if (fileObjUrl) {
         </div>
 
         <div className="sb-card__footer d-flex justify-content-end gap-2 mb-3 pe-3">
-          <Button type="default" className="btn btn-sb-soft" onClick={() => router.push(`/notice/edit?bno=${bno}`)}>
-            <i className="bi bi-pencil-square"></i>
-            {t("detail.editBtn")}
-          </Button>
-          <Button type="default" className="btn btn-outline-danger" loading={loading} onClick={handleDelete}>
-            <i className="bi bi-trash"></i>
-            {t("detail.deleteBtn")}
-          </Button>
+          {isAdmin && (
+            <Button type="default" className="btn btn-sb-soft" onClick={() => router.push(`/notice/edit?bno=${bno}`)}>
+              <i className="bi bi-pencil-square"></i>
+              {t("detail.editBtn")}
+            </Button>
+          )}
+          {isAdmin && (
+            <Button type="default" className="btn btn-outline-danger" loading={loading} onClick={handleDelete}>
+              <i className="bi bi-trash"></i>
+              {t("detail.deleteBtn")}
+            </Button>
+          )}
           <Button type="default" className="btn btn-sb" onClick={() => router.push("/notice/list")}>
             <i className="bi bi-list"></i>
             {t("detail.listBtn")}
