@@ -12,7 +12,7 @@ import com.sb.erp.pos.dto.response.PosResponse;
 public interface PosMapper {
 
 	// 회사별 직급 목록 (기존)
-	List<PosResponse> selectAll(long comId);
+	List<PosResponse> selectAll(Long comId);
 
 	// 직급 단건 조회 (수정 화면용, com_id 가드)
 	PosResponse selectOneById(@Param("posId") long posId, @Param("comId") long comId);

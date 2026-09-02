@@ -3,6 +3,7 @@ package com.sb.erp.eval.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,7 +86,7 @@ public class EvalController {
 		if (eval == null) return ResponseEntity.notFound().build();
 
 		Long loginEmpId = authUserJwtService.getCurrentEmpId(auth);
-		if (eval.getEvaluatorId() != loginEmpId && !isAdmin(auth)) {
+		if (!Objects.equals(eval.getEvaluatorId(), loginEmpId) && !isAdmin(auth)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "본인이 작성한 평가만 조회할 수 있습니다."));
 		}

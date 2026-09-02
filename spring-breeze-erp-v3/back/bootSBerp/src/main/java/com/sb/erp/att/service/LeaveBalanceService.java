@@ -2,12 +2,12 @@ package com.sb.erp.att.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +36,19 @@ public class LeaveBalanceService {
     private final LeaveGrantRepository leaveGrantRepository;
     private final AttendanceRepository attendanceRepository;
     private final EmpRepository empRepository;
-
+    
+    // ================================================================
+    //  0. 멀티테넌시 가드
+    // ================================================================
+    // 관리자가 empId만 알면 타사 사원의 연차를 조회/부여/차감하는 문제가 생길 수 있음
+    // 대시보드에 적용된 "본인 comId 기준 조회" 기준을 연차 도메인에도 동일하게 적용하기
+    private void assertSameCompany(Long empId, Long comId) {
+        if (empId == null || comId == null
+                || !empRepository.existsByEmpIdAndCompany_ComId(empId, comId)) {
+            throw new AccessDeniedException("다른 회사 사원의 연차 정보에는 접근할 수 없습니다.");
+        }
+    }
+    
     // ================================================================
     //  1. 조회
     // ================================================================
@@ -57,7 +69,10 @@ public class LeaveBalanceService {
     }
 
     // 특정 사원의 특정 연도 연차 잔여 조회 (단건)
-    public LeaveBalanceResponse getBalance(Long empId, Integer year) {
+    public LeaveBalanceResponse getBalance(Long empId, Integer year, Long comId) {
+        
+    	assertSameCompany(empId, comId);
+    	
         LeaveBalance balance = leaveBalanceRepository
                 .findByEmployee_EmpIdAndYear(empId, year)
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -67,7 +82,9 @@ public class LeaveBalanceService {
     }
 
     // 특정 사원의 부여/차감 이력 목록
-    public List<LeaveGrantResponse> getGrantHistory(Long empId) {
+    public List<LeaveGrantResponse> getGrantHistory(Long empId, Long comId) {
+    	
+    	assertSameCompany(empId, comId);
         return leaveGrantRepository.findByEmployee_EmpIdOrderByGrantedAtDesc(empId)
                 .stream()
                 .map(LeaveGrantResponse::from)
@@ -89,8 +106,9 @@ public class LeaveBalanceService {
      * 예 : 입사 6개월 → 6일, 입사 1년 → 15일, 입사 5년 → 17일, 입사 21년+ → 25일
      */
     @Transactional
-    public LeaveBalanceResponse calculateAnnual(Long empId, Integer year) {
+    public LeaveBalanceResponse calculateAnnual(Long empId, Long comId, Integer year) {
 
+    	assertSameCompany(empId, comId);
         Employee emp = empRepository.findById(empId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));
 
@@ -162,12 +180,15 @@ public class LeaveBalanceService {
     
     
 	// 재직 사원 연차 일괄 발생. 이미 부여된 사원은 건너뛴다.
+    @Transactional
     public int calculateAllForYear(Long comId, int year) {
+    	
         List<Long> empIds = empRepository.findActiveEmpIdsByComId(comId);
+        
         int count = 0;
         for (Long empId : empIds) {
             try {
-                calculateAnnual(empId, year);
+                calculateAnnual(empId, comId, year);
                 count++;
             } catch (IllegalArgumentException e) {
                 log.debug("[연차일괄] empId={} 건너뜀: {}", empId, e.getMessage());
@@ -178,17 +199,20 @@ public class LeaveBalanceService {
     }
     
     // 스케줄러용
+    @Transactional
     public int calculateAllForYear(int year) {
         List<Long> empIds = empRepository.findAllActiveEmpIds();
         int count = 0;
         for (Long empId : empIds) {
             try {
-                calculateAnnual(empId, year);
+                calculateAnnual(empId, comId, year);
                 count++;
             } catch (IllegalArgumentException e) {
-                // 이미 부여된 사원 건너뜀
+                // 이미 부여된 사원은 정상 스킵. 원인 추적용으로 로그는 남긴다.
+                log.debug("[연차일괄-스케줄러] empId={} 건너뜀: {}", empId, e.getMessage());
             }
         }
+        log.info("[연차일괄-스케줄러] year={}, 대상={}명, 처리={}명", year, empIds.size(), count);
         return count;
     }
 
@@ -198,8 +222,10 @@ public class LeaveBalanceService {
     // ================================================================
     // 연차 사용 차감 — leave_request 전자결재 승인 시 호출
     @Transactional
-    public LeaveGrantResponse deductLeave(Long empId, LeaveGrantRequest request) {
+    public LeaveGrantResponse deductLeave(Long empId, Long comId, LeaveGrantRequest request) {
 
+    	assertSameCompany(empId, comId);
+    	
         Employee emp = empRepository.findById(empId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));
         
@@ -289,9 +315,12 @@ public class LeaveBalanceService {
     // ================================================================
     // 관리자가 수동으로 연차를 부여하거나 차감
     @Transactional
-    public LeaveGrantResponse adjustLeave(LeaveGrantRequest request) {
+    public LeaveGrantResponse adjustLeave(Long comId, LeaveGrantRequest request) {
 
-        Employee emp = empRepository.findById(request.getEmpId())
+    	Long empId = request.getEmpId();
+    	assertSameCompany(empId, comId);
+    	
+        Employee emp = empRepository.findById(empId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));
 
         int currentYear = LocalDate.now().getYear();

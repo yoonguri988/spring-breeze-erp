@@ -62,8 +62,9 @@ public class LeaveBalanceController {
     @Operation(summary = "본인 연차 사용 이력")
     @GetMapping("/grant/my")
     public ResponseEntity<List<LeaveGrantResponse>> myGrantHistory(Authentication auth) {
-        Long empId = authUserJwtService.getCurrentEmpId(auth);
-        List<LeaveGrantResponse> list = leaveBalanceService.getGrantHistory(empId);
+        Long comId = authUserJwtService.getCurrentComId(auth);
+    	Long empId = authUserJwtService.getCurrentEmpId(auth);
+        List<LeaveGrantResponse> list = leaveBalanceService.getGrantHistory(empId, comId);
         return ResponseEntity.ok(list);
     }
     
@@ -82,15 +83,16 @@ public class LeaveBalanceController {
         return ResponseEntity.ok(list);
     }
 
-    // 관리자 — 특정 사원의 특정 연도 연차 단건 조회
     @Operation(summary = "사원 연차 단건 조회", description = "특정 사원의 특정 연도 연차 잔여 현황")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/balance/{empId}")
     public ResponseEntity<?> balance(
+            Authentication auth,
             @PathVariable("empId") Long empId,
             @Parameter(description = "조회 연도 (예: 2026)")
             @RequestParam("year") Integer year) {
-        LeaveBalanceResponse result = leaveBalanceService.getBalance(empId, year);
+        Long comId = authUserJwtService.getCurrentComId(auth);
+        LeaveBalanceResponse result = leaveBalanceService.getBalance(empId, year, comId);
         return ResponseEntity.ok(result);
     }
     
@@ -99,8 +101,12 @@ public class LeaveBalanceController {
     @Operation(summary = "연차 부여/차감 이력 조회", description = "특정 사원의 연차 부여 및 사용 이력")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/grant/{empId}")
-    public ResponseEntity<?> grantHistory(@PathVariable("empId") Long empId) {
-        List<LeaveGrantResponse> list = leaveBalanceService.getGrantHistory(empId);
+    public ResponseEntity<?> grantHistory(
+    		Authentication auth, 
+    		@PathVariable("empId") Long empId) {
+    	
+    	Long comId = authUserJwtService.getCurrentComId(auth);
+        List<LeaveGrantResponse> list = leaveBalanceService.getGrantHistory(empId, comId);
         return ResponseEntity.ok(list);
     }
 
@@ -113,12 +119,15 @@ public class LeaveBalanceController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/calculate/{empId}")
     public ResponseEntity<?> calculate(
+    		Authentication auth,
             @PathVariable("empId") Long empId,
             @Parameter(description = "발생 연도 (예: 2026)")
             @RequestParam("year") Integer year) {
-
+    	
+    	Long comId = authUserJwtService.getCurrentComId(auth);
+    	
     	try {
-            LeaveBalanceResponse result = leaveBalanceService.calculateAnnual(empId, year);
+            LeaveBalanceResponse result = leaveBalanceService.calculateAnnual(empId, comId, year);
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -133,7 +142,7 @@ public class LeaveBalanceController {
     public ResponseEntity<?> calculateAll(
             Authentication auth,
             @RequestParam("year") Integer year) {
-        Long comId = authUserJwtService.getCurrentComId(auth);  // ← 추가
+        Long comId = authUserJwtService.getCurrentComId(auth);
         int count = leaveBalanceService.calculateAllForYear(comId, year);
         return ResponseEntity.ok(Map.of(
             "message", year + "년 연차 일괄 발생 완료",
@@ -146,7 +155,8 @@ public class LeaveBalanceController {
     public ResponseEntity<?> deduct(
             Authentication auth,
             @Valid @RequestBody LeaveGrantRequest request) {
-
+    	
+    	Long comId = authUserJwtService.getCurrentComId(auth);
         // 본인 연차 사용 시 JWT empId를 강제 세팅
         // → 다른 사원의 연차를 본인이 차감하는 것을 방지
         Long empId = authUserJwtService.getCurrentEmpId(auth);
@@ -156,7 +166,7 @@ public class LeaveBalanceController {
             empId = request.getEmpId();
         }
 
-        LeaveGrantResponse result = leaveBalanceService.deductLeave(empId, request);
+        LeaveGrantResponse result = leaveBalanceService.deductLeave(empId, comId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 

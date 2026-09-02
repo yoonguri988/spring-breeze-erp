@@ -65,6 +65,8 @@ public class AttendanceService {
 			}else if("AM_HALF".equals(status)) {
 				throw new IllegalArgumentException("오전 반차가 등록된 날입니다.");
 				// 오전 출근만 반려, 오후 출근 허용해야함... 나중에...
+			}else if("PM_HALF".equals(status)) {
+				throw new IllegalArgumentException("오후 반차가 등록된 날입니다.");
 			}
 			throw new IllegalArgumentException("이미 출근 처리되었습니다.");
 		}
@@ -95,18 +97,26 @@ public class AttendanceService {
 	// 퇴근 check-out
 	@Transactional
 	public AttendanceResponse checkOut(Long empId) {
-		
+
 		// 금일 출근 기록 찾기
 		LocalDate today = LocalDate.now();
-		Attendance attendance = attendanceRepository
-								.findByEmployee_EmpIdAndAttDate(empId, today)
-								.orElseThrow(() -> new IllegalArgumentException("출근 기록이 없습니다."));
-		
+		Attendance attendance = attendanceRepository.findByEmployee_EmpIdAndAttDate(empId, today)
+				.orElseThrow(() -> new IllegalArgumentException("출근 기록이 없습니다."));
+
+		/*
+			연차/반차 행은 LeaveBalanceService.insertLeaveAttendance()가
+			checkIn=null로 생성한다. 아래 calculateWorkMinutes()와 119행의
+			getCheckIn().isAfter()가 NPE를 내므로 먼저 차단하기 
+		*/
+		if (attendance.getCheckIn() == null) {
+			throw new IllegalArgumentException("출근 기록이 없어 퇴근 처리할 수 없습니다.");
+		}
+
 		// 이미 퇴근처리 되었는지 확인
-		if(attendance.getCheckOut() != null) {
+		if (attendance.getCheckOut() != null) {
 			throw new IllegalArgumentException("이미 퇴근 처리되었습니다.");
 		}
-		
+
 		// 퇴근 시각 세팅
 		attendance.setCheckOut(LocalDateTime.now());
 
@@ -133,16 +143,16 @@ public class AttendanceService {
 	@Transactional
 	public AttendanceResponse createAtt(AttendanceRequest request) {
 		
-		// 근태 내용 중복 체크하기
-		long count = attendanceRepository.countByEmployee_EmpIdAndAttDate(request.getEmpId(), request.getAttDate());
+		// 등록된 사원이 맞는지/사번 맞는지 — 사원을 먼저 확정
+		Employee emp = empRepository.findByEmpNo(request.getEmpNo())
+				.orElseThrow(()-> new IllegalArgumentException("존재하지 않는 사원입니다."));
+		
+		// 확정된 emp의 empId 기준으로! request.getEmpId()를 쓰면 empNo와 어긋나거나 null일 때 체크가 무력화되어 중복 행이 생김
+		long count = attendanceRepository.countByEmployee_EmpIdAndAttDate(emp.getEmpId(), request.getAttDate());
 		
 		if(count > 0) {
 			throw new IllegalArgumentException("해당 날짜에 이미 근태 기록이 존재합니다.");
 		}
-		
-		// 등록된 사원이 맞는지/사번 맞는지
-		Employee emp = empRepository.findByEmpNo(request.getEmpNo())
-				.orElseThrow(()-> new IllegalArgumentException("존재하지 않는 사원입니다."));
 		
 		// 근태 없고 등록된 사원 맞으면 누락된 근태를 생성해주기
 		Attendance att = Attendance.builder()

@@ -11,6 +11,8 @@ import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 /* 
 
 ★HR 규정 안내 도우미
@@ -25,6 +27,7 @@ HR 규정 근거 조항을 바탕으로 사원 질문에 답하는 GPT 호출 �
 
 */
 @Component
+@Slf4j
 public class HrAiAnswerClient {
 
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
@@ -94,8 +97,12 @@ public class HrAiAnswerClient {
             return (content == null || content.isBlank()) ? null : content.trim();
 
         } catch (Exception e) {
-            // AI 호출 실패가 전체 기능을 막으면 안 됨
-            // null 반환 → HrAiChatService에서 fallback 메시지 처리
+            // AI 호출 실패가 전체 기능을 막으면 안 됨 → null 반환은 유지하되,
+            // 로그를 남기지 않으면 OpenAI 장애/키 만료/rate limit이
+            // "규정에 근거 없음"과 구분되지 않아 운영 모니터링에 안 잡힌다.
+            // 질문 원문에는 개인정보가 섞일 수 있으므로 길이만 기록한다.
+            log.error("[HrAiAnswer] GPT 호출 실패 model={}, questionLen={}",
+                    model, question == null ? 0 : question.length(), e);
             return null;
         }
     }

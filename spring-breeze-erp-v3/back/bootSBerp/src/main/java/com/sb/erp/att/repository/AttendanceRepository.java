@@ -46,6 +46,10 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	
 	// 출근 기록
 	Optional<Attendance> findByEmployee_EmpIdAndAttDate(Long empId, LocalDate attDate);
+	
+	// ── 멀티테넌시 검증용 ──
+	// attId만으로 타사 근태를 수정하지 못하도록 comId를 조회 조건에 함께 기재
+	Optional<Attendance> findByAttIdAndEmployee_Company_ComId(Long attId, Long comId);
 
 	
 	// 급여 산정(고정연장수당, sal 모듈 OvertimeAllowanceCalculator)용 - 기간 내 연장근로시간(분) 합계.

@@ -2,6 +2,7 @@ package com.sb.erp.eval.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -91,7 +92,9 @@ public class EvalReportController {
 		if (report == null) return ResponseEntity.notFound().build();
 
 		Long loginEmpId = authUserJwtService.getCurrentEmpId(auth);
-		if (report.getEmpId() != loginEmpId && !isAdmin(auth)) {
+		// ★ Long끼리 !=는 참조 비교. Long.valueOf 캐시(-128~127) 밖에서는
+		// 값이 같아도 항상 true가 되어 본인 리포트에도 403이 나타난다.
+		if (!Objects.equals(report.getEmpId(), loginEmpId) && !isAdmin(auth)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 					.body(Map.of("message", "본인 리포트만 조회할 수 있습니다."));
 		}
