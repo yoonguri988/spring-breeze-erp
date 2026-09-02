@@ -16,6 +16,8 @@ export default function NoticeListPage() {
   const { notices = [], noticesPaging, totalCnt = 0, loading, error } = useSelector((state) => state.notice);
   const [keyword, setKeyword] = useState("");
   const [sortBy, setSortBy] = useState("new");
+  const user = useSelector((state) => state.auth.user);
+  const isAdmin = user?.roles?.includes("ROOT") || user?.roles?.includes("ROLE_ADMIN");
 
   // 목록 조회
   useEffect(() => {
@@ -119,9 +121,11 @@ export default function NoticeListPage() {
           <p>{t("list.subtitle")}</p>
         </div>
         <div className="sb-page-head__actions my-3">
-          <Link href="/notice/write">
-            <Button type="primary" size="small" icon={<PlusOutlined />}>{t("list.writeBtn")}</Button>
-          </Link>
+          {isAdmin && (
+            <Link href="/notice/write">
+              <Button type="primary" size="small" icon={<PlusOutlined />}>{t("list.writeBtn")}</Button>
+            </Link>
+          )}
         </div>
       </div>
 

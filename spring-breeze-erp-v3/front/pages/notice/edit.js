@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-
+import axios from "../../api/axios.js";
 import { Button, Input, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
@@ -73,11 +73,27 @@ export default function NoticeEditPage() {
   const handleChange = ({ fileList }) => {
     setFileList(fileList);
   };
-
-  const attExt = notice?.bfile ? notice.bfile.split(".").pop().toLowerCase() : null;
-  const isImage = ["png", "jpg", "jpeg", "gif", "webp"].includes(attExt);
-  const fileUrl = notice?.bfile ? `${API_BASE}${notice.bfile}` : null;
-
+  const handleFilePreview = async () => {
+    try {
+      const res = await axios.get(fileUrl, { responseType: "blob" });
+      const blobUrl = URL.createObjectURL(res.data);
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      message.error(t("edit.fileLoadError") || "파일을 불러올 수 없습니다.");
+    }
+  };
+const bfileName = notice?.bfile ? notice.bfile.split("|")[0] : null;
+const attExt = bfileName ? bfileName.split(".").pop().toLowerCase() : null;
+const isImage = ["png", "jpg", "jpeg", "gif", "webp"].includes(attExt);
+const fileUrl = notice?.bfile ? `${API_BASE}/api/notice/${bno}/file` : null;
+const [imgSrc, setImgSrc] = useState(null);
+useEffect(() => {
+  if (isImage && fileUrl) {
+    axios.get(fileUrl, { responseType: "blob" })
+      .then((res) => setImgSrc(URL.createObjectURL(res.data)))
+      .catch(() => setImgSrc(null));
+  }
+}, [isImage, fileUrl]);
   return (
     <main className="sb-content">
       <div className="sb-page-head">
@@ -131,17 +147,21 @@ export default function NoticeEditPage() {
                   <div className="mt-1">
                     {isImage ? (
                       <img
-                        src={fileUrl}
-                        alt={notice.btitle}
+                        src={imgSrc}
+                        alt={bfileName}
                         className="img-fluid rounded"
                         style={{ maxWidth: 200 }}
                       />
-                    ) : (
-                      <a href={fileUrl} className="btn btn-sb-soft btn-sm" target="_blank" rel="noopener noreferrer">
-                        <i className="bi bi-paperclip"></i>
-                        {t("edit.viewFileBtn", { ext: attExt })}
-                      </a>
-                    )}
+                  ) : (
+                    <Button
+                      type="default"
+                      className="btn btn-sb-soft btn-sm"
+                      icon={<i className="bi bi-paperclip"></i>}
+                      onClick={handleFilePreview}
+                    >
+                      {t("edit.viewFileBtn", { ext: attExt })}
+                    </Button>
+                  )}
                   </div>
                   <div className="form-text">{t("edit.fileReplaceNote")}</div>
                 </div>
