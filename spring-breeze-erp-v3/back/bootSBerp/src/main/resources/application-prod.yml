@@ -21,6 +21,7 @@ spring:
         # 운영 로그에 매 쿼리의 SQL 원문이 그대로 남지 않도록 끈다.
         format_sql: false
         show_sql: false
+        default_batch_fetch_size: 100
 
 logging:
   level:

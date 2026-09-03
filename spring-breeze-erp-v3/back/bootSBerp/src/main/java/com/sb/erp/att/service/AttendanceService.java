@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -141,13 +142,19 @@ public class AttendanceService {
 	
 	// 누락된 근태가 있을 경우 관리자가 새로운 근태 내용 작성
 	@Transactional
-	public AttendanceResponse createAtt(AttendanceRequest request) {
+	public AttendanceResponse createAtt(AttendanceRequest request, Long comId) {
 		
-		// 등록된 사원이 맞는지/사번 맞는지 — 사원을 먼저 확정
+		// 등록된 사원이 맞는지/사번 맞는지 — 사원을 먼저 확정한다
+		// ★ empNo는 회사 내에서만 유니크하므로, comId 검증 없이는
+		//   타사 사원의 근태를 등록할 수 있다
 		Employee emp = empRepository.findByEmpNo(request.getEmpNo())
 				.orElseThrow(()-> new IllegalArgumentException("존재하지 않는 사원입니다."));
 		
-		// 확정된 emp의 empId 기준으로! request.getEmpId()를 쓰면 empNo와 어긋나거나 null일 때 체크가 무력화되어 중복 행이 생김
+		if (!empRepository.existsByEmpIdAndCompany_ComId(emp.getEmpId(), comId)) {
+			throw new AccessDeniedException("다른 회사 사원의 근태는 등록할 수 없습니다.");
+		}
+		
+		// ★ 중복 체크는 확정된 emp의 empId 기준으로.
 		long count = attendanceRepository.countByEmployee_EmpIdAndAttDate(emp.getEmpId(), request.getAttDate());
 		
 		if(count > 0) {
@@ -176,10 +183,11 @@ public class AttendanceService {
 	
 	// 관리자 보정 쓰기 attId, AttendanceRequest AttendanceResponse
 	@Transactional
-	public AttendanceResponse editAtt(Long attId, AttendanceRequest request) {
+	public AttendanceResponse editAtt(Long attId, AttendanceRequest request, Long comId) {
 
-		// 수정할 근태 기록 찾기(attId)
-		Attendance attendance = attendanceRepository.findById(attId)
+		// 수정할 근태 기록 찾기 + 타사 근태 수정 차단
+		Attendance attendance = attendanceRepository
+				.findByAttIdAndEmployee_Company_ComId(attId, comId)
 				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 근태 기록입니다."));
 
 		// request 시간으로 덮어쓰기

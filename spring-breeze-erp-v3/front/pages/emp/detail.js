@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Row, Col, Card, Button, Tag, Avatar, Descriptions, Modal, Form, Input, message, } from "antd";
+import { Row, Col, Card, Button, Tag, Avatar, Descriptions, Modal, Form, Input, message, Alert, } from "antd";
 import { ArrowLeftOutlined, EditOutlined, KeyOutlined, SafetyCertificateOutlined, } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
@@ -290,6 +290,16 @@ export default function EmpDetailPage() {
         </Card>
       )}
 
+            {/* 본인이지만 관리자가 아닌 경우 안내 */}
+      {isSelf && !isAdmin && (
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message={t("detail.editRequestNotice")}
+        />
+      )}
+
       {/* 하단 버튼 */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
         {isAdmin && (
@@ -321,13 +331,16 @@ export default function EmpDetailPage() {
             {t("detail.changePasswordBtn")}
           </Button>
         )}
-        <Link
-          href={{ pathname: "/emp/edit", query: { empId } }}
-        >
-          <Button type="primary" icon={<EditOutlined />}>
-            {t("detail.editBtn")}
-          </Button>
-        </Link>
+        {/* 정보 수정은 관리자만. 사원은 관리자에게 요청한다. */}
+        {isAdmin && (
+          <Link
+            href={{ pathname: "/emp/edit", query: { empId } }}
+          >
+            <Button type="primary" icon={<EditOutlined />}>
+              {t("detail.editBtn")}
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* ── 비밀번호 변경 모달 (본인) ── */}

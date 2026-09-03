@@ -134,8 +134,10 @@ public class EmpController {
 	}
 
 
-	// ─── 사원 정보 수정 ───────────────────────────────
-	@Operation(summary = "사원 정보 수정")
+	// ─── 사원 정보 수정 (관리자 전용) ───────────────────
+	// 정책: 사원은 본인 정보를 직접 수정할 수 없다. 관리자에게 요청하여 수정한다.
+	// 비밀번호 변경(editPassword)만 본인이 직접 수행한다.
+	@Operation(summary = "사원 정보 수정 (관리자)")
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{empId}")
 	public ResponseEntity<?> edit(
@@ -144,24 +146,8 @@ public class EmpController {
 			@RequestBody EmpRequest request) {
 
 		Long comId = authUserJwtService.getCurrentComId(auth);
-		Long loginEmpId = authUserJwtService.getCurrentEmpId(auth);
-		boolean isAdmin = isAdmin(auth);
-
-		if (empId != loginEmpId && !isAdmin) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-					.body(Map.of("message", "수정 권한이 없습니다."));
-		}
 
 		request.setEmpId(empId);
-
-		// 일반 사원이 관리자 전용 필드를 변경하지 못하도록 보정
-		if (!isAdmin) {
-			EmpResponse current = empService.selectByEmpId(empId, comId);
-			request.setEmpName(current.getEmpName());
-			request.setDeptId(current.getDeptId());
-			request.setPosId(current.getPosId());
-			request.setEmpStatus(current.getEmpStatus());
-		}
 
 		empService.update(request, comId);
 		EmpResponse updated = empService.selectByEmpId(empId, comId);

@@ -82,7 +82,8 @@ public class EvalController {
 	public ResponseEntity<?> detail(
 			Authentication auth,
 			@PathVariable("evalId") long evalId) {
-		EvalResponse eval = evalService.selectByEvalId(evalId);
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		EvalResponse eval = evalService.selectByEvalId(evalId, comId);
 		if (eval == null) return ResponseEntity.notFound().build();
 
 		Long loginEmpId = authUserJwtService.getCurrentEmpId(auth);

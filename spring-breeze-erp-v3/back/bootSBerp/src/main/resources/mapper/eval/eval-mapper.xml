@@ -47,25 +47,20 @@
 	<!-- 평가 단건 조회 (수정 폼용) -->
 	<select id="selectByEvalId" resultType="com.sb.erp.eval.dto.response.EvalResponse">
 		select
-		pe.eval_id as
-		evalId,
+		pe.eval_id as evalId,
 		pe.period_id as periodId,
 		pe.target_emp_id as targetEmpId,
 		pe.evaluator_id as evaluatorId,
 		pe.eval_type as evalType,
 		pe.score_performance as scorePerformance,
-		pe.score_expertise as
-		scoreExpertise,
+		pe.score_expertise as scoreExpertise,
 		pe.score_teamwork as scoreTeamwork,
-		pe.score_attitude as
-		scoreAttitude,
+		pe.score_attitude as scoreAttitude,
 		pe.score_growth as scoreGrowth,
-		pe.weighted_score as
-		weightedScore,
+		pe.weighted_score as weightedScore,
 		pe.strength_comment as strengthComment,
 		pe.improvement_comment as improvementComment,
-		pe.eval_status as
-		evalStatus,
+		pe.eval_status as evalStatus,
 		TO_CHAR(pe.created_at, 'YYYY-MM-DD') as createdAt,
 		TO_CHAR(pe.updated_at, 'YYYY-MM-DD') as updatedAt,
 		p.title as
@@ -79,18 +74,14 @@
 		evaluator.emp_name as evaluatorName,
 		evPos.pos_name as evaluatorPosName
 		from performance_evaluation pe
-		join evaluation_period p on pe.period_id
-		= p.period_id
+		join evaluation_period p on pe.period_id = p.period_id
 		join employee emp on pe.target_emp_id = emp.emp_id
-		join
-		department dept on emp.dept_id = dept.dept_id
-		join emp_position pos on
-		emp.pos_id = pos.pos_id
-		join employee evaluator on pe.evaluator_id =
-		evaluator.emp_id
-		join emp_position evPos on evaluator.pos_id =
-		evPos.pos_id
+		join department dept on emp.dept_id = dept.dept_id
+		join emp_position pos on emp.pos_id = pos.pos_id
+		join employee evaluator on pe.evaluator_id = evaluator.emp_id
+		join emp_position evPos on evaluator.pos_id = evPos.pos_id
 		where pe.eval_id = #{evalId}
+		and emp.com_id = #{comId}
 	</select>
 
 	<!-- 회차 내 특정 대상+평가자+유형 조합 조회 -->

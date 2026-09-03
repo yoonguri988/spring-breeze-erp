@@ -136,7 +136,14 @@ public class EvalPeriodServiceImpl implements EvalPeriodService {
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 			@Override
 			public void afterCommit() {
-				evalReportBatchService.runInBackground(periodId, finalComId);
+				// 배치 제출 자체가 실패하면(스레드풀 거부 등) 회차가 REPORTING에서 멈춤
+				// REPORTING_FAILED 상태를 둔 이유가 이 데드락이므로 여기서도 동일하게 처리하기
+				try {
+					evalReportBatchService.runInBackground(periodId, finalComId);
+				} catch (Exception e) {
+					log.error("[EvalPeriod] 배치 개시 실패 periodId={}", periodId, e);
+					evalPeriodMapper.updateStatus(periodId, "REPORTING_FAILED", finalComId);
+				}
 			}
 		});
 
