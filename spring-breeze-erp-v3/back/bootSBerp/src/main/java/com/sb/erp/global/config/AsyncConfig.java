@@ -56,7 +56,11 @@ public class AsyncConfig {
         executor.setMaxPoolSize(2);
         executor.setQueueCapacity(10);
         executor.setThreadNamePrefix("ReportBatch-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        /* ★ mailExecutor와 달리 여기서는 CallerRunsPolicy를 사용하면 안 된다
+        	호출 스레드 = afterCommit이 실행되는 HTTP 요청 스레드이므로
+        	AI 배치 전체가 요청 스레드에서 동기 실행되어 타임아웃 발생
+        	거부 시 예외를 던지고 EvalPeriodServiceImpl이 REPORTING_FAILED로 복구 */
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(60);
         executor.initialize();

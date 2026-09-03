@@ -25,12 +25,27 @@ export default function EmpAddPage() {
   const { posList } = useSelector((state) => state.pos);
   const { flatList } = useSelector((state) => state.dept);
 
+  const isAdmin = user?.roles?.includes("ROLE_ADMIN");
+
+  // 관리자 전용 페이지. 주소창으로 직접 진입한 경우 목록으로 되돌린다.
+  // user가 아직 없으면 인증 정보 로딩 중이므로 판단을 미룬다.
+  useEffect(() => {
+    if (!user) return;
+    if (!isAdmin) {
+      message.warning(t("add.adminOnlyMsg"));
+      router.replace("/emp/list");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isAdmin]);
+
   // 직급, 부서 목록 로드
   useEffect(() => {
+    if (user && !isAdmin) return;   // 비관리자에게는 조회 요청도 보내지 않는다
     dispatch(listPosRequest());
     dispatch(fetchDeptFlatRequest(user?.comId));
     return () => { dispatch(resetEmpState()); };
-  }, [dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, user, isAdmin]);
 
   // 등록 성공 시 목록으로 이동
   useEffect(() => {
@@ -68,6 +83,9 @@ export default function EmpAddPage() {
       dispatch(createEmpRequest(data));
     } catch (e) {}
   };
+
+  // 리다이렉트 직전 폼이 깜빡이는 것을 방지
+  if (user && !isAdmin) return null;
 
   //////
   return (

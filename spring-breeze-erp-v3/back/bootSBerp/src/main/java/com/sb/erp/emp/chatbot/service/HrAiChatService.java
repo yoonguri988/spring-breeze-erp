@@ -104,7 +104,8 @@ public class HrAiChatService {
 			// 1위 유사도 대비 50% 미만인 청크는 노이즈로 간주하여 제거
 			if (!top.isEmpty()) {
 				double best = top.get(0).similarity();
-				double cutoff = best * MIN_RELEVANT_RATIO;
+				// best가 음수일 경우 best*0.5가 best보다 커져서 1위 청크까지 필터에서 탈락함
+				double cutoff = (best > 0) ? best * MIN_RELEVANT_RATIO : best;
 				top = top.stream().filter(sc -> sc.similarity() >= cutoff).toList();
 			}
         }

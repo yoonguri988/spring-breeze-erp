@@ -11,7 +11,6 @@ import com.sb.erp.resv.dto.response.ResvResponse;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Builder

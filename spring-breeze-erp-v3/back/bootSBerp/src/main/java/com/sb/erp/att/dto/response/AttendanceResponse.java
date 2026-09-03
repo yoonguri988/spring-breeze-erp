@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.sb.erp.att.entity.Attendance;
+import com.sb.erp.emp.entity.Employee;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -36,9 +37,12 @@ public class AttendanceResponse {
         res.overtimeMinutes = att.getOvertimeMinutes();
         res.nightMinutes = att.getNightMinutes();
         res.attStatus = att.getAttStatus();
-        res.empId = att.getEmployee().getEmpId();
-        res.empName = att.getEmployee().getEmpName();
-        res.empNo = att.getEmployee().getEmpNo();
+
+        Employee emp = att.getEmployee();
+        res.empId = emp.getEmpId();
+        res.empName = emp.getEmpName();
+        res.empNo = emp.getEmpNo();
+        res.deptName = (emp.getDepartment() != null) ? emp.getDepartment().getDeptName() : null;
         return res;
     }
 

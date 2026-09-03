@@ -23,6 +23,7 @@ import com.sb.erp.auth.service.AuthUserJwtService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -86,9 +87,12 @@ public class AttendanceController {
 	@Operation(summary = "관리자 근태 등록")
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/admin")
-	public ResponseEntity<?> create(@RequestBody AttendanceRequest request){
+	public ResponseEntity<?> create(
+			Authentication auth,
+			@Valid @RequestBody AttendanceRequest request){
+		Long comId = authUserJwtService.getCurrentComId(auth);
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(attendanceService.createAtt(request));
+				.body(attendanceService.createAtt(request, comId));
 	}
 	
 	
@@ -97,9 +101,11 @@ public class AttendanceController {
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{attId}")
 	public ResponseEntity<?> edit(
+			Authentication auth,
 			@PathVariable("attId") Long attId,
-			@RequestBody AttendanceRequest request) {
-		AttendanceResponse updated = attendanceService.editAtt(attId, request);
+			@Valid @RequestBody AttendanceRequest request) {
+		Long comId = authUserJwtService.getCurrentComId(auth);
+		AttendanceResponse updated = attendanceService.editAtt(attId, request, comId);
 		return ResponseEntity.ok(updated);
 	}
 }

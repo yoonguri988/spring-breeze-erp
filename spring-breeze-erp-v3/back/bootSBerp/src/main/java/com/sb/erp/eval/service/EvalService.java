@@ -13,7 +13,7 @@ public interface EvalService {
 	List<EvalResponse> selectTargetsByEvaluator(long periodId, Long evaluatorId);
 
 	// 평가 단건 조회 (수정 폼용)
-	EvalResponse selectByEvalId(long evalId);
+	EvalResponse selectByEvalId(long evalId, Long comId);
 
 	// 회차 내 전체 평가 (관리자용)
 	List<EvalResponse> selectByPeriodId(long periodId);

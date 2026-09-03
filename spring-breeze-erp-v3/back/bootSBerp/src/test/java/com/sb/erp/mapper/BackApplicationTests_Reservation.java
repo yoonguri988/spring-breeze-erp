@@ -464,7 +464,7 @@ class BackApplicationTests_Reservation {
 				.extracting("revId")
 				.contains(savedResvId);
 
-		int updated = resvMapper.updateAlertSent(savedResvId);
+		int updated = resvMapper.updateAlertSent(savedResvId, null);
 		assertThat(updated).isEqualTo(1);
 
 		// noshow_alert_at이 세팅되면 알림 대상 조회에서 제외되어야 한다

@@ -2,12 +2,12 @@ package com.sb.erp.att.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +36,15 @@ public class LeaveBalanceService {
     private final LeaveGrantRepository leaveGrantRepository;
     private final AttendanceRepository attendanceRepository;
     private final EmpRepository empRepository;
-
+    
+    //  본인 comId - 조회 조건을 연차 도메인에도 동일하게 적용하기
+    private void assertSameCompany(Long empId, Long comId) {
+        if (empId == null || comId == null
+                || !empRepository.existsByEmpIdAndCompany_ComId(empId, comId)) {
+            throw new AccessDeniedException("다른 회사 사원의 연차 정보에는 접근할 수 없습니다.");
+        }
+    }
+    
     // ================================================================
     //  1. 조회
     // ================================================================
@@ -57,7 +65,9 @@ public class LeaveBalanceService {
     }
 
     // 특정 사원의 특정 연도 연차 잔여 조회 (단건)
-    public LeaveBalanceResponse getBalance(Long empId, Integer year) {
+    public LeaveBalanceResponse getBalance(Long empId, Integer year, Long comId) {
+        assertSameCompany(empId, comId);
+
         LeaveBalance balance = leaveBalanceRepository
                 .findByEmployee_EmpIdAndYear(empId, year)
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -67,6 +77,13 @@ public class LeaveBalanceService {
     }
 
     // 특정 사원의 부여/차감 이력 목록
+    // comId는 관리자 조회 경로에서만!
+    // 본인 조회(myGrantHistory)는 JWT empId를 그대로 쓰므로 아래 오버로드를 사용한다.
+    public List<LeaveGrantResponse> getGrantHistory(Long empId, Long comId) {
+        assertSameCompany(empId, comId);
+        return getGrantHistory(empId);
+    }
+
     public List<LeaveGrantResponse> getGrantHistory(Long empId) {
         return leaveGrantRepository.findByEmployee_EmpIdOrderByGrantedAtDesc(empId)
                 .stream()
@@ -88,12 +105,24 @@ public class LeaveBalanceService {
      *   └─────────────────────────────────────────────────────────┘
      * 예 : 입사 6개월 → 6일, 입사 1년 → 15일, 입사 5년 → 17일, 입사 21년+ → 25일
      */
+    
+    // 관리자가 특정 사원에게 연차를 부여할 때. comId 검증
     @Transactional
-    public LeaveBalanceResponse calculateAnnual(Long empId, Integer year) {
+    public LeaveBalanceResponse calculateAnnual(Long empId, Integer year, Long comId) {
+       
+    	assertSameCompany(empId, comId);
+    	// 같은 회사 소속이 맞다면 grantAnnual 실행
+        
+        return grantAnnual(empId, year);
+    }
 
+    // 내부 코어 — 검증 없음. 일괄 배치(calculateAllForYear)에서만 직접 호출
+    // 배치는 이미 comId 또는 전사 범위로 대상을 확정해서 넘기므로 재검증이 불필요
+    // 사원 수만큼 검증 쿼리가 추가되는 것도 피함
+    private LeaveBalanceResponse grantAnnual(Long empId, Integer year) {
         Employee emp = empRepository.findById(empId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));
-
+        
         // ── 중복 부여 방지 ──
         // 해당 연도에 이미 REG 타입 이력이 있으면 중복 발생 차단
         // balance 테이블에서 이미 해당 연도 행이 있고, totalDays > 0 이면 중복
@@ -162,12 +191,15 @@ public class LeaveBalanceService {
     
     
 	// 재직 사원 연차 일괄 발생. 이미 부여된 사원은 건너뛴다.
+    @Transactional
     public int calculateAllForYear(Long comId, int year) {
+        
+    	// 대상 자체를 comId로 좁히므로 사원별 재검증 불필요
         List<Long> empIds = empRepository.findActiveEmpIdsByComId(comId);
         int count = 0;
         for (Long empId : empIds) {
             try {
-                calculateAnnual(empId, year);
+                grantAnnual(empId, year);
                 count++;
             } catch (IllegalArgumentException e) {
                 log.debug("[연차일괄] empId={} 건너뜀: {}", empId, e.getMessage());
@@ -177,18 +209,20 @@ public class LeaveBalanceService {
         return count;
     }
     
-    // 스케줄러용
+    // 스케줄러용 — 전사 대상/comId 검증X
+    @Transactional
     public int calculateAllForYear(int year) {
         List<Long> empIds = empRepository.findAllActiveEmpIds();
         int count = 0;
         for (Long empId : empIds) {
             try {
-                calculateAnnual(empId, year);
+                grantAnnual(empId, year);
                 count++;
             } catch (IllegalArgumentException e) {
-                // 이미 부여된 사원 건너뜀
+                log.debug("[연차일괄-스케줄러] empId={} 건너뜀: {}", empId, e.getMessage());
             }
         }
+        log.info("[연차일괄-스케줄러] year={}, 대상={}명, 처리={}명", year, empIds.size(), count);
         return count;
     }
 
@@ -196,6 +230,16 @@ public class LeaveBalanceService {
     // ================================================================
     //  3. 연차 사용 차감
     // ================================================================
+    // 연차 사용 차감 — leave_request 전자결재 승인 시 호출
+    // 관리자 대행 차감 경로 — comId 검증 포함
+    // 파라미터 버전은 ApprDocServiceImpl(전자결재 승인)에서 호출하므로 시그니처를 유지
+    // 결재 경로는 문서의 empId가 이미 같은 회사 내에서 확정된 값이라 별도 검증이 불필요
+    @Transactional
+    public LeaveGrantResponse deductLeave(Long empId, LeaveGrantRequest request, Long comId) {
+        assertSameCompany(empId, comId);
+        return deductLeave(empId, request);
+    }
+
     // 연차 사용 차감 — leave_request 전자결재 승인 시 호출
     @Transactional
     public LeaveGrantResponse deductLeave(Long empId, LeaveGrantRequest request) {
@@ -289,7 +333,9 @@ public class LeaveBalanceService {
     // ================================================================
     // 관리자가 수동으로 연차를 부여하거나 차감
     @Transactional
-    public LeaveGrantResponse adjustLeave(LeaveGrantRequest request) {
+    public LeaveGrantResponse adjustLeave(LeaveGrantRequest request, Long comId) {
+
+        assertSameCompany(request.getEmpId(), comId);
 
         Employee emp = empRepository.findById(request.getEmpId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));

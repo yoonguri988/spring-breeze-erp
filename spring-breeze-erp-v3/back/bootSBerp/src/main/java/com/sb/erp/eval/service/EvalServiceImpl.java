@@ -35,8 +35,8 @@ public class EvalServiceImpl implements EvalService {
 	}
 
 	@Override
-	public EvalResponse selectByEvalId(long evalId) {
-		return evalMapper.selectByEvalId(evalId);
+	public EvalResponse selectByEvalId(long evalId, Long comId) {
+		return evalMapper.selectByEvalId(evalId, comId);
 	}
 
 	@Override

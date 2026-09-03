@@ -62,7 +62,7 @@ public class LeaveBalanceController {
     @Operation(summary = "본인 연차 사용 이력")
     @GetMapping("/grant/my")
     public ResponseEntity<List<LeaveGrantResponse>> myGrantHistory(Authentication auth) {
-        Long empId = authUserJwtService.getCurrentEmpId(auth);
+    	Long empId = authUserJwtService.getCurrentEmpId(auth);
         List<LeaveGrantResponse> list = leaveBalanceService.getGrantHistory(empId);
         return ResponseEntity.ok(list);
     }
@@ -87,10 +87,12 @@ public class LeaveBalanceController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/balance/{empId}")
     public ResponseEntity<?> balance(
+            Authentication auth,
             @PathVariable("empId") Long empId,
             @Parameter(description = "조회 연도 (예: 2026)")
             @RequestParam("year") Integer year) {
-        LeaveBalanceResponse result = leaveBalanceService.getBalance(empId, year);
+        Long comId = authUserJwtService.getCurrentComId(auth);
+        LeaveBalanceResponse result = leaveBalanceService.getBalance(empId, year, comId);
         return ResponseEntity.ok(result);
     }
     
@@ -99,8 +101,11 @@ public class LeaveBalanceController {
     @Operation(summary = "연차 부여/차감 이력 조회", description = "특정 사원의 연차 부여 및 사용 이력")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/grant/{empId}")
-    public ResponseEntity<?> grantHistory(@PathVariable("empId") Long empId) {
-        List<LeaveGrantResponse> list = leaveBalanceService.getGrantHistory(empId);
+    public ResponseEntity<?> grantHistory(
+            Authentication auth,
+            @PathVariable("empId") Long empId) {
+        Long comId = authUserJwtService.getCurrentComId(auth);
+        List<LeaveGrantResponse> list = leaveBalanceService.getGrantHistory(empId, comId);
         return ResponseEntity.ok(list);
     }
 
@@ -113,12 +118,14 @@ public class LeaveBalanceController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/calculate/{empId}")
     public ResponseEntity<?> calculate(
+            Authentication auth,
             @PathVariable("empId") Long empId,
             @Parameter(description = "발생 연도 (예: 2026)")
             @RequestParam("year") Integer year) {
 
+        Long comId = authUserJwtService.getCurrentComId(auth);
     	try {
-            LeaveBalanceResponse result = leaveBalanceService.calculateAnnual(empId, year);
+            LeaveBalanceResponse result = leaveBalanceService.calculateAnnual(empId, year, comId);
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -126,14 +133,13 @@ public class LeaveBalanceController {
         }
     }
     
-    // 
     @Operation(summary = "전체 사원 연차 일괄 발생")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/calculate-all")
     public ResponseEntity<?> calculateAll(
             Authentication auth,
             @RequestParam("year") Integer year) {
-        Long comId = authUserJwtService.getCurrentComId(auth);  // ← 추가
+        Long comId = authUserJwtService.getCurrentComId(auth);
         int count = leaveBalanceService.calculateAllForYear(comId, year);
         return ResponseEntity.ok(Map.of(
             "message", year + "년 연차 일괄 발생 완료",
@@ -146,14 +152,17 @@ public class LeaveBalanceController {
     public ResponseEntity<?> deduct(
             Authentication auth,
             @Valid @RequestBody LeaveGrantRequest request) {
-
+    	
         // 본인 연차 사용 시 JWT empId를 강제 세팅
         // → 다른 사원의 연차를 본인이 차감하는 것을 방지
         Long empId = authUserJwtService.getCurrentEmpId(auth);
 
-        // 관리자가 다른 사원의 연차를 차감하는 경우에만 request.empId 사용
+        // 관리자가 다른 사원의 연차를 차감하는 경우에만 request.empId → 이 경로만 comId 검증 필요
         if (isAdmin(auth) && request.getEmpId() != null) {
-            empId = request.getEmpId();
+            Long comId = authUserJwtService.getCurrentComId(auth);
+            LeaveGrantResponse result =
+                    leaveBalanceService.deductLeave(request.getEmpId(), request, comId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
         }
 
         LeaveGrantResponse result = leaveBalanceService.deductLeave(empId, request);
@@ -163,8 +172,11 @@ public class LeaveBalanceController {
     @Operation(summary = "연차 수동 조정", description = "관리자가 수동으로 연차를 부여하거나 차감")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/adjust")
-    public ResponseEntity<?> adjust(@Valid @RequestBody LeaveGrantRequest request) {
-        LeaveGrantResponse result = leaveBalanceService.adjustLeave(request);
+    public ResponseEntity<?> adjust(
+            Authentication auth,
+            @Valid @RequestBody LeaveGrantRequest request) {
+        Long comId = authUserJwtService.getCurrentComId(auth);
+        LeaveGrantResponse result = leaveBalanceService.adjustLeave(request, comId);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }

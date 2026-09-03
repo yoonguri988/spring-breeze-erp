@@ -27,7 +27,7 @@ public class EvalReportBatchService {
 	private final EvalReportService evalReportService;
 	private final EvalPeriodMapper evalPeriodMapper;
 
-	/**
+	/*
 	 * 백그라운드에서 리포트 생성 실행.
 	 * - 호출자는 트랜잭션 커밋 후 이 메서드를 호출해야 함 (REPORTING 상태가 확정된 후)
 	 * - 이 메서드는 즉시 반환하고 별도 스레드에서 실행됨.
@@ -36,23 +36,23 @@ public class EvalReportBatchService {
 	 */
 	@Async("reportExecutor")
 	public void runInBackground(long periodId, long comId) {
-		log.info("[ReportBatch] 시작 periodId=" + periodId);
+		log.info("[ReportBatch] 시작 periodId={}", periodId);
 
 		try {
 			int result = evalReportService.generateReports(periodId, comId);
 
 			if (result == 1) {
 				evalPeriodMapper.updateStatus(periodId, "REPORTED", comId);
-				log.info("[ReportBatch] 완료 periodId=" + periodId);
+				log.info("[ReportBatch] 완료 periodId={}", periodId);
 			} else {
 				evalPeriodMapper.updateStatus(periodId, "REPORTING_FAILED", comId);
-				log.error("[ReportBatch] 실패 코드 " + result + " ("
-						+ describeGenerateResult(result) + ") periodId=" + periodId);
+				log.error("[ReportBatch] 실패 코드 {} ({}) periodId={}",
+						result, describeGenerateResult(result), periodId);
 			}
 
 		} catch (Exception e) {
 			// 예상 못한 예외 (네트워크, DB, OpenAI API 등) → REPORTING_FAILED
-			log.error("[ReportBatch] 예외 발생 periodId=" + periodId, e);
+			log.error("[ReportBatch] 예외 발생 periodId={}", periodId, e);
 			try {
 				evalPeriodMapper.updateStatus(periodId, "REPORTING_FAILED", comId);
 			} catch (Exception statusEx) {

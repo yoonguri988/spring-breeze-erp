@@ -80,6 +80,7 @@
     "resetPasswordBtn": "비밀번호 초기화",
     "changePasswordBtn": "비밀번호 수정",
     "editBtn": "정보 수정",
+    "editRequestNotice": "본인 정보는 직접 수정할 수 없습니다. 변경이 필요하시면 관리자에게 요청해 주세요.",
     "changePasswordModalTitle": "비밀번호 수정",
     "changeBtn": "변경",
     "currentPasswordLabel": "현재 비밀번호",
@@ -103,7 +104,8 @@
     "emailRequired": "이메일을 입력하세요.",
     "emailInvalid": "올바른 이메일 형식이 아닙니다",
     "successMsg": "사원 정보가 수정되었습니다.",
-    "duplicateWarning": "중복된 항목이 있습니다."
+    "duplicateWarning": "중복된 항목이 있습니다.",
+    "adminOnlyMsg": "사원 정보 수정은 관리자만 가능합니다."
   },
   "add": {
     "breadcrumbCurrent": "사원 등록",
@@ -119,6 +121,7 @@
     "emailInvalid": "올바른 이메일 형식이 아닙니다.",
     "hireDateRequired": "입사일을 선택하세요.",
     "duplicateWarning": "중복된 항목이 있습니다. 확인 후 다시 시도하세요.",
+    "adminOnlyMsg": "사원 등록은 관리자만 가능합니다.",
     "successMsg": "사원이 등록되었습니다."
   },
   "hrAiChat": {

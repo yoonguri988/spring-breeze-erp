@@ -41,7 +41,7 @@ public class MailSchedulerService {
                 return;
             }
 
-            log.info("[MailScheduler] 3일 메일 대상자 " + targets.size() + "명");
+            log.info("[MailScheduler] 3일 메일 대상자 {}명", targets.size());
             for (WelcomeMailTargetDto target : targets) {
                 // 개별 발송은 EmailService @Async로 위임 → 스레드 풀에서 병렬 처리
                 emailService.sendFollowup3DayMailAsync(target);
@@ -75,7 +75,7 @@ public class MailSchedulerService {
                 return;
             }
 
-            log.info("[MailScheduler] 환영 메일 누락자 " + orphans.size() + "명");
+            log.info("[MailScheduler] 환영 메일 누락자 {}명", orphans.size());
             for (WelcomeMailTargetDto orphan : orphans) {
                 // 안전망 배치: WelcomeMailTargetDto를 EmpRequest로 변환 후 위임
                 EmpRequest emp = new EmpRequest();
@@ -94,10 +94,10 @@ public class MailSchedulerService {
 
     // ─── 수동 트리거용 공개 메서드 (Controller에서 호출) ───
 
-    /** 관리자 강제 실행: 3일 메일 배치. */
+    /* 관리자 강제 실행: 3일 메일 배치. */
     public void triggerFollowup3Day() { sendFollowup3DayEmails(); }
 
-    /** 관리자 강제 실행: 환영 메일 안전망 배치. */
+    /* 관리자 강제 실행: 환영 메일 안전망 배치. */
     public void triggerWelcomeOrphans() { sendWelcomeOrphans(); }
 
 }

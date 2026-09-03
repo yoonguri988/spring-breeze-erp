@@ -29,8 +29,16 @@ public interface EmpRepository extends JpaRepository<Employee, Long> {
 	List<Object[]> findEmpProfileById(@Param("empId") Long empId);
 	
 	
+	
 	// 연차 관리용 : 재직중인 전체 사원 확인
 	@Query("SELECT e.empId FROM Employee e WHERE e.empStatus = '재직'")
 	List<Long> findAllActiveEmpIds();
+	
+	// ── 멀티테넌시 검증용 ──
+	// 해당 사원이 요청자의 회사 소속인지 확인.
+	// Employee는 comId 컬럼이 아니라 @ManyToOne Company를 갖고 있으므로
+	// emp.getCompany().getComId()를 쓰면 Company가 지연 로딩되며 @Lob comLogo 문제가 재발한다.
+	// 파생 쿼리로 FK만 비교해서 엔티티 로딩을 회피
+	boolean existsByEmpIdAndCompany_ComId(Long empId, Long comId);
 	
 }

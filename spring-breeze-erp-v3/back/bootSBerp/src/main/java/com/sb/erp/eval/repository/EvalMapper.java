@@ -18,7 +18,7 @@ public interface EvalMapper {
 	List<EvalResponse> selectTargetsByEvaluator(@Param("periodId") long periodId, @Param("evaluatorId") long evaluatorId);
 
 	// 평가 단건 조회 (수정 폼용)
-	EvalResponse selectByEvalId(@Param("evalId") long evalId);
+	EvalResponse selectByEvalId(@Param("evalId") long evalId, @Param("comId") Long comId);
 
 	// 회차 내 특정 대상+평가자+유형 조합 조회 (중복 체크 및 기존 데이터 조회)
 	EvalResponse selectByPeriodTargetEvaluator(@Param("periodId") long periodId, @Param("targetEmpId") long targetEmpId,

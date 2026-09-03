@@ -80,6 +80,7 @@
     "resetPasswordBtn": "Reset Password",
     "changePasswordBtn": "Change Password",
     "editBtn": "Edit Info",
+        "editRequestNotice": "You cannot edit your own information. Please contact an administrator to request changes.",
     "changePasswordModalTitle": "Change Password",
     "changeBtn": "Change",
     "currentPasswordLabel": "Current Password",
@@ -103,7 +104,8 @@
     "emailRequired": "Please enter an email.",
     "emailInvalid": "Invalid email format",
     "successMsg": "Employee information updated.",
-    "duplicateWarning": "There are duplicate fields."
+    "duplicateWarning": "There are duplicate fields.",
+    "adminOnlyMsg": "Only administrators can edit employee information."
   },
   "add": {
     "breadcrumbCurrent": "Add Employee",
@@ -119,6 +121,7 @@
     "emailInvalid": "Invalid email format.",
     "hireDateRequired": "Please select a hire date.",
     "duplicateWarning": "There are duplicate fields. Please check and try again.",
+    "adminOnlyMsg": "Only administrators can register employees.",
     "successMsg": "Employee registered."
   },
   "hrAiChat": {
