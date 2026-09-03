@@ -211,6 +211,7 @@ public class EmpController {
 	// 이메일/연락처: 전역 유니크 → comId 불필요
 	// 사번: 회사 내에서만 유니크 → comId 필요
 	@Operation(summary = "이메일 중복 검사")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/check-email")
 	public ResponseEntity<Map<String, Boolean>> checkEmail(
 			@RequestParam("email") String empEmail) {
@@ -219,6 +220,7 @@ public class EmpController {
 	}
 
 	@Operation(summary = "연락처 중복 검사")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/check-mobile")
 	public ResponseEntity<Map<String, Boolean>> checkMobile(
 			@RequestParam("mobile") String empMobile) {

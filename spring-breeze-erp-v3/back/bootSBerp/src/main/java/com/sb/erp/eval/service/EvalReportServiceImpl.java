@@ -117,22 +117,22 @@ public class EvalReportServiceImpl implements EvalReportService {
 		// 평가 회차 확인
 		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, comId);
 		if (period == null) {
-			log.error("[EvalReport] 실패(-1): 회차 없음 periodId={}" + periodId);
+			log.error("[EvalReport] 실패(-1): 회차 없음 periodId={}", periodId);
 			return -1;
 		}
 		
 		// 회차 상태 확인
 		String status = period.getPeriodStatus();
 		if (!"REPORTING".equals(status) && !"REPORTED".equals(status)) {
-			log.error("[EvalReport] 실패(-2): 허용되지 않은 상태 status={}" + status
-					+ " (REPORTING/REPORTED만 가능) periodId=" + periodId);
+			log.error("[EvalReport] 실패(-2): 허용되지 않은 상태 status={} (REPORTING/REPORTED만 가능) periodId={}",
+					status, periodId);
 			return -2;
 		}
 		
 		// 사원 평가 내용 있는지 확인
 		List<Map<String, Object>> aggregates = evalReportMapper.selectAggregatesByPeriod(periodId);
 		if (aggregates == null || aggregates.isEmpty()) {
-			log.error("[EvalReport] 실패(-3): 집계 대상 없음 (SUBMITTED 상태 평가 부재) periodId={}" + periodId);
+			log.error("[EvalReport] 실패(-3): 집계 대상 없음 (SUBMITTED 상태 평가 부재) periodId={}", periodId);
 			return -3;
 		}
 		
@@ -159,7 +159,7 @@ public class EvalReportServiceImpl implements EvalReportService {
 		log.debug("[EvalReport] 영업일 수={} (기간: {} ~ {})", businessDays, startDate, endDate);
 		log.info("[EvalReport] 근태 조회 {}명 / 대상 {}명", attStatMap.size(), empIds.size());
 		// 사원 수만큼 찍히므로 반드시 debug. 500명이면 리포트 1회당 500줄이 INFO로 쌓인다.
-		attStatMap.forEach((id, stat) -> log.debug("  empId={} workDays={} late={}",
+		attStatMap.forEach((id, stat) -> log.debug("empId={} workDays={} late={}",
 				id, stat.getWorkDays(), stat.getLateCount()));
 
 		// 사원별 리포트 생성 (기존 존재 시 update)
@@ -182,15 +182,15 @@ public class EvalReportServiceImpl implements EvalReportService {
 		// 재생성할 회차 확인
 		PeriodResponse period = evalPeriodMapper.selectByPeriodId(periodId, comId);
 		if (period == null) {
-			log.error("[EvalReport] 재생성 실패(-1): 회차 없음 periodId={}" + periodId);
+			log.error("[EvalReport] 재생성 실패(-1): 회차 없음 periodId={}", periodId);
 			return -1;
 		}
 		
 		// 회차 상태 확인, 재생성은 REPORTED만 허용
 		String status = period.getPeriodStatus();
 		if (!"REPORTED".equals(status)) {
-			log.error("[EvalReport] 재생성 실패(-2): 허용되지 않은 상태 status={}" + status
-					+ " (REPORTED만 가능) periodId=" + periodId);
+			log.error("[EvalReport] 재생성 실패(-2): 허용되지 않은 상태 status={} (REPORTED만 가능) periodId={}",
+					status, periodId);
 			return -2;
 		}
 		
@@ -223,8 +223,8 @@ public class EvalReportServiceImpl implements EvalReportService {
 			}
 		}
 
-		log.error("[EvalReport] 재생성 실패(-3): 해당 사원의 평가가 없음 periodId={}" + periodId
-				+ " empId=" + empId);
+		log.error("[EvalReport] 재생성 실패(-3): 해당 사원의 평가가 없음 periodId={} empId={}",
+				periodId, empId);
 		return -3;
 	}
 
