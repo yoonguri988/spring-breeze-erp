@@ -3,20 +3,8 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import {
-  Card,
-  Form,
-  InputNumber,
-  Input,
-  Button,
-  Divider,
-  message,
-} from "antd";
-import {
-  ArrowLeftOutlined,
-  SaveOutlined,
-  SendOutlined,
-} from "@ant-design/icons";
+import {  Card, Form, Radio, Input, Button, Divider, message, } from "antd";
+import {  ArrowLeftOutlined, SaveOutlined, SendOutlined, } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -94,9 +82,21 @@ export default function EvalWritePage() {
     dispatch(draftEvalRequest(buildPayload(values)));
   };
 
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+
+      // 제출 시 필수값 검증 (임시저장은 빈 값 허용)
+      const emptyScore = SCORE_ITEMS.find((item) => values[item.name] == null);
+      if (emptyScore) {
+        message.warning(t("write.scoreRequiredMsg"));
+        return;
+      }
+      if (!values.strengthComment?.trim() || !values.improvementComment?.trim()) {
+        message.warning(t("write.commentRequiredMsg"));
+        return;
+      }
+
       dispatch(submitEvalRequest(buildPayload(values)));
     } catch (e) {}
   };
@@ -153,7 +153,12 @@ export default function EvalWritePage() {
                 },
               ]}
             >
-              <InputNumber min={1} max={5} style={{ width: "100%" }} placeholder={t("write.scorePlaceholder")} />
+              <Radio.Group
+                className="sb-score-group"
+                buttonStyle="solid"
+                optionType="button"
+                options={[1, 2, 3, 4, 5].map((n) => ({ label: n, value: n }))}
+              />
             </Form.Item>
           ))}
 
