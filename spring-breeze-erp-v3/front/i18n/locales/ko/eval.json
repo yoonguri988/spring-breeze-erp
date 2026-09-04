@@ -82,7 +82,9 @@
     "improvementCommentPlaceholder": "개선이 필요한 부분을 작성하세요.",
     "draftBtn": "임시 저장",
     "submitBtn": "최종 제출",
-    "savedMsg": "저장되었습니다."
+    "savedMsg": "저장되었습니다.",
+    "scoreRequiredMsg": "모든 점수 항목을 선택해주세요.",
+    "commentRequiredMsg": "강점과 개선점을 모두 입력해주세요."
   },
   "report": {
     "detail": {

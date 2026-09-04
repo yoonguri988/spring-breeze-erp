@@ -82,7 +82,9 @@
     "improvementCommentPlaceholder": "Describe areas that need improvement.",
     "draftBtn": "Save Draft",
     "submitBtn": "Submit Final",
-    "savedMsg": "Saved."
+    "savedMsg": "Saved.",
+    "scoreRequiredMsg": "Please select a score for every item.",
+    "commentRequiredMsg": "Please fill in both the strength and improvement comments."
   },
   "report": {
     "detail": {

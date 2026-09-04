@@ -1523,3 +1523,29 @@ a.sb-card {
   background: var(--sb-red-soft);
   color: var(--sb-red);
 }
+
+/* ==========================================================================
+   Score radio (AntD Radio.Group 버전 · 1~5 점수 선택 UI)
+   ========================================================================== */
+.sb-score-group {
+    display: flex;
+    width: 100%;
+    gap: 0;
+}
+
+.sb-score-group .ant-radio-button-wrapper {
+    flex: 1;
+    height: 44px;
+    line-height: 42px;
+    text-align: center;
+    font-weight: 650;
+    font-size: 15px;
+}
+
+@media (max-width: 768px) {
+    .sb-score-group .ant-radio-button-wrapper {
+        height: 40px;
+        line-height: 38px;
+        font-size: 14px;
+    }
+}
