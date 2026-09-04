@@ -59,6 +59,9 @@ const salAcctReducer = createSlice({
       state.loading = false;
       state.success = true;
       state.myAcct = action.payload;
+      // 최초 조회 시 미등록(404)으로 남아있던 myAcctError를 지워야 화면이 "계좌 등록" 안내에서
+      // 방금 등록한 계좌 정보로 바로 전환된다.
+      state.myAcctError = null;
     },
     registerMyAcctFailure: (state, action) => {
       state.loading = false;
@@ -75,6 +78,7 @@ const salAcctReducer = createSlice({
       state.loading = false;
       state.success = true;
       state.myAcct = action.payload;
+      state.myAcctError = null;
     },
     updateMyAcctFailure: (state, action) => {
       state.loading = false;
