@@ -25,6 +25,13 @@ public class SalaryIncomeTaxBracketService {
 
     @Transactional
     public SalaryIncomeTaxBracketResponse register(SalaryIncomeTaxBracketCreateRequest request) {
+        // 동일 구간(min~max)에 유효 중이던(eff_to가 NULL인) 이력이 있다면 신규 구간 시작일 전날짜로 종료 처리(이력 보존)
+        salaryIncomeTaxBracketRepository.findActiveByRange(request.getMinAmt(), request.getMaxAmt())
+                .ifPresent(prev -> prev.closeAsHistory(request.getEffFrom().minusDays(1)));
+
+        // 변경된 UPDATE 쿼리를 DB에 즉시 강제 반영
+        salaryIncomeTaxBracketRepository.flush();
+
         SalIncTaxBrkt entity = SalIncTaxBrkt.builder()
                 .minAmt(request.getMinAmt())
                 .maxAmt(request.getMaxAmt())
