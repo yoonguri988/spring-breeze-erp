@@ -50,7 +50,6 @@
 				where
 					ff.com_id = f.com_id
 					and ff.for_id = f.for_id
-					and ff.for_status = 1
 					and ff.is_deleted = 0
 			)
 	</select>

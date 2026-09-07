@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ import com.sb.erp.appr.entity.LeaveRequest;
 import com.sb.erp.appr.repository.ApprDocMapper;
 import com.sb.erp.appr.repository.ApprFormRepository;
 import com.sb.erp.appr.repository.ApprLineMapper;
+import com.sb.erp.appr.repository.ApprLineRequestRepository;
 import com.sb.erp.appr.repository.LeaveRequestRepository;
 import com.sb.erp.att.dto.request.LeaveGrantRequest;
 import com.sb.erp.att.service.LeaveBalanceService;
@@ -48,6 +51,7 @@ public class ApprDocServiceImpl implements ApprDocService{
 	private final DeptService deptService;
 	private final ApprAutoDelegationTriggerService autoTrigger;
 	private final ApprLineFavoriteService favService;
+	private final ApprLineRequestRepository lineReqDao;
 	
 	// 연차 연동
 	private final ApprFormRepository formDao;
@@ -88,14 +92,6 @@ public class ApprDocServiceImpl implements ApprDocService{
 				String status = (linOrder == 1) ? "WAI" : "NOT";
 				lineDao.insertLine(docId, approverEmpIds.get(i), linOrder, status);
 			}
-			
-			// 결재선 조합 사용횟수 반영
-			Long deptId = dao.initResponse(empId).getDeptId();
-			ApprLineFavoriteRequest favReq = new ApprLineFavoriteRequest();
-			favReq.setDeptId(deptId);
-			favReq.setForId(req.getForId());
-			favReq.setEmpIds(approverEmpIds);
-			favService.saveOrIncrement(favReq);
 		}
 		
 		// 연차 신청서면 기안시점에 LeaveRequest 생성
@@ -207,6 +203,22 @@ public class ApprDocServiceImpl implements ApprDocService{
 			// 발동 시 실제 결재선(ApprLine)을 수정하는 코드라 리스크 차단을 위해 호출 자체를 막음.
 			// autoTrigger.tryTrigger(docId, doc.getForId(), doc.getForVersion(), doc.getEmpId(), doc.getDocContent());
 			ApprDocResponse doc = dao.selectDocDetail(docId);
+			
+			// 결재선 조합 사용횟수 반영 - 위임/대결이 한 번도 없었던 경우에만 카운트
+			boolean everDelegated = lineReqDao.existsByApprDoc_DocIdAndReqStatus(docId, "APP");
+			if (!everDelegated) {
+				List<Long> approverEmpIds = lines.stream()
+						.sorted(Comparator.comparing(ApprLineResponse::getLinOrder))
+						.map(ApprLineResponse::getEmpId)
+						.collect(Collectors.toList());
+				
+				Long deptId = dao.initResponse(doc.getEmpId()).getDeptId();
+				ApprLineFavoriteRequest favReq = new ApprLineFavoriteRequest();
+				favReq.setDeptId(deptId);
+				favReq.setForId(doc.getForId());
+				favReq.setEmpIds(approverEmpIds);
+				favService.saveOrIncrement(favReq);
+			}
 			
 			// 연차 신청서면 최종 승인시 잔여 연차 차감 + LeaveRequest 상태 갱신
 			processLeaveApprovalIfNeeded(docId, doc);

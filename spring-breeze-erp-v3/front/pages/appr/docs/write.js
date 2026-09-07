@@ -277,6 +277,10 @@ export default function DocWritePage() {
             message.warning(t("docs.write.duplicateApproverWarning"));
             return;
         }
+        if (approvers.length >= requiredApproverCount) {
+            message.warning(t("docs.write.approverLimitReachedWarning", {count: requiredApproverCount}));
+            return;
+        }
         setApprovers((prev) => [...prev, person]);
     };
 
