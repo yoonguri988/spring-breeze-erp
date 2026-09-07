@@ -97,13 +97,17 @@ public class AttendanceController {
 	
 	
 	//PUT	/api/attendance/{attId}	editAtt	@PathVariable + @RequestBody
+	// ★ @Valid를 걸지 않는다.
+	//    AttendanceRequest의 @NotBlank(empNo) / @NotNull(attDate)는 "등록" 기준이다.
+	//    수정은 attId로 기존 레코드를 찾아 checkIn/checkOut/attStatus만 덮어쓰므로
+	//    empNo와 attDate는 애초에 변경 대상이 아니고 요청에도 담기지 않는다.
 	@Operation(summary = "기록된 근태 내용 수정")
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{attId}")
 	public ResponseEntity<?> edit(
 			Authentication auth,
 			@PathVariable("attId") Long attId,
-			@Valid @RequestBody AttendanceRequest request) {
+			@RequestBody AttendanceRequest request) {
 		Long comId = authUserJwtService.getCurrentComId(auth);
 		AttendanceResponse updated = attendanceService.editAtt(attId, request, comId);
 		return ResponseEntity.ok(updated);
