@@ -74,6 +74,7 @@
       "rejectModalTitle": "Reject Document",
       "approveModalContent": "Do you want to approve this document?",
       "rejectModalContent": "Do you want to reject this document?",
+      "approverLimitReachedWarning": "The approval line is already full ({{count}} people).",
       "delegateRequestBtn": "Delegation Request",
       "delegation": {
         "modalTitle": "Delegation Request",
