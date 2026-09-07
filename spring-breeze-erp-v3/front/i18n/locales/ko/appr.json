@@ -69,6 +69,7 @@
       "approveConfirmTitle": "승인 하시겠습니까?",
       "rejectBtn": "반려",
       "approveBtn": "승인",
+      "editBtn": "수정",
       "approveModalTitle": "결재 승인",
       "rejectModalTitle": "결재 반려",
       "approveModalContent": "이 문서를 승인하시겠습니까?",

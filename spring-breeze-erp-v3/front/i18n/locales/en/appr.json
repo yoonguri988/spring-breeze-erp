@@ -69,6 +69,7 @@
       "approveConfirmTitle": "Do you want to approve?",
       "rejectBtn": "Reject",
       "approveBtn": "Approve",
+      "editBtn": "Edit",
       "approveModalTitle": "Approve Document",
       "rejectModalTitle": "Reject Document",
       "approveModalContent": "Do you want to approve this document?",
