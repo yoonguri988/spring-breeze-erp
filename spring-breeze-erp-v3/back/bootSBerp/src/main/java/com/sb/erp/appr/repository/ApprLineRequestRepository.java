@@ -24,6 +24,9 @@ public interface ApprLineRequestRepository extends JpaRepository<ApprLineRequest
 	// 관리자용 - 대기중인 요청이 있는지 검증
 	public boolean existsByApprLine_LinIdAndReqStatus(Long linId, String reqStatus);
 	
+	// 즐겨찾기 카운트용 - 문서에 위임/대결이 한 번이라도 있었는지
+	public boolean existsByApprDoc_DocIdAndReqStatus(Long docId, String reqStatus);
+	
 	// 관리자 콘솔 - 상태/요청자/기간 필터 조회 (전부 선택적, 전체이력용)
 	@Query("""
 		select
