@@ -22,42 +22,60 @@
 - **FULLSTACK**: 백엔드 · DB · 뷰 · AI · 외부 API를 하나의 서비스에서 통합 구현
 
 ## 🛠 기술 스택
+<table>
+<tr>
+<td valign="top" width="50%">
 
 **Backend**
-- Java 17 / Spring Boot 3.5.16
-- Spring Security (인증 · 인가)
-- MyBatis (SQL Mapper)
+![Java](https://img.shields.io/badge/Java%2017-007396?style=flat-square&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot%203.5.16-6DB33F?style=flat-square&logo=springboot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)
+![MyBatis](https://img.shields.io/badge/MyBatis-000000?style=flat-square)
+> Spring Security로 인증 · 인가, MyBatis로 SQL Mapper 관리
 
 **Frontend (View Layer)**
-- Thymeleaf (SSR) + thymeleaf-layout-dialect
-- Bootstrap 5
-- HTML5 / CSS3 / JavaScript (Vanilla)
+![Thymeleaf](https://img.shields.io/badge/Thymeleaf-005F0F?style=flat-square&logo=thymeleaf&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap%205-7952B3?style=flat-square&logo=bootstrap&logoColor=white)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+> SSR 기반, thymeleaf-layout-dialect로 레이아웃 관리
 
 **Database**
-- Oracle 18c
+![Oracle](https://img.shields.io/badge/Oracle%2018c-F80000?style=flat-square&logo=oracle&logoColor=white)
+
+</td>
+<td valign="top" width="50%">
 
 **External API / AI**
-- OpenAI GPT-4o-mini (결재 양식 생성, 평가 리포트 요약, 부서 이관 추천, 태스크 리스크 판정)
-- Naver OCR (사업자등록증 인식)
-- 국세청 공공데이터 API (data.go.kr, 사업자 진위확인)
-- Discord Webhook (실시간 알림)
-- SMTP Mail (온보딩 · 안내 메일 자동 발송)
-- Google Docs API (주간 보고서 자동 저장)
-- Apache PDFBox (개인용 리포트 PDF 생성)
+![OpenAI](https://img.shields.io/badge/GPT--4o--mini-412991?style=flat-square&logo=openai&logoColor=white)
+![Naver](https://img.shields.io/badge/Naver%20OCR-03C75A?style=flat-square&logo=naver&logoColor=white)
+![data.go.kr](https://img.shields.io/badge/국세청%20공공데이터-0B6E4F?style=flat-square)
+![Discord Webhook](https://img.shields.io/badge/Discord%20Webhook-5865F2?style=flat-square&logo=discord&logoColor=white)
+![SMTP](https://img.shields.io/badge/SMTP%20Mail-EA4335?style=flat-square&logo=gmail&logoColor=white)
+![Google Docs](https://img.shields.io/badge/Google%20Docs%20API-4285F4?style=flat-square&logo=googledocs&logoColor=white)
+![PDFBox](https://img.shields.io/badge/Apache%20PDFBox-D22128?style=flat-square&logo=apache&logoColor=white)
+> GPT: 결재 양식 생성 · 평가 리포트 요약 · 부서 이관 추천 · 태스크 리스크 판정
+> Naver OCR: 사업자등록증 인식 · 국세청 API: 사업자 진위확인
+> Discord: 실시간 알림 · Google Docs: 주간 보고서 자동 저장 · PDFBox: 개인 리포트 PDF
 
 **협업 도구**
-- GitHub (형상 관리)
-- Discord (실시간 소통)
-- Notion (문서화)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)
+![Discord](https://img.shields.io/badge/Discord-5865F2?style=flat-square&logo=discord&logoColor=white)
+![Notion](https://img.shields.io/badge/Notion-000000?style=flat-square&logo=notion&logoColor=white)
+
+</td>
+</tr>
+</table>
 
 ## 👥 팀원 역할 분담
 
 | 담당자 | 역할 | 담당 도메인 |
 |---|---|---|
-| **최윤정** (팀장) | 회사 · 부서 · 자원 예약 | 사업자등록증 OCR 등록, 국세청 API 검증, AI 부서 이관 추천, 자원 예약 동시성 제어 |
-| 정수정 | 인사 · 평가 · 권한 | 온보딩 메일 자동화, AI 평가 리포트 요약 |
-| 김주엽 | 전자결재 | AI 결재 양식 생성, 동적 스키마 렌더링, 순차 승인 시스템 |
-| 최다영 | 프로젝트 · 태스크 · 공지 | 재귀 CTE 기반 태스크 트리, AI 리스크 판정, 주간 보고서 자동화 |
+| 최윤정 (팀장) | 회사 · 부서 · 자원 예약 | 사업자등록증 OCR 등록, 국세청 API 검증, AI 부서 이관 추천, 자원 예약 동시성 제어 |
+| 정수정 (팀원) | 인사 · 평가 · 권한 | 온보딩 메일 자동화, AI 평가 리포트 요약 |
+| 김주엽 (팀원) | 전자결재 | AI 결재 양식 생성, 동적 스키마 렌더링, 순차 승인 시스템 |
+| 최다영 (팀원) | 프로젝트 · 태스크 · 공지 | 재귀 CTE 기반 태스크 트리, AI 리스크 판정, 주간 보고서 자동화 |
 
 ## 🗂 ERD (Entity Relationship Diagram)
 
