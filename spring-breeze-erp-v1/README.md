@@ -149,7 +149,9 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 - 비밀번호 수정 · 초기화, 권한 수정
 - **성과**: 정확한 사원 데이터 기준을 세우고, 가입 · 정보 수정 단계에서의 중복 데이터를 사전에 차단해 데이터 정합성 확보
 
-> [이미지 필요] 사원 관리 목록 / 사원 등록 화면 스크린샷
+| 사원 관리 | 사원 등록 |
+|:---:|:---:|
+| ![사원관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/jsj/employee.PNG) | ![사원 등록](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/jsj/emp_create.PNG) |
 
 ### 03. 김주엽 — `approval-docs`
 
@@ -159,7 +161,9 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 - 양식 코드 유효성 검증 (`checkCode`)
 - **성과**: 전자결재 양식 체계를 표준화해 이후 결재 문서 확장 시 재사용 가능한 구조를 마련
 
-> [이미지 필요] 결재 문서 양식 관리 화면 스크린샷
+| 결재문서양식 관리 | 결재문서양식 등록 |
+|:---:|:---:|
+| ![결재문서양식관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/kjy/apprDoc.PNG) | ![결재문서양식등록](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/kjy/apprDoc_create.PNG) |
 
 ### 04. 최다영 — `project-task`
 
