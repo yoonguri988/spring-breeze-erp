@@ -382,6 +382,7 @@ export default function DocWritePage() {
             forVersion: Number(forVersion),
             docTitle: values.docTitle,
             docContent: content,
+            important: isImportant,
             approverEmpIds: approvers.map((a) => a.empId),
         };
 
