@@ -174,7 +174,9 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 - 프로젝트 참여 사원(`project_member`) 추가 / 삭제 — N:M 매핑
 - **성과**: 프로젝트 · 태스크 · 참여 사원 구조로 팀 단위 업무를 가시화하고 진행 상태를 추적할 수 있도록 구현
 
-> [이미지 필요] 프로젝트 상세 조회 화면 스크린샷
+| 프로젝트관리 | 프로젝트멤버관리 | 태스크관리 |
+|:---:|:---:|:---:|
+| ![프로젝트관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/cyj/login.PNG) | ![프로젝트멤버관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/cyj/company.PNG) | ![태스크관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/cyj/department.PNG) |
 
 ### 05. 장영탁 — `resource`
 
@@ -185,7 +187,9 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 - 자원 예약 목록 조회
 - **성과**: 자원 운영 흐름(등록 → 예약 → 승인/반려)을 시스템으로 옮겨 오프라인으로 관리되던 사내 자원 현황을 실시간으로 확인할 수 있게 함
 
-> [이미지 필요] 자원 목록 · 자원 예약 승인 관리 화면 스크린샷
+| 자원관리 | 자원예약관리 |
+|:---:|:---:|
+| ![자원관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/kjy/apprDoc.PNG) | ![자원예약관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/kjy/apprDoc_create.PNG) |
 
 ### 06. 손창기 — `notice`
 
@@ -195,7 +199,10 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 - 공지 등록 / 상세 조회 / 수정 / 삭제
 - **성과**: 전사 공지 흐름을 한곳에 모아 카테고리별로 관리할 수 있는 구조 마련 (일정상 세부 기능은 1차 시연 시점 기준 in-progress)
 
-> [이미지 필요] 공지 관리 목록 · 등록/수정 화면 스크린샷
+| 공지관리 |
+|:---:|
+| ![공지관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/kjy/apprDoc.PNG) |
+
 
 ### ▶️ 파트별 시연 영상
 
