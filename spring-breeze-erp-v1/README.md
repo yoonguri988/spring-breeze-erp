@@ -70,8 +70,6 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
 ![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white)
 
-> [이미지 필요] 아키텍처 다이어그램
-
 ---
 
 ## 4. 시스템 구조
@@ -85,7 +83,7 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 - **PROJECT / TASK**: `project`, `project_member`, `task`
 - **RESOURCE & NOTICE**: `resource`, `reservation`, `notice`
 
-> [이미지 필요] ERD 다이어그램 이미지
+![alt text](https://github.com/yoonguri988/spring-breeze-erp/blob/a856fcbc285986ae1da2064a2bd175015dfaea28/spring-breeze-erp-v1/docs/img/SBerpV1_ERD_img.PNG)
 
 ### 시스템 워크플로우
 
