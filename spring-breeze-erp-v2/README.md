@@ -27,13 +27,13 @@ Spring Breeze 팀의 전사적 자원관리(ERP) 시스템 2차 프로젝트입�
 ## 2. 기간 / 인원
 
 - **개발 기간**: 2026.07.02 ~ 2026.07.15 (14일)
-- **팀 인원**: 4명 (Spring Breeze, Team 04)
+- **팀 인원**: 4명 (Spring Breeze)
 
 | 단계 | 기간 | 내용 |
 |---|---|---|
-| Phase 1 | 07.02 ~ 07.07 (6일) | 리팩토링 — Spring Boot · Thymeleaf · Oracle 마이그레이션 |
-| Phase 2 | 07.08 ~ 07.12 (5일) | 신규 기능 — 팀원별 신규 페이지 · AI/API 통합 (M1: 1차 개발 완료) |
-| Phase 3 | 07.13 ~ 07.15 (3일) | QA & 시연 — 통합 테스트 · 리허설 · 시연 준비 (M2: 2차 개발 완료) |
+| 리팩토링 | 07.02 ~ 07.07 | Spring Boot · Thymeleaf · Oracle 마이그레이션 |
+| 신규 기능 | 07.08 ~ 07.12 | 팀원별 신규 페이지 · AI/API 통합 (M1: 1차 개발 완료) |
+| QA & 시연 | 07.13 ~ 07.15 | 통합 테스트 · 리허설 · 시연 준비 (M2: 2차 개발 완료) |
 
 ---
 
@@ -88,7 +88,7 @@ Spring Breeze 팀의 전사적 자원관리(ERP) 시스템 2차 프로젝트입�
 - **RESOURCE**: `com_resource`, `reservation`
 - **EVALUATION**: `evaluation_period`, `performance_evaluation`, `evaluation_ai_report`
 
-> [이미지 필요] ERD 다이어그램
+![2차ERD](https://github.com/yoonguri988/spring-breeze-erp/blob/c5ccab28075eda31bd4deb0cddd3413d7655ecdd/spring-breeze-erp-v2/docs/img/sberp_v2_erd.PNG)
 
 ### 시스템 워크플로우 (Layered Architecture)
 
@@ -103,8 +103,6 @@ Spring Breeze 팀의 전사적 자원관리(ERP) 시스템 2차 프로젝트입�
 3. **APPLICATION**: Service 계층에서 비즈니스 로직 처리, Spring Security로 인가 검증
 4. **PERSISTENCE**: MyBatis Mapper를 통해 Oracle 18c와 통신
 5. **EXTERNAL**: 필요 시 OpenAI, Discord, Naver OCR, 국세청 API 등 외부 서비스 연동
-
-> [이미지 필요] 시스템 워크플로우 다이어그램
 
 ---
 
@@ -130,27 +128,31 @@ Spring Breeze 팀의 전사적 자원관리(ERP) 시스템 2차 프로젝트입�
 
 **담당**: 사업자등록증 OCR 등록, 국세청 실시간 검증, AI 부서 이관 추천, 자원 예약 동시성 제어
 
-- 사업자등록증 OCR 등록: Naver OCR로 이미지 1장에서 사업자번호 · 상호명 · 대표자명 · 개업일자 · 업종 등 6개 필드 자동 인식, 인식 실패 시 수동 입력으로 전환
-- 국세청 실시간 검증: 사업자번호 · 대표자명 · 개업일자 · 휴폐업 여부를 공공데이터 API로 3중 검증, 응답 지연 시 Fallback 응답으로 서버 스레드 보호
-- AI 부서 이관 추천: 부서 삭제 시 유사 부서를 AI가 추천, 관리자가 최종 승인. 이관 후보가 없을 때도 전체 활성 부서로 자동 폴백
-- 자원 예약 동시성 제어: 기간 겹침(Overlap) 조회와 실시간 잔여 수량 조회로 동시 예약 충돌 방지
+- **사업자등록증 OCR 등록**: Naver OCR로 이미지 1장에서 사업자번호 · 상호명 · 대표자명 · 개업일자 · 업종 등 6개 필드 자동 인식, 인식 실패 시 수동 입력으로 전환
+- **국세청 실시간 검증**: 사업자번호 · 대표자명 · 개업일자 · 휴폐업 여부를 공공데이터 API로 3중 검증, 응답 지연 시 Fallback 응답으로 서버 스레드 보호
+- **AI 부서 이관 추천**: 부서 삭제 시 유사 부서를 AI가 추천, 관리자가 최종 승인. 이관 후보가 없을 때도 전체 활성 부서로 자동 폴백
+- **자원 예약 동시성 제어**: 기간 겹침(Overlap) 조회와 실시간 잔여 수량 조회로 동시 예약 충돌 방지
 - **성과**: OCR · 국세청 API 연동으로 사업자등록증 등록 소요시간을 약 69.57% 단축(46초 → 14초)하고 잘못된 사업자번호 유입을 100% 차단, AI 부서 이관과 자원 예약에 트랜잭션 안전장치를 마련해 데이터 정합성을 확보
 
-| 사업자등록증 OCR 등록 | 국세청 실시간 검증 | 자원 예약 |
-|:---:|:---:|:---:|
-| [이미지 필요] | [이미지 필요] | [이미지 필요] |
+
+|  |  |
+|:---:|:---:|
+| **사업자등록증 OCR 등록** | **국세청 실시간 검증** |
+| ![사업자등록증OCR등록](https://github.com/yoonguri988/spring-breeze-erp/blob/c5ccab28075eda31bd4deb0cddd3413d7655ecdd/spring-breeze-erp-v2/docs/img/cyj/com_naver_ocr.PNG) | ![국세청실시간검증](https://github.com/yoonguri988/spring-breeze-erp/blob/c5ccab28075eda31bd4deb0cddd3413d7655ecdd/spring-breeze-erp-v2/docs/img/cyj/com_data_api.PNG) |
+| **AI 부서 이관 추천** | **자원 예약 동시성 제어** |
+| ![AI부서이관추천](https://github.com/yoonguri988/spring-breeze-erp/blob/c5ccab28075eda31bd4deb0cddd3413d7655ecdd/spring-breeze-erp-v2/docs/img/cyj/dept_transfer.PNG) | ![자원예약동시성제어](https://github.com/yoonguri988/spring-breeze-erp/blob/c5ccab28075eda31bd4deb0cddd3413d7655ecdd/spring-breeze-erp-v2/docs/img/cyj/resv_control.PNG) |
 
 ### 02. 정수정 — 인사 · 평가 · 권한
 
 **담당**: 온보딩 메일 자동화, AI 평가 리포트 요약
 
-- 온보딩 메일 자동화: 사원 등록 즉시 온보딩 메일, 입사 3일 뒤 적응 확인 메일을 자동 발송, 발송 실패 건은 재확인 후 재발송
-- AI 평가 리포트 요약: 평가 마감 시 OpenAI가 사원별 코멘트를 요약, 평가 진행 상태를 6단계로 세분화해 실패 지점을 명시적으로 관리
+- **온보딩 메일 자동화**: 사원 등록 즉시 온보딩 메일, 입사 3일 뒤 적응 확인 메일을 자동 발송, 발송 실패 건은 재확인 후 재발송
+- **AI 평가 리포트 요약**: 평가 마감 시 OpenAI가 사원별 코멘트를 요약, 평가 진행 상태를 6단계로 세분화해 실패 지점을 명시적으로 관리
 - **성과**: 반복적인 메일 발송 · 리포트 취합 업무를 자동화해 담당자의 수작업을 줄이고, AI 응답 이상 시에도 안전한 기본값으로 100% 대체해 서비스 안정성을 확보
 
 | 온보딩 메일 자동화 | AI 평가 리포트 요약 |
 |:---:|:---:|
-| [이미지 필요] | [이미지 필요] |
+| ![온보딩메일자동화](https://github.com/yoonguri988/spring-breeze-erp/blob/c5ccab28075eda31bd4deb0cddd3413d7655ecdd/spring-breeze-erp-v2/docs/img/jsj/emp_onboarding.PNG) | ![AI평가리포트요약](https://github.com/yoonguri988/spring-breeze-erp/blob/c5ccab28075eda31bd4deb0cddd3413d7655ecdd/spring-breeze-erp-v2/docs/img/jsj/emp_eval.PNG) |
 
 ### 03. 김주엽 — 전자결재
 
