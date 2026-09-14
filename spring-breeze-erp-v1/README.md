@@ -42,28 +42,35 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 
 ### Backend
 
-- Java (JDK) / Spring MVC 4.3
-- MyBatis 3.5 (동적 SQL, Mapper XML)
-- Apache Tomcat 9.0
-- Session 기반 인증 (Spring Security)
-- Lombok / Maven
+![Java](https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring](https://img.shields.io/badge/Spring%20MVC-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
+![MyBatis](https://img.shields.io/badge/MyBatis-000000?style=for-the-badge&logoColor=white)
+![Apache Tomcat](https://img.shields.io/badge/Apache%20Tomcat-F8DC75?style=for-the-badge&logo=apachetomcat&logoColor=black)
+![Maven](https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
+![Lombok](https://img.shields.io/badge/Lombok-BC0031?style=for-the-badge&logoColor=white)
+
+### Database
+
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 
 ### Frontend (View Layer)
 
-- JSP (server-side view)
-- HTML5 / CSS3 / JavaScript
-- Bootstrap 5
-- jQuery (Ajax 기반 실시간 중복검사 등)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=000000)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
+![jQuery](https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white)
+![JSP](https://img.shields.io/badge/JSP-437291?style=for-the-badge&logoColor=white)
 
-### Database & Tools
+### Collaboration / Tools
 
-- MySQL 8.4.9
-- MyBatis Mapper XML
-- Git / GitHub (브랜치 전략으로 협업)
-- Figma (UI 설계) / ERDCloud (ERD 설계)
-- Notion (협업 문서화)
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
+![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white)
 
-> [이미지 필요] 기술 스택 한눈에 보기 배너 / 아키텍처 다이어그램
+> [이미지 필요] 아키텍처 다이어그램
 
 ---
 
