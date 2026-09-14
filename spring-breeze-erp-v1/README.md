@@ -176,7 +176,7 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 
 | 프로젝트관리 | 프로젝트멤버관리 | 태스크관리 |
 |:---:|:---:|:---:|
-| ![프로젝트관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/cyj/login.PNG) | ![프로젝트멤버관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/cyj/company.PNG) | ![태스크관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/cyj/department.PNG) |
+| ![프로젝트관리](https://github.com/yoonguri988/spring-breeze-erp/blob/85d9d2e971cb3b613b3487d365a3cbb436f8e63c/spring-breeze-erp-v1/docs/img/cdy/project.PNG) | ![프로젝트멤버관리](https://github.com/yoonguri988/spring-breeze-erp/blob/85d9d2e971cb3b613b3487d365a3cbb436f8e63c/spring-breeze-erp-v1/docs/img/cdy/project_member.PNG) | ![태스크관리](https://github.com/yoonguri988/spring-breeze-erp/blob/85d9d2e971cb3b613b3487d365a3cbb436f8e63c/spring-breeze-erp-v1/docs/img/cdy/task.PNG) |
 
 ### 05. 장영탁 — `resource`
 
@@ -189,7 +189,7 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 
 | 자원관리 | 자원예약관리 |
 |:---:|:---:|
-| ![자원관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/kjy/apprDoc.PNG) | ![자원예약관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/kjy/apprDoc_create.PNG) |
+| ![자원관리](https://github.com/yoonguri988/spring-breeze-erp/blob/85d9d2e971cb3b613b3487d365a3cbb436f8e63c/spring-breeze-erp-v1/docs/img/jyt/resource.PNG) | ![자원예약관리](https://github.com/yoonguri988/spring-breeze-erp/blob/85d9d2e971cb3b613b3487d365a3cbb436f8e63c/spring-breeze-erp-v1/docs/img/jyt/resource.PNG) |
 
 ### 06. 손창기 — `notice`
 
@@ -201,7 +201,7 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 
 | 공지관리 |
 |:---:|
-| ![공지관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/kjy/apprDoc.PNG) |
+| ![공지관리](https://github.com/yoonguri988/spring-breeze-erp/blob/85d9d2e971cb3b613b3487d365a3cbb436f8e63c/spring-breeze-erp-v1/docs/img/sck/notice.PNG) |
 
 
 ### ▶️ 파트별 시연 영상
