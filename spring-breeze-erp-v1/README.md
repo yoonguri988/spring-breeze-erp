@@ -104,7 +104,7 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 - 인증 성공 시 세션 생성(empId 저장) → 권한 체크 후 관리자 / 사원 / PM 화면으로 라우팅
 - 비밀번호 분실 시 사번 · 이메일 · 휴대폰번호 기반 본인확인 후 재설정
 
-> [이미지 필요] 로그인 인증 흐름도 / 로그인 화면 스크린샷
+![alt text](https://github.com/yoonguri988/spring-breeze-erp/blob/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/SBerpV1_Login_Flow_img.PNG)
 
 ---
 
@@ -135,7 +135,10 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.
 - 비밀번호 분실 시 사번 · 이메일 · 휴대폰번호 기반 본인확인 후 재설정
 - **성과**: 팀장으로서 역할 분배와 전체 일정을 조율하고, 인증 · 조직 기반 기능을 먼저 완성해 다른 팀원들이 막히지 않고 개발할 수 있는 기반을 마련
 
-> [이미지 필요] 로그인 화면 / 회사 관리 · 조직도 화면 스크린샷
+| 로그인 | 회사 관리 | 조직도(부서) |
+|:---:|:---:|:---:|
+| ![로그인](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/cyj/login.PNG) | ![회사 관리](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/cyj/company.PNG) | ![조직도](https://raw.githubusercontent.com/yoonguri988/spring-breeze-erp/6a8df1ae5f4744695964fa9612749bbdc9c95193/spring-breeze-erp-v1/docs/img/cyj/department.PNG) |
+
 
 ### 02. 정수정 — `employee`
 
