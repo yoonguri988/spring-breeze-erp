@@ -45,7 +45,8 @@
     "createSuccessMsg": "급여기준이 등록되었습니다.",
     "updateSuccessMsg": "급여기준이 수정되었습니다.",
     "deleteSuccessMsg": "급여기준이 삭제되었습니다.",
-    "empSelectWarning": "사원을 선택해 주세요."
+    "empSelectWarning": "사원을 선택해 주세요.",
+    "startDateEditHint": "기존 적용시작일({{date}}) 이후 날짜만 선택할 수 있습니다. 기존 급여기준은 이력으로 보존되고, 새 시작일부터 새 급여기준이 적용됩니다."
   },
   "my": {
     "breadcrumb": "급여관리 > 내 급여정보",

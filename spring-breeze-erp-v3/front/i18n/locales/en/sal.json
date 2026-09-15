@@ -45,7 +45,8 @@
     "createSuccessMsg": "Salary standard registered.",
     "updateSuccessMsg": "Salary standard updated.",
     "deleteSuccessMsg": "Salary standard deleted.",
-    "empSelectWarning": "Please select an employee."
+    "empSelectWarning": "Please select an employee.",
+    "startDateEditHint": "Only dates after the current effective date ({{date}}) can be selected. The current standard is kept as history, and the new one takes effect from the new start date."
   },
   "my": {
     "breadcrumb": "Salary > My Salary Info",
