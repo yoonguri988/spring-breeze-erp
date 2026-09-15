@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>결재 분석 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-soft: #52514e;
+    --ink-muted: #898781;
+    --border: rgba(11,11,11,0.10);
+    --grid: #e1e0d9;
+    --blue: #2a78d6;
+    --red: #e34948;
+    --aqua: #1baf7a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+    background: var(--page);
+    color: var(--ink);
+    margin: 0;
+    padding: 32px;
+  }
+  h1 { font-size: 20px; font-weight: 700; margin: 0 0 24px; }
+  h3 { font-size: 13px; font-weight: 700; color: var(--ink-soft); margin: 0 0 12px; }
+
+  .cards { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    min-width: 150px;
+    flex: 1;
+  }
+  .card .label { font-size: 12px; color: var(--ink-muted); margin-bottom: 6px; }
+  .card .value { font-size: 24px; font-weight: 700; }
+
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    height: 300px;
+    position: relative;
+  }
+  .panel.wide { grid-column: 1 / -1; }
+  .panel .chart-area { position: relative; height: calc(100% - 28px); }
+</style>
+</head>
+<body>
+
+<h1>결재 분석 대시보드</h1>
+
+<div class="cards" id="summaryCards"></div>
+
+<div class="charts">
+  <div class="panel">
+    <h3>월별 결재 문서 발생 추이</h3>
+    <div class="chart-area"><canvas id="monthlyChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <h3>부서별 승인/반려 현황</h3>
+    <div class="chart-area"><canvas id="deptChart"></canvas></div>
+  </div>
+  <div class="panel wide">
+    <h3>월별 위임/대결 발생 건수</h3>
+    <div class="chart-area"><canvas id="delegationChart"></canvas></div>
+  </div>
+</div>
+
+<script>
+const COLORS = { blue: "#2a78d6", red: "#e34948", aqua: "#1baf7a", grid: "#e1e0d9", ink: "#52514e" };
+
+Chart.defaults.font.family = "system-ui, -apple-system, 'Segoe UI', 'Malgun Gothic', sans-serif";
+Chart.defaults.color = COLORS.ink;
+
+async function getJSON(url) {
+  const res = await fetch(url);
+  return res.json();
+}
+
+(async function init() {
+  const summary = await getJSON("{% url 'api_summary' %}");
+  const turnaround = await getJSON("{% url 'api_turnaround' %}");
+  document.getElementById("summaryCards").innerHTML = `
+    <div class="card"><div class="label">전체 문서</div><div class="value">${summary.total}</div></div>
+    <div class="card"><div class="label">승인</div><div class="value">${summary.approved}</div></div>
+    <div class="card"><div class="label">반려</div><div class="value">${summary.rejected}</div></div>
+    <div class="card"><div class="label">진행중</div><div class="value">${summary.inProgress}</div></div>
+    <div class="card"><div class="label">평균 결재 소요시간</div><div class="value">${turnaround.avgHours}h</div></div>
+  `;
+
+  const monthly = await getJSON("{% url 'api_monthly_trend' %}");
+  new Chart(document.getElementById("monthlyChart"), {
+    type: "line",
+    data: {
+      labels: monthly.labels,
+      datasets: [{
+        data: monthly.values,
+        borderColor: COLORS.blue, backgroundColor: COLORS.blue + "22",
+        borderWidth: 2, pointRadius: 3, tension: 0.3, fill: true,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: COLORS.grid } },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+
+  const dept = await getJSON("{% url 'api_dept_stats' %}");
+  new Chart(document.getElementById("deptChart"), {
+    type: "bar",
+    data: {
+      labels: dept.labels,
+      datasets: [
+        { label: "승인", data: dept.approved, backgroundColor: COLORS.blue },
+        { label: "반려", data: dept.rejected, backgroundColor: COLORS.red },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: "top", align: "end" } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: COLORS.grid } },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+
+  const deleg = await getJSON("{% url 'api_delegation_trend' %}");
+  new Chart(document.getElementById("delegationChart"), {
+    type: "line",
+    data: {
+      labels: deleg.labels,
+      datasets: [{
+        data: deleg.values,
+        borderColor: COLORS.aqua, backgroundColor: COLORS.aqua + "22",
+        borderWidth: 2, pointRadius: 3, tension: 0.3, fill: true,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: COLORS.grid } },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+})();
+</script>
+
+</body>
+</html>
