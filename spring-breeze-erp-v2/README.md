@@ -22,6 +22,7 @@ Spring Breeze 팀의 전사적 자원관리(ERP) 시스템 2차 프로젝트입�
 - **COMPLEX**: 사원 · 부서 정보를 공유하는 4개 파트를 처음부터 협업 구조로 설계
 - **FULLSTACK**: 백엔드 · DB · 뷰 · AI · 외부 API를 하나의 서비스에서 통합 구현
 
+[![발표자료 PDF](https://img.shields.io/badge/발표자료-PDF%20보기-EA4335?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://github.com/yoonguri988/spring-breeze-erp/blob/9a6ccbb7e00991b138fa688799ecd5627fa7f181/spring-breeze-erp-v2/docs/SBerpV2.pdf)
 ---
 
 ## 2. 기간 / 인원
