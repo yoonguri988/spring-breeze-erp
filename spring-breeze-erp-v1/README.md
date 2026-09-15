@@ -21,6 +21,8 @@ spring-breeze 팀이 만든 **전사적 자원관리(ERP) 시스템**입니다.<
 - **권한 분리**: 로그인, 최초 로그인 시 강제 비밀번호 재설정, 비밀번호 분실 시 본인확인 등 안전한 인증 흐름 설계
 - **협업 강화**: 프로젝트 · 태스크 · 참여 사원 구조로 팀 단위 업무를 가시화하고 추적
 
+[![발표자료 PDF](https://img.shields.io/badge/발표자료-PDF%20보기-EA4335?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://github.com/yoonguri988/spring-breeze-erp/blob/7ef5aa948d281135fdc12a3a7b239520a6179b18/spring-breeze-erp-v1/docs/SBerpV1.pdf)
+
 ---
 
 ## 2. 기간 / 인원
