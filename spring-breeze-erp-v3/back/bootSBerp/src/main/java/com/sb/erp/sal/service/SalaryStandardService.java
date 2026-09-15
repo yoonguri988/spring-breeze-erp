@@ -48,6 +48,8 @@ public class SalaryStandardService {
         // 기존에 적용 중인 급여기준이 있다면 새 기준 시작일 전날 종료 처리(이력 보존)
         salaryStandardRepository.findByEmployee_EmpIdAndActvTrue(employee.getEmpId())
                 .ifPresent(prev -> prev.closeAsHistory(request.getStartDate().minusDays(1)));
+        
+        salaryStandardRepository.flush();
 
         SalStd entity = SalStd.builder()
                 .employee(employee)

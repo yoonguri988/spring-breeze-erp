@@ -102,3 +102,5 @@ Thumbs.db
 *.log
 logs/
 
+spring-breeze-erp-v3/SBerp.pem
+spring-breeze-erp-v3/sberp_cyj_accessKeys.csv
