@@ -22,6 +22,7 @@ spring-breeze 팀이 2차 ERP를 Spring Boot 4 · JPA · JWT · React/Next.js �
 - **COMPLEX**: 급여 항목 간 계산 순서 의존성, 연차 차감과 결재 승인의 트랜잭션 정합성, 규정 문서 근거 판정 등 여러 도메인이 얽힌 규칙을 구조적으로 정리
 - **FULLSTACK**: 2차의 세션 인증 · Thymeleaf SSR · MyBatis 단독 구조를 JWT + Redis 인증, React/Next.js SSR, JPA + MyBatis 하이브리드로 전면 재구축
 
+[![발표자료 PDF](https://img.shields.io/badge/발표자료-PDF%20보기-EA4335?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://github.com/yoonguri988/spring-breeze-erp/blob/7ff9f1dd54e90638b44b67dd90f2c2ed3d0cc295/spring-breeze-erp-v3/docs/SBerpV3.pdf)
 ---
 
 ## 2. 기간 / 인원
